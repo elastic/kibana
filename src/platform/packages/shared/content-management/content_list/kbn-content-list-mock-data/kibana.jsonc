@@ -1,0 +1,12 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/content-list-mock-data",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}
+
+

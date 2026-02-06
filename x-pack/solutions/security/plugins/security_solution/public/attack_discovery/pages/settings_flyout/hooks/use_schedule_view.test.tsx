@@ -29,13 +29,6 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView

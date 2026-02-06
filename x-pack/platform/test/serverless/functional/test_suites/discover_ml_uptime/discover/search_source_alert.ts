@@ -228,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
+    await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
     // Different create rule buttons in serverless
     if (await testSubjects.exists('discoverCreateAlertButton')) {
@@ -384,9 +385,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
-    // Failing: https://github.com/elastic/kibana/issues/203045
-    // Failing: https://github.com/elastic/kibana/issues/207865
-    this.tags(['skipSvlOblt', 'skipSvlSearch']);
+    // Failing in Observability projects: https://github.com/elastic/kibana/issues/203045
+    // Failing in MKI Search projects: https://github.com/elastic/kibana/issues/207865
+    // Failing in MKI Security projects: https://github.com/elastic/kibana/issues/252028
+    this.tags(['skipSvlOblt', 'failsOnMKI']);
 
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);

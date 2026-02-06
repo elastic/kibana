@@ -13,7 +13,7 @@ import {
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality';
 import type { RiskScoreBucket } from '../types';
-import { processScores } from './calculate_risk_scores';
+import { processScores } from './helpers';
 import { getIndexPatternDataStream } from './configurations';
 
 export interface ResetToZeroDependencies {
@@ -38,7 +38,7 @@ export const resetToZero = async ({
   logger,
   refresh,
   excludedEntities,
-}: ResetToZeroDependencies): Promise<void> => {
+}: ResetToZeroDependencies): Promise<{ scoresWritten: number }> => {
   const { alias } = await getIndexPatternDataStream(spaceId);
   const entityField = EntityTypeToIdentifierField[entityType];
   const excludedEntitiesClause = `AND ${entityField} NOT IN (${excludedEntities
@@ -105,4 +105,6 @@ export const resetToZero = async ({
     logger.error(`Error resetting ${entityType} risk scores to zero: ${e.message}`);
     throw e;
   });
+
+  return { scoresWritten: scores.length };
 };

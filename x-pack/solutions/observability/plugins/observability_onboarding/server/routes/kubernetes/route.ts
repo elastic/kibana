@@ -14,6 +14,7 @@ import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
@@ -58,6 +59,16 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     }
 
     const fleetPluginStart = await plugins.fleet.start();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetPluginStart);
+
+    if (!hasFleetPrivileges) {
+      throw Boom.forbidden(
+        "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege."
+      );
+    }
+
     const packageClient = fleetPluginStart.packageService.asScoped(request);
     const apiKeyPromise =
       config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
@@ -116,6 +127,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       const result = await elasticsearch.client.asCurrentUser.search({
         index: ['logs-*', 'metrics-*'],
         ignore_unavailable: true,
+        allow_partial_search_results: true,
         size: 0,
         terminate_after: 1,
         query: {

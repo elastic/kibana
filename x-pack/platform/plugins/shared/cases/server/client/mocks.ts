@@ -28,7 +28,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
-import type { CasesSearchRequest } from '../../common/types/api';
+import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
@@ -54,6 +54,7 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
 } from '../services/mocks';
+import { ConfigSchema } from '../config';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -62,6 +63,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     create: jest.fn(),
     bulkCreate: jest.fn(),
     search: jest.fn(),
+    find: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
@@ -106,7 +108,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
+    getAllDocumentsAttachedToCase: jest.fn(),
   });
 };
 
@@ -255,14 +257,37 @@ export const createCasesClientFactoryMockArgs = () => {
     ),
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    config: ConfigSchema.validate({}),
   };
 };
+
+export const createCasesClientMockFindRequest = (
+  overwrites?: CasesFindRequestWithCustomFields
+): CasesFindRequestWithCustomFields => ({
+  search: '',
+  searchFields: ['title', 'description', 'incremental_id.text'],
+  severity: CaseSeverity.LOW,
+  assignees: [],
+  reporters: [],
+  status: CaseStatuses.open,
+  tags: [],
+  owner: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  customFields: {},
+  ...overwrites,
+});
 
 export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description', 'incremental_id.text'],
+  searchFields: [
+    'cases.title',
+    'cases.description',
+    'cases.incremental_id.text',
+    'cases-comments.comment',
+  ],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],

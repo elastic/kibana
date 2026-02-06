@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
-    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
+    await serviceInventoryPage.gotoServiceInventory({
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
+    });
   });
 
   test('renders page with selected date range', async ({ page }) => {
@@ -25,44 +26,46 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('shows a list of services', async () => {
-      await expect(page.getByText('opbeans-node')).toBeVisible();
-      await expect(page.getByText('opbeans-java')).toBeVisible();
-      await expect(page.getByText('opbeans-rum')).toBeVisible();
+      await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeVisible();
+      await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
+      await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeVisible();
     });
 
     await test.step('shows a list of environments', async () => {
-      const environmentEntrySelector = page.locator('td:has-text("production")');
-      await expect(environmentEntrySelector).toHaveCount(3);
+      const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
+      await expect(environmentEntrySelector).toHaveCount(10);
     });
   });
 
   test('loads the service overview for a service when clicking on it', async ({ page }) => {
-    await page.getByText('opbeans-node').click();
-    expect(page.url()).toContain('/apm/services/opbeans-node/overview');
-    await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-node');
+    await page.getByText(testData.SERVICE_OPBEANS_NODE).click();
+    expect(page.url()).toContain(`/apm/services/${testData.SERVICE_OPBEANS_NODE}/overview`);
+    await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+      testData.SERVICE_OPBEANS_NODE
+    );
   });
 
   test('shows the correct environment when changing the environment', async ({ page }) => {
     await page.testSubj.click('environmentFilter > comboBoxSearchInput');
     await page
       .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-      .locator('button:has-text("production")')
+      .locator(`button:has-text("${PRODUCTION_ENVIRONMENT}")`)
       .click();
-    await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue('production');
+    await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT);
   });
 
   test('shows the filtered services when using the service name fast filter', async ({ page }) => {
     await expect(page.getByTestId('tableSearchInput')).toBeVisible();
-    await expect(page.getByText('opbeans-node')).toBeVisible();
-    await expect(page.getByText('opbeans-java')).toBeVisible();
-    await expect(page.getByText('opbeans-rum')).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeVisible();
     await page.getByTestId('tableSearchInput').fill('java');
-    await expect(page.getByText('opbeans-node')).toBeHidden();
-    await expect(page.getByText('opbeans-java')).toBeVisible();
-    await expect(page.getByText('opbeans-rum')).toBeHidden();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeHidden();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeHidden();
     await page.getByTestId('tableSearchInput').clear();
-    await expect(page.getByText('opbeans-node')).toBeVisible();
-    await expect(page.getByText('opbeans-java')).toBeVisible();
-    await expect(page.getByText('opbeans-rum')).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
+    await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeVisible();
   });
 });

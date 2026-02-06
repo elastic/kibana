@@ -7,97 +7,150 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { checkForTripleQuotesAndQueries, unescapeInvalidChars } from './autocomplete_utils';
+import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
   describe('checkForTripleQuotesAndQueries', () => {
-    it('should return false for all flags for an empty string', () => {
-      expect(checkForTripleQuotesAndQueries('')).toEqual({
+    it('returns false for all flags for an empty string', () => {
+      expect(checkForTripleQuotesAndEsqlQuery('')).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should return false for all flags for a request without triple quotes', () => {
+    it('returns false for all flags for a request without triple quotes or ESQL query', () => {
       const request = `POST _search\n{\n  "query": {\n    "match": {\n      "message": "hello world"\n    }\n  }\n}`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should return true for insideTripleQuotes and false for insideTripleQuotesQuery when triple quotes are outside a query', () => {
+    it('returns true for insideTripleQuotes and false for ESQL flags when triple quotes are outside a query', () => {
       const request = `POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {\n        "script": {\n          "source":\n          """\n            for (field in params['fields']){\n                if (!$(field, '').isEmpty()){\n`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: true,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should return false for all flags when triple-quoted string is properly closed', () => {
-      const request = `POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {\n        "script": {\n          "source":\n          """\n            return 'hello';\n          """\n        }\n      }\n    ]\n  }\n}`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
-        insideTripleQuotes: false,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
-      });
-    });
-
-    it('should return true for both insideTripleQuotes and insideTripleQuotesQuery if inside a "query" field', () => {
+    it('returns true for insideTripleQuotes but false for ESQL flags inside a non-_query request query field', () => {
       const request = `POST _search\n{\n  "query": """FROM test `;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: true,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: true,
-        queryIndex: request.indexOf('"""') + 3,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should return true for insideSingleQuotesQuery if inside a single-quoted "query" string', () => {
+    it('returns false for ESQL flags inside a single-quoted query for non-_query request', () => {
       const request = `GET index/_search\n{\n  "query": "SELECT * FROM logs `;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+      const result = checkForTripleQuotesAndEsqlQuery(request);
+      expect(result).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesQuery: true,
-        insideTripleQuotesQuery: false,
-        queryIndex: 32,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should return false for all flags if single quote is closed', () => {
-      const request = `GET index/_search\n{\n  "query": "SELECT * FROM logs" }`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+    it('returns false for all flags if single quote is closed', () => {
+      const request = `POST _query\n{\n  "query": "SELECT * FROM logs" }`;
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
 
-    it('should handle escaped quotes correctly (not toggling inside state)', () => {
-      const request = `GET _search\n{\n  "query": "FROM test | WHERE KQL(\\"\\"\\")`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
+    it('returns false for all flags if triple quote is closed', () => {
+      const request = `POST _query\n{\n  "query": """SELECT * FROM logs""" }`;
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesQuery: true,
-        insideTripleQuotesQuery: false,
-        queryIndex: 26,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
       });
     });
+  });
 
-    it('should reset the state after closing triple quotes', () => {
-      const request = `GET _search\n{\n  "query": """SELECT * FROM logs"""\n}`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
-        insideTripleQuotes: false,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: false,
-        queryIndex: -1,
-      });
+  it('sets insideEsqlQuery for single quoted query after POST _query', () => {
+    const request = `POST    _query\n{\n  "query": "FROM test `;
+    expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM test ') + 1,
+    });
+  });
+
+  it('sets insideEsqlQuery for triple quoted query after POST _query (case-insensitive)', () => {
+    const request = `post _query\n{\n  "query": """FROM test `; // lowercase POST should also match
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: true,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"""') + 3,
+    });
+  });
+
+  it('detects single quoted query after POST _query?pretty suffix', () => {
+    const request = `POST _query?pretty\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('detects query with /_query endpoint', () => {
+    const request = `POST /_query\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('detects triple quoted query after POST   _query?foo=bar with extra spaces', () => {
+    const request = `POST   _query?foo=bar\n{\n  "query": """FROM metrics `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: true,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"""') + 3,
+    });
+  });
+
+  it('does not set ESQL flags for subsequent non-_query request in same buffer', () => {
+    const request = `POST _query\n{\n  "query": "FROM a | STATS "\n}\nGET other_index/_search\n{\n  "query": "match_all" }`;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: false,
+      esqlQueryIndex: -1, // single quotes closed in second request
+    });
+  });
+
+  it('only flags current active _query section in mixed multi-request buffer', () => {
+    const partial = `POST _query\n{\n  "query": "FROM a | STATS "\n}\nPOST _query\n{\n  "query": """FROM b | WHERE foo = `; // cursor inside triple quotes of second request
+    const result = checkForTripleQuotesAndEsqlQuery(partial);
+    expect(result).toEqual({
+      insideTripleQuotes: true,
+      insideEsqlQuery: true,
+      esqlQueryIndex: partial.lastIndexOf('"""') + 3,
+    });
+  });
+
+  it('handles request method at end of buffer without trailing newline (regression test)', () => {
+    const buffer = 'POST _query';
+    const result = checkForTripleQuotesAndEsqlQuery(buffer);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: false,
+      esqlQueryIndex: -1,
     });
   });
 

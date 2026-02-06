@@ -129,6 +129,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     if (previewData.error) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('indexPatternManagement.testScript.errorMessage', {
             defaultMessage: `There's an error in your script`,
           })}

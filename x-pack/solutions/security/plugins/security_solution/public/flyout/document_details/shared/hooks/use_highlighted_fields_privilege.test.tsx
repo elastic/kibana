@@ -13,10 +13,11 @@ import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_lice
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import {
-  LACK_OF_KIBANA_SECURITY_PRIVILEGES,
+  LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES,
   ML_RULES_DISABLED_MESSAGE,
 } from '../../../../detection_engine/common/translations';
-import { useUserData } from '../../../../detections/components/user_info';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock(
@@ -25,6 +26,7 @@ jest.mock(
 jest.mock('../../../../../common/machine_learning/has_ml_license');
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
 jest.mock('../../../../detections/components/user_info');
+jest.mock('../../../../common/components/user_privileges');
 
 const defaultProps = {
   rule: {} as RuleResponse,
@@ -37,7 +39,10 @@ const renderUseHighlightedFieldsPrivilege = (props: UseHighlightedFieldsPrivileg
 describe('useHighlightedFieldsPrivilege', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: true }]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      rulesPrivileges: { rules: { read: true, edit: true } },
+    });
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
     (hasMlLicense as jest.Mock).mockReturnValue(false);
     (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue(undefined);
@@ -64,10 +69,13 @@ describe('useHighlightedFieldsPrivilege', () => {
   });
 
   it('should return isDisabled as true when user does not have CRUD privileges', () => {
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: false }]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      rulesPrivileges: { rules: { read: true, edit: false } },
+    });
     const { result } = renderUseHighlightedFieldsPrivilege(defaultProps);
     expect(result.current.isDisabled).toBe(true);
-    expect(result.current.tooltipContent).toContain(LACK_OF_KIBANA_SECURITY_PRIVILEGES);
+    expect(result.current.tooltipContent).toContain(LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES);
   });
 
   describe('when rule is machine learning rule', () => {

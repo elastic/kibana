@@ -81,7 +81,12 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         </EuiText>
         <EuiSpacer />
         {!canCreateMLJob && (
-          <EuiCallOut title={labels.ADD_JOB_PERMISSIONS_NEEDED} color="primary" iconType="info">
+          <EuiCallOut
+            announceOnMount
+            title={labels.ADD_JOB_PERMISSIONS_NEEDED}
+            color="primary"
+            iconType="info"
+          >
             <p>
               <FormattedMessage
                 id="xpack.uptime.ml.enableAnomalyDetectionPanel.insufficient_permissions_add_job"

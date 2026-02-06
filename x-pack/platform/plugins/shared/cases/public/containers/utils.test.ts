@@ -56,10 +56,15 @@ describe('utils', () => {
   describe('createUpdateSuccessToaster', () => {
     it('creates the correct toast when sync alerts is turned on and case has alerts', () => {
       // We remove the id as is randomly generated
-      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
-        syncAlerts: true,
-        extractObservables: false,
-      });
+      const toast = createUpdateSuccessToaster(
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: false } },
+        caseAfterUpdate,
+        'settings',
+        {
+          syncAlerts: true,
+          extractObservables: false,
+        }
+      );
 
       expect(toast).toEqual({
         title: 'Alerts in "My case" have been synced',
@@ -68,13 +73,18 @@ describe('utils', () => {
     });
 
     it('creates the correct toast when extract observables is turned on', () => {
-      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
-        syncAlerts: false,
-        extractObservables: true,
-      });
+      const toast = createUpdateSuccessToaster(
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: false } },
+        caseAfterUpdate,
+        'settings',
+        {
+          syncAlerts: false,
+          extractObservables: true,
+        }
+      );
 
       expect(toast).toEqual({
-        title: 'Auto-extract observables in "My case" have been updated',
+        title: 'Auto-extract observables setting in "My case" have been updated',
         className: 'eui-textBreakWord',
       });
     });
@@ -258,11 +268,11 @@ describe('utils', () => {
 
     it('returns the correct overrides for an incremental id search', () => {
       expect(getIncrementalIdSearchOverrides('#123')).toEqual({
-        searchFields: ['incremental_id.text'],
+        searchFields: ['cases.incremental_id.text'],
         search: '123',
       });
       expect(getIncrementalIdSearchOverrides('   #123   ')).toEqual({
-        searchFields: ['incremental_id.text'],
+        searchFields: ['cases.incremental_id.text'],
         search: '123',
       });
     });

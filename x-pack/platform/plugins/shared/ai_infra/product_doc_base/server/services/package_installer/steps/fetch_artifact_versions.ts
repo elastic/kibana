@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { DocumentationProduct, parseArtifactName, type ProductName } from '@kbn/product-doc-common';
+import {
+  DocumentationProduct,
+  parseArtifactName,
+  parseSecurityLabsArtifactName,
+  type ProductName,
+} from '@kbn/product-doc-common';
 import * as fs from 'fs';
-import fetch from 'node-fetch';
 import Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
+import { getFetchOptions } from '../../proxy';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
 }: {
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
 }): Promise<ArtifactAvailableVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -27,7 +34,9 @@ export const fetchArtifactVersions = async ({
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
     xml = await res.text();
   }
 
@@ -85,3 +94,52 @@ interface ListBucketResponse {
     Contents?: Array<{ Key: string[] }>;
   };
 }
+
+/**
+ * Fetches available Security Labs artifact versions from the repository.
+ */
+export const fetchSecurityLabsVersions = async ({
+  artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
+}: {
+  artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
+}): Promise<string[]> => {
+  const parsedUrl = new URL(artifactRepositoryUrl);
+
+  let xml: string;
+  if (parsedUrl.protocol === 'file:') {
+    const file = await fetchLocalFile(parsedUrl);
+    xml = file.toString();
+  } else {
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
+    xml = await res.text();
+  }
+
+  return new Promise((resolve, reject) => {
+    parseString(xml, (err, result: ListBucketResponse) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      if (result.ListBucketResult.IsTruncated?.includes('true')) {
+        throw new Error('bucket content is truncated, cannot retrieve all versions');
+      }
+
+      const versions: string[] = [];
+
+      result.ListBucketResult.Contents?.forEach((contentEntry) => {
+        const artifactName = contentEntry.Key[0];
+        const parsed = parseSecurityLabsArtifactName(artifactName);
+        if (parsed) {
+          versions.push(parsed.version);
+        }
+      });
+
+      resolve(versions);
+    });
+  });
+};

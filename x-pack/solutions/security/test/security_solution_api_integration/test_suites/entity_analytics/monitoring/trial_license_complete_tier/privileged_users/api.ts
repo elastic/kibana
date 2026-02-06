@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -19,10 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privmonUtils = PrivMonUtils(getService);
 
   describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
-
     beforeEach(async () => {
-      await enablePrivmonSetting(kibanaServer);
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
       await privmonUtils.initPrivMonEngine();
     });
@@ -45,21 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(user.event.ingested).to.be.a('string');
         expect(user.id).to.be.a('string');
         expect(user.user.name).to.be('test_user1');
-      });
-
-      it('should not create a user if the advanced setting is disabled', async () => {
-        await disablePrivmonSetting(kibanaServer);
-        log.info(`creating a user with advanced setting disabled`);
-        const res = await entityAnalyticsApi.createPrivMonUser({
-          body: { user: { name: 'test_user2' } },
-        });
-
-        if (res.status !== 403) {
-          log.error(`Creating privmon user with advanced setting disabled should fail`);
-          log.error(JSON.stringify(res.body));
-        }
-
-        expect(res.status).eql(403);
       });
 
       it('should not create a user if the maximum user limit is reached', async () => {
@@ -159,8 +140,24 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
-        expect(res.body.stats.total).to.be(3);
+        log.info(`Uploaded users successfully, response: ${JSON.stringify(res.body)}`);
+        log.info(`Upload response: ${JSON.stringify(res.body.stats.successfulOperations)}`);
+        expect(res.body.stats.successfulOperations).to.be(3);
+        expect(res.body.stats.totalOperations).to.be(3);
+      });
+
+      it('should upload large volume of users without deleting any non-duplicate users via a csv file', async () => {
+        log.info(`Uploading multiple users via CSV`);
+        const users = Array.from({ length: 999 }).map((_, i) => `csv_user_${i + 1}`);
+        const csv = users.join('\n');
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
+        if (res.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res.body));
+        }
+        expect(res.status).eql(200);
+        expect(res.body.stats.successfulOperations).to.be(999);
+        expect(res.body.stats.totalOperations).to.be(999);
       });
 
       it('should add source labels and `is_privileged` field to the uploaded users', async () => {
@@ -173,8 +170,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
-        expect(res.body.stats.total).to.be(3);
+        expect(res.body.stats.successfulOperations).to.be(3);
+        expect(res.body.stats.totalOperations).to.be(3);
 
         log.info('Verifying uploaded users');
 
@@ -189,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
         const listed = listRes.body as ListPrivMonUsersResponse;
         listed.forEach((user) => {
           privmonUtils.assertIsPrivileged(user, true);
-          expect(user['@timestamp']).to.be.a('string');
+          expect(user.event?.['@timestamp']).to.be.a('string');
           expect(user.event?.ingested).to.be.a('string');
           expect(user.labels?.sources).to.contain('csv');
         });
@@ -361,8 +358,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(1);
-        expect(res.body.stats.total).to.be(1);
+        expect(res.body.stats.successfulOperations).to.be(1);
+        expect(res.body.stats.totalOperations).to.be(1);
 
         const {
           body: [userBefore],
@@ -378,8 +375,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res2.status).eql(200);
-        expect(res2.body.stats.successful).to.be(1);
-        expect(res2.body.stats.total).to.be(1);
+        expect(res2.body.stats.successfulOperations).to.be(1);
+        expect(res2.body.stats.totalOperations).to.be(1);
 
         const {
           body: [userAfter],

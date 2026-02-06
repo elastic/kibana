@@ -15,6 +15,7 @@ import { TlsTranslations } from '../../../../../common/rules/synthetics/translat
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
 
 import type { AlertTypeInitializer } from './types';
+import { getDescriptionFields } from './get_description_fields';
 
 let validateFunc: (ruleParams: any) => ValidationResult;
 
@@ -55,4 +56,5 @@ export const initTlsAlertType: AlertTypeInitializer = ({
     reason: fields[ALERT_REASON] || '',
     link: `/app/synthetics${CERTIFICATES_ROUTE}`,
   }),
+  getDescriptionFields,
 });

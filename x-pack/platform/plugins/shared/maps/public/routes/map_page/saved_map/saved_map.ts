@@ -13,7 +13,12 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
 import type { AdhocDataView, MapAttributes } from '../../../../server';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import {
+  APP_ID,
+  MAP_PATH,
+  MAP_SAVED_OBJECT_TYPE,
+  SOURCE_TYPES,
+} from '../../../../common/constants';
 import type { MapStore, MapStoreState } from '../../../reducers/store';
 import { createMapStore } from '../../../reducers/store';
 import type { MapSettings } from '../../../../common/descriptor_types';
@@ -314,7 +319,7 @@ export class SavedMap {
         pageTitle: this._getPageTitle(),
         isByValue: this.isByValue(),
         getHasUnsavedChanges: this.hasUnsavedChanges,
-        originatingApp: this._originatingApp,
+        originatingApp: this.hasOriginatingApp() ? this._originatingApp : undefined,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });
@@ -334,8 +339,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  private _isFromDashboardListing(): boolean {
+    return (
+      this._originatingApp === 'dashboards' && Boolean(this._originatingPath?.includes('/list/'))
+    );
+  }
+
   public hasOriginatingApp(): boolean {
-    return !!this._originatingApp;
+    return !!this._originatingApp && !this._isFromDashboardListing();
   }
 
   public getOriginatingPath(): string | undefined {
@@ -386,7 +397,7 @@ export class SavedMap {
 
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return !!this._originatingApp && !hasSavedObjectId;
+    return this.hasOriginatingApp() && !hasSavedObjectId;
   }
 
   public async save({
@@ -465,21 +476,25 @@ export class SavedMap {
         });
         return;
       }
-      await this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
-        state: {
-          embeddableId: newCopyOnSave ? undefined : this._embeddableId,
-          type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState },
-        },
+      await this._getStateTransfer().navigateToWithEmbeddablePackages(this._originatingApp, {
+        state: [
+          {
+            embeddableId: newCopyOnSave ? undefined : this._embeddableId,
+            type: MAP_SAVED_OBJECT_TYPE,
+            serializedState: mapEmbeddableState,
+          },
+        ],
         path: this._originatingPath,
       });
       return;
     } else if (dashboardId) {
-      await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-        state: {
-          type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState },
-        },
+      await this._getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
+        state: [
+          {
+            type: MAP_SAVED_OBJECT_TYPE,
+            serializedState: mapEmbeddableState,
+          },
+        ],
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
@@ -536,9 +551,12 @@ export class SavedMap {
 
   private async _getAdHocDataViews() {
     const dataViewIds: string[] = [];
-    getLayerList(this._store.getState()).forEach((layer) => {
-      dataViewIds.push(...layer.getIndexPatternIds());
-    });
+    getLayerList(this._store.getState())
+      // exclude adhoc data views from ESQL sources
+      .filter((layer) => layer.getDescriptor().sourceDescriptor?.type !== SOURCE_TYPES.ESQL)
+      .forEach((layer) => {
+        dataViewIds.push(...layer.getIndexPatternIds());
+      });
 
     const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
     return dataViews

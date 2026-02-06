@@ -407,12 +407,6 @@ describe('fetchActionRequests()', () => {
   });
 
   describe('and space awareness feature is enabled', () => {
-    beforeEach(() => {
-      // @ts-expect-error
-      fetchOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-    });
-
     it('should fetch all policy IDs for all package names supporting response actions', async () => {
       await fetchActionRequests(fetchOptions);
 

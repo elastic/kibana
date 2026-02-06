@@ -32,7 +32,7 @@ interface APMRootTransactionResponse {
 export function useWorkflowTraceSearch({
   workflowExecution,
 }: {
-  workflowExecution: any | null; // The workflow execution object with traceId, or null to disable
+  workflowExecution: any | null; // eslint-disable-line @typescript-eslint/no-explicit-any -- The workflow execution object with traceId, or null to disable
 }): WorkflowTraceSearchResult {
   const [result, setResult] = useState<WorkflowTraceSearchResult>({
     traceId: null,

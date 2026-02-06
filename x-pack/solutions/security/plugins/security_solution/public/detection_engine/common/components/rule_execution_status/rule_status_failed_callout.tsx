@@ -17,6 +17,10 @@ import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface RuleStatusFailedCallOutProps {
   ruleNameForChat: string;
@@ -48,6 +52,23 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   const chatTitle = useMemo(() => {
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
+
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const ruleAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text:
+          ruleNameForChat != null && dataSources != null
+            ? `Rule name: ${ruleNameForChat}\nData sources: ${dataSources}\nError message: ${message}`
+            : `Error message: ${message}`,
+        attachmentLabel: ruleNameForChat,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT,
+    }),
+    [message, ruleNameForChat, dataSources]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   if (!shouldBeDisplayed) {
     return null;
@@ -82,20 +103,33 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        {hasAssistantPrivilege && (
-          <NewChat
-            category="detection-rules"
-            color={color}
-            conversationTitle={chatTitle}
-            description={i18n.ASK_ASSISTANT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          >
-            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-          </NewChat>
-        )}
+        <>
+          {isAgentChatExperienceEnabled ? (
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              color={color}
+              telemetry={{
+                pathway: 'rule_failure',
+                attachments: ['rule'],
+              }}
+            />
+          ) : (
+            hasAssistantPrivilege && (
+              <NewChat
+                category="detection-rules"
+                color={color}
+                conversationTitle={chatTitle}
+                description={i18n.ASK_ASSISTANT_DESCRIPTION}
+                getPromptContext={getPromptContext}
+                suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+                tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+                isAssistantEnabled={isAssistantEnabled}
+              >
+                {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+              </NewChat>
+            )
+          )}
+        </>
       </EuiCallOut>
     </div>
   );

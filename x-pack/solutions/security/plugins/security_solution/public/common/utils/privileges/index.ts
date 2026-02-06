@@ -28,10 +28,6 @@ export const canEditRuleWithActions = (
   return true;
 };
 
-// typed as null not undefined as the initial state for this value is null.
-export const hasUserCRUDPermission = (canUserCRUD: boolean | null): boolean =>
-  canUserCRUD != null ? canUserCRUD : true;
-
 export const explainLackOfPermission = (
   rule: Rule | null | undefined,
   hasMlPermissions: boolean,
@@ -40,7 +36,7 @@ export const explainLackOfPermission = (
     | Readonly<{
         [x: string]: boolean;
       }>,
-  canUserCRUD: boolean | null
+  canEditRules: boolean
 ): string | undefined => {
   if (rule == null) {
     return undefined;
@@ -48,8 +44,8 @@ export const explainLackOfPermission = (
     return i18nActions.ML_RULES_DISABLED_MESSAGE;
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
     return i18nActions.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES;
-  } else if (!hasUserCRUDPermission(canUserCRUD)) {
-    return i18nActions.LACK_OF_KIBANA_SECURITY_PRIVILEGES;
+  } else if (!canEditRules) {
+    return i18nActions.LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES;
   } else {
     return undefined;
   }

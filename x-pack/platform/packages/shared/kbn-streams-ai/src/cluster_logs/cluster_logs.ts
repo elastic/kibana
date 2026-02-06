@@ -6,19 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { format } from 'util';
 import pLimit from 'p-limit';
 import { compact, isEqual } from 'lodash';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { clusterSampleDocs } from './cluster_sample_docs';
 
 export interface ClusterLogsResponse {
   sampled: number;
   noise: number[];
-  clusters: Array<{ count: number; analysis: TruncatedDocumentAnalysis }>;
+  clusters: Array<{ count: number; analysis: FormattedDocumentAnalysis }>;
 }
 
 function getFields(condition: Condition): string[] {

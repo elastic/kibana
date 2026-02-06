@@ -22,7 +22,7 @@ import {
 } from '@kbn/discover-utils';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
-import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import type { GenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
 export const getColumns = ({

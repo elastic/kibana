@@ -20,25 +20,8 @@ describe('useHostMetricsTable hook', () => {
     typeof useInfrastructureNodeMetrics
   >;
 
-  it('should call useInfrastructureNodeMetrics hook with event.module filter in filterClauseDsl query', () => {
-    const filterClauseDsl = {
-      bool: {
-        should: [
-          {
-            terms: {
-              'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    };
-
-    const filterClauseWithEventModuleFilter = {
-      bool: {
-        filter: [{ term: { 'event.module': 'system' } }, { ...filterClauseDsl }],
-      },
-    };
+  it('should call useInfrastructureNodeMetrics hook with event.module filter in kuery', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
     // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -49,15 +32,17 @@ describe('useHostMetricsTable hook', () => {
     renderHook(() =>
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        filterClauseDsl,
+        kuery,
         metricsClient: createMetricsClientMock({}),
       })
     );
 
+    const kueryWithEventModuleFilter = `event.module: "system" AND (${kuery})`;
+
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+          kuery: kueryWithEventModuleFilter,
         }),
       })
     );

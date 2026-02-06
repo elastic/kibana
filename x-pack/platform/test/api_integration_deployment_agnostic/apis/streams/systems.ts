@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { emptyAssets, type System } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
+import type { System } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -26,25 +26,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Systems', function () {
     const STREAM_NAME = 'logs.systems-test';
 
-    const createSystem = async (
-      systemName: string,
-      body: { description: string; filter: Condition }
-    ) => {
+    const upsertSystem = async (body: System) => {
       return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         params: {
-          path: { name: STREAM_NAME, systemName },
-          body,
-        },
-      });
-    };
-
-    const updateSystem = async (
-      systemName: string,
-      body: { description: string; filter: Condition }
-    ) => {
-      return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
-        params: {
-          path: { name: STREAM_NAME, systemName },
+          path: { name: STREAM_NAME, systemName: body.name },
           body,
         },
       });
@@ -72,7 +57,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const clearAllSystems = async () => {
       const systems = await listSystems();
       if (!systems.length) return;
-      const operations = systems.map((s) => ({ delete: { system: { name: s.name } } }));
+      const operations = systems.map((system) => ({
+        delete: { system: { name: system.name } },
+      }));
       await bulkOps(operations);
     };
 
@@ -93,6 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: { steps: [] },
             wired: { routing: [], fields: {} },
             settings: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,
@@ -108,7 +96,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('single system lifecycle', () => {
       beforeEach(async () => {
-        const resp = await createSystem('system-a', {
+        const resp = await upsertSystem({
+          name: 'feature-a',
+          type: 'system',
           description: 'Initial description',
           filter: { always: {} },
         });
@@ -123,12 +113,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getResponse = await apiClient.fetch(
           'GET /internal/streams/{name}/systems/{systemName}',
           {
-            params: { path: { name: STREAM_NAME, systemName: 'system-a' } },
+            params: {
+              path: { name: STREAM_NAME, systemName: 'feature-a' },
+            },
           }
         );
         expect(getResponse.status).to.be(200);
         expect(getResponse.body.system).to.eql({
-          name: 'system-a',
+          type: 'system',
+          name: 'feature-a',
           description: 'Initial description',
           filter: { always: {} },
         });
@@ -136,14 +129,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const systems = await listSystems();
         expect(systems).to.have.length(1);
         expect(systems[0]).to.eql({
-          name: 'system-a',
+          type: 'system',
+          name: 'feature-a',
           description: 'Initial description',
           filter: { always: {} },
         });
       });
 
       it('cannot create a system with a name starting with an underscore', async () => {
-        const resp = await createSystem('_invalid-system', {
+        const resp = await upsertSystem({
+          name: '_invalid-system',
+          type: 'system',
           description: 'A system with an invalid name',
           filter: { always: {} },
         });
@@ -151,7 +147,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('cannot create a system with a name starting with a dot', async () => {
-        const resp = await createSystem('.invalid-system', {
+        const resp = await upsertSystem({
+          name: '.invalid-system',
+          type: 'system',
           description: 'A system with an invalid name',
           filter: { always: {} },
         });
@@ -160,7 +158,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after update', () => {
         beforeEach(async () => {
-          const resp = await updateSystem('system-a', {
+          const resp = await upsertSystem({
+            name: 'feature-a',
+            type: 'system',
             description: 'Updated description',
             filter: { field: 'message', contains: 'error' },
           });
@@ -171,12 +171,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const getUpdatedResponse = await apiClient.fetch(
             'GET /internal/streams/{name}/systems/{systemName}',
             {
-              params: { path: { name: STREAM_NAME, systemName: 'system-a' } },
+              params: {
+                path: { name: STREAM_NAME, systemName: 'feature-a' },
+              },
             }
           );
           expect(getUpdatedResponse.status).to.be(200);
           expect(getUpdatedResponse.body.system).to.eql({
-            name: 'system-a',
+            type: 'system',
+            name: 'feature-a',
             description: 'Updated description',
             filter: { field: 'message', contains: 'error' },
           });
@@ -187,11 +190,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('bulk operations', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
-          { index: { system: { name: 's1', description: 'one', filter: { always: {} } } } },
+          {
+            index: {
+              system: { name: 's1', type: 'system', description: 'one', filter: { always: {} } },
+            },
+          },
           {
             index: {
               system: {
                 name: 's2',
+                type: 'system',
                 description: 'two',
                 filter: { field: 'message', contains: 'error' },
               },
@@ -217,6 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               index: {
                 system: {
+                  type: 'system',
                   name: 's3',
                   description: 'three',
                   filter: { field: 'host.name', eq: 'web-01' },
@@ -237,8 +246,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('systems are removed when stream is deleted', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
-          { index: { system: { name: 'sd1', description: 'one', filter: { always: {} } } } },
-          { index: { system: { name: 'sd2', description: 'two', filter: { always: {} } } } },
+          {
+            index: {
+              system: { name: 'sd1', type: 'system', description: 'one', filter: { always: {} } },
+            },
+          },
+          {
+            index: {
+              system: { name: 'sd2', type: 'system', description: 'two', filter: { always: {} } },
+            },
+          },
         ]);
         expect(bulkCreate.status).to.be(200);
         const systems = await listSystems();
@@ -255,6 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               wired: { routing: [], fields: {} },
               settings: {},
+              failure_store: { inherit: {} },
             },
           },
           ...emptyAssets,
@@ -262,7 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await clearAllSystems();
       });
 
-      it('deletes all systems documents belonging to the stream', async () => {
+      it('deletes all system documents belonging to the stream', async () => {
         await deleteStream(apiClient, STREAM_NAME);
 
         // Verify via ES that no docs remain in the systems index for this stream
@@ -315,7 +333,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const res = await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
           params: {
             path: { name: STREAM_NAME, systemName: 'nope' },
-            body: { description: 'x', filter: { always: {} } },
+            body: { type: 'system', name: 'nope', description: 'x', filter: { always: {} } },
           },
         });
         expect(res.status).to.be(403);
@@ -334,7 +352,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             path: { name: STREAM_NAME },
             body: {
               operations: [
-                { index: { system: { name: 'a', description: 'A', filter: { always: {} } } } },
+                {
+                  index: {
+                    system: {
+                      name: 'a',
+                      type: 'system',
+                      description: 'A',
+                      filter: { always: {} },
+                    },
+                  },
+                },
                 { delete: { system: { name: 'a' } } },
               ],
             },

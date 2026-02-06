@@ -6,11 +6,11 @@
  */
 
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/connector-schemas/crowdstrike';
 import { keyBy } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';

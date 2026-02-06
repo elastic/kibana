@@ -11,16 +11,12 @@ import type { OverviewStatusMetaData } from '../../../../../../common/runtime_ty
 import type { TrendRequest } from '../../../../../../common/types';
 import { selectOverviewTrends, trendStatsBatch } from '../../../state';
 
-export const useOverviewTrendsRequests = (
-  monitorsSortedByStatus: OverviewStatusMetaData[],
-  maxItem: number
-) => {
+export const useOverviewTrendsRequests = (monitorsToFetchTrendsFor: OverviewStatusMetaData[]) => {
   const dispatch = useDispatch();
-
   const trendData = useSelector(selectOverviewTrends);
 
   useEffect(() => {
-    const trendRequests = monitorsSortedByStatus.reduce((acc, item) => {
+    const trendRequests = monitorsToFetchTrendsFor.reduce((acc, item) => {
       if (trendData[item.configId + item.locationId] === undefined) {
         acc.push({
           configId: item.configId,
@@ -31,5 +27,5 @@ export const useOverviewTrendsRequests = (
       return acc;
     }, [] as TrendRequest[]);
     if (trendRequests.length) dispatch(trendStatsBatch.get(trendRequests));
-  }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
+  }, [dispatch, monitorsToFetchTrendsFor, trendData]);
 };

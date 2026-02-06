@@ -10,6 +10,7 @@ import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
+  assertConnectorSelected,
   assertEmptySystemPrompt,
   assertErrorResponse,
   assertMessageSent,
@@ -97,6 +98,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       openAssistant();
       selectSystemPrompt(customPrompt2.name);
       clearSystemPrompt();
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       // ensure response before clearing convo
@@ -134,6 +137,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       // we did not set a default conversation, so the prompt should not be set
       assertEmptySystemPrompt();
       selectSystemPrompt(testPrompt.name);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertSystemPromptSent(testPrompt.content);
       assertMessageSent('hello', true);
@@ -152,6 +157,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       // current conversation is 'Lovely title'
       createSystemPrompt(testPrompt.name, testPrompt.content, ['Lucky title', 'Lovely title']);
       assertSystemPromptSelected(testPrompt.name);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
 
       assertSystemPromptSent(testPrompt.content);
@@ -172,6 +179,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       visitGetStartedPage();
       openAssistant();
       createQuickPrompt(testPrompt.name, testPrompt.content);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       sendQuickPrompt(testPrompt.name);
       assertMessageSent(testPrompt.content);
       assertErrorResponse();

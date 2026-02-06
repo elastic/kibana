@@ -8,7 +8,12 @@
  */
 
 import React from 'react';
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonEmpty,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
@@ -27,14 +32,14 @@ function prependRootCrumb(rootCrumb: ChromeBreadcrumb | undefined, rest: ChromeB
 }
 
 export function buildBreadcrumbs({
-  projectName,
+  kibanaName,
   cloudLinks,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
   isServerless,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -45,7 +50,7 @@ export function buildBreadcrumbs({
   isServerless: boolean;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
-    projectName,
+    kibanaName,
     cloudLinks,
     isServerless,
   });
@@ -97,18 +102,18 @@ export function buildBreadcrumbs({
 }
 
 function buildRootCrumb({
-  projectName,
+  kibanaName,
   cloudLinks,
   isServerless,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
 }): ChromeBreadcrumb | undefined {
   if (isServerless) {
     return {
       text:
-        projectName ??
+        kibanaName ??
         i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
           defaultMessage: 'Project',
         }),
@@ -139,9 +144,13 @@ function buildRootCrumb({
 
   if (cloudLinks.deployment || cloudLinks.deployments) {
     return {
-      text: i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
-        defaultMessage: 'Deployment',
-      }),
+      text: kibanaName ? (
+        <EuiTextTruncate text={kibanaName} width={96} />
+      ) : (
+        i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
+          defaultMessage: 'Deployment',
+        })
+      ),
       'data-test-subj': 'deploymentCrumb',
       popoverContent: () => (
         <>
@@ -151,6 +160,12 @@ function buildRootCrumb({
               color="text"
               iconType="gear"
               data-test-subj="manageDeploymentBtn"
+              aria-label={i18n.translate(
+                'core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel',
+                {
+                  defaultMessage: 'Manage this deployment',
+                }
+              )}
               size="s"
             >
               {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
@@ -165,6 +180,7 @@ function buildRootCrumb({
               color="text"
               iconType="spaces"
               data-test-subj="viewDeploymentsBtn"
+              aria-label={cloudLinks.deployments.title}
               size="s"
             >
               {cloudLinks.deployments.title}

@@ -25,6 +25,32 @@
         "shards"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "store",
+        "indexing",
+        "get",
+        "search",
+        "merge",
+        "flush",
+        "refresh",
+        "query_cache",
+        "fielddata",
+        "docs",
+        "warmer",
+        "completion",
+        "segments",
+        "translog",
+        "request_cache",
+        "recovery",
+        "bulk",
+        "shard_stats",
+        "mappings",
+        "dense_vector",
+        "sparse_vector"
+      ]
+    },
     "methods": [
       "GET"
     ],

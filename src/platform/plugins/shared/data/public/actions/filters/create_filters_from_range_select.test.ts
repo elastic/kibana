@@ -14,7 +14,7 @@ import {
   type RangeSelectDataContext,
 } from './create_filters_from_range_select';
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
@@ -54,11 +54,10 @@ describe('brushEvent', () => {
 
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.get = jest.fn().mockResolvedValue(indexPattern);
     setSearchService(dataStart.search);
-    setIndexPatterns({
-      ...dataStart.indexPatterns,
-      get: async () => indexPattern,
-    } as unknown as DataViewsContract);
+    setIndexPatterns(dataViews);
 
     baseEvent = {
       column: 0,

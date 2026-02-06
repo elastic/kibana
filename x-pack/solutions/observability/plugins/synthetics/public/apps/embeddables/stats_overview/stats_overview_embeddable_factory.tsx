@@ -12,7 +12,6 @@ import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-pl
 import type {
   PublishesWritableTitle,
   PublishesTitle,
-  SerializedTitles,
   HasEditCapabilities,
   HasSupportedTriggers,
 } from '@kbn/presentation-publishing';
@@ -25,15 +24,15 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import type {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import type { MonitorFilters } from '../monitors_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
+import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import type {
+  MonitorFilters,
+  OverviewStatsEmbeddableState,
+} from '../../../../common/embeddables/stats_overview/types';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -47,14 +46,6 @@ const DEFAULT_FILTERS: MonitorFilters = {
   monitorIds: [],
   monitorTypes: [],
 };
-
-export interface OverviewStatsEmbeddableCustomState {
-  filters?: MonitorFilters;
-}
-
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
@@ -71,13 +62,13 @@ export const getStatsOverviewEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
+      const filters$ = new BehaviorSubject(initialState.filters);
 
       const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState
@@ -85,15 +76,10 @@ export const getStatsOverviewEmbeddableFactory = (
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            ...dynamicActionsState,
-          },
-          references: dynamicActionsReferences ?? [],
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          ...(dynamicActionsManager?.getLatestState() ?? {}),
         };
       }
 
@@ -109,15 +95,15 @@ export const getStatsOverviewEmbeddableFactory = (
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
       });
 

@@ -6,7 +6,8 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import { LensAppLocatorDefinition, type LensAppLocatorParams } from './locator';
+import { LensAppLocatorDefinition } from './locator';
+import type { LensAppLocatorParams } from '@kbn/lens-common';
 
 const savedObjectId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
@@ -19,7 +20,7 @@ const setup = async () => {
 };
 
 const lensShareableState: LensAppLocatorParams = {
-  visualization: { activeId: 'bar_chart', state: {} },
+  visualization: { activeId: 'bar_chart', state: {}, selectedLayerId: null },
   activeDatasourceId: 'xxxxx',
   datasourceStates: { formBased: { state: {} } },
   references: [],

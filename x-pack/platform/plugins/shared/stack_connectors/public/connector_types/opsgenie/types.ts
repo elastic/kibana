@@ -11,10 +11,10 @@ import type {
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
-  OpsgenieActionConfig,
-  OpsgenieActionSecrets,
-  OpsgenieActionParams,
-} from '../../../server/connector_types';
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+  Params as OpsgenieActionParams,
+} from '@kbn/connector-schemas/opsgenie';
 
 export type OpsgenieActionConnector = UserConfiguredActionConnector<
   OpsgenieActionConfig,

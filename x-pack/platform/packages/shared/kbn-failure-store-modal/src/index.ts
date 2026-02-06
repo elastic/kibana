@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FailureStoreModal } from './components';
+export { FailureStoreModal, type FailureStoreFormData } from './components';

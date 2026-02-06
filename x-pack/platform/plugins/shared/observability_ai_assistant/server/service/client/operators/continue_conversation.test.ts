@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { MessageRole, type Message } from '../../../../common';
 import { toolCallEventType } from '../../../analytics/tool_call';
 import { executeFunctionAndCatchError } from './continue_conversation';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const testMessages: Message[] = [
   {
@@ -20,15 +21,12 @@ const testMessages: Message[] = [
   },
 ];
 
-const mockConnector: Connector = {
+const mockConnector: Connector = createMockConnector({
   id: 'test-connector-id',
   name: 'Test GenAI Connector',
   actionTypeId: '.gen-ai',
   config: { apiProvider: 'OpenAI' },
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-};
+});
 
 describe('executeFunctionAndCatchError', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn(), trace: jest.fn() } as unknown as Logger;

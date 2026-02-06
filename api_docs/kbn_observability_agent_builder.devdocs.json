@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/observability-agent-builder",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/observability-agent-builder",
+        "id": "def-public.AiInsight",
+        "type": "Function",
+        "tags": [],
+        "label": "AiInsight",
+        "description": [],
+        "signature": [
+          "({\n  title,\n  description,\n  content,\n  onStartConversation,\n  onOpen,\n  startButtonLabel,\n  isLoading,\n  error,\n  'data-test-subj': dataTestSubj,\n}: ",
+          "AiInsightProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/packages/agent-builder/src/components/ai_insight.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-agent-builder",
+            "id": "def-public.AiInsight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  description,\n  content,\n  onStartConversation,\n  onOpen,\n  startButtonLabel,\n  isLoading,\n  error,\n  'data-test-subj': dataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              "AiInsightProps"
+            ],
+            "path": "x-pack/solutions/observability/packages/agent-builder/src/components/ai_insight.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

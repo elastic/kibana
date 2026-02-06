@@ -1,0 +1,817 @@
+{
+  "lastModified": "2026-01-30T09:08:24.451Z",
+  "sha1": "2cc21468fa435f3cd7e85ac37ecaed5a82ea602d",
+  "tests": [
+    {
+      "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 35,
+        "column": 16
+      }
+    },
+    {
+      "id": "82828921c5db931-a4f5b2b343279e6",
+      "title": "Infrastructure Inventory - Alerts Flyout Should open inventory rule flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "82828921c5db931-2e95665939de6f4",
+      "title": "Infrastructure Inventory - Alerts Flyout Should open metrics threshold rule flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "82828921c5db931-45a6ef56fe1bcda",
+      "title": "Infrastructure Inventory - Alerts Flyout Should not have option to create custom threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "5e38f34b5515120-206368a2dde7fc8",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Overview Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-6e381623a016832",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 182,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-f69934a00916c14",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 223,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-1b63fa121e7d932",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 230,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-ca3eba215d3909f",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 279,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-18dcb0fd2be32ae",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Logs Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 331,
+        "column": 9
+      }
+    },
+    {
+      "id": "5e38f34b5515120-fc5dd8af89f3a37",
+      "title": "Infrastructure Inventory - Container Asset Details Flyout Open as page and return to flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
+        "line": 365,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-c8e20be5abd8e78",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Overview Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-469ff7d8d0bf19c",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 199,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-5fa9e52b3d43c86",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 238,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-26196539e673891",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 245,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-bc798ba5304790c",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 306,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-1af8d1fefe82665",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Logs Tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 343,
+        "column": 9
+      }
+    },
+    {
+      "id": "36d755278d33c00-d11360011449561",
+      "title": "Infrastructure Inventory - Host Asset Details Flyout Open as page and return to flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
+        "line": 377,
+        "column": 9
+      }
+    },
+    {
+      "id": "d0e00b3ccbe2f5d-3e1c3cb21c2d22e",
+      "title": "Infrastructure Inventory - K8s Integration Links Navigation K8s integration link navigates to integrations detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "d0e00b3ccbe2f5d-88af438158defa4",
+      "title": "Infrastructure Inventory - K8s Integration Links Navigation K8s dashboards link navigates to dashboards with tag filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "446ba8748acaf8f-32af48c416a35ef",
+      "title": "Infrastructure Inventory - K8s Tour Render and dismiss k8s tour",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_tour.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-12274413b608985",
+      "title": "Infrastructure Inventory Render expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-e1d7933bc2e1452",
+      "title": "Infrastructure Inventory Filter nodes by query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-c21565e30cadc06",
+      "title": "Infrastructure Inventory Render empty data prompt for dates with no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-b51ee5e8bfbfce2",
+      "title": "Infrastructure Inventory Inventory switcher changes node types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-66b8f74fa30ba50",
+      "title": "Infrastructure Inventory K8s pods waffle map node redirects to pod details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-157990389cea2ed",
+      "title": "Infrastructure Inventory Change waffle map color palette",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 164,
+        "column": 7
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-a7c175dddc9afe0",
+      "title": "Infrastructure Inventory Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 204,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-8a61c415a1cf242",
+      "title": "Infrastructure Inventory - Saved Views Load the 'Default view' when no saved view is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-a334afd264fe9f9",
+      "title": "Infrastructure Inventory - Saved Views Apply an existing saved view when it is selected in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 107,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-640b875bd0fde51",
+      "title": "Infrastructure Inventory - Saved Views Create a new saved view from the current inventory state without saving the time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 119,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-ef26d1003158e26",
+      "title": "Infrastructure Inventory - Saved Views Create a new saved view from the current inventory state saving the time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 145,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-e67350d9f6baae6",
+      "title": "Infrastructure Inventory - Saved Views Select and load an existing saved view from the manage views flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 171,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-92007c030550556",
+      "title": "Infrastructure Inventory - Saved Views Can make a saved view the default view from the manage views flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 205,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-2d38062fe42baa8",
+      "title": "Infrastructure Inventory - Saved Views Delete a saved view from the manage views flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 234,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e008efa1fbe8e-0d7ab2c5cd554d2",
+      "title": "Infrastructure Inventory - Saved Views Update a saved view from the manage views flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
+        "line": 290,
+        "column": 7
+      }
+    },
+    {
+      "id": "270dac3dc7dc448-520018ed67055b4",
+      "title": "Node Details: host with kubernetes section Overview Tab validates all KPIs and charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "270dac3dc7dc448-8a9cb5affab0300",
+      "title": "Node Details: host with kubernetes section Metrics Tab validates all charts and quick access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "f99b488a0e6019e-b6ddb921df7e2cd",
+      "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-a72b272d0977ff3",
+      "title": "Node Details: host preserves selected tab between page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-7f79f309b15190b",
+      "title": "Node Details: host Date picker: host - preserves date range across tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-7d1e6d6429e1a95",
+      "title": "Node Details: host Date picker: host - preserves selected date range between page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-528209bce8c610d",
+      "title": "Node Details: host Overview Tab - KPI tiles show correct values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-bd1a29ee5040b38",
+      "title": "Node Details: host Overview Tab - renders metric charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-37cd8581a79597a",
+      "title": "Node Details: host Overview Tab - shows all sections as collapsible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 148,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-dea7e0102986aef",
+      "title": "Node Details: host Overview Tab - shows alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 160,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-4fb0d91c535b76d",
+      "title": "Node Details: host Overview Tab - shows / hides alerts section with no alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 167,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-f82241f4d64419f",
+      "title": "Node Details: host Metadata Tab - shows metadata table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 189,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-cc924821cb71d9c",
+      "title": "Node Details: host Metadata Tab - pin and unpin table row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 197,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-c2628c417b26208",
+      "title": "Node Details: host Metadata Tab - preserves search term between page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 220,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-c75727c6beb8118",
+      "title": "Node Details: host Metrics Tab - renders quick access items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 249,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-c5d7693f6c92d1e",
+      "title": "Node Details: host Legacy alert metric callout - shows for cpu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 262,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-4fa7228cf9d5d36",
+      "title": "Node Details: host Legacy alert metric callout - shows for rx",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 278,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-c78d7ebab1a5ed2",
+      "title": "Node Details: host Legacy alert metric callout - shows for tx",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 294,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-dba87ff5548f5c0",
+      "title": "Node Details: host Legacy alert metric callout - does not show for cpuV2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 310,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-7624ac9afaa9409",
+      "title": "Node Details: host Legacy alert metric callout - does not show for rxV2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 326,
+        "column": 7
+      }
+    },
+    {
+      "id": "992d39c263d731e-d12ae3a801710eb",
+      "title": "Node Details: host Legacy alert metric callout - does not show for txV2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
+        "line": 342,
+        "column": 7
+      }
+    },
+    {
+      "id": "abf34a10292294d-c875936bb9e3cec",
+      "title": "Node Details Serverless: Osquery tab should not render in serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlOblt",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    }
+  ]
+}

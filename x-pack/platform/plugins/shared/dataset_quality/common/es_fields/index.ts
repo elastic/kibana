@@ -12,3 +12,6 @@ export const INDEX = '_index';
 export const DATA_STREAM_DATASET = 'data_stream.dataset';
 export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';
 export const DATA_STREAM_TYPE = 'data_stream.type';
+
+export const ERROR_TYPE = 'error.type';
+export const ERROR_MESSAGE = 'error.message';

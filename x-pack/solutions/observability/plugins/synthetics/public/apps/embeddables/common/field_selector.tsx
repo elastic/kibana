@@ -14,7 +14,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 import { useFetchSyntheticsSuggestions } from '../hooks/use_fetch_synthetics_suggestions';
 import { OptionalText } from './optional_text';
-import type { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
 
 interface Option {
   label: string;

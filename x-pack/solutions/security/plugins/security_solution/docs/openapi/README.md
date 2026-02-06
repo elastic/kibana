@@ -25,6 +25,11 @@ Security Solution has multiple API domains scattered across Kibana. Currently th
   - Bundling script: `x-pack/platform/packages/shared/kbn-elastic-assistant-common/scripts/openapi/bundle.js`
   - Bundles location: `x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/{ess|serverless}`
 
+- Security Attack discovery
+
+  - Bundling script: `x-pack/platform/packages/shared/kbn-elastic-assistant-common/scripts/openapi/bundle_attack_discovery.js`
+  - Bundles location: `x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/{ess|serverless}`
+
 - Security Detections
 
   - Bundling script: `x-pack/solutions/security/plugins/security_solution/scripts/openapi/bundle_detections.js`

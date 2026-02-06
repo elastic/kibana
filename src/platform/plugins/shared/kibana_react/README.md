@@ -150,15 +150,3 @@ const Demo = () => {
   }, [errorMessage]);
 };
 ```
-
-## RedirectAppLinks
-
-Utility component that will intercept click events on children anchor (`<a>`) elements to call
-`application.navigateToUrl` with the link's href. This will trigger SPA friendly navigation
-when the link points to a valid Kibana app.
-
-```tsx
-<RedirectAppLinks application={application}>
-  <a href="/base-path/app/another-app/some-path">Go to another-app</a>
-</RedirectAppLinks>
-```

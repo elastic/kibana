@@ -41,7 +41,7 @@ describe('uploadAllEventsFromPath', () => {
   const spies = {
     existsSync: jest.spyOn(fs, 'existsSync'),
     statSync: jest.spyOn(fs, 'statSync'),
-    readdirSync: jest.spyOn(fs, 'readdirSync'),
+    readdirSync: jest.spyOn(fs, 'readdirSync') as any as jest.Mock<string[], [string, any]>,
   };
 
   beforeEach(() => {
@@ -124,7 +124,7 @@ describe('uploadAllEventsFromPath', () => {
     spies.statSync.mockReturnValue({
       isDirectory: () => true,
     } as unknown as fs.Stats);
-    spies.readdirSync.mockReturnValue(['file.txt' as unknown as fs.Dirent]);
+    spies.readdirSync.mockReturnValue(['file.txt']);
 
     // assume the provided event log path exists
     spies.existsSync.mockReturnValue(true);

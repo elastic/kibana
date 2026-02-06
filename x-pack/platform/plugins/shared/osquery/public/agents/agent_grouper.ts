@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { generateColorPicker } from './helpers';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
+import { generateColorPicker, getAgentOsqueryAvailability } from './helpers';
 import {
   ALL_AGENTS_LABEL,
   AGENT_PLATFORMS_LABEL,
@@ -13,7 +14,7 @@ import {
   AGENT_SELECTION_LABEL,
 } from './translations';
 import type { Group, GroupOption, GroupedAgent } from './types';
-import { AGENT_GROUP_KEY } from './types';
+import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 
 const getColor = generateColorPicker();
 
@@ -31,21 +32,36 @@ export const generateAgentOption = (
   data: GroupedAgent[]
 ) => ({
   label,
-  options: data.map((agent) => ({
-    disabled: agent.status !== 'online',
-    label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
-    key: agent.local_metadata.elastic.agent.id,
-    color: agent.status !== 'online' ? 'danger' : getColor(groupType),
-    value: {
-      groupType,
-      groups: {
-        policy: agent.policy_id ?? '',
-        platform: agent.local_metadata.os.platform,
+  options: data.map((agent) => {
+    const availability = getAgentOsqueryAvailability(agent);
+
+    const isDisabled = availability === 'offline' || availability === 'osquery_unavailable';
+
+    let color: string;
+    if (availability === 'online') {
+      color = getColor(groupType);
+    } else if (availability === 'degraded') {
+      color = AGENT_STATUS_COLORS.DEGRADED;
+    } else {
+      color = AGENT_STATUS_COLORS.UNAVAILABLE;
+    }
+
+    return {
+      disabled: isDisabled,
+      label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
+      key: agent.local_metadata.elastic.agent.id,
+      color,
+      value: {
+        groupType,
+        groups: {
+          policy: agent.policy_id ?? '',
+          platform: agent.local_metadata.os.platform,
+        },
+        id: agent.local_metadata.elastic.agent.id,
+        status: (agent.status ?? 'unknown') as AgentStatus | 'unknown',
       },
-      id: agent.local_metadata.elastic.agent.id,
-      status: agent.status ?? 'unknown',
-    },
-  })),
+    };
+  }),
 });
 
 export const generateGroupOption = (label: string, groupType: AGENT_GROUP_KEY, data: Group[]) => ({

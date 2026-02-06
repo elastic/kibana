@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
-  AttackDiscoveryPostInternalRequestBody,
+  PostAttackDiscoveryGenerateRequestBody,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { sizeIsOutOfRange } from '@kbn/elastic-assistant-common';
@@ -23,7 +23,7 @@ export const requestIsValid = ({
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostInternalRequestBody
+    ExecuteConnectorRequestBody | PostAttackDiscoveryGenerateRequestBody
   >;
   size: number | undefined;
 }): boolean =>

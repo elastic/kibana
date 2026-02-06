@@ -48,8 +48,8 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
 
   if (usersAndRolesUrl) {
     links.userAndRoles = {
-      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.usersAndRolesLinkText', {
-        defaultMessage: 'Users and roles',
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.membersLinkText', {
+        defaultMessage: 'Members',
       }),
       href: usersAndRolesUrl,
     };

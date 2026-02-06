@@ -74,6 +74,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
     });
 
+    it('does create the rules when there are no connectors defined', async () => {
+      await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(DYNAMIC_SETTINGS_DEFAULTS)
+        .expect(200);
+
+      const apiResponse = await supertest
+        .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      expect(apiResponse.body.statusRule).not.to.be(null);
+      expect(apiResponse.body.tlsRule).not.to.be(null);
+    });
+
     it('returns the created alerted when called', async () => {
       const apiResponse = await supertest
         .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)

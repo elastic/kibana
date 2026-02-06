@@ -201,6 +201,10 @@ export const AnomalyTimeline: FC = () => {
 
   const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType | undefined>();
 
+  const viewByLabel = i18n.translate('xpack.ml.explorer.viewByLabel', {
+    defaultMessage: 'View by',
+  });
+
   const timeRange = getTimeBoundsFromSelection(selectedCells);
 
   const viewByLoadedForTimeFormatted = timeRange
@@ -400,14 +404,14 @@ export const AnomalyTimeline: FC = () => {
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -478,9 +482,8 @@ export const AnomalyTimeline: FC = () => {
             <>
               <EuiFlexItem grow={false}>
                 <EuiSelect
-                  prepend={i18n.translate('xpack.ml.explorer.viewByLabel', {
-                    defaultMessage: 'View by',
-                  })}
+                  prepend={viewByLabel}
+                  aria-label={viewByLabel}
                   compressed
                   id="selectViewBy"
                   options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
@@ -577,10 +580,10 @@ export const AnomalyTimeline: FC = () => {
             onResize={onResize}
             isLoading={loading}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   <NoOverallData />
-                </h5>
+                </strong>
               </EuiText>
             }
             showTimeline={false}
@@ -622,8 +625,8 @@ export const AnomalyTimeline: FC = () => {
             isLoading={loading || viewBySwimlaneDataLoading}
             yAxisWidth={Y_AXIS_LABEL_WIDTH}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   {typeof viewBySwimlaneFieldName === 'string' ? (
                     viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
                       <FormattedMessage
@@ -638,7 +641,7 @@ export const AnomalyTimeline: FC = () => {
                       />
                     )
                   ) : null}
-                </h5>
+                </strong>
               </EuiText>
             }
           />

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/pagerduty/constants';
 import type { PagerDutyConfig, PagerDutySecrets, PagerDutyActionParams } from '../types';
 import { EventActionOptions } from '../types';
 import { hasMustacheTokens } from './has_mustache_tokens';
@@ -24,7 +25,7 @@ export function getConnectorType(): ConnectorTypeModel<
   PagerDutyActionParams
 > {
   return {
-    id: '.pagerduty',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.pagerDuty.selectMessageText', {
       defaultMessage: 'Send an event in PagerDuty.',

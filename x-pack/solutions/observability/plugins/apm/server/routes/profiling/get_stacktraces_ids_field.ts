@@ -6,8 +6,7 @@
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { isEmpty } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   ELASTIC_PROFILER_STACK_TRACE_IDS,
   SERVICE_NAME,
@@ -17,6 +16,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { maybe } from '../../../common/utils/maybe';
 
 export async function getStacktracesIdsField({
   apmEventClient,
@@ -64,11 +64,15 @@ export async function getStacktracesIdsField({
     },
   });
 
-  const field = unflattenKnownApmEventFields(response.hits.hits[0]?.fields, [
-    ELASTIC_PROFILER_STACK_TRACE_IDS,
-  ]);
+  const fields = maybe(response.hits.hits[0])?.fields;
 
-  if (!isEmpty(field.elastic.profiler_stack_trace_ids)) {
+  const field =
+    fields &&
+    accessKnownApmEventFields(fields).requireFields([ELASTIC_PROFILER_STACK_TRACE_IDS])[
+      ELASTIC_PROFILER_STACK_TRACE_IDS
+    ];
+
+  if (field?.length) {
     return ELASTIC_PROFILER_STACK_TRACE_IDS;
   }
 

@@ -23,7 +23,9 @@ const createLegacyAlertsClientMock = () => {
       client: jest.fn(),
       determineDelayedAlerts: jest.fn(),
       determineFlappingAlerts: jest.fn(),
-      updatePersistedAlertsWithMaintenanceWindowIds: jest.fn(),
+      updatePersistedAlerts: jest.fn(),
+      getAlertsToUpdateWithMaintenanceWindows: jest.fn(),
+      getAlertsToUpdateWithLastScheduledActions: jest.fn(),
     };
   });
 };

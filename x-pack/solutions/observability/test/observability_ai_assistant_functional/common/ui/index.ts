@@ -41,6 +41,7 @@ const pages = {
     bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
     bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
     bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    bulkImportFilePicker: 'knowledgeBaseBulkImportFilePicker',
     toastTitle: 'euiToastHeader__title',
   },
   conversations: {

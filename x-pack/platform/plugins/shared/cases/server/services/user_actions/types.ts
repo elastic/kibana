@@ -21,7 +21,6 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseSettings,
   CaseSeverity,
   CaseStatuses,
   User,
@@ -69,7 +68,7 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: CaseSettings } };
+    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
   };
   comment: {
     parameters: {
@@ -254,6 +253,42 @@ export interface UserActionsStatsAggsResult {
       }>;
     };
   };
+  creations: {
+    doc_count: number;
+    creations: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  nonDeletedCommentUpdates: {
+    doc_count: number;
+    comments: {
+      doc_count: number;
+      byCommentId: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          reverse: {
+            doc_count: number;
+            hasDelete: {
+              doc_count: number;
+            };
+            updates: {
+              doc_count: number;
+              byCommentType: {
+                buckets: Array<{
+                  key: string;
+                  doc_count: number;
+                }>;
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {
@@ -306,6 +341,11 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
   originalValue: T[];
   newValue: T[];
+}
+
+export interface TypedUserActionItem<T> extends GetUserActionItemByDifference {
+  originalValue: T;
+  newValue: T;
 }
 
 export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (

@@ -17,6 +17,7 @@ import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
+  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
@@ -376,18 +377,28 @@ export class CaseCommentModel {
     return dedupedAttachments;
   }
 
-  private getAlertAttachments(attachments: AttachmentRequest[]): AlertAttachmentPayload[] {
-    return attachments.filter(
-      (attachment): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert
-    );
+  private getAttachmentsByType<
+    T extends AttachmentType,
+    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
+  >(attachments: AttachmentRequest[], attachmentType: T): R {
+    return attachments.filter((attachment) => attachment.type === attachmentType) as R;
   }
 
   private async validateCreateCommentRequest(req: AttachmentRequest[]) {
-    const alertAttachments = this.getAlertAttachments(req);
-    const hasAlertsInRequest = alertAttachments.length > 0;
+    if (this.caseInfo.attributes.status === CaseStatuses.closed) {
+      const alertAttachments = this.getAttachmentsByType(req, AttachmentType.alert);
+      const hasAlertsInRequest = alertAttachments.length > 0;
 
-    if (hasAlertsInRequest && this.caseInfo.attributes.status === CaseStatuses.closed) {
-      throw Boom.badRequest('Alert cannot be attached to a closed case');
+      if (hasAlertsInRequest) {
+        throw Boom.badRequest('Alert cannot be attached to a closed case');
+      }
+
+      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
+      const hasEventsInRequest = eventAttachments.length > 0;
+
+      if (hasEventsInRequest) {
+        throw Boom.badRequest('Event cannot be attached to a closed case');
+      }
     }
 
     if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
@@ -428,7 +439,7 @@ export class CaseCommentModel {
   }
 
   private async handleAlertComments(attachments: AttachmentRequest[]) {
-    const alertAttachments = this.getAlertAttachments(attachments);
+    const alertAttachments = this.getAttachmentsByType(attachments, AttachmentType.alert);
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 

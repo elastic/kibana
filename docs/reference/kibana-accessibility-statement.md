@@ -7,6 +7,7 @@ products:
   - id: kibana
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/accessibility.html
+navigation_title: Accessibility
 ---
 
 # {{kib}} Accessibility Statement (USA, Europe, and Beyond)

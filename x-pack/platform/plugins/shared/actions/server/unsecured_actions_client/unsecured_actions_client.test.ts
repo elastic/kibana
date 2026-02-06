@@ -16,10 +16,17 @@ import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import type { ActionTypeRegistry } from '../action_type_registry';
+import {
+  createMockConnectorFindResult,
+  createMockInMemoryConnector,
+} from '../application/connector/mocks';
 
 jest.mock('../application/connector/methods/get_all/get_all');
 
 const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
+
+const connectorTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
@@ -27,38 +34,32 @@ const executionEnqueuer = jest.fn();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const clusterClient = elasticsearchServiceMock.createClusterClient();
 const inMemoryConnectors = [
-  {
+  createMockInMemoryConnector({
     id: 'testPreconfigured',
     actionTypeId: '.slack',
     secrets: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
     name: 'test',
     config: {
       foo: 'bar',
     },
-  },
+  }),
   /**
    * System actions will not
    * be returned from getAllUnsecured
    */
-  {
+  createMockInMemoryConnector({
     id: 'system-connector-.cases',
     actionTypeId: '.cases',
     name: 'System action: .cases',
-    config: {},
-    secrets: {},
-    isDeprecated: false,
-    isMissingSecrets: false,
-    isPreconfigured: false,
     isSystemAction: true,
-  },
+  }),
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
     clusterClient,
@@ -67,32 +68,27 @@ beforeEach(() => {
     internalSavedObjectsRepository,
     kibanaIndices: ['.kibana'],
     logger,
+    connectorTypeRegistry,
   });
 });
 
 describe('getAll()', () => {
   test('calls getAllUnsecured library method with appropriate parameters', async () => {
     const expectedResult = [
-      {
+      createMockConnectorFindResult({
         actionTypeId: 'test',
         id: '1',
         name: 'test',
-        isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
-      },
-      {
+      }),
+      createMockConnectorFindResult({
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
-      },
+      }),
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
     const result = await unsecuredActionsClient.getAll('default');
@@ -104,6 +100,7 @@ describe('getAll()', () => {
       logger,
       internalSavedObjectsRepository,
       spaceId: 'default',
+      connectorTypeRegistry,
     });
   });
 
@@ -121,6 +118,7 @@ describe('getAll()', () => {
       logger,
       internalSavedObjectsRepository,
       spaceId: 'customSpace',
+      connectorTypeRegistry,
     });
   });
 });

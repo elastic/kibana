@@ -32,7 +32,7 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
       <EuiCallOut
         size="s"
         title={i18n.translate('xpack.idxMgmt.streamsPromotion.title', {
-          defaultMessage: 'Explore the New Streams UI in Technical Preview',
+          defaultMessage: 'Explore the New Streams UI',
         })}
         color="primary"
       >

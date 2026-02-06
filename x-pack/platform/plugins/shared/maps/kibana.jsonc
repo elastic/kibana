@@ -17,11 +17,13 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
       "lens",
       "licensing",
       "features",
       "inspector",
       "data",
+      "dataViews",
       "fieldFormats",
       "fileUpload",
       "uiActions",
@@ -36,6 +38,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "customIntegrations",
       "embeddableEnhanced",
       "home",

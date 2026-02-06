@@ -27,6 +27,7 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constan
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export interface RulesFeatureTourContextType {
   steps: EuiTourStepProps[];
@@ -58,7 +59,7 @@ const stepsConfig: EuiStatelessTourStep[] = [
 ];
 
 export const RuleFeatureTour: FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, notifications } = useKibana().services;
 
   const restoredState = useMemo<EuiTourState>(
     () => ({
@@ -75,8 +76,12 @@ export const RuleFeatureTour: FC = () => {
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
+  const isTourEnabled = notifications.tours.isEnabled();
   const isTourAnchorMounted = useIsElementMounted(CREATE_NEW_RULE_TOUR_ANCHOR);
-  const shouldShowRuleUpgradeTour = isTourAnchorMounted;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  // Display the tour only if the user has permissions to create/edit rules,
+  // otherwise they could not follow the tour steps
+  const shouldShowRuleUpgradeTour = isTourEnabled && isTourAnchorMounted && canEditRules;
 
   const enhancedSteps = useMemo(
     () =>

@@ -21,6 +21,7 @@ import {
   getPoliciesPath,
   getPolicyBlocklistsPath,
   getPolicyDetailPath,
+  getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
@@ -48,6 +49,7 @@ describe('Policy Details', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   let http: typeof coreStart.http;
   let render: () => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
@@ -59,7 +61,7 @@ describe('Policy Details', () => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
+    ({ history, coreStart, middlewareSpy, setExperimentalFlag } = appContextMockRenderer);
     render = () =>
       mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
     http = coreStart.http;
@@ -299,11 +301,11 @@ describe('Policy Details', () => {
       });
 
       describe('without required permissions', () => {
-        const renderWithoutPrivilege = async (privilege: string) => {
+        const renderWithPrivilege = async (privilege: string, value: boolean) => {
           useUserPrivilegesMock.mockReturnValue({
             endpointPrivileges: {
               loading: false,
-              [privilege]: false,
+              [privilege]: value,
             },
           });
           policyView = render();
@@ -316,13 +318,38 @@ describe('Policy Details', () => {
           ['event filters', 'canReadEventFilters', 'eventFilters'],
           ['host isolation exeptions', 'canReadHostIsolationExceptions', 'hostIsolationExceptions'],
           ['blocklist', 'canReadBlocklist', 'blocklists'],
+          ['endpoint exceptions', 'canReadEndpointExceptions', 'endpointExceptions'],
         ])(
           'should not display the %s tab with no privileges',
           async (_: string, privilege: string, selector: string) => {
-            await renderWithoutPrivilege(privilege);
+            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+
+            await renderWithPrivilege(privilege, false);
             expect(policyView.find(`button#${selector}`)).toHaveLength(0);
           }
         );
+
+        it.each([
+          ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
+          ['event filters', 'canReadEventFilters', 'eventFilters'],
+          ['blocklist', 'canReadBlocklist', 'blocklists'],
+          ['endpoint exceptions', 'canReadEndpointExceptions', 'endpointExceptions'],
+        ])(
+          'should display the %s tab with  the correct privilege',
+          async (_: string, privilege: string, selector: string) => {
+            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+
+            await renderWithPrivilege(privilege, true);
+            expect(policyView.find(`button#${selector}`)).toHaveLength(1);
+          }
+        );
+
+        it('should not display endpoint exceptions without the feature flag enabled', async () => {
+          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+
+          await renderWithPrivilege('canReadEndpointExceptions', true);
+          expect(policyView.find('button#endpointExceptions')).toHaveLength(0);
+        });
 
         it.each([
           ['trusted apps', 'canReadTrustedApplications', getPolicyTrustedAppsPath('1')],
@@ -333,11 +360,18 @@ describe('Policy Details', () => {
             getPolicyHostIsolationExceptionsPath('1'),
           ],
           ['blocklist', 'canReadBlocklist', getPolicyBlocklistsPath('1')],
+          [
+            'endpoint exceptions',
+            'canReadEndpointExceptions',
+            getPolicyEndpointExceptionsPath('1'),
+          ],
         ])(
           'should redirect to policy details when no %s required privileges',
           async (_: string, privilege: string, path: string) => {
+            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+
             history.push(path);
-            await renderWithoutPrivilege(privilege);
+            await renderWithPrivilege(privilege, false);
             expect(history.location.pathname).toBe(policyDetailsPathUrl);
             expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
             expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(

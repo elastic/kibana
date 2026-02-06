@@ -57,9 +57,8 @@ POST /_bulk?pretty
 GET kibana_sample_data_semantic/_search
 {
   "query": {
-    "semantic": {
-      "field": "text",
-      "query": "Which park is most popular?"
+    "match": {
+      "text": "Which park is most popular?"
     }
   }
 }
@@ -81,9 +80,8 @@ GET kibana_sample_data_semantic/_search
     "bool": {
       "must": [
         {
-          "semantic": {
-            "field": "text",
-            "query": "Which park has the most wildlife?"
+          "match": {
+            "text": "Which park has the most wildlife?"
           }
         }
       ],
@@ -116,9 +114,8 @@ GET kibana_sample_data_semantic/_search
 {
   "min_score": 15.0,
   "query": {
-    "semantic": {
-      "field": "text",
-      "query": "Which park is best for hiking?"
+    "match": {
+      "text": "Which park is best for hiking?"
     }
   }
 }

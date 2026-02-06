@@ -10,6 +10,9 @@
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import { getESQLResults } from '@kbn/esql-utils';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { coreServices } from '../../../services/kibana_services';
 
 export interface GetESQLSingleColumnValuesSuccess {
   values: string[];
@@ -23,15 +26,18 @@ interface GetESQLSingleColumnValuesParams {
   query: string;
   search: ISearchGeneric;
   timeRange?: TimeRange;
+  esqlVariables: ESQLControlVariable[];
 }
 export const getESQLSingleColumnValues = async ({
   query,
   search,
   timeRange,
+  esqlVariables,
 }: GetESQLSingleColumnValuesParams): Promise<
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
 > => {
   try {
+    const timezone = coreServices.uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
     const results = await getESQLResults({
       esqlQuery: query,
       search,
@@ -39,6 +45,8 @@ export const getESQLSingleColumnValues = async ({
       filter: undefined,
       dropNullColumns: true,
       timeRange,
+      timezone,
+      variables: esqlVariables,
     });
     const columns = results.response.columns.map((col) => col.name);
 

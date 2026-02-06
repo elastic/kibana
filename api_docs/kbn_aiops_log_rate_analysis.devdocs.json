@@ -40,6 +40,8 @@
           ", baselineBuckets: number, deviationBuckets: number, docCount: number, bgCount: number) => { baselineBucketRate: number; deviationBucketRate: number; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +64,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,6 +83,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +102,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,6 +121,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -130,6 +140,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_baseline_and_deviation_rates.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -153,6 +165,8 @@
           "(buckets: Record<string, number>, changePointTs: number) => { startTs: number; endTs: number; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +183,8 @@
               "Record<string, number>"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+            "lineNumber": 19,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -186,6 +202,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+            "lineNumber": 19,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,6 +250,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -255,6 +275,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -278,6 +300,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_analysis_type_for_histogram.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -309,6 +333,8 @@
           ", baselineBucketRate: number, deviationBucketRate: number) => { message: string; factor?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,6 +357,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -348,6 +376,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -365,6 +395,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_log_rate_change.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -388,6 +420,8 @@
           "(timeRangeEarliest: number, timeRangeLatest: number, interval: number) => number[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -404,6 +438,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -421,6 +457,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -438,6 +476,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -476,6 +516,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -498,6 +540,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -515,6 +559,8 @@
               "number[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -553,6 +599,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_swapped_window_parameters.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -575,6 +623,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_swapped_window_parameters.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -605,6 +655,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -621,6 +673,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -638,6 +692,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -655,6 +711,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -672,6 +730,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -689,6 +749,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -735,6 +797,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -758,6 +822,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -775,6 +841,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -792,6 +860,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -809,6 +879,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -833,6 +905,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -856,6 +930,8 @@
           "() => { barColor: string; barHighlightColor: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/constants.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -874,6 +950,8 @@
           "\nRepresents the document count statistics for a given time range."
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -890,6 +968,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,6 +986,8 @@
               "{ [key: string]: number; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,6 +1011,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -945,6 +1029,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -961,6 +1047,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -974,6 +1062,8 @@
               "The total document count."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -990,6 +1080,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1006,6 +1098,8 @@
           "\nRepresents a change point in document count statistics,\nidentifying a significant change over time."
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1019,6 +1113,8 @@
               "Key is the timestamp of the change point."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,6 +1128,8 @@
               "The start timestamp of the change point period."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1045,6 +1143,8 @@
               "The end timestamp of the change point period."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1058,6 +1158,8 @@
               "The type of change point."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1074,6 +1176,8 @@
           "\nRepresents the overall document stats."
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1087,6 +1191,8 @@
               "The probability of sampling."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1100,6 +1206,8 @@
               "The total document count."
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1123,6 +1231,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1146,6 +1256,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1162,6 +1274,8 @@
           "\nLog rate histogram item"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1175,6 +1289,8 @@
               "\nTime of bucket"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1188,6 +1304,8 @@
               "\nNumber of doc count for that time bucket"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1208,6 +1326,8 @@
           "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/window_parameters.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1221,6 +1341,8 @@
               "Baseline minimum value"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1234,6 +1356,8 @@
               "Baseline maximum value"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1247,6 +1371,8 @@
               "Deviation minimum value"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1260,6 +1386,8 @@
               "Deviation maximum value"
             ],
             "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1282,6 +1410,8 @@
           "\"spike\" | \"dip\""
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1301,6 +1431,8 @@
           "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

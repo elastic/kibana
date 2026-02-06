@@ -557,6 +557,14 @@ export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T
   }, {}) as T;
 }
 
+export function withErrorMessage(error?: Error, meta?: LogMeta): LogMeta {
+  return {
+    error,
+    error_message: error?.message,
+    ...(meta ?? {}),
+  } as LogMeta;
+}
+
 function _set(object: AnyObject, key: string, value: unknown) {
   if (key.startsWith('.') || key.endsWith('.') || contiguousDotRegex.test(key)) {
     // Preserve original keys with dots used in non-path representations (e.g. '.kibana_field_name')

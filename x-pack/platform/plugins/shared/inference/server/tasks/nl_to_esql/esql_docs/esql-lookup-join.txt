@@ -1,127 +1,79 @@
-# LOOKUP JOIN
+# LOOKUP-JOIN
 
-The `LOOKUP JOIN` command combines data from a query results table with matching records from a specified lookup index. It adds fields from the lookup index as new columns to the results table based on matching values in the join field. This is particularly useful for enriching or correlating data across multiple indices, such as logs, IPs, user IDs, or hosts.
+The LOOKUP JOIN command adds new columns to your query results by finding documents in a lookup index that share the same join field value as your result rows. For each row that matches a document in the lookup index based on the join fields, all fields from the matching document are added as new columns to that row. If multiple documents in the lookup index match a single row, the output will contain one row for each matching combination. This command enables you to enrich your results with data from another index, simplifying data enrichment and analysis workflows.
 
 ## Syntax
 
-`LOOKUP JOIN <lookup_index> ON <field_name>`
+`FROM <source_index> | LOOKUP JOIN <lookup_index> ON <join_condition>`
 
 ### Parameters
 
-#### lookup_index
+#### <lookup_index>
 
-The name of the lookup index. This must be a specific index name—wildcards, aliases, and remote cluster references are not supported. Indices used for lookups must be configured with the `lookup` mode.
+The name of the lookup index. This must be a specific index name; wildcards, aliases, and remote cluster references are not supported. Indices used for lookups must be configured with the `lookup` index mode.
 
-#### field_name
+#### <join_condition>
 
-The field to join on. This field must exist in both the current query results and the lookup index. If the field contains multi-valued entries, those entries will not match anything, and the added fields will contain `null` for those rows.
+Can be one of the following:
+- A single field name.
+- A comma-separated list of field names, for example `<field1>, <field2>, <field3>`.
+- An expression with one or more predicates linked by `AND`, for example `<left_field1> >= <lookup_field1> AND <left_field2> == <lookup_field2>`. Each predicate compares a field from the left index with a field from the lookup index using binary operators (`==`, `>=`, `<=`, `>`, `<`, `!=`). Each field name in the join condition must exist in only one of the indexes. Use RENAME to resolve naming conflicts.
+- An expression that includes full text functions and other Lucene-pushable functions, for example `MATCH(<lookup_field>, "search term") AND <left_field> == <lookup_field>`. These functions can be combined with binary operators and logical operators (`AND`, `OR`, `NOT`) to create complex join conditions. At least one condition that relates the lookup index fields to the left side of the join fields is still required.
 
-If no rows match in the lookup index, the incoming row is retained, and `null` values are added. If multiple rows in the lookup index match, one row is added per match.
+If using join on a single field or a field list, the fields used must exist in both your current query results and in the lookup index. If the fields contain multi-valued entries, those entries will not match anything (the added fields will contain null for those rows).
 
 ## Examples
 
-### Example 1: Enriching Firewall Logs with Threat Data
-
-This example demonstrates how to enrich firewall logs with threat data from a lookup index.
-
-#### Sample Data Setup
-
-##### Create the `threat_list` index
+Correlate source IPs with known malicious addresses by joining firewall logs with a threat list on the source IP field.
 
 ```esql
-PUT threat_list
-{
-  "settings": {
-    "index.mode": "lookup" 
-  },
-  "mappings": {
-    "properties": {
-      "source.ip": { "type": "ip" },
-      "threat_level": { "type": "keyword" },
-      "threat_type": { "type": "keyword" },
-      "last_updated": { "type": "date" }
-    }
-  }
-}
+FROM firewall_logs
+| LOOKUP JOIN threat_list ON source.IP
 ```
 
-##### Create the `firewall_logs` index
+Show only firewall logs where the source IP matches a known threat by filtering for rows with a non-null threat level after joining.
 
 ```esql
-PUT firewall_logs
-{
-  "mappings": {
-    "properties": {
-      "timestamp": { "type": "date" },
-      "source.ip": { "type": "ip" },
-      "destination.ip": { "type": "ip" },
-      "action": { "type": "keyword" },
-      "bytes_transferred": { "type": "long" }
-    }
-  }
-}
+FROM firewall_logs
+| LOOKUP JOIN threat_list ON source.IP
+| WHERE threat_level IS NOT NULL
 ```
 
-##### Add sample data to `threat_list`
+Enrich system metrics with host inventory and ownership information by joining with both the host inventory and ownerships indices on the host name.
 
 ```esql
-POST threat_list/_bulk
-{"index":{}}
-{"source.ip":"203.0.113.5","threat_level":"high","threat_type":"C2_SERVER","last_updated":"2025-04-22"}
-{"index":{}}
-{"source.ip":"198.51.100.2","threat_level":"medium","threat_type":"SCANNER","last_updated":"2025-04-23"}
+FROM system_metrics
+| LOOKUP JOIN host_inventory ON host.name
+| LOOKUP JOIN ownerships ON host.name
 ```
 
-##### Add sample data to `firewall_logs`
+Add service ownership details to application logs by joining with the service owners index on the service ID.
 
 ```esql
-POST firewall_logs/_bulk
-{"index":{}}
-{"timestamp":"2025-04-23T10:00:01Z","source.ip":"192.0.2.1","destination.ip":"10.0.0.100","action":"allow","bytes_transferred":1024}
-{"index":{}}
-{"timestamp":"2025-04-23T10:00:05Z","source.ip":"203.0.113.5","destination.ip":"10.0.0.55","action":"allow","bytes_transferred":2048}
-{"index":{}}
-{"timestamp":"2025-04-23T10:00:08Z","source.ip":"198.51.100.2","destination.ip":"10.0.0.200","action":"block","bytes_transferred":0}
-{"index":{}}
-{"timestamp":"2025-04-23T10:00:15Z","source.ip":"203.0.113.5","destination.ip":"10.0.0.44","action":"allow","bytes_transferred":4096}
-{"index":{}}
-{"timestamp":"2025-04-23T10:00:30Z","source.ip":"192.0.2.1","destination.ip":"10.0.0.100","action":"allow","bytes_transferred":512}
+FROM app_logs
+| LOOKUP JOIN service_owners ON service_id
 ```
 
-#### Query the Data
+Filter employees by employee number before joining with language lookup data to demonstrate optimizer behavior with the WHERE clause before the LOOKUP JOIN.
 
 ```esql
-FROM firewall_logs 
-| LOOKUP JOIN threat_list ON source.ip 
-| WHERE threat_level IS NOT NULL 
-| SORT timestamp 
-| KEEP source.ip, action, threat_level, threat_type 
-| LIMIT 10 
+FROM employees
+| EVAL language_code = languages
+| WHERE emp_no >= 10091 AND emp_no < 10094
+| LOOKUP JOIN languages_lookup ON language_code
 ```
 
-This query:
-- Matches the `source.ip` field in `firewall_logs` with the `source.ip` field in `threat_list`.
-- Filters rows to include only those with non-null `threat_level`.
-- Sorts the results by `timestamp`.
-- Keeps only the `source.ip`, `action`, `threat_level`, and `threat_type` fields.
-- Limits the output to 10 rows.
+Join employees with language lookup data, then filter by employee number to demonstrate optimizer behavior with the WHERE clause after the LOOKUP JOIN. The optimizer will move the filter before the join when possible.
 
-#### Response
-
-| source.ip     | action | threat_type | threat_level |
-|---------------|--------|-------------|--------------|
-| 203.0.113.5   | allow  | C2_SERVER   | high         |
-| 198.51.100.2  | block  | SCANNER     | medium       |
-| 203.0.113.5   | allow  | C2_SERVER   | high         |
-
-In this example, the `source.ip` field from `firewall_logs` is matched with the `source.ip` field in `threat_list`, and the corresponding `threat_level` and `threat_type` fields are added to the output.
+```esql
+FROM employees
+| EVAL language_code = languages
+| LOOKUP JOIN languages_lookup ON language_code
+| WHERE emp_no >= 10091 AND emp_no < 10094
+```
 
 ## Limitations
 
-- Indices in `lookup` mode are always single-sharded.
-- Cross-cluster search is not supported; both source and lookup indices must be local.
-- Only equality-based matching is supported.
-- `LOOKUP JOIN` can only use a single match field and a single index.
-- Wildcards, aliases, datemath, and datastreams are not supported.
-- The match field in `LOOKUP JOIN <lookup_index> ON <match_field>` must match an existing field in the query. Renames or evaluations may be required to achieve this.
-- The query may circuit break if there are too many matching documents in the lookup index or if the documents are too large. `LOOKUP JOIN` processes data in batches of approximately 10,000 rows, which can require significant heap space for large matching documents.
+- The lookup index must be a specific index name; wildcards, aliases, and remote cluster references are not supported.
+- Indices used for lookups must be configured with the `lookup` index mode.
+- If the join fields contain multi-valued entries, those entries will not match anything, and the added fields will contain null for those rows.

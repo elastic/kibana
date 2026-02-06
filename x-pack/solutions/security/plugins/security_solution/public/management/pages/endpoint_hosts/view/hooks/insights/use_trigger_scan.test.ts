@@ -28,11 +28,11 @@ jest.mock(
   })
 );
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn(),
 }));
 
-const mockUseMutation = jest.requireMock('@tanstack/react-query').useMutation;
+const mockUseMutation = jest.requireMock('@kbn/react-query').useMutation;
 
 describe('useTriggerScan', () => {
   const mockOnSuccess = jest.fn();

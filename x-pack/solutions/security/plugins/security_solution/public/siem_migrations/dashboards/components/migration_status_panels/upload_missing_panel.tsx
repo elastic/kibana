@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
@@ -20,7 +19,6 @@ import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import * as i18n from './translations';
-import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { DashboardMigrationStats } from '../../types';
@@ -65,25 +63,15 @@ const DashboardMigrationsUploadMissingPanelContent =
   React.memo<DashboardMigrationsUploadMissingPanelContentProps>(
     ({ migrationStats, topSpacerSize, missingResources }) => {
       const { euiTheme } = useEuiTheme();
-      const { data: translationStats, isLoading: isLoadingTranslationStats } =
-        useGetMigrationTranslationStats(migrationStats.id);
       const { openFlyout } = useMigrationDataInputContext();
       const { telemetry } = useKibana().services.siemMigrations.dashboards;
-      const totalDashboardsToRetry = useMemo(() => {
-        if (!translationStats) return 0;
-
-        return (
-          (translationStats.dashboards.failed ?? 0) +
-          (translationStats.dashboards.success.result.partial ?? 0) +
-          (translationStats.dashboards.success.result.untranslatable ?? 0)
-        );
-      }, [translationStats]);
 
       const onOpenFlyout = useCallback(() => {
         openFlyout(migrationStats);
         telemetry.reportSetupMigrationOpenResources({
           migrationId: migrationStats.id,
           missingResourcesCount: missingResources.length,
+          vendor: migrationStats.vendor,
         });
       }, [migrationStats, openFlyout, telemetry, missingResources.length]);
 
@@ -107,15 +95,9 @@ const DashboardMigrationsUploadMissingPanelContent =
                 </PanelText>
               </EuiFlexItem>
               <EuiFlexItem>
-                {isLoadingTranslationStats ? (
-                  <EuiLoadingSpinner size="s" />
-                ) : (
-                  <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
-                    {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(
-                      totalDashboardsToRetry
-                    )}
-                  </PanelText>
-                )}
+                <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
+                  {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION}
+                </PanelText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton

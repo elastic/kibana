@@ -8,8 +8,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/gemini/constants';
-import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/gemini/constants';
 import type { GeminiActionParams, GeminiConnector } from './types';
 
 interface ValidationErrors {
@@ -18,12 +17,12 @@ interface ValidationErrors {
 }
 export function getConnectorType(): GeminiConnector {
   return {
-    id: GEMINI_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.gemini.selectMessageText', {
       defaultMessage: 'Send a request to Google Gemini.',
     }),
-    actionTypeTitle: GEMINI_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: GeminiActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {

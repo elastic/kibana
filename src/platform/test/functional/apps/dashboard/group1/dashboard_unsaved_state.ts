@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.loadSavedDashboard('few panels');
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       originalPanelCount = await dashboard.getPanelCount();
     });
@@ -99,14 +98,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('edit mode state', () => {
       it('does not show unsaved changes badge when there are no unsaved changes', async () => {
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('shows the unsaved changes badge after adding panels', async () => {
         await dashboard.switchToEditMode();
         await dashboardAddPanel.addVisualization('Rendering-Test: metric');
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('has correct number of panels', async () => {
@@ -164,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.saveDashboard('Unsaved State Test');
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
     });
   });

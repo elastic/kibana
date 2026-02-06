@@ -43,6 +43,8 @@
           "<unknown>, any[]>"
         ],
         "path": "src/core/packages/di/common-internal/src/modules/plugin.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

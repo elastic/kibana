@@ -6,8 +6,8 @@
  */
 import { useCallback } from 'react';
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { getRuleIdsWithGaps } from '../api';
 import type { GapRangeValue } from '../../constants';
 import { getGapRange } from './utils';
@@ -27,13 +27,13 @@ export const useInvalidateGetRuleIdsWithGapsQuery = () => {
 export const useGetRuleIdsWithGaps = (
   {
     gapRange,
-    statuses,
+    gapFillStatuses,
     hasUnfilledIntervals,
     hasInProgressIntervals,
     hasFilledIntervals,
   }: {
     gapRange: GapRangeValue;
-    statuses: string[];
+    gapFillStatuses: string[];
     hasUnfilledIntervals?: boolean;
     hasInProgressIntervals?: boolean;
     hasFilledIntervals?: boolean;
@@ -44,7 +44,7 @@ export const useGetRuleIdsWithGaps = (
     [
       GET_RULE_IDS_WITH_GAPS,
       gapRange,
-      ...statuses,
+      ...gapFillStatuses,
       hasUnfilledIntervals,
       hasInProgressIntervals,
       hasFilledIntervals,
@@ -55,7 +55,7 @@ export const useGetRuleIdsWithGaps = (
         signal,
         start,
         end,
-        statuses,
+        gapFillStatuses,
         hasUnfilledIntervals,
         hasInProgressIntervals,
         hasFilledIntervals,

@@ -10,6 +10,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { lazy } from 'react';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/torq/constants';
 import type { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
 import * as i18n from './translations';
 
@@ -48,7 +49,7 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
     return validationResult;
   };
   return {
-    id: '.torq',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.TORQ_SELECT_MESSAGE,
     actionTypeTitle: i18n.TORQ_ACTION_TYPE_TITLE,

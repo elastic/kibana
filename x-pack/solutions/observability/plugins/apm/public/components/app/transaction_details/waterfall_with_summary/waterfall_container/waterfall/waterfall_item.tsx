@@ -19,8 +19,6 @@ import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { ColdStartBadge } from './badge/cold_start_badge';
-import { SpanLinksBadge } from './badge/span_links_badge';
 import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
@@ -29,6 +27,8 @@ import type {
   IWaterfallSpan,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { SpanLinksBadge } from '../../../../../shared/trace_waterfall/badges/span_links_badge';
+import { ColdStartBadge } from '../../../../../shared/trace_waterfall/badges/cold_start_badge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -180,9 +180,9 @@ function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
 
 function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiBadge color="hollow" iconType="clock">
       {asDuration(item.duration)}
-    </EuiText>
+    </EuiBadge>
   );
 }
 
@@ -198,6 +198,19 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   }
 
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
+}
+
+function ServiceNameBadge({ item }: { item: IWaterfallSpanOrTransaction }) {
+  const serviceName = item.doc.service.name;
+  if (!serviceName) {
+    return null;
+  }
+
+  return (
+    <EuiBadge color="hollow" iconType="dot">
+      {serviceName}
+    </EuiBadge>
+  );
 }
 
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -331,7 +344,7 @@ export function WaterfallItem({
         {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-
+        <ServiceNameBadge item={item} />
         <Duration item={item} />
         {isEmbeddable ? (
           <EmbeddableRelatedErrors
@@ -347,8 +360,8 @@ export function WaterfallItem({
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
         <SpanLinksBadge
-          linkedParents={item.spanLinksCount.linkedParents}
-          linkedChildren={item.spanLinksCount.linkedChildren}
+          outgoingCount={item.spanLinksCount.linkedParents}
+          incomingCount={item.spanLinksCount.linkedChildren}
           id={item.id}
           onClick={onClick}
         />

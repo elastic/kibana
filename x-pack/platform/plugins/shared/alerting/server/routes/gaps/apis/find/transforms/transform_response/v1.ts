@@ -31,6 +31,7 @@ export const transformResponse = ({
       return {
         _id: gap.internalFields._id,
         ...gap.toObject(),
+        rule_id: gap.ruleId,
         '@timestamp': gap.timestamp,
       };
     })

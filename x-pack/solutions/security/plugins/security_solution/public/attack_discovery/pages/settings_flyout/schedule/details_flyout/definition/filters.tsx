@@ -11,8 +11,8 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 
+import { PageScope } from '../../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
-import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
@@ -23,11 +23,11 @@ interface FiltersProps {
 
 export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(PageScope.alerts);
 
   // create a `DataView` from the `DataViewSpec`:
   const { dataView: oldDataView } = useCreateDataView({

@@ -13,6 +13,7 @@ import {
   CreateExceptionListRequestBody,
   CreateExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -25,7 +26,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })
@@ -48,6 +49,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             namespace_type: namespaceType,
             description,
             list_id: listId = uuidv4(),
+            os_types: osTypes = [],
             type,
             version,
           } = request.body;
@@ -72,6 +74,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
             version,

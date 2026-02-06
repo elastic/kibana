@@ -30,6 +30,7 @@ export type {
   ExportShareConfig,
   ExportShareDerivatives,
   RegisterShareIntegrationArgs,
+  ShareableUrlLocatorParams,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';

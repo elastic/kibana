@@ -1,8 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/test-suites-xpack-chat",
-  "owner": ["@elastic/workchat-eng"],
-  "group": "chat",
-  "visibility": "private",
-  "devOnly": true
-}

@@ -361,6 +361,29 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:17:00.000Z'));
   });
 
+  test('should return the calculated runAt when an rrule with hourly interval is provided', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          freq: 4, // Hourly
+          interval: 2,
+          tzid: 'UTC',
+          byminute: [30],
+        },
+      },
+    };
+
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+
+    // The next occurrence is specified by byminute which is 1:30pm
+    expect(firstRunAtDate).toEqual(new Date('2025-04-15T13:30:00.000Z'));
+  });
+
   test('should log an error and return now if rrule fails', () => {
     const now = new Date();
     const taskInstance = {

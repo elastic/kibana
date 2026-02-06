@@ -18,8 +18,6 @@ paths:
       operationId: GetAttackDiscoveryGeneration
       summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
       description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
-      tags:
-        - Attack discovery API
       parameters:
         - name: execution_uuid
           in: path

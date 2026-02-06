@@ -7,9 +7,7 @@
 
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import {
-  AttackDiscoveryPostInternalResponse,
   API_VERSIONS,
-  ATTACK_DISCOVERY_INTERNAL,
   ATTACK_DISCOVERY_GENERATE,
   PostAttackDiscoveryGenerateResponse,
 } from '@kbn/elastic-assistant-common';
@@ -23,7 +21,6 @@ import { getGenAiConfig, getRequestBody } from './helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
   end?: string;
@@ -75,8 +72,6 @@ export const useAttackDiscovery = ({
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
-
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
     async (options: FetchAttackDiscoveriesOptions | undefined) => {
@@ -120,23 +115,13 @@ export const useAttackDiscovery = ({
         }
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        const route = attackDiscoveryPublicApiEnabled
-          ? ATTACK_DISCOVERY_GENERATE
-          : ATTACK_DISCOVERY_INTERNAL;
-
-        const version = attackDiscoveryPublicApiEnabled
-          ? API_VERSIONS.public.v1
-          : API_VERSIONS.internal.v1;
-
         // call the API to generate attack discoveries:
-        const rawResponse = await http.post(route, {
+        const rawResponse = await http.post(ATTACK_DISCOVERY_GENERATE, {
           body: JSON.stringify(bodyWithOverrides),
-          version,
+          version: API_VERSIONS.public.v1,
         });
 
-        const parsedResponse = attackDiscoveryPublicApiEnabled
-          ? PostAttackDiscoveryGenerateResponse.safeParse(rawResponse)
-          : AttackDiscoveryPostInternalResponse.safeParse(rawResponse);
+        const parsedResponse = PostAttackDiscoveryGenerateResponse.safeParse(rawResponse);
 
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');
@@ -160,7 +145,6 @@ export const useAttackDiscovery = ({
       aiConnectors,
       alertsIndexPattern,
       anonymizationFields,
-      attackDiscoveryPublicApiEnabled,
       connectorId,
       connectorName,
       http,

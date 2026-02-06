@@ -6,10 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { unitOfTime } from 'moment';
+import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
 export const DEFAULT_MINIMUM_TIME_RANGE_OPTION: MinimumTimeRangeOption = 'No minimum';
-
-export type MinimumTimeRangeOption = 'No minimum' | '1 week' | '1 month' | '3 months' | '6 months';
 
 type MinimumTimeRange = Record<
   MinimumTimeRangeOption,

@@ -114,7 +114,7 @@ export const ContextFieldsSelect = ({
         onChange={onSelectFields}
         isClearable={false}
         fullWidth
-        aria-label={i18n.translate('xpack.searchPlayground.editContext.', {
+        aria-label={i18n.translate('xpack.searchPlayground.editContext.ariaLabel', {
           defaultMessage: 'Select context field options',
         })}
         onSearchChange={handleSearchChange}

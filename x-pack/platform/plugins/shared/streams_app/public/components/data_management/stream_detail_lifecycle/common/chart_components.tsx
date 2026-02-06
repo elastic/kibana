@@ -26,52 +26,34 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
-import type { useAggregations } from '../hooks/use_ingestion_rate';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
-interface BaseChartComponentProps {
+interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
   isLoadingStats: boolean;
+  stats?: CalculatedStats;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
 }
-
-interface MainStreamChartProps extends BaseChartComponentProps {
-  stats?: DataStreamStats;
-  isLoadingAggregations: boolean;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
-  aggregationsError: Error | undefined;
-}
-
-interface FailureStoreChartProps extends BaseChartComponentProps {
-  stats?: FailureStoreStats;
-  isLoadingAggregations: boolean;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
-  aggregationsError: Error | undefined;
-}
-
-type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
-type ChartPhasesComponentProps = BaseChartComponentProps & {
-  stats?: DataStreamStats;
-};
 
 export function ChartBarSeries({
   stats,
   timeState,
   isLoadingStats,
-  isLoadingAggregations,
   aggregations,
-  aggregationsError,
+  statsError,
 }: ChartComponentProps) {
   const mainStreamResult = useIngestionRate({
-    stats,
+    calculatedStats: stats,
     timeState,
     aggregations,
-    isLoading: isLoadingAggregations,
-    error: aggregationsError,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;
@@ -98,16 +80,15 @@ export function FailureStoreChartBarSeries({
   stats,
   timeState,
   isLoadingStats,
-  isLoadingAggregations,
   aggregations,
-  aggregationsError,
+  statsError,
 }: ChartComponentProps) {
   const failureStoreResult = useIngestionRate({
-    stats,
+    calculatedStats: stats,
     timeState,
     aggregations,
-    isLoading: isLoadingAggregations,
-    error: aggregationsError,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;
@@ -151,11 +132,11 @@ export function ChartBarSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <Chart size={{ height: 250 }}>
+    <div style={{ height: '100%', minHeight: '200px', width: '100%' }}>
+      <Chart size={{ height: '100%', width: '100%' }}>
         <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <BarSeries
@@ -184,7 +165,7 @@ export function ChartBarSeriesBase({
           gridLine={{ visible: true }}
         />
       </Chart>
-    </>
+    </div>
   );
 }
 
@@ -215,13 +196,17 @@ function ChartBarPhasesSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }} gutterSize="s">
-        <EuiFlexItem grow={9}>
-          <Chart size={{ height: 250 }}>
+    <div style={{ width: '100%', height: '100%', minHeight: '200px' }}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        css={{ width: '100%', height: '100%' }}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={9} css={{ minHeight: '200px' }}>
+          <Chart size={{ height: '100%', width: '100%' }}>
             <Settings showLegend={false} baseTheme={chartBaseTheme} />
             {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
               <BarSeries
@@ -257,7 +242,7 @@ function ChartBarPhasesSeriesBase({
           <PhasesLegend phases={availablePhases} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </div>
   );
 }
 
@@ -266,14 +251,14 @@ export function ChartBarPhasesSeries({
   stats,
   timeState,
   isLoadingStats,
-}: ChartPhasesComponentProps) {
+}: ChartComponentProps) {
   const { timeState: defaultTimeState } = useTimefilter();
   const currentTimeState = timeState || defaultTimeState;
 
   // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRatePerTier({
     definition,
-    stats,
+    calculatedStats: stats,
     timeState: currentTimeState,
   });
 
@@ -329,7 +314,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
       <EuiSpacer size="s" />
       {availablePhases.map((phase) => (
         <React.Fragment key={phase.name}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false} css={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
                 <span

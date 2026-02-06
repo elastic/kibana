@@ -67,12 +67,15 @@ export class ManagementPlugin
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-          id: mgmtApp.id,
-          title: mgmtApp.title,
-          path: mgmtApp.basePath,
-          keywords: mgmtApp.keywords,
-        })),
+        deepLinks: section
+          .getAppsEnabled()
+          .filter((mgmtApp) => !mgmtApp.hideFromGlobalSearch)
+          .map((mgmtApp) => ({
+            id: mgmtApp.id,
+            title: mgmtApp.title,
+            path: mgmtApp.basePath,
+            keywords: mgmtApp.keywords,
+          })),
       })
     );
 

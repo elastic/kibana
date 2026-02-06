@@ -34,6 +34,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RawRule } from '../../../types';
 import { RecoveredActionGroup, type BulkEditSkipReason } from '../../../types';
 import type { SavedObject } from '@kbn/core/server';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 
 jest.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -524,6 +525,80 @@ describe('bulkEditRules', () => {
         { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
       ],
       total: 1,
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(
+        // @ts-expect-error: not all args are required for this test
+        new Map([
+          ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          [
+            'test.internal-rule-type-2',
+            { id: 'test.internal-rule-type-2', internallyManaged: true },
+          ],
+        ])
+      );
+
+      // @ts-expect-error: not all args are required for this test
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: nodeBuilder.and([
+          nodeBuilder.is('alert.attributes.alertTypeId', 'foo'),
+          nodeBuilder.is('alert.attributes.consumer', 'bar'),
+        ]),
+      });
+    });
+
+    it('should ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await bulkEditRules(rulesClientContext, {
+        filter: 'alert.attributes.tags: "APM"',
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+        shouldInvalidateApiKeys: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+    });
+
+    it('should not ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await bulkEditRules(rulesClientContext, {
+        filter: 'alert.attributes.tags: "APM"',
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+        shouldInvalidateApiKeys: false,
+        ignoreInternalRuleTypes: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
     });
   });
 });

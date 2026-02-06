@@ -11,8 +11,8 @@ import type {
   Visualization,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
-} from '../../../../types';
-import { isOperation } from '../../../../types';
+} from '@kbn/lens-common';
+import { isOperation } from '../../../../types_guards';
 
 export interface OnVisDropProps<T> {
   prevState: T;
@@ -32,6 +32,18 @@ export function onDropForVisualization<T, P = unknown, E = unknown>(
 
   const previousColumn =
     isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
+  if (isOperation(source) && dropType === 'reorder') {
+    return (
+      activeVisualization.reorderDimension?.({
+        columnId: source.columnId,
+        groupId,
+        layerId,
+        prevState,
+        targetColumnId: target.columnId,
+        frame,
+      }) ?? prevState
+    );
+  }
 
   let newVisState = activeVisualization.setDimension({
     columnId,

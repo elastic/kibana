@@ -15,6 +15,8 @@ import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_act
 import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import type { ExternalRuleSource } from '../../../../../../common/api/detection_engine';
 import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -25,6 +27,7 @@ jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
 jest.mock(
   '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
+jest.mock('../../../../../common/components/user_privileges');
 
 const mockReportEvent = jest.fn();
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -59,6 +62,13 @@ describe('RuleActionsOverflow', () => {
       actions: { openCustomizationsRevertFlyout: jest.fn() },
       state: { doesBaseVersionExist: true },
     });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { read: true, edit: true },
+        exceptions: { read: true, edit: true },
+      },
+    });
   });
   describe('rules details menu panel', () => {
     test('menu items rendered when a rule is passed to the component', () => {
@@ -67,7 +77,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -87,7 +97,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={null}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -99,13 +109,13 @@ describe('RuleActionsOverflow', () => {
   });
 
   describe('rules details pop over button icon', () => {
-    test('it does not open the popover when rules-details-popover-button-icon is clicked when the user does not have permission', () => {
+    test('it does not open the popover when rules-details-popover-button-icon is clicked when the disabled flag is passed', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions={false}
+          isDisabled={true}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -124,7 +134,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -147,7 +157,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -165,7 +175,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -177,6 +187,30 @@ describe('RuleActionsOverflow', () => {
       // Popover is not shown
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
+
+    test('should be enabled when user only has rule read permissions', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          rules: { read: true, edit: false },
+          exceptions: { read: true, edit: false },
+        },
+      });
+
+      const { getByTestId } = render(
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+          rule={mockRule('id')}
+          isDisabled={false}
+          canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
+        />,
+        { wrapper: TestProviders }
+      );
+      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
+      expect(getByTestId('rules-details-export-rule')).not.toBeDisabled();
+    });
   });
 
   describe('rules details delete rule', () => {
@@ -186,7 +220,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -208,7 +242,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -232,7 +266,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={rule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -255,7 +289,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -274,7 +308,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={mockRule('id')}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -305,7 +339,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={customizedMockRule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,
@@ -331,7 +365,7 @@ describe('RuleActionsOverflow', () => {
           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
           rule={customizedMockRule}
-          userHasPermissions
+          isDisabled={false}
           canDuplicateRuleWithActions={true}
           confirmDeletion={() => Promise.resolve(true)}
         />,

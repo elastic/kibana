@@ -272,6 +272,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
    */
   shared: z.boolean().optional(),
+  /**
+   * Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
+   */
+  scheduled: z.boolean().optional(),
   sortField: z.string().optional().default('@timestamp'),
   sortOrder: z.string().optional(),
   /**
@@ -290,7 +294,16 @@ export const FindAttackDiscoveryAlertsParams = z.object({
 
 export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
 export const AttackDiscoveryGenerationConfig = z.object({
+  /**
+      * The (space specific) index pattern that contains the alerts to use as
+context for the attack discovery.
+Example: .alerts-security.alerts-default
+
+      */
   alertsIndexPattern: z.string(),
+  /**
+   * The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
+   */
   anonymizationFields: z.array(AnonymizationFieldResponse),
   /**
    * LLM API configuration.
@@ -298,6 +311,32 @@ export const AttackDiscoveryGenerationConfig = z.object({
   apiConfig: ApiConfig,
   connectorName: z.string().optional(),
   end: z.string().optional(),
+  /**
+      * An Elasticsearch-style query DSL object used to filter alerts. For example:
+```json {
+  "filter": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "bool": {
+            "should": [
+              {
+                "term": {
+                  "user.name": { "value": "james" }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ],
+      "should": [],
+      "must_not": []
+    }
+  }
+} ```
+      */
   filter: z.object({}).catchall(z.unknown()).optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),

@@ -24,14 +24,14 @@ import {
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { DatatableComponent } from './components/table_basic';
-
 import type {
   GetCompatibleCellValueActions,
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
-} from '../../types';
+} from '@kbn/lens-common';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { DatatableComponent } from './components';
+
 import type { FormatFactory } from '../../../common/types';
 import type { DatatableProps } from '../../../common/expressions';
 
@@ -180,7 +180,6 @@ export const getDatatableRenderer = (dependencies: {
           {...config}
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
-          renderMode={handlers.getRenderMode()}
           paletteService={dependencies.paletteService}
           getType={getType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}

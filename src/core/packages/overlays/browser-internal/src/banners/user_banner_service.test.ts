@@ -42,6 +42,7 @@ describe('OverlayBannersService', () => {
       i18n: i18nServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       uiSettings,
+      // @ts-expect-error upgrade typescript v5.9.3
       userProfile,
     });
   };

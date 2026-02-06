@@ -9,14 +9,30 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { ContainerMetricTypes } from '../charts/types';
+import {
+  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
+  MAX_AS_FIRST_FUNCTION_PATTERN,
+} from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
-const getSubtitleFromFormula = (value: string) =>
-  value.startsWith('max')
-    ? i18n.translate('xpack.infra.containerViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
-    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-        defaultMessage: 'Average',
-      });
+export const getSubtitleFromFormula = (value: string) => {
+  // Check if 'avg' or 'average' is the first word/function in the formula
+  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+      defaultMessage: 'Average',
+    });
+  }
+
+  // Check if 'max' is the first word/function in the formula
+  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.containerViewPage.kpi.subtitle.max', {
+      defaultMessage: 'Max',
+    });
+  }
+
+  // remove the fallback subtitle to avoid confusion
+  return '';
+};
 
 export const useDockerContainerPageViewMetricsCharts = ({
   metric,

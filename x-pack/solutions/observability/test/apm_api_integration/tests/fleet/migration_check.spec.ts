@@ -23,7 +23,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const bettertest = getBettertest(supertest);
   const apmApiClient = getService('apmApiClient');
 
-  registry.when('Fleet migration check - basic', { config: 'basic', archives: [] }, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/229299
+  registry.when.skip('Fleet migration check - basic', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await setupFleet(bettertest);
     });
@@ -37,13 +38,13 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
     });
   });
-
-  registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/229299
+  registry.when.skip('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
     before(async () => {
       await setupFleet(bettertest);
     });
 
-    describe('migration check properties', () => {
+    describe.skip('migration check properties', () => {
       it('should contain all expected properties', async () => {
         const { status, body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',

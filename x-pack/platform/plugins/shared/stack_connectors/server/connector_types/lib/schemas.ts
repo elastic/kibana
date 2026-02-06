@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 const PORT_MAX = 256 * 256 - 1;
-export const portSchema = () => schema.number({ min: 1, max: PORT_MAX });
+export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);

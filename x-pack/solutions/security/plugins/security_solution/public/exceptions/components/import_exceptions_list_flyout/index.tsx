@@ -34,7 +34,7 @@ import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
@@ -138,7 +138,7 @@ export const ImportExceptionListFlyout = React.memo(
                 setAlreadyExistingItem(true);
                 if (
                   err.error.message.includes(
-                    `Found that list_id: "${ENDPOINT_LIST_ID}" already exists`
+                    `Found that list_id: "${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id}" already exists`
                   )
                 ) {
                   setEndpointListImporting(true);
@@ -187,7 +187,7 @@ export const ImportExceptionListFlyout = React.memo(
             initialPromptText={i18n.IMPORT_PROMPT}
             onChange={handleFileChange}
             display={'large'}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label={i18n.IMPORT_FILE_PICKER_ARIA_LABEL}
           />
 
           {alreadyExistingItem && (

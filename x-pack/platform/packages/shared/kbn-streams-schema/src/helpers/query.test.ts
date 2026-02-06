@@ -12,13 +12,14 @@ import type { StreamQuery } from '../queries';
 describe('buildEsqlQuery', () => {
   const createTestQuery = (
     kqlQuery: string,
-    systemFilter: Condition = { field: 'some.field', eq: 'some value' }
+    featureFilter: Condition = { field: 'some.field', eq: 'some value' }
   ): StreamQuery => ({
     id: 'irrelevant',
     title: 'irrelevant',
-    system: {
+    feature: {
       name: 'irrelevant',
-      filter: systemFilter,
+      filter: featureFilter,
+      type: 'system',
     },
     kql: {
       query: kqlQuery,
@@ -76,7 +77,7 @@ describe('buildEsqlQuery', () => {
     });
   });
 
-  it('should build query without system filter', () => {
+  it('should build query without feature filter', () => {
     const indices = ['logs.child', 'logs.child.*'];
     const query: StreamQuery = {
       id: 'irrelevant',
@@ -88,6 +89,34 @@ describe('buildEsqlQuery', () => {
     const esqlQuery = buildEsqlQuery(indices, query);
 
     expect(esqlQuery).toBe('FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"")');
+  });
+
+  it('should build query with simple feature filter', () => {
+    const indices = ['logs.child', 'logs.child.*'];
+    const query = createTestQuery('event.type: "access"', {
+      field: 'some.field',
+      eq: 'some value',
+    });
+    const esqlQuery = buildEsqlQuery(indices, query);
+
+    expect(esqlQuery).toBe(
+      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND `some.field` == "some value"'
+    );
+  });
+
+  it('should build query with `or` feature filter', () => {
+    const indices = ['logs.child', 'logs.child.*'];
+    const query = createTestQuery('event.type: "access"', {
+      or: [
+        { field: 'some.field', eq: 'some value' },
+        { field: 'some.other.field', eq: 'some other value' },
+      ],
+    });
+    const esqlQuery = buildEsqlQuery(indices, query);
+
+    expect(esqlQuery).toBe(
+      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND (`some.field` == "some value" OR `some.other.field` == "some other value")'
+    );
   });
 
   describe('KQL query variations', () => {

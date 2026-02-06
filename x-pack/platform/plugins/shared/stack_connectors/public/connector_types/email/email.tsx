@@ -14,9 +14,12 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  CONNECTOR_ID,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+} from '@kbn/connector-schemas/email/constants';
 import type { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import type { RegistrationServices } from '..';
-import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
 export const emailServices: Array<EuiSelectOption & { 'kbn-setting-value': string }> = [
   {
@@ -92,7 +95,7 @@ export function getConnectorType(
   services: RegistrationServices
 ): ConnectorTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   return {
-    id: '.email',
+    id: CONNECTOR_ID,
     iconClass: 'email',
     selectMessage: i18n.translate('xpack.stackConnectors.components.email.selectMessageText', {
       defaultMessage: 'Send email from your server.',
@@ -108,9 +111,11 @@ export function getConnectorType(
         to: new Array<string>(),
         cc: new Array<string>(),
         bcc: new Array<string>(),
+        replyTo: new Array<string>(),
         message: new Array<string>(),
         subject: new Array<string>(),
       };
+
       const validationResult = { errors };
 
       if (!actionParams.message?.length) {
@@ -123,6 +128,7 @@ export function getConnectorType(
       const toEmails = getToFields(actionParams);
       const ccEmails = getCcFields(actionParams);
       const bccEmails = getBccFields(actionParams);
+      const replyTo = getReplyToFields(actionParams);
 
       if (toEmails.length === 0 && ccEmails.length === 0 && bccEmails.length === 0) {
         const errorText = translations.TO_CC_REQUIRED;
@@ -131,7 +137,7 @@ export function getConnectorType(
         errors.bcc.push(errorText);
       }
 
-      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails));
+      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails)).concat(replyTo ?? []);
       const validatedEmails = services.validateEmailAddresses(allEmails, {
         treatMustacheTemplatesAsValid: true,
       });
@@ -139,6 +145,7 @@ export function getConnectorType(
       const toEmailSet = new Set(toEmails);
       const ccEmailSet = new Set(ccEmails);
       const bccEmailSet = new Set(bccEmails);
+      const replyToSet = new Set(replyTo);
 
       for (const validated of validatedEmails) {
         if (!validated.valid) {
@@ -151,6 +158,7 @@ export function getConnectorType(
           if (toEmailSet.has(email)) errors.to.push(message);
           if (ccEmailSet.has(email)) errors.cc.push(message);
           if (bccEmailSet.has(email)) errors.bcc.push(message);
+          if (replyToSet.has(email)) errors.replyTo.push(message);
         }
       }
 
@@ -162,16 +170,21 @@ export function getConnectorType(
 }
 
 function getToFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.to instanceof Array)) return [];
+  if (!Array.isArray(actionParams.to)) return [];
   return actionParams.to;
 }
 
 function getCcFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.cc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.cc)) return [];
   return actionParams.cc;
 }
 
 function getBccFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.bcc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.bcc)) return [];
   return actionParams.bcc;
+}
+
+function getReplyToFields(actionParams: EmailActionParams): string[] {
+  if (!Array.isArray(actionParams.replyTo)) return [];
+  return actionParams.replyTo;
 }

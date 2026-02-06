@@ -11,6 +11,7 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { getEvaluatorLlm } from '.';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/langchain/server', () => ({
   ...jest.requireActual('@kbn/langchain/server'),
@@ -30,7 +31,7 @@ const evaluatorConnector = {
   isDeprecated: false,
 } as Connector;
 
-const experimentConnector: Connector = {
+const experimentConnector: Connector = createMockConnector({
   name: 'Gemini 1.5 Pro 002',
   actionTypeId: '.gemini',
   config: {
@@ -39,14 +40,9 @@ const experimentConnector: Connector = {
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  secrets: {
-    credentialsJson: '{}',
-  },
   id: 'gemini-1-5-pro-002',
   isPreconfigured: true,
-  isSystemAction: false,
-  isDeprecated: false,
-} as Connector;
+});
 
 const logger = loggerMock.create();
 

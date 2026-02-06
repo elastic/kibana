@@ -29,7 +29,7 @@ import type {
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 
 export type AnyMetricLensStateColumn =
   | CountIndexPatternColumn
@@ -74,3 +74,14 @@ export type ReferenceMetricLensStateColumn = Exclude<
   AnyLensStateColumn,
   ReferableMetricLensStateColumn | AnyBucketLensStateColumn
 >;
+
+export interface APIDataView {
+  type: 'dataView';
+  id: string;
+}
+
+export interface APIAdHocDataView {
+  type: 'adHocDataView';
+  index: string;
+  timeFieldName: string | undefined;
+}

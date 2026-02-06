@@ -50,7 +50,7 @@ const geti18nTexts = (
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
-            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
+            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. Because snapshots provide resiliency, enabling this option disables and removes replicas from the previous phase. You can manually re-enable replicas if needed. {learnMoreLink}"
             values={{
               learnMoreLink: <LearnMoreLink docPath={fullyMountedSearchableSnapshotLink} />,
             }}
@@ -169,6 +169,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           } else if (repos.length === 0) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 color="warning"
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle',
@@ -204,6 +205,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           ) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle',
                   { defaultMessage: 'Repository name not found' }
@@ -267,6 +269,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
@@ -281,6 +284,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     } else if (isDisabledDueToLicense) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',

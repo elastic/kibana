@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { DefendInsightsResponse, DefendInsightType } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

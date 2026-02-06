@@ -108,3 +108,12 @@ export const logsSynthMappings = (dataset: string): MappingTypeMapping => ({
     },
   },
 });
+
+export const logsSynthMalformedMappings = (dataset: string): MappingTypeMapping => ({
+  properties: {
+    ...logsSynthMappings(dataset).properties,
+    numeric_field: {
+      type: 'long',
+    },
+  },
+});

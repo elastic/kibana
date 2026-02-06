@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { createSelector } from 'reselect';
+import { PageScope } from '../../data_view_manager/constants';
 import type { State } from '../../common/store/types';
 import type { SourcererModel } from './model';
-import { SourcererScopeName } from './model';
 
-const SOURCERER_SCOPE_MAX_SIZE = Object.keys(SourcererScopeName).length;
+const SOURCERER_SCOPE_MAX_SIZE = Object.keys(PageScope).length;
 
 const selectSourcerer = (state: State): SourcererModel => state.sourcerer;
 
@@ -20,7 +20,7 @@ export const sourcererScopes = createSelector(
 
 export const sourcererScope = createSelector(
   sourcererScopes,
-  (state: State, scopeId: SourcererScopeName) => scopeId,
+  (state: State, scopeId: PageScope) => scopeId,
   (scopes, scopeId) => scopes[scopeId],
   {
     memoizeOptions: {

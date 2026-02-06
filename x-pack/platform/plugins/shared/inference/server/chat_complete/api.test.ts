@@ -21,10 +21,11 @@ import {
   createInferenceConnectorAdapterMock,
   createInferenceConnectorMock,
   createInferenceExecutorMock,
+  createRegexWorkerServiceMock,
   chunkEvent,
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
-import { createRegexWorkerServiceMock } from '../test_utils';
+import { createChatCompleteCallbackApi } from './callback_api';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -46,13 +47,16 @@ describe('createChatCompleteApi', () => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     regexWorker = createRegexWorkerServiceMock();
-    chatComplete = createChatCompleteApi({
+    const callbackApi = createChatCompleteCallbackApi({
       request,
       actions,
       logger,
-      esClient: mockEsClient,
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
+      esClient: mockEsClient,
+    });
+    chatComplete = createChatCompleteApi({
+      callbackApi,
     });
 
     inferenceAdapter = createInferenceConnectorAdapterMock();

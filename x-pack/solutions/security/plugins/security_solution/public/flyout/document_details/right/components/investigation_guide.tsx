@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
-import { EuiButton, EuiSkeletonText, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -29,10 +30,9 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  const { navigateToLeftPanel: goToInvestigationsTab, isEnabled: isLinkEnabled } =
-    useNavigateToLeftPanel({
-      tab: LeftPanelInvestigationTab,
-    });
+  const goToInvestigationsTab = useNavigateToLeftPanel({
+    tab: LeftPanelInvestigationTab,
+  });
 
   const hasInvestigationGuide = useMemo(
     () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
@@ -43,6 +43,7 @@ export const InvestigationGuide: React.FC = () => {
     if (isRulePreview) {
       return (
         <EuiCallOut
+          announceOnMount
           iconType="documentation"
           size="s"
           title={
@@ -73,30 +74,6 @@ export const InvestigationGuide: React.FC = () => {
             { defaultMessage: 'investigation guide' }
           )}
         />
-      );
-    }
-
-    if (hasInvestigationGuide && !isLinkEnabled) {
-      return (
-        <EuiCallOut
-          iconType="documentation"
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutTitle"
-              defaultMessage="Investigation guide available"
-            />
-          }
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutAriaLabel',
-            { defaultMessage: 'Investigation guide available' }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutMessage"
-            defaultMessage="Open alert details to access investigation guides."
-          />
-        </EuiCallOut>
       );
     }
 
@@ -142,7 +119,7 @@ export const InvestigationGuide: React.FC = () => {
         />
       </EuiCallOut>
     );
-  }, [isRulePreview, loading, hasInvestigationGuide, isLinkEnabled, goToInvestigationsTab]);
+  }, [isRulePreview, loading, hasInvestigationGuide, goToInvestigationsTab]);
 
   return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };

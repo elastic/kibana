@@ -64,13 +64,16 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     }
   }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
+  const webApplicationLabel = i18n.translate('xpack.ux.localFilters.titles.webApplication', {
+    defaultMessage: 'Web application',
+  });
+
   return (
     <EuiSelect
       data-test-subj="uxServiceNameFilterSelect"
       fullWidth
-      prepend={i18n.translate('xpack.ux.localFilters.titles.webApplication', {
-        defaultMessage: 'Web application',
-      })}
+      prepend={webApplicationLabel}
+      aria-label={webApplicationLabel}
       isLoading={loading}
       data-cy="serviceNameFilter"
       options={options}

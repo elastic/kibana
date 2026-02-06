@@ -18,8 +18,6 @@ export const ensureActionRequestsIndexIsConfigured = async (
 ): Promise<void> => {
   const logger = endpointService.createLogger('ensureActionRequestsIndexIsConfigured');
   const esClient = endpointService.getInternalEsClient();
-  const isSpacesEnabled =
-    endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
   const COMPONENT_TEMPLATE_NAME = '.logs-endpoint.actions@package';
 
   logger.debug(`Checking setup of index [${ENDPOINT_ACTIONS_INDEX}]`);
@@ -35,11 +33,6 @@ export const ensureActionRequestsIndexIsConfigured = async (
 
     logger.debug(`Index for [${ENDPOINT_ACTIONS_INDEX}] already exists`);
   });
-
-  if (!isSpacesEnabled) {
-    logger.debug(`Space awareness feature is disabled. Nothing to do.`);
-    return;
-  }
 
   logger.debug(
     `Checking field mappings for index [${ENDPOINT_ACTIONS_INDEX}] in support of space awareness`

@@ -17,10 +17,7 @@ import {
   isDataViewDataset,
 } from './utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type {
-  GenericIndexPatternColumn,
-  PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-common';
 
 const dataView = {
   id: 'test-dataview',
@@ -66,24 +63,50 @@ describe('isDataViewDataset', () => {
 });
 
 test('build references correctly builds references', () => {
-  const results = buildReferences({
-    layer1: dataView as unknown as DataView,
-    layer2: dataView as unknown as DataView,
-  });
-  expect(results).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "id": "test-dataview",
-        "name": "indexpattern-datasource-layer-layer1",
-        "type": "index-pattern",
-      },
-      Object {
-        "id": "test-dataview",
-        "name": "indexpattern-datasource-layer-layer2",
-        "type": "index-pattern",
-      },
-    ]
-  `);
+  const results = buildReferences(
+    {
+      layer1: dataView as unknown as DataView,
+      layer2: dataView as unknown as DataView,
+    },
+    {}
+  );
+  expect(results.references).toEqual([
+    {
+      id: 'test-dataview',
+      name: 'indexpattern-datasource-layer-layer1',
+      type: 'index-pattern',
+    },
+    {
+      id: 'test-dataview',
+      name: 'indexpattern-datasource-layer-layer2',
+      type: 'index-pattern',
+    },
+  ]);
+  expect(results.internalReferences).toEqual([]);
+});
+
+test('should split references and internalReferences', () => {
+  const results = buildReferences(
+    {
+      layer1: dataView as unknown as DataView,
+      layer2: { ...dataView, id: 'ad-hoc' } as unknown as DataView,
+    },
+    { 'ad-hoc': {} }
+  );
+  expect(results.references).toEqual([
+    {
+      id: 'test-dataview',
+      name: 'indexpattern-datasource-layer-layer1',
+      type: 'index-pattern',
+    },
+  ]);
+  expect(results.internalReferences).toEqual([
+    {
+      id: 'ad-hoc',
+      name: 'indexpattern-datasource-layer-layer2',
+      type: 'index-pattern',
+    },
+  ]);
 });
 
 test('getAdhocDataviews', () => {

@@ -10,6 +10,7 @@ import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   BadCRUDRequestError,
+  EntityNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
@@ -17,6 +18,7 @@ import {
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
+import type { TransformPreviewTransformResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('EntityStoreCrudClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -29,6 +31,82 @@ describe('EntityStoreCrudClient', () => {
     namespace: 'default',
     logger: loggerMock,
     dataClient: dataClientMock,
+  });
+
+  describe('delete single entity', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    it('when Entity Store disabled throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
+        new EngineNotRunningError('user')
+      );
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+    });
+
+    it('when Entity Store enabled but CRUD API not in place throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
+        new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API)
+      );
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'user',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
+    it('when not found throw', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 0 }));
+
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new EntityNotFoundError('host', 'does-not-exist'));
+    });
+
+    it('when version conflicts throw', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ version_conflicts: 1 }));
+
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new DocumentVersionConflictError());
+    });
+
+    it('when successful responds OK', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 1 }));
+
+      const response = await client.deleteEntity('service', { id: 'entity-id' });
+      expect(response).toStrictEqual({ deleted: true });
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('service');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'service',
+        EntityStoreCapability.CRUD_API
+      );
+      expect(esClientMock.deleteByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v1.latest.security_service_default',
+        query: {
+          term: {
+            'entity.id': 'entity-id',
+          },
+        },
+      });
+    });
   });
 
   describe('update single entity', () => {
@@ -175,6 +253,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -250,6 +329,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -342,6 +422,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -351,7 +432,18 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
-
+      esClientMock.transform.previewTransform.mockReturnValue(
+        Promise.resolve({
+          preview: [
+            {
+              _id: 'some-id',
+              _source: {
+                entity: { identity: { host: { name: 'host-1' } } },
+              },
+            },
+          ],
+        } as TransformPreviewTransformResponse)
+      );
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
@@ -397,9 +489,408 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
-
       expect(v4Spy).toBeCalledTimes(1);
+      expect(esClientMock.transform.previewTransform).toBeCalledWith(
+        {
+          pivot: {
+            aggs: {
+              count: {
+                value_count: {
+                  field: 'host.name',
+                },
+              },
+            },
+            group_by: {
+              'entity.identity.host.name': {
+                terms: {
+                  field: 'host.name',
+                },
+              },
+            },
+          },
+          source: {
+            index: '.entities.v1.updates.security_host_default',
+            query: { bool: { must: { term: { 'host.name': 'host-1' } } } },
+          },
+        },
+        { querystring: { as_index_request: true } }
+      );
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.latest.security_host_default',
+        id: 'some-id',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          host: {
+            name: 'host-1',
+            entity: {
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              behaviors: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                New_country_login: false,
+              },
+            },
+          },
+        },
+        refresh: 'true',
+      });
+    });
+
+    it('when creating entity synchronously and entity is not in preview transform docs, throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValue(Promise.resolve({ updated: 0 }));
+      esClientMock.transform.previewTransform.mockReturnValue(
+        Promise.resolve({
+          preview: [] as Array<{ _source: string; id: string }[]>,
+        } as TransformPreviewTransformResponse)
+      );
+
+      const doc: Entity = {
+        entity: {
+          id: 'user-id',
+          attributes: {
+            privileged: true,
+          },
+        },
+      };
+
+      await expect(async () => client.upsertEntity('user', doc)).rejects.toThrow(
+        new EntityNotFoundError('user', 'user-id')
+      );
+      expect(esClientMock.transform.previewTransform).toBeCalledTimes(1);
+    });
+  });
+
+  describe('update entities bulk', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useRealTimers();
+    });
+
+    it('when Entity Store disabled throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () =>
+        client.upsertEntitiesBulk([
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+              },
+            },
+          },
+        ])
+      ).rejects.toThrow(new EngineNotRunningError('user'));
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+    });
+
+    it('when Entity Store enabled but CRUD API not in place throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () =>
+        client.upsertEntitiesBulk([
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+              },
+            },
+          },
+        ])
+      ).rejects.toThrow(new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API));
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'user',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
+    it('when Entity Store enabled only for some throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () =>
+        client.upsertEntitiesBulk([
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+              },
+            },
+          },
+          {
+            type: 'host',
+            record: {
+              entity: {
+                id: 'host-id',
+              },
+            },
+          },
+        ])
+      ).rejects.toThrow(new EngineNotRunningError('host'));
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'user',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
+    it('when Entity Store enabled, but CRUD API enabled only for some throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
+
+      await expect(async () =>
+        client.upsertEntitiesBulk([
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+              },
+            },
+          },
+          {
+            type: 'host',
+            record: {
+              entity: {
+                id: 'host-id',
+              },
+            },
+          },
+        ])
+      ).rejects.toThrow(new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API));
+
+      expect(dataClientMock.isEngineRunning).toBeCalledTimes(2);
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledTimes(2);
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('user');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'user',
+        EntityStoreCapability.CRUD_API
+      );
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
+    });
+
+    it('when not allowed attributes are updated, throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+
+      const brokenRecord: Entity = {
+        user: {
+          name: 'not-allowed',
+          id: ['123'],
+        },
+        entity: {
+          id: 'host-1',
+          type: 'update',
+          sub_type: 'updated-sub',
+          attributes: {
+            privileged: true,
+          },
+        },
+      };
+
+      await expect(async () =>
+        client.upsertEntitiesBulk([
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+              },
+            },
+          },
+          {
+            type: 'host',
+            record: {
+              entity: {
+                id: 'host-id',
+              },
+            },
+          },
+          {
+            type: 'user',
+            record: brokenRecord,
+          },
+        ])
+      ).rejects.toThrow(
+        new BadCRUDRequestError(
+          `The following attributes are not allowed to be ` +
+            `updated without forcing it (?force=true): user.id, entity.type, entity.sub_type`
+        )
+      );
+    });
+
+    it('when valid create entities', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      await client.upsertEntitiesBulk([
+        {
+          type: 'user',
+          record: {
+            entity: {
+              id: 'user-id',
+              attributes: {
+                privileged: true,
+              },
+            },
+          },
+        },
+        {
+          type: 'host',
+          record: {
+            entity: {
+              id: 'host-id',
+              attributes: {
+                privileged: true,
+              },
+            },
+          },
+        },
+        {
+          type: 'service',
+          record: {
+            entity: {
+              id: 'service-id',
+              attributes: {
+                privileged: true,
+              },
+            },
+          },
+        },
+        {
+          type: 'generic',
+          record: {
+            entity: {
+              id: 'generic-id',
+              attributes: {
+                privileged: true,
+              },
+            },
+          },
+        },
+        {
+          type: 'service',
+          record: {
+            entity: {
+              id: 'service-id-2',
+              attributes: {
+                privileged: true,
+              },
+            },
+          },
+        },
+      ]);
+
+      expect(dataClientMock.isEngineRunning).toBeCalledTimes(4);
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledTimes(4);
+      expect(esClientMock.bulk).toBeCalledTimes(4);
+
+      expect(esClientMock.bulk).toMatchSnapshot();
+    });
+
+    it('when valid create entity using force', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      await client.upsertEntitiesBulk(
+        [
+          {
+            type: 'user',
+            record: {
+              entity: {
+                id: 'user-id',
+                attributes: {
+                  privileged: true,
+                },
+              },
+            },
+          },
+          {
+            type: 'host',
+            record: {
+              entity: {
+                id: 'host-id',
+              },
+              host: {
+                id: ['123'],
+                name: 'a',
+              },
+            },
+          },
+          {
+            type: 'service',
+            record: {
+              entity: {
+                id: 'service-id',
+                attributes: {
+                  privileged: true,
+                },
+              },
+            },
+          },
+          {
+            type: 'generic',
+            record: {
+              entity: {
+                id: 'generic-id',
+                attributes: {
+                  privileged: true,
+                },
+              },
+            },
+          },
+          {
+            type: 'service',
+            record: {
+              entity: {
+                id: 'service-id-2',
+                attributes: {
+                  privileged: true,
+                },
+              },
+            },
+          },
+        ],
+        true
+      );
+
+      expect(dataClientMock.isEngineRunning).toBeCalledTimes(4);
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledTimes(4);
+      expect(esClientMock.bulk).toBeCalledTimes(4);
+
+      expect(esClientMock.bulk).toMatchSnapshot();
     });
   });
 });

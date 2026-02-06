@@ -14,10 +14,10 @@ import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import { getEsqlQuery } from './get_esql_query';
-import type { ContentFrameworkSectionProps } from '../../../../content_framework/section/section';
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
   defaultMessage: 'Similar spans',
@@ -27,14 +27,6 @@ const latencyTitle = i18n.translate(
   {
     defaultMessage: 'Latency',
   }
-);
-const discoverBtnLabel = i18n.translate(
-  'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.button',
-  { defaultMessage: 'Open in Discover' }
-);
-const discoverBtnAria = i18n.translate(
-  'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.label',
-  { defaultMessage: 'Open in Discover link' }
 );
 
 export interface SimilarSpansProps {
@@ -62,29 +54,22 @@ export function SimilarSpans({
     isOtelSpan,
   });
   const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.traces });
 
-  const esqlQuery = getEsqlQuery({ serviceName, spanName, transactionName, transactionType });
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.apm.traces,
+    whereClause: getEsqlQuery({ serviceName, spanName, transactionName, transactionType }),
+  });
 
-  const discoverUrl = useMemo(
-    () => generateDiscoverLink(esqlQuery),
-    [generateDiscoverLink, esqlQuery]
-  );
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
+  });
 
-  const sectionActions: ContentFrameworkSectionProps['actions'] = useMemo(
-    () =>
-      discoverUrl
-        ? [
-            {
-              dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
-              label: discoverBtnLabel,
-              href: discoverUrl,
-              icon: 'discoverApp',
-              ariaLabel: discoverBtnAria,
-            },
-          ]
-        : [],
-    [, discoverUrl]
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
   );
 
   return (
@@ -92,7 +77,7 @@ export function SimilarSpans({
       id="similarSpans"
       data-test-subj="docViewerSimilarSpansSection"
       title={sectionTitle}
-      actions={sectionActions}
+      actions={actions}
     >
       <ContentFrameworkChart
         data-test-subj="docViewerSimilarSpansLatencyChart"

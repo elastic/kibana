@@ -16,7 +16,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'step1', type: 'console' },
         { name: 'step2', type: 'http' },
@@ -35,7 +35,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'step1', type: 'console' },
         { name: 'step2', type: 'http' },
@@ -59,7 +59,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'root_step', type: 'console' },
         {
@@ -87,7 +87,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'if_step',
@@ -112,7 +112,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'parallel_step',
@@ -144,7 +144,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'atomic_step',
@@ -170,7 +170,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'merge_step',
@@ -196,7 +196,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'root_step', type: 'console' },
         {
@@ -237,7 +237,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [],
     };
 
@@ -252,7 +252,7 @@ describe('validateStepNameUniqueness', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
     } as WorkflowYaml;
 
     const result = validateStepNameUniqueness(workflow);

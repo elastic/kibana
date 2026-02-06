@@ -36,10 +36,6 @@ export const useLayoutStyles = () => {
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
         ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
 
-      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
-
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
@@ -58,7 +54,14 @@ export const useLayoutStyles = () => {
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
-      .kbnGridPanel--resizeHandle {
+      // allows embeddables (specifically the control embeddables in this case) to hide the drag handle icon
+      .kbnGridPanel:has(.kbnGridLayout--hideDragHandle) {
+        .kbnGridPanel--resizeHandle::after {
+          display: none !important;
+        }
+      }
+
+      .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
@@ -72,7 +75,7 @@ export const useLayoutStyles = () => {
           mask-position: bottom ${euiTheme.size.s} right ${euiTheme.size.s};
           mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8' fill='none'%3E%3Cg clip-path='url(%23clip0_472_172810)'%3E%3Ccircle cx='7' cy='1' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip1_472_172810)'%3E%3Ccircle cx='4' cy='4' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='4' r='1' fill='%23000000'/%3E%3C/g%3E%3Cg clip-path='url(%23clip2_472_172810)'%3E%3Ccircle cx='1' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='4' cy='7' r='1' fill='%23000000'/%3E%3Ccircle cx='7' cy='7' r='1' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E");
 
-          background-color: ${euiTheme.colors.borderBaseFormsControl};
+          background-color: ${euiTheme.colors.borderBaseProminent};
         }
         &:hover,
         &:focus-visible {
@@ -85,7 +88,6 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--active {
         // overwrite the border style on panels + hover actions for active panels
         --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
-        --hoverActionsBoxShadowStyle: var(--dashboardHoverActionsActivePanelBoxShadow);
         --hoverActionsSingleWrapperBoxShadowStyle: var(
           --dashboardHoverActionsActivePanelBoxShadow--singleWrapper
         );

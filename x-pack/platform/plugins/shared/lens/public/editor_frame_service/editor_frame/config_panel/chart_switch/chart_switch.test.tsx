@@ -18,15 +18,16 @@ import {
 } from '../../../../mocks';
 
 import type {
+  LensAppState,
   DatasourcePublicAPI,
   SuggestionRequest,
   DatasourceSuggestion,
-} from '../../../../types';
+} from '@kbn/lens-common';
 import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import type { LensAppState } from '../../../../state_management';
 import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service_context';
 
 const mockFrame = (layers: string[]) => ({
   ...createMockFramePublicAPI(),
@@ -45,7 +46,7 @@ const mockFrame = (layers: string[]) => ({
 const datasourceSuggestions: Record<string, DatasourceSuggestion[]> = {
   unchanged: [
     {
-      state: 'testDatasource suggestion',
+      state: 'formBased suggestion',
       table: {
         columns: [
           {
@@ -74,7 +75,7 @@ const datasourceSuggestions: Record<string, DatasourceSuggestion[]> = {
   ],
   layers: [
     {
-      state: 'testDatasource suggestion layer a',
+      state: 'formBased suggestion layer a',
       table: {
         columns: [
           {
@@ -101,7 +102,7 @@ const datasourceSuggestions: Record<string, DatasourceSuggestion[]> = {
       keptLayerIds: ['a'],
     },
     {
-      state: 'testDatasource suggestion layer b',
+      state: 'formBased suggestion layer b',
       table: {
         columns: [
           {
@@ -232,13 +233,15 @@ describe('chart_switch', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <ChartSwitchPopover
-        framePublicAPI={frame}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        layerId="a"
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <ChartSwitchPopover
+          filteredVisualizationMap={visualizationMap}
+          framePublicAPI={frame}
+          layerId="a"
+          {...propsOverrides}
+        />
+      </EditorFrameServiceProvider>,
+
       {},
       {
         storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
@@ -246,9 +249,10 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis',
             state: 'state from a',
+            selectedLayerId: null,
           },
           datasourceStates,
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           ...preloadedStateOverrides,
         },
       }
@@ -288,10 +292,10 @@ describe('chart_switch', () => {
 
   describe('data loss indicators', () => {
     it('should indicate data loss if not all columns will be used', async () => {
-      datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
+      datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.unchanged
       );
-      datasourceMap.testDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+      datasourceMap.formBased.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'col1', fields: [] },
         { columnId: 'col2', fields: [] },
         { columnId: 'col3', fields: [] },
@@ -317,7 +321,7 @@ describe('chart_switch', () => {
 
     it('should support multi-layer suggestions without data loss', async () => {
       frame = mockFrame(['a', 'b']);
-      datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
+      datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.unchanged
       );
       (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([
@@ -358,6 +362,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC2' },
+            selectedLayerId: null,
           },
         },
       });
@@ -380,6 +385,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC2' },
+            selectedLayerId: null,
           },
         },
       });
@@ -414,7 +420,7 @@ describe('chart_switch', () => {
         suggestion: {
           visualizationState: 'testVis2 initial state',
           newVisualizationId: 'testVis2',
-          datasourceId: 'testDatasource',
+          datasourceId: 'formBased',
           datasourceState: {},
         },
         clearStagedPreview: true,
@@ -469,7 +475,7 @@ describe('chart_switch', () => {
     await openChartSwitch();
     switchToVis('testVis2');
 
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a'); // from preloaded state
+    expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'a'); // from preloaded state
     expect(store.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
@@ -494,7 +500,7 @@ describe('chart_switch', () => {
     visualizationMap.testVis.getMainPalette = jest.fn(() => legacyPalette);
     visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
     frame = mockFrame(['a', 'b', 'c']);
-    datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+    datasourceMap.formBased.getLayers.mockReturnValue(['a', 'b', 'c']);
 
     const { openChartSwitch, switchToVis } = renderChartSwitch();
     await openChartSwitch();
@@ -524,7 +530,7 @@ describe('chart_switch', () => {
         suggestion: {
           visualizationState: 'testVis2 initial state testVis2',
           newVisualizationId: 'testVis2',
-          datasourceId: 'testDatasource',
+          datasourceId: 'formBased',
           datasourceState: {},
         },
         clearStagedPreview: true,
@@ -538,6 +544,7 @@ describe('chart_switch', () => {
         visualization: {
           activeId: 'testVis3',
           state: { type: 'subvisC3' },
+          selectedLayerId: null,
         },
       },
     });
@@ -556,8 +563,8 @@ describe('chart_switch', () => {
   describe('multi-layer suggestions', () => {
     it('should use suggestion for chart switch for selected layer', async () => {
       frame = mockFrame(['a', 'b']);
-      datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b']);
-      datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
+      datasourceMap.formBased.getLayers.mockReturnValue(['a', 'b']);
+      datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.layers
       );
       (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([
@@ -579,8 +586,8 @@ describe('chart_switch', () => {
           suggestion: {
             visualizationState: 'testVis2 initial state',
             newVisualizationId: 'testVis2',
-            datasourceId: 'testDatasource',
-            datasourceState: 'testDatasource suggestion layer b',
+            datasourceId: 'formBased',
+            datasourceState: 'formBased suggestion layer b',
           },
           clearStagedPreview: true,
         },
@@ -597,6 +604,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC1' },
+            selectedLayerId: null,
           },
         },
       });
@@ -615,7 +623,7 @@ describe('chart_switch', () => {
         type: 'lens/switchVisualization',
         payload: {
           suggestion: {
-            datasourceId: 'testDatasource',
+            datasourceId: 'formBased',
             datasourceState: {},
             visualizationState: 'switched',
             newVisualizationId: 'testVis3',
@@ -623,7 +631,7 @@ describe('chart_switch', () => {
           clearStagedPreview: true,
         },
       });
-      expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
+      expect(datasourceMap.formBased.removeLayer).not.toHaveBeenCalled();
     });
 
     it('should not remove layers and initialize with existing state when switching between subtypes without data', async () => {
@@ -638,6 +646,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC1' },
+            selectedLayerId: null,
           },
         },
       });
@@ -651,13 +660,13 @@ describe('chart_switch', () => {
         },
         'a'
       );
-      expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
+      expect(datasourceMap.formBased.removeLayer).not.toHaveBeenCalled();
     });
 
     it('should switch to the updated datasource state', async () => {
       frame = mockFrame(['a', 'b']);
 
-      datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
+      datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.unchanged
       );
 
@@ -670,8 +679,8 @@ describe('chart_switch', () => {
         payload: {
           suggestion: {
             newVisualizationId: 'testVis2',
-            datasourceId: 'testDatasource',
-            datasourceState: 'testDatasource suggestion',
+            datasourceId: 'formBased',
+            datasourceState: 'formBased suggestion',
             visualizationState: 'testVis2 initial state',
           },
           clearStagedPreview: true,
@@ -682,16 +691,16 @@ describe('chart_switch', () => {
     // it('should get suggestions when switching subvisualization based on the current layer', async () => {
     //   visualizationMap.testVis3.getSuggestions.mockReturnValueOnce([]);
     //   frame = mockFrame(['a', 'b', 'c']);
-    //   datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+    //   datasourceMap.formBased.getLayers.mockReturnValue(['a', 'b', 'c']);
 
     //   const { openChartSwitch, switchToVis } = renderChartSwitch({ layerId: 'c' });
     //   openChartSwitch();
     //   screen.debug();
     //   switchToVis('testVis3');
 
-    //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-    //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
-    //   expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
+    //   expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'a');
+    //   expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'b');
+    //   expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'c');
     //   expect(visualizationMap.testVis2.getSuggestions).toHaveBeenCalledWith(
     //     expect.objectContaining({
     //       keptLayerIds: ['a'],
@@ -715,15 +724,15 @@ describe('chart_switch', () => {
     it('should get suggestions when switching subvisualization', async () => {
       visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
       frame = mockFrame(['a', 'b', 'c']);
-      datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+      datasourceMap.formBased.getLayers.mockReturnValue(['a', 'b', 'c']);
 
       const { openChartSwitch, switchToVis, store } = renderChartSwitch();
       await openChartSwitch();
       switchToVis('testVis2');
 
-      expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-      expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
-      expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
+      expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'a');
+      expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'b');
+      expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'c');
       expect(visualizationMap.testVis2.getSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           keptLayerIds: ['a'],

@@ -12,6 +12,7 @@ import {
   FindExceptionListItemsRequestQuery,
   FindExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -24,7 +25,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })

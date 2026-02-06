@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -17,7 +16,6 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getAgentStatusClient } from '../../services';
 
 export const registerAgentStatusRoute = (
@@ -68,23 +66,6 @@ export const getAgentStatusRouteHandler = (
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
 
-    // Note: because our API schemas are defined as module static variables (as opposed to a
-    //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      (agentType === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures
-          .responseActionsCrowdstrikeManualHostIsolationEnabled) ||
-      (agentType === 'microsoft_defender_endpoint' &&
-        !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
-    ) {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
-      );
-    }
-
     try {
       const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
         context.securitySolution,
@@ -92,10 +73,7 @@ export const getAgentStatusRouteHandler = (
         context.actions,
       ]);
       const esClient = corePlugin.elasticsearch.client.asInternalUser;
-      const spaceId = endpointContext.service.experimentalFeatures
-        .endpointManagementSpaceAwarenessEnabled
-        ? securitySolutionPlugin.getSpaceId()
-        : DEFAULT_SPACE_ID;
+      const spaceId = securitySolutionPlugin.getSpaceId();
       const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
         spaceId,
       });

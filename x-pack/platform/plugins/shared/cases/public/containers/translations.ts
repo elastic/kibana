@@ -54,7 +54,7 @@ export const SYNC_CASE = (caseTitle: string) =>
 export const EXTRACT_OBSERVABLES = (caseTitle: string) =>
   i18n.translate('xpack.cases.containers.extractObservables', {
     values: { caseTitle },
-    defaultMessage: 'Auto-extract observables in "{caseTitle}" have been updated',
+    defaultMessage: 'Auto-extract observables setting in "{caseTitle}" have been updated',
   });
 
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(

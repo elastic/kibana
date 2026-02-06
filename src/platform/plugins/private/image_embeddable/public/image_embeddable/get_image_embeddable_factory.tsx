@@ -17,27 +17,24 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
-import { IMAGE_CLICK_TRIGGER } from '../actions';
+import type { ImageEmbeddableState } from '../../server';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';
-import { IMAGE_EMBEDDABLE_TYPE } from './constants';
-import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
+import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }) => {
-  const imageEmbeddableFactory: EmbeddableFactory<
-    ImageEmbeddableSerializedState,
-    ImageEmbeddableApi
-  > = {
+  const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState
@@ -46,41 +43,37 @@ export const getImageEmbeddableFactory = ({
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.rawState.imageConfig);
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...dynamicActionsState,
-            imageConfig: imageConfig$.getValue(),
-          },
-          references: dynamicActionsReferences ?? [],
+          ...titleManager.getLatestState(),
+          ...(dynamicActionsManager?.getLatestState() ?? {}),
+          imageConfig: imageConfig$.getValue(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          imageConfig$.pipe(map(() => undefined))
+          imageConfig$.pipe(map(() => undefined)),
+          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip', drilldowns: 'skip' }),
             ...titleComparators,
             imageConfig: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.rawState.imageConfig);
+          titleManager.reinitializeState(lastSaved);
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          if (lastSaved) imageConfig$.next(lastSaved.imageConfig);
         },
       });
 
@@ -89,7 +82,7 @@ export const getImageEmbeddableFactory = ({
         ...(dynamicActionsManager?.api ?? {}),
         ...unsavedChangesApi,
         dataLoading$,
-        supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
+        supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
 
         onEdit: async () => {
           openLazyFlyout({

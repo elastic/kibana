@@ -23,6 +23,7 @@ export interface Store {
   currentView: string;
   restoreRequestFromHistory: RequestToRestore | null;
   fileToImport: string | null;
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
 export const initialValue: Store = {
@@ -32,6 +33,7 @@ export const initialValue: Store = {
   currentView: SHELL_TAB_ID,
   restoreRequestFromHistory: null,
   fileToImport: null,
+  customParsedRequestsProvider: undefined,
 };
 
 export type Action =

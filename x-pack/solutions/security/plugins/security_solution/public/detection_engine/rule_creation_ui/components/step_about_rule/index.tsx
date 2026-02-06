@@ -40,6 +40,7 @@ import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -71,6 +72,7 @@ const TagContainer = styled.div`
 `;
 
 TagContainer.displayName = 'TagContainer';
+const GhostFormField = () => <></>;
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   ruleType,
@@ -100,6 +102,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
+
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   useEffect(() => {
     if (index != null && (dataViewId === '' || dataViewId == null)) {
@@ -324,18 +330,22 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiToolTip>
             <EuiSpacer size="l" />
-            <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
-              <CommonUseField
-                path="isAssociatedToEndpointList"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
-                  'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
-                  euiFieldProps: {
-                    disabled: isLoading,
-                  },
-                }}
-              />
-            </EuiFormRow>
+            {!endpointExceptionsMovedUnderManagement ? (
+              <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
+                <CommonUseField
+                  path="isAssociatedToEndpointList"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                    'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </EuiFormRow>
+            ) : (
+              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
+            )}
             <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField
                 path="isBuildingBlock"

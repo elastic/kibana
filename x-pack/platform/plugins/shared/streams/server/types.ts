@@ -6,6 +6,7 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
@@ -26,7 +27,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -34,6 +37,7 @@ export interface StreamsServer {
   config: StreamsConfig;
   logger: Logger;
   security: SecurityPluginStart;
+  actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
@@ -55,6 +59,7 @@ export interface StreamsPluginSetupDependencies {
 }
 
 export interface StreamsPluginStartDependencies {
+  actions: ActionsPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
@@ -63,4 +68,6 @@ export interface StreamsPluginStartDependencies {
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;
+  console: ConsoleServerStart;
+  spaces?: SpacesPluginStart;
 }

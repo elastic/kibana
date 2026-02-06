@@ -15,17 +15,18 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   goToExecutionLogTab,
   getExecutionLogTableRow,
-  refreshRuleExecutionTable,
   filterByRunType,
+  waitForExecutionLogTabToBePopulated,
 } from '../../../../tasks/rule_details';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { EXECUTION_SHOWING } from '../../../../screens/rule_details';
 import { manualRuleRun } from '../../../../tasks/api_calls/backfill';
 
+// TODO: https://github.com/elastic/kibana/issues/244006
 describe(
   'Event log',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   function () {
     before(() => {
@@ -48,16 +49,7 @@ describe(
       visit(ruleDetailsUrl(this.ruleId));
       goToExecutionLogTab();
 
-      cy.waitUntil(
-        () => {
-          cy.log('Waiting for execution logs to appear in execution log table');
-          refreshRuleExecutionTable();
-          return getExecutionLogTableRow().then((rows) => {
-            return rows.length > 0;
-          });
-        },
-        { interval: 5000, timeout: 20000 }
-      );
+      waitForExecutionLogTabToBePopulated(1);
 
       cy.get(EXECUTION_SHOWING).contains('Showing 1 rule execution');
       getExecutionLogTableRow().should('have.length', 1);
@@ -69,16 +61,7 @@ describe(
         end: moment().toISOString(),
       });
 
-      cy.waitUntil(
-        () => {
-          cy.log('Waiting for execution logs to appear in execution log table');
-          refreshRuleExecutionTable();
-          return getExecutionLogTableRow().then((rows) => {
-            return rows.length > 1;
-          });
-        },
-        { interval: 5000, timeout: 20000 }
-      );
+      waitForExecutionLogTabToBePopulated(2);
 
       cy.get(EXECUTION_SHOWING).contains('Showing 2 rule executions');
       getExecutionLogTableRow().should('have.length', 2);

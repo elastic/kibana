@@ -27,6 +27,19 @@
         "0"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "version",
+        "master_node",
+        "blocks",
+        "nodes",
+        "metadata",
+        "routing_table",
+        "routing_nodes",
+        "customs"
+      ]
+    },
     "methods": [
       "GET"
     ],

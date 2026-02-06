@@ -10,8 +10,8 @@ import { Readable } from 'stream';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
-  EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  EXCEPTION_LIST_NAMESPACE_AWARE,
 } from '@kbn/securitysolution-list-constants';
 import type {
   SavedObjectsBulkUpdateObject,
@@ -40,7 +40,7 @@ import type {
 } from './exception_list_client_types';
 
 const isExceptionsListSavedObjectType = (type: string): boolean =>
-  type === EXCEPTION_LIST_NAMESPACE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
+  type === EXCEPTION_LIST_NAMESPACE_AWARE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
 
 export class ExceptionListClientMock extends ExceptionListClient {
   public getExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
@@ -152,7 +152,6 @@ export const getUpdateExceptionListItemOptionsMock = (): UpdateExceptionListItem
 export const getExceptionListSoSchemaMock = (
   overrides: Partial<ExceptionListSoSchema> = {}
 ): ExceptionListSoSchema => {
-  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     comments,
     created_at,
@@ -169,7 +168,6 @@ export const getExceptionListSoSchemaMock = (
     type,
     updated_by,
   } = getExceptionListItemSchemaMock();
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const soSchema: ExceptionListSoSchema = {
     comments,

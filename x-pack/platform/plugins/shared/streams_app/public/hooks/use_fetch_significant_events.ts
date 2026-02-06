@@ -6,27 +6,33 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
-import moment from 'moment';
+import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
+import moment from 'moment';
 import { useKibana } from './use_kibana';
-import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { useTimefilter } from './use_timefilter';
+import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
-  title: string;
   query: StreamQuery;
+  stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
 }
 
-export const useFetchSignificantEvents = ({
-  name,
-  start,
-  end,
-}: {
-  name: string;
-  start: number;
-  end: number;
-}) => {
+type SignificantEventsFetchResult =
+  | undefined
+  | {
+      significant_events: SignificantEventItem[];
+      aggregated_occurrences: { x: number; y: number }[];
+      total_occurrences: number;
+    };
+
+export const useFetchSignificantEvents = (
+  options: { name?: string; query?: string } | undefined = {},
+  deps: unknown[] = []
+) => {
+  const { name, query } = options;
   const {
     dependencies: {
       start: {
@@ -35,59 +41,82 @@ export const useFetchSignificantEvents = ({
       },
     },
   } = useKibana();
+  const showFetchErrorToast = useFetchErrorToast();
 
-  const result = useStreamsAppFetch(
-    async ({ signal }): Promise<undefined | SignificantEventItem[]> => {
-      const isoFrom = new Date(start).toISOString();
-      const isoTo = new Date(end).toISOString();
+  const { timeState } = useTimefilter();
 
-      const { min, max } = data.query.timefilter.timefilter.calculateBounds({
-        from: isoFrom,
-        to: isoTo,
-      });
+  const fetchSignificantEvents = async ({
+    signal,
+  }: QueryFunctionContext): Promise<SignificantEventsFetchResult> => {
+    const isoFrom = new Date(timeState.start).toISOString();
+    const isoTo = new Date(timeState.end).toISOString();
 
-      if (!min || !max) {
-        return undefined;
-      }
+    const { min, max } = data.query.timefilter.timefilter.calculateBounds({
+      from: isoFrom,
+      to: isoTo,
+    });
 
-      const bucketSize = calculateAuto.near(50, moment.duration(max.diff(min)));
-      if (!bucketSize) {
-        return undefined;
-      }
+    if (!min || !max) {
+      return undefined;
+    }
 
-      const intervalString = `${bucketSize.asSeconds()}s`;
+    const bucketSize = calculateAuto.near(50, moment.duration(max.diff(min)));
+    if (!bucketSize) {
+      return undefined;
+    }
 
-      const response = await streamsRepositoryClient
-        .fetch('GET /api/streams/{name}/significant_events 2023-10-31', {
-          params: {
-            path: { name },
-            query: {
-              from: isoFrom,
-              to: isoTo,
-              bucketSize: intervalString,
-            },
+    const intervalString = `${bucketSize.asSeconds()}s`;
+
+    const requestPromise = streamsRepositoryClient.fetch(
+      'GET /internal/streams/_significant_events',
+      {
+        params: {
+          query: {
+            from: isoFrom,
+            to: isoTo,
+            bucketSize: intervalString,
+            query: query?.trim() ?? '',
+            streamNames: name ? [name] : undefined,
           },
-          signal,
-        })
-        .then((res) => {
-          return res.map((series) => {
-            const { occurrences, change_points: changePoints, ...query } = series;
+        },
+        signal: signal ?? null,
+      }
+    );
+
+    return await requestPromise.then(
+      ({
+        significant_events: significantEvents,
+        aggregated_occurrences: aggregatedOccurrences,
+      }) => {
+        return {
+          significant_events: significantEvents.map((series) => {
+            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
             return {
-              title: query.title,
-              query,
+              query: rest,
+              stream_name,
               change_points: changePoints,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),
                 y: occurrence.count,
               })),
             };
-          });
-        });
+          }),
+          aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
+            x: new Date(occurrence.date).getTime(),
+            y: occurrence.count,
+          })),
+          total_occurrences: aggregatedOccurrences.reduce(
+            (sum, occurrence) => sum + occurrence.count,
+            0
+          ),
+        };
+      }
+    );
+  };
 
-      return response;
-    },
-    [name, start, end, streamsRepositoryClient, data.query.timefilter]
-  );
-
-  return result;
+  return useQuery<SignificantEventsFetchResult, Error>({
+    queryKey: ['significantEvents', name, timeState.start, timeState.end, query, ...deps],
+    queryFn: fetchSignificantEvents,
+    onError: showFetchErrorToast,
+  });
 };

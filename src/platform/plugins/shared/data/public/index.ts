@@ -35,42 +35,6 @@ export const exporters = {
   tableHasFormulas,
 };
 
-/*
- * Index patterns:
- */
-
-import {
-  isNestedField,
-  isFilterable,
-  isMultiField,
-  getFieldSubtypeNested,
-  getFieldSubtypeMulti,
-} from '../common';
-
-import {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  validateDataView,
-} from './data_views';
-
-// Index patterns namespace:
-export const indexPatterns = {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  isFilterable,
-  isNestedField,
-  isMultiField,
-  getFieldSubtypeMulti,
-  getFieldSubtypeNested,
-  validate: validateDataView,
-};
-
-export type { DataViewsContract, TypeMeta } from './data_views';
-
 export type {
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,

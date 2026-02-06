@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
-import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
+import {
+  LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+  LENS_HISTOGRAM_GRANULARITY_MAX,
+  LENS_RANGE_DEFAULT_INTERVAL,
+} from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
@@ -70,7 +74,11 @@ export function fromRangeOrHistogramLensStateToAPI(
   return {
     operation: 'histogram',
     include_empty_rows: Boolean(column.params.includeEmptyRows),
-    granularity: column.params?.maxBars,
+    granularity:
+      column.params?.maxBars !== LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE &&
+      column.params?.maxBars > LENS_HISTOGRAM_GRANULARITY_MAX
+        ? 'auto'
+        : column.params?.maxBars,
     ...getLensAPIBucketSharedProps(column),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };

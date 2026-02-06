@@ -32,6 +32,9 @@ export function checkTargetVersionsValidity(
   if (versions.length !== uniqueVersions.size) {
     return `duplicate versions not allowed`;
   }
+  if (requiredVersions.some((item) => item.percentage < 1)) {
+    return `percentage must be greater than 0`;
+  }
   if (requiredVersions.some((item) => !item.percentage)) {
     return `percentage is required`;
   }

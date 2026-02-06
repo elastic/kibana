@@ -48,3 +48,11 @@ export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
     default: AttackDiscoveryUpsellingPageESS,
   }))
 );
+
+export const AIValueUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/ai_value').then(({ AIValueUpsellingPageESS }) => ({
+      default: AIValueUpsellingPageESS,
+    }))
+  )
+);

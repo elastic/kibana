@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/storybook",

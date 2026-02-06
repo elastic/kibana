@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
 import type { FieldTypeKnown, FieldBase } from '@kbn/field-utils/types';
 
@@ -104,6 +104,20 @@ export type OverrideFieldGroupDetails = (
   groupName: FieldsGroupNames
 ) => Partial<FieldsGroupDetails> | undefined | null;
 
+export interface ExistingFieldsInfo {
+  fetchStatus: ExistenceFetchStatus;
+  existingFieldsByFieldNameMap: Record<string, boolean>;
+  newFields?: FieldSpec[];
+  numberOfFetches: number;
+  hasDataViewRestrictions?: boolean;
+}
+
+export interface FetchedExistingFieldsInfo {
+  dataViewId: string;
+  dataViewHash: string;
+  info: ExistingFieldsInfo;
+}
+
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 
 export type ButtonAddFieldVariant = 'primary' | 'toolbar';
@@ -160,6 +174,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
    * Pass `true` to have non-draggable field list items (like in the mobile flyout)
    */
   disableFieldListItemDragAndDrop?: boolean;
+
+  /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
 
   /**
    * This button will be shown in mobile view

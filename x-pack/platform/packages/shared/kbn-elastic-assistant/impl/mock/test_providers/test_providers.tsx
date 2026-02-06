@@ -12,7 +12,7 @@ import React from 'react';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
@@ -40,6 +40,8 @@ export const mockAssistantAvailability: AssistantAvailability = {
   hasConnectorsReadPrivilege: true,
   hasUpdateAIAssistantAnonymization: true,
   hasManageGlobalKnowledgeBase: true,
+  hasAgentBuilderPrivilege: true,
+  hasAgentBuilderManagePrivilege: true,
   isAssistantEnabled: true,
   isAssistantVisible: true,
   isAssistantManagementEnabled: true,

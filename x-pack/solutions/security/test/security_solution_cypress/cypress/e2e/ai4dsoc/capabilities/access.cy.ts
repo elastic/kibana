@@ -119,6 +119,29 @@ describe('Capabilities', { tags: '@serverless' }, () => {
         cy.task('deleteServerlessCustomRole', 'siemV4');
       },
     },
+    {
+      name: 'User with siem v5 role',
+      loginAs: 'siemV5',
+      setup: () => {
+        cy.task('createServerlessCustomRole', {
+          roleDescriptor: {
+            elasticsearch: {
+              indices: [{ names: ['*'], privileges: ['all'] }],
+            },
+            kibana: [
+              {
+                feature: { siemV5: ['all'], securitySolutionRulesV2: ['all'], fleet: ['all'] },
+                spaces: ['*'],
+              },
+            ],
+          },
+          roleName: 'siemV5',
+        });
+      },
+      teardown: () => {
+        cy.task('deleteServerlessCustomRole', 'siemV5');
+      },
+    },
   ];
 
   // Iterate through each user role

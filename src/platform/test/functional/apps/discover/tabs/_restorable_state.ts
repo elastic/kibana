@@ -23,6 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const esql = getService('esql');
   const browser = getService('browser');
+  const fieldEditor = getService('fieldEditor');
+  const find = getService('find');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -118,6 +120,95 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clearSidebarFieldFilters();
         await retry.try(async () => {
           await expectState(initialCount);
+        });
+      });
+    });
+
+    describe('sidebar existing fields', function () {
+      it('should not fetch existing fields again when returning', async function () {
+        const expectState = async () => {
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(48);
+        };
+        await expectState();
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(1);
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState();
+        });
+      });
+
+      it('should refetch when returning to an edited data view', async function () {
+        const initialCount = 48;
+        const countAfterEditing = 49;
+        const expectState = async (state: number) => {
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(state);
+        };
+        await expectState(initialCount);
+        const expectField = async (fieldName: string, exists: boolean) => {
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
+          expect(availableFields.includes(fieldName)).to.be(exists);
+        };
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState(initialCount);
+        });
+
+        const field = '_test';
+        const field2 = '_test2';
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await discover.addRuntimeField(field, `emit('test')`);
+          await discover.waitUntilTabIsLoaded();
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(1);
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await discover.editField(field);
+          await fieldEditor.setName(field2, true);
+          await fieldEditor.save();
+          await fieldEditor.confirmSave();
+          await fieldEditor.waitUntilClosed();
+          await discover.waitUntilTabIsLoaded();
+          await expectState(countAfterEditing);
+          await expectField(field, false);
+          await expectField(field2, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState(countAfterEditing);
+          await expectField(field, false);
+          await expectField(field2, true);
         });
       });
     });
@@ -389,6 +480,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('50');
       });
 
+      it('should restore the search bar state also after running the updated query', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+        const defaultQuery = 'FROM logstash-*';
+
+        const expectState = async (query: string, isDirty: boolean) => {
+          await retry.try(async () => {
+            expect(await monacoEditor.getCodeEditorValue()).to.be(query);
+          });
+          expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
+            isDirty ? 'Run query' : 'Refresh query'
+          );
+        };
+
+        const draftQuery0 =
+          'from logstash-* | sort @timestamp desc | limit 50 // edit and run this';
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery0);
+        await expectState(draftQuery0, true);
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        const draftQuery1 = 'from logstash-* | sort @timestamp desc | limit 150 // only edit this';
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery1);
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
+      });
+
       it('should restore ES|QL editor state', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -421,6 +555,294 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         await expectState(false, updatedHeight);
+      });
+    });
+
+    describe('restorable, tab scoped state', function () {
+      afterEach(async () => {
+        await browser.clearLocalStorage();
+      });
+
+      describe('classic view', () => {
+        it('should restore state for searchValue, pinnedFields when switching tabs', async () => {
+          /* Tab 1 settings: 
+          // searchValue: "geo", 
+          // pinnedFields: ["geo.src"], 
+          */
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('geo');
+          await retry.waitFor('first tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+
+          /* Tab 2 settings: 
+          // searchValue: ".sr", 
+          // pinnedFields: ["geo.srcdest"], 
+          // showOnlySelectedFields toggle on
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('.sr');
+          await retry.waitFor('second tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          await dataGrid.togglePinActionInFlyout('geo.srcdest');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(false);
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.srcdest')).to.be(true);
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          // searchValue
+          const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
+          expect(await searchInput.getAttribute('value')).to.be('geo');
+          expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
+
+          // pinnedFields
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+        });
+
+        it('should restore state for fieldTypeFilters, showSelectedOnly when switching tabs', async () => {
+          /* Tab 1 settings: 
+          // fieldTypeFilters: date, 
+          // showSelectedOnly toggle off, 
+          */
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+
+          // fieldTypeFilters
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('typeFilter-date');
+          const dateFilter = await testSubjects.find('typeFilter-date');
+          expect(await dateFilter.getAttribute('aria-checked')).to.be('true');
+          await discover.closeFilterByFieldTypeInDocViewer();
+          const filterToggleTab1 = await testSubjects.find(
+            'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+          );
+          expect(await filterToggleTab1.getVisibleText()).to.be('1');
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('utc_time');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab1.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+
+          /* Tab 2 settings: 
+          // fieldTypeFilters: number, 
+          // showSelectedOnly toggle on,
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+
+          // fieldTypeFilters
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('typeFilter-number');
+          const numberFilter = await testSubjects.find('typeFilter-number');
+          expect(await numberFilter.getAttribute('aria-checked')).to.be('true');
+          await discover.closeFilterByFieldTypeInDocViewer();
+          const filterToggleTab2 = await testSubjects.find(
+            'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+          );
+          expect(await filterToggleTab2.getVisibleText()).to.be('2');
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('utc_time');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+          await showOnlySelectedFieldsSwitchTab2.click();
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          const filterToggleTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+          );
+          expect(await filterToggleTab1AfterSwitch.getVisibleText()).to.be('1');
+
+          // showOnlySelectedFields
+          const showOnlySelectedFieldsSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(
+            await showOnlySelectedFieldsSwitchTab1AfterSwitch.getAttribute('aria-checked')
+          ).to.be('false');
+        });
+
+        it('should restore state for rowsPerPage and pageNumber when switching tabs', async () => {
+          /* Tab 1 settings: 
+          // rowsPerPage: 50, 
+          // pageNumber 1, 
+          */
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+
+          // rowsPerPage
+          const docViewerTable = await testSubjects.find('UnifiedDocViewerTableGrid');
+          const paginationButton1 = await docViewerTable.findByTestSubject(
+            'tablePaginationPopoverButton'
+          );
+          await paginationButton1.click();
+          await testSubjects.click('tablePagination-50-rows');
+          await retry.waitFor('rows per page to be 50', async () => {
+            const button = await docViewerTable.findByTestSubject('tablePaginationPopoverButton');
+            return (await button.getVisibleText()) === 'Rows per page: 50';
+          });
+
+          // pageNumber
+          const currentPage1 = await docViewerTable.findByCssSelector(
+            '.euiPaginationButton[aria-current="page"]'
+          );
+          expect(await currentPage1.getVisibleText()).to.be('1');
+
+          /* Tab 2 settings: 
+          // rowsPerPage: 25, 
+          // pageNumber 2, 
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+
+          // rowsPerPage
+          const docViewerTable2 = await testSubjects.find('UnifiedDocViewerTableGrid');
+          const paginationButton2 = await docViewerTable2.findByTestSubject(
+            'tablePaginationPopoverButton'
+          );
+          await paginationButton2.click();
+          await testSubjects.click('tablePagination-25-rows');
+          await retry.waitFor('rows per page to be 25', async () => {
+            const button = await docViewerTable2.findByTestSubject('tablePaginationPopoverButton');
+            return (await button.getVisibleText()) === 'Rows per page: 25';
+          });
+
+          // pageNumber
+          const page2Button = await docViewerTable2.findByTestSubject('pagination-button-1');
+          await page2Button.click();
+          await retry.waitFor('page 2 to be active', async () => {
+            const currentPage = await docViewerTable2.findByCssSelector(
+              '.euiPaginationButton[aria-current="page"]'
+            );
+            return (await currentPage.getVisibleText()) === '2';
+          });
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          // rowsPerPage
+          const docViewerTable1AfterSwitch = await testSubjects.find('UnifiedDocViewerTableGrid');
+          await retry.waitFor('rows per page to be 50 after switch', async () => {
+            const button = await docViewerTable1AfterSwitch.findByTestSubject(
+              'tablePaginationPopoverButton'
+            );
+            return (await button.getVisibleText()) === 'Rows per page: 50';
+          });
+
+          // pageNumber
+          const currentPage1AfterSwitch = await docViewerTable1AfterSwitch.findByCssSelector(
+            '.euiPaginationButton[aria-current="page"]'
+          );
+          expect(await currentPage1AfterSwitch.getVisibleText()).to.be('1');
+        });
+      });
+
+      describe('ES|QL view', () => {
+        it('should restore state for hideNullValues', async () => {
+          /* Tab 1 settings: 
+          // hideNullValues toggle off,
+          */
+          await discover.selectTextBaseLang();
+          await discover.waitUntilTabIsLoaded();
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // hideNullValues
+          const hideNullValuesSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1.getAttribute('aria-checked')).to.be('false');
+
+          /* Tab 2 settings: 
+          // hideNullValues toggle on,
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // hideNullValues
+          const hideNullValuesSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('false');
+          await hideNullValuesSwitchTab2.click();
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          // hideNullValues
+          const hideNullValuesSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1AfterSwitch.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+        });
       });
     });
   });

@@ -33,12 +33,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
-
     await PageObjects.exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await PageObjects.exports.isExportPopoverOpen();
+    });
     await PageObjects.reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await PageObjects.exports.isExportFlyoutOpen();
+    });
     await PageObjects.reporting.clickGenerateReportButton();
     await PageObjects.exports.closeExportFlyout();
-    await PageObjects.exports.clickExportTopNavButton();
 
     const url = await PageObjects.reporting.getReportURL(timeout);
     // TODO: Fetch CSV client side in Serverless since `PageObjects.reporting.getResponse()`
@@ -72,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         concurrency: 4,
       });
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
@@ -85,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Check Available', () => {
       before(async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
       afterEach(async () => {
@@ -93,8 +99,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await PageObjects.exports.isExportPopoverOpen();
+        });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await PageObjects.reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -102,19 +110,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'my search - expectEnabledGenerateReportButton',
           true
         );
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await PageObjects.exports.isExportPopoverOpen();
+        });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await PageObjects.reporting.openExportPopover();
       });
     });
 
     describe('Generate CSV: new search', () => {
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -126,8 +142,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         const res = await getReport({ timeout: 180_000 }); // 3 minutes
         expect(res.text).to.be(`\n`);
@@ -222,7 +241,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
       after(async () => {
@@ -240,6 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
         });
@@ -260,10 +282,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Jun 22, 2019 @ 00:00:00.000';
         const toTime = 'Jun 26, 2019 @ 23:30:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilTabIsLoaded();
       };
 
       before(async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
       beforeEach(async () => {
@@ -283,6 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with data', async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
         });
@@ -293,12 +318,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with filtered data', async () => {
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
         });
 
         // filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('154');
         });

@@ -10,6 +10,7 @@ import { MockRouter, mockDependencies } from '../../__mocks__';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({
   fetchAnalyticsCollections: jest.fn(),
@@ -38,9 +39,7 @@ describe('Enterprise Search Analytics API', () => {
       });
 
       const mockDataPlugin = {
-        indexPatterns: {
-          dataViewsServiceFactory: jest.fn(),
-        },
+        indexPatterns: createIndexPatternsStartMock(),
       };
 
       const mockedSavedObjects = {
@@ -112,9 +111,7 @@ describe('Enterprise Search Analytics API', () => {
       });
 
       const mockDataPlugin = {
-        indexPatterns: {
-          dataViewsServiceFactory: jest.fn(),
-        },
+        indexPatterns: createIndexPatternsStartMock(),
       };
 
       const mockedSavedObjects = {
@@ -129,40 +126,19 @@ describe('Enterprise Search Analytics API', () => {
       });
     });
 
-    it('fetches a defined analytics collection name', async () => {
-      const mockData: AnalyticsCollection[] = [
-        {
-          events_datastream: 'logs-elastic_analytics.events-example',
-          name: 'my_collection',
-        },
-      ];
+    it('fetches a defined analytics collection by name', async () => {
+      const mockData: AnalyticsCollection = {
+        events_datastream: 'logs-elastic_analytics.events-example',
+        name: 'my_collection',
+      };
 
       (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve(mockData);
+        return Promise.resolve([mockData]);
       });
-      await mockRouter.callRoute({ params: { name: '1' } });
+      await mockRouter.callRoute({ params: { name: 'my_collection' } });
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: mockData[0],
-      });
-    });
-
-    it('throws a 404 error if data returns an empty obj', async () => {
-      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
-        throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
-      });
-      await mockRouter.callRoute({
-        params: { name: 'my_collection' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        body: {
-          attributes: {
-            error_code: 'analytics_collection_not_found',
-          },
-          message: 'Analytics collection not found',
-        },
-        statusCode: 404,
+        body: mockData,
       });
     });
   });

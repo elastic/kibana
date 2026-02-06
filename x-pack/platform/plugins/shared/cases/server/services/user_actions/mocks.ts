@@ -134,6 +134,54 @@ export const patchAddRemoveAssigneesCasesRequest = {
   ],
 };
 
+const originalCasesWithSettings = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: { settings: { syncAlerts: false, extractObservables: false } },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const patchSyncAlertsCasesRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        settings: { syncAlerts: true, extractObservables: false },
+      },
+      originalCase: originalCasesWithSettings[0],
+    },
+  ],
+};
+
+export const patchExtractObservablesCasesRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        settings: { syncAlerts: false, extractObservables: true },
+      },
+      originalCase: originalCasesWithSettings[0],
+    },
+  ],
+};
+
+export const patchBothSettingsCasesRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        settings: { syncAlerts: true, extractObservables: true },
+      },
+      originalCase: originalCasesWithSettings[0],
+    },
+  ],
+};
+
 export const patchTagsCasesRequest = {
   cases: [
     {
@@ -555,7 +603,6 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
           payload: {
             settings: {
               syncAlerts: false,
-              extractObservables: false,
             },
           },
           type: 'settings',
@@ -831,6 +878,121 @@ export const getTagsAddedRemovedUserActions = ({
             tags: ['defacement'],
           },
           type: 'tags',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const getSyncAlertsUserActions = ({ isMock }: { isMock: boolean }): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_case_settings',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            settings: { syncAlerts: true },
+          },
+          type: 'settings',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const getExtractObservablesUserActions = ({
+  isMock,
+}: {
+  isMock: boolean;
+}): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_case_settings',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            settings: { extractObservables: true },
+          },
+          type: 'settings',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const getBothSettingsUserActions = ({ isMock }: { isMock: boolean }): UserActionsDict => ({
+  '1': [
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_case_settings',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            settings: { syncAlerts: true, extractObservables: true },
+          },
+          type: 'settings',
         },
         references: [
           {

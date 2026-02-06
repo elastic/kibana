@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {
   it('should sort the marks by time', () => {
-    const transaction: Transaction = {
-      transaction: {
-        marks: {
-          agent: {
-            domInteractive: 117,
-            timeToFirstByte: 10,
-            domComplete: 118,
-          },
-        },
-      },
-    } as any;
-    expect(getAgentMarks(transaction)).toEqual([
+    expect(
+      getAgentMarks({
+        domInteractive: 117,
+        timeToFirstByte: 10,
+        domComplete: 118,
+      })
+    ).toEqual([
       {
         id: 'timeToFirstByte',
         offset: 10000,
@@ -44,16 +38,10 @@ describe('getAgentMarks', () => {
   });
 
   it('should return empty array if marks are missing', () => {
-    const transaction: Transaction = {
-      transaction: {},
-    } as any;
-    expect(getAgentMarks(transaction)).toEqual([]);
+    expect(getAgentMarks(undefined)).toEqual([]);
   });
 
   it('should return empty array if agent marks are missing', () => {
-    const transaction: Transaction = {
-      transaction: { marks: {} },
-    } as any;
-    expect(getAgentMarks(transaction)).toEqual([]);
+    expect(getAgentMarks(undefined)).toEqual([]);
   });
 });

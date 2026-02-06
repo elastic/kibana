@@ -26,6 +26,8 @@ import {
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
+  FleetElasticsearchError,
+  isESClientError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
@@ -231,6 +233,12 @@ export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = fleetErrorToResponseOptions(error);
+  // Convert ALL Elasticsearch errors to Fleet errors (preserving original status codes)
+  let processedError = error;
+  if (isESClientError(error)) {
+    processedError = new FleetElasticsearchError(error);
+  }
+
+  const options = fleetErrorToResponseOptions(processedError);
   return response.customError(options);
 };

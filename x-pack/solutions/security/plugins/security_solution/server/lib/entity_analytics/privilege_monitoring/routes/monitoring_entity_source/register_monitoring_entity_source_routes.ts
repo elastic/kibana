@@ -10,14 +10,16 @@ import { createMonitoringEntitySourceRoute } from './create';
 import { getMonitoringEntitySourceRoute } from './get';
 import { updateMonitoringEntitySourceRoute } from './update';
 import { listMonitoringEntitySourceRoute } from './list';
+import { deleteMonitoringEntitySourceRoute } from './delete';
 
-export const registerMonitoringEntitySourceRoutes = ({
-  router,
-  logger,
-  config,
-}: EntityAnalyticsRoutesDeps) => {
+export const registerMonitoringEntitySourceRoutes = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: EntityAnalyticsRoutesDeps['logger'],
+  config: EntityAnalyticsRoutesDeps['config']
+) => {
   createMonitoringEntitySourceRoute(router, logger);
   getMonitoringEntitySourceRoute(router, logger, config);
   updateMonitoringEntitySourceRoute(router, logger, config);
+  deleteMonitoringEntitySourceRoute(router, logger, config);
   listMonitoringEntitySourceRoute(router, logger);
 };

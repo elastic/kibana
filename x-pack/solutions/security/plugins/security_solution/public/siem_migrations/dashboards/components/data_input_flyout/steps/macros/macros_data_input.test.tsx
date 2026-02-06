@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
-import { DashboardUploadSteps } from '../constants';
-import * as i18n from './translations';
 import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
+import type { MigrationStepProps } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockReportSetupMacrosQueryCopied = jest.fn();
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
@@ -23,6 +26,9 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
       siemMigrations: {
         dashboards: {
           api: {},
+          telemetry: {
+            reportSetupMacrosQueryCopied: mockReportSetupMacrosQueryCopied,
+          },
         },
       },
       notifications: {
@@ -34,14 +40,25 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
     },
   }),
 }));
+jest.mock('../../../../../../common/hooks/use_app_toasts');
 
 describe('MacrosDataInput', () => {
-  const defaultProps = {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  const defaultProps: MigrationStepProps = {
     onMissingResourcesFetched: jest.fn(),
-    dataInputStep: DashboardUploadSteps.MacrosUpload,
+    dataInputStep: SplunkDataInputStep.Macros,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    missingMacros: ['macro1', 'macro2'],
+    migrationSource: MigrationSource.SPLUNK,
+    onMigrationCreated: jest.fn(),
+    setDataInputStep: jest.fn(),
+    missingResourcesIndexed: { macros: ['macro1', 'macro2'], lookups: [] },
   };
+
+  beforeEach(() => {
+    appToastsMock = useAppToastsMock.create();
+    jest.mocked(useAppToasts).mockReturnValue(appToastsMock);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -64,13 +81,13 @@ describe('MacrosDataInput', () => {
       </TestProviders>
     );
     expect(getByTestId('macrosUploadTitle')).toBeInTheDocument();
-    expect(getByTestId('macrosUploadTitle')).toHaveTextContent(i18n.MACROS_DATA_INPUT_TITLE);
+    expect(getByTestId('macrosUploadTitle')).toHaveTextContent('Upload macros');
   });
 
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} dataInputStep={DashboardUploadSteps.DashboardsUpload} />
+        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
@@ -88,7 +105,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when missingMacros is missing', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} missingMacros={undefined} />
+        <MacrosDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
@@ -101,5 +118,35 @@ describe('MacrosDataInput', () => {
       </TestProviders>
     );
     expect(getByTestId('migrationsSubSteps')).toBeInTheDocument();
+  });
+
+  it('shows a warning toast if uploaded file does not contain any of the missing macros', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <MacrosDataInput {...defaultProps} />
+      </TestProviders>
+    );
+
+    const fileContent =
+      '[{"result":{"name":"other_macro","definition":"`other_index`","iseval":"false"}}]';
+    const file = new File([fileContent], 'macros.json', { type: 'application/json' });
+
+    const filePicker = getByTestId('macrosFilePicker');
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [file] } });
+    });
+
+    const uploadButton = getByTestId('uploadFileButton');
+    expect(uploadButton).not.toBeDisabled();
+
+    await act(async () => {
+      if (uploadButton) {
+        fireEvent.click(uploadButton);
+      }
+    });
+
+    expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+      title: 'No relevant macros found.',
+    });
   });
 });

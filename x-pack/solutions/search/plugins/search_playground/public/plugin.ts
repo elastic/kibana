@@ -68,7 +68,7 @@ export class SearchPlaygroundPlugin
         return renderApp(coreStart, startDeps, element);
       },
       visibleIn: ['sideNav', 'globalSearch'],
-      order: 2,
+      order: 3,
     });
 
     registerLocators(deps.share);

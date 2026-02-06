@@ -44,6 +44,7 @@ import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
 import { isMapRendererApi } from './map_renderer/types';
 import type { MapByReferenceState, MapEmbeddableState } from '../../common';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -52,7 +53,7 @@ export function getControlledBy(id: string) {
 export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const savedMap = new SavedMap({ mapEmbeddableState: state });
     await savedMap.whenReady();
 
@@ -65,7 +66,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -91,6 +92,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       savedMap,
       uuid,
     });
+    const projectRoutingManager = await initializeProjectRoutingManager(savedMap);
 
     function getLatestState() {
       return {
@@ -104,17 +106,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     }
 
     function serializeByReference(libraryId: string) {
-      return {
-        rawState: getByReferenceState(getLatestState(), libraryId),
-        references: [],
-      };
+      return getByReferenceState(getLatestState(), libraryId);
     }
 
     function serializeByValue() {
-      return {
-        rawState: getByValueState(getLatestState(), savedMap.getAttributes()),
-        references: [],
-      };
+      return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
     function serializeState() {
@@ -136,7 +132,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
@@ -146,12 +142,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (lastSaved) {
-          await savedMap.reset(lastSaved.rawState);
+          await savedMap.reset(lastSaved);
         }
       },
     });
@@ -182,6 +178,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
         serializeByValue
       ),
       ...initializeDataViews(savedMap.getStore()),
+      ...projectRoutingManager.api,
       serializeState,
       supportedTriggers: () => {
         return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];

@@ -54,22 +54,6 @@ describe('updateSavedSearch', () => {
     jest.clearAllMocks();
   });
 
-  it('should set visContext from initialInternalState', async () => {
-    const savedSearch = {
-      ...savedSearchMock,
-      searchSource: savedSearchMock.searchSource.createCopy(),
-    };
-    updateSavedSearch({
-      savedSearch,
-      dataView: undefined,
-      initialInternalState: { visContext: { foo: 'bar' } },
-      appState: undefined,
-      globalState: undefined,
-      services: discoverServiceMock,
-    });
-    expect(savedSearch.visContext).toEqual({ foo: 'bar' });
-  });
-
   it('should set query and filters from appState and globalState', async () => {
     const savedSearch = {
       ...savedSearchMock,
@@ -80,7 +64,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -101,7 +84,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -130,7 +112,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState: {
         ...globalState,
         timeRange: {
@@ -159,7 +140,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -178,7 +158,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       globalState,
       services: discoverServiceMock,
       appState: {
@@ -186,6 +165,42 @@ describe('updateSavedSearch', () => {
       },
     });
     expect(savedSearch.breakdownField).toEqual('');
+  });
+
+  it('should pass chartInterval if state has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    expect(savedSearch.chartInterval).toBeUndefined();
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: 'm',
+      },
+    });
+    expect(savedSearch.chartInterval).toEqual('m');
+  });
+
+  it('should pass "auto" if state already has interval', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      chartInterval: 'm',
+    };
+    updateSavedSearch({
+      savedSearch,
+      dataView: undefined,
+      globalState,
+      services: discoverServiceMock,
+      appState: {
+        interval: undefined,
+      },
+    });
+    expect(savedSearch.chartInterval).toEqual('auto');
   });
 
   it('should set query and filters from services', async () => {
@@ -202,7 +217,6 @@ describe('updateSavedSearch', () => {
     updateSavedSearch({
       savedSearch,
       dataView: undefined,
-      initialInternalState: undefined,
       appState: undefined,
       globalState,
       services: discoverServiceMock,

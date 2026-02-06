@@ -67,6 +67,7 @@ export const GenAiStreamingResponseExampleApp = ({
     id: '.gen-ai',
     name: 'OpenAI',
     enabled: true,
+    isDeprecated: false,
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<LoadConnectorResult[]>([]);

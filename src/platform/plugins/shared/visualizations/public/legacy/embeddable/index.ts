@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
 export { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 
 export type { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';

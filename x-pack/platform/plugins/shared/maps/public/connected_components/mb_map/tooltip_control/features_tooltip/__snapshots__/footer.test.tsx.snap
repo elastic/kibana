@@ -15,6 +15,7 @@ exports[`Footer multiple features, multiple layers: locked should show paginatio
     >
       <EuiPagination
         activePage={0}
+        aria-label="Tooltip results pagination"
         compressed={true}
         onPageClick={[Function]}
         pageCount={3}
@@ -102,6 +103,7 @@ exports[`Footer multiple features, single layer: locked should show pagination c
     >
       <EuiPagination
         activePage={0}
+        aria-label="Tooltip results pagination"
         compressed={true}
         onPageClick={[Function]}
         pageCount={2}

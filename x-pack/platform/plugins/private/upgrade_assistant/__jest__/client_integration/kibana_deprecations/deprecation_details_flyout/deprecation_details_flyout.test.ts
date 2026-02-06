@@ -5,117 +5,117 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
-import type { KibanaTestBed } from '../kibana_deprecations.helpers';
 import { setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecation details flyout', () => {
-  let testBed: KibanaTestBed;
   const {
     defaultMockedResponses: { mockedKibanaDeprecations },
   } = kibanaDeprecationsServiceHelpers;
   const deprecationService = deprecationsServiceMock.createStartContract();
-  beforeEach(async () => {
-    await act(async () => {
-      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-      testBed = await setupKibanaPage(setupEnvironment().httpSetup, {
-        services: {
-          core: {
-            deprecations: deprecationService,
-          },
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpSetup = mockEnvironment.httpSetup;
+
+    kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
+
+    await setupKibanaPage(httpSetup, {
+      services: {
+        core: {
+          deprecations: deprecationService,
         },
-      });
+      },
     });
 
-    testBed.component.update();
+    await screen.findByTestId('kibanaDeprecationsTable');
   });
+
+  const openDeprecationAt = async (index: number) => {
+    const table = screen.getByTestId('kibanaDeprecationsTable');
+    const rows = within(table).getAllByTestId('row');
+    const row = rows[index];
+    fireEvent.click(within(row).getByTestId('deprecationDetailsLink'));
+    return await screen.findByTestId('kibanaDeprecationDetails');
+  };
 
   describe('Deprecation with manual steps', () => {
     test('renders flyout with single manual step as a standalone paragraph', async () => {
-      const { find, exists, actions } = testBed;
       const manualDeprecation = mockedKibanaDeprecations[1];
 
-      await actions.table.clickDeprecationAt(0);
+      const flyout = await openDeprecationAt(0);
 
-      expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
-      expect(find('manualStep').length).toBe(1);
+      expect(flyout).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutTitle')).toHaveTextContent(manualDeprecation.title);
+      expect(screen.getAllByTestId('manualStep')).toHaveLength(1);
     });
 
     test('renders flyout with multiple manual steps as a list', async () => {
-      const { find, exists, actions } = testBed;
       const manualDeprecation = mockedKibanaDeprecations[1];
 
-      await actions.table.clickDeprecationAt(1);
+      const flyout = await openDeprecationAt(1);
 
-      expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
-      expect(find('manualStepsListItem').length).toBe(3);
+      expect(flyout).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutTitle')).toHaveTextContent(manualDeprecation.title);
+      expect(screen.getAllByTestId('manualStepsListItem')).toHaveLength(3);
     });
 
     test(`doesn't show corrective actions title and steps if there aren't any`, async () => {
-      const { find, exists, actions } = testBed;
       const manualDeprecation = mockedKibanaDeprecations[2];
 
-      await actions.table.clickDeprecationAt(2);
+      const flyout = await openDeprecationAt(2);
 
-      expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(exists('kibanaDeprecationDetails.manualStepsTitle')).toBe(false);
-      expect(exists('manualStepsListItem')).toBe(false);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
+      expect(flyout).toBeInTheDocument();
+      expect(screen.queryByTestId('manualStepsTitle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manualStepsListItem')).not.toBeInTheDocument();
+      expect(screen.getByTestId('flyoutTitle')).toHaveTextContent(manualDeprecation.title);
     });
   });
 
   test('Shows documentationUrl when present', async () => {
-    const { find, actions } = testBed;
     const deprecation = mockedKibanaDeprecations[1];
 
-    await actions.table.clickDeprecationAt(1);
-
-    expect(find('kibanaDeprecationDetails.documentationLink').props().href).toBe(
-      deprecation.documentationUrl
-    );
+    const flyout = await openDeprecationAt(1);
+    const docLink = within(flyout).getByTestId('documentationLink') as HTMLAnchorElement;
+    expect(docLink.getAttribute('href')).toBe(deprecation.documentationUrl);
   });
 
   describe('Deprecation with automatic resolution', () => {
     test('resolves deprecation successfully', async () => {
-      const { find, exists, actions } = testBed;
       const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
-      await actions.table.clickDeprecationAt(0);
-
-      expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
+      const flyout = await openDeprecationAt(0);
+      expect(within(flyout).getByTestId('criticalDeprecationBadge')).toBeInTheDocument();
+      expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
         quickResolveDeprecation.title
       );
 
       // Quick resolve callout and button should display
-      expect(exists('quickResolveCallout')).toBe(true);
-      expect(exists('resolveButton')).toBe(true);
+      expect(within(flyout).getByTestId('quickResolveCallout')).toBeInTheDocument();
+      expect(within(flyout).getByTestId('resolveButton')).toBeInTheDocument();
 
-      await actions.flyout.clickResolveButton();
+      fireEvent.click(within(flyout).getByTestId('resolveButton'));
 
-      // Flyout should close after button click
-      expect(exists('kibanaDeprecationDetails')).toBe(false);
+      await waitFor(() => {
+        expect(screen.queryByTestId('kibanaDeprecationDetails')).not.toBeInTheDocument();
+      });
 
       // Reopen the flyout
-      await actions.table.clickDeprecationAt(0);
+      const reopenedFlyout = await openDeprecationAt(0);
 
       // Resolve information should not display and Quick resolve button should be disabled
-      expect(exists('resolveSection')).toBe(false);
-      expect(exists('resolveButton')).toBe(false);
-      // Badge should be updated in flyout title
-      expect(exists('kibanaDeprecationDetails.resolvedDeprecationBadge')).toBe(true);
+      expect(within(reopenedFlyout).queryByTestId('resolveSection')).not.toBeInTheDocument();
+      expect(within(reopenedFlyout).queryByTestId('resolveButton')).not.toBeInTheDocument();
+      expect(within(reopenedFlyout).getByTestId('resolvedDeprecationBadge')).toBeInTheDocument();
     });
 
     test('handles resolve failure', async () => {
-      const { find, exists, actions } = testBed;
       const quickResolveDeprecation = mockedKibanaDeprecations[0];
 
       kibanaDeprecationsServiceHelpers.setResolveDeprecations({
@@ -123,34 +123,29 @@ describe('Kibana deprecations - Deprecation details flyout', () => {
         status: 'fail',
       });
 
-      await actions.table.clickDeprecationAt(0);
-
-      expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
+      const flyout = await openDeprecationAt(0);
+      expect(within(flyout).getByTestId('criticalDeprecationBadge')).toBeInTheDocument();
+      expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
         quickResolveDeprecation.title
       );
 
       // Quick resolve callout and button should display
-      expect(exists('quickResolveCallout')).toBe(true);
-      expect(exists('resolveButton')).toBe(true);
+      expect(within(flyout).getByTestId('quickResolveCallout')).toBeInTheDocument();
+      expect(within(flyout).getByTestId('resolveButton')).toBeInTheDocument();
 
-      await actions.flyout.clickResolveButton();
-
-      // Flyout should close after button click
-      expect(exists('kibanaDeprecationDetails')).toBe(false);
+      fireEvent.click(within(flyout).getByTestId('resolveButton'));
+      await waitFor(() => {
+        expect(screen.queryByTestId('kibanaDeprecationDetails')).not.toBeInTheDocument();
+      });
 
       // Reopen the flyout
-      await actions.table.clickDeprecationAt(0);
+      const reopenedFlyout = await openDeprecationAt(0);
 
-      // Verify error displays
-      expect(exists('quickResolveError')).toBe(true);
-      // Resolve information should display and Quick resolve button should be enabled
-      expect(exists('resolveSection')).toBe(true);
-      // Badge should remain the same
-      expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
-      expect(find('resolveButton').props().disabled).toBe(false);
-      expect(find('resolveButton').text()).toContain('Try again');
+      expect(within(reopenedFlyout).getByTestId('quickResolveError')).toBeInTheDocument();
+      expect(within(reopenedFlyout).getByTestId('resolveSection')).toBeInTheDocument();
+      expect(within(reopenedFlyout).getByTestId('criticalDeprecationBadge')).toBeInTheDocument();
+      expect(within(reopenedFlyout).getByTestId('resolveButton')).toBeEnabled();
+      expect(within(reopenedFlyout).getByTestId('resolveButton')).toHaveTextContent('Try again');
     });
   });
 });

@@ -38,7 +38,7 @@ steps:
       preemptible: true
     depends_on: build
     env:
-      PING_SLACK_TEAM: "@obs-ux-management-team"
+      PING_SLACK_TEAM: '@actionable-obs-team'
     timeout_in_minutes: 120
     artifact_paths:
       - 'x-pack/solutions/observability/plugins/synthetics/e2e/.journeys/**/*'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { Mutable } from 'utility-types';
@@ -16,8 +16,8 @@ import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

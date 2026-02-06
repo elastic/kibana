@@ -42,6 +42,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:defaultValueReportMinutes': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportRate': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportTitle': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -104,14 +116,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:timeDefaults': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enablePrivilegedUserMonitoring': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableEsqlRiskScoring': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:defaultAnomalyScore': {
@@ -503,7 +507,19 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:enabled': {
+  'agentBuilder:dashboardTools': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:navEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:externalMcp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -611,6 +627,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -651,6 +671,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'aiAssistant:preferredChatExperience': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {
@@ -676,10 +700,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable significant events in streams.',
     },
   },
-  'observability:streamsEnableGroupStreams': {
+  'observability:streamsEnableSignificantEventsDiscovery': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Group streams in Streams',
+      description: 'Enable Significant events discovery in Streams.',
+    },
+  },
+  'observability:streamsEnableAttachments': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {
@@ -704,6 +734,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Restrict to default AI connector only',
+    },
+  },
+  'securitySolution:entityStoreEnableV2': {
+    type: 'boolean',
+    _meta: {
+      description: 'Switches the Entity Store Engine to v2',
     },
   },
 };

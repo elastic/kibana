@@ -9,11 +9,12 @@ import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps, ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+
 import type { EmailActionParams } from '../types';
 
 const noop = () => {};
@@ -33,6 +34,21 @@ export const getFormattedEmailOptions = (
   return formattedOptions;
 };
 
+export const getEmailSender = (connector?: ActionConnector): string[] => {
+  if (
+    connector &&
+    !connector.isPreconfigured &&
+    !connector.isSystemAction &&
+    connector.config &&
+    connector.config.from
+  ) {
+    const from = connector.config.from;
+    return typeof from === 'string' ? [from] : [];
+  }
+
+  return [];
+};
+
 export const EmailParamsFields = ({
   actionParams,
   editAction,
@@ -46,13 +62,18 @@ export const EmailParamsFields = ({
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
   ruleTypeId,
+  actionConnector,
 }: ActionParamsProps<EmailActionParams>) => {
-  const { to, cc, bcc, subject, message } = actionParams;
+  const { to, cc, bcc, subject, message, replyTo } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
   const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];
+  const replyToOptions = replyTo ? replyTo.map((label: string) => ({ label })) : [];
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
+  const [addReplyTo, setAddReplyTo] = useState<boolean>(false);
+
+  const emailSender: string[] = getEmailSender(actionConnector);
 
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]
@@ -78,6 +99,15 @@ export const EmailParamsFields = ({
     errors.cc !== undefined && Number(errors.cc.length) > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && Number(errors.bcc.length) > 0 && bcc !== undefined;
+  const isReplyToInvalid: boolean =
+    errors.replyTo !== undefined && Number(errors.replyTo.length) > 0 && replyTo !== undefined;
+
+  const subjectLabel = i18n.translate(
+    'xpack.stackConnectors.components.email.subjectTextFieldLabel',
+    {
+      defaultMessage: 'Subject',
+    }
+  );
 
   return (
     <>
@@ -104,6 +134,22 @@ export const EmailParamsFields = ({
                   <FormattedMessage
                     defaultMessage="Bcc"
                     id="xpack.stackConnectors.components.email.addBccButton"
+                  />
+                </EuiButtonEmpty>
+              ) : null}
+              {!addReplyTo && (!replyTo || replyTo?.length === 0) ? (
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => {
+                    setAddReplyTo(true);
+                    if (!replyTo) {
+                      editAction('replyTo', emailSender, index);
+                    }
+                  }}
+                >
+                  <FormattedMessage
+                    defaultMessage="ReplyTo"
+                    id="xpack.stackConnectors.components.email.addReplyToButton"
                   />
                 </EuiButtonEmpty>
               ) : null}
@@ -232,14 +278,57 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
+      {addReplyTo || (replyTo && replyTo?.length > 0) ? (
+        <EuiFormRow
+          fullWidth
+          error={errors.replyTo as string}
+          isInvalid={isReplyToInvalid}
+          label={i18n.translate(
+            'xpack.stackConnectors.components.email.recipientReplyToTextFieldLabel',
+            {
+              defaultMessage: 'ReplyTo',
+            }
+          )}
+        >
+          <EuiComboBox
+            autoFocus
+            noSuggestions
+            isInvalid={isReplyToInvalid}
+            isDisabled={isDisabled}
+            isLoading={isLoading}
+            fullWidth
+            data-test-subj="replyToEmailAddressInput"
+            selectedOptions={replyToOptions}
+            onCreateOption={(searchValue: string) => {
+              const newOptions = getFormattedEmailOptions(searchValue, replyToOptions);
+              editAction(
+                'replyTo',
+                newOptions.map((newOption) => newOption.label),
+                index
+              );
+            }}
+            onChange={(selectedOptions: Array<{ label: string }>) => {
+              editAction(
+                'replyTo',
+                selectedOptions.map((selectedOption) => selectedOption.label),
+                index
+              );
+            }}
+            onBlur={() => {
+              if (!replyTo) {
+                editAction('replyTo', [], index);
+              }
+              onBlur('replyTo');
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
       {showEmailSubjectAndMessage && (
         <EuiFormRow
           fullWidth
           error={errors.subject as string}
           isInvalid={isSubjectInvalid}
-          label={i18n.translate('xpack.stackConnectors.components.email.subjectTextFieldLabel', {
-            defaultMessage: 'Subject',
-          })}
+          label={subjectLabel}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -248,6 +337,7 @@ export const EmailParamsFields = ({
             paramsProperty={'subject'}
             inputTargetValue={subject}
             errors={(errors.subject ?? []) as string[]}
+            aria-label={subjectLabel}
           />
         </EuiFormRow>
       )}

@@ -17,6 +17,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexSavedObject } from './types';
 import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -68,6 +69,8 @@ export class ReindexWorker {
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
   private currentWorkerPadding: number = INITIAL_WORKER_PADDING_MS;
+  private rollupsEnabled: boolean;
+  private isServerless: boolean;
 
   public static create(
     client: SavedObjectsClientContract,
@@ -76,7 +79,9 @@ export class ReindexWorker {
     log: Logger,
     licensing: LicensingPluginStart,
     security: SecurityPluginStart,
-    version: Version
+    version: Version,
+    rollupsEnabled: boolean = true,
+    isServerless: boolean = false
   ): ReindexWorker {
     if (ReindexWorker.workerSingleton) {
       log.debug(`More than one ReindexWorker cannot be created, returning existing worker.`);
@@ -88,7 +93,9 @@ export class ReindexWorker {
         log,
         licensing,
         security,
-        version
+        version,
+        rollupsEnabled,
+        isServerless
       );
     }
 
@@ -102,20 +109,31 @@ export class ReindexWorker {
     log: Logger,
     private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
-    version: Version
+    version: Version,
+    rollupsEnabled: boolean = true,
+    isServerless: boolean = false
   ) {
     this.log = log.get('reindex_worker');
     this.security = security;
+    this.rollupsEnabled = rollupsEnabled;
+    this.isServerless = isServerless;
     ReindexWorker.version = version;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log),
+      reindexActionsFactory(
+        this.client,
+        callAsInternalUser,
+        this.log,
+        getRollupJobByIndexName,
+        rollupsEnabled
+      ),
       log,
       this.licensing,
-      version
+      version,
+      isServerless
     );
   }
 
@@ -213,13 +231,20 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
+    const actions = reindexActionsFactory(
+      this.client,
+      callAsCurrentUser,
+      this.log,
+      getRollupJobByIndexName,
+      this.rollupsEnabled
+    );
     return reindexServiceFactory(
       callAsCurrentUser,
       actions,
       this.log,
       this.licensing,
-      ReindexWorker.version
+      ReindexWorker.version,
+      this.isServerless
     );
   };
 

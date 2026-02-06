@@ -23,6 +23,8 @@
         "label": "coreUsageDataServiceMock",
         "description": [],
         "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+        "lineNumber": 179,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               ">>"
             ],
             "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -67,6 +71,8 @@
               ">"
             ],
             "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -119,6 +125,8 @@
                   "ICoreUsageStatsClient"
                 ],
                 "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -137,6 +145,8 @@
               ">"
             ],
             "path": "src/core/packages/usage-data/server-mocks/src/core_usage_data_service.mock.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -153,6 +163,8 @@
         "label": "coreUsageStatsClientMock",
         "description": [],
         "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +181,8 @@
               ">"
             ],
             "path": "src/core/packages/usage-data/server-mocks/src/core_usage_stats_client.mock.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

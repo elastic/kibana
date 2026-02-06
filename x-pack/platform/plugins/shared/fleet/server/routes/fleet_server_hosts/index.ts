@@ -57,9 +57,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetAllFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(FleetServerHostSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -87,9 +89,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -118,9 +122,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -149,12 +155,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   id: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -183,9 +191,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PutFleetServerHostRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetServerHostResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

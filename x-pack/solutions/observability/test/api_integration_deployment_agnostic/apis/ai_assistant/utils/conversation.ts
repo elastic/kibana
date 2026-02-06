@@ -80,7 +80,7 @@ export async function invokeChatCompleteWithFunctionRequest({
 
   expect(status).to.be(200);
 
-  return body;
+  return body as Readable;
 }
 
 export async function chatComplete({
@@ -117,10 +117,12 @@ export async function chatComplete({
     },
   });
 
+  const readableBody = body as Readable;
+
   expect(status).to.be(200);
-  const messageEvents = decodeEvents(body);
-  const messageAddedEvents = getMessageAddedEvents(body);
-  const conversationCreateEvent = getConversationCreatedEvent(body);
+  const messageEvents = decodeEvents(readableBody);
+  const messageAddedEvents = getMessageAddedEvents(readableBody);
+  const conversationCreateEvent = getConversationCreatedEvent(readableBody);
   return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 

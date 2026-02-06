@@ -187,6 +187,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
         {removedPolicies.length > 0 && (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount={false}
               data-test-subj="confirmRemovePoliciesCallout"
               title={
                 <FormattedMessage

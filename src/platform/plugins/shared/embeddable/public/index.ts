@@ -17,7 +17,6 @@ export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
@@ -27,9 +26,8 @@ export {
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
 } from './ui_actions/triggers';
+export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../common';
 export type {
   CellValueContext,
   ChartActionContext,
@@ -39,7 +37,6 @@ export type {
 } from './ui_actions/triggers';
 export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
-export type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export {
   EmbeddableRenderer,
@@ -55,4 +52,5 @@ export {
   ADD_PANEL_ANNOTATION_GROUP,
   ADD_PANEL_OTHER_GROUP,
   ADD_PANEL_VISUALIZATION_GROUP,
+  ADD_PANEL_LEGACY_GROUP,
 } from './ui_actions/add_panel_groups';

@@ -97,11 +97,17 @@ export const createNewChat = () => {
 };
 
 export const selectConnector = (connectorName: string) => {
+  const connectorOption = CONNECTOR_SELECT(connectorName);
+
   cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(CONNECTOR_SELECT(connectorName)).click();
+  // The connector list can be visible but not scrollable (e.g. only 1-2 connectors).
+  // In that case Cypress will retry `scrollTo()` until it times out unless we disable the scrollability check.
+  cy.get('[data-test-subj="aiAssistantConnectorSelector"] .euiSelectableList__list')
+    .should('be.visible')
+    .scrollTo('bottom', { ensureScrollable: false });
+  cy.get(connectorOption).scrollIntoView();
+  cy.get(connectorOption).should('be.visible').click();
   assertConnectorSelected(connectorName);
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(2000);
 };
 export const resetConversation = () => {
   cy.get(CONVERSATION_SETTINGS_MENU).click();
@@ -129,6 +135,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
 };
@@ -137,6 +144,7 @@ export const typeAndSendMessage = (message: string) => {
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
   assertNewConversation(false, 'New chat');
+  selectConnector(azureConnectorAPIPayload.name);
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');

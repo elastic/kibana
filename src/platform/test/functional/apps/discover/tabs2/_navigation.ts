@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
+  const browser = getService('browser');
 
   describe('navigation', function () {
     it('should go back to the last active tab after returning from Surrounding Docs page', async () => {
@@ -35,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(1, 'testing');
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
+      await browser.pressKeys(browser.keys.ESCAPE); // close filter tooltip, sometimes it gets on top of the tabs making them unclickable
       await discover.waitUntilTabIsLoaded();
 
       await retry.try(async () => {
@@ -42,10 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled', 'testing']);
       });
 
+      await unifiedTabs.selectTab(1); // trick to ensure tooltips do not block further clicks
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(2, 'third tab');
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await browser.pressKeys(browser.keys.ESCAPE); // close filter tooltip, sometimes it gets on top of the tabs making them unclickable
       await discover.waitUntilTabIsLoaded();
 
       await retry.try(async () => {

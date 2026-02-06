@@ -14,6 +14,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -41,7 +42,8 @@ import {
 } from '@kbn/alerting-rule-utils';
 import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { isLeft } from 'fp-ts/Either';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
   RuleParams,
@@ -144,74 +146,17 @@ export const createLogThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: LogThresholdAlertReporter = (
-      id,
-      reason,
-      value,
-      threshold,
-      actions,
-      rootLevelContext,
-      flattenGrouping
-    ) => {
-      const alertContext =
-        actions != null
-          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
-          : {};
-
-      if (actions && actions.length > 0) {
-        actions.forEach((actionSet) => {
-          const { actionGroup, context: actionContext } = actionSet;
-          const alertInstanceId = (actionContext.group || id) as string;
-          const { uuid, start } = alertsClient.report({
-            id: alertInstanceId,
-            actionGroup,
-            state: {
-              alertState: AlertStates.ALERT,
-            },
-          });
-          const indexedStartedAt = start ?? startedAt.toISOString();
-          const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-          const viewInAppUrl = addSpaceIdToPath(
-            basePath.publicBaseUrl,
-            spaceId,
-            relativeViewInAppUrl
-          );
-
-          const groups = getFormattedGroups(flattenGrouping);
-          const grouping = unflattenGrouping(flattenGrouping);
-
-          const context = {
-            ...actionContext,
-            timestamp: startedAt.toISOString(),
-            viewInAppUrl,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
-            grouping,
-          };
-
-          const payload = {
-            [ALERT_EVALUATION_THRESHOLD]: threshold,
-            [ALERT_EVALUATION_VALUE]: value,
-            [ALERT_REASON]: reason,
-            [ALERT_CONTEXT]: alertContext,
-            [ALERT_GROUP]: groups,
-            [ALERT_GROUPING]: grouping,
-            ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
-          };
-
-          alertsClient.setAlertData({
-            id: alertInstanceId,
-            payload,
-            context,
-          });
-        });
-      }
-    };
-
     const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
-      const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+      const decoded = ruleParamsRT.decode(params);
+
+      if (isLeft(decoded)) {
+        const errorMessages = formatErrors(decoded.left);
+        throw new Error(`Invalid rule parameters: ${errorMessages.join(', ')}`);
+      }
+
+      const validatedParams = decoded.right;
 
       const logSourcesService =
         logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
@@ -219,6 +164,71 @@ export const createLogThresholdExecutor =
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
+
+      const alertReporter: LogThresholdAlertReporter = (
+        id,
+        reason,
+        value,
+        threshold,
+        actions,
+        rootLevelContext,
+        flattenGrouping
+      ) => {
+        const alertContext =
+          actions != null
+            ? actions.reduce((next, action) => Object.assign(next, action.context), {})
+            : {};
+
+        if (actions && actions.length > 0) {
+          actions.forEach((actionSet) => {
+            const { actionGroup, context: actionContext } = actionSet;
+            const alertInstanceId = (actionContext.group || id) as string;
+            const { uuid, start } = alertsClient.report({
+              id: alertInstanceId,
+              actionGroup,
+              state: {
+                alertState: AlertStates.ALERT,
+              },
+            });
+            const indexedStartedAt = start ?? startedAt.toISOString();
+            const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
+
+            const groups = getFormattedGroups(flattenGrouping);
+            const grouping = unflattenGrouping(flattenGrouping);
+
+            const context = {
+              ...actionContext,
+              timestamp: startedAt.toISOString(),
+              viewInAppUrl,
+              alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+              grouping,
+            };
+
+            const payload = {
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_EVALUATION_VALUE]: value,
+              [ALERT_REASON]: reason,
+              [ALERT_CONTEXT]: alertContext,
+              [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: grouping,
+              [ALERT_INDEX_PATTERN]: indices,
+              ...flattenAdditionalContext(rootLevelContext),
+              ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
+            };
+
+            alertsClient.setAlertData({
+              id: alertInstanceId,
+              payload,
+              context,
+            });
+          });
+        }
+      };
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
@@ -858,7 +868,15 @@ export const getUngroupedESQuery = (
 };
 
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
+  const searchResponse = await esClient.search(query);
+  const decoded = UngroupedSearchQueryResponseRT.decode(searchResponse);
+
+  if (isLeft(decoded)) {
+    const errorMessages = formatErrors(decoded.left);
+    throw new Error(`Failed to parse ungrouped search response: ${errorMessages.join(', ')}`);
+  }
+
+  return decoded.right;
 };
 
 const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
@@ -868,9 +886,17 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
   while (true) {
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
-    const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await esClient.search(queryWithAfterKey)
-    );
+
+    const searchResponse = await esClient.search(queryWithAfterKey);
+    const decoded = GroupedSearchQueryResponseRT.decode(searchResponse);
+
+    if (isLeft(decoded)) {
+      const errorMessages = formatErrors(decoded.left);
+      throw new Error(`Failed to parse grouped search response: ${errorMessages.join(', ')}`);
+    }
+
+    const groupResponse = decoded.right;
+
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
       ...groupResponse.aggregations.groups.buckets,

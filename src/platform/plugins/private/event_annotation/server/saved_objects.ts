@@ -12,7 +12,7 @@ import type { CoreSetup, SavedObjectMigrationMap } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
 import type { EventAnnotationGroupSavedObjectAttributes } from '../common';

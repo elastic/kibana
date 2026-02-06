@@ -37,6 +37,8 @@ const SECURITY_GEN_AI_CONFIG_FILE = Path.join(
 const configSchema = schema.object({
   evaluatorConnectorId: schema.string(),
   langsmithKey: schema.string(),
+  esURL: schema.maybe(schema.string()),
+  phoenixKey: schema.maybe(schema.string()),
   connectors: schema.recordOf(
     schema.string(),
     schema.object({

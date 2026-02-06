@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { Observable } from 'rxjs';
+import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
 import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export interface EmbeddableDynamicActionsManager {
@@ -15,11 +16,11 @@ export interface EmbeddableDynamicActionsManager {
   comparators: StateComparators<DynamicActionsSerializedState>;
   anyStateChange$: Observable<void>;
   getLatestState: () => DynamicActionsSerializedState;
-  serializeState: () => SerializedPanelState<DynamicActionsSerializedState>;
+  serializeState: () => DynamicActionsSerializedState;
   reinitializeState: (lastState: DynamicActionsSerializedState) => void;
   startDynamicActions: () => { stopDynamicActions: () => void };
 }
 
-export interface DynamicActionsSerializedState {
+export type DynamicActionsSerializedState = DrilldownsState & {
   enhancements?: { dynamicActions: DynamicActionsState };
-}
+};

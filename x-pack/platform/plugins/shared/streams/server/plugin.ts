@@ -30,7 +30,7 @@ import {
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
-import { AssetService } from './lib/streams/assets/asset_service';
+import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
@@ -42,6 +42,10 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { FeatureService } from './lib/streams/feature/feature_service';
+import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
+import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -69,11 +73,13 @@ export class StreamsPlugin
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
+  private processorSuggestionsService: ProcessorSuggestionsService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.processorSuggestionsService = new ProcessorSuggestionsService();
   }
 
   public setup(
@@ -98,12 +104,84 @@ export class StreamsPlugin
     }));
 
     registerRules({ plugins, logger: this.logger.get('rules') });
+    registerStreamsSavedObjects(core.savedObjects);
 
-    const assetService = new AssetService(core, this.logger);
+    const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const featureService = new FeatureService(core, this.logger);
     const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
+    const taskService = new TaskService(plugins.taskManager);
+
+    const getScopedClients = async ({
+      request,
+    }: {
+      request: KibanaRequest;
+    }): Promise<RouteHandlerScopedClients> => {
+      const [
+        [coreStart, pluginsStart],
+        attachmentClient,
+        featureClient,
+        systemClient,
+        contentClient,
+        queryClient,
+      ] = await Promise.all([
+        core.getStartServices(),
+        attachmentService.getClientWithRequest({ request }),
+        featureService.getClientWithRequest({ request }),
+        systemService.getClientWithRequest({ request }),
+        contentService.getClient(),
+        queryService.getClientWithRequest({ request }),
+      ]);
+
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+        coreStart.savedObjects.getScopedClient(request)
+      );
+
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      const inferenceClient = pluginsStart.inference.getClient({ request });
+      const licensing = pluginsStart.licensing;
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+      const taskClient = await taskService.getClient(
+        coreStart,
+        pluginsStart.taskManager,
+        this.logger
+      );
+
+      const streamsClient = await streamsService.getClientWithRequest({
+        request,
+        attachmentClient,
+        queryClient,
+        systemClient,
+        featureClient,
+      });
+
+      return {
+        scopedClusterClient,
+        soClient,
+        attachmentClient,
+        streamsClient,
+        featureClient,
+        systemClient,
+        inferenceClient,
+        contentClient,
+        queryClient,
+        fieldsMetadataClient,
+        licensing,
+        uiSettingsClient,
+        taskClient,
+      };
+    };
+
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
+    taskService.registerTasks({
+      getScopedClients,
+      logger: this.logger,
+      telemetry: telemetryClient,
+    });
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -113,9 +191,6 @@ export class StreamsPlugin
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
-      privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
-        defaultMessage: 'All Spaces is required for Streams access.',
-      }),
       alerting: alertingFeatures,
       privileges: {
         all: {
@@ -124,7 +199,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               all: alertingFeatures,
@@ -142,7 +216,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               read: alertingFeatures,
@@ -162,58 +235,11 @@ export class StreamsPlugin
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
-        assets: assetService,
-        systems: systemService,
+        features: featureService,
         server: this.server,
-        telemetry: this.ebtTelemetryService.getClient(),
-        getScopedClients: async ({
-          request,
-        }: {
-          request: KibanaRequest;
-        }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient, systemClient, contentClient] =
-            await Promise.all([
-              core.getStartServices(),
-              assetService.getClientWithRequest({ request }),
-              systemService.getClientWithRequest({ request }),
-              contentService.getClient(),
-            ]);
-
-          const [queryClient, uiSettingsClient] = await Promise.all([
-            queryService.getClientWithRequest({
-              request,
-              assetClient,
-            }),
-            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
-          ]);
-
-          const streamsClient = await streamsService.getClientWithRequest({
-            request,
-            assetClient,
-            queryClient,
-            systemClient,
-          });
-
-          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-          const soClient = coreStart.savedObjects.getScopedClient(request);
-          const inferenceClient = pluginsStart.inference.getClient({ request });
-          const licensing = pluginsStart.licensing;
-          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
-
-          return {
-            scopedClusterClient,
-            soClient,
-            assetClient,
-            streamsClient,
-            systemClient,
-            inferenceClient,
-            contentClient,
-            queryClient,
-            fieldsMetadataClient,
-            licensing,
-            uiSettingsClient,
-          };
-        },
+        telemetry: telemetryClient,
+        processorSuggestions: this.processorSuggestionsService,
+        getScopedClients,
       },
       core,
       logger: this.logger,
@@ -224,7 +250,7 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(this.logger)
       );
     }
 
@@ -236,9 +262,12 @@ export class StreamsPlugin
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
+      this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
     }
+
+    this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
   }

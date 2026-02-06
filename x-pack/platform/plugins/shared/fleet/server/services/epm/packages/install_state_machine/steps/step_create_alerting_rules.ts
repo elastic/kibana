@@ -9,14 +9,16 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import pMap from 'p-map';
+
 import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
-import { createKibanaRequestFromAuth } from '../../../../request_utils';
 import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
 import { saveKibanaAssetsRefs } from '../../install';
+import { MAX_CONCURRENT_RULE_CREATION_OPERATIONS } from '../../../../../constants';
 
 function getRuleId({
   pkgName,
@@ -80,7 +82,7 @@ export async function createAlertingRuleFromTemplate(
       data: {
         alertTypeId: ruleTypeId,
         ...rest,
-        enabled: true,
+        enabled: false,
         actions: [],
         consumer: 'alerts',
       }, // what value for consumer will make sense?
@@ -106,7 +108,7 @@ export async function createAlertingRuleFromTemplate(
 export async function stepCreateAlertingRules(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'authorizationHeader'
+    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
   >
 ) {
   const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
@@ -118,13 +120,11 @@ export async function stepCreateAlertingRules(
   }
 
   await withPackageSpan('Install elastic agent rules', async () => {
-    const rulesClient = context.authorizationHeader
-      ? await appContextService
-          .getAlertingStart()
-          ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
+    const rulesClient = context.request
+      ? await appContextService.getAlertingStart()?.getRulesClientWithRequest(context.request)
       : undefined;
 
-    const assetRefs: KibanaAssetReference[] = [];
+    const alertTemplateAssets: ArchiveAsset[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
         if (!entry.buffer) {
@@ -132,15 +132,25 @@ export async function stepCreateAlertingRules(
         }
 
         const alertTemplate = JSON.parse(entry.buffer.toString('utf8')) as ArchiveAsset;
+        alertTemplateAssets.push(alertTemplate);
+      },
+      (path) => path.match(/\/alerting_rule_template\//) !== null
+    );
 
+    const assetRefs: KibanaAssetReference[] = [];
+    await pMap(
+      alertTemplateAssets,
+      async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
           { rulesClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
+
         assetRefs.push(ref);
       },
-      (path) => path.match(/\/alerting_rule_template\//) !== null
+      { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
+
     await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
   });
 }

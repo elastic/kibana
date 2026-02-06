@@ -11,3 +11,5 @@ export { RouterMock } from './router_mock';
 export { routeDependencies } from './route_dependencies';
 
 export { createTestESEnrichPolicy } from './policies_fixtures';
+
+export { withStubbedHandleEsError, getTransportRequest } from './route_deps_mocks';

@@ -7,13 +7,13 @@
 
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { PageScope } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../containers';
 import { useKibana } from '../../common/lib/kibana';
-import type { SourcererScopeName } from '../store/model';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface UseGetScopedSourcererDataViewArgs {
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
 }
 
 /*

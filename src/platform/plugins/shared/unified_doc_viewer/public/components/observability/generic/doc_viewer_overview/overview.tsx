@@ -8,28 +8,31 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
-import { DataSourcesProvider } from '../../traces/hooks/use_data_sources';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
 import { About } from '../../traces/components/about';
-import { TraceRootItemProvider } from '../../traces/doc_viewer_overview/hooks/use_fetch_trace_root_item';
+import { TraceRootSpanProvider } from '../../traces/doc_viewer_overview/hooks/use_fetch_trace_root_span';
 import { TraceWaterfall } from '../../traces/components/trace_waterfall';
 import { ErrorsTable } from '../../traces/components/errors';
 import { TraceContextLogEvents } from '../../traces/components/trace_context_log_events';
 import { isTransaction } from '../../traces/helpers';
+import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_viewer_extension_actions';
 
 export type OverviewProps = DocViewRenderProps & {
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
+  docViewActions?: DocViewActions;
 };
 
 export function Overview({
@@ -41,6 +44,7 @@ export function Overview({
   showWaterfall = true,
   dataView,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
+  docViewActions,
 }: OverviewProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
@@ -59,41 +63,47 @@ export function Overview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <TraceRootItemProvider traceId={traceId}>
-        <div
-          ref={setContainerRef}
-          css={
-            containerHeight
-              ? css`
-                  max-height: ${containerHeight}px;
-                  overflow: auto;
-                `
-              : undefined
-          }
-        >
-          <EuiSpacer size="m" />
-          <About
-            hit={hit}
-            dataView={dataView}
-            filter={filter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-          />
-          <EuiSpacer size="m" />
-          {showWaterfall ? (
-            <TraceWaterfall
+      <DocViewerExtensionActionsProvider actions={docViewActions}>
+        <TraceRootSpanProvider traceId={traceId}>
+          <div
+            ref={setContainerRef}
+            css={
+              containerHeight
+                ? css`
+                    max-height: ${containerHeight}px;
+                    overflow: auto;
+                  `
+                : undefined
+            }
+          >
+            <EuiSpacer size="m" />
+            <About
+              hit={hit}
               dataView={dataView}
-              traceId={traceId}
-              docId={docId}
-              serviceName={serviceName}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
-          ) : null}
-          <EuiSpacer size="m" />
-          <ErrorsTable traceId={traceId} docId={docId} />
-          <EuiSpacer size="m" />
-          <TraceContextLogEvents traceId={traceId} spanId={spanId} transactionId={transactionId} />
-        </div>
-      </TraceRootItemProvider>
+            <EuiSpacer size="m" />
+            {showWaterfall ? (
+              <TraceWaterfall
+                dataView={dataView}
+                traceId={traceId}
+                docId={docId}
+                serviceName={serviceName}
+              />
+            ) : null}
+            <EuiSpacer size="m" />
+            <ErrorsTable traceId={traceId} docId={docId} />
+            <EuiSpacer size="m" />
+            <TraceContextLogEvents
+              traceId={traceId}
+              spanId={spanId}
+              transactionId={transactionId}
+            />
+          </div>
+        </TraceRootSpanProvider>
+      </DocViewerExtensionActionsProvider>
     </DataSourcesProvider>
   );
 }

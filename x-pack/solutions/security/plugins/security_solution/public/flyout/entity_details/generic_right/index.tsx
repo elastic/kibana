@@ -27,8 +27,8 @@ import {
 } from '../shared/components/left_panel/left_panel_header';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import {
-  type UseGetGenericEntityParams,
   useGetGenericEntity,
+  type UseGetGenericEntityParams,
 } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
@@ -68,8 +68,6 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   key: 'generic-entity-panel';
   params: GenericEntityPanelProps;
 }
-
-export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
 export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
@@ -201,6 +199,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
   const fields = getGenericEntity.data.fields || {};
+  const assetCriticalityLevel = getAssetCriticality.data?.criticality_level;
 
   return (
     <>
@@ -224,6 +223,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
         isPreviewMode={isPreviewMode ?? false}
         entityId={entity.id}
         entityFields={fields}
+        assetCriticalityLevel={assetCriticalityLevel}
       />
     </>
   );

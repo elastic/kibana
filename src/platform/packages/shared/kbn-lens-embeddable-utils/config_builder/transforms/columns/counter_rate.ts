@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CounterRateIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CounterRateIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCounterRateOperation, LensApiMetricOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
@@ -32,7 +32,6 @@ export const fromCounterRateLensStateToAPI = (
   options: CounterRateIndexPatternColumn,
   ref: LensApiMetricOperation
 ): LensApiCounterRateOperation => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { reduced_time_range, ...sharedProps } = getLensAPIMetricSharedProps(options);
   return {
     operation: 'counter_rate',

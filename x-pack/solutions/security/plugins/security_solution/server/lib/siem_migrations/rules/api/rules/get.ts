@@ -16,7 +16,7 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { RuleMigrationGetRulesOptions } from '../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
@@ -65,6 +65,7 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
                   untranslatable: req.query.is_untranslatable,
                   failed: req.query.is_failed,
                   missingIndex: req.query.is_missing_index,
+                  isEligibleForTranslation: true,
                 },
                 sort: { sortField: req.query.sort_field, sortDirection: req.query.sort_direction },
                 size,

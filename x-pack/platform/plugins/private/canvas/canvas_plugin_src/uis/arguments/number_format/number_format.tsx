@@ -45,10 +45,12 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
 );
 
 NumberFormatArgInput.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   numberFormats: PropTypes.arrayOf(
     PropTypes.shape({ value: PropTypes.string, text: PropTypes.string })
   ).isRequired,
   onValueChange: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
   argId: PropTypes.string.isRequired,
 };

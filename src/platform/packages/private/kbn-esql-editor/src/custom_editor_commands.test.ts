@@ -1,0 +1,213 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { monaco } from '@kbn/monaco';
+import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { ESQLVariableType, ControlTriggerSource } from '@kbn/esql-types';
+import {
+  registerCustomCommands,
+  addEditorKeyBindings,
+  type MonacoCommandDependencies,
+} from './custom_editor_commands';
+import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+
+const mockEditor = {
+  addCommand: jest.fn(),
+  getPosition: jest.fn(),
+  getValue: jest.fn(),
+} as unknown as monaco.editor.IStandaloneCodeEditor;
+
+const mockTriggerExec = jest.fn();
+const mockTrigger = {
+  exec: mockTriggerExec,
+};
+
+const mockUiActions = {
+  ...uiActionsPluginMock.createStartContract(),
+  getTrigger: jest.fn(() => mockTrigger),
+};
+
+const mockTelemetryService = {
+  trackEsqlControlFlyoutOpened: jest.fn(),
+  trackRecommendedQueryClicked: jest.fn(),
+} as unknown as ESQLEditorTelemetryService;
+
+describe('Custom Editor Commands', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockTriggerExec.mockClear();
+    // Mock monaco.editor.registerCommand to return a disposable
+    jest.spyOn(monaco.editor, 'registerCommand').mockReturnValue({
+      dispose: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('registerCustomCommands', () => {
+    it('should use current ref values for esqlVariables and controlsContext when command is executed', async () => {
+      const initialVariables = [{ key: 'var1', type: ESQLVariableType.VALUES, value: 'initial' }];
+      const updatedVariables = [{ key: 'var2', type: ESQLVariableType.VALUES, value: 'updated' }];
+
+      const initialContext = {
+        onSaveControl: jest.fn(),
+        onCancelControl: jest.fn(),
+        supportsControls: false,
+      };
+      const updatedContext = {
+        onSaveControl: jest.fn(),
+        onCancelControl: jest.fn(),
+        supportsControls: true,
+      };
+
+      // Create refs
+      const esqlVariablesRef = { current: initialVariables };
+      const controlsContextRef = { current: initialContext };
+      const editorRef = { current: mockEditor };
+
+      const deps = {
+        application: coreMock.createStart().application,
+        uiActions: mockUiActions,
+        telemetryService: mockTelemetryService,
+        editorRef,
+        getCurrentQuery: jest.fn().mockReturnValue('FROM index'),
+        esqlVariables: esqlVariablesRef,
+        controlsContext: controlsContextRef,
+        openTimePickerPopover: jest.fn(),
+      } as unknown as MonacoCommandDependencies;
+
+      registerCustomCommands(deps);
+
+      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const controlCommandCall = registerCommandCalls.find(
+        ([commandId]) => commandId === 'esql.control.values.create'
+      );
+      expect(controlCommandCall).toBeDefined();
+
+      const commandHandler = controlCommandCall[1];
+
+      // Simulate state changes
+      esqlVariablesRef.current = updatedVariables;
+      controlsContextRef.current = updatedContext;
+
+      await commandHandler(null, { triggerSource: ControlTriggerSource.ADD_CONTROL_BTN });
+
+      expect(mockTriggerExec).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlVariables: updatedVariables,
+          onSaveControl: updatedContext.onSaveControl,
+          onCancelControl: updatedContext.onCancelControl,
+        })
+      );
+    });
+
+    it('should use getCurrentQuery function that accesses current editor state', async () => {
+      const getCurrentQuery = jest.fn().mockReturnValue('FROM updated_index');
+      const esqlVariablesRef = { current: [] };
+      const controlsContextRef = { current: null };
+      const editorRef = { current: mockEditor };
+
+      const deps = {
+        application: coreMock.createStart().application,
+        uiActions: mockUiActions,
+        telemetryService: mockTelemetryService,
+        editorRef,
+        getCurrentQuery,
+        esqlVariables: esqlVariablesRef,
+        controlsContext: controlsContextRef,
+        openTimePickerPopover: jest.fn(),
+      } as unknown as MonacoCommandDependencies;
+
+      registerCustomCommands(deps);
+
+      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
+      const controlCommandCall = registerCommandCalls.find(
+        ([commandId]) => commandId === 'esql.control.values.create'
+      );
+      const commandHandler = controlCommandCall[1];
+
+      await commandHandler(null, { triggerSource: ControlTriggerSource.ADD_CONTROL_BTN });
+
+      expect(getCurrentQuery).toHaveBeenCalled();
+      expect(mockTelemetryService.trackEsqlControlFlyoutOpened).toHaveBeenCalledWith(
+        true,
+        ESQLVariableType.VALUES,
+        ControlTriggerSource.ADD_CONTROL_BTN,
+        'FROM updated_index'
+      );
+    });
+  });
+
+  describe('addEditorKeyBindings', () => {
+    it('should call toggleVisor function when command is executed', () => {
+      const mockOnQuerySubmit = jest.fn();
+      const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
+
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+
+      expect(mockEditor.addCommand).toHaveBeenCalledTimes(3);
+
+      const cmdKCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK)
+      );
+      expect(cmdKCall).toBeDefined();
+
+      const cmdKHandler = cmdKCall[1];
+
+      cmdKHandler();
+
+      expect(mockToggleVisor).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onQuerySubmit when CMD+Enter is pressed', () => {
+      const mockOnQuerySubmit = jest.fn();
+      const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
+
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+
+      const cmdEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter)
+      );
+      expect(cmdEnterCall).toBeDefined();
+
+      const cmdEnterHandler = cmdEnterCall[1];
+
+      cmdEnterHandler();
+
+      expect(mockOnQuerySubmit).toHaveBeenCalledWith('manual');
+    });
+
+    it('should call onPrettifyQuery when CMD+I is pressed', () => {
+      const mockOnQuerySubmit = jest.fn();
+      const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
+
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+
+      const cmdICall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI)
+      );
+      expect(cmdICall).toBeDefined();
+
+      const cmdIHandler = cmdICall[1];
+
+      cmdIHandler();
+
+      expect(mockOnPrettifyQuery).toHaveBeenCalledTimes(1);
+    });
+  });
+});

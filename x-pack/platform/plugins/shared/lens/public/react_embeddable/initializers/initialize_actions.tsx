@@ -9,32 +9,39 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import type {
-  DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { Visualization } from '../..';
-import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
-import type { TableInspectorAdapter } from '../../editor_frame_service/types';
-
-import type { Datasource, IndexPatternMap } from '../../types';
-import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { isTextBasedLanguage } from '../helper';
 import type {
+  Datasource,
+  IndexPatternMap,
+  TableInspectorAdapter,
+  Visualization,
   GetStateType,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import {
+  combineQueryAndFilters,
+  findDataViewByIndexPatternId,
+  getLayerMetaInfo,
+} from '../../app_plugin/show_underlying_data';
+
+import { getMergedSearchContext } from '../expressions/merged_search_context';
+import { isTextBasedLanguage } from '../helper';
+import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
 
 function getViewUnderlyingDataArgs({
@@ -103,7 +110,7 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
-  const dataViewSpec = dataViews[meta.id]!.spec;
+  const dataViewSpec = findDataViewByIndexPatternId(meta.id, dataViews)?.spec;
 
   return {
     dataViewSpec,
@@ -156,12 +163,17 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
+      projectRouting: projectRouting$?.getValue(),
     },
     searchContextApi.timeRange$,
     parentApi,
@@ -243,10 +255,10 @@ export function initializeActionApi(
 ): {
   api: ViewInDiscoverCallbacks & HasDynamicActions;
   anyStateChange$: Observable<void>;
-  getComparators: () => StateComparators<DynamicActionsSerializedState>;
-  getLatestState: () => DynamicActionsSerializedState;
+  getComparators: () => EmbeddableDynamicActionsManager['comparators'];
+  getLatestState: () => ReturnType<EmbeddableDynamicActionsManager['getLatestState']>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 } {
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
@@ -264,6 +276,7 @@ export function initializeActionApi(
     anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
     getComparators: () => ({
       ...(dynamicActionsManager?.comparators ?? {
+        drilldowns: 'skip',
         enhancements: 'skip',
       }),
     }),
@@ -271,7 +284,7 @@ export function initializeActionApi(
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };

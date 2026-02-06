@@ -30,7 +30,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -68,17 +67,17 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
-import {
-  SYNTHETICS_MONITORS_EMBEDDABLE,
-  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-} from './apps/embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -98,6 +97,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
+  kql: KqlPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
@@ -235,15 +235,18 @@ export class SyntheticsPlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    pluginsStart.dashboard.registerDashboardPanelSettings(
+    pluginsStart.presentationUtil.registerPanelPlacementSettings(
       SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
       () => {
         return { placementSettings: { width: 10, height: 8 } };
       }
     );
-    pluginsStart.dashboard.registerDashboardPanelSettings(SYNTHETICS_MONITORS_EMBEDDABLE, () => {
-      return { placementSettings: { width: 30, height: 12 } };
-    });
+    pluginsStart.presentationUtil.registerPanelPlacementSettings(
+      SYNTHETICS_MONITORS_EMBEDDABLE,
+      () => {
+        return { placementSettings: { width: 30, height: 12 } };
+      }
+    );
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

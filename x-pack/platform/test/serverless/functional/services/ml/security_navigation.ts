@@ -16,9 +16,6 @@ export function MachineLearningNavigationProviderSecurity({
   const retry = getService('retry');
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
-    await svlCommonNavigation.sidenav.openSection(
-      'security_solution_nav_footer.category-management'
-    );
     await retry.tryForTime(5 * 1000, async () => {
       await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
       await svlCommonNavigation.sidenav.clickPanelLink(id);

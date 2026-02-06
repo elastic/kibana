@@ -194,7 +194,7 @@ export function extractDefaultDynamicKafkaTopics(
   ];
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
 
@@ -255,7 +255,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const isServerless = cloud?.isServerlessEnabled;
   // Set the hosts to default for new ES output in serverless.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -329,15 +329,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const diskQueuePathInput = useInput(
     output?.shipper?.disk_queue_path ?? '',
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueMaxSizeInput = useNumberInput(
     output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueEncryptionEnabled = useSwitchInput(
     output?.shipper?.disk_queue_encryption_enabled ?? false,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -352,7 +355,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     });
   const compressionLevelInput = useSelectInput(
     options,
+    // @ts-expect-error upgrade typescript v5.9.3
     `${output?.shipper?.compression_level}` ?? options[0].value,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueCompressionEnabled.value ?? false
   );
 

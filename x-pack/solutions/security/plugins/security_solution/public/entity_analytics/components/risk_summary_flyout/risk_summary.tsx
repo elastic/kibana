@@ -6,22 +6,22 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-
 import {
-  useEuiTheme,
   EuiAccordion,
-  EuiTitle,
-  EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
   useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -53,8 +53,7 @@ export interface RiskSummaryProps<T extends EntityType> {
   recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isLinkEnabled: boolean;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -63,7 +62,6 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
-  isLinkEnabled,
   isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
@@ -83,8 +81,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       riskEntity: entityType,
     });
   }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
+
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-  const rows = useMemo(() => getItems(entityData), [entityData]);
+  const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(
+    'enableRiskScorePrivmonModifier'
+  );
+  const rows = useMemo(
+    () => getItems(entityData, isPrivmonModifierEnabled),
+    [entityData, isPrivmonModifierEnabled]
+  );
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
@@ -120,6 +125,24 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     return { from, to };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskDataTimestamp]); // Update the timerange whenever the risk score timestamp changes to include new entries
+
+  const goToEntityInsightsTab = useCallback(
+    () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+    [openDetailsPanel]
+  );
+
+  const link = useMemo(
+    () => ({
+      callback: goToEntityInsightsTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+          defaultMessage="Show all risk inputs"
+        />
+      ),
+    }),
+    [goToEntityInsightsTab]
+  );
 
   return (
     <EuiAccordion
@@ -178,19 +201,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
               defaultMessage="View risk contributions"
             />
           ),
-          link: riskScoreData.loading
-            ? undefined
-            : {
-                callback: isLinkEnabled
-                  ? () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RISK_INPUTS })
-                  : undefined,
-                tooltip: (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-                    defaultMessage="Show all risk inputs"
-                  />
-                ),
-              },
+          link: riskScoreData.loading ? undefined : link,
           iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
@@ -260,6 +271,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   />
                 </div>
                 <EuiBasicTable
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
+                    {
+                      defaultMessage: 'Risk summary for {entity}',
+                      values: {
+                        entity: capitalize(entityType),
+                      },
+                    }
+                  )}
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
                   columns={columnsArray}

@@ -120,3 +120,10 @@ export const INTEGRATION_ENABLED = (integrationTitle: string) =>
       },
     }
   );
+
+export const RELATED_INTEGRATIONS_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.helpAriaLabel',
+  {
+    defaultMessage: 'Related integrations help',
+  }
+);

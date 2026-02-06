@@ -28,6 +28,7 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
+  enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -75,12 +76,6 @@ export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
-export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
-export const rulesLocatorID = 'RULES_LOCATOR';
-export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
-export const sloDetailsHistoryLocatorID = 'SLO_DETAILS_HISTORY_LOCATOR';
-export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
-export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;

@@ -14,7 +14,6 @@ import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
@@ -36,6 +35,8 @@ import type {
   RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
+  RollbackAvailableCheckResponse,
+  BulkRollbackAvailableCheckResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -75,10 +76,25 @@ import {
   updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
-import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
+import {
+  fleetErrorToResponseOptions,
+  FleetError,
+  FleetTooManyRequestsError,
+  FleetUnauthorizedError,
+} from '../../errors';
+import {
+  appContextService,
+  checkAllowedPackages,
+  licenseService,
+  packagePolicyService,
+} from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { rollbackInstallation } from '../../services/epm/packages/rollback';
+import {
+  bulkRollbackAvailableCheck,
+  isIntegrationRollbackTTLExpired,
+  rollbackAvailableCheck,
+  rollbackInstallation,
+} from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -263,7 +279,11 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
-    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate, KibanaSavedObjectType.alert],
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.alert,
+      KibanaSavedObjectType.sloTemplate,
+    ],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
@@ -314,11 +334,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   const { pkgName, pkgVersion } = request.params;
-
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
   const installSource = 'registry';
@@ -331,7 +348,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
@@ -359,9 +376,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
   const installSource = 'custom';
@@ -374,7 +389,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       esClient,
       spaceId,
       force,
-      authorizationHeader,
+      request,
       kibanaVersion,
     });
 
@@ -460,8 +475,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
@@ -470,7 +483,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
-    authorizationHeader,
+    request,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -491,8 +504,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const installSource = 'upload';
   const res = await installPackage({
     installSource,
@@ -501,7 +512,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
@@ -595,9 +606,8 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   }
 
   const logger = appContextService.getLogger();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
   const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-    authorizationHeader,
+    request,
     logger,
     username,
     pkgName,
@@ -694,6 +704,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       latest_executed_state: attributes.latest_executed_state,
       previous_version: attributes.previous_version,
       rolled_back: attributes.rolled_back,
+      is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
     };
 
     return {
@@ -712,6 +723,11 @@ export const rollbackPackageHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
   const spaceId = fleetContext.spaceId;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
+
   const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
     { name: pkgName },
   ]);
@@ -727,5 +743,41 @@ export const rollbackPackageHandler: FleetRequestHandler<
   } catch (error) {
     error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
     throw error;
+  }
+};
+
+export const rollbackAvailableCheckHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+
+  try {
+    const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
+      { name: pkgName },
+    ]);
+    const body: RollbackAvailableCheckResponse = await rollbackAvailableCheck(
+      pkgName,
+      packagePolicyIdsForCurrentUser[pkgName]
+    );
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for ${pkgName} integration`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: { isAvailable: false, reason } });
+  }
+};
+
+export const bulkRollbackAvailableCheckHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const body: BulkRollbackAvailableCheckResponse = await bulkRollbackAvailableCheck(request);
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for installed integrations`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: {} });
   }
 };

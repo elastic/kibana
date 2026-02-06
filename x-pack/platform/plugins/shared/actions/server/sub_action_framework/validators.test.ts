@@ -85,14 +85,14 @@ describe('Validators', () => {
   it('should validate the params correctly', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(params.schema.validate({ subAction: 'test', subActionParams: {} }));
+    expect(params.schema.parse({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
-      params.schema.validate({
+      params.schema.parse({
         subAction: 'test',
         subActionParams: {
           foo: 'foo',
@@ -125,7 +125,7 @@ describe('Validators', () => {
   ])('should throw if the subAction is %p', async (subAction) => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(() => params.schema.validate({ subAction, subActionParams: {} })).toThrow();
+    expect(() => params.schema.parse({ subAction, subActionParams: {} })).toThrow();
   });
 
   it('calls the config and secrets custom validator functions', () => {

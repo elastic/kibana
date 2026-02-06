@@ -15,5 +15,6 @@ export interface WorkflowsActionParams {
   subAction: string;
   subActionParams: {
     workflowId: string;
+    summaryMode?: boolean;
   };
 }

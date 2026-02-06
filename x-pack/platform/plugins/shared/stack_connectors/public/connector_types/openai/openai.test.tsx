@@ -9,7 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/openai/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/openai/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const ACTION_TYPE_ID = '.gen-ai';
@@ -42,7 +42,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: '{"message": "test"}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [], subAction: [] },
     });
   });
@@ -53,7 +53,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: 'message {test}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: ['Body does not have a valid JSON format.'], subAction: [] },
     });
   });
@@ -63,7 +63,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: '{"message": "test"}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         subAction: ['Action is required.'],
@@ -77,7 +77,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
         subAction: [],

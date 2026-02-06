@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { createIndexPatternsStartMock } from '../data_views/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 import type { SearchServiceSetupDependencies } from './search_service';
 import { SearchService } from './search_service';
@@ -247,7 +247,7 @@ describe('Search service', () => {
 
         expect(mockSessionClient.trackId).toBeCalledTimes(1);
 
-        expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
+        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options]);
       });
 
       it('does not call `trackId` if search is already tracked', async () => {
@@ -527,6 +527,16 @@ describe('Search service', () => {
         expect(searchId).toBe('def');
         expect(keepAlive).toContain('ms');
         expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
+      });
+    });
+
+    describe('updateSessionStatuses', () => {
+      it('calls updateSessionStatuses on the session client', async () => {
+        mockSessionClient.updateStatuses = jest.fn().mockResolvedValue(undefined);
+
+        await mockScopedClient.updateSessionStatuses(['id1', 'id2']);
+
+        expect(mockSessionClient.updateStatuses).toHaveBeenCalledWith(['id1', 'id2']);
       });
     });
   });

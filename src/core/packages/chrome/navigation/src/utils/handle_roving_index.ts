@@ -13,8 +13,7 @@ import { getFocusableElements } from './get_focusable_elements';
 /**
  * Handles the roving index for a given element.
  *
- * @param ref - The ref to the element to handle the roving index.
- * @returns
+ * @param ref - the ref to the element to handle the roving index.
  */
 export const handleRovingIndex: KeyboardEventHandler<HTMLDivElement> = (e) => {
   e.stopPropagation();

@@ -45,6 +45,7 @@ import {
 import { buildValuesFileUrl } from './build_values_file_url';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
@@ -105,6 +106,7 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      <ManagedOtlpCallout />
       <EuiSteps
         steps={[
           {
@@ -116,6 +118,28 @@ export const OtelKubernetesPanel: React.FC = () => {
             ),
             children: (
               <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.observability_onboarding.otelKubernetesPanel.addRepositoryDescription"
+                    defaultMessage="Run this command to add the Helm chart. Refer to the {docsLink} for information on supported Helm versions."
+                    values={{
+                      docsLink: (
+                        <EuiLink
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelQuickstartDocsLink"
+                          href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-unified-kubernetes-observability-with-elastic-distributions-of-opentelemetry-edot"
+                          external
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelKubernetesPanel.quickstartDocsLinkLabel',
+                            { defaultMessage: 'quickstart guide' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <EuiSpacer />
                 <EuiCodeBlock paddingSize="m" language="bash">
                   {addRepoCommand}
                 </EuiCodeBlock>

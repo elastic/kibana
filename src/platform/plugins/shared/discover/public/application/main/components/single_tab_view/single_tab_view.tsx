@@ -10,10 +10,13 @@
 import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
+import useLatest from 'react-use/lib/useLatest';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
 import { getDiscoverStateContainer } from '../../state_management/discover_state';
 import {
   RuntimeStateProvider,
@@ -24,6 +27,7 @@ import {
   useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useCurrentTabAction,
+  TabInitializationStatus,
 } from '../../state_management/redux';
 import type {
   CustomizationCallback,
@@ -38,7 +42,6 @@ import { NoDataPage } from './no_data_page';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { DiscoverMainApp } from './main_app';
-import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
@@ -53,15 +56,6 @@ export interface SingleTabViewProps {
   searchSessionManager: DiscoverSearchSessionManager;
 }
 
-interface SessionInitializationState {
-  showNoDataPage: boolean;
-}
-
-type InitializeSingleSession = (options?: {
-  dataViewSpec?: DataViewSpec | undefined;
-  defaultUrlState?: DiscoverAppState;
-}) => Promise<SessionInitializationState>;
-
 export const SingleTabView = ({
   customizationContext,
   customizationCallbacks,
@@ -73,8 +67,9 @@ export const SingleTabView = ({
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
 
-  const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const appInitializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const currentTabInitializationState = useCurrentTabSelector((tab) => tab.initializationState);
   const currentStateContainer = useCurrentTabRuntimeState(
     runtimeStateManager,
     (tab) => tab.stateContainer$
@@ -98,8 +93,16 @@ export const SingleTabView = ({
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
-  const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
-    async ({ dataViewSpec, defaultUrlState } = {}) => {
+  const initializeTab = useLatest(
+    async ({
+      dataViewSpec,
+      defaultUrlState,
+      esqlControls,
+    }: {
+      dataViewSpec?: DataViewSpec | undefined;
+      defaultUrlState?: DiscoverAppState;
+      esqlControls?: ControlPanelsState<ESQLControlState>;
+    } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
         services,
@@ -112,50 +115,46 @@ export const SingleTabView = ({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks,
+        services,
       });
 
-      return dispatch(
+      dispatch(
         initializeSingleTab({
           initializeSingleTabParams: {
             stateContainer,
             customizationService,
             dataViewSpec,
+            esqlControls,
             defaultUrlState,
           },
         })
       );
-    },
-    currentStateContainer && currentCustomizationService
-      ? { loading: false, value: { showNoDataPage: false } }
-      : { loading: true }
+    }
   );
 
   useEffect(() => {
-    if (!currentStateContainer && !currentCustomizationService) {
+    if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NotStarted) {
       const historyLocationState = services.getScopedHistory<
         MainHistoryLocationState & { defaultState?: DiscoverAppState }
       >()?.location.state;
 
-      initializeTab({
+      initializeTab.current({
         dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
       });
     }
-  }, [currentCustomizationService, currentStateContainer, initializeTab, services]);
+  }, [currentTabInitializationState.initializationStatus, initializeTab, services]);
 
-  if (initializeTabState.loading) {
-    return <BrandedLoadingIndicator />;
+  if (currentTabInitializationState.initializationStatus === TabInitializationStatus.Error) {
+    return <InitializationError error={currentTabInitializationState.error} />;
   }
 
-  if (initializeTabState.error) {
-    return <InitializationError error={initializeTabState.error} />;
-  }
-
-  if (initializeTabState.value.showNoDataPage) {
+  if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
     return (
-      <HideTabsBar>
+      <HideTabsBar customizationContext={customizationContext}>
         <NoDataPage
-          {...initializationState}
+          {...appInitializationState}
           onDataViewCreated={async (dataViewUnknown) => {
             await dispatch(internalStateActions.loadDataViewList());
             dispatch(
@@ -165,14 +164,14 @@ export const SingleTabView = ({
               })
             );
             const dataView = dataViewUnknown as DataView;
-            initializeTab({
+            initializeTab.current({
               defaultUrlState: dataView.id
                 ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
                 : undefined,
             });
           }}
           onESQLNavigationComplete={() => {
-            initializeTab();
+            initializeTab.current();
           }}
         />
       </HideTabsBar>

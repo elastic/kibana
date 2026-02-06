@@ -8,6 +8,7 @@
  */
 
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { FancySelectOption } from './types';
 
@@ -20,6 +21,12 @@ export interface FancySelectProps {
 export const FancySelect: React.FC<FancySelectProps> = ({ value, options, onChange }) => {
   return (
     <EuiSuperSelect
+      aria-label={i18n.translate(
+        'cloud.connectionDetails.components.fancySelect.superSelect.ariaLabel',
+        {
+          defaultMessage: 'Fancy options',
+        }
+      )}
       valueOfSelected={value}
       options={options.map((option) => ({
         value: option.id,

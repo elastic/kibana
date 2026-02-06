@@ -14,7 +14,7 @@ export const vislibTooltipStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
     .visTooltip,
     .visTooltip__sizingClone {
-      ${euiShadow(euiThemeContext, 'l')};
+      ${euiShadow(euiThemeContext, 'l', { border: 'none' })};
       border-radius: ${euiTheme.border.radius.medium};
       background-color: ${euiTheme.colors.backgroundBasePlain};
       border: ${euiThemeContext.euiTheme.border.width.thin} solid

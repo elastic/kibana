@@ -714,7 +714,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const statusItem = await testSubjects.find(testSubj);
           return statusItem
             ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null')
-            : null;
+            : false;
         };
 
         await retry.try(async () => {

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -30,7 +30,6 @@
     "@kbn/storybook",
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",

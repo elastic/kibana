@@ -12,6 +12,7 @@ import type { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { getVisualizationInstance } from '../get_visualization_instance';
 import {
   getEditBreadcrumbs,
@@ -20,7 +21,6 @@ import {
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
 import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 import type { VisualizeInput } from '../../..';
@@ -111,18 +111,27 @@ export const useSavedVisInstance = (
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
 
         if (savedVis.id) {
+          const breadcrumbs = getEditBreadcrumbs(
+            { originatingAppName, redirectToOrigin },
+            savedVis.title
+          );
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(
               getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
             );
           } else {
-            chrome.setBreadcrumbs(
-              getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-            );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           chrome.docTitle.change(savedVis.title);
         } else {
+          const createBreadcrumbs = getCreateBreadcrumbs({
+            byValue: Boolean(originatingApp),
+            originatingAppName,
+            redirectToOrigin,
+          });
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(
               getCreateServerlessBreadcrumbs({
@@ -132,13 +141,9 @@ export const useSavedVisInstance = (
               })
             );
           } else {
-            chrome.setBreadcrumbs(
-              getCreateBreadcrumbs({
-                byValue: Boolean(originatingApp),
-                originatingAppName,
-                redirectToOrigin,
-              })
-            );
+            chrome.setBreadcrumbs(createBreadcrumbs, {
+              project: { value: createBreadcrumbs, absolute: true },
+            });
           }
         }
 

@@ -19,6 +19,10 @@ describe('SecretFormRow', () => {
   const cancelEdit = jest.fn();
   const useSecretsStorage = true;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should switch to edit mode when the replace button is clicked', () => {
     const { getByText, queryByText, container } = renderWithI18n(
       <SecretFormRow
@@ -41,6 +45,25 @@ describe('SecretFormRow', () => {
     expect(getByText(title)).toBeInTheDocument();
     expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
     expect(queryByText(initialValue)).not.toBeInTheDocument();
+  });
+
+  it('should call clear function when the replace button is clicked', () => {
+    const { getByText } = renderWithI18n(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+      >
+        <input type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    fireEvent.click(getByText('Replace Test Secret'));
+
+    expect(clear).toHaveBeenCalled();
   });
 
   it('should not enable action links if the row is disabled', () => {

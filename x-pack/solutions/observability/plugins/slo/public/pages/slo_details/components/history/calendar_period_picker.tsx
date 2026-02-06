@@ -7,36 +7,40 @@
 
 import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useState } from 'react';
-import { toDuration } from '../../../../utils/slo/duration';
+import React from 'react';
 import type { TimeBounds } from '../../types';
 
 interface Props {
-  slo: SLOWithSummaryResponse;
+  period: 'week' | 'month';
+  range: TimeBounds;
   onChange: (range: TimeBounds) => void;
 }
 
-export function CalendarPeriodPicker({ slo, onChange }: Props) {
-  const [periodOffset, setPeriodOffset] = useState<number>(0);
+export function CalendarPeriodPicker({ period, range, onChange }: Props) {
+  const isWeeklyPeriod = period === 'week';
+  const durationUnit = isWeeklyPeriod ? 'week' : 'month';
+  const unit = isWeeklyPeriod ? 'isoWeek' : 'month';
 
-  function handleChangePeriod(offset: number) {
-    const now = moment();
-    const duration = toDuration(slo.timeWindow.duration);
-    const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
-    const durationUnit = duration.unit === 'w' ? 'week' : 'month';
-
-    setPeriodOffset((curr) => {
-      const newOffset = curr + offset;
-
-      onChange({
-        from: moment.utc(now).subtract(newOffset, durationUnit).startOf(unit).toDate(),
-        to: moment.utc(now).subtract(newOffset, durationUnit).endOf(unit).toDate(),
-      });
-
-      return newOffset;
+  function handlePrevious() {
+    const start = moment.utc(range.from).subtract(1, durationUnit);
+    onChange({
+      from: start.startOf(unit).toDate(),
+      to: start.endOf(unit).toDate(),
     });
+  }
+
+  function handleNext() {
+    const start = moment.utc(range.from).add(1, durationUnit);
+    onChange({
+      from: start.startOf(unit).toDate(),
+      to: start.endOf(unit).toDate(),
+    });
+  }
+
+  function getCalendarPeriodLabel() {
+    const start = moment.utc(range.from);
+    return `${start.startOf(unit).format('ll')} - ${start.endOf(unit).format('ll')}`;
   }
 
   return (
@@ -44,9 +48,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
-        onClick={() => {
-          handleChangePeriod(+1);
-        }}
+        onClick={() => handlePrevious()}
         iconType="arrowLeft"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
@@ -54,15 +56,12 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
         })}
       </EuiButton>
       <EuiText size="s" textAlign="center">
-        <p>{getCalendarPeriodLabel(slo, periodOffset)}</p>
+        <p>{getCalendarPeriodLabel()}</p>
       </EuiText>
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryNextButton"
-        disabled={periodOffset <= 0}
-        onClick={() => {
-          handleChangePeriod(-1);
-        }}
+        onClick={() => handleNext()}
         iconType="arrowRight"
         iconSide="right"
       >
@@ -72,21 +71,4 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
       </EuiButton>
     </EuiFlexGroup>
   );
-}
-
-function getCalendarPeriodLabel(slo: SLOWithSummaryResponse, calendarPeriod: number): string {
-  const duration = toDuration(slo.timeWindow.duration);
-  const isWeeklyCalendarAligned = duration.unit === 'w';
-  const now = moment().utc();
-
-  const start = now
-    .clone()
-    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
-    .startOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
-  const end = now
-    .clone()
-    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
-    .endOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
-
-  return `${start.format('ll')} - ${end.format('ll')}`;
 }

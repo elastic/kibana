@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Goal');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Goal');
       await timePicker.setDefaultAbsoluteRange();
     });
 
@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Goal - Agg with params');
       await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
@@ -98,7 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Goal - Sibling pipeline agg');
       await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Goal - Color ranges');
       await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);

@@ -10,6 +10,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   getArtifactName,
   getProductDocIndexName,
+  getSecurityLabsArtifactName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
@@ -19,6 +21,7 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import { i18n } from '@kbn/i18n';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
+import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
   downloadToDisk,
   openZipArchive,
@@ -32,6 +35,7 @@ import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
   fetchArtifactVersions,
+  fetchSecurityLabsVersions,
   createIndex,
   populateIndex,
 } from './steps';
@@ -43,6 +47,7 @@ interface PackageInstallerOpts {
   esClient: ElasticsearchClient;
   productDocClient: ProductDocInstallClient;
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
   kibanaVersion: string;
   elserInferenceId?: string;
 }
@@ -53,6 +58,7 @@ export class PackageInstaller {
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
+  private readonly artifactRepositoryProxyUrl?: string;
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
 
@@ -62,6 +68,7 @@ export class PackageInstaller {
     esClient,
     productDocClient,
     artifactRepositoryUrl,
+    artifactRepositoryProxyUrl,
     elserInferenceId,
     kibanaVersion,
   }: PackageInstallerOpts) {
@@ -69,6 +76,7 @@ export class PackageInstaller {
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
+    this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
@@ -133,6 +141,7 @@ export class PackageInstaller {
     const { inferenceId } = params;
     const repositoryVersions = await fetchArtifactVersions({
       artifactRepositoryUrl: this.artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
@@ -204,12 +213,16 @@ export class PackageInstaller {
         inferenceId: customInference?.inference_id ?? this.elserInferenceId,
       });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
 
-      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPath}]`);
-      await downloadToDisk(artifactUrl, artifactPath);
+      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
+      const artifactFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPathAtVolume,
+        this.artifactRepositoryProxyUrl
+      );
 
-      zipArchive = await openZipArchive(artifactPath);
+      zipArchive = await openZipArchive(artifactFullPath);
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
@@ -293,6 +306,233 @@ export class PackageInstaller {
       await this.productDocClient.setUninstallationStarted(productName, inferenceId);
       await this.uninstallPackage({ productName, inferenceId });
     }
+  }
+
+  // Security Labs methods
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  async installSecurityLabs({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+
+    this.log.info(
+      `Starting Security Labs installation${
+        version ? ` for version [${version}]` : ''
+      } with inference ID [${effectiveInferenceId}]`
+    );
+
+    // Uninstall existing Security Labs content first
+    await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
+
+    let zipArchive: ZipArchive | undefined;
+    let selectedVersion: string | undefined;
+    try {
+      // Ensure ELSER is deployed
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
+
+      // Determine version to install
+      selectedVersion = version;
+      if (!selectedVersion) {
+        const availableVersions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+          artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
+        });
+        if (availableVersions.length === 0) {
+          throw new Error('No Security Labs versions available');
+        }
+        // Select the latest version
+        selectedVersion = availableVersions.sort().reverse()[0];
+      }
+
+      await this.productDocClient.setSecurityLabsInstallationStarted({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+
+      const artifactFileName = getSecurityLabsArtifactName({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+
+      this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
+      const downloadedFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPath,
+        this.artifactRepositoryProxyUrl
+      );
+
+      zipArchive = await openZipArchive(downloadedFullPath);
+      validateArtifactArchive(zipArchive);
+
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
+
+      const manifestVersion = manifest.formatVersion;
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+
+      const modifiedMappings = cloneDeep(mappings);
+      overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+      await createIndex({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion,
+        esClient: this.esClient,
+        log: this.log,
+      });
+
+      await populateIndex({
+        indexName,
+        manifestVersion,
+        archive: zipArchive,
+        esClient: this.esClient,
+        log: this.log,
+        inferenceId: effectiveInferenceId,
+      });
+
+      await this.productDocClient.setSecurityLabsInstallationSuccessful({
+        version: selectedVersion,
+        indexName,
+        inferenceId: effectiveInferenceId,
+      });
+
+      this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId },
+            defaultMessage:
+              'No Security Labs artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during Security Labs installation: ${message}`);
+      await this.productDocClient.setSecurityLabsInstallationFailed({
+        version: selectedVersion,
+        failureReason: message,
+        inferenceId: effectiveInferenceId,
+      });
+      throw e;
+    } finally {
+      zipArchive?.close();
+    }
+  }
+
+  /**
+   * Uninstall Security Labs content.
+   */
+  async uninstallSecurityLabs({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    const indexName = getSecurityLabsIndexName(inferenceId);
+    await this.esClient.indices.delete(
+      {
+        index: indexName,
+      },
+      { ignore: [404] }
+    );
+    if (inferenceId) {
+      await this.productDocClient.setSecurityLabsUninstalled(inferenceId);
+    }
+    this.log.info(`Security Labs content uninstalled from index [${indexName}]`);
+  }
+
+  /**
+   * Get the installation status of Security Labs content.
+   */
+  async getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    try {
+      const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+      const status = await this.productDocClient.getSecurityLabsInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+
+      // Compute latest version (best-effort) for UX and auto-update checks.
+      let repoLatestVersion: string | undefined;
+      try {
+        const versions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+        });
+        if (versions.length > 0) {
+          repoLatestVersion = versions.slice().sort().reverse()[0];
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      const installedVersion = status.version;
+      const isUpdateAvailable =
+        status.status === 'installed' &&
+        Boolean(installedVersion) &&
+        Boolean(repoLatestVersion) &&
+        installedVersion !== repoLatestVersion;
+
+      // If we have a saved-object based status, return it (augmented with update info).
+      // (Backwards compatibility: if not found, fall back to index existence checks below.)
+      if (status.status !== 'uninstalled' || status.version || status.failureReason) {
+        return { ...status, latestVersion: repoLatestVersion, isUpdateAvailable };
+      }
+
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+      const exists = await this.esClient.indices.exists({ index: indexName });
+      if (!exists) return { status: 'uninstalled' };
+
+      const countResponse = await this.esClient.count({ index: indexName });
+      if (countResponse.count === 0) return { status: 'uninstalled' };
+
+      // Unknown version (legacy install), but installed.
+      return { status: 'installed', latestVersion: repoLatestVersion };
+    } catch (error) {
+      this.log.error(`Error checking Security Labs status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
+    }
+  }
+
+  /**
+   * Ensure Security Labs content is up to date, if currently installed.
+   */
+  async ensureSecurityLabsUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const { inferenceId, forceUpdate } = params;
+    const status = await this.productDocClient.getSecurityLabsInstallationStatus({ inferenceId });
+    if (status.status !== 'installed') {
+      return;
+    }
+
+    const availableVersions = await fetchSecurityLabsVersions({
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+    });
+    if (availableVersions.length === 0) {
+      return;
+    }
+    const latest = availableVersions.sort().reverse()[0];
+    const installedVersion = status.version;
+
+    if (!forceUpdate && installedVersion && installedVersion === latest) {
+      return;
+    }
+
+    await this.installSecurityLabs({ version: latest, inferenceId });
   }
 }
 

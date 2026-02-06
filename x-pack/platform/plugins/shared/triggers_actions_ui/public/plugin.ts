@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -24,7 +30,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -204,6 +210,7 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
+    const experimentalFeatures = this.experimentalFeatures;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
@@ -268,6 +275,67 @@ export class Plugin
     }
 
     if (this.config.rules.enabled) {
+      if (this.experimentalFeatures.unifiedRulesPage) {
+        core.application.register({
+          id: 'rules',
+          appRoute: '/app/rules',
+          title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+            defaultMessage: 'Rules',
+          }),
+          category: DEFAULT_APP_CATEGORIES.management,
+          visibleIn: ['sideNav'],
+          async mount(params: AppMountParameters) {
+            const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+              CoreStart,
+              PluginsStart,
+              unknown
+            ];
+
+            const { renderRulesPageApp } = await import('./application/rules_page_app');
+
+            // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+            // subset of this privilege are not authorized to access this endpoint and will receive a 404
+            // error that causes the Alerting view to fail to load.
+            let kibanaFeatures: KibanaFeature[];
+            try {
+              kibanaFeatures = await pluginsStart.features.getFeatures();
+            } catch (err) {
+              kibanaFeatures = [];
+            }
+
+            return renderRulesPageApp({
+              ...coreStart,
+              actions: plugins.actions,
+              cloud: plugins.cloud,
+              data: pluginsStart.data,
+              dataViews: pluginsStart.dataViews,
+              dataViewEditor: pluginsStart.dataViewEditor,
+              charts: pluginsStart.charts,
+              alerting: pluginsStart.alerting,
+              spaces: pluginsStart.spaces,
+              unifiedSearch: pluginsStart.unifiedSearch,
+              isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+              element: params.element,
+              theme: coreStart.theme,
+              storage: new Storage(window.localStorage),
+              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              history: params.history,
+              actionTypeRegistry,
+              ruleTypeRegistry,
+              kibanaFeatures,
+              licensing: pluginsStart.licensing,
+              expressions: pluginsStart.expressions,
+              isServerless,
+              fieldFormats: pluginsStart.fieldFormats,
+              lens: pluginsStart.lens,
+              fieldsMetadata: pluginsStart.fieldsMetadata,
+              contentManagement: pluginsStart.contentManagement,
+              share: pluginsStart.share,
+            });
+          },
+        });
+      }
+
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -279,6 +347,29 @@ export class Plugin
             unknown
           ];
 
+          if (experimentalFeatures.unifiedRulesPage) {
+            const currentLocation = params.history.location;
+            const search = currentLocation.search;
+
+            const [, page, id] = currentLocation.pathname.split('/');
+
+            switch (page) {
+              case 'rule':
+                await coreStart.application.navigateToApp('rules', {
+                  path: getRulesAppDetailsRoute(id),
+                  replace: true,
+                });
+                break;
+              default:
+                await coreStart.application.navigateToApp('rules', {
+                  path: currentLocation.pathname + search,
+                  replace: true,
+                });
+                break;
+            }
+
+            return () => {};
+          }
           const { renderApp } = await import('./application/rules_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
@@ -319,6 +410,7 @@ export class Plugin
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -368,6 +460,7 @@ export class Plugin
           share: pluginsStart.share,
           kibanaFeatures,
           isServerless,
+          uiActions: pluginsStart.uiActions,
         });
       },
     });
@@ -417,6 +510,7 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });

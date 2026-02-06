@@ -5,48 +5,47 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, within } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { HomeTestBed } from './home.helpers';
-import { setup } from './home.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderHome } from '../helpers/render_home';
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('<IndexManagementHome />', () => {
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: HomeTestBed;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
+  });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
+      await renderHome(httpSetup);
+
+      await screen.findByTestId('appTitle');
     });
 
     test('should set the correct app title', () => {
-      const { exists, find } = testBed;
-      expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Index Management');
+      expect(screen.getByTestId('appTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('appTitle')).toHaveTextContent('Index Management');
     });
 
     test('should have a link to the documentation', () => {
-      const { exists, find } = testBed;
-      expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Index Management docs');
+      expect(screen.getByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.getByTestId('documentationLink')).toHaveTextContent('Index Management docs');
     });
 
     describe('tabs', () => {
-      test('should have 4 tabs', () => {
-        const { find } = testBed;
+      test('should have 5 tabs', () => {
+        const indexManagementHeader = screen.getByTestId('indexManagementHeaderContent');
+        const tabs = within(indexManagementHeader).getAllByRole('tab');
 
-        const indexManagementContainer = find('indexManagementHeaderContent');
-        const tabListContainer = indexManagementContainer.find('div.euiTabs');
-        const allTabs = tabListContainer.children();
-        const allTabsLabels = [
+        const expectedTabLabels = [
           'Indices',
           'Data Streams',
           'Index Templates',
@@ -54,27 +53,25 @@ describe('<IndexManagementHome />', () => {
           'Enrich Policies',
         ];
 
-        expect(allTabs.length).toBe(5);
-        for (let i = 0; i < allTabs.length; i++) {
-          expect(tabListContainer.childAt(i).text()).toEqual(allTabsLabels[i]);
-        }
+        expect(tabs).toHaveLength(5);
+        expectedTabLabels.forEach((label, index) => {
+          expect(tabs[index]).toHaveTextContent(label);
+        });
       });
 
       test('should navigate to Index Templates tab', async () => {
-        const { exists, actions, component } = testBed;
-
-        expect(exists('indicesList')).toBe(true);
-        expect(exists('templateList')).toBe(false);
+        expect(screen.getByTestId('indicesList')).toBeInTheDocument();
+        expect(screen.queryByTestId('templateList')).not.toBeInTheDocument();
 
         httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        await act(async () => {
-          actions.selectHomeTab('templatesTab');
-        });
+        // Click on Index Templates tab (Section.IndexTemplates = 'templates')
+        fireEvent.click(screen.getByTestId('templatesTab'));
 
-        component.update();
-        expect(exists('indicesList')).toBe(false);
-        expect(exists('templateList')).toBe(true);
+        await screen.findByTestId('templateList');
+
+        expect(screen.queryByTestId('indicesList')).not.toBeInTheDocument();
+        expect(screen.getByTestId('templateList')).toBeInTheDocument();
       });
     });
   });

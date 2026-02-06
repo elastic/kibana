@@ -13,7 +13,7 @@ import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions
 import { InvalidEmailReason, MustacheInEmailRegExp } from '@kbn/actions-plugin/common';
 import { experimentalFeaturesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
+import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email/constants';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;
@@ -133,11 +133,12 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: [],
         cc: [],
         bcc: [],
+        replyTo: [],
         message: [],
         subject: [],
       },
@@ -152,12 +153,57 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: ['Email address invalid.com is not valid.'],
         cc: ['Email address bob@notallowed.com is not allowed.'],
         bcc: ['Email address another-invalid.com is not valid.'],
+        replyTo: [],
         message: ['Message is required.'],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation succeeds when replyTo is provided and valid', async () => {
+    const actionParams = {
+      to: ['bob@example.com'],
+      cc: ['cc@example.com'],
+      bcc: [],
+      replyTo: ['reply@example.com'],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: [],
+        cc: [],
+        bcc: [],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation fails when replyTo is invalid', async () => {
+    const actionParams = {
+      to: ['bob@example.com'],
+      cc: ['cc@example.com'],
+      bcc: [],
+      replyTo: ['invalidEmail'],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: [],
+        cc: [],
+        bcc: [],
+        replyTo: ['Email address invalidEmail is not valid.'],
+        message: [],
         subject: [],
       },
     });

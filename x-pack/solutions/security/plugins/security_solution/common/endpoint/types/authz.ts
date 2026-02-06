@@ -114,6 +114,11 @@ export interface EndpointAuthz {
    */
   canReadAdminData: boolean;
   canWriteAdminData: boolean;
+
+  /** User has privilege to read from the scripts library */
+  canReadScriptsLibrary: boolean;
+  /** user has privilege to write to the scripts library */
+  canWriteScriptsLibrary: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

@@ -11,6 +11,8 @@ export const ENDPOINT_EVENTS_INDEX = 'logs-endpoint.events.process-default';
 
 export const ENDPOINT_ALERTS_INDEX = 'logs-endpoint.alerts-default';
 
+export const ENDPOINT_DEVICE_INDEX = 'logs-endpoint.events.device-default';
+
 export const COMMON_API_HEADERS = Object.freeze({
   'kbn-xsrf': 'security-solution',
   'x-elastic-internal-origin': 'security-solution',

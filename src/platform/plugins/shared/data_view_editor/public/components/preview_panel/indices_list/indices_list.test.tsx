@@ -8,16 +8,21 @@
  */
 
 import React from 'react';
-import type { IndicesListProps } from './indices_list';
-import { IndicesList, PER_PAGE_STORAGE_KEY } from './indices_list';
-import { shallow } from 'enzyme';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import type { IndicesListProps } from './indices_list';
+import { I18nProvider } from '@kbn/i18n-react';
+import { IndicesList, PER_PAGE_STORAGE_KEY } from './indices_list';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import userEvent from '@testing-library/user-event';
 
 const indices = [
   { name: 'kibana', tags: [] },
   { name: 'es', tags: [] },
 ] as unknown as MatchedItem[];
+
+const secondPageIndex = { name: 'second-page', tags: [] } as unknown as MatchedItem;
 
 const similarIndices = [
   { name: 'logstash', tags: [] },
@@ -35,35 +40,48 @@ describe('IndicesList', () => {
   });
 
   it('should render normally', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+    const { container } = renderWithI18n(<IndicesList {...commonProps} query="" />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('should change pages', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+  it('should change pages', async () => {
+    new Storage(localStorage).set(PER_PAGE_STORAGE_KEY, 5);
+    const user = userEvent.setup();
+    const propsWithMoreIndices = {
+      ...commonProps,
+      indices: [...indices, ...indices, ...indices, secondPageIndex],
+    };
 
-    const instance = component.instance() as IndicesList;
+    renderWithI18n(<IndicesList {...propsWithMoreIndices} query="" />);
+    const paginationButton = screen.getByTestId('pagination-button-1');
 
-    component.setState({ perPage: 1 });
-    instance.onChangePage(1);
-    component.update();
+    await user.click(paginationButton);
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('second-page')).toBeVisible();
   });
 
-  it('should change per page', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+  it('should change per page', async () => {
+    const user = userEvent.setup();
+    const moreIndices = [...indices, ...indices, ...indices, ...indices, ...indices, ...indices];
 
-    const instance = component.instance() as IndicesList;
-    instance.onChangePerPage(1);
-    component.update();
+    renderWithI18n(<IndicesList {...commonProps} indices={moreIndices} query="" />);
 
-    expect(component).toMatchSnapshot();
+    const rowsPerPageButton = screen.getByText('Rows per page: 10');
+    let rows = screen.getAllByTestId('indicesListTableRow');
+    expect(rows).toHaveLength(10);
+    await user.click(rowsPerPageButton);
+
+    const option1 = screen.getByTestId('tablePagination-5-rows');
+    await user.click(option1);
+
+    rows = screen.getAllByTestId('indicesListTableRow');
+    expect(screen.getByText('Rows per page: 5')).toBeVisible();
+    expect(rows).toHaveLength(5);
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(
+    renderWithI18n(
       <IndicesList
         {...commonProps}
         query="es,ki"
@@ -71,11 +89,12 @@ describe('IndicesList', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('es').closest('strong')).toBeVisible();
+    expect(screen.getByText('ki').closest('strong')).toBeVisible();
   });
 
   it('should highlight fully when an exact match', () => {
-    const component = shallow(
+    renderWithI18n(
       <IndicesList
         {...commonProps}
         indices={similarIndices}
@@ -84,13 +103,12 @@ describe('IndicesList', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('some_logs').closest('strong')).toBeVisible();
   });
 
   describe('updating props', () => {
     it('should render all new indices', () => {
-      const component = shallow(<IndicesList {...commonProps} query="" />);
-
+      new Storage(localStorage).set(PER_PAGE_STORAGE_KEY, 25);
       const moreIndices = [
         ...indices,
         ...indices,
@@ -102,9 +120,14 @@ describe('IndicesList', () => {
         ...indices,
       ];
 
-      component.setProps({ indices: moreIndices });
-      component.update();
-      expect(component).toMatchSnapshot();
+      const { rerender } = renderWithI18n(<IndicesList {...commonProps} query="" />);
+      rerender(
+        <I18nProvider>
+          <IndicesList {...commonProps} query="" indices={moreIndices} />
+        </I18nProvider>
+      );
+
+      expect(screen.getAllByRole('row')).toHaveLength(moreIndices.length);
     });
   });
 });

@@ -14,7 +14,7 @@ import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common'
 import type { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { TimelionVisDependencies } from './plugin';

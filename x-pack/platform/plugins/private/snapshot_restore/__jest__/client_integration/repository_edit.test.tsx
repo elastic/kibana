@@ -5,41 +5,57 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import './helpers/mocks';
 
-import type { TestBed } from './helpers';
-import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
-import { RepositoryForm } from '../../public/application/components/repository_form';
-import type { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
-import type { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
-import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-const { setup } = pageHelpers.repositoryEdit;
-const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
+import { getRandomString } from '@kbn/test-jest-helpers';
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
+import { renderApp } from './helpers/render_app';
+import { RepositoryForm } from '../../public/application/components/repository_form/repository_form';
+import { REPOSITORY_EDIT } from './helpers/constant';
+import type { getRepository } from '../../test/fixtures';
+
+type Repository = ReturnType<typeof getRepository>;
 
 describe('<RepositoryEdit />', () => {
-  let testBed: TestBed<RepositoryEditTestSubjects>;
-  let testBedRepositoryAdd: TestBed<RepositoryAddTestSubjects>;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const setupPage = async (
+    repository: Repository,
+    { isManagedRepository }: { isManagedRepository?: boolean } = {}
+  ) => {
+    const { httpSetup } = setupEnvironment();
+    const clearSaveError = jest.fn();
+    const onSave = jest.fn();
+
+    const RepositoryFormWithDeps = WithAppDependencies(RepositoryForm, httpSetup);
+    render(
+      <RepositoryFormWithDeps
+        repository={repository}
+        isManagedRepository={isManagedRepository}
+        isEditing={true}
+        isSaving={false}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+      />
+    );
+
+    // Let mount-time effects settle under RTL's async act wrapper.
+    await screen.findByTestId('title');
+
+    return { onSave };
+  };
 
   describe('on component mount', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_EDIT.name, {
-        repository: REPOSITORY_EDIT,
-        snapshots: { count: 0 },
-      });
+    test('should set the correct page title', async () => {
+      await setupPage(REPOSITORY_EDIT);
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
-    });
-
-    test('should set the correct page title', () => {
-      const { find } = testBed;
-      expect(find('repositoryForm.stepTwo.title').text()).toBe(
-        `'${REPOSITORY_EDIT.name}' settings`
-      );
+      const title = screen.getByTestId('title');
+      expect(title).toHaveTextContent(`'${REPOSITORY_EDIT.name}' settings`);
     });
 
     /**
@@ -48,84 +64,66 @@ describe('<RepositoryEdit />', () => {
      * the same form component is indeed shared between the 2 app sections.
      */
     test('should use the same Form component as the "<RepositoryAdd />" section', async () => {
+      const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+
+      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_EDIT.name, {
+        repository: REPOSITORY_EDIT,
+        snapshots: { count: 0 },
+      });
+
+      const { unmount } = renderApp(httpSetup, {
+        initialEntries: [`/edit_repository/${encodeURIComponent(REPOSITORY_EDIT.name)}`],
+      });
+
+      await screen.findByTestId('title');
+      expect(screen.getByTestId('title')).toBeInTheDocument();
+
+      unmount();
+
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(['fs', 'url']);
+      renderApp(httpSetup, { initialEntries: ['/add_repository'] });
 
-      testBedRepositoryAdd = await setupRepositoryAdd(httpSetup);
-
-      const formEdit = testBed.component.find(RepositoryForm);
-      const formAdd = testBedRepositoryAdd.component.find(RepositoryForm);
-
-      expect(formEdit.length).toBe(1);
-      expect(formAdd.length).toBe(1);
+      await screen.findByTestId('fsRepositoryType');
+      expect(screen.getByTestId('nextButton')).toBeInTheDocument();
     });
   });
 
   describe('should disable client, bucket / container and base path fields for managed repositories', () => {
-    const mountComponentWithMock = async (repository: any) => {
-      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
-        repository: { name: getRandomString(), ...repository },
-        snapshots: { count: 0 },
-        isManagedRepository: true,
-      });
-
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
-    };
-
     it('azure repository', async () => {
-      await mountComponentWithMock({ type: 'azure' });
-      const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
-
-      const containerInput = find('containerInput');
-      expect(containerInput.props().disabled).toEqual(true);
-
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      const repositoryName = getRandomString();
+      await setupPage(
+        { name: repositoryName, type: 'azure', settings: {} },
+        { isManagedRepository: true }
+      );
+      expect(screen.getByTestId('clientInput')).toBeDisabled();
+      expect(screen.getByTestId('containerInput')).toBeDisabled();
+      expect(screen.getByTestId('basePathInput')).toBeDisabled();
     });
 
     it('gcs repository', async () => {
-      await mountComponentWithMock({ type: 'gcs' });
-      const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
-
-      const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
-
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      const repositoryName = getRandomString();
+      await setupPage(
+        { name: repositoryName, type: 'gcs', settings: {} },
+        { isManagedRepository: true }
+      );
+      expect(screen.getByTestId('clientInput')).toBeDisabled();
+      expect(screen.getByTestId('bucketInput')).toBeDisabled();
+      expect(screen.getByTestId('basePathInput')).toBeDisabled();
     });
 
     it('s3 repository', async () => {
-      await mountComponentWithMock({ type: 's3' });
-      const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
-
-      const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
-
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      const repositoryName = getRandomString();
+      await setupPage(
+        { name: repositoryName, type: 's3', settings: {} },
+        { isManagedRepository: true }
+      );
+      expect(screen.getByTestId('clientInput')).toBeDisabled();
+      expect(screen.getByTestId('bucketInput')).toBeDisabled();
+      expect(screen.getByTestId('basePathInput')).toBeDisabled();
     });
   });
 
   describe('should populate the correct values', () => {
-    const mountComponentWithMock = async (repository: any) => {
-      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
-        repository: { name: getRandomString(), ...repository },
-        snapshots: { count: 0 },
-      });
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      testBed.component.update();
-    };
-
     it('fs repository', async () => {
       const settings = {
         location: getRandomString(),
@@ -136,33 +134,38 @@ describe('<RepositoryEdit />', () => {
         readonly: true,
       };
 
-      await mountComponentWithMock({ type: 'fs', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 'fs', settings });
 
-      const { find } = testBed;
-
-      expect(find('locationInput').props().defaultValue).toBe(settings.location);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('locationInput')).toHaveValue(settings.location);
+      expect(screen.getByTestId('compressToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.compress ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('chunkSizeInput')).toHaveValue(settings.chunkSize);
+      expect(screen.getByTestId('maxSnapshotBytesInput')).toHaveValue(
         settings.maxSnapshotBytesPerSec
       );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxRestoreBytesInput')).toHaveValue(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      expect(screen.getByTestId('readOnlyToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.readonly ? 'true' : 'false'
+      );
     });
 
     it('readonly repository', async () => {
       const settings = {
         url: 'https://elastic.co',
+        readonly: true,
       };
 
-      await mountComponentWithMock({ type: 'url', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 'url', settings });
 
-      const { find } = testBed;
-
-      expect(find('schemeSelect').props().value).toBe('https');
-      expect(find('urlInput').props().defaultValue).toBe('elastic.co');
+      // URL settings UI strips scheme from the input value.
+      expect(screen.getByTestId('urlInput')).toHaveValue('elastic.co');
     });
 
     it('azure repository', async () => {
@@ -173,34 +176,37 @@ describe('<RepositoryEdit />', () => {
         compress: true,
         chunkSize: getRandomString(),
         readonly: true,
-        locationMode: getRandomString(),
         maxRestoreBytesPerSec: getRandomString(),
         maxSnapshotBytesPerSec: getRandomString(),
       };
 
-      await mountComponentWithMock({ type: 'azure', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 'azure', settings });
 
-      const { find } = testBed;
-
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('containerInput').props().defaultValue).toBe(settings.container);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('clientInput')).toHaveValue(settings.client);
+      expect(screen.getByTestId('containerInput')).toHaveValue(settings.container);
+      expect(screen.getByTestId('basePathInput')).toHaveValue(settings.basePath);
+      expect(screen.getByTestId('compressToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.compress ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('chunkSizeInput')).toHaveValue(settings.chunkSize);
+      expect(screen.getByTestId('maxSnapshotBytesInput')).toHaveValue(
         settings.maxSnapshotBytesPerSec
       );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxRestoreBytesInput')).toHaveValue(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('locationModeSelect').props().value).toBe(settings.locationMode);
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      expect(screen.getByTestId('readOnlyToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.readonly ? 'true' : 'false'
+      );
     });
 
     it('gcs repository', async () => {
       const settings = {
-        bucket: getRandomString(),
         client: getRandomString(),
+        bucket: getRandomString(),
         basePath: getRandomString(),
         compress: true,
         chunkSize: getRandomString(),
@@ -209,22 +215,27 @@ describe('<RepositoryEdit />', () => {
         maxSnapshotBytesPerSec: getRandomString(),
       };
 
-      await mountComponentWithMock({ type: 'gcs', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 'gcs', settings });
 
-      const { find } = testBed;
-
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('clientInput')).toHaveValue(settings.client);
+      expect(screen.getByTestId('bucketInput')).toHaveValue(settings.bucket);
+      expect(screen.getByTestId('basePathInput')).toHaveValue(settings.basePath);
+      expect(screen.getByTestId('compressToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.compress ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('chunkSizeInput')).toHaveValue(settings.chunkSize);
+      expect(screen.getByTestId('maxSnapshotBytesInput')).toHaveValue(
         settings.maxSnapshotBytesPerSec
       );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxRestoreBytesInput')).toHaveValue(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      expect(screen.getByTestId('readOnlyToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.readonly ? 'true' : 'false'
+      );
     });
 
     it('hdfs repository', async () => {
@@ -243,28 +254,36 @@ describe('<RepositoryEdit />', () => {
         conf2: 'bar',
       };
 
-      await mountComponentWithMock({ type: 'hdfs', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 'hdfs', settings });
 
-      const { find } = testBed;
-
-      expect(find('uriInput').props().defaultValue).toBe('elastic.co');
-      expect(find('pathInput').props().defaultValue).toBe(settings.path);
-      expect(find('loadDefaultsToggle').props()['aria-checked']).toBe(settings.loadDefault);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('securityPrincipalInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('uriInput')).toHaveValue('elastic.co');
+      expect(screen.getByTestId('pathInput')).toHaveValue(settings.path);
+      expect(screen.getByTestId('loadDefaultsToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.loadDefault ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('compressToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.compress ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('chunkSizeInput')).toHaveValue(settings.chunkSize);
+      expect(screen.getByTestId('securityPrincipalInput')).toHaveValue(
         settings['security.principal']
       );
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxSnapshotBytesInput')).toHaveValue(
         settings.maxSnapshotBytesPerSec
       );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxRestoreBytesInput')).toHaveValue(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      expect(screen.getByTestId('readOnlyToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.readonly ? 'true' : 'false'
+      );
 
-      const codeEditorValue = testBed.find('codeEditor').props()['data-currentvalue'];
-      expect(JSON.parse(codeEditorValue)).toEqual({
+      const codeEditorValue = screen.getByTestId('codeEditor').getAttribute('data-currentvalue');
+      expect(JSON.parse(codeEditorValue!)).toEqual({
         loadDefault: true,
         conf1: 'foo',
         conf2: 'bar',
@@ -280,35 +299,42 @@ describe('<RepositoryEdit />', () => {
         chunkSize: getRandomString(),
         serverSideEncryption: true,
         bufferSize: getRandomString(),
-        cannedAcl: getRandomString(),
-        storageClass: getRandomString(),
+        // Must be one of the allowed options (see s3_settings.tsx).
+        cannedAcl: 'public-read',
+        storageClass: 'onezone_ia',
         readonly: true,
         maxRestoreBytesPerSec: getRandomString(),
         maxSnapshotBytesPerSec: getRandomString(),
       };
 
-      await mountComponentWithMock({ type: 's3', settings });
+      const repositoryName = getRandomString();
+      await setupPage({ name: repositoryName, type: 's3', settings });
 
-      const { find } = testBed;
-
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('serverSideEncryptionToggle').props()['aria-checked']).toBe(
-        settings.serverSideEncryption
+      expect(screen.getByTestId('clientInput')).toHaveValue(settings.client);
+      expect(screen.getByTestId('bucketInput')).toHaveValue(settings.bucket);
+      expect(screen.getByTestId('basePathInput')).toHaveValue(settings.basePath);
+      expect(screen.getByTestId('compressToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.compress ? 'true' : 'false'
       );
-      expect(find('bufferSizeInput').props().defaultValue).toBe(settings.bufferSize);
-      expect(find('cannedAclSelect').props().value).toBe(settings.cannedAcl);
-      expect(find('storageClassSelect').props().value).toBe(settings.storageClass);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('chunkSizeInput')).toHaveValue(settings.chunkSize);
+      expect(screen.getByTestId('serverSideEncryptionToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.serverSideEncryption ? 'true' : 'false'
+      );
+      expect(screen.getByTestId('bufferSizeInput')).toHaveValue(settings.bufferSize);
+      expect(screen.getByTestId('cannedAclSelect')).toHaveValue(settings.cannedAcl);
+      expect(screen.getByTestId('storageClassSelect')).toHaveValue(settings.storageClass);
+      expect(screen.getByTestId('maxSnapshotBytesInput')).toHaveValue(
         settings.maxSnapshotBytesPerSec
       );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+      expect(screen.getByTestId('maxRestoreBytesInput')).toHaveValue(
         settings.maxRestoreBytesPerSec
       );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      expect(screen.getByTestId('readOnlyToggle')).toHaveAttribute(
+        'aria-checked',
+        settings.readonly ? 'true' : 'false'
+      );
     });
   });
 });

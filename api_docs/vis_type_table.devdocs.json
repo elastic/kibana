@@ -28,6 +28,8 @@
         "label": "TableVisParams",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "number | \"\""
             ],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,6 +57,8 @@
             "label": "showPartialRows",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -64,6 +70,8 @@
             "label": "showMetricsAtAllLevels",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,6 +83,8 @@
             "label": "showToolbar",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,6 +96,8 @@
             "label": "showTotal",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +118,8 @@
               }
             ],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,6 +131,8 @@
             "label": "percentageCol",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,6 +147,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +163,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -161,6 +181,8 @@
         "label": "AggTypes",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -178,6 +200,8 @@
           "\"table\""
         ],
         "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

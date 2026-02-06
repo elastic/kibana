@@ -35,6 +35,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
               model: this.modelName,
               eventName:
                 siemMigrationEventNames[SiemMigrationsEventTypes.DashboardTranslationSuccess],
+              vendor: this.vendor,
             });
           },
           failure: (error: Error) => {
@@ -45,6 +46,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
               model: this.modelName,
               eventName:
                 siemMigrationEventNames[SiemMigrationsEventTypes.DashboardTranslationFailure],
+              vendor: this.vendor,
             });
           },
         };
@@ -60,6 +62,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
           total: stats.completed + stats.failed,
           duration,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationSuccess],
+          vendor: this.vendor,
         });
       },
       failure: (error: Error) => {
@@ -74,6 +77,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
           duration,
           error: error.message,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
+          vendor: this.vendor,
         });
       },
       aborted: (error: Error) => {
@@ -88,6 +92,7 @@ export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryCli
           duration,
           reason: error.message,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationAborted],
+          vendor: this.vendor,
         });
       },
     };

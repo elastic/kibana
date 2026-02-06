@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: SLO burn rate
+description: >
+  The parameters for the SLO burn rate rule.
+  These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+type: object
 properties:
   sloId:
     description: The SLO identifier used by the rule

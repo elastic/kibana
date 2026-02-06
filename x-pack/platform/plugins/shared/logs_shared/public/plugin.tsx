@@ -17,6 +17,7 @@ import type {
   LogsSharedClientStartDeps,
 } from './types';
 import { createLogEventsRenderer } from './components/log_events';
+
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   private logViews: LogViewsService;
 
@@ -83,7 +84,9 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       };
     }
 
-    const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
+    const LogAIAssistant = createLogAIAssistant({
+      observabilityAIAssistant,
+    });
 
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',
@@ -100,6 +103,21 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
         embeddable: plugins.embeddable,
         searchSource: data.search.searchSource,
       }),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-logs-fetch-document-by-id',
+      fetchLogDocumentById: async (params, signal) => {
+        const { fetchLogDocumentById } = await import('./services/log/fetch_log_document_by_id');
+        return fetchLogDocumentById(
+          {
+            ...params,
+            data,
+            logSourcesService: logsDataAccess.services.logSourcesService,
+          },
+          signal
+        );
+      },
     });
 
     return {

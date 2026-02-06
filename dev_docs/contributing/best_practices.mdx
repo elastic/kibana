@@ -37,7 +37,54 @@ all of our apps are accessible.
 - If you don't use EUI, follow the same EUI accessibility standards
 
 <DocCallOut title="Internal only">
-  Elasticians, check out the #accessibility channel to ask questions and receive guidance.
+  ## Accessibility automation in Kibana
+
+  Kibana maintains accessibility quality using a layered, hybrid approach:
+
+  ### 1. Code‑level checks
+  - **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
+  - **Enforces:** Correct ARIA usage, required labels, prohibited patterns, and safer EUI practices
+  - **Action:** Resolve all warnings before committing (treat warnings as blockers)
+
+  ### 2. Render‑level checks
+  - **CI tooling:** running `axe-core` check in `FTR`, `Scout` and `Cypress` tests.
+  - **Enforces:** Semantics, landmarks, contrast, focus order, interaction patterns. 
+  - **Note:** All tests are based on the common configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
+
+  - **Usage:**
+    - **FTR a11y tests** (tests must be placed in the `test/accessibility` folder):
+      ```ts
+      const a11y = getService('a11y');
+      ...
+      it('has no detectable a11y violations on load', async () => {
+        await common.navigateToApp('dashboard');
+        await a11y.testAppSnapshot();
+      });
+      ```
+
+    - **Scout** using `page.checkA11y`. Run an accessibility check on a specific root element:
+      ```ts
+      test('has no detectable a11y violations', async ({ page }) => {
+        const { violations } = await page.checkA11y({ include: ['{CSS selector of root element you are testing}'] });
+        expect(violations).toHaveLength(0);
+      });
+      ```
+
+    - **Cypress** using `cy.checkA11y`. A custom Cypress command is available to run accessibility checks:
+      ```ts
+      it('has no detectable a11y violations on load', () => {
+        cy.checkA11y();
+      });
+      ```
+  - **Action:** Improve coverage — add or extend tests while developing features.
+
+  ### 3. Ready check (execute before commit)
+  - Favor EUI components and honor their accessibility playbook
+  - Zero tolerance for a11y ESLint warnings
+  - No new axe violations in updated components — keep it clean
+  - VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose
+
+  For help: join `#accessibility` slack channel.
 </DocCallOut>
 
 ## Localization

@@ -99,6 +99,10 @@ export interface CloudStart extends CloudBasicUrls {
    */
   getUrls: () => CloudBasicUrls;
   /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -244,6 +248,10 @@ export interface CloudSetup extends CloudBasicUrls {
      */
     organizationInTrial?: boolean;
   };
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
 }
 
 export interface PublicElasticsearchConfigType {

@@ -8,7 +8,7 @@
  */
 
 import { fromPercentileAPItoLensState, fromPercentileLensStateToAPI } from './percentile';
-import type { PercentileIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiPercentileOperation } from '../../schema/metric_ops';
 import { LENS_PERCENTILE_DEFAULT_VALUE } from '../../schema/constants';
 

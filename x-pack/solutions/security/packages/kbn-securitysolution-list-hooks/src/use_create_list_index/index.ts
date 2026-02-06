@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 
 import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { createListIndex } from '@kbn/securitysolution-list-api';

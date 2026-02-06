@@ -13,7 +13,6 @@ import {
   EuiPageTemplate,
   EuiSelect,
   EuiTitle,
-  useEuiTheme,
   type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectPageModeChange,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
-  const { euiTheme } = useEuiTheme();
   const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
     {
       id: PlaygroundViewMode.preview,
@@ -68,12 +66,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <EuiPageTemplate.Header
-      css={{
+      css={({ euiTheme }) => ({
         '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
         backgroundColor: euiTheme.colors.emptyShade,
-      }}
-      paddingSize="s"
+      })}
       data-test-subj="chat-playground-home-page"
+      paddingSize="s"
     >
       <EuiPageHeaderSection>
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -98,6 +96,9 @@ export const Header: React.FC<HeaderProps> = ({
                 { value: PlaygroundPageMode.Search, text: 'Search' },
               ]}
               value={pageMode}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
@@ -114,7 +115,11 @@ export const Header: React.FC<HeaderProps> = ({
           data-test-subj="viewModeSelector"
         />
       </EuiPageHeaderSection>
-      <EuiPageHeaderSection>
+      <EuiPageHeaderSection
+        css={({ euiTheme }) => ({
+          paddingRight: euiTheme.size.s,
+        })}
+      >
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
           <Toolbar selectedPageMode={pageMode} />

@@ -15,6 +15,7 @@ import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 import type { SidebarToggleState } from '../../application/types';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { internalStateActions } from '../../application/main/state_management/redux';
 
 describe('Panels toggle component', () => {
   const mountComponent = ({
@@ -24,14 +25,14 @@ describe('Panels toggle component', () => {
     hideChart,
   }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.appState.set({
-      hideChart,
-    });
+
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setAppState)({ appState: { hideChart } })
+    );
 
     return mountWithIntl(
       <DiscoverTestProvider stateContainer={stateContainer}>
         <PanelsToggle
-          stateContainer={stateContainer}
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}

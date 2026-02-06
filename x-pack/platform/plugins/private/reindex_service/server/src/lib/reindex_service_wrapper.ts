@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { i18n } from '@kbn/i18n';
@@ -64,6 +65,8 @@ export interface ReindexServiceWrapperConstructorArgs {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   version: Version;
+  rollupsEnabled: boolean;
+  isServerless: boolean;
 }
 
 export class ReindexServiceWrapper {
@@ -75,6 +78,8 @@ export class ReindexServiceWrapper {
     security: SecurityPluginStart;
     soClient: SavedObjectsClientContract;
     version: Version;
+    rollupsEnabled: boolean;
+    isServerless: boolean;
   };
 
   constructor({
@@ -85,6 +90,8 @@ export class ReindexServiceWrapper {
     licensing,
     security,
     version,
+    rollupsEnabled,
+    isServerless,
   }: ReindexServiceWrapperConstructorArgs) {
     this.deps = {
       credentialStore,
@@ -93,6 +100,8 @@ export class ReindexServiceWrapper {
       security,
       soClient,
       version,
+      rollupsEnabled,
+      isServerless,
     };
 
     this.reindexWorker = ReindexWorker.create(
@@ -102,7 +111,9 @@ export class ReindexServiceWrapper {
       logger,
       licensing,
       security,
-      version
+      version,
+      rollupsEnabled,
+      isServerless
     );
 
     this.reindexWorker.start();
@@ -122,14 +133,17 @@ export class ReindexServiceWrapper {
     const reindexActions = reindexActionsFactory(
       this.deps.soClient,
       callAsCurrentUser,
-      this.deps.logger
+      this.deps.logger,
+      getRollupJobByIndexName,
+      this.deps.rollupsEnabled
     );
     const reindexService = reindexServiceFactory(
       callAsCurrentUser,
       reindexActions,
       this.deps.logger,
       this.deps.licensing,
-      this.deps.version
+      this.deps.version,
+      this.deps.isServerless
     );
 
     const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {

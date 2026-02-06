@@ -23,6 +23,7 @@ import { isPackageInstalled } from './epm/packages/install';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { outputService } from './output';
 
 jest.mock('./app_context');
 jest.mock('./preconfiguration');
@@ -37,6 +38,7 @@ jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./setup/managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
+jest.mock('./setup/ensure_fleet_global_es_assets');
 jest.mock('./setup/update_deprecated_component_templates');
 jest.mock('./epm/elasticsearch/template/install', () => {
   return {
@@ -102,6 +104,9 @@ describe('setupFleet', () => {
     (upgradeAgentPolicySchemaVersion as jest.Mock).mockResolvedValue(undefined);
     (createCCSIndexPatterns as jest.Mock).mockResolvedValue(undefined);
     (getSpaceAwareSaveobjectsClients as jest.Mock).mockReturnValue({});
+    (outputService.ensureDefaultOutput as jest.Mock).mockResolvedValue({
+      defaultOutput: { id: 'test-default-output', name: 'test' },
+    });
   });
 
   afterEach(async () => {
@@ -139,6 +144,14 @@ describe('setupFleet', () => {
       isInitialized: true,
       nonFatalErrors: [],
     });
+  });
+
+  it('should call ensureDefaultOutputs during setup', async () => {
+    const soClient = getMockedSoClient();
+
+    await setupFleet(soClient, esClient);
+
+    expect(outputService.ensureDefaultOutput).toHaveBeenCalledWith(soClient, esClient);
   });
 
   it('should return non fatal errors when generateKeyPair result has errors', async () => {

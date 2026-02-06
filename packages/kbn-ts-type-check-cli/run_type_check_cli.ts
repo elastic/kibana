@@ -9,26 +9,29 @@
 
 import Path from 'path';
 import Fsp from 'fs/promises';
-
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
+import execa from 'execa';
 
-import {
-  updateRootRefsConfig,
-  cleanupRootRefsConfig,
-  ROOT_REFS_CONFIG_PATH,
-} from './root_refs_config';
+import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
+import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
+import { LOCAL_CACHE_ROOT } from './src/archive/constants';
+import { isCiEnvironment } from './src/archive/utils';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
   return path.startsWith('.') ? path : `./${path}`;
 };
 
-async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
+async function createTypeCheckConfigs(
+  log: SomeDevLog,
+  projects: TsProject[],
+  allProjects: TsProject[]
+) {
   const writes: Array<[path: string, content: string]> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
@@ -52,7 +55,7 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
       },
       kbn_references: undefined,
-      references: project.getKbnRefs(TS_PROJECTS).map((refd) => {
+      references: project.getKbnRefs(allProjects).map((refd) => {
         queue.add(refd);
 
         return {
@@ -84,21 +87,51 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
   );
 }
 
+async function detectLocalChanges(): Promise<boolean> {
+  const { stdout } = await execa('git', ['status', '--porcelain'], {
+    cwd: REPO_ROOT,
+  });
+
+  return stdout.trim().length > 0;
+}
+
 run(
   async ({ log, flagsReader, procRunner }) => {
-    if (flagsReader.boolean('clean-cache')) {
+    // Lazy-load so --help can run before TS project metadata is available.
+    const { TS_PROJECTS } = await import('@kbn/ts-projects');
+    const shouldCleanCache = flagsReader.boolean('clean-cache');
+    const shouldUseArchive = flagsReader.boolean('with-archive');
+
+    if (shouldCleanCache) {
       await asyncForEachWithLimit(TS_PROJECTS, 10, async (proj) => {
         await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {
           force: true,
           recursive: true,
         });
       });
-      log.warning('Deleted all typescript caches');
+      await Fsp.rm(LOCAL_CACHE_ROOT, {
+        force: true,
+        recursive: true,
+      });
+      log.warning('Deleted all TypeScript caches');
+      return;
     }
+
+    const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import(
+      './root_refs_config'
+    );
 
     // if the tsconfig.refs.json file is not self-managed then make sure it has
     // a reference to every composite project in the repo
     await updateRootRefsConfig(log);
+
+    if (shouldUseArchive && !shouldCleanCache) {
+      await restoreTSBuildArtifacts(log);
+    } else if (shouldCleanCache && shouldUseArchive) {
+      log.info('Skipping TypeScript cache restore because --clean-cache was provided.');
+    } else {
+      log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
+    }
 
     const projectFilter = flagsReader.path('project');
 
@@ -106,9 +139,9 @@ run(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
     );
 
-    const created = await createTypeCheckConfigs(log, projects);
+    const created = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
 
-    let pluginBuildResult;
+    let didTypeCheckFail = false;
     try {
       log.info(
         `Building TypeScript projects to check types (For visible, though excessive, progress info you can pass --verbose)`
@@ -126,6 +159,7 @@ run(
           relative,
           '--pretty',
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
+          ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
         ],
         env: {
           NODE_OPTIONS: '--max-old-space-size=10240',
@@ -133,10 +167,26 @@ run(
         cwd: REPO_ROOT,
         wait: true,
       });
-
-      pluginBuildResult = { failed: false };
     } catch (error) {
-      pluginBuildResult = { failed: true };
+      didTypeCheckFail = true;
+    }
+
+    const hasLocalChanges = shouldUseArchive ? await detectLocalChanges() : false;
+
+    if (shouldUseArchive) {
+      if (hasLocalChanges) {
+        const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.`;
+
+        if (isCiEnvironment()) {
+          throw new Error(`Canceling TypeScript cache archive because ${message}`);
+        }
+
+        log.info(`Skipping TypeScript cache archive because ${message}`);
+      } else {
+        await archiveTSBuildArtifacts(log);
+      }
+    } else {
+      log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
     }
 
     // cleanup if requested
@@ -149,7 +199,7 @@ run(
       });
     }
 
-    if (pluginBuildResult.failed) {
+    if (didTypeCheckFail) {
       throw createFailError('Unable to build TS project refs');
     }
   },
@@ -166,7 +216,7 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: ['clean-cache', 'cleanup'],
+      boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -175,6 +225,8 @@ run(
                                   files in place makes subsequent executions faster because ts can
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
+        --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
+        --with-archive          Restore cached artifacts before running and archive results afterwards
       `,
     },
   }

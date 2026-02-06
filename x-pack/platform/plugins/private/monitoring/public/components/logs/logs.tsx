@@ -192,7 +192,13 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     }
 
     return (
-      <EuiBasicTable items={logs || []} columns={nodeId || indexUuid ? columns : clusterColumns} />
+      <EuiBasicTable
+        items={logs || []}
+        columns={nodeId || indexUuid ? columns : clusterColumns}
+        tableCaption={i18n.translate('xpack.monitoring.logs.listing.tableCaption', {
+          defaultMessage: 'Recent log entries',
+        })}
+      />
     );
   }
 
@@ -227,6 +233,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
 
     return discoverLink ? (
       <EuiCallOut
+        announceOnMount
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
           defaultMessage: 'Want to see more log entries?',

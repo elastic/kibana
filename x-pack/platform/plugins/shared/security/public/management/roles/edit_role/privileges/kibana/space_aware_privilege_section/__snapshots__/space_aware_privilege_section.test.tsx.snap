@@ -2,6 +2,7 @@
 
 exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
 <EuiCallOut
+  announceOnMount={true}
   color="danger"
   data-test-subj="userCannotManageSpacesCallout"
   iconType="warning"

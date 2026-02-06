@@ -20,7 +20,7 @@ import {
   type SavedObjectsServiceSetup,
   type StartServicesAccessor,
 } from '@kbn/core/server';
-import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+import { errorContent } from '@kbn/core-saved-objects-server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,

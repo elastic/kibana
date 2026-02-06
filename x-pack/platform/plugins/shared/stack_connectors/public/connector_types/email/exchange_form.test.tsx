@@ -11,11 +11,12 @@ import ExchangeFormFields from './exchange_form';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('ExchangeFormFields renders', () => {
-  const actionConnector = {
+  const actionConnector = createMockActionConnector({
     secrets: {
       clientSecret: 'secret',
     },
@@ -29,7 +30,7 @@ describe('ExchangeFormFields renders', () => {
       tenantId: 'tenant-id',
       clientId: 'clientId-id',
     },
-  };
+  });
 
   test('should display exchange form fields', () => {
     const wrapper = mountWithIntl(

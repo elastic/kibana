@@ -6,53 +6,20 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import SlackParamsFields from './slack_params';
-import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AppMockRenderer } from '../lib/test_utils';
+import { createAppMockRenderer } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
-
-interface Result {
-  isLoading: boolean;
-  response: Record<string, unknown>;
-  error: null | Error;
-}
 
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 
-const mockUseValidChanelId = jest.fn().mockImplementation(() => ({
-  isLoading: false,
-  response: {
-    channel: {
-      id: 'id',
-      name: 'general',
-      is_channel: true,
-      is_archived: false,
-      is_private: true,
-    },
-  },
-  error: null,
-}));
-const testBlock = {
-  blocks: [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
-      },
-    },
-  ],
-};
-const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseValidChanelId);
-
 const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
+
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
     ...original,
-    useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
       services: {
@@ -62,439 +29,520 @@ jest.mock(triggersActionsPath, () => {
   };
 });
 
-describe('SlackParamsFields renders', () => {
+describe('SlackParamsFields', () => {
+  const actionConnector = {
+    secrets: {},
+    config: {},
+    id: 'test',
+    actionTypeId: '.slack_api',
+    name: 'slack',
+    isDeprecated: false,
+    isPreconfigured: false as const,
+    isSystemAction: false,
+    isConnectorTypeDeprecated: false,
+  };
+
+  const actionConnectorWithAllowedList = {
+    ...actionConnector,
+    id: 'test-2',
+    config: { allowedChannels: [{ name: '#test' }, { name: '#general' }] },
+  };
+
+  const actionParams = {
+    subAction: 'postMessage' as const,
+    subActionParams: {
+      channels: ['my-channel'],
+      channelIds: ['my-channel-id'],
+      channelNames: ['my-channel-name'],
+      text: 'a new slack message',
+    },
+  };
+
+  const testBlock = JSON.stringify({
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: 'Some **text**',
+        },
+      },
+    ],
+  });
+
+  const editAction = jest.fn();
+  let appMockRenderer: AppMockRenderer;
+
   beforeEach(() => {
-    mockUseSubAction.mockClear();
-    mockUseValidChanelId.mockClear();
-    mockUseValidChanelId.mockImplementation(() => ({
-      isLoading: false,
-      response: {
-        channel: {
-          id: 'id',
-          name: 'general',
-          is_channel: true,
-          is_archived: false,
-          is_private: true,
-        },
-      },
-      error: null,
-    }));
-  });
-  test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
-    const editAction = jest.fn();
-    const { rerender } = render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={editAction}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-          useDefaultMessage={true}
-        />
-      </IntlProvider>
-    );
-    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
-    rerender(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={editAction}
-          index={0}
-          defaultMessage="some different default message"
-          messageVariables={[]}
-          useDefaultMessage={true}
-        />
-      </IntlProvider>
-    );
-    expect(editAction).toHaveBeenCalledWith(
-      'subActionParams',
-      { channels: ['general'], channelIds: [], text: 'some different default message' },
-      0
-    );
+    appMockRenderer = createAppMockRenderer();
   });
 
-  test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed, Web API', () => {
-    const editAction = jest.fn();
-    const { rerender } = render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={editAction}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-          useDefaultMessage={false}
-        />
-      </IntlProvider>
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('changing connector resets the fields', async () => {
+    const { rerender } = appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+      />
     );
+
     expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
+
+    await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+    await userEvent.paste('a slack message');
 
     rerender(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={editAction}
-          index={0}
-          defaultMessage="some different default message"
-          messageVariables={[]}
-          useDefaultMessage={false}
-        />
-      </IntlProvider>
-    );
-    expect(editAction).not.toHaveBeenCalled();
-  });
-
-  test('default to text field when no existing subaction params', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{}}
-          errors={{ message: [] }}
-          editAction={() => {}}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnectorWithAllowedList}
+      />
     );
 
-    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
     expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('');
+
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        { channels: [], channelIds: [], channelNames: [], text: undefined },
+        0
+      );
+    });
   });
 
-  test('correctly renders params fields for postMessage subaction', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionConnector={
-            {
-              id: 'connector-id',
-              actionTypeId: '.slack_api',
-              config: {},
-            } as ActionConnector
-          }
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={() => {}}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
+  it('changing the index resets the fields', async () => {
+    const { rerender } = appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+      />
     );
 
-    expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
     expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
-  });
 
-  test('correctly renders params fields for postBlockkit subaction', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionConnector={
-            {
-              id: 'connector-id',
-              actionTypeId: '.slack_api',
-              config: {},
-            } as ActionConnector
-          }
-          actionParams={{
-            subAction: 'postBlockkit',
-            subActionParams: { channels: ['general'], text: JSON.stringify(testBlock) },
-          }}
-          errors={{ message: [] }}
-          editAction={() => {}}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
+    await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+    await userEvent.paste('a slack message');
+
+    rerender(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={1}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+      />
     );
 
-    expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
-    expect(screen.getByTestId('webApiBlock')).toBeInTheDocument();
-  });
-
-  test('should toggle subaction when button group clicked', async () => {
-    const mockEditFunc = jest.fn();
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionConnector={
-            {
-              id: 'connector-id',
-              actionTypeId: '.slack_api',
-              config: {},
-            } as ActionConnector
-          }
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={mockEditFunc}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
-    );
-
-    getByTestId('blockkit').click();
-    expect(mockEditFunc).toBeCalledWith('subAction', 'postBlockkit', 0);
-
-    getByTestId('text').click();
-    expect(mockEditFunc).toBeCalledWith('subAction', 'postMessage', 0);
-  });
-
-  test('show the Channel label when using the old attribute "channels" in subActionParams', async () => {
-    const mockEditFunc = jest.fn();
-    const WrappedComponent = () => {
-      return (
-        <IntlProvider locale="en">
-          <SlackParamsFields
-            actionParams={{
-              subAction: 'postMessage',
-              subActionParams: { channels: ['old channel name'], text: 'some text' },
-            }}
-            actionConnector={
-              {
-                id: 'connector-id',
-                config: {},
-              } as ActionConnector
-            }
-            errors={{ message: [] }}
-            editAction={mockEditFunc}
-            index={0}
-            defaultMessage="default message"
-            messageVariables={[]}
-          />
-        </IntlProvider>
-      );
-    };
-    const { getByTestId } = render(<WrappedComponent />);
-
-    expect(screen.findByText('Channel')).toBeTruthy();
-    expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
-    expect(getByTestId('slackApiChannelId')).toHaveValue('old channel name');
-  });
-
-  test('show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
-    const mockEditFunc = jest.fn();
-    const WrappedComponent: React.FunctionComponent = () => {
-      return (
-        <IntlProvider locale="en">
-          <SlackParamsFields
-            actionParams={{
-              subAction: 'postMessage',
-              subActionParams: { channelIds: ['channel-id-xxx'], text: 'some text' },
-            }}
-            actionConnector={
-              {
-                id: 'connector-id',
-                config: {},
-              } as ActionConnector
-            }
-            errors={{ message: [] }}
-            editAction={mockEditFunc}
-            index={0}
-            defaultMessage="default message"
-            messageVariables={[]}
-          />
-        </IntlProvider>
-      );
-    };
-    const { getByTestId } = render(<WrappedComponent />);
-
-    expect(screen.findByText('Channel ID')).toBeTruthy();
-    expect(screen.getByTestId('slackApiChannelId')).toBeInTheDocument();
-    expect(getByTestId('slackApiChannelId')).toHaveValue('channel-id-xxx');
-  });
-
-  test('channel id in subActionParams should be validated', async () => {
-    const mockEditFunc = jest.fn();
-    mockUseValidChanelId.mockImplementation(() => ({
-      isLoading: false,
-      response: {
-        channel: {
-          id: 'new-channel-id',
-          name: 'new channel id',
-          is_channel: true,
-          is_archived: false,
-          is_private: true,
-        },
-      },
-      error: null,
-    }));
-    const WrappedComponent = () => {
-      return (
-        <IntlProvider locale="en">
-          <SlackParamsFields
-            actionParams={{
-              subAction: 'postMessage',
-              subActionParams: { channelIds: ['new-channel-id'], text: 'some text' },
-            }}
-            actionConnector={
-              {
-                id: 'connector-id',
-                config: {},
-              } as ActionConnector
-            }
-            errors={{ message: [] }}
-            editAction={mockEditFunc}
-            index={0}
-            defaultMessage="default message"
-            messageVariables={[]}
-          />
-        </IntlProvider>
-      );
-    };
-    const { getByTestId } = render(<WrappedComponent />);
-
-    getByTestId('slackApiChannelId').click();
-    await userEvent.clear(getByTestId('slackApiChannelId'));
-    fireEvent.change(getByTestId('slackApiChannelId'), {
-      target: { value: 'new-channel-id' },
-    });
-    await userEvent.tab();
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('');
 
     await waitFor(() => {
-      expect(mockEditFunc).toBeCalledWith(
+      expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { channelIds: ['new-channel-id'], channels: undefined, text: 'some text' },
+        { channels: [], channelIds: [], channelNames: [], text: undefined },
         0
       );
-      expect(mockUseSubAction).toBeCalledWith({
-        connectorId: 'connector-id',
-        disabled: false,
-        subAction: 'validChannelId',
-        subActionParams: {
-          channelId: 'new-channel-id',
-        },
-      });
     });
   });
 
-  test('channel id work with combobox when allowedChannels pass in the config attributes', async () => {
-    const mockEditFunc = jest.fn();
-    const WrappedComponent = () => {
-      return (
-        <IntlProvider locale="en">
-          <SlackParamsFields
-            actionParams={{
-              subAction: 'postMessage',
-              subActionParams: { channelIds: ['channel-id-1'], text: 'some text' },
-            }}
-            actionConnector={
-              {
-                id: 'connector-id',
-                config: {
-                  allowedChannels: [
-                    {
-                      id: 'channel-id-1',
-                      name: 'channel 1',
-                    },
-                    {
-                      id: 'channel-id-2',
-                      name: 'channel 2',
-                    },
-                    {
-                      id: 'channel-id-3',
-                      name: 'channel 3',
-                    },
-                  ],
-                },
-              } as unknown as ActionConnector
-            }
-            errors={{ message: [] }}
-            editAction={mockEditFunc}
-            index={0}
-            defaultMessage="default message"
-            messageVariables={[]}
-          />
-        </IntlProvider>
-      );
-    };
-    const { getByTestId } = render(<WrappedComponent />);
+  it('changing the connector resets the fields to the new params', async () => {
+    const { rerender } = appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+      />
+    );
 
-    expect(screen.findByText('Channel ID')).toBeTruthy();
-    expect(getByTestId('slackChannelsComboBox')).toBeInTheDocument();
-    expect(getByTestId('slackChannelsComboBox').textContent).toBe('channel-id-1 - channel 1');
+    expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
 
-    act(() => {
-      const combobox = getByTestId('slackChannelsComboBox');
-      const inputCombobox = within(combobox).getByTestId('comboBoxSearchInput');
-      inputCombobox.click();
-    });
+    await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+    await userEvent.paste('a slack message');
+
+    rerender(
+      <SlackParamsFields
+        actionParams={actionParams}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnectorWithAllowedList}
+      />
+    );
+
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('a new slack message');
 
     await waitFor(() => {
-      // const popOverElement = within(baseElement).getByTestId('slackChannelsComboBox-optionsList');
-      expect(screen.getByTestId('channel-id-1')).toBeInTheDocument();
-      expect(screen.getByTestId('channel-id-2')).toBeInTheDocument();
-      expect(screen.getByTestId('channel-id-3')).toBeInTheDocument();
+      expect(editAction).toHaveBeenCalledWith('subActionParams', actionParams.subActionParams, 0);
     });
+  });
 
-    act(() => {
-      screen.getByTestId('channel-id-3').click();
-    });
+  it('uses the default value if the text is not defined', async () => {
+    appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+        defaultMessage="my default message"
+      />
+    );
+
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('my default message');
 
     await waitFor(() => {
-      expect(
-        within(getByTestId('slackChannelsComboBox')).getByText('channel-id-3 - channel 3')
-      ).toBeInTheDocument();
-      expect(mockEditFunc).toBeCalledWith(
+      expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { channelIds: ['channel-id-3'], channels: undefined, text: 'some text' },
+        { channels: [], channelIds: [], channelNames: [], text: 'my default message' },
         0
       );
-      expect(mockUseSubAction).toBeCalledWith({
-        connectorId: 'connector-id',
-        disabled: false,
-        subAction: 'validChannelId',
-        subActionParams: { channelId: '' },
-      });
     });
   });
 
-  test('show error message when no channel is selected', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: [], text: 'some text' },
-          }}
-          errors={{ message: [], channels: ['my error message'] }}
-          editAction={() => {}}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
+  it('does not uses the default value if text is defined', async () => {
+    appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={actionParams}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+        useDefaultMessage={true}
+        defaultMessage="my default message"
+      />
     );
-    expect(screen.getByText('my error message')).toBeInTheDocument();
+
+    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('a new slack message');
+
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith('subActionParams', actionParams.subActionParams, 0);
+    });
+  });
+
+  it('sets the inital values on first render correctly', async () => {
+    appMockRenderer.render(
+      <SlackParamsFields
+        actionParams={{}}
+        editAction={editAction}
+        index={0}
+        errors={{ message: [] }}
+        actionConnector={actionConnector}
+      />
+    );
+
+    await waitFor(() => {
+      expect(editAction).toHaveBeenCalledWith('subAction', 'postMessage', 0);
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        { channels: [], channelIds: [], channelNames: [], text: undefined },
+        0
+      );
+    });
+  });
+
+  describe('new params', () => {
+    const params = {};
+
+    it('renders the initial fields correctly', () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+      expect(screen.getByTestId('slackChannelsComboBox')).toBeInTheDocument();
+      expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+    });
+
+    it('changes the message type correctly', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Block Kit'));
+
+      expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+    });
+
+    it('fill out all params (text) and submits correctly', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+      await userEvent.paste('a slack message');
+
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith('subAction', 'postMessage', 0);
+        expect(editAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { channels: [], channelIds: [], channelNames: [], text: 'a slack message' },
+          0
+        );
+      });
+    });
+
+    it('fill out all params (blockKit) and submits correctly', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByText('Block Kit'));
+      expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('webApiBlockJsonEditor'));
+      await userEvent.paste(testBlock);
+
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
+        expect(editAction).toHaveBeenCalledWith(
+          'subActionParams',
+          { channels: [], channelIds: [], channelNames: [], text: testBlock },
+          0
+        );
+      });
+    });
+
+    it('resets the textarea when changing tabs', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+      await userEvent.paste('a slack message');
+
+      await userEvent.click(screen.getByText('Block Kit'));
+      expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Text'));
+      expect(await screen.findByTestId('webApiTextTextArea')).toHaveValue('');
+
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith('subAction', 'postMessage', 0);
+      });
+    });
+
+    it('changes the subAction correctly when changing tabs', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByTestId('slackMessageTypeChangeButton')).toBeInTheDocument();
+      await userEvent.click(screen.getByText('Block Kit'));
+      expect(await screen.findByTestId('webApiBlock')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith('subAction', 'postBlockkit', 0);
+      });
+    });
+
+    it('can set any channel when the allowlist is empty', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#my-channel{enter}');
+
+      await waitFor(() => {
+        expect(editAction).toHaveBeenCalledWith(
+          'subActionParams',
+          {
+            channels: undefined,
+            channelIds: undefined,
+            channelNames: ['#my-channel'],
+            text: undefined,
+          },
+          0
+        );
+      });
+    });
+
+    it('cannot set channels not in the allow list', async () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ message: [] }}
+          actionConnector={actionConnectorWithAllowedList}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#my-channel{enter}');
+
+      expect(await screen.findByText(`doesn't match any options`)).toBeInTheDocument();
+    });
+  });
+
+  describe('editing params', () => {
+    const actionParamsWithChannels = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['my-channel'] },
+    };
+
+    const actionParamsWithChannelsIds = {
+      subAction: 'postMessage',
+      subActionParams: { channelIds: ['my-channel-id'] },
+    };
+
+    const actionParamsWithChannelNames = {
+      subAction: 'postMessage',
+      subActionParams: { channelNames: ['my-channel-name'] },
+    };
+
+    const tests: [string, Record<string, unknown>, string][] = [
+      ['channels', actionParamsWithChannels, 'my-channel'],
+      ['channelIds', actionParamsWithChannelsIds, 'my-channel-id'],
+      ['channelNames', actionParamsWithChannelNames, 'my-channel-name'],
+    ];
+
+    it.each(tests)(
+      'renders the initial fields correctly %s',
+      async (_, params, expectedChannel) => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={params}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+        expect(await screen.findByText(expectedChannel)).toBeInTheDocument();
+      }
+    );
+
+    it.each(tests)(
+      'changes to channelNames when editing the channels for %s',
+      async (_, params, expectedChannel) => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={params}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+
+        expect(await screen.findByText(expectedChannel)).toBeInTheDocument();
+
+        await userEvent.click(screen.getByTestId('comboBoxClearButton'));
+        await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+        await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#my-channel{enter}');
+
+        await waitFor(() => {
+          expect(editAction).toHaveBeenCalledWith(
+            'subActionParams',
+            {
+              channels: undefined,
+              channelIds: undefined,
+              channelNames: ['#my-channel'],
+              text: undefined,
+            },
+            0
+          );
+        });
+      }
+    );
+
+    it.each(tests)(
+      'does not change the %s when editing the text field',
+      async (key, params, expectedChannel) => {
+        appMockRenderer.render(
+          <SlackParamsFields
+            actionParams={params}
+            editAction={editAction}
+            index={0}
+            errors={{ message: [] }}
+            actionConnector={actionConnector}
+          />
+        );
+
+        expect(await screen.findByText(expectedChannel)).toBeInTheDocument();
+
+        await userEvent.click(screen.getByTestId('webApiTextTextArea'));
+        await userEvent.paste('a slack message');
+
+        await waitFor(() => {
+          expect(editAction).toHaveBeenCalledWith(
+            'subActionParams',
+            {
+              channels: [],
+              channelIds: [],
+              channelNames: [],
+              /**
+               * The value below will overwrite one of the values above.
+               * For each test a different value will be overwritten.
+               */
+              [key]: [expectedChannel],
+              text: 'a slack message',
+            },
+            0
+          );
+        });
+      }
+    );
   });
 });

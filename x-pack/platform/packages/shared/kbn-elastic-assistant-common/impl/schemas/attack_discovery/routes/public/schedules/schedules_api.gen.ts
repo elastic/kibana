@@ -136,19 +136,40 @@ export const AttackDiscoveryApiScheduleActionFrequency = z.object({
   throttle: AttackDiscoveryApiScheduleActionThrottle.nullable(),
 });
 
-export type AttackDiscoveryApiScheduleAction = z.infer<typeof AttackDiscoveryApiScheduleAction>;
-export const AttackDiscoveryApiScheduleAction = z.object({
+export type AttackDiscoveryApiScheduleGeneralAction = z.infer<
+  typeof AttackDiscoveryApiScheduleGeneralAction
+>;
+export const AttackDiscoveryApiScheduleGeneralAction = z.object({
   /**
    * The action type used for sending notifications.
    */
   action_type_id: z.string(),
-  group: AttackDiscoveryApiScheduleActionGroup.optional(),
+  group: AttackDiscoveryApiScheduleActionGroup,
   id: AttackDiscoveryApiScheduleActionId,
   params: AttackDiscoveryApiScheduleActionParams,
   uuid: NonEmptyString.optional(),
   alerts_filter: AttackDiscoveryApiScheduleActionAlertsFilter.optional(),
   frequency: AttackDiscoveryApiScheduleActionFrequency.optional(),
 });
+
+export type AttackDiscoveryApiScheduleSystemAction = z.infer<
+  typeof AttackDiscoveryApiScheduleSystemAction
+>;
+export const AttackDiscoveryApiScheduleSystemAction = z.object({
+  /**
+   * The action type used for sending notifications.
+   */
+  action_type_id: z.string(),
+  id: AttackDiscoveryApiScheduleActionId,
+  params: AttackDiscoveryApiScheduleActionParams,
+  uuid: NonEmptyString.optional(),
+});
+
+export type AttackDiscoveryApiScheduleAction = z.infer<typeof AttackDiscoveryApiScheduleAction>;
+export const AttackDiscoveryApiScheduleAction = z.union([
+  AttackDiscoveryApiScheduleGeneralAction,
+  AttackDiscoveryApiScheduleSystemAction,
+]);
 
 /**
  * An attack discovery schedule execution status

@@ -8,9 +8,8 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 import { createChartInfoApi } from './chart_info_api';
-import { LENS_ITEM_LATEST_VERSION } from '../common/constants';
-import type { LensDocument } from './persistence';
-import type { DatasourceMap, VisualizationMap } from './types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { LensDocument, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 
 const mockGetVisualizationInfo = jest.fn().mockReturnValue({
   layers: [
@@ -47,7 +46,7 @@ describe('createChartInfoApi', () => {
         },
       } as unknown as VisualizationMap,
       {
-        from_based: {
+        formBased: {
           getDatasourceInfo: mockGetDatasourceInfo,
         },
       } as unknown as DatasourceMap
@@ -57,7 +56,7 @@ describe('createChartInfoApi', () => {
       visualizationType: 'lnsXY',
       state: {
         datasourceStates: {
-          from_based: {},
+          formBased: {},
         },
         visualization: {},
         filters: [],

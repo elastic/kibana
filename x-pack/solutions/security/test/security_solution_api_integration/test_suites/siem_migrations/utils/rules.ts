@@ -25,23 +25,30 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
+  SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH,
+  SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type {
-  CreateRuleMigrationRequestBody,
-  CreateRuleMigrationResponse,
-  GetAllStatsRuleMigrationResponse,
-  GetRuleMigrationIntegrationsResponse,
-  GetRuleMigrationPrebuiltRulesResponse,
-  GetRuleMigrationResponse,
-  GetRuleMigrationRulesRequestQuery,
-  GetRuleMigrationRulesResponse,
-  GetRuleMigrationStatsResponse,
-  InstallMigrationRulesResponse,
-  StartRuleMigrationRequestBody,
-  StartRuleMigrationResponse,
-  StopRuleMigrationResponse,
-  UpdateRuleMigrationRequestBody,
-  UpdateRuleMigrationRulesResponse,
+  CreateQRadarRuleMigrationRulesRequestBody,
+  RuleMigrationEnhanceRuleResponse,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  type CreateRuleMigrationRequestBody,
+  type CreateRuleMigrationResponse,
+  type RuleMigrationEnhanceRuleRequestBodyInput,
+  type GetAllStatsRuleMigrationResponse,
+  type GetRuleMigrationIntegrationsResponse,
+  type GetRuleMigrationPrebuiltRulesResponse,
+  type GetRuleMigrationResponse,
+  type GetRuleMigrationRulesRequestQuery,
+  type GetRuleMigrationRulesResponse,
+  type GetRuleMigrationStatsResponse,
+  type InstallMigrationRulesResponse,
+  type StartRuleMigrationRequestBody,
+  type StartRuleMigrationResponse,
+  type StopRuleMigrationResponse,
+  type UpdateRuleMigrationRequestBody,
+  type UpdateRuleMigrationRulesResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
@@ -74,6 +81,12 @@ export interface CreateRuleMigrationRulesParams extends RequestParams {
   payload?: any;
 }
 
+export interface CreateRuleMigrationQradarRulesParams extends RequestParams {
+  /* The id is necessary only for batching the migration creation in multiple requests */
+  migrationId: string;
+  payload: CreateQRadarRuleMigrationRulesRequestBody;
+}
+
 export interface UpdateRulesParams extends MigrationRequestParams {
   /** Optional payload to send */
   payload?: any;
@@ -87,6 +100,10 @@ export interface InstallRulesParams extends MigrationRequestParams {
 export type StartMigrationRuleParams = MigrationRequestParams & {
   payload: StartRuleMigrationRequestBody;
 };
+
+export interface EnhanceRulesParams extends MigrationRequestParams {
+  payload: RuleMigrationEnhanceRuleRequestBodyInput;
+}
 
 export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => {
   return {
@@ -180,6 +197,26 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       expectStatusCode = 200,
     }: CreateRuleMigrationRulesParams): Promise<{ body: null }> => {
       const route = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId });
+      const response = await supertest
+        .post(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    addQradarRulesToMigration: async ({
+      migrationId,
+      payload,
+      expectStatusCode = 200,
+    }: CreateRuleMigrationQradarRulesParams): Promise<{ body: null }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, {
+        migration_id: migrationId,
+      });
       const response = await supertest
         .post(route)
         .set('kbn-xsrf', 'true')
@@ -363,6 +400,26 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    enhanceRules: async ({
+      migrationId,
+      payload,
+      expectStatusCode = 200,
+    }: EnhanceRulesParams): Promise<{ body: RuleMigrationEnhanceRuleResponse }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
 
       assertStatusCode(expectStatusCode, response);
 

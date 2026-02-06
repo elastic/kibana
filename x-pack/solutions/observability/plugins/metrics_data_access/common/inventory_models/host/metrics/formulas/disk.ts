@@ -52,8 +52,7 @@ export const diskUsage: SchemaBasedFormula = {
   label: DISK_USAGE_LABEL,
   value: {
     ecs: 'max(system.filesystem.used.pct)',
-    semconv:
-      "1 - max(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
+    semconv: 'max(metrics.system.filesystem.utilization)',
   },
   format: 'percent',
   decimals: 0,

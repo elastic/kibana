@@ -113,7 +113,7 @@ describe('request utils', () => {
       expect(params).toHaveProperty('keep_on_completion', false);
     });
 
-    test('Sets `batched_reduce_size` and `ccs_minimize_roundtrips`', async () => {
+    test('Sets `batched_reduce_size` and `ccs_minimize_roundtrips` for non serverless', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
       });
@@ -124,6 +124,15 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
       expect(params).toHaveProperty('batched_reduce_size', batchedReduceSize);
       expect(params).toHaveProperty('ccs_minimize_roundtrips', true);
+    });
+
+    test('Does not set `ccs_minimize_roundtrips` for serverless', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchConfig({});
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {}, true);
+      expect(params).not.toHaveProperty('ccs_minimize_roundtrips');
     });
   });
 

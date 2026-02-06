@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 import { DeleteListIndexResponse } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListClient } from '../../services/lists/list_client';
 import type { ListsPluginRouter } from '../../types';
@@ -37,7 +38,7 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
       path: LIST_INDEX,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

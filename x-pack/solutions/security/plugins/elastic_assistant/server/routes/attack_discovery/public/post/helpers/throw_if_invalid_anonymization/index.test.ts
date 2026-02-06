@@ -7,7 +7,7 @@
 
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import { throwIfInvalidAnonymization } from '.';
+import { throwIfInvalidAnonymization, isInvalidAnonymizationError } from '.';
 import * as i18n from './translations';
 
 const userNameFieldNotAllowed: AnonymizationFieldResponse = {
@@ -37,60 +37,79 @@ const idFieldNotAllowed: AnonymizationFieldResponse = {
   updatedAt: '2025-03-13T20:33:58.283Z',
 };
 
-describe('throwIfInvalidAnonymization', () => {
-  it('throws when the anonymizationFields are empty', () => {
-    const emptyAnonymizationFields: AnonymizationFieldResponse[] = [];
+describe('throw_if_invalid_anonymization', () => {
+  describe('throwIfInvalidAnonymization', () => {
+    it('throws when the anonymizationFields are empty', () => {
+      const emptyAnonymizationFields: AnonymizationFieldResponse[] = [];
 
-    expect(() => {
-      throwIfInvalidAnonymization(emptyAnonymizationFields);
-    }).toThrowError(i18n.NO_FIELDS_ALLOWED);
+      expect(() => {
+        throwIfInvalidAnonymization(emptyAnonymizationFields);
+      }).toThrowError(i18n.NO_FIELDS_ALLOWED);
+    });
+
+    it('throws when all fields are NOT allowed', () => {
+      const anonymizationFields: AnonymizationFieldResponse[] = [
+        userNameFieldNotAllowed,
+        idFieldNotAllowed,
+      ];
+
+      expect(() => {
+        throwIfInvalidAnonymization(anonymizationFields);
+      }).toThrowError(i18n.NO_FIELDS_ALLOWED);
+    });
+
+    it('throws when the _id field is NOT included', () => {
+      const idFieldNotIncluded: AnonymizationFieldResponse[] = [
+        userNameFieldAllowed, // <-- at least one field is allowed
+      ];
+
+      expect(() => {
+        throwIfInvalidAnonymization(idFieldNotIncluded);
+      }).toThrowError(i18n.ID_FIELD_REQUIRED);
+    });
+
+    it('throws when the _id field is NOT allowed', () => {
+      const anonymizationFields: AnonymizationFieldResponse[] = [
+        userNameFieldAllowed, // <-- at least one field is allowed
+        idFieldNotAllowed,
+      ];
+
+      expect(() => {
+        throwIfInvalidAnonymization(anonymizationFields);
+      }).toThrowError(i18n.ID_FIELD_REQUIRED);
+    });
+
+    it('does NOT throw when the _id field is allowed', () => {
+      const idFieldAllowed: AnonymizationFieldResponse = {
+        ...idFieldNotAllowed,
+        allowed: true, // <-- the _id field is allowed
+      };
+
+      const anonymizationFields: AnonymizationFieldResponse[] = [
+        idFieldAllowed,
+        userNameFieldNotAllowed,
+      ];
+
+      expect(() => {
+        throwIfInvalidAnonymization(anonymizationFields);
+      }).not.toThrow();
+    });
   });
 
-  it('throws when all fields are NOT allowed', () => {
-    const anonymizationFields: AnonymizationFieldResponse[] = [
-      userNameFieldNotAllowed,
-      idFieldNotAllowed,
-    ];
+  describe('isInvalidAnonymizationError', () => {
+    it('returns true when the error message is NO_FIELDS_ALLOWED', () => {
+      const error = new Error(i18n.NO_FIELDS_ALLOWED);
+      expect(isInvalidAnonymizationError(error)).toBe(true);
+    });
 
-    expect(() => {
-      throwIfInvalidAnonymization(anonymizationFields);
-    }).toThrowError(i18n.NO_FIELDS_ALLOWED);
-  });
+    it('returns true when the error message is ID_FIELD_REQUIRED', () => {
+      const error = new Error(i18n.ID_FIELD_REQUIRED);
+      expect(isInvalidAnonymizationError(error)).toBe(true);
+    });
 
-  it('throws when the _id field is NOT included', () => {
-    const idFieldNotIncluded: AnonymizationFieldResponse[] = [
-      userNameFieldAllowed, // <-- at least one field is allowed
-    ];
-
-    expect(() => {
-      throwIfInvalidAnonymization(idFieldNotIncluded);
-    }).toThrowError(i18n.ID_FIELD_REQUIRED);
-  });
-
-  it('throws when the _id field is NOT allowed', () => {
-    const anonymizationFields: AnonymizationFieldResponse[] = [
-      userNameFieldAllowed, // <-- at least one field is allowed
-      idFieldNotAllowed,
-    ];
-
-    expect(() => {
-      throwIfInvalidAnonymization(anonymizationFields);
-    }).toThrowError(i18n.ID_FIELD_REQUIRED);
-  });
-
-  it('does NOT throw when the _id field is allowed', () => {
-    const idFieldAllowed: AnonymizationFieldResponse = {
-      ...idFieldNotAllowed,
-      allowed: true, // <-- the _id field is allowed
-    };
-
-    const anonymizationFields: AnonymizationFieldResponse[] = [
-      idFieldAllowed,
-      userNameFieldNotAllowed,
-    ];
-
-    expect(() => {
-      throwIfInvalidAnonymization(anonymizationFields);
-    }).not.toThrow();
+    it('returns false when the error message is NOT related to anonymization', () => {
+      const error = new Error('Some other error');
+      expect(isInvalidAnonymizationError(error)).toBe(false);
+    });
   });
 });

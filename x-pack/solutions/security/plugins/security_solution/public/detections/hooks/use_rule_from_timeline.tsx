@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import { PageScope } from '../../data_view_manager/constants';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { convertKueryToElasticSearchQuery } from '../../common/lib/kuery';
@@ -22,7 +23,6 @@ import { useQueryTimelineById } from '../../timelines/components/open_timeline/h
 import { useGetInitialUrlParamValue } from '../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../timelines/components/timeline/query_bar';
-import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
@@ -61,13 +61,13 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     browserFields: oldBrowserFields,
     dataViewId: oldDataViewId,
     selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
   const selectDataView = useSelectDataView();
 
   const selectedPatterns = newDataViewPickerEnabled
@@ -104,7 +104,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         // sourcerer handles the logic of if the fields have been fetched or need to be fetched
         dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
+            id: PageScope.timeline,
             selectedDataViewId: timeline.dataViewId,
             selectedPatterns: timeline.indexNames,
           })
@@ -112,7 +112,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
 
         if (newDataViewPickerEnabled) {
           selectDataView({
-            scope: SourcererScopeName.timeline,
+            scope: PageScope.timeline,
             id: timeline.dataViewId,
             fallbackPatterns: timeline.indexNames,
           });
@@ -199,7 +199,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     if (originalDataView.dataViewId !== dataViewId) {
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: originalDataView.dataViewId,
           selectedPatterns: originalDataView.selectedPatterns,
         })
@@ -207,7 +207,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
 
       if (newDataViewPickerEnabled) {
         selectDataView({
-          scope: SourcererScopeName.timeline,
+          scope: PageScope.timeline,
           id: originalDataView.dataViewId,
           fallbackPatterns: originalDataView.selectedPatterns,
         });

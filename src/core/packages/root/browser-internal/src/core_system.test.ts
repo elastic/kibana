@@ -481,6 +481,7 @@ describe('#start()', () => {
       targetDomElement: expect.any(HTMLElement),
       analytics: expect.any(Object),
       rendering: expect.any(Object),
+      settings: expect.any(Object),
     });
   });
 

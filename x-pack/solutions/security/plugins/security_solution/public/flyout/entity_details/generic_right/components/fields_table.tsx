@@ -11,7 +11,7 @@ import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from 
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { EcsFlat } from '@elastic/ecs';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
@@ -200,6 +200,9 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
 
   return (
     <EuiInMemoryTable<FlattenedItem>
+      tableCaption={i18n.translate('xpack.securitySolution.fieldsTable.tableCaption', {
+        defaultMessage: 'Fields',
+      })}
       // @ts-ignore
       items={sortedItems}
       columns={columns}

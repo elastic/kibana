@@ -12,6 +12,8 @@ import { TrustedDevicesApiClient } from './api_client';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '../constants';
 import { readTransform, writeTransform } from './transforms';
+import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 describe('TrustedDevicesApiClient', () => {
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -42,5 +44,43 @@ describe('TrustedDevicesApiClient', () => {
   it('constructor creates an instance', () => {
     const instance = new TrustedDevicesApiClient(fakeHttpServices);
     expect(instance).toBeInstanceOf(ExceptionsListApiClient);
+  });
+
+  describe('getSuggestions', () => {
+    let trustedDevicesApiClient: TrustedDevicesApiClient;
+
+    beforeEach(() => {
+      trustedDevicesApiClient = new TrustedDevicesApiClient(fakeHttpServices);
+    });
+
+    it('should call the SUGGESTIONS_INTERNAL_ROUTE with correct URL and body', async () => {
+      await trustedDevicesApiClient.getSuggestions({
+        field: 'device.serial_number',
+        query: 'test',
+      });
+
+      expect(fakeHttpServices.post).toHaveBeenCalledWith(
+        resolvePathVariables(SUGGESTIONS_INTERNAL_ROUTE, { suggestion_type: 'trustedDevices' }),
+        {
+          version: '1',
+          body: JSON.stringify({
+            field: 'device.serial_number',
+            query: 'test',
+          }),
+        }
+      );
+    });
+
+    it('should return suggestions from the API', async () => {
+      const mockSuggestions = ['device-1', 'device-2', 'device-3'];
+      fakeHttpServices.post.mockResolvedValue(mockSuggestions);
+
+      const result = await trustedDevicesApiClient.getSuggestions({
+        field: 'device.manufacturer',
+        query: 'Apple',
+      });
+
+      expect(result).toEqual(mockSuggestions);
+    });
   });
 });

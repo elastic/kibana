@@ -7,13 +7,13 @@
 
 import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
-import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateErrorData } from './generate_data';
 

@@ -8,6 +8,7 @@
 import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
+import type { AttachmentType } from '../../../common';
 import type {
   BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
@@ -115,12 +116,13 @@ export interface BulkGetArgs {
   attachmentIDs: string[];
 }
 
-export interface GetAllAlertsAttachToCase {
+export interface GetAllDocumentsAttachedToCase {
   /**
    * The ID of the case to retrieve the alerts from
    */
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 /**

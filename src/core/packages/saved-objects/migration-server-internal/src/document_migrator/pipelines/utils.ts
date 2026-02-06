@@ -66,7 +66,9 @@ export const assertValidCoreVersion = ({
   }
 };
 
-export function maxVersion(a?: string, b?: string) {
+export function maxVersion(a?: string, ...otherVersions: string[]): string | undefined {
+  const b = otherVersions.length ? maxVersion(...otherVersions) : undefined;
+
   if (!a) {
     return b;
   }

@@ -1,8 +1,0 @@
-// v8dark global scope
-//
-// prepended to all .scss imports (from JS, when v8dark theme selected)
-
-@import '@elastic/eui/src/themes/amsterdam/colors_dark';
-@import '@elastic/eui/src/themes/amsterdam/globals';
-
-$kbnThemeVersion: 'v8dark';

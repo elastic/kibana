@@ -7,8 +7,8 @@
 
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
-
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { PageScope } from '../../../../data_view_manager/constants';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type {
   FlowTargetSourceDest,
@@ -16,7 +16,6 @@ import type {
 } from '../../../../../common/search_strategy';
 import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-
 import {
   autonomousSystemRenderer,
   hostIdRenderer,
@@ -24,7 +23,7 @@ import {
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
-} from '../../../../timelines/components/field_renderers/field_renderers';
+} from '../field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -38,7 +37,6 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface IpOverviewProps {
   anomaliesData: Anomalies | null;
@@ -52,7 +50,7 @@ export interface IpOverviewProps {
   isLoadingAnomaliesData: boolean;
   loading: boolean;
   narrowDateRange: NarrowDateRange;
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];
@@ -89,13 +87,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID
+          scopeId
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, scopeId)
           : getEmptyTagValue(),
       },
     ];
@@ -167,7 +165,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
                   scopeId,
                   host: data.host,
                   ipFilter: ip,
-                  contextID,
                   isFlyoutOpen,
                 })
               : getEmptyTagValue(),

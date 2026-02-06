@@ -54,6 +54,7 @@ import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
 import type { ObservablePost } from '../../../common/types/api';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
   commentObj,
@@ -96,17 +97,14 @@ describe('utils', () => {
       totalComments: 1,
     };
 
-    const connector = {
+    const connector = createMockConnector({
       id: '456',
       actionTypeId: '.jira',
       name: 'Connector without isCaseOwned',
       config: {
         apiUrl: 'https://elastic.jira.com',
       },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({

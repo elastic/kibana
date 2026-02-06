@@ -16,6 +16,7 @@ export class SLOError extends Error {
 
 export class SLONotFound extends SLOError {}
 export class SLOIdConflict extends SLOError {}
+export class SLOTemplateNotFound extends SLOError {}
 
 export class InternalQueryError extends SLOError {}
 export class IllegalArgumentError extends SLOError {}

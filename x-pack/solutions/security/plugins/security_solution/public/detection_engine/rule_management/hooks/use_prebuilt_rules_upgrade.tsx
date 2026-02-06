@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
@@ -73,6 +74,7 @@ export function usePrebuiltRulesUpgrade({
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const {
     data: upgradeReviewResponse,
@@ -254,6 +256,7 @@ export function usePrebuiltRulesUpgrade({
       return (
         <EuiButton
           disabled={
+            !canEditRules ||
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
@@ -278,6 +281,7 @@ export function usePrebuiltRulesUpgrade({
     },
     [
       rulesUpgradeState,
+      canEditRules,
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,

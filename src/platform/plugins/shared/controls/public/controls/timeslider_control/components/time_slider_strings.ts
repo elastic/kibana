@@ -37,7 +37,7 @@ export const TimeSliderStrings = {
       }),
     getPlayButtonDisabledTooltip: () =>
       i18n.translate('controls.timeSlider.playButtonTooltip.disabled', {
-        defaultMessage: '"Apply selections automatically" is disabled in Control Settings.',
+        defaultMessage: '"Auto apply filters" is disabled in Settings.',
       }),
   },
 };

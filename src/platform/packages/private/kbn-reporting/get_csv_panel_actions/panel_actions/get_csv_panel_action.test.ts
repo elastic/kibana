@@ -59,8 +59,11 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   beforeEach(() => {
+    core.uiSettings.get.mockReturnValue('America/Los_Angeles');
+
     csvConfig = {
       scroll: {} as ClientConfigType['csv']['scroll'],
+      maxRows: 10000,
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
@@ -128,7 +131,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: [],
       objectType: 'search',
       searchSource: {},
@@ -162,7 +165,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: ['column_a', 'column_b'],
       objectType: 'search',
       searchSource: { testData: 'testDataValue' },
@@ -184,7 +187,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
-      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
+      body: '{"jobParams":"(browserTimezone:America/Los_Angeles,columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
       method: 'POST',
     });
   });

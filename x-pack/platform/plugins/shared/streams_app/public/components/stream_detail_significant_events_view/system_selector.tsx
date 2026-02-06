@@ -7,8 +7,13 @@
 
 import { EuiFormRow, EuiText, EuiSpacer, EuiComboBox, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { System } from '@kbn/streams-schema';
+import { type System } from '@kbn/streams-schema';
 import React from 'react';
+
+export const ALL_DATA_OPTION = {
+  label: 'All data',
+  value: { name: 'All data', type: 'all_data' as const },
+};
 
 export interface SystemSelectorProps {
   systems: System[];
@@ -16,8 +21,14 @@ export interface SystemSelectorProps {
   onSystemsChange: (systems: System[]) => void;
 }
 
-export function SystemSelector({ systems, selectedSystems, onSystemsChange }: SystemSelectorProps) {
+export function SystemsSelector({
+  isDisabled,
+  systems,
+  selectedSystems,
+  onSystemsChange,
+}: SystemSelectorProps & { isDisabled: boolean }) {
   const { euiTheme } = useEuiTheme();
+  const options = systems.map((system) => ({ label: system.name, value: system }));
 
   return (
     <EuiFormRow
@@ -39,13 +50,14 @@ export function SystemSelector({ systems, selectedSystems, onSystemsChange }: Sy
               defaultMessage: 'Select systems',
             }
           )}
-          options={systems.map((system) => ({ label: system.name, value: system }))}
+          options={options}
+          isDisabled={systems.length === 0 || isDisabled}
           selectedOptions={selectedSystems.map((system) => ({
             label: system.name,
             value: system,
           }))}
           onChange={(selected) => {
-            onSystemsChange(selected.map((option) => option.value) as System[]);
+            onSystemsChange(selected.map((option) => option.value as System));
           }}
         />
       </>

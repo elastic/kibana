@@ -116,6 +116,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
         {indexMode && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.title"

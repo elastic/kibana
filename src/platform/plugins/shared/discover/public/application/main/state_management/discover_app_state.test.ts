@@ -1,0 +1,211 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource } from '../../../../common/data_sources';
+import { omit } from 'lodash';
+import { fromTabStateToSavedObjectTab, internalStateActions } from './redux';
+import type { DiscoverServices } from '../../../build_services';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+
+describe('Test discover app state', () => {
+  const setupNoTab = async ({
+    persistedDiscoverSession,
+    services,
+    stateStorage,
+  }: {
+    persistedDiscoverSession?: DiscoverSession;
+    stateStorage?: IKbnUrlStateStorage;
+    services?: DiscoverServices;
+  } = {}) => {
+    const {
+      internalState,
+      runtimeStateManager,
+      initializeTabs,
+      initializeSingleTab,
+      getCurrentTab,
+    } = getDiscoverInternalStateMock({
+      stateStorageContainer: stateStorage,
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+
+    await initializeTabs({ persistedDiscoverSession });
+
+    return { internalState, runtimeStateManager, initializeSingleTab, getCurrentTab };
+  };
+
+  const setup = async (...params: Parameters<typeof setupNoTab>) => {
+    const setupReturn = await setupNoTab(...params);
+    await setupReturn.initializeSingleTab({ tabId: setupReturn.getCurrentTab().id });
+    return setupReturn;
+  };
+
+  const getPersistedDiscoverSession = ({ services }: { services: DiscoverServices }) => {
+    const persistedTab = fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({
+        id: 'persisted-tab',
+        initialInternalState: {
+          serializedSearchSource: { index: dataViewWithTimefieldMock.id },
+        },
+      }),
+      timeRestore: false,
+      services,
+    });
+
+    return createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+  };
+
+  test('getPrevious returns the state before the current', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: { dataSource: createDataViewDataSource({ dataViewId: 'first' }) },
+      })
+    );
+    const stateA = getCurrentTab().appState;
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: { dataSource: createDataViewDataSource({ dataViewId: 'second' }) },
+      })
+    );
+    expect(getCurrentTab().previousAppState).toEqual(stateA);
+  });
+
+  test('should automatically set ES|QL data source when query is ES|QL', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: { dataSource: createDataViewDataSource({ dataViewId: 'test' }) },
+      })
+    );
+    expect(getCurrentTab().appState.dataSource?.type).toBe('dataView');
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: { query: { esql: 'from test' } },
+      })
+    );
+    expect(getCurrentTab().appState.dataSource?.type).toBe('esql');
+  });
+
+  describe('initializeAndSync', () => {
+    it('should call setResetDefaultProfileState correctly with no initial state', async () => {
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: true,
+        rowHeight: true,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial columns', async () => {
+      const stateStorage = createKbnUrlStateStorage();
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: true,
+        rowHeight: true,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial rowHeight', async () => {
+      const stateStorage = createKbnUrlStateStorage();
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: true,
+        rowHeight: false,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial hide chart', async () => {
+      const stateStorage = createKbnUrlStateStorage();
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ hideChart: true });
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({ stateStorage });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: false,
+        rowHeight: true,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with persisted Discover session', async () => {
+      const stateStorage = createKbnUrlStateStorage();
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ columns: ['test'], rowHeight: 5 });
+      const { initializeSingleTab, getCurrentTab } = await setupNoTab({
+        persistedDiscoverSession: getPersistedDiscoverSession({ services: discoverServiceMock }),
+        stateStorage,
+      });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+    });
+  });
+});

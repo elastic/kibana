@@ -13,9 +13,11 @@ import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_mes
 export function AiFlowWaitingForGeneration({
   stopGeneration,
   hasInitialResults = false,
+  isBeingCanceled = false,
 }: {
   stopGeneration: () => void;
   hasInitialResults?: boolean;
+  isBeingCanceled?: boolean;
 }) {
   const label = useWaitingForAiMessage(hasInitialResults);
 
@@ -30,15 +32,26 @@ export function AiFlowWaitingForGeneration({
       <EuiFlexItem grow={false}>
         <EuiLoadingElastic size="xxl" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={stopGeneration}>
-          {i18n.translate(
-            'xpack.streams.aiFlowWaitingForGeneration.button.stopGenerationButtonLabel',
-            { defaultMessage: 'Stop' }
-          )}
-        </EuiButtonEmpty>
+        {isBeingCanceled
+          ? i18n.translate('xpack.streams.aiFlowWaitingForGeneration.cancelingGenerationLabel', {
+              defaultMessage: 'Canceling generation...',
+            })
+          : label}
       </EuiFlexItem>
+      {!isBeingCanceled && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={stopGeneration}
+            data-test-subj="significant_events_ai_generate_stop_button"
+          >
+            {i18n.translate(
+              'xpack.streams.aiFlowWaitingForGeneration.button.stopGenerationButtonLabel',
+              { defaultMessage: 'Stop' }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

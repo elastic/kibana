@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -15,6 +16,8 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
@@ -25,12 +28,14 @@ import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
+import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
 import { useKibana } from '../../hooks/use_kibana';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
+import { docLinks } from '../../../common/doc_links';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -38,7 +43,7 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { notifications },
+    services: { notifications, cloud, application },
   } = useKibana();
   const toasts = notifications?.toasts;
   const [showDeleteAction, setShowDeleteAction] = useState(false);
@@ -89,8 +94,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowInferenceFlyout(true);
   }, []);
 
   const onCloseInferenceFlyout = useCallback(() => {
@@ -131,6 +136,14 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         },
         sortable: true,
         width: '300px',
+      },
+      {
+        name: i18n.MODEL,
+        'data-test-subj': 'modelCell',
+        render: (endpointInfo: InferenceInferenceEndpointInfo) => {
+          return <Model endpointInfo={endpointInfo} />;
+        },
+        width: '200px',
       },
       {
         field: 'service',
@@ -218,6 +231,20 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   return (
     <>
       <EuiFlexGroup direction="column">
+        <EisPromotionalCallout
+          promoId="inferenceEndpointManagement"
+          isCloudEnabled={cloud?.isCloudEnabled ?? false}
+          ctaLink={docLinks.elasticInferenceService}
+          direction="row"
+        />
+        <EisCloudConnectPromoCallout
+          promoId="inferenceEndpointManagement"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+        />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem style={{ width: '400px' }} grow={false}>
@@ -242,12 +269,18 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
-            itemId="id"
+            itemId="inference_id"
             items={paginatedSortedTableData}
             onChange={handleTableChange}
             pagination={pagination}
             sorting={sorting}
             data-test-subj="inferenceEndpointTable"
+            tableCaption={kbnI18n.translate(
+              'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
+              {
+                defaultMessage: 'Inference endpoints list',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

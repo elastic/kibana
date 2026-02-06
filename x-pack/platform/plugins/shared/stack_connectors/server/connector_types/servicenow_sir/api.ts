@@ -6,9 +6,9 @@
  */
 
 import { isEmpty, isString } from 'lodash';
+import type { ExecutorSubActionPushParamsSIR } from '@kbn/connector-schemas/servicenow_sir';
 import { api as commonApi } from '../lib/servicenow/api';
 import type {
-  ExecutorSubActionPushParamsSIR,
   ExternalServiceAPI,
   ExternalServiceSIR,
   PushToServiceApiHandlerArgs,

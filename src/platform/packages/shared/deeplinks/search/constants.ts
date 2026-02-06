@@ -23,3 +23,4 @@ export const SEARCH_HOMEPAGE = 'searchHomepage';
 export const SEARCH_INDICES = 'elasticsearchIndices';
 export const SEARCH_INDEX_MANAGEMENT = 'elasticsearchIndexManagement';
 export const SEARCH_INDICES_CREATE_INDEX = 'createIndex';
+export const SEARCH_GETTING_STARTED = 'searchGettingStarted';

@@ -275,9 +275,10 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
 function getCheckGroupChecksum(checkGroupResults: CheckGroupResult[]) {
   return checkGroupResults.reduce((acc, cur) => {
     return (
-      acc + cur?.journeyDoc?._id ??
-      '' + cur?.summaryDoc?._id ??
-      '' + (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
+      acc +
+      (cur?.journeyDoc?._id ?? '') +
+      (cur?.summaryDoc?._id ?? '') +
+      (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
     );
   }, '');
 }

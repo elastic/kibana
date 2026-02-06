@@ -11,11 +11,6 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CrowdStrikeSessionManager } from './rtr_session_manager';
-import { CrowdStrikeTokenManager } from './token_manager';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { NodeSystemError } from './types';
-import { isAggregateError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -26,9 +21,10 @@ import type {
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
   CrowdstrikeGetScriptsResponse,
-} from '../../../common/crowdstrike/types';
-import { CrowdstrikeGetScriptsResponseSchema } from '../../../common/crowdstrike/schema';
+} from '@kbn/connector-schemas/crowdstrike';
 import {
+  SUB_ACTION,
+  CrowdstrikeGetScriptsResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeHostActionsResponseSchema,
@@ -36,8 +32,12 @@ import {
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
-} from '../../../common/crowdstrike/schema';
-import { SUB_ACTION } from '../../../common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike';
+import { CrowdStrikeSessionManager } from './rtr_session_manager';
+import { CrowdStrikeTokenManager } from './token_manager';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { NodeSystemError } from './types';
+import { isAggregateError } from './types';
 import { CrowdstrikeError } from './error';
 
 const SUPPORTED_RTR_COMMANDS = ['runscript'];

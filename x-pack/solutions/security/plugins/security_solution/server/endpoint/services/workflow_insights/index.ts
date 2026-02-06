@@ -242,9 +242,10 @@ class SecurityWorkflowInsightsService {
     registerCallback(CallbackIds.DefendInsightsPostFetch, this.onAfterFetch.bind(this));
   }
 
-  private async suppressExistingInsights(types: DefendInsightType[]) {
+  private async suppressExistingInsights(endpointIds: string[], types: DefendInsightType[]) {
     const existingInsights = await this.fetch({
       size: DEFAULT_SUPPRESS_SIZE,
+      targetIds: endpointIds,
       types,
       actionTypes: [ActionType.Refreshed],
     });
@@ -286,7 +287,7 @@ class SecurityWorkflowInsightsService {
     await this.isInitialized;
 
     // suppress existing insights since they might be stale, any current ones will be refreshed
-    await this.suppressExistingInsights([request.body.insightType]);
+    await this.suppressExistingInsights(request.body.endpointIds, [request.body.insightType]);
 
     // comes after suppression since we should always suppress stale insights
     if (!defendInsights || !defendInsights.length) {
@@ -309,11 +310,6 @@ class SecurityWorkflowInsightsService {
     request: KibanaRequest,
     agentIds: string[] = []
   ): Promise<void> {
-    const { endpointManagementSpaceAwarenessEnabled } = this.endpointContext.experimentalFeatures;
-    if (!endpointManagementSpaceAwarenessEnabled) {
-      return;
-    }
-
     const { id: spaceId } = await this.endpointContext.getActiveSpace(request);
     const fleetServices = this.endpointContext.getInternalFleetServices(spaceId);
     await fleetServices.ensureInCurrentSpace({ agentIds });

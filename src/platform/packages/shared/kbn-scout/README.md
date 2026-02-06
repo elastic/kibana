@@ -101,6 +101,7 @@ import { createPlaywrightConfig } from '@kbn/scout';
 export default createPlaywrightConfig({
   testDir: './tests',
   workers: 2,
+  runGlobalSetup: true, // to trigger setup hook before the tests (e.g. to ingest ES data)
 });
 ```
 

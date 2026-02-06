@@ -61,8 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.editTabLabel(1, 'query and app filters');
       await queryBar.setQuery('bytes > 100');
       await queryBar.submitQuery();
-      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'gif' });
       await discover.waitUntilTabIsLoaded();
+      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'gif' });
       await discover.waitUntilTabIsLoaded();
       await checkTab1();
 
@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({ field: '@message', operation: 'exists' });
       await discover.waitUntilTabIsLoaded();
       await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
+      await discover.waitUntilTabIsLoaded();
       await filterBar.toggleFilterPinned('extension.raw');
       await discover.waitUntilTabIsLoaded();
       await queryBar.setQuery('machine.os: "ios"');

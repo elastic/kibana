@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/cps-utils",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -71,6 +71,8 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockedRule: RuleData<Record<string, unknown>> = {
+  muteAll: false,
+  mutedInstanceIds: [],
   id: '1',
   name: 'rule-name',
   tags: ['rule-', '-tags'],
@@ -126,6 +128,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -187,6 +191,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -249,6 +255,8 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -321,6 +329,8 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muteAll: false,
+        mutedInstanceIds: [],
         parameters: {
           bar: true,
         },

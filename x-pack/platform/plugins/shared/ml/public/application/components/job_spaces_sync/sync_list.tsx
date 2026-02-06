@@ -74,7 +74,7 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsCreated.description"
-              defaultMessage="If there are jobs that do not have accompanying saved objects, they will be created in the current space."
+              defaultMessage="If there are jobs or trained models that do not have accompanying saved objects, they will be created in the current space."
             />
           </EuiTextColor>
         </p>
@@ -107,7 +107,7 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsDeleted.description"
-              defaultMessage="If there are saved objects that do not have an accompanying job, they will be deleted."
+              defaultMessage="If there are saved objects that do not have an accompanying job or trained model, they will be deleted."
             />
           </EuiTextColor>
         </p>

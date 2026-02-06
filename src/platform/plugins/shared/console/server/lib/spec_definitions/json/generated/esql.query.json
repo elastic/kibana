@@ -15,7 +15,9 @@
         "smile",
         "arrow"
       ],
-      "delimiter": "",
+      "delimiter": [
+        ","
+      ],
       "drop_null_columns": "__flag__",
       "allow_partial_results": "__flag__"
     },

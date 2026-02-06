@@ -201,7 +201,17 @@ apiTest.describe('Streamlang to ES|QL - Set Processor', { tag: ['@ess', '@svlObl
     };
 
     expect(() => transpile(streamlangDSL)).toThrowError(
-      "Set processor requires either 'value' or 'copy_from' parameter"
+      JSON.stringify(
+        [
+          {
+            code: 'custom',
+            message: 'Set processor must have either value or copy_from, but not both.',
+            path: ['steps', 0, 'value', 'copy_from'],
+          },
+        ],
+        null,
+        2
+      )
     );
   });
 
@@ -218,7 +228,17 @@ apiTest.describe('Streamlang to ES|QL - Set Processor', { tag: ['@ess', '@svlObl
     };
 
     expect(() => transpile(streamlangDSL)).toThrowError(
-      "Set processor cannot have both 'value' and 'copy_from' parameters"
+      JSON.stringify(
+        [
+          {
+            code: 'custom',
+            message: 'Set processor must have either value or copy_from, but not both.',
+            path: ['steps', 0, 'value', 'copy_from'],
+          },
+        ],
+        null,
+        2
+      )
     );
   });
 });

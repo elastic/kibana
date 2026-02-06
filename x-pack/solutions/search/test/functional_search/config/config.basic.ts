@@ -8,15 +8,15 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
+  const searchFunctionalConfig = await readConfigFile(require.resolve('../config'));
 
   return {
-    ...searchFuncationalConfig.getAll(),
+    ...searchFunctionalConfig.getAll(),
     junit: {
       reportName: 'Search Solution Functional Tests - Basic License',
     },
     esTestCluster: {
-      ...searchFuncationalConfig.get('esTestCluster'),
+      ...searchFunctionalConfig.get('esTestCluster'),
       license: 'basic',
       serverArgs: [
         'xpack.license.self_generated.type=basic',

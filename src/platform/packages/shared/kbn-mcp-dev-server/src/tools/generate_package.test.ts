@@ -9,6 +9,7 @@
 
 import { generateKibanaPackageTool } from './generate_package';
 import execa from 'execa';
+import { extractToolResultTextContent } from './test_utils';
 
 jest.mock('execa');
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -26,10 +27,10 @@ describe('generateKibanaPackageTool', () => {
     const result = await generateKibanaPackageTool.handler({
       name: '@kbn/some-pkg',
       owner: 'kibana-foo',
-      group: 'chat',
+      group: 'workplaceai',
     });
 
-    expect(result.content[0].text).toBe('package created');
+    expect(extractToolResultTextContent(result)).toBe('package created');
     expect(mockedExeca.command).toHaveBeenCalledTimes(1);
 
     const command = mockedExeca.command.mock.calls[0][0];
@@ -40,6 +41,6 @@ describe('generateKibanaPackageTool', () => {
     );
 
     expect(command).toContain('--owner kibana-foo');
-    expect(command).toContain('--group chat');
+    expect(command).toContain('--group workplaceai');
   });
 });

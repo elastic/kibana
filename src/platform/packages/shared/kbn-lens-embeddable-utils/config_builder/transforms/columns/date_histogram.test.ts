@@ -11,7 +11,7 @@ import {
   fromDateHistogramLensApiToLensState,
   fromDateHistogramLensStateToAPI,
 } from './date_histogram';
-import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
 import { bucketDateHistogramOperationSchema } from '../../schema/bucket_ops';
 import {

@@ -13,6 +13,7 @@ import type { Writable } from 'stream';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
@@ -70,6 +71,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,
+    licensing: licensingMock.createStart(),
   });
 
   getScreenshotsSpy.mockImplementation((opts) => {

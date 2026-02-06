@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { UserStartPrivilegesResponse } from '../../../common/types';
 import { QueryKeys } from '../../constants';
@@ -15,7 +15,8 @@ import { useKibana } from '../use_kibana';
 export const useUserPrivilegesQuery = (indexName: string) => {
   const { http } = useKibana().services;
   return useQuery({
-    queryKey: [QueryKeys.FetchUserStartPrivileges],
+    queryKey: [QueryKeys.FetchUserStartPrivileges, indexName],
+    refetchOnWindowFocus: false,
     queryFn: () =>
       http.get<UserStartPrivilegesResponse>(
         `/internal/search_indices/start_privileges/${indexName}`

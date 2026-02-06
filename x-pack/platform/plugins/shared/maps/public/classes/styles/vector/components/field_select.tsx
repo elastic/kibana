@@ -53,6 +53,7 @@ function groupFieldsByOrigin(fields: StyleField[]) {
   if (fieldsByOriginMap.size === 1) {
     // do not show origin group if all fields are from same origin
     const onlyOriginKey = fieldsByOriginMap.keys().next().value;
+    // @ts-expect-error upgrade typescript v5.9.3
     const fieldsList = fieldsByOriginMap.get(onlyOriginKey)!;
     return fieldsListToOptions(fieldsList);
   }

@@ -11,6 +11,7 @@ import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
 import type { DashboardMigrationStats } from '../../types';
+import { MigrationSource } from '../../../common/types';
 
 export const DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.service.createDashboardSuccess.title',
@@ -37,13 +38,14 @@ export const useCreateMigration = (onSuccess?: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    (migrationName, dashboards) => {
+    (migrationName, dashboards, vendor = MigrationSource.SPLUNK) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
           const migrationId = await siemMigrations.dashboards.createDashboardMigration(
             dashboards,
-            migrationName
+            migrationName,
+            vendor
           );
           const stats = await siemMigrations.dashboards.api.getDashboardMigrationStats({
             migrationId,

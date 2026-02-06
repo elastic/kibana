@@ -166,7 +166,7 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'USB storage access levelAllow all'
+        'USB storage access levelAllow read, write and execute'
       );
     });
 

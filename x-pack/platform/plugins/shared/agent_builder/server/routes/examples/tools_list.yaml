@@ -1,0 +1,136 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          listToolsResponseExample:
+            description: "Example response returning a list of existing tools"
+            value:
+              results:
+                - id: platform.core.search
+                  type: builtin
+                  description: "A powerful tool for searching and analyzing data within your Elasticsearch cluster.\nIt supports both full-text relevance searches and structured analytical queries.\n\nUse this tool for any query that involves finding documents, counting, aggregating, or summarizing data from a known index.\n\nExamples of queries:\n- \"find articles about serverless architecture\"\n- \"search for support tickets mentioning 'billing issue' or 'refund request'\"\n- \"what is our policy on parental leave?\"\n- \"list all products where the category is 'electronics'\"\n- \"show me the last 5 documents from that index\"\n- \"show me the sales over the last year break down by month\"\n\nNote:\n- The 'index' parameter can be used to specify which index to search against.\n If not provided, the tool will decide itself which is the best index to use.\n- It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already\n know about the index and fields you want to search on, e.g. if the user explicitly specified it."
+                  tags: []
+                  configuration: {}
+                  readonly: true
+                  schema:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: A natural language query expressing the search request
+                      index:
+                        type: string
+                        description: "(optional) Index to search against. If not provided, will automatically select the best index to use based on the query."
+                    required:
+                      - query
+                    additionalProperties: false
+                    "$schema": http://json-schema.org/draft-07/schema#
+                - id: platform.core.get_document_by_id
+                  type: builtin
+                  description: Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.
+                  tags: []
+                  configuration: {}
+                  readonly: true
+                  schema:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: ID of the document to retrieve
+                      index:
+                        type: string
+                        description: Name of the index to retrieve the document from
+                    required:
+                      - id
+                      - index
+                    additionalProperties: false
+                    "$schema": http://json-schema.org/draft-07/schema#
+                - id: platform.core.execute_esql
+                  type: builtin
+                  description: |-
+                    Execute an ES|QL query and return the results in a tabular format.
+
+                    **IMPORTANT**: This tool only **runs** queries; it does not write them.
+                    Think of this as the final step after a query has been prepared.
+
+                    You **must** get the query from one of two sources before calling this tool:
+                    1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
+                    2.  A verbatim query provided directly by the user.
+
+                    Under no circumstances should you invent, guess, or modify a query yourself for this tool.
+                    If you need a query, use the `platform.core.generate_esql` tool first.
+                  tags: []
+                  configuration: {}
+                  readonly: true
+                  schema:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: The ES|QL query to execute
+                    required:
+                      - query
+                    additionalProperties: false
+                    "$schema": http://json-schema.org/draft-07/schema#
+                - id: example-esql-tool
+                  type: esql
+                  description: Example ES|QL query tool for analyzing financial trades with time filtering
+                  tags:
+                    - analytics
+                    - finance
+                  configuration:
+                    query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+                    params:
+                      startTime:
+                        type: date
+                        description: Start time for the analysis in ISO format
+                      limit:
+                        type: integer
+                        description: Maximum number of results to return
+                  readonly: false
+                  schema:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        format: date-time
+                        description: Start time for the analysis in ISO format
+                      limit:
+                        type: integer
+                        description: Maximum number of results to return
+                    required:
+                      - startTime
+                      - limit
+                    additionalProperties: false
+                    description: Parameters needed to execute the query
+                    "$schema": http://json-schema.org/draft-07/schema#
+                - id: example-index-search-tool
+                  type: index_search
+                  description: Search tool specifically for financial data analysis and reporting
+                  tags:
+                    - search
+                    - finance
+                  configuration:
+                    pattern: financial_*
+                  readonly: false
+                  schema:
+                    type: object
+                    properties:
+                      nlQuery:
+                        type: string
+                        description: A natural language query expressing the search request
+                    required:
+                      - nlQuery
+                    additionalProperties: false
+                    "$schema": http://json-schema.org/draft-07/schema#
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/tools" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/tools

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
@@ -13,8 +13,7 @@ test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
@@ -27,8 +26,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('should handle network failures during a processor creation', async ({
@@ -39,6 +38,8 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       // Simulate network failure
       await page.route('**/streams/**/_ingest', async (route) => {
@@ -76,6 +77,8 @@ test.describe(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       await pageObjects.streams.saveStepsListChanges();
       await pageObjects.streams.confirmChangesInReviewModal();

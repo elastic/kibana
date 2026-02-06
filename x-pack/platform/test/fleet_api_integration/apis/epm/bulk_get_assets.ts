@@ -34,7 +34,8 @@ export default function (providerContext: FtrProviderContext) {
       await fleetAndAgents.setup();
     });
 
-    describe('installs all assets when installing a package for the first time', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/247176
+    describe.skip('installs all assets when installing a package for the first time', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);

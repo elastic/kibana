@@ -8,11 +8,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.16",
-    "axios": "^1.8.3",
+    "axios": "^1.13.4",
+    "diff": "^4.0.4",
     "globby": "^11.1.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "minimatch": "^5.0.1",
     "minimist": "^1.2.8",
     "p-limit": "^3.1.0",
@@ -24,13 +25,17 @@
     "@types/jscodeshift": "^0.12.0",
     "@types/minimatch": "^3.0.5",
     "@types/minimist": "^1.2.5",
-    "@types/node": "^22.17.1",
+    "@types/node": "22.19.0",
     "jest": "^30.0.3",
     "jscodeshift": "^17.1.2",
     "nock": "^12.0.2",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "yarn": "^1.22.22"
+  },
+  "overrides": {
+    "lodash": "^4.17.23"
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",

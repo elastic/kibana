@@ -7,5 +7,8 @@
 
 export type * from './src/types';
 export * from './src/constants';
-export * from './src/readiness_tasks';
-export * from './src/use_readiness_tasks';
+export * from './src/use_siem_readiness_api';
+export * from './src/use_get_detection_rules_by_integration';
+export * from './src/use_integration_display_names';
+export * from './src/use_siem_readiness_get_cases_count_by_tags';
+export * from './src/use_mitre_attack_indices_doc_counts';

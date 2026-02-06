@@ -84,8 +84,11 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   },
 ];
 
-export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
-  return [
+export const getItems: (
+  entityData: EntityData | undefined,
+  isPrivmonEnabled: boolean
+) => TableItem[] = (entityData, isPrivmonEnabled) => {
+  const items = [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
@@ -101,10 +104,31 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
           defaultMessage: 'Asset Criticality',
         }
       ),
-      score: entityData?.risk.category_2_score ?? 0,
+      score: isPrivmonEnabled
+        ? entityData?.risk.modifiers?.find((modifier) => modifier.type === 'asset_criticality')
+            ?.contribution ?? 0
+        : entityData?.risk.category_2_score ?? 0,
       count: undefined,
     },
   ];
+
+  if (isPrivmonEnabled) {
+    items.push({
+      category: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
+        {
+          defaultMessage: 'Privileged User',
+        }
+      ),
+      score:
+        entityData?.risk.modifiers?.find(
+          (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
+        )?.contribution ?? 0,
+      count: undefined,
+    });
+  }
+
+  return items;
 };
 
 export const getEntityData = <T extends EntityType>(

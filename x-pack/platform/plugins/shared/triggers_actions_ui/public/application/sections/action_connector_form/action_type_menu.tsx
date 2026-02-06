@@ -35,6 +35,7 @@ interface RegisteredActionType {
   actionType: ActionType;
   name: string;
   isExperimental: boolean | undefined;
+  isDeprecated: boolean;
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -122,6 +123,7 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionType.isDeprecated,
       };
     });
 
@@ -176,6 +178,7 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
+
       <EuiFlexGrid
         gutterSize="xl"
         columns={3}

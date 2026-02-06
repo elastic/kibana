@@ -18,8 +18,11 @@ import {
 } from './lists';
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import {
+  FILTER_PROCESS_DESCENDANTS_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
 
@@ -66,7 +69,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -112,7 +115,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -163,7 +166,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -216,7 +219,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -268,7 +271,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -311,7 +314,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -354,7 +357,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -383,7 +386,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
@@ -399,7 +402,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated.entries.length).toEqual(0);
@@ -450,13 +453,13 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
@@ -505,67 +508,18 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
 
     describe('`descendant_of` operator', () => {
-      let enabledProcessDescendant: ExperimentalFeatures;
-
-      beforeEach(() => {
-        enabledProcessDescendant = {
-          ...defaultFeatures,
-          filterProcessDescendantsForEventFiltersEnabled: true,
-        };
-      });
-
-      test('when feature flag is disabled, it should not convert `descendant_of`', async () => {
-        const expectedEndpointExceptions: TranslatedExceptionListItem = {
-          type: 'simple',
-          entries: [
-            {
-              field: 'process.executable',
-              operator: 'included',
-              type: 'exact_caseless',
-              value: 'C:\\Windows\\System32\\ping.exe',
-            },
-          ],
-        };
-
-        const inputEntry: EntriesArray = [
-          {
-            field: 'process.executable.text',
-            operator: 'included',
-            type: 'match',
-            value: 'C:\\Windows\\System32\\ping.exe',
-          },
-        ];
-
-        const exceptionMock = getFoundExceptionListItemSchemaMock();
-        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
-        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
-        exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
-
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
-        });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', {
-          filterProcessDescendantsForEventFiltersEnabled: false,
-        } as ExperimentalFeatures);
-
-        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
-      });
-
       test.each([
         ENDPOINT_ARTIFACT_LISTS.blocklists.id,
         ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
@@ -601,9 +555,9 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -658,9 +612,9 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -717,9 +671,205 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+    });
+
+    describe(`'trusted_descendants' operator`, () => {
+      let enabledTrustedProcessDescendant: ExperimentalFeatures;
+
+      beforeEach(() => {
+        enabledTrustedProcessDescendant = {
+          ...defaultFeatures,
+          filterProcessDescendantsForTrustedAppsEnabled: true,
+        };
+      });
+      it('when the feature flag is disabled, it should not convert `trusted_descendants`', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'C:\\Windows\\System32\\ping.exe',
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', {
+          filterProcessDescendantsForTrustedAppsEnabled: false,
+        } as ExperimentalFeatures);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      it.each([
+        ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+        ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      ])('when %s, it should not convert process descendants for trusted apps', async (listId) => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'C:\\Windows\\System32\\ping.exe',
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = listId;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        });
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      it('it should convert `trusted_descendants` to the expected format', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          trust_descendants: true,
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'C:\\Windows\\System32\\ping.exe',
+            },
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'process',
+            },
+          ],
+        } as TranslatedExceptionListItem;
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        });
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      it('should handle nested entries properly', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          trust_descendants: true,
+          entries: [
+            {
+              entries: [
+                {
+                  field: 'nested.field',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: 'some value',
+                },
+              ],
+              field: 'some.parentField',
+              type: 'nested',
+            },
+            {
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
+            },
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'process',
+            },
+          ],
+        };
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+        });
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -862,14 +1012,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'windows',
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
 
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"windows"',
         perPage: 1000,

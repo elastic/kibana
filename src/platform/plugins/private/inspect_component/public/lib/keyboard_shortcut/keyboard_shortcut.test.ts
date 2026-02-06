@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isKeyboardShortcut, isMac } from './keyboard_shortcut';
+import { isKeyboardShortcut } from './keyboard_shortcut';
 
 describe('keyboard_shortcut', () => {
   describe('isKeyboardShortcut', () => {
@@ -87,60 +87,6 @@ describe('keyboard_shortcut', () => {
       const result = isKeyboardShortcut(event);
 
       expect(result).toBe(true);
-    });
-  });
-
-  describe('isMac', () => {
-    const originalNavigator = global.navigator;
-
-    afterEach(() => {
-      global.navigator = originalNavigator;
-    });
-
-    it('should return true when platform is macOS using userAgentData', () => {
-      Object.defineProperty(global, 'navigator', {
-        value: {
-          userAgentData: {
-            platform: 'macOS',
-          },
-          userAgent: 'Something Else',
-        },
-        writable: true,
-      });
-
-      const isUserAgentMac = isMac();
-
-      expect(isUserAgentMac).toBe(true);
-    });
-
-    it('should return true when platform is macOS using userAgent', () => {
-      Object.defineProperty(global, 'navigator', {
-        value: {
-          userAgentData: undefined,
-          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-        },
-        writable: true,
-      });
-
-      const isUserAgentMac = isMac();
-
-      expect(isUserAgentMac).toBe(true);
-    });
-
-    it('should return false when platform is not macOS', () => {
-      Object.defineProperty(global, 'navigator', {
-        value: {
-          userAgentData: {
-            platform: 'Windows',
-          },
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        },
-        writable: true,
-      });
-
-      const isUserAgentMac = isMac();
-
-      expect(isUserAgentMac).toBe(false);
     });
   });
 });

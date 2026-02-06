@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';

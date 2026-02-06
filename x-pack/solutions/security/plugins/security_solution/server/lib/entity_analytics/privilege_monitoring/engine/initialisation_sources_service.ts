@@ -12,6 +12,7 @@ import {
   getPrivilegedMonitorUsersIndex,
 } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
+import type { MonitoringEntitySourceType } from '../../../../../common/api/entity_analytics';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { IntegrationType } from '../data_sources';
 import {
@@ -41,19 +42,23 @@ export const createInitialisationSourcesService = (deps: {
     try {
       // required sources to initialize privileged monitoring engine
       const requiredInitSources = buildRequiredSources(namespace, index);
-      const existing = await deps.descriptorClient.findAll({});
+      const { total: existingTotal } = await deps.descriptorClient.list({
+        per_page: 1,
+      });
 
       // create all sources, if none exist already
-      if (existing.length === 0) {
+      if (existingTotal === 0) {
         await deps.descriptorClient.bulkCreate(requiredInitSources);
         logger.log('debug', `Created all ${requiredInitSources.length} default sources`);
         return;
       }
       const requiredIntegrationNames = requiredInitSources.map(({ name }) => name).sort();
-      const installedIntegration = await deps.descriptorClient.findByQuery(
-        buildFilterByIntegrationNames(requiredIntegrationNames)
-      );
-      const installedIntegrationsNames = installedIntegration.map(({ name }) => name).sort();
+      const { sources: installedIntegrations } = await deps.descriptorClient.listByKuery({
+        kuery: buildFilterByIntegrationNames(requiredIntegrationNames),
+        perPage: requiredIntegrationNames.length,
+      });
+
+      const installedIntegrationsNames = installedIntegrations.map(({ name }) => name).sort();
 
       if (!isEqual(requiredIntegrationNames, installedIntegrationsNames)) {
         const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
@@ -88,7 +93,7 @@ const getLastFullSyncMarkersIndex = (namespace: string, integration: Integration
 };
 
 const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
-  type: 'entity_analytics_integration' as const,
+  type: 'entity_analytics_integration' as MonitoringEntitySourceType,
   managed: true,
   indexPattern: getStreamPatternFor(integration, namespace),
   name: integrationsSourceIndex(namespace, integration),

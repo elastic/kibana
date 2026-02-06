@@ -7,7 +7,7 @@
 
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
 
 interface CreateOrUpdateIlmPolicyOpts {

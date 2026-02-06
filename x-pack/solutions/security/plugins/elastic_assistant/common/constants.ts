@@ -6,7 +6,7 @@
  */
 
 export {
-  SECURITY_FEATURE_ID_V4 as SECURITY_FEATURE_ID,
+  SECURITY_FEATURE_ID_V5 as SECURITY_FEATURE_ID,
   CASES_FEATURE_ID_V3 as CASES_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 

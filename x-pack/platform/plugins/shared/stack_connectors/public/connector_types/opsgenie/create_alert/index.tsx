@@ -22,9 +22,9 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import type {
-  OpsgenieActionParams,
-  OpsgenieCreateAlertParams,
-} from '../../../../server/connector_types';
+  Params as OpsgenieActionParams,
+  CreateAlertParams as OpsgenieCreateAlertParams,
+} from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';

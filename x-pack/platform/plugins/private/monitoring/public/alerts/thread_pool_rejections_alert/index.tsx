@@ -14,6 +14,7 @@ import type { CommonAlertParamDetails } from '../../../common/types/alerts';
 import type { MonitoringConfig } from '../../types';
 import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
 import { LazyExpression } from '../components/param_details_form/lazy_expression';
+import { getDescriptionFields } from '../get_description_fields';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
@@ -68,5 +69,6 @@ export function createThreadPoolRejectionsAlertType(
     },
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

@@ -14,6 +14,8 @@
           "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
         ],
         "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               ">[]>"
             ],
             "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -56,6 +60,8 @@
               ">[]>"
             ],
             "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -70,6 +76,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+                "lineNumber": 29,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,6 +102,8 @@
               ">) => boolean"
             ],
             "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -111,6 +121,8 @@
                   ">"
                 ],
                 "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+                "lineNumber": 35,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -137,6 +149,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,6 +168,8 @@
                   ">"
                 ],
                 "path": "src/core/packages/deprecations/browser/src/contracts.ts",
+                "lineNumber": 41,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -180,6 +196,8 @@
           "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
         ],
         "path": "src/core/packages/deprecations/browser/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

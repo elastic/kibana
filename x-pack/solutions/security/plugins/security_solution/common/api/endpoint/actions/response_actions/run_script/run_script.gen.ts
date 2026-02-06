@@ -77,11 +77,11 @@ export const SentinelOneRunScriptParameters = z.object({
   /**
    * The script ID from SentinelOne scripts library that will be executed.
    */
-  script: z.string().min(1),
+  scriptId: z.string().min(1),
   /**
    * The input parameter arguments for the script that was selected.
    */
-  inputParams: z.string().min(1).optional(),
+  scriptInput: z.string().min(1).optional(),
 });
 
 /**
@@ -102,9 +102,9 @@ export const MDERunScriptParameters = z.object({
 export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
 export const RunScriptRouteRequestBody = BaseActionSchema.merge(
   z.object({
-    /** 
+    /**
       * One of the following set of parameters must be provided
- 
+
       */
     parameters: z.union([
       RawScriptParameters,

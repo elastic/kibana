@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -120,6 +120,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     executionContext,
     requestsAdapter,
     onWarning,
+    fetchOptions,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestId: string;
@@ -129,6 +130,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     executionContext: KibanaExecutionContext;
     requestsAdapter: RequestAdapter | undefined;
     onWarning?: (warning: SearchResponseWarning) => void;
+    fetchOptions?: { projectRouting?: ProjectRouting };
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -148,6 +150,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           },
           executionContext,
           disableWarningToasts,
+          ...fetchOptions,
         })
       );
 
@@ -171,7 +174,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestMeta: VectorSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
-  ): Promise<ISearchSource> {
+  ): Promise<{ searchSource: ISearchSource; fetchOptions: { projectRouting?: ProjectRouting } }> {
     const indexPattern = await this.getIndexPattern();
     const globalFilters: Filter[] = requestMeta.applyGlobalQuery ? requestMeta.filters : [];
     const allFilters: Filter[] = [...globalFilters];
@@ -244,14 +247,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       searchSource.setParent(parents[1]);
     }
 
-    return searchSource;
+    return {
+      searchSource,
+      fetchOptions: {
+        projectRouting: requestMeta.projectRouting,
+      },
+    };
   }
 
   async getBoundsForFilters(
     boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
@@ -273,6 +281,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             { description: 'es_source:bounds' },
             boundsFilters.executionContext
           ),
+          ...fetchOptions,
         })
       );
 

@@ -52,13 +52,16 @@ export const FieldFormFormat = ({ value, onChange }: FieldFormFormatProps) => {
     }
   };
 
+  const placeholderText = i18n.translate(
+    'xpack.streams.schemaEditor.fieldFormatSelector.placeholderText',
+    { defaultMessage: 'Select or type the field format...' }
+  );
+
   return (
     <EuiComboBox
       data-test-subj="streamsAppSchemaEditorFieldFormFormat"
-      placeholder={i18n.translate(
-        'xpack.streams.schemaEditor.fieldFormatSelector.placeholderText',
-        { defaultMessage: 'Select or type the field format...' }
-      )}
+      placeholder={placeholderText}
+      aria-label={placeholderText}
       options={POPULAR_FORMATS_SUGGESTIONS}
       selectedOptions={selectedOptions}
       onChange={handleSelectionChange}

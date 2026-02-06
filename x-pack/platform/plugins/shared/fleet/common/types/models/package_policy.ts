@@ -49,6 +49,7 @@ export interface NewPackagePolicyInputStream {
   };
   release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
 }
 
@@ -86,9 +87,11 @@ export interface NewPackagePolicy {
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
   cloud_connector_id?: string | null;
+  cloud_connector_name?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];

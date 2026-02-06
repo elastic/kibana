@@ -8,7 +8,7 @@
  */
 
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
-import { DASHBOARD_APP_ID } from '../../../common/constants';
+import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 
 const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 

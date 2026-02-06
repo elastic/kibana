@@ -5,112 +5,52 @@
  * 2.0.
  */
 
-import useObservable from 'react-use/lib/useObservable';
 import type { Streams } from '@kbn/streams-schema';
-import { useMemo } from 'react';
-import { map, switchAll, catchError, of, startWith, filter } from 'rxjs';
-import { useAbortController } from '@kbn/react-hooks';
-import { isNumber } from 'lodash';
-import type { ReviewSuggestionsInputs } from './use_review_suggestions_form';
+import { useEffect, useMemo } from 'react';
+import { useSelector } from '@xstate5/react';
+import { createActor } from 'xstate5';
+import { getPercentageFormatter } from '../../../../util/formatters';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useKibana } from '../../../../hooks/use_kibana';
-import {
-  buildDocumentCountSearchParams,
-  buildDocumentCountProbabilitySearchParams,
-} from '../state_management/stream_routing_state_machine/routing_samples_state_machine';
+import { createDocumentsCountCollectorActor } from '../state_management/stream_routing_state_machine/routing_samples_state_machine';
 
-export function useMatchRate(
+const percentageFormatter = getPercentageFormatter({ precision: 2 });
+
+export const useMatchRate = (
   definition: Streams.WiredStream.GetResponse,
-  partition: ReviewSuggestionsInputs['suggestions'][number],
-  start: number,
-  end: number
-) {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
+  partition: PartitionSuggestion
+) => {
+  const { data } = useKibana().dependencies.start;
+  const { timeState } = useTimefilter();
 
-  const abortController = useAbortController();
-
-  const search$ = useMemo(() => {
-    return data.search
-      .search(
-        {
-          params: buildDocumentCountSearchParams({
-            definition,
-            start,
-            end,
-          }),
+  // Re-use logic from the machine definition to retrieve the match rate for the partitions
+  const actorInstance = useMemo(
+    () => {
+      const actor = createActor(createDocumentsCountCollectorActor({ data }), {
+        input: {
+          condition: partition.condition,
+          definition,
+          documentMatchFilter: 'matched',
         },
-        { abortSignal: abortController.signal }
-      )
-      .pipe(
-        map((countResult) => {
-          const docCount =
-            !countResult.rawResponse.hits.total || isNumber(countResult.rawResponse.hits.total)
-              ? countResult.rawResponse.hits.total
-              : countResult.rawResponse.hits.total.value;
+      });
+      actor.start();
+      return actor;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, partition.condition, definition, timeState.start, timeState.end] // Actor restarts when these change
+  );
 
-          if (!docCount) {
-            return of(0);
-          }
+  useEffect(() => {
+    return () => {
+      actorInstance.stop();
+    };
+  }, [actorInstance]);
 
-          return data.search
-            .search(
-              {
-                params: buildDocumentCountProbabilitySearchParams({
-                  definition,
-                  condition: partition.condition,
-                  docCount,
-                  start,
-                  end,
-                }),
-              },
-              { abortSignal: abortController.signal }
-            )
-            .pipe(
-              map((probabilityResult) => {
-                if (probabilityResult.rawResponse.aggregations) {
-                  // We need to divide this by the sampling / probability factor:
-                  // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
-                  const sampleAgg = probabilityResult.rawResponse.aggregations.sample as {
-                    doc_count: number;
-                    probability: number;
-                    matching_docs: { doc_count: number };
-                  };
-                  const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
-                  const matchingDocCount = sampleAgg.matching_docs.doc_count;
+  const value = useSelector(actorInstance, (snapshot) =>
+    snapshot.status === 'done' ? percentageFormatter.format(snapshot.context ?? 0) : undefined
+  );
+  const loading = useSelector(actorInstance, (snapshot) => snapshot.status === 'active');
 
-                  return matchingDocCount / randomSampleDocCount;
-                }
-
-                return undefined;
-              }),
-              filter((matchRate): matchRate is number => matchRate !== undefined)
-            );
-        }),
-        switchAll(),
-        map((matchRate) => {
-          return {
-            value: matchRate,
-            loading: false,
-            error: undefined,
-          };
-        }),
-        startWith({
-          value: undefined,
-          loading: true,
-          error: undefined,
-        }),
-        catchError((error) => [
-          {
-            value: undefined,
-            loading: false,
-            error,
-          },
-        ])
-      );
-  }, [definition, partition.condition, start, end]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return useObservable(search$, { value: undefined, loading: true, error: undefined });
-}
+  return { value, loading };
+};

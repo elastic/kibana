@@ -8,12 +8,22 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
+import { isDynamicConnector } from '@kbn/workflows';
+import type {
+  ActionsMenuGroup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
-import type { ActionOptionData } from '../types';
+import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
+import { isActionGroup } from '../types';
 
-export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
+export function getActionOptions(
+  euiTheme: UseEuiTheme['euiTheme'],
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): ActionOptionData[] {
   const connectors = getAllConnectors();
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -61,6 +71,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
       },
     ],
   };
+
   const kibanaGroup: ActionOptionData = {
     iconType: 'logoKibana',
     id: 'kibana',
@@ -70,6 +81,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.kibanaDescription', {
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
+    options: [],
   };
   const httpRequest: ActionOptionData = {
     iconType: 'globe',
@@ -83,7 +95,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     }),
   };
   const externalGroup: ActionOptionData = {
-    iconType: 'apps',
+    iconType: 'plugs',
     iconColor: euiTheme.colors.vis.euiColorVis0,
     id: 'external',
     label: i18n.translate('workflows.actionsMenu.external', {
@@ -92,6 +104,41 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.externalDescription', {
       defaultMessage: 'Automate actions in external systems and apps.',
     }),
+    options: [],
+  };
+  const aiGroup: ActionOptionData = {
+    iconType: AssistantIcon,
+    id: 'ai',
+    label: i18n.translate('workflows.actionsMenu.ai', {
+      defaultMessage: 'AI',
+    }),
+    description: i18n.translate('workflows.actionsMenu.aiDescription', {
+      defaultMessage: 'Use AI to automate your workflows and get insights into your data',
+    }),
+    options: [],
+  };
+  const dataTransformationGroup: ActionOptionData = {
+    iconType: 'pencil',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
+    id: 'data',
+    label: i18n.translate('workflows.actionsMenu.dataTransformation', {
+      defaultMessage: 'Data transformation',
+    }),
+    description: i18n.translate('workflows.actionsMenu.dataTransformationDescription', {
+      defaultMessage: 'Manipulate and convert your data',
+    }),
+    options: [
+      {
+        id: 'data.set',
+        label: i18n.translate('workflows.actionsMenu.dataSet', {
+          defaultMessage: 'Set Variables',
+        }),
+        description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
+          defaultMessage: 'Define or compute variables to use in your workflow',
+        }),
+        iconType: 'tableOfContents',
+      },
+    ],
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
@@ -148,13 +195,30 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.elasticsearchDescription', {
       defaultMessage: 'Work with Elastic data and features directly from your workflow',
     }),
+    options: [],
   };
 
+  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
+    elasticsearch: elasticSearchGroup,
+    external: externalGroup,
+    ai: aiGroup,
+    kibana: kibanaGroup,
+    data: dataTransformationGroup,
+  };
+
+  const baseTypeInstancesCount: Record<string, number> = {};
+
   for (const connector of connectors) {
-    if (connector.type.startsWith('elasticsearch.')) {
-      if (!elasticSearchGroup.options) {
-        elasticSearchGroup.options = [];
-      }
+    const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
+    if (customStepDefinition) {
+      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      group.options.push({
+        id: customStepDefinition.id,
+        label: customStepDefinition.label,
+        description: customStepDefinition.description,
+        iconType: customStepDefinition.icon ?? group.iconType,
+      });
+    } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
         id: connector.type,
         label: connector.description || connector.type,
@@ -162,42 +226,50 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         iconType: 'logoElasticsearch',
       });
     } else if (connector.type.startsWith('kibana.')) {
-      if (!kibanaGroup.options) {
-        kibanaGroup.options = [];
-      }
       kibanaGroup.options.push({
         id: connector.type,
         label: connector.summary || connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
       });
-    } else {
-      if (!externalGroup.options) {
-        externalGroup.options = [];
-      }
+    } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
       let groupOption = externalGroup;
       if (subtype) {
         let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
         // create a group for the basetype if not yet exists
         if (!connectorGroup) {
-          connectorGroup = {
+          baseTypeInstancesCount[baseType] = 0;
+          const newConnectorGroup: ActionConnectorGroup = {
             id: baseType,
             label: baseType,
-            iconType: getStepIconType(baseType),
+            connectorType: baseType,
             options: [],
           };
-          externalGroup.options.push(connectorGroup);
+          connectorGroup = newConnectorGroup;
+          externalGroup.options.push(newConnectorGroup);
         }
-        groupOption = connectorGroup;
+        // We know connectorGroup is an ActionGroup because we either found it in options
+        // (which are ActionOptionData[]) or we just created it with the options property
+        if (isActionGroup(connectorGroup)) {
+          groupOption = connectorGroup;
+        }
       }
       const iconType = getStepIconType(connector.type);
-      groupOption.options!.push({
-        id: connector.type,
-        label: connector.description || connector.type,
-        description: connector.type,
-        iconType,
-      });
+      baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
+      groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
+
+      // groupOption is always an ActionGroup here (either externalGroup or a validated connectorGroup)
+      if (isActionGroup(groupOption)) {
+        groupOption.options.push({
+          id: connector.type,
+          label: connector.description || connector.type,
+          description: connector.type,
+          connectorType: connector.type,
+          instancesLabel: getInstancesLabel(connector.instances?.length),
+          iconType,
+        });
+      }
     }
   }
 
@@ -205,6 +277,8 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     triggersGroup,
     elasticSearchGroup,
     kibanaGroup,
+    aiGroup,
+    dataTransformationGroup,
     externalGroup,
     httpRequest,
     flowControlGroup,
@@ -212,5 +286,27 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
 }
 
 export function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {
-  return options.map((option) => [option, ...flattenOptions(option.options || [])]).flat();
+  return options
+    .map((option) => [option, ...flattenOptions(isActionGroup(option) ? option.options : [])])
+    .flat();
+}
+
+function getInstancesLabel(instancesCount: number | undefined): string | undefined {
+  if (!instancesCount) {
+    return undefined;
+  }
+  if (instancesCount === 0) {
+    return i18n.translate('workflows.actionsMenu.noInstances', {
+      defaultMessage: 'Not connected',
+    });
+  }
+  if (instancesCount === 1) {
+    return i18n.translate('workflows.actionsMenu.oneInstance', {
+      defaultMessage: '1 connected',
+    });
+  }
+  return i18n.translate('workflows.actionsMenu.multipleInstances', {
+    defaultMessage: '{count} connected',
+    values: { count: instancesCount },
+  });
 }

@@ -143,4 +143,5 @@ export const indicatorWithNestedObjects = {
   'agent.ephemeral_id': ['0532c813-1434-4c76-800b-6abdf7eaf62c'],
   'agent.version': ['8.10.4'],
   'event.dataset': ['ti_recordedfuture.threat'],
+  'indicator.reference': ['indicatorReferenceValue'],
 } as const;

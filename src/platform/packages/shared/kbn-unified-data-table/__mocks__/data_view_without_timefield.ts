@@ -7,59 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const fields = [
+const fields: FieldSpec[] = [
   {
     name: '_index',
     type: 'string',
     scripted: false,
-    filterable: true,
+    searchable: true,
+    aggregatable: false,
   },
   {
     name: 'timestamp',
-    displayName: 'timestamp',
     type: 'date',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
-    sortable: true,
   },
   {
     name: 'message',
-    displayName: 'message',
     type: 'string',
     scripted: false,
-    filterable: false,
+    searchable: false,
+    aggregatable: false,
   },
   {
     name: 'extension',
-    displayName: 'extension',
     type: 'string',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
   },
   {
     name: 'bytes',
-    displayName: 'bytes',
     type: 'number',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
   },
   {
     name: 'scripted',
-    displayName: 'scripted',
     type: 'number',
     scripted: true,
-    filterable: false,
+    searchable: false,
+    aggregatable: false,
   },
-] as DataView['fields'];
+];
 
 export const dataViewWithoutTimefieldMock = buildDataViewMock({
   name: 'index-pattern-without-timefield',
-  fields,
+  fields: fieldList(fields),
   timeFieldName: undefined,
 });

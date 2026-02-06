@@ -22,6 +22,7 @@ import {
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
+import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
 
 export function useDevToolsRequest({
   newAgentPolicy,
@@ -43,6 +44,19 @@ export function useDevToolsRequest({
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+
+      if (packagePolicy.supports_agentless) {
+        return [
+          generateCreateAgentlessPolicyDevToolsRequest(packagePolicy),
+          i18n.translate(
+            'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
+            {
+              defaultMessage: 'These Kibana requests create a new agentless policy.',
+            }
+          ),
+        ];
+      }
+
       return [
         `${generateCreateAgentPolicyDevToolsRequest(
           newAgentPolicy,

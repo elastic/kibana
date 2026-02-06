@@ -494,6 +494,9 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
             isDisabled={!errorsData?.total}
             onClick={handleErrorsToggle}
             iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+              defaultMessage: 'Error details',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -749,6 +752,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      tableCaption={i18n.translate(
+        'xpack.osquery.pack.queriesTable.packQueriesStatusTableCaption',
+        {
+          defaultMessage: 'Status of pack {packName} queries',
+          values: { packName },
+        }
+      )}
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

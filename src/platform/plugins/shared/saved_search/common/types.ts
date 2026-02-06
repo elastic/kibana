@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   ISearchSource,
   RefreshInterval,
@@ -68,11 +69,16 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
   tabs: DiscoverSessionTabSchema[];
 }
+
+export type SavedSearchByValueAttributes = SavedSearchAttributes & {
+  references: Reference[];
+};
 
 /** @internal **/
 export type { SortOrder } from '@kbn/discover-utils';
@@ -119,6 +125,7 @@ export interface DiscoverSessionTab {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>

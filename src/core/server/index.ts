@@ -226,6 +226,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
@@ -365,6 +366,7 @@ export type {
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

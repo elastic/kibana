@@ -14,6 +14,7 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 import { getThreatsDetectedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   from: string;
@@ -24,6 +25,8 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
 
   const spaceId = useSpaceId();
   return (
@@ -34,7 +37,10 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis6};
+          ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis6};`}
+        }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
         }
         .echMetricText {
           padding: 8px 16px 60px;

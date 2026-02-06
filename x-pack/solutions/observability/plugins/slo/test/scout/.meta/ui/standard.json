@@ -1,0 +1,86 @@
+{
+  "lastModified": "2026-01-30T09:08:46.486Z",
+  "sha1": "49bf7f78d11965c80fdeb0515e9344301a80795b",
+  "tests": [
+    {
+      "id": "b77b3725a7cda3a-a405bc5e45e74c0",
+      "title": "Setup environment for SLO tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-d4057e4746e6d25",
+      "title": "Annotations List create an annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-847fd6698b3b503",
+      "title": "Annotations List Go to SLOs and check that annotation is displayed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-2d4124b6ff8f776",
+      "title": "Annotations List update annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-c180b803b4e7cdb",
+      "title": "Annotations List delete annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "448f08951b285c6-2f7c95082c6900b",
+      "title": "SLOs Overview Go to slos overview and validate data retention tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    }
+  ]
+}

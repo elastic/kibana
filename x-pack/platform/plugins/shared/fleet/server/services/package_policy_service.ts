@@ -19,8 +19,6 @@ import type {
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -29,6 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -84,7 +83,6 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
@@ -109,9 +107,9 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -150,6 +148,14 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,

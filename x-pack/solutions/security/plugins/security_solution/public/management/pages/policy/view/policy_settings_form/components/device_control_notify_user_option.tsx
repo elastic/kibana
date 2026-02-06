@@ -25,6 +25,7 @@ import { useLicense } from '../../../../../../common/hooks/use_license';
 import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
+import { DefaultPolicyDeviceNotificationMessage } from '../../../../../../../common/endpoint/models/policy_config';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
 import {
   NOTIFY_USER_SECTION_TITLE,
@@ -64,14 +65,14 @@ export const DeviceControlNotifyUserOption = React.memo(
         // Update Windows popup device control
         newPayload.windows.popup.device_control = newPayload.windows.popup.device_control || {
           enabled: event.target.checked,
-          message: 'Elastic Security {action} {rule}',
+          message: DefaultPolicyDeviceNotificationMessage,
         };
         newPayload.windows.popup.device_control.enabled = event.target.checked;
 
         // Update Mac popup device control
         newPayload.mac.popup.device_control = newPayload.mac.popup.device_control || {
           enabled: event.target.checked,
-          message: 'Elastic Security {action} {rule}',
+          message: DefaultPolicyDeviceNotificationMessage,
         };
         newPayload.mac.popup.device_control.enabled = event.target.checked;
 

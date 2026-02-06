@@ -84,14 +84,14 @@ The \`COMPLETION\` processing command uses a machine learning model to generate 
 **Syntax**
 
 \`\`\` esql
-COMPLETION [column =] prompt WITH inference_id
+COMPLETION [column =] prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 \`\`\`
 
 **Parameters**
 
 * \`column\`: (Optional) The name of the output column that will contain the completion results. If not specified, the results will be stored in a column named \`completion\`. If the specified column already exists, it will be overwritten with the new completion results.
 * \`prompt\`: The input text or expression that will be used as the prompt for the completion. This can be a string literal or a reference to a column containing text.
-* \`inference_id\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
+* \`my_inference_endpoint\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
 
 **Best practices**
 
@@ -110,7 +110,7 @@ The following is a basic example with an inline prompt:
 
 \`\`\` esql
 ROW question = "What is Elasticsearch?"
-| COMPLETION answer = question WITH test_completion_model
+| COMPLETION answer = question WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP question, answer
 \`\`\`
 
@@ -130,7 +130,7 @@ FROM movies
    "Synopsis: ", synopsis, "\\\\n",
    "Actors: ", MV_CONCAT(actors, ", "), "\\\\n",
   )
-| COMPLETION summary = prompt WITH test_completion_model
+| COMPLETION summary = prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP title, summary, rating
 \`\`\`
 
@@ -348,6 +348,80 @@ FROM books METADATA _score
 | Danny Faulkner | 1.59 | fork1 | null |
 | Keith Faulkner | 1.59 | fork1 | null |
 | null | null | fork2 | 18 |
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
+  },
+  {
+    name: 'fuse',
+    labelDefaultMessage: 'FUSE',
+    descriptionDefaultMessage: `### FUSE
+
+The \`FUSE\` [processing command](https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands) merges rows from multiple result sets and assigns new relevance scores. \`FUSE\` is for search use cases. Learn more about [how search works in ES|QL](https://www.elastic.co/docs/solutions/search/esql-for-search#how-search-works-in-esql).
+
+Together with \`FORK\`, \`FUSE\` enables [hybrid search](https://www.elastic.co/docs/reference/query-languages/esql/esql-search-tutorial#perform-hybrid-search) to combine and score results from multiple queries.
+
+\`FUSE\` works by:
+
+1. Merging rows with matching \`<key_columns>\` values
+2. Assigning new relevance scores using the specified \`<fuse_method>\` algorithm and the values from the \`<group_column>\` and \`<score_column>\`
+#### Syntax
+
+Use default parameters:
+
+\`\`\` esql
+FUSE
+\`\`\`
+
+Specify custom parameters:
+
+\`\`\` esql
+FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+\`\`\`
+
+#### Parameters
+
+\`fuse_method\`
+:   Defaults to \`RRF\`. Can be one of \`RRF\` (for [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf)) or \`LINEAR\` (for linear combination of scores). Designates which method to use to assign new relevance scores.
+
+\`score_column\`
+:   Defaults to \`_score\`. Designates which column to use to retrieve the relevance scores of the input row and where to output the new relevance scores of the merged rows.
+
+\`group_column\`
+:   Defaults to \`_fork\`. Designates which column represents the result set.
+
+\`key_columns\`
+:   Defaults to \`_id, _index\`. Rows with matching values for these columns are merged.
+
+\`options\`
+:   Options for the \`fuse_method\`.
+
+\`rank_constant\`
+:   Defaults to \`60\`. Represents the \`rank_constant\` used in the RRF formula.
+
+\`weights\`
+:   Defaults to \'\{\}\' (empty object). Allows you to set different weights based on \`group_column\` values.
+
+\`normalizer\`
+:   Defaults to \`none\`. Can be one of \`none\` or \`minmax\`. Specifies which score normalization method to apply.
+
+#### Examples
+
+- Use RRF to merge two ranked result sets.
+
+\`\`\` esql
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC)
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC)
+| FUSE
+\`\`\`
+
+Refer to the [reference documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/fuse) for more information, including additional examples and limitations.
             `,
     descriptionOptions: {
       description:

@@ -503,9 +503,10 @@ export interface ValueListIndicatorMatchResponseAggregation {
 }
 
 export interface TelemetryQueryConfiguration {
-  pageSize: number;
-  maxResponseSize: number;
-  maxCompressedResponseSize: number;
+  pageSize?: number;
+  maxResponseSize?: number;
+  maxCompressedResponseSize?: number;
+  excludeColdAndFrozenTiers: () => Promise<boolean>;
 }
 
 export interface TelemetryConfiguration {
@@ -523,6 +524,7 @@ export interface TelemetryConfiguration {
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
   health_diagnostic_config?: HealthDiagnosticConfiguration;
   query_config?: TelemetryQueryConfiguration;
+  encryption_public_keys?: Record<string, string>;
 }
 
 export interface IndicesMetadataConfiguration {

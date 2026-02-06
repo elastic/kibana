@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
+export type { FieldStatisticsTableProps } from './types';
+export { FieldStatisticsTable } from './field_stats_table';
 export { FieldStatisticsTab } from './field_stats_tab';

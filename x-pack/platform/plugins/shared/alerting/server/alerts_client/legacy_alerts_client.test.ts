@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertInstanceContext } from '../types';
-import { MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
+import { RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
@@ -15,8 +16,10 @@ import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { processAlerts } from '../lib';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import {
+  maintenanceWindowsServiceMock,
+  getMockMaintenanceWindow,
+} from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
@@ -355,7 +358,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('processAlerts() should set maintenance windows IDs on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
+  test('processAlerts() should set maintenance windows IDs and names on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
@@ -364,6 +367,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id1',
+          title: 'Maintenance Window 1',
         },
         {
           ...getMockMaintenanceWindow(),
@@ -371,6 +375,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id5',
+          title: 'Maintenance Window 5',
         },
       ],
       maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id5'],
@@ -381,6 +386,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'bar',
         maintenanceWindowIds: ['test-id1', 'test-id2'],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 2'],
       },
     };
 
@@ -389,6 +395,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'ghi',
         maintenanceWindowIds: ['test-id1', `test-id3`],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 3'],
       },
     };
 
@@ -433,11 +440,21 @@ describe('Legacy Alerts Client', () => {
       'test-id1',
       'test-id5',
     ]);
+    expect(alertsClient.getProcessedAlerts('new')['1'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+      'Maintenance Window 5',
+    ]);
     expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
     ]);
+    expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+    ]);
     expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
+    ]);
+    expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
     ]);
   });
 
@@ -533,13 +550,14 @@ describe('Legacy Alerts Client', () => {
 
     expect(determineDelayedAlerts).toHaveBeenCalledWith({
       newAlerts: {},
+      delayedAlerts: {},
       activeAlerts: {},
       trackedActiveAlerts: {},
       recoveredAlerts: {},
       trackedRecoveredAlerts: {},
       alertDelay: 5,
-      ruleRunMetricsStore,
       startedAt: null,
+      ruleRunMetricsStore,
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({

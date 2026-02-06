@@ -18,10 +18,7 @@ import { render as reactRender } from '@testing-library/react';
 import type { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import type {
-  ConnectorFormSchema,
-  InternalConnectorForm,
-} from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import type { ConnectorFormSchema, InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
 import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 

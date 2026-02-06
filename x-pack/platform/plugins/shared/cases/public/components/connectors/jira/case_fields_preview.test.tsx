@@ -13,7 +13,7 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import FieldsPreview from './case_fields_preview';
 
 import { renderWithTestingProviders } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 jest.mock('./use_get_issue_types');
 
@@ -41,6 +41,7 @@ describe('Jira Fields: Preview', () => {
     issueType: '10006',
     priority: 'High',
     parent: 'Parent Task',
+    otherFields: '{"testField":"testValue"}',
   };
 
   beforeEach(() => {
@@ -51,10 +52,15 @@ describe('Jira Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
 
-    expect(getByTextWithMarkup('Issue type: Task')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Parent issue: Parent Task')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Priority: High')).toBeInTheDocument();
+    const expectedContent = [
+      ['Issue type', 'Task'],
+      ['Parent issue', 'Parent Task'],
+      ['Priority', 'High'],
+      ['testField', 'testValue'],
+    ];
+
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

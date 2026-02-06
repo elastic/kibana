@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 import type { EsqlColumn } from '../../types';
 
@@ -25,6 +26,7 @@ interface PanelJSON {
     w: number;
     h: number;
     i: string;
+    sectionId?: string;
   };
   panelIndex?: string;
   embeddableConfig?: {
@@ -71,6 +73,7 @@ export const processPanel = (
       w: parsedPanel.position.w,
       h: parsedPanel.position.h,
       i: parsedPanel.id,
+      sectionId: parsedPanel.section?.id,
     };
     panelJSON.panelIndex = parsedPanel.id;
   }
@@ -95,7 +98,7 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
       columnList.push({
         columnId: columnName,
         fieldName: columnName,
-        meta: { type },
+        meta: { type: esFieldTypeToKibanaFieldType(type) },
         /* The first column is mostly a metric so here we are making that assumption
          * unless we have better way to do this. */
         inMetricDimension: true,
@@ -106,8 +109,8 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
         fieldName: columnName,
         meta: { type: 'string' },
       });
-      columnNames.push(columnName);
     }
+    columnNames.push(columnName);
   });
 
   return { columnList, columns: columnNames };
@@ -130,6 +133,7 @@ function configureVixTypeProperties(
     'area_stacked',
     'line',
     'heatmap',
+    'markdown',
   ];
 
   if (chartTypes.includes(vizType)) {
@@ -236,14 +240,14 @@ function configureStackedProperties(
 ): void {
   if ((vizType.includes('stacked') || vizType.includes('line')) && columns.length > 2) {
     if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
+      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
         columns[columns.length - 2];
     }
   }
 
   if (vizType.includes('stacked') && columns.length === 2) {
     if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
+      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
         columns[columns.length - 1];
     }
   }

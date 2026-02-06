@@ -16,9 +16,12 @@ import { StopEntityEngineRequestParams } from '../../../../../common/api/entity_
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { ENGINE_STATUS } from '../constants';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const stopEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -49,11 +52,17 @@ export const stopEntityEngineRoute = (
           const engine = await secSol
             .getEntityStoreDataClient()
             .stop(EntityType[request.params.entityType]);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
           logger.error(`Error in StopEntityEngine: ${e.message}`);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
