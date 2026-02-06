@@ -60,7 +60,7 @@ const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
     // There are not pod metrics that can derive this value.
     'metrics.k8s.pod.cpu_limit_utilization': {
       aggregation: 'avg',
-      field: 'metrics.k8s.pod.cpu_limit_utilization',
+      field: 'metrics.k8s.pod.cpu_limit_utilization', // this is an opt-in field.
     },
     memory_limit_utilization: {
       field: 'memory_limit_utilization',

@@ -46,10 +46,12 @@ const containerMetricsQueryConfigOtel: MetricsQueryOptions<ContainerMetricsField
   groupByField: 'container.id',
   metricsMap: {
     'metrics.container.cpu.usage': {
+      // this field is opt-in
       aggregation: 'avg',
       field: 'metrics.container.cpu.usage',
     },
     'metrics.container.memory.usage': {
+      // this field is opt-in
       aggregation: 'avg',
       field: 'metrics.container.memory.usage',
     },

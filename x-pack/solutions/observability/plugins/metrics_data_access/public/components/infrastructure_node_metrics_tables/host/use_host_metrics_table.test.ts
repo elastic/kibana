@@ -37,12 +37,80 @@ describe('useHostMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.module: "system" AND (${kuery})`;
+    const kueryWithEventModuleFilter = `event.module: "system" AND ${kuery}`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
           kuery: kueryWithEventModuleFilter,
+        }),
+      })
+    );
+  });
+
+  it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when schema is semconv', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
+
+    renderHook(() =>
+      useHostMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        schema: 'semconv',
+      })
+    );
+
+    expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          kuery,
+          metrics: expect.arrayContaining([
+            expect.objectContaining({ field: 'metrics.system.cpu.logical.count' }),
+            expect.objectContaining({ field: 'metrics.system.cpu.utilization' }),
+            expect.objectContaining({ field: 'metrics.system.memory.limit' }),
+            expect.objectContaining({ field: 'metrics.system.memory.utilization' }),
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('should call useInfrastructureNodeMetrics with ECS metrics when schema is ecs', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
+
+    renderHook(() =>
+      useHostMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        schema: 'ecs',
+      })
+    );
+
+    const kueryWithEventModuleFilter = `event.module: "system" AND ${kuery}`;
+
+    expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          kuery: kueryWithEventModuleFilter,
+          metrics: expect.arrayContaining([
+            expect.objectContaining({ field: 'system.cpu.cores' }),
+            expect.objectContaining({ field: 'system.cpu.total.norm.pct' }),
+            expect.objectContaining({ field: 'system.memory.total' }),
+            expect.objectContaining({ field: 'system.memory.used.pct' }),
+          ]),
         }),
       })
     );

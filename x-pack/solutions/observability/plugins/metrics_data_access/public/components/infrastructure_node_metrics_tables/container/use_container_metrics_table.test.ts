@@ -37,12 +37,44 @@ describe('useContainerMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND (${kuery})`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND ${kuery}`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
           kuery: kueryWithEventModuleFilter,
+        }),
+      })
+    );
+  });
+
+  it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when schema is semconv', () => {
+    const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
+
+    renderHook(() =>
+      useContainerMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        schema: 'semconv',
+      })
+    );
+
+    // For semconv/OTEL schema the sourceFilter should be empty, so the kuery should be passed through as-is
+    expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          kuery,
+          metrics: expect.arrayContaining([
+            expect.objectContaining({ field: 'metrics.container.cpu.usage' }),
+            expect.objectContaining({ field: 'metrics.container.memory.usage' }),
+          ]),
         }),
       })
     );

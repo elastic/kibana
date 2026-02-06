@@ -13,7 +13,7 @@ export interface UseNodeMetricsTableOptions {
   timerange: { from: string; to: string };
   kuery?: string;
   metricsClient: MetricsDataClient;
-  schema: DataSchemaFormat | null;
+  schema?: DataSchemaFormat;
 }
 
 export interface SourceProviderProps {

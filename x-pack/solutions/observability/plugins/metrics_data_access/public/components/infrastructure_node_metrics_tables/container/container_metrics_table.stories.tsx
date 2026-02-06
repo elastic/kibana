@@ -17,12 +17,18 @@ import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 const mockServices = {
   application: {
+    currentAppId$: {
+      subscribe: (callback: (appId: string) => void) => {
+        callback('mock-app-id');
+        return { unsubscribe: () => {} };
+      },
+    },
     getUrlForApp: (app: string, { path }: { path: string }) => `your-kibana/app/${app}/${path}`,
   },
 };
 
 export default {
-  title: 'infra/Node Metrics Tables/Container',
+  title: 'metrics_data_access/Node Metrics Tables/Container',
   decorators: [
     (wrappedStory) => <EuiCard title="Container metrics">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (
@@ -163,5 +169,28 @@ export const FailedToLoadMetrics = {
       state: 'error',
       errors: [new Error('Failed to load metrics')],
     },
+  },
+};
+
+export const BasicWithSemconv = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 10,
+      rows: loadedContainers,
+    },
+    schema: 'semconv',
+  },
+};
+
+export const LoadingWithSemconv = {
+  render: Template,
+
+  args: {
+    isLoading: true,
+    schema: 'semconv',
   },
 };
