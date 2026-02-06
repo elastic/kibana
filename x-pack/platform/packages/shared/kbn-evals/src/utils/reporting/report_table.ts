@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { sumBy } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
-import type { EvaluatorStats, DatasetScoreWithStats } from '../evaluation_stats';
-import { getUniqueEvaluatorNames, calculateOverallStats } from '../evaluation_stats';
+import type { EvaluatorStats } from '../score_repository';
+import { expandPatternsToEvaluators, matchesEvaluatorPattern } from '../../evaluators/patterns';
+
+interface StatsDisplay {
+  mean: number;
+  median: number;
+  stdDev: number;
+  min: number;
+  max: number;
+  count: number;
+}
 
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
   unitSuffix?: string;
-  statsToInclude?: Array<keyof EvaluatorStats>;
+  statsToInclude?: Array<keyof StatsDisplay>;
 }
 
 export interface EvaluatorDisplayGroup {
@@ -29,6 +37,94 @@ export interface EvaluationTableOptions {
   evaluatorDisplayGroups?: EvaluatorDisplayGroup[];
 }
 
+function getUniqueEvaluatorNames(stats: EvaluatorStats[]): string[] {
+  return [...new Set(stats.map((s) => s.evaluatorName))].sort();
+}
+
+function getUniqueDatasets(stats: EvaluatorStats[]): Array<{ id: string; name: string }> {
+  const seen = new Map<string, string>();
+  stats.forEach((s) => {
+    if (!seen.has(s.datasetId)) {
+      seen.set(s.datasetId, s.datasetName);
+    }
+  });
+  return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+}
+
+function calculateOverallStats(stats: EvaluatorStats[]): EvaluatorStats[] {
+  const evaluatorNames = getUniqueEvaluatorNames(stats);
+
+  return evaluatorNames.map((evaluatorName) => {
+    const evaluatorStats = stats.filter((s) => s.evaluatorName === evaluatorName);
+
+    if (evaluatorStats.length === 0) {
+      return {
+        datasetId: 'overall',
+        datasetName: 'Overall',
+        evaluatorName,
+        stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+      };
+    }
+
+    const totalCount = evaluatorStats.reduce((sum, s) => sum + s.stats.count, 0);
+
+    if (totalCount === 0) {
+      return {
+        datasetId: 'overall',
+        datasetName: 'Overall',
+        evaluatorName,
+        stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
+      };
+    }
+
+    const weightedMean =
+      evaluatorStats.reduce((sum, s) => sum + s.stats.mean * s.stats.count, 0) / totalCount;
+
+    const pooledVariance =
+      totalCount > 1
+        ? evaluatorStats.reduce((sum, s) => {
+            return (
+              sum +
+              (s.stats.count - 1) * s.stats.stdDev ** 2 +
+              s.stats.count * (s.stats.mean - weightedMean) ** 2
+            );
+          }, 0) /
+          (totalCount - 1)
+        : 0;
+
+    return {
+      datasetId: 'overall',
+      datasetName: 'Overall',
+      evaluatorName,
+      stats: {
+        mean: weightedMean,
+        median: weightedMean,
+        stdDev: Math.sqrt(pooledVariance),
+        min: Math.min(...evaluatorStats.map((s) => s.stats.min)),
+        max: Math.max(...evaluatorStats.map((s) => s.stats.max)),
+        count: totalCount,
+      },
+    };
+  });
+}
+
+/** Gets display options for an evaluator, supporting @K pattern matching */
+function getEvaluatorDisplayOptions(
+  evaluatorName: string,
+  evaluatorFormats: Map<string, EvaluatorDisplayOptions>
+): EvaluatorDisplayOptions {
+  const exactMatch = evaluatorFormats.get(evaluatorName);
+  if (exactMatch) return exactMatch;
+
+  for (const [pattern, options] of evaluatorFormats.entries()) {
+    if (matchesEvaluatorPattern(evaluatorName, pattern)) {
+      return options;
+    }
+  }
+  return {};
+}
+
+/** Groups evaluator scores, expanding @K patterns to actual evaluator names */
 function groupEvaluatorScores(
   evaluatorNames: string[],
   evaluatorScoreGroups: EvaluatorDisplayGroup[]
@@ -39,12 +135,16 @@ function groupEvaluatorScores(
   const groupMapping = new Map<string, EvaluatorDisplayGroup>();
   const grouped = new Set<string>();
 
-  evaluatorScoreGroups.forEach((group) => {
-    if (group.evaluatorNames.every((name) => evaluatorNames.includes(name))) {
-      groupMapping.set(group.combinedColumnName, group);
-      group.evaluatorNames.forEach((name) => grouped.add(name));
+  for (const group of evaluatorScoreGroups) {
+    const expandedNames = expandPatternsToEvaluators(group.evaluatorNames, evaluatorNames);
+    if (expandedNames.length > 0) {
+      groupMapping.set(group.combinedColumnName, {
+        evaluatorNames: expandedNames,
+        combinedColumnName: group.combinedColumnName,
+      });
+      expandedNames.forEach((name) => grouped.add(name));
     }
-  });
+  }
 
   return {
     columnNames: [...evaluatorNames.filter((name) => !grouped.has(name)), ...groupMapping.keys()],
@@ -67,21 +167,19 @@ function buildTableConfig(columnCount: number): {
 }
 
 function formatStatsCell(
-  stats: Partial<EvaluatorStats>,
+  stats: Partial<StatsDisplay>,
   evaluatorName: string,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string {
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
-  const percentageColor = chalk.bold.yellow;
 
-  const evaluatorConfig = evaluatorFormats.get(evaluatorName) || {};
+  const evaluatorConfig = getEvaluatorDisplayOptions(evaluatorName, evaluatorFormats);
   const decimalPlaces = evaluatorConfig.decimalPlaces ?? 2;
   const unitSuffix = evaluatorConfig.unitSuffix || '';
   const statsToInclude = evaluatorConfig.statsToInclude;
 
-  const statLabels: Array<[keyof EvaluatorStats, string]> = [
-    ['percentage', 'percentage'],
+  const statLabels: Array<[keyof StatsDisplay, string]> = [
     ['mean', 'mean'],
     ['median', 'median'],
     ['stdDev', 'std'],
@@ -95,9 +193,6 @@ function formatStatsCell(
     )
     .map(([key, label]) => {
       const value = stats[key] as number;
-      if (key === 'percentage') {
-        return percentageColor(`${(value * 100).toFixed(1)}%`);
-      }
       const formatted = Number.isInteger(value) ? value.toFixed(0) : value.toFixed(decimalPlaces);
       return colorFn(`${label}: ${formatted}${unitSuffix}`);
     })
@@ -105,14 +200,14 @@ function formatStatsCell(
 }
 
 function formatEvaluatorScoreGroupCell(
-  evaluatorStatsMap: Map<string, Partial<EvaluatorStats>>,
+  statsMap: Map<string, Partial<StatsDisplay>>,
   group: EvaluatorDisplayGroup,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string {
   const sections = group.evaluatorNames
     .map((evaluatorName) => {
-      const stats = evaluatorStatsMap.get(evaluatorName);
+      const stats = statsMap.get(evaluatorName);
       if (!stats || !stats.count || stats.count === 0) return null;
       const statsContent = formatStatsCell(stats, evaluatorName, isBold, evaluatorFormats);
       return statsContent ? `${chalk.white(evaluatorName)}\n${statsContent}` : null;
@@ -125,25 +220,28 @@ function formatEvaluatorScoreGroupCell(
 }
 
 function formatRowCells(
-  evaluatorStats: Map<string, Partial<EvaluatorStats>>,
+  statsForDataset: EvaluatorStats[],
   columnNames: string[],
   groupMapping: Map<string, EvaluatorDisplayGroup>,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string[] {
+  const statsMap = new Map<string, StatsDisplay>();
+  statsForDataset.forEach((s) => statsMap.set(s.evaluatorName, s.stats));
+
   return columnNames.map((columnName) => {
     const group = groupMapping.get(columnName);
     if (group) {
-      const evaluatorStatsToGroup = new Map<string, Partial<EvaluatorStats>>(
+      const groupStatsMap = new Map<string, Partial<StatsDisplay>>(
         group.evaluatorNames
-          .map((name) => [name, evaluatorStats.get(name)] as const)
-          .filter((entry): entry is [string, Partial<EvaluatorStats>] => entry[1] !== undefined)
+          .map((name) => [name, statsMap.get(name)] as const)
+          .filter((entry): entry is [string, StatsDisplay] => entry[1] !== undefined)
       );
-      return formatEvaluatorScoreGroupCell(evaluatorStatsToGroup, group, isBold, evaluatorFormats);
+      return formatEvaluatorScoreGroupCell(groupStatsMap, group, isBold, evaluatorFormats);
     }
 
-    const stats = evaluatorStats.get(columnName);
-    if (stats && stats.count !== undefined && stats.count > 0) {
+    const stats = statsMap.get(columnName);
+    if (stats && stats.count > 0) {
       return formatStatsCell(stats, columnName, isBold, evaluatorFormats);
     }
     return isBold ? chalk.bold.green('-') : chalk.gray('-');
@@ -151,7 +249,7 @@ function formatRowCells(
 }
 
 export function createTable(
-  datasetScoresWithStats: DatasetScoreWithStats[],
+  stats: EvaluatorStats[],
   repetitions: number,
   options: EvaluationTableOptions = {}
 ): string {
@@ -165,28 +263,37 @@ export function createTable(
   const evaluatorFormats = evaluatorDisplayOptions || new Map();
   const evaluatorScoreGroups = evaluatorDisplayGroups || [];
 
-  const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
+  const evaluatorNames = getUniqueEvaluatorNames(stats);
+  const datasets = getUniqueDatasets(stats);
   const { columnNames, groupMapping } = groupEvaluatorScores(evaluatorNames, evaluatorScoreGroups);
-  const overallStats = calculateOverallStats(datasetScoresWithStats);
-  const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
+  const overallStats = calculateOverallStats(stats);
 
-  const formatExampleCount = (numExamples: number): string => {
-    return repetitions > 1
-      ? `${repetitions} x ${numExamples / repetitions}`
-      : numExamples.toString();
+  const getDatasetCount = (datasetId: string): number => {
+    const datasetStats = stats.filter((s) => s.datasetId === datasetId);
+    if (datasetStats.length === 0) return 0;
+    return Math.max(...datasetStats.map((s) => s.stats.count));
+  };
+
+  const totalCount = datasets.reduce((sum, d) => sum + getDatasetCount(d.id), 0);
+
+  const formatCount = (count: number): string => {
+    return repetitions > 1 ? `${repetitions} x ${count / repetitions}` : count.toString();
   };
 
   const tableHeaders = [firstColumnHeader, '#', ...columnNames];
 
-  const datasetRows = datasetScoresWithStats.map((dataset) => [
-    styleRowName(dataset.name),
-    formatExampleCount(dataset.numExamples),
-    ...formatRowCells(dataset.evaluatorStats, columnNames, groupMapping, false, evaluatorFormats),
-  ]);
+  const datasetRows = datasets.map((dataset) => {
+    const datasetStats = stats.filter((s) => s.datasetId === dataset.id);
+    return [
+      styleRowName(dataset.name),
+      formatCount(getDatasetCount(dataset.id)),
+      ...formatRowCells(datasetStats, columnNames, groupMapping, false, evaluatorFormats),
+    ];
+  });
 
   const overallRow = [
     chalk.bold.green('Overall'),
-    chalk.bold.green(formatExampleCount(totalExamples)),
+    chalk.bold.green(formatCount(totalCount)),
     ...formatRowCells(overallStats, columnNames, groupMapping, true, evaluatorFormats),
   ];
 
