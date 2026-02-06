@@ -13,8 +13,8 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { counterAppId } from './counter_app';
-import { tabSelectionAppId, getTabSelectionParamsSchema } from './tab_selection_app';
-import { textInputAppId, getTextInputParamsSchema } from './text_input_app';
+import { tabSelectionAppId, tabSelectionStore } from './tab_selection_app';
+import { textInputAppId, textInputStore } from './text_input_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -26,13 +26,13 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
-      getParamsSchema: getTextInputParamsSchema,
+      store: textInputStore,
       loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: counterAppId,
-      restoreOnReload: false, // Uses internal React state, not persisted params
+      restoreOnReload: false, // Uses internal React state, not persisted store state
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
@@ -40,7 +40,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
     this.updateTabSelectionApp = core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
       status: 'inaccessible', // Initially inaccessible
-      getParamsSchema: getTabSelectionParamsSchema,
+      store: tabSelectionStore,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
 

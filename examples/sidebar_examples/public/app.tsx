@@ -22,8 +22,10 @@ import {
 import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 import React from 'react';
 import { counterAppId } from './counter_app';
-import { textInputAppId, type TextInputSidebarParams } from './text_input_app';
-import { tabSelectionAppId, type TabSelectionSidebarParams } from './tab_selection_app';
+import type { TextInputState, TextInputActions } from './text_input_app';
+import { textInputAppId } from './text_input_app';
+import type { TabSelectionState, TabSelectionActions } from './tab_selection_app';
+import { tabSelectionAppId } from './tab_selection_app';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
@@ -32,22 +34,22 @@ export function App({}: Props) {
   const { close, setWidth } = useSidebar();
 
   // Get app-bound APIs for each sidebar app
-  const textApp = useSidebarApp<TextInputSidebarParams>(textInputAppId);
+  const textApp = useSidebarApp<TextInputState, TextInputActions>(textInputAppId);
   const counterApp = useSidebarApp(counterAppId);
-  const tabsApp = useSidebarApp<TabSelectionSidebarParams>(tabSelectionAppId);
+  const tabsApp = useSidebarApp<TabSelectionState, TabSelectionActions>(tabSelectionAppId);
 
   // App handlers just for simple demo controls,
   // For real apps, these handlers would be exposed on plugins contracts or as hooks.
   // Text Input App handlers
   const handleOpenTextApp = () => textApp.open();
-  const handleResetTextInput = () => textApp.setParams({ userName: '' });
+  const handleResetTextInput = () => textApp.actions.clear();
 
-  // Counter App handlers (no params - uses internal state)
+  // Counter App handlers (no store - uses internal React state)
   const handleOpenCounterApp = () => counterApp.open();
 
   // Tab Selection App handlers
   const handleOpenTabsApp = () => tabsApp.open();
-  const handleResetTabs = () => tabsApp.setParams({ selectedTab: 'overview' });
+  const handleResetTabs = () => tabsApp.actions.selectTab('overview');
 
   const handleCloseSidebar = () => close();
 
@@ -75,7 +77,7 @@ export function App({}: Props) {
 
           <EuiSpacer size="m" />
 
-          {/* Counter App Controls (no params - uses internal state) */}
+          {/* Counter App Controls (no store - uses internal React state) */}
           <EuiPanel hasBorder>
             <EuiTitle size="s">
               <h3>Counter App</h3>

@@ -12,7 +12,6 @@ import { BehaviorSubject, filter, map, take } from 'rxjs';
 import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
-import type { SidebarAppStateService } from './sidebar_app_state_service';
 import type { StorageHelper } from './storage_helper';
 import { bind, memoize } from './utils';
 
@@ -31,7 +30,6 @@ export class SidebarStateService {
 
   constructor(
     private readonly registry: SidebarRegistryService,
-    private readonly appStateService: SidebarAppStateService,
     private readonly storage: StorageHelper
   ) {}
 
@@ -99,7 +97,7 @@ export class SidebarStateService {
   }
 
   @bind
-  open<TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>): void {
+  open(appId: SidebarAppId): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
@@ -110,10 +108,6 @@ export class SidebarStateService {
 
     this.pendingRestoreSubscription?.unsubscribe();
     this.pendingRestoreSubscription = undefined;
-
-    if (params) {
-      this.appStateService.setParams(appId, params);
-    }
 
     this.currentAppId$.next(appId);
     this.storage.set('currentAppId', appId, 'session');
