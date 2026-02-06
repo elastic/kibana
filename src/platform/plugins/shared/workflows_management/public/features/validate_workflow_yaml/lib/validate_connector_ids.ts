@@ -75,6 +75,7 @@ export function validateConnectorIds(
       lineNumber: connectorIdItem.startLineNumber,
       column: connectorIdItem.startColumn,
     };
+
     const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
 
     if (!instance) {
