@@ -10,5 +10,5 @@ import { createPlaywrightConfig } from '@kbn/scout';
 export default createPlaywrightConfig({
   testDir: './parallel_tests',
   workers: 3,
-  runGlobalSetup: false, // TODO: enable global setup once we have a global setup for GenAI Settings
+  runGlobalSetup: false,
 });

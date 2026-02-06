@@ -46,22 +46,25 @@ This follows the convention used in other Scout tests (e.g., `rules_page_header.
 ## Running Tests
 
 ```bash
-# Start Kibana locally first, then run tests
+# Start Server
 
-# Run all parallel tests
-node scripts/scout run-tests \
-  --stateful \
-  --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts
+node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
+
+# Run all tests
+npx playwright test --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
+  --project local --ui
 
 # Run tests with specific tag
-npx playwright test \
-  --config x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel.playwright.config.ts \
   --grep "@ess"
+
+# To run tests in UI mode
+  --ui
 ```
 
 ## Test Fixtures
 
 ### `spaceTest` (Parallel Tests)
+
 Use `spaceTest` for parallel tests that run in isolated Kibana spaces:
 
 ```typescript
@@ -91,6 +94,7 @@ The fixtures provide custom authentication methods for testing different privile
 ## Services
 
 ### `setSpaceSolution`
+
 Sets the solution view for a space (Security, Observability, Search, Classic):
 
 ```typescript
@@ -109,57 +113,59 @@ Available solution values: `'security'`, `'oblt'`, `'es'`, `'classic'`
 
 ## Test Coverage
 
-| Test File | Tags | Description |
-|-----------|------|-------------|
-| `page_display.spec.ts` | `@ess`, `@svl*` | Page title and nav button visibility |
-| `page_display.no_ab_privilege.spec.ts` | `@ess` | Page display without Agent Builder privilege |
-| `page_display.no_assistant_privilege.spec.ts` | `@ess` | Page display without AI Assistant privilege |
-| `ai_assistant_visibility.spec.ts` | `@ess` | AI Assistant Visibility setting behavior |
-| `ai_assistant_visibility.no_assistant_privilege.spec.ts` | `@ess` | AI Assistant Visibility without AI Assistant privilege |
-| `selection_modal.spec.ts` | `@ess` | Selection modal interactions |
-| `selection_modal.no_ab_privilege.spec.ts` | `@ess` | Selection modal without Agent Builder privilege |
-| `selection_modal.no_assistant_privilege.spec.ts` | `@ess` | Selection modal without AI Assistant privilege |
-| `confirmation_modal.spec.ts` | `@ess`, `@svl*` | Confirmation modal when switching to Agent mode |
-| `documentation_section.spec.ts` | `@ess`, `@svl*` | Documentation section visibility in Agent mode |
-| `agent_nav_button.no_ab_privilege.spec.ts` | `@ess` | Agent nav button without Agent Builder privilege |
-| `agent_mode_complete_flow.spec.ts` | `@ess`, `@svl*` | Complete Agent mode switching flow |
-| `solution_space.security.spec.ts` | `@ess` | Agent mode in Security solution space |
-| `solution_space.observability.spec.ts` | `@ess` | Agent mode in Observability solution space |
-| `solution_space.search.spec.ts` | `@ess` | Classic mode in Search solution space |
+
+| Test File                                                | Tags                                       | Description                                            |
+| -------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| `page_display.spec.ts`                                   | `@ess`, `@svl*` | Page title and nav button visibility                   |
+| `page_display.no_ab_privilege.spec.ts`                   | `@ess`, `@svl*` | Page display without Agent Builder privilege           |
+| `page_display.no_assistant_privilege.spec.ts`            | `@ess`, `@svl*` | Page display without AI Assistant privilege            |
+| `ai_assistant_visibility.spec.ts`                        | `@ess`                                     | AI Assistant Visibility setting behavior               |
+| `ai_assistant_visibility.no_assistant_privilege.spec.ts` | `@ess`, `@svlOblt`, `@svlSecurity`         | AI Assistant Visibility without AI Assistant privilege |
+| `selection_modal.spec.ts`                                | `@ess`                                     | Selection modal interactions                           |
+| `selection_modal.no_ab_privilege.spec.ts`                | `@ess`                                     | Selection modal without Agent Builder privilege        |
+| `selection_modal.no_assistant_privilege.spec.ts`         | `@ess`                                     | Selection modal without AI Assistant privilege         |
+| `confirmation_modal.spec.ts`                             | `@ess`, `@svlOblt`, `@svlSecurity`         | Confirmation modal when switching to Agent mode        |
+| `documentation_section.spec.ts`                          | `@ess`, `@svlOblt`, `@svlSecurity`         | Documentation section visibility in Agent mode         |
+| `agent_nav_button.no_ab_privilege.spec.ts`               | `@ess`, `@svl*` | Agent nav button without Agent Builder privilege       |
+| `agent_mode_complete_flow.spec.ts`                       | `@ess`, `@svlOblt`, `@svlSecurity`         | Complete Agent mode switching flow                     |
+| `solution_space.security.spec.ts`                        | `@ess`                                     | Agent mode in Security solution space                  |
+| `solution_space.observability.spec.ts`                   | `@ess`                                     | Agent mode in Observability solution space             |
+| `solution_space.search.spec.ts`                          | `@ess`                                     | Classic mode in Search solution space                  |
+
 
 ## Page Object Methods
 
 Key methods in `GenAiSettingsPage`:
 
-| Method | Description |
-|--------|-------------|
-| `navigateTo()` | Navigate to GenAI Settings page (works in any space) |
-| `getChatExperienceField()` | Get the Chat Experience dropdown |
-| `getAIAgentNavButton()` | Get the AI Agent nav button |
-| `getAiAssistantNavButton()` | Get the AI Assistant nav button (classic) |
-| `getAiAssistantNavButtonSecurity()` | Get the AI Assistant nav button (Security) |
-| `getAIAssistantNavButtonObservability()` | Get the AI Assistant nav button (Observability) |
-| `getConfirmModalConfirmButton()` | Get confirm button in Agent mode modal |
-| `getSaveButton()` | Get the save button |
-| `getDocumentationSection()` | Get the documentation section (Agent mode only) |
+
+| Method                                   | Description                                          |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `navigateTo()`                           | Navigate to GenAI Settings page (works in any space) |
+| `getChatExperienceField()`               | Get the Chat Experience dropdown                     |
+| `getAIAgentNavButton()`                  | Get the AI Agent nav button                          |
+| `getAiAssistantNavButton()`              | Get the AI Assistant nav button (Classic)            |
+| `getAiAssistantNavButtonSecurity()`      | Get the AI Assistant nav button (Security)           |
+| `getAIAssistantNavButtonObltSearch()` | Get the AI Assistant nav button (Observability/Search)      |
+| `getConfirmModalConfirmButton()`         | Get confirm button in Agent confirmation modal               |
+| `getSaveButton()`                        | Get the save button                                  |
+| `getDocumentationSection()`              | Get the documentation section (Agent mode only)      |
+
 
 ## Adding New Tests
 
 1. Create a new test file in `ui/parallel_tests/` with descriptive naming:
-   - Feature tests: `feature_name.spec.ts`
-   - Privilege variants: `feature_name.no_ab_privilege.spec.ts`
-   - Solution space tests: `solution_space.solution_name.spec.ts`
-
+  - Feature tests: `feature_name.spec.ts`
+  - Privilege variants: `feature_name.no_ab_privilege.spec.ts`
+  - Solution space tests: `solution_space.solution_name.spec.ts`
 2. Import fixtures:
-   ```typescript
+  ```typescript
    import { expect } from '@kbn/scout';
    import { spaceTest, setSpaceSolution } from '../fixtures';
-   ```
-
+  ```
 3. Use appropriate tags:
-   - `@ess` - ESS/Stateful deployments
-   - `@svlSecurity` - Serverless Security
-   - `@svlOblt` - Serverless Observability
-   - `@svlSearch` - Serverless Search
-
+  - `@ess` - ESS/Stateful deployments
+  - `@svlSecurity` - Serverless Security
+  - `@svlOblt` - Serverless Observability
+  - `@svlSearch` - Serverless Search
 4. Follow the existing patterns for setup/teardown and test organization
+
