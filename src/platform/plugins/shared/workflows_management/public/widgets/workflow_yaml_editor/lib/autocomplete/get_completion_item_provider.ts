@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -88,38 +89,6 @@ export function getCompletionItemProvider(
     // '{' - start of Liquid blocks (e.g., {{ ... }})
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: async (model, position, completionContext) => {
-      // Incremental deduplication accumulator
-      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
-
-      // First, get suggestions from Monaco YAML providers (includes schema-based completion for workflow keys)
-      // This should run even if workflowDefinition is null to allow autocompletion when YAML is invalid
-      const allYamlProviders = getAllYamlProviders();
-      let isIncomplete = false;
-
-      // Call all stored providers and add their suggestions incrementally
-      for (const yamlProvider of allYamlProviders) {
-        if (yamlProvider.provideCompletionItems) {
-          try {
-            const result = await yamlProvider.provideCompletionItems(
-              model,
-              position,
-              completionContext,
-              {} as monaco.CancellationToken
-            );
-            if (result) {
-              mapSuggestions(deduplicatedMap, result.suggestions || []);
-              if (result.incomplete) {
-                isIncomplete = true;
-              }
-            }
-          } catch (error) {
-            // Continue with other providers if one fails
-          }
-        }
-      }
-
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // These require workflowDefinition, so only run if available
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
         editorState,
@@ -127,15 +96,65 @@ export function getCompletionItemProvider(
         position,
         completionContext,
       });
-      if (autocompleteContext) {
-        // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-        const workflowSuggestions = await getSuggestions({
-          ...autocompleteContext,
-          model,
-          position,
-        });
-        mapSuggestions(deduplicatedMap, workflowSuggestions);
+      if (!autocompleteContext) {
+        return {
+          suggestions: [],
+          incomplete: false,
+        };
       }
+
+      // Incremental deduplication accumulator
+      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
+
+      // Check if we're in a context where we should have exclusive suggestions
+      // (e.g., workflow.output's with: block where only declared outputs are valid)
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.path,
+        autocompleteContext.focusedStepInfo,
+        autocompleteContext.yamlDocument,
+        autocompleteContext.absoluteOffset
+      );
+
+      let isIncomplete = false;
+
+      // Only call YAML providers if we're not in an exclusive context
+      // When we're in workflow.output's with block, skip YAML provider regardless of suggestion count
+      // (even if all outputs are provided, we don't want YAML suggesting arbitrary keys)
+      if (!shouldUseExclusiveSuggestions) {
+        // Get suggestions from all stored YAML providers (excluding workflow provider)
+        const allYamlProviders = getAllYamlProviders();
+
+        // Call all stored providers and add their suggestions incrementally
+        for (const yamlProvider of allYamlProviders) {
+          if (yamlProvider.provideCompletionItems) {
+            try {
+              const result = await yamlProvider.provideCompletionItems(
+                model,
+                position,
+                completionContext,
+                {} as monaco.CancellationToken
+              );
+              if (result) {
+                mapSuggestions(deduplicatedMap, result.suggestions || []);
+                if (result.incomplete) {
+                  isIncomplete = true;
+                }
+              }
+            } catch (error) {
+              // Continue with other providers if one fails
+            }
+          }
+        }
+      }
+
+      // Then, get workflow-specific suggestions (variables, connectors, etc.)
+      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
+      const workflowSuggestions = await getSuggestions({
+        ...autocompleteContext,
+        model,
+        position,
+      });
+      mapSuggestions(deduplicatedMap, workflowSuggestions);
 
       return {
         suggestions: Array.from(deduplicatedMap.values()),

@@ -52,6 +52,10 @@ export function getFakeAutocompleteContextParams(
       : undefined,
     computed: computedData,
     connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
+    workflows: {
+      workflows: {},
+      totalWorkflows: 0,
+    },
   } as WorkflowDetailState;
 
   return {
@@ -156,7 +160,7 @@ steps:
         type: console
         with:
           message: "im true, {{steps.|<-}}"
-    else: 
+    else:
       - name: false-step
         type: console
         with:
