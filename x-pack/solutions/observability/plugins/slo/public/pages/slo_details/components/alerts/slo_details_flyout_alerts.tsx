@@ -9,19 +9,38 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import type { SloDetailsAlertsProps } from '.';
+
+const PANEL_TITLE = i18n.translate('xpack.slo.sloDetailsFlyout.alerts.alertsLabel', {
+  defaultMessage: 'Alerts',
+});
+const ALERTS_LINK_TEXT = i18n.translate('xpack.slo.sloDetailsFlyout.alerts.alertsLinkText', {
+  defaultMessage: 'Open in Alerts',
+});
 
 export function SloDetailsFlyoutAlerts({ slo }: SloDetailsAlertsProps) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
 
+  const getAlertsUrl = useAlertsUrl();
+
   return (
     <SloFlyoutPanel
-      title={i18n.translate('xpack.slo.sloDetailsFlyoutAlerts.sloFlyoutPanel.alertsLabel', {
-        defaultMessage: 'Alerts',
-      })}
+      title={PANEL_TITLE}
+      append={
+        <EuiLink
+          href={getAlertsUrl({
+            kuery: `slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"`,
+          })}
+          data-test-subj="sloDetailsFlyoutAlertsLink"
+        >
+          <EuiText size="xs">{ALERTS_LINK_TEXT}</EuiText>
+        </EuiLink>
+      }
     >
       <ObservabilityAlertsTable
         id={SLO_ALERTS_TABLE_ID}
