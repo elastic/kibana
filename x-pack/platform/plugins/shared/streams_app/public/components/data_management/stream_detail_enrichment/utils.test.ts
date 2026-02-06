@@ -43,8 +43,7 @@ describe('utils', () => {
       });
 
       if (result.action === 'grok') {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
         throw new Error('Result is not a grok processor');
       }
@@ -73,8 +72,7 @@ describe('utils', () => {
       });
 
       if (result.action === 'grok') {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
         throw new Error('Result is not a grok processor');
       }
@@ -106,8 +104,7 @@ describe('utils', () => {
       });
 
       if (result.action === 'grok') {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
         throw new Error('Result is not a grok processor');
       }
@@ -139,8 +136,7 @@ describe('utils', () => {
       });
 
       if (result.action === 'grok') {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
         throw new Error('Result is not a grok processor');
       }
