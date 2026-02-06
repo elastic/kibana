@@ -25,5 +25,5 @@ export const transformConnectorResponse = ({
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
-  ...(authMode ? { auth_mode: authMode } : {}),
+  ...(authMode !== undefined ? { auth_mode: authMode } : {}),
 });

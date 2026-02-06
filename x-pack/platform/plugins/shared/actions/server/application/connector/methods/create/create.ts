@@ -126,7 +126,7 @@ export async function create({
           isMissingSecrets: false,
           config: validatedActionTypeConfig as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-          ...(authMode ? { authMode } : {}),
+          ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }
       )
@@ -169,6 +169,6 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    ...(result.attributes.authMode ? { authMode: result.attributes.authMode } : {}),
+    ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
   };
 }

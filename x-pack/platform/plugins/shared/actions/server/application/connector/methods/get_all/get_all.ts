@@ -130,7 +130,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        ...(connector.authMode ? { authMode: connector.authMode } : {}),
+        ...(connector.authMode !== undefined ? { authMode: connector.authMode } : {}),
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));

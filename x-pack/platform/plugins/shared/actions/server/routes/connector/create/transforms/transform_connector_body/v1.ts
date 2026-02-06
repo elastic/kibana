@@ -19,5 +19,5 @@ export const transformCreateConnectorBody = ({
   name,
   config,
   secrets,
-  ...(authMode ? { authMode } : {}),
+  ...(authMode !== undefined ? { authMode } : {}),
 });

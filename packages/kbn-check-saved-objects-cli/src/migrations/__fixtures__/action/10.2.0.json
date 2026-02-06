@@ -1,0 +1,102 @@
+{
+  "10.1.0": [
+    {
+      "name": "Webhook Connector with authType",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post",
+        "authType": "basic"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
+    },
+    {
+      "name": "ServiceNow Connector",
+      "actionTypeId": ".servicenow",
+      "isMissingSecrets": false,
+      "config": {
+        "apiUrl": "https://instance.service-now.com",
+        "authType": "apiKey",
+        "usesTableApi": false
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
+    },
+    {
+      "name": "Slack Connector without authType",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0="
+    },
+    {
+      "name": "Email Connector",
+      "actionTypeId": ".email",
+      "isMissingSecrets": false,
+      "config": {
+        "service": "gmail",
+        "from": "test@example.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
+    }
+  ],
+  "10.2.0": [
+    {
+      "name": "Webhook Connector with authType",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post",
+        "authType": "basic"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "ServiceNow Connector",
+      "actionTypeId": ".servicenow",
+      "isMissingSecrets": false,
+      "config": {
+        "apiUrl": "https://instance.service-now.com",
+        "authType": "apiKey",
+        "usesTableApi": false
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Slack Connector without authType",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0="
+    },
+    {
+      "name": "Email Connector",
+      "actionTypeId": ".email",
+      "isMissingSecrets": false,
+      "config": {
+        "service": "gmail",
+        "from": "test@example.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
+    }
+  ]
+}
