@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { partition } from 'lodash';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import {
@@ -51,7 +52,7 @@ export class DispatcherService implements DispatcherServiceContract {
       this.fetchAlertEpisodeSuppressions(alertEpisodes)
     );
 
-    const suppressedEpisodes = alertEpisodes.filter((episode) =>
+    const [suppressedEpisodes, nonSuppressedEpisodes] = partition(alertEpisodes, (episode) =>
       suppressions.some(
         (s) =>
           s.should_suppress &&
@@ -60,36 +61,47 @@ export class DispatcherService implements DispatcherServiceContract {
           (s.episode_id == null || s.episode_id === episode.episode_id)
       )
     );
-    const nonSuppressedEpisodes = alertEpisodes.filter(
-      (episode) => !suppressedEpisodes.includes(episode)
-    );
 
     this.logger.info({
       message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressedEpisodes.length} suppressed, ${nonSuppressedEpisodes.length} not suppressed`,
     });
 
-    const now = new Date().toISOString();
-    const toFireEventAction = (alertEpisode: AlertEpisode, isSuppressed: boolean): AlertAction => ({
-      '@timestamp': now,
-      group_hash: alertEpisode.group_hash,
-      last_series_event_timestamp: alertEpisode.last_event_timestamp,
-      actor: 'system',
-      action_type: isSuppressed ? 'suppress' : 'fire',
-      rule_id: alertEpisode.rule_id,
-      source: 'internal',
-    });
-
+    const now = new Date();
     await withDispatcherSpan('dispatcher:bulk-index-actions', () =>
       this.storageService.bulkIndexDocs<AlertAction>({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: [
-          ...suppressedEpisodes.map((episode) => toFireEventAction(episode, true)),
-          ...nonSuppressedEpisodes.map((episode) => toFireEventAction(episode, false)),
+          ...suppressedEpisodes.map((episode) =>
+            this.toAction({ episode, isSuppressed: true, now })
+          ),
+          ...nonSuppressedEpisodes.map((episode) =>
+            this.toAction({ episode, isSuppressed: false, now })
+          ),
         ],
       })
     );
 
     return { startedAt };
+  }
+
+  private toAction({
+    episode,
+    isSuppressed,
+    now,
+  }: {
+    episode: AlertEpisode;
+    isSuppressed: boolean;
+    now: Date;
+  }): AlertAction {
+    return {
+      '@timestamp': now.toISOString(),
+      group_hash: episode.group_hash,
+      last_series_event_timestamp: episode.last_event_timestamp,
+      actor: 'system',
+      action_type: isSuppressed ? 'suppress' : 'fire',
+      rule_id: episode.rule_id,
+      source: 'internal',
+    };
   }
 
   private async fetchAlertEpisodeSuppressions(
