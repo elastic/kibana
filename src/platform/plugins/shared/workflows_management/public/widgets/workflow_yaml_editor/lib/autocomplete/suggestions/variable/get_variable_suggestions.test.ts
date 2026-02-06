@@ -60,6 +60,10 @@ describe('getVariableSuggestions', () => {
     path: ['steps', 0, 'with', 'message'],
     absoluteOffset: 50,
     dynamicConnectorTypes: null,
+    workflows: {
+      workflows: {},
+      totalWorkflows: 0,
+    },
     isInLiquidBlock: false,
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
