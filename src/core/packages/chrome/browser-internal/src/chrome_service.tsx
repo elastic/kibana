@@ -24,6 +24,7 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
@@ -75,6 +76,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly sidebar: SidebarService;
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
@@ -82,13 +84,16 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
+    this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
 
-    return {};
+    return {
+      sidebar: this.sidebar.setup(),
+    };
   }
 
   public async start({
@@ -154,6 +159,8 @@ export class ChromeService {
       uiSettings,
     });
 
+    const sidebar = this.sidebar.start();
+
     // 5. Setup app change handler (resets chrome state on app navigation)
     setupAppChangeHandler({
       currentAppId$: application.currentAppId$,
@@ -214,6 +221,7 @@ export class ChromeService {
         projectNavigation,
       },
       components,
+      sidebar,
     });
   }
 

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { type ReactNode } from 'react';
 import { map } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -29,6 +32,7 @@ interface ChromeComponents {
   getHeaderBanner: () => JSX.Element;
   getChromelessHeader: () => JSX.Element;
   getProjectAppMenu: () => JSX.Element;
+  getSidebar: () => JSX.Element;
 }
 
 export interface ChromeApiDeps {
@@ -41,12 +45,14 @@ export interface ChromeApiDeps {
     projectNavigation: ProjectNavigationStart;
   };
   components: ChromeComponents;
+  sidebar: SidebarStart;
 }
 
 export function createChromeApi({
   state,
   services,
   components,
+  sidebar,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
@@ -88,6 +94,10 @@ export function createChromeApi({
     getHeaderBanner: components.getHeaderBanner,
     getChromelessHeader: components.getChromelessHeader,
     getProjectAppMenuComponent: components.getProjectAppMenu,
+    getSidebarComponent: components.getSidebar,
+    withProvider: (children: ReactNode) => {
+      return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
+    },
 
     // Sub-services
     navControls: services.navControls,
@@ -168,5 +178,6 @@ export function createChromeApi({
         InternalChromeStart['getActiveSolutionNavId$']
       >,
     project,
+    sidebar,
   };
 }

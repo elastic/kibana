@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
-import { Header, LoadingIndicator, ProjectHeader } from '.';
+import { Header, LoadingIndicator, ProjectHeader, Sidebar } from '.';
 import { HeaderTopBanner } from './header/header_top_banner';
 import { AppMenuBar } from './project/app_menu';
 import { GridLayoutProjectSideNav } from './project/sidenav/grid_layout_sidenav';
@@ -176,6 +176,10 @@ export const createChromeComponents = ({
     return <AppMenuBar appMenuActions$={appMenuActions$} appMenu$={state.appMenu.$} />;
   };
 
+  const getSidebar = () => {
+    return <Sidebar />;
+  };
+
   return {
     getClassicHeader,
     getProjectHeader,
@@ -183,5 +187,6 @@ export const createChromeComponents = ({
     getHeaderBanner,
     getChromelessHeader,
     getProjectAppMenu,
+    getSidebar,
   };
 };
