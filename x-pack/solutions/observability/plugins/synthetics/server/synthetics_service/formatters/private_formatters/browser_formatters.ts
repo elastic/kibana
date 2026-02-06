@@ -38,7 +38,7 @@ export const throttlingFormatter: Formatter = (fields) => {
 export const browserTimeoutFormatterPrivate: Formatter = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   if (!value) return null;
-  
+
   // Heartbeat adds an overhead to browser monitor timeouts, so we subtract it and
   // clamp to the overhead to avoid generating an invalid/too-small timeout.
   if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
@@ -49,7 +49,7 @@ export const browserTimeoutFormatterPrivate: Formatter = (fields) => {
     );
     return `${adjustedTimeout}s`;
   }
-    
+
   return `${value}s`;
 };
 

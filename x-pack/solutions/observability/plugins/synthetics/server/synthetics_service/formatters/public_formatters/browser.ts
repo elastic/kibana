@@ -40,7 +40,7 @@ export const browserTimeoutFormatterPublic: Formatter = (fields) => {
   if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
     return null;
   }
-  
+
   // For other types (should not reach here, but for safety)
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   return value ? `${value}s` : null;
