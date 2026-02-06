@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-/**
- * Forcefully disable the feature while in development.
- */
-export const SKILLS_ENABLED = false;
+export { FEEDBACK_SUBMITTED_EVENT_TYPE, feedbackSubmittedEventType } from './telemetry';

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-/**
- * Forcefully disable the feature while in development.
- */
-export const FILESTORE_ENABLED = false;
+export type { FeedbackQuestion, FeedbackSubmittedData, FeedbackFormData } from './types';
