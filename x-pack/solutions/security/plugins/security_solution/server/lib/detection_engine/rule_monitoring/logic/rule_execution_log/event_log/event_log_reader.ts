@@ -27,7 +27,6 @@ import {
 
 import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { kqlAnd, kqlOr } from '../../utils/kql';
@@ -259,27 +258,6 @@ const normalizeEventType = (event: RawEvent): RuleExecutionEventType => {
 
   const result = RuleExecutionEventType.safeParse(value);
   return result.success ? result.data : RuleExecutionEventTypeEnum.message;
-};
-
-const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): string => {
-  if (
-    type === RuleExecutionEventTypeEnum.message ||
-    type === RuleExecutionEventTypeEnum['status-change']
-  ) {
-    return event.message || '';
-  }
-
-  if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
-    invariant(
-      event.kibana?.alert?.rule?.execution?.metrics,
-      'Required "kibana.alert.rule.execution.metrics" field is not found'
-    );
-
-    return JSON.stringify(event.kibana.alert.rule.execution.metrics);
-  }
-
-  assertUnreachable(type);
-  return '';
 };
 
 const normalizeEventDetails = (
