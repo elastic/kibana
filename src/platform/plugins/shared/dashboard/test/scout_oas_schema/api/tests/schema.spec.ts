@@ -62,6 +62,9 @@ apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () 
         'application/json; Elastic-Api-Version=1'
       ].schema;
     const panelsSchema = createBodySchema.properties.data.properties.panels;
+    expect(panelsSchema).toBeDefined();
+    expect(panelsSchema.items?.anyOf?.length).toBeGreaterThan(0);
+
     const panelSchema = panelsSchema.items.anyOf.find(
       (schema: { properties: Record<string, unknown> }) => 'config' in schema.properties
     );
