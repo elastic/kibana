@@ -48,7 +48,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/test",
     "@kbn/esql-language",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }

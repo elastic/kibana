@@ -25,6 +25,7 @@ import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
 } from './types';
+import { withDispatcherSpan } from './with_dispatcher_span';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
@@ -43,8 +44,12 @@ export class DispatcherService implements DispatcherServiceContract {
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
 
-    const alertEpisodes = await this.fetchAlertEpisodes(previousStartedAt);
-    const suppressions = await this.fetchAlertEpisodeSuppressions(alertEpisodes);
+    const alertEpisodes = await withDispatcherSpan('dispatcher:fetch-alert-episodes', () =>
+      this.fetchAlertEpisodes(previousStartedAt)
+    );
+    const suppressions = await withDispatcherSpan('dispatcher:fetch-suppressions', () =>
+      this.fetchAlertEpisodeSuppressions(alertEpisodes)
+    );
 
     const suppressedEpisodes = alertEpisodes.filter((episode) =>
       suppressions.some(
@@ -74,13 +79,15 @@ export class DispatcherService implements DispatcherServiceContract {
       source: 'internal',
     });
 
-    await this.storageService.bulkIndexDocs<AlertAction>({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        ...suppressedEpisodes.map((episode) => toFireEventAction(episode, true)),
-        ...nonSuppressedEpisodes.map((episode) => toFireEventAction(episode, false)),
-      ],
-    });
+    await withDispatcherSpan('dispatcher:bulk-index-actions', () =>
+      this.storageService.bulkIndexDocs<AlertAction>({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        docs: [
+          ...suppressedEpisodes.map((episode) => toFireEventAction(episode, true)),
+          ...nonSuppressedEpisodes.map((episode) => toFireEventAction(episode, false)),
+        ],
+      })
+    );
 
     return { startedAt };
   }
