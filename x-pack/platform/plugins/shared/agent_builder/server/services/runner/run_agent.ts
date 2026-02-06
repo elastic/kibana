@@ -54,7 +54,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  // Fetch experimental features setting and convert to ExperimentalFeatures object
+  // fetch experimental features setting to build experimental feature list
   const soClient = savedObjects.getScopedClient(request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
   const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
