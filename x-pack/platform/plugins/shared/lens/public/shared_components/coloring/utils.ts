@@ -29,6 +29,11 @@ import type { KbnPalettes } from '@kbn/palettes';
 import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '@kbn/lens-common';
 
 /**
+ * Determines if a data type is numeric.
+ */
+export const isDataTypeNumeric = (dataType?: string): boolean => dataType === 'number';
+
+/**
  * Returns array of colors for provided palette or colorMapping
  */
 export function getPaletteDisplayColors(
@@ -60,10 +65,10 @@ export function getAccessorTypeFromOperation(
   // isNotNumeric('unknown') = true, which may be wrong. Recalculate from actual data.
   // For form_based: trust operation.isBucketed as it's explicitly set by the operation definition.
   const isBucketed =
-    useFallback && isTextBased ? dataTypeFallback !== 'number' : operation?.isBucketed;
+    useFallback && isTextBased ? !isDataTypeNumeric(dataTypeFallback) : operation?.isBucketed;
 
   const isNumericTypeFromOperation = Boolean(
-    !isBucketed && dataType === 'number' && !hasArraySupport
+    !isBucketed && isDataTypeNumeric(dataType) && !hasArraySupport
   );
   const isBucketableTypeFromOperationType = Boolean(
     isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
