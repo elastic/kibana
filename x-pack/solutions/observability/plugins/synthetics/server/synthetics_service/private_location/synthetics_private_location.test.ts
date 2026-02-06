@@ -286,7 +286,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[3].streams[1].vars.timeout).toStrictEqual({
+    expect(test.formattedPolicy.inputs[3].streams[1].vars?.timeout).toStrictEqual({
       type: 'text',
       value: '30s',
     });
