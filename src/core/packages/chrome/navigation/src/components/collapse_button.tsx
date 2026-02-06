@@ -25,12 +25,18 @@ import {
   EuiToolTip,
   useEuiTheme,
   euiDragDropReorder,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import type { DropResult } from '@hello-pangea/dnd';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PRIMARY_NAVIGATION_ID, TOOLTIP_OFFSET } from '../constants';
 import type { MenuItem } from '../../types';
 import type { IconType } from '@elastic/eui';
@@ -98,6 +104,15 @@ export const SideNavCollapseButton: FC<Props> = ({
   const NAV_ITEMS_VISIBILITY_KEY = 'core.chrome.sideNav.itemsVisibility';
   const isLocked = useCallback((id: string) => LOCKED_IDS.includes(id.toLowerCase()), []);
 
+  // Track initial state for change detection
+  const [initialState, setInitialState] = useState<{
+    showLabels: boolean;
+    navItemsConfig: NavItemConfig[];
+  } | null>(null);
+
+  // Local state for modal (not saved until Apply is clicked)
+  const [localShowLabels, setLocalShowLabels] = useState(showLabels);
+
   // Initialize nav items config from primaryItems with saved preferences
   const [navItemsConfig, setNavItemsConfig] = useState<NavItemConfig[]>(() => {
     // Load saved order and visibility from localStorage
@@ -141,7 +156,13 @@ export const SideNavCollapseButton: FC<Props> = ({
     return [...lockedItems, ...sortedUnlocked];
   });
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    // Reset local state when closing
+    setLocalShowLabels(showLabels);
+    setInitialState(null);
+  };
+
   const openModal = useCallback(() => {
     // Sync state when opening modal - load current preferences
     const NAV_ITEMS_ORDER_KEY = 'core.chrome.sideNav.itemsOrder';
@@ -182,9 +203,18 @@ export const SideNavCollapseButton: FC<Props> = ({
           .concat(unlockedItems.filter((item) => !savedOrder.includes(item.id)))
       : unlockedItems;
 
-    setNavItemsConfig([...lockedItems, ...sortedUnlocked]);
+    const initialConfig = [...lockedItems, ...sortedUnlocked];
+    setNavItemsConfig(initialConfig);
+    setLocalShowLabels(showLabels);
+    
+    // Store initial state for change detection
+    setInitialState({
+      showLabels,
+      navItemsConfig: initialConfig,
+    });
+    
     setIsModalOpen(true);
-  }, [primaryItems, isLocked]);
+  }, [primaryItems, isLocked, showLabels]);
 
   // Expose openModal function globally and listen for custom event
   useEffect(() => {
@@ -226,14 +256,9 @@ export const SideNavCollapseButton: FC<Props> = ({
       const newItems = [...lockedItems, ...reorderedUnlocked];
       
       setNavItemsConfig(newItems);
-
-      // Immediately call the callback to update parent state (only unlocked items)
-      if (onSetNavItemsOrder) {
-        const unlockedOrder = reorderedUnlocked.map((item) => item.id);
-        onSetNavItemsOrder(unlockedOrder);
-      }
+      // Don't save immediately - wait for Apply button
     },
-    [navItemsConfig, onSetNavItemsOrder]
+    [navItemsConfig]
   );
 
   const handleToggleVisibility = useCallback(
@@ -241,14 +266,81 @@ export const SideNavCollapseButton: FC<Props> = ({
       setNavItemsConfig((prev) =>
         prev.map((item) => (item.id === itemId ? { ...item, visible } : item))
       );
-
-      // Immediately call the callback to update parent state
-      if (onSetNavItemVisibility) {
-        onSetNavItemVisibility(itemId, visible);
-      }
+      // Don't save immediately - wait for Apply button
     },
-    [onSetNavItemVisibility]
+    []
   );
+
+  // Calculate change count
+  const changeCount = useMemo(() => {
+    if (!initialState) return 0;
+    
+    let count = 0;
+    
+    // Check showLabels change
+    if (localShowLabels !== initialState.showLabels) {
+      count++;
+    }
+    
+    // Check navItemsConfig changes (order or visibility)
+    const initialOrder = initialState.navItemsConfig.map((item) => item.id);
+    const currentOrder = navItemsConfig.map((item) => item.id);
+    const orderChanged = JSON.stringify(initialOrder) !== JSON.stringify(currentOrder);
+    if (orderChanged) {
+      count++;
+    }
+    
+    // Check visibility changes
+    const visibilityChanges = initialState.navItemsConfig.filter((initialItem) => {
+      const currentItem = navItemsConfig.find((item) => item.id === initialItem.id);
+      return currentItem && initialItem.visible !== currentItem.visible;
+    }).length;
+    
+    count += visibilityChanges;
+    
+    return count;
+  }, [initialState, localShowLabels, navItemsConfig]);
+
+  const hasChanges = changeCount > 0;
+
+  // Handle discard - reset to initial state
+  const handleDiscard = useCallback(() => {
+    if (!initialState) return;
+    setLocalShowLabels(initialState.showLabels);
+    setNavItemsConfig(initialState.navItemsConfig);
+  }, [initialState]);
+
+  // Handle apply - save changes and close modal
+  const handleApply = useCallback(() => {
+    if (!hasChanges) return;
+    
+    // Save showLabels
+    if (localShowLabels !== showLabels) {
+      onSetShowLabels(localShowLabels);
+    }
+    
+    // Save nav items order (only unlocked items)
+    const unlockedItems = navItemsConfig.filter((item) => !item.isLocked);
+    const unlockedOrder = unlockedItems.map((item) => item.id);
+    if (onSetNavItemsOrder) {
+      onSetNavItemsOrder(unlockedOrder);
+    }
+    
+    // Save nav items visibility
+    navItemsConfig.forEach((item) => {
+      const initialItem = initialState?.navItemsConfig.find((i) => i.id === item.id);
+      if (!initialItem || initialItem.visible !== item.visible) {
+        if (onSetNavItemVisibility) {
+          onSetNavItemVisibility(item.id, item.visible);
+        }
+      }
+    });
+    
+    // Close modal after saving
+    setTimeout(() => {
+      closeModal();
+    }, 100);
+  }, [hasChanges, localShowLabels, showLabels, navItemsConfig, initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
 
   const button = (
     <EuiButtonIcon
@@ -292,8 +384,8 @@ export const SideNavCollapseButton: FC<Props> = ({
         <EuiModal
           onClose={closeModal}
           aria-labelledby="navigation-modal-title"
-          maxWidth={400}
-          style={{ width: '400px' }}
+          maxWidth={500}
+          style={{ width: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
           outsideClickCloses={true}
         >
           <EuiModalHeader>
@@ -303,13 +395,13 @@ export const SideNavCollapseButton: FC<Props> = ({
               })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
-          <EuiModalBody>
+          <EuiModalBody style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
             <EuiSwitch
               label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
                 defaultMessage: 'Show labels',
               })}
-              checked={showLabels}
-              onChange={(e) => onSetShowLabels(e.target.checked)}
+              checked={localShowLabels}
+              onChange={(e) => setLocalShowLabels(e.target.checked)}
             />
             <EuiSpacer size="l" />
             <EuiTitle size="xs">
@@ -409,6 +501,57 @@ export const SideNavCollapseButton: FC<Props> = ({
               </EuiDroppable>
             </EuiDragDropContext>
           </EuiModalBody>
+          {/* Fixed footer with save/discard buttons */}
+          <div
+            css={css`
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              padding: ${euiTheme.size.m};
+              background: ${euiTheme.colors.emptyShade};
+              border-top: ${euiTheme.border.thin};
+            `}
+          >
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              {hasChanges && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="success">
+                      <FormattedMessage
+                        id="core.ui.chrome.sideNavigation.unsavedChangesMessage"
+                        defaultMessage="{count, plural, one {# unsaved change} other {# unsaved changes}}"
+                        values={{ count: changeCount }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty 
+                      onClick={handleDiscard} 
+                      color="text"
+                    >
+                      <FormattedMessage
+                        id="core.ui.chrome.sideNavigation.discardChangesButton"
+                        defaultMessage="Discard"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={handleApply}
+                  fill
+                  disabled={!hasChanges}
+                >
+                  <FormattedMessage
+                    id="core.ui.chrome.sideNavigation.applyChangesButton"
+                    defaultMessage="Apply"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </EuiModal>
       )}
     </>
