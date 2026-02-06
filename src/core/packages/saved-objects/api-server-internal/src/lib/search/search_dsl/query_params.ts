@@ -395,14 +395,22 @@ const getFieldsByQueryType = ({
 
   types.forEach((type) => {
     searchFields.forEach((searchField) => {
-      const isFieldDefinedAsNested = searchField.split('.').length > 1;
-      const absoluteFieldPath = `${type}.${searchField}`;
-      const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
-      const parentNodeType = getProperty(mappings, parentNode)?.type;
+      const fieldPathSegments = searchField.split('.');
+      const isFieldDefinedAsNested = fieldPathSegments.length > 1;
+      let closestAncestorMappedAsNested: string | null = null;
 
-      if (isFieldDefinedAsNested && parentNodeType === 'nested') {
-        nestedQueryFields.set(parentNode, [
-          ...(nestedQueryFields.get(parentNode) || []),
+      while (fieldPathSegments.length > 1) {
+        fieldPathSegments.pop();
+        closestAncestorMappedAsNested = [type, ...fieldPathSegments].join('.');
+        const fieldMapping = getProperty(mappings, closestAncestorMappedAsNested);
+        if (fieldMapping?.type === 'nested') {
+          break;
+        }
+      }
+
+      if (isFieldDefinedAsNested && closestAncestorMappedAsNested) {
+        nestedQueryFields.set(closestAncestorMappedAsNested, [
+          ...(nestedQueryFields.get(closestAncestorMappedAsNested) || []),
           `${type}.${searchField}`,
         ]);
       } else {
