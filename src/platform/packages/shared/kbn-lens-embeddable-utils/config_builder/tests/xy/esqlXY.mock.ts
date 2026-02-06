@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { XYDataLayerConfig } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+
+const LAYER_ID = 'c2eacea8-91d4-4372-a82d-8760979ff893';
 
 export const esqlChart: LensAttributes = {
   title: 'Bar vertical stacked',
@@ -128,4 +131,70 @@ export const esqlChart: LensAttributes = {
   },
   visualizationType: 'lnsXY',
   version: 2,
+};
+
+/**
+ * Derives from esqlChart, adding a breakdown column (category) with colorMapping assignments
+ */
+export const esqlChartWithBreakdownColorMapping: LensAttributes = {
+  ...esqlChart,
+  title: 'ES|QL bar with breakdown color mapping',
+  state: {
+    ...esqlChart.state,
+    datasourceStates: {
+      textBased: {
+        layers: {
+          [LAYER_ID]: {
+            ...esqlChart.state.datasourceStates.textBased!.layers[LAYER_ID],
+            query: {
+              esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)  | STATS count = COUNT(*) BY buckets, category',
+            },
+            columns: [
+              ...esqlChart.state.datasourceStates.textBased!.layers[LAYER_ID].columns,
+              {
+                columnId: 'category',
+                fieldName: 'category',
+                label: 'category',
+                customLabel: false,
+                meta: {
+                  type: 'string',
+                  esType: 'keyword',
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    query: {
+      esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)  | STATS count = COUNT(*) BY buckets, category',
+    },
+    visualization: {
+      ...(esqlChart.state.visualization as Record<string, unknown>),
+      layers: [
+        {
+          ...(esqlChart.state.visualization as { layers: XYDataLayerConfig[] }).layers[0],
+          splitAccessors: ['category'],
+          colorMapping: {
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: 'Clothing' }],
+                color: { type: 'colorCode', colorCode: '#ff0000' },
+                touched: false,
+              },
+            ],
+            specialAssignments: [
+              {
+                rules: [{ type: 'other' }],
+                color: { type: 'loop' },
+                touched: false,
+              },
+            ],
+            paletteId: 'default',
+            colorMode: { type: 'categorical' },
+          },
+        },
+      ],
+    },
+  },
 };
