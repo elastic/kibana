@@ -84,23 +84,32 @@ export const getInterfaceRateFields = (
     return null;
   }
 
-  // Check for filter-wrapped pattern first: {metricId}_dimension.aggs.{metricId}_interfaces...
   if (isFilteredInterfaceRateAgg(metric)) {
     const basePath = `${metricId}_dimension.aggs.${metricId}_interfaces`;
+    const field = get(metric, `${basePath}.aggregations.${metricId}_interface_max.max.field`) as
+      | string
+      | undefined;
+    const interfaceField = get(metric, `${basePath}.terms.field`) as string | undefined;
+    if (!field || !interfaceField) {
+      return null;
+    }
     return {
-      field: get(metric, `${basePath}.aggregations.${metricId}_interface_max.max.field`) as string,
-      interfaceField: get(metric, `${basePath}.terms.field`) as string,
+      field,
+      interfaceField,
       filter: get(metric, `${metricId}_dimension.filter`) as estypes.QueryDslQueryContainer,
     };
   }
 
-  // Check for direct pattern: {metricId}_interfaces...
   if (hasInterfaceRatePattern(metric)) {
     const basePath = `${metricId}_interfaces`;
-    return {
-      field: get(metric, `${basePath}.aggregations.${metricId}_interface_max.max.field`) as string,
-      interfaceField: get(metric, `${basePath}.terms.field`) as string,
-    };
+    const field = get(metric, `${basePath}.aggregations.${metricId}_interface_max.max.field`) as
+      | string
+      | undefined;
+    const interfaceField = get(metric, `${basePath}.terms.field`) as string | undefined;
+    if (!field || !interfaceField) {
+      return null;
+    }
+    return { field, interfaceField };
   }
 
   return null;

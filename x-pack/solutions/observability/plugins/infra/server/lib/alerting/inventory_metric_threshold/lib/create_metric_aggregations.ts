@@ -20,7 +20,6 @@ import { isMetricRate, isCustomMetricRate, getInterfaceRateFields } from './is_r
 import { createRateAggs } from './create_rate_aggs';
 import { createLogRateAggs } from './create_log_rate_aggs';
 import { createRateAggsWithInterface } from './create_rate_agg_with_interface';
-import { createRateAggsWithInterfaceAndFilter } from './create_rate_agg_with_interface_and_filter';
 
 export const createMetricAggregations = async (
   timerange: InfraTimerangeInput,
@@ -50,9 +49,7 @@ export const createMetricAggregations = async (
     const interfaceRateConfig = getInterfaceRateFields(metricAgg, metric);
     if (interfaceRateConfig) {
       const { field, interfaceField, filter } = interfaceRateConfig;
-      return filter
-        ? createRateAggsWithInterfaceAndFilter(timerange, metric, field, interfaceField, filter)
-        : createRateAggsWithInterface(timerange, metric, field, interfaceField);
+      return createRateAggsWithInterface(timerange, metric, field, interfaceField, filter);
     }
 
     if (isMetricRate(metricAgg)) {

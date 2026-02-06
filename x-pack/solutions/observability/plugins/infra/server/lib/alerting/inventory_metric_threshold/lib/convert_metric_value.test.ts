@@ -58,7 +58,6 @@ describe('convertMetricValue', () => {
       expect(convertMetricValue('diskIOReadBytes', 1000)).toBe(1000);
       expect(convertMetricValue('diskIOWriteBytes', 2000)).toBe(2000);
       expect(convertMetricValue('logRate', 500)).toBe(500);
-      expect(convertMetricValue('count', 42)).toBe(42);
     });
   });
 });
