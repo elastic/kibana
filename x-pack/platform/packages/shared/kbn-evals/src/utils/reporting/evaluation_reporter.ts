@@ -45,7 +45,9 @@ export function createDefaultTerminalReporter(
         .join(', ');
 
       log.error(
-        `No evaluation results found for run ID: ${runId}${filterSuffix ? ` (${filterSuffix})` : ''}`
+        `No evaluation results found for run ID: ${runId}${
+          filterSuffix ? ` (${filterSuffix})` : ''
+        }`
       );
       return;
     }
