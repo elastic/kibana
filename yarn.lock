@@ -8485,7 +8485,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-info@link:src/platform/packages/private/kbn-scout-info":
+"@kbn/scout-info@link:src/platform/packages/private/kbn_scout_info":
   version "0.0.0"
   uid ""
 

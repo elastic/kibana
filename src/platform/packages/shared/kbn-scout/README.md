@@ -576,4 +576,4 @@ On merge commits, Scout tests run in a non-blocking mode.
 
 ### AI prompts to help you migrate from FTR
 
-The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-scout-info/llms) to help you migrate FTR test files.
+The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn_scout_info/llms) to help you migrate FTR test files.

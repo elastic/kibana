@@ -41,8 +41,8 @@ Generate empty Scout skeleton files for this plugin (look at all files in this f
 @x-pack/solutions/observability/test/functional/apps/uptime
 
 Instructions:
-@src/platform/packages/private/kbn-scout-info/llms/generate-scout-skeleton-from-ftr-test.md contains instructions on how to perform this task
-@src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
+@src/platform/packages/private/kbn_scout_info/llms/generate-scout-skeleton-from-ftr-test.md contains instructions on how to perform this task
+@src/platform/packages/private/kbn_scout_info/llms/what-is-scout.md contains a high-level description of the Scout framework
 ```
 
 **Checkpoint**: you should now see one or more Scout test files (one for each FTR test) and a Playwright configuration file. The test cases will contain `// TODO` comments to guide the next steps.
@@ -60,10 +60,10 @@ Generate a Scout page object for this FTR file (or update existing ones):
 @x-pack/solutions/observability/test/functional/apps/uptime/settings.ts
 
 Instructions:
-@src/platform/packages/private/kbn-scout-info/llms/generate-scout-page-objects.md contains instructions on how to perform this task
-@src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
-@src/platform/packages/private/kbn-scout-info/llms/scout-page-objects.md contains a high-level overview of page objects in Scout
-@src/platform/packages/private/kbn-scout-info/llms/scout-browser-auth.md contains information on how browser authentication works in Scout
+@src/platform/packages/private/kbn_scout_info/llms/generate-scout-page-objects.md contains instructions on how to perform this task
+@src/platform/packages/private/kbn_scout_info/llms/what-is-scout.md contains a high-level description of the Scout framework
+@src/platform/packages/private/kbn_scout_info/llms/scout-page-objects.md contains a high-level overview of page objects in Scout
+@src/platform/packages/private/kbn_scout_info/llms/scout-browser-auth.md contains information on how browser authentication works in Scout
 ```
 
 **Checkpoint**: the AI will generate or modify Scout page objects. For this step, you may need to manually move these files to the correct directory (either the plugin's page objects folder, or one of the Scout packages), and register them in the `pageObjects` fixture. Refer to the official Scout documentation.
@@ -95,8 +95,8 @@ Guidelines:
 - Register the new API helper in the `index.ts` file.
 
 Instructions:
-@src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
-@src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md contains a high-level overview of API services in Scout
+@src/platform/packages/private/kbn_scout_info/llms/what-is-scout.md contains a high-level description of the Scout framework
+@src/platform/packages/private/kbn_scout_info/llms/scout-api-services.md contains a high-level overview of API services in Scout
 ```
 
 **Checkpoint**: the AI should now have generated or updated a Scout API service that your tests can use. For this step, you may need to manually move these files to the correct directory (one of the Scout packages),

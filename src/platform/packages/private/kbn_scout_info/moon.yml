@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-qa'
   metadata:
-    sourceRoot: src/platform/packages/private/kbn-scout-info
+    sourceRoot: src/platform/packages/private/kbn_scout_info
 dependsOn:
   - '@kbn/repo-info'
 tags:

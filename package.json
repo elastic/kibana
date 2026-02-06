@@ -1725,7 +1725,7 @@
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/sample-log-parser": "link:x-pack/platform/packages/shared/kbn-sample-parser",
     "@kbn/scout": "link:src/platform/packages/shared/kbn-scout",
-    "@kbn/scout-info": "link:src/platform/packages/private/kbn-scout-info",
+    "@kbn/scout-info": "link:src/platform/packages/private/kbn_scout_info",
     "@kbn/scout-oblt": "link:x-pack/solutions/observability/packages/kbn-scout-oblt",
     "@kbn/scout-release-testing": "link:x-pack/platform/packages/private/kbn-scout-release-testing",
     "@kbn/scout-reporting": "link:src/platform/packages/private/kbn-scout-reporting",
