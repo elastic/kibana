@@ -9,6 +9,18 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Model } from '@kbn/inference-common';
 
+interface BulkDroppedDocument<TDocument> {
+  status?: number;
+  error?: {
+    type?: string;
+    reason?: string;
+    caused_by?: unknown;
+    root_cause?: unknown;
+  };
+  operation?: unknown;
+  document?: TDocument;
+}
+
 export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
@@ -243,8 +255,9 @@ export class EvaluationScoreRepository {
 
       this.log.debug('Upserted Elasticsearch index template for evaluation scores');
     } catch (error) {
-      this.log.error('Failed to create index template:', error);
-      throw error;
+      const cause = error instanceof Error ? error : new Error(String(error));
+      this.log.error('Failed to upsert Elasticsearch index template for evaluation scores', cause);
+      throw cause;
     }
   }
 
@@ -375,6 +388,8 @@ export class EvaluationScoreRepository {
 
       // Bulk index documents
       if (enrichedDocuments.length > 0) {
+        const dropped: Array<BulkDroppedDocument<EvaluationScoreDocument>> = [];
+
         const stats = await this.esClient.helpers.bulk({
           datasource: enrichedDocuments,
           onDocument: (doc) => {
@@ -393,32 +408,78 @@ export class EvaluationScoreRepository {
             ].join('-');
 
             return {
-              // Use `index` to keep exports idempotent (Buildkite retries / reruns of the same
-              // `run_id` should not fail due to existing documents).
-              index: {
+              // Data streams only allow create operations. Use deterministic document IDs so:
+              // - Re-runs/retries don't create duplicates (they'll 409 conflict instead)
+              // - We can treat 409s as a no-op for idempotency
+              create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
                 _id: docId,
               },
             };
+          },
+          onDrop: (droppedDoc) => {
+            dropped.push(droppedDoc as BulkDroppedDocument<EvaluationScoreDocument>);
           },
           refresh: 'wait_for',
         });
 
         // Check for bulk operation errors
         if (stats.failed > 0) {
+          // `helpers.bulk` counts any dropped operation as failed, including expected 409 conflicts
+          // when re-exporting the same deterministic IDs. Ignore 409s to keep exports idempotent.
+          //
+          // Note: In the unlikely event that `helpers.bulk` reports `failed > 0` but does not call
+          // `onDrop`, fall back to failing with an "unknown" reason.
+          if (dropped.length === 0) {
+            const firstErrorSummary = 'unknown failure reason';
+            this.log.error(
+              `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}. ` +
+                `First error: ${firstErrorSummary}`
+            );
+
+            throw new Error(
+              `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed. ` +
+                `First error: ${firstErrorSummary}`
+            );
+          }
+
+          const conflicts = dropped.filter((d) => d.status === 409);
+          const nonConflictDropped = dropped.filter((d) => d.status !== 409);
+
+          if (nonConflictDropped.length === 0) {
+            this.log.debug(
+              `Bulk indexing had ${conflicts.length} 409 conflicts out of ${stats.total} operations (ignored)`
+            );
+            this.log.debug(
+              `Successfully indexed ${stats.successful} evaluation scores (${conflicts.length} already existed)`
+            );
+            return;
+          }
+
+          const first = nonConflictDropped[0];
+          const firstErrorSummary = first.error
+            ? `${first.status ?? 'unknown status'} ${first.error.type ?? 'unknown type'}: ${
+                first.error.reason ?? 'unknown reason'
+              }`
+            : 'unknown failure reason';
+
           this.log.error(
-            `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}`
+            `Bulk indexing had ${nonConflictDropped.length} failed operations out of ${stats.total} ` +
+              `(${conflicts.length} conflicts ignored). First error: ${firstErrorSummary}`
           );
+
           throw new Error(
-            `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed`
+            `Bulk indexing failed: ${nonConflictDropped.length} of ${stats.total} operations failed ` +
+              `(${conflicts.length} conflicts ignored). First error: ${firstErrorSummary}`
           );
         }
 
         this.log.debug(`Successfully indexed ${stats.successful} evaluation scores`);
       }
     } catch (error) {
-      this.log.error('Failed to export scores to Elasticsearch:', error);
-      throw error;
+      const cause = error instanceof Error ? error : new Error(String(error));
+      this.log.error('Failed to export scores to Elasticsearch', cause);
+      throw cause;
     }
   }
 

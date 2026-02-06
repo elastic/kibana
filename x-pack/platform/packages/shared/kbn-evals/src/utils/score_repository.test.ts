@@ -200,10 +200,39 @@ describe('EvaluationScoreRepository', () => {
       } as any);
 
       await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Bulk indexing failed: 2 of 2 operations failed'
+        'Bulk indexing failed: 2 of 2 operations failed. First error: unknown failure reason'
       );
 
-      expect(mockLog.error).toHaveBeenCalledWith('Bulk indexing had 2 failed operations out of 2');
+      expect(mockLog.error).toHaveBeenCalled();
+      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
+      expect(errorMessages.join('\n')).toContain('Bulk indexing had 2 failed operations out of 2');
+    });
+
+    it('should ignore 409 conflicts to keep export idempotent', async () => {
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
+      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
+
+      mockEsClient.helpers.bulk.mockImplementation(async (options: any) => {
+        // Simulate re-exporting the same deterministic IDs -> ES returns 409 conflict.
+        options.onDrop?.({
+          status: 409,
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: 'document already exists',
+          },
+        });
+        return {
+          total: 1,
+          failed: 1,
+          successful: 0,
+        } as any;
+      });
+
+      await expect(repository.exportScores([createMockScoreDocument()])).resolves.toBeUndefined();
+
+      const debugMessages = mockLog.debug.mock.calls.map(([arg]) => String(arg));
+      expect(debugMessages.join('\n')).toContain('409 conflicts');
+      expect(debugMessages.join('\n')).toContain('already existed');
     });
 
     it('should handle index template creation errors', async () => {
@@ -214,7 +243,11 @@ describe('EvaluationScoreRepository', () => {
         'Template creation failed'
       );
 
-      expect(mockLog.error).toHaveBeenCalledWith('Failed to create index template:', error);
+      expect(mockLog.error).toHaveBeenCalled();
+      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
+      expect(errorMessages.join('\n')).toContain(
+        'Failed to upsert Elasticsearch index template for evaluation scores'
+      );
     });
 
     it('should handle datastream creation errors', async () => {
@@ -227,10 +260,9 @@ describe('EvaluationScoreRepository', () => {
         'Datastream creation failed'
       );
 
-      expect(mockLog.error).toHaveBeenCalledWith(
-        'Failed to export scores to Elasticsearch:',
-        error
-      );
+      expect(mockLog.error).toHaveBeenCalled();
+      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
+      expect(errorMessages.join('\n')).toContain('Failed to export scores to Elasticsearch');
     });
 
     it('should export multiple documents for multiple evaluators', async () => {
@@ -249,7 +281,7 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.datasource[0].evaluator.name).toBe('Correctness');
       expect(bulkCall.datasource[1].evaluator.name).toBe('Groundedness');
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
-        index: {
+        create: {
           _index: '.kibana-evaluations',
           _id: 'run-123-unknown-suite-llm-gateway/gpt-5.2-dataset-1-example-1-Correctness-0',
         },
