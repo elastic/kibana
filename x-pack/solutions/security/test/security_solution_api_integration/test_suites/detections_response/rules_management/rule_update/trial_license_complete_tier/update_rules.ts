@@ -809,8 +809,6 @@ export default ({ getService }: FtrProviderContext) => {
             })
           );
 
-          log.info(JSON.stringify(ruleToUpdate, null, 2));
-
           updatePayload = {
             ...ruleToUpdate,
             response_actions: [
