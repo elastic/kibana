@@ -25,12 +25,6 @@ export type TopologyDirection = 'downstream' | 'upstream' | 'both';
 const getServiceTopologyToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z.string().min(1).describe('The name of the service to get the topology for'),
-  environment: z
-    .string()
-    .optional()
-    .describe(
-      'The environment the service runs in (e.g., production, staging). Leave empty for all environments.'
-    ),
   direction: z
     .enum(['downstream', 'upstream', 'both'])
     .default('downstream')
@@ -39,22 +33,6 @@ const getServiceTopologyToolSchema = z.object({
         '"downstream" shows what this service calls (dependencies). ' +
         '"upstream" shows what calls this service (callers). ' +
         '"both" shows both directions. Defaults to "downstream".'
-    ),
-  kqlFilter: z
-    .string()
-    .optional()
-    .describe(
-      'Optional KQL filter to narrow down which traces are sampled for topology discovery. ' +
-        'Note: This filter affects trace selection, not connection filtering. ' +
-        'All connections from sampled traces are returned. ' +
-        'Available fields: service.name, service.environment, transaction.name, agent.name.'
-    ),
-  includeMetrics: z
-    .boolean()
-    .default(true)
-    .describe(
-      'Include health metrics (latency, error rate, throughput) for each connection. ' +
-        'Set to false for faster topology-only queries. Defaults to true.'
     ),
 });
 
@@ -70,14 +48,14 @@ export function createGetServiceTopologyTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServiceTopologyToolSchema> = {
     id: OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the service topology showing dependencies and callers for a service, with optional health metrics.
+    description: `Retrieves the service topology showing dependencies and callers for a service, with health metrics.
 
 Returns:
 - Number of traces sampled to build the topology
 - List of connections showing source and target nodes
-- For service nodes: service name, agent name, environment
+- For service nodes: service name
 - For external dependencies: resource identifier, span type/subtype
-- When includeMetrics=true: error rate (0-1), latency (ms), throughput (rpm) per connection
+- Health metrics per connection: error rate (0-1), latency (ms), throughput (rpm)
 
 When to use:
 - Tracing cascading failures through multi-hop dependencies (direction: "downstream")
@@ -97,8 +75,7 @@ When NOT to use:
       },
     },
     handler: async (toolParams, context) => {
-      const { serviceName, environment, direction, kqlFilter, start, end, includeMetrics } =
-        toolParams;
+      const { serviceName, direction, start, end } = toolParams;
       const { request } = context;
 
       try {
@@ -106,12 +83,9 @@ When NOT to use:
           request,
           dataRegistry,
           serviceName,
-          environment,
           direction,
-          kqlFilter,
           start,
           end,
-          includeMetrics,
         });
 
         return {
@@ -120,7 +94,6 @@ When NOT to use:
               type: ToolResultType.other,
               data: {
                 tracesCount: topology.tracesCount,
-                connectionsCount: topology.connections.length,
                 connections: topology.connections,
               },
             },

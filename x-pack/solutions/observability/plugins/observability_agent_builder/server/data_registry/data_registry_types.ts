@@ -134,8 +134,6 @@ interface InfraHostsResponse {
 
 interface ServiceTopologyNode {
   'service.name': string;
-  'agent.name': string;
-  'service.environment'?: string;
 }
 
 interface ExternalNode {
@@ -228,11 +226,8 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmServiceTopology: (params: {
     request: KibanaRequest;
     serviceName: string;
-    environment?: string;
     direction?: 'downstream' | 'upstream' | 'both';
-    kuery?: string;
     start: string;
     end: string;
-    includeMetrics?: boolean;
   }) => Promise<ServiceTopologyResponse>;
 }

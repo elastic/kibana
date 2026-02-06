@@ -14,32 +14,23 @@ export async function getToolHandler({
   request,
   dataRegistry,
   serviceName,
-  environment,
   direction,
-  kqlFilter,
   start,
   end,
-  includeMetrics,
 }: {
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   serviceName: string;
-  environment?: string;
   direction: TopologyDirection;
-  kqlFilter?: string;
   start: string;
   end: string;
-  includeMetrics: boolean;
 }): Promise<ServiceTopologyResponse> {
   const topology = await dataRegistry.getData('apmServiceTopology', {
     request,
     serviceName,
-    environment,
     direction,
-    kuery: kqlFilter,
     start,
     end,
-    includeMetrics,
   });
 
   if (!topology) {

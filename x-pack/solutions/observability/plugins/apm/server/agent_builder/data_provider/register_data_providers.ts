@@ -178,7 +178,7 @@ export function registerDataProviders({
 
   observabilityAgentBuilder.registerDataProvider(
     'apmServiceTopology',
-    async ({ request, serviceName, environment, direction, kuery, start, end, includeMetrics }) => {
+    async ({ request, serviceName, direction, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({
         core,
         plugins,
@@ -191,12 +191,9 @@ export function registerDataProviders({
         config,
         logger,
         serviceName,
-        environment,
         direction: direction ?? 'downstream',
-        kuery,
         start,
         end,
-        includeMetrics: includeMetrics ?? true,
       });
     }
   );

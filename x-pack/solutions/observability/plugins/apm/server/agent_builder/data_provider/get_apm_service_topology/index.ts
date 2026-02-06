@@ -5,9 +5,12 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
-import { getDocumentTypeFilterForServiceDestinationStatistics } from '@kbn/apm-data-access-plugin/server/utils';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateThroughputWithRange,
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getRollupIntervalForTimeRange,
+} from '@kbn/apm-data-access-plugin/server/utils';
 import type { APMConfig } from '../../..';
 import { parseDatemath } from '../../utils/time';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -18,28 +21,21 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  SERVICE_TARGET_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
   EVENT_OUTCOME,
 } from '../../../../common/es_fields/apm';
+
 import { EventOutcome } from '../../../../common/event_outcome';
 import { excludeRumExitSpansQuery } from '../../../lib/connections/exclude_rum_exit_spans_query';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export type TopologyDirection = 'downstream' | 'upstream' | 'both';
 
 export interface ServiceTopologyNode {
   'service.name': string;
-  'agent.name': string;
-  'service.environment'?: string;
 }
 
 export interface ExternalNode {
@@ -77,8 +73,6 @@ function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWithKey[]
   for (const span of spans) {
     const source: ServiceTopologyNode = {
       'service.name': span.serviceName,
-      'agent.name': span.agentName,
-      'service.environment': span.serviceEnvironment,
     };
 
     let target: ServiceTopologyNode | ExternalNode;
@@ -87,8 +81,6 @@ function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWithKey[]
       // Target is another service
       target = {
         'service.name': span.destinationService.serviceName,
-        'agent.name': span.destinationService.agentName,
-        'service.environment': span.destinationService.serviceEnvironment,
       };
     } else {
       // Target is an external dependency
@@ -143,7 +135,7 @@ async function getConnectionMetrics({
       sources: [
         {
           documentType: ApmDocumentType.ServiceDestinationMetric,
-          rollupInterval: RollupInterval.OneMinute,
+          rollupInterval: getRollupIntervalForTimeRange(start, end),
         },
       ],
     },
@@ -219,237 +211,174 @@ async function getConnectionMetrics({
   return metricsMap;
 }
 
-function enrichConnectionsWithMetrics(
+function finalizeConnections(
   connections: ConnectionWithKey[],
-  metricsMap: MetricsMap
+  metricsMap?: MetricsMap
 ): ServiceTopologyConnection[] {
-  return connections.map((conn) => {
-    const metrics = metricsMap[conn._key] ?? null;
-    // Remove internal keys and return clean connection
-    return {
-      source: conn.source,
-      target: conn.target,
-      metrics,
-    };
-  });
-}
-
-function stripInternalKeys(connections: ConnectionWithKey[]): ServiceTopologyConnection[] {
   return connections.map((conn) => ({
     source: conn.source,
     target: conn.target,
-    metrics: conn.metrics,
+    metrics: metricsMap?.[conn._key] ?? null,
   }));
 }
 
 /**
- * Get upstream connections - services that call the target service.
- * This queries ServiceDestinationMetric where span.destination.service.resource
- * matches the target service name.
+ * Filters connections to only include those that are downstream (descendants) of the root service.
+ * This performs a graph traversal starting from the root service, following outgoing edges.
+ *
+ * For example, given connections: A→B, B→C, A→D, X→Y
+ * filterDownstreamConnections(connections, 'A') returns: A→B, B→C, A→D
+ * (excludes X→Y because X is not reachable from A)
+ *
+ * This excludes sibling dependencies - services called by ancestors but not by the queried service
+ * or its descendants.
  */
-async function getUpstreamConnections({
-  apmEventClient,
-  serviceName,
-  environment,
-  kuery,
-  start,
-  end,
-  includeMetrics,
-}: {
-  apmEventClient: APMEventClient;
-  serviceName: string;
-  environment: string;
-  kuery?: string;
-  start: number;
-  end: number;
-  includeMetrics: boolean;
-}): Promise<ServiceTopologyConnection[]> {
-  const response = await apmEventClient.search('get_upstream_connections', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ServiceDestinationMetric,
-          rollupInterval: RollupInterval.OneMinute,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-          ...excludeRumExitSpansQuery(),
-          // Find exit spans where the destination matches the target service.
-          // Match against multiple fields because the service name can appear in different places:
-          // - span.destination.service.resource: "checkout", "checkout:5050", "10.0.0.1:5050"
-          // - service.target.name: "oteldemo.CheckoutService", "checkout", "checkout:5050"
-          {
-            bool: {
-              should: [
-                // Match span.destination.service.resource exactly or with port suffix
-                { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: serviceName } },
-                { prefix: { [SPAN_DESTINATION_SERVICE_RESOURCE]: `${serviceName}:` } },
-                // Match service.target.name exactly or with port suffix
-                { term: { [SERVICE_TARGET_NAME]: serviceName } },
-                { prefix: { [SERVICE_TARGET_NAME]: `${serviceName}:` } },
-                // Match service.target.name containing the service name (case-insensitive)
-                // Handles OTel naming conventions like "oteldemo.PaymentService"
-                {
-                  wildcard: {
-                    [SERVICE_TARGET_NAME]: { value: `*${serviceName}*`, case_insensitive: true },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          ...environmentQuery(environment),
-          ...kqlQuery(kuery),
-        ],
-      },
-    },
-    aggs: {
-      callers: {
-        composite: {
-          size: 1500,
-          sources: asMutableArray([
-            { serviceName: { terms: { field: SERVICE_NAME } } },
-            { agentName: { terms: { field: AGENT_NAME } } },
-            { serviceEnvironment: { terms: { field: SERVICE_ENVIRONMENT, missing_bucket: true } } },
-            { spanType: { terms: { field: SPAN_TYPE, missing_bucket: true } } },
-            { spanSubtype: { terms: { field: SPAN_SUBTYPE, missing_bucket: true } } },
-          ] as const),
-        },
-        aggs: includeMetrics
-          ? {
-              total_latency_sum: {
-                sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM },
-              },
-              total_latency_count: {
-                sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
-              },
-              error_count: {
-                filter: {
-                  bool: { filter: [{ term: { [EVENT_OUTCOME]: EventOutcome.failure } }] },
-                },
-              },
-              success_count: {
-                filter: {
-                  bool: { filter: [{ term: { [EVENT_OUTCOME]: EventOutcome.success } }] },
-                },
-              },
-            }
-          : {},
-      },
-    },
-  });
-
-  const connections: ServiceTopologyConnection[] = [];
-
-  interface UpstreamBucket {
-    key: {
-      serviceName: string;
-      agentName: string;
-      serviceEnvironment: string | null;
-      spanType: string | null;
-      spanSubtype: string | null;
-    };
-    total_latency_sum?: { value: number };
-    total_latency_count?: { value: number };
-    error_count?: { doc_count: number };
-    success_count?: { doc_count: number };
+function filterDownstreamConnections(
+  connections: ConnectionWithKey[],
+  rootServiceName: string
+): ConnectionWithKey[] {
+  // Build adjacency list: source -> list of connections from that source
+  const adjacencyMap = new Map<string, ConnectionWithKey[]>();
+  for (const conn of connections) {
+    const existing = adjacencyMap.get(conn._sourceName) ?? [];
+    existing.push(conn);
+    adjacencyMap.set(conn._sourceName, existing);
   }
 
-  const buckets = (response.aggregations?.callers as { buckets: UpstreamBucket[] })?.buckets ?? [];
+  // BFS traversal starting from rootServiceName
+  const visitedServices = new Set<string>();
+  const reachableConnections: ConnectionWithKey[] = [];
+  const queue: string[] = [rootServiceName];
 
-  for (const bucket of buckets) {
-    const callerServiceName = bucket.key.serviceName;
-    const callerAgentName = bucket.key.agentName;
-    const callerEnvironment = bucket.key.serviceEnvironment;
-    const spanType = bucket.key.spanType;
-    const spanSubtype = bucket.key.spanSubtype;
+  while (queue.length > 0) {
+    const currentService = queue.shift()!;
 
-    // Skip self-references
-    if (callerServiceName === serviceName) {
+    if (visitedServices.has(currentService)) {
       continue;
     }
+    visitedServices.add(currentService);
 
-    const source: ServiceTopologyNode = {
-      'service.name': callerServiceName,
-      'agent.name': callerAgentName,
-      'service.environment': callerEnvironment ?? undefined,
-    };
+    // Get all connections from this service
+    const outgoingConnections = adjacencyMap.get(currentService) ?? [];
 
-    // Target is always the service being queried (represented as external node from caller's perspective)
-    const target: ExternalNode = {
-      'span.destination.service.resource': serviceName,
-      'span.type': spanType ?? 'unknown',
-      'span.subtype': spanSubtype ?? 'unknown',
-    };
+    for (const conn of outgoingConnections) {
+      reachableConnections.push(conn);
 
-    let metrics: ConnectionMetrics | null = null;
-
-    if (includeMetrics && bucket.total_latency_count) {
-      const latencyCount = bucket.total_latency_count.value ?? 0;
-      const latencySum = bucket.total_latency_sum?.value ?? 0;
-      const errorCount = bucket.error_count?.doc_count ?? 0;
-      const successCount = bucket.success_count?.doc_count ?? 0;
-      const totalOutcomes = errorCount + successCount;
-
-      metrics = {
-        latencyMs: latencyCount > 0 ? latencySum / latencyCount / 1000 : null,
-        throughputPerMin:
-          latencyCount > 0
-            ? Math.round(calculateThroughputWithRange({ start, end, value: latencyCount }) * 1000) /
-              1000
-            : null,
-        errorRate: totalOutcomes > 0 ? errorCount / totalOutcomes : null,
-      };
+      // If target is a service (not external dependency), add to queue for further traversal
+      const target = conn.target;
+      if ('service.name' in target) {
+        const targetServiceName = target['service.name'];
+        if (!visitedServices.has(targetServiceName)) {
+          queue.push(targetServiceName);
+        }
+      }
     }
-
-    connections.push({ source, target, metrics });
   }
 
-  return connections;
+  return reachableConnections;
 }
 
-async function getDownstreamConnections({
+/**
+ * Filters connections to only include those that are upstream (ancestors) of the root service.
+ * This performs a reverse graph traversal starting from the root service, following incoming edges.
+ *
+ * For example, given connections: A→B, B→C, C→D, X→Y
+ * filterUpstreamConnections(connections, 'D') returns: A→B, B→C, C→D
+ * (excludes X→Y because it doesn't lead to D)
+ *
+ * This excludes sibling dependencies - services that don't eventually call the queried service.
+ *
+ * IMPORTANT: Graph traversal relies on resolved `target['service.name']` for service-to-service
+ * edges. We do NOT use heuristic matching on `span.destination.service.resource` because that
+ * field can contain arbitrary values (proxy hostnames, IP addresses, load balancer names, etc.)
+ * that don't necessarily relate to the downstream service name. For the root node only, we also
+ * check exact `_dependencyName` match to handle external dependencies (e.g., "postgres").
+ */
+function filterUpstreamConnections(
+  connections: ConnectionWithKey[],
+  rootServiceName: string
+): ConnectionWithKey[] {
+  // Build reverse adjacency lists:
+  // 1. By resolved service name (target['service.name']) - reliable for graph traversal
+  // 2. By exact dependency name (span.destination.service.resource) - only for root node lookup
+  const reverseAdjacencyByService = new Map<string, ConnectionWithKey[]>();
+  const reverseAdjacencyByDep = new Map<string, ConnectionWithKey[]>();
+
+  for (const conn of connections) {
+    // Add to service name map if the target is a resolved service
+    if ('service.name' in conn.target) {
+      const targetServiceName = conn.target['service.name'];
+      const existing = reverseAdjacencyByService.get(targetServiceName) ?? [];
+      existing.push(conn);
+      reverseAdjacencyByService.set(targetServiceName, existing);
+    }
+
+    // Add to dependency name map (exact key)
+    const depName = conn._dependencyName;
+    const existingByDep = reverseAdjacencyByDep.get(depName) ?? [];
+    existingByDep.push(conn);
+    reverseAdjacencyByDep.set(depName, existingByDep);
+  }
+
+  // BFS traversal starting from the root service, going backwards through callers
+  const visitedServices = new Set<string>();
+  const visitedEdges = new Set<string>();
+  const reachableConnections: ConnectionWithKey[] = [];
+  const queue: string[] = [rootServiceName];
+
+  while (queue.length > 0) {
+    const currentService = queue.shift()!;
+
+    if (visitedServices.has(currentService)) {
+      continue;
+    }
+    visitedServices.add(currentService);
+
+    // Find connections where target['service.name'] matches (resolved service-to-service edges)
+    const connsByService = reverseAdjacencyByService.get(currentService) ?? [];
+
+    // For the root node only, also find connections by exact dependency name.
+    // This handles external dependencies like "postgres" where the user queries by the
+    // resource name and there is no resolved target['service.name'].
+    const connsByDep =
+      currentService === rootServiceName ? reverseAdjacencyByDep.get(currentService) ?? [] : [];
+
+    // Process both sets of connections, deduplicating by edge key
+    for (const conn of [...connsByService, ...connsByDep]) {
+      if (!visitedEdges.has(conn._key)) {
+        visitedEdges.add(conn._key);
+        reachableConnections.push(conn);
+
+        const sourceName = conn._sourceName;
+        if (!visitedServices.has(sourceName)) {
+          queue.push(sourceName);
+        }
+      }
+    }
+  }
+
+  return reachableConnections;
+}
+
+/**
+ * Shared pipeline: fetch exit spans from trace IDs, build connections, filter by direction,
+ * and enrich with service_destination metrics.
+ */
+async function buildTopologyFromTraceIds({
   apmEventClient,
-  config,
-  logger,
+  traceIds,
   serviceName,
-  environment,
-  kuery,
   startMs,
   endMs,
-  includeMetrics,
+  filterFn,
 }: {
   apmEventClient: APMEventClient;
-  config: APMConfig;
-  logger: Logger;
+  traceIds: string[];
   serviceName: string;
-  environment: string;
-  kuery?: string;
   startMs: number;
   endMs: number;
-  includeMetrics: boolean;
-}): Promise<{ tracesCount: number; connections: ServiceTopologyConnection[] }> {
-  logger.debug('Getting trace sample IDs for downstream topology');
-
-  const { traceIds } = await getTraceSampleIds({
-    config,
-    apmEventClient,
-    serviceName,
-    environment,
-    start: startMs,
-    end: endMs,
-    kuery,
-  });
-
-  logger.debug(`Found ${traceIds.length} traces to inspect for downstream topology`);
-
+  filterFn: (connections: ConnectionWithKey[], rootService: string) => ConnectionWithKey[];
+}): Promise<ServiceTopologyResponse> {
   if (traceIds.length === 0) {
     return { tracesCount: 0, connections: [] };
   }
@@ -461,19 +390,265 @@ async function getDownstreamConnections({
     end: endMs,
   });
 
-  const connectionsWithKeys = buildConnectionsFromSpans(spans);
+  const filtered = filterFn(buildConnectionsFromSpans(spans), serviceName);
 
-  if (!includeMetrics) {
-    return {
-      tracesCount: traceIds.length,
-      connections: stripInternalKeys(connectionsWithKeys),
-    };
+  const serviceNames = [...new Set(filtered.map((c) => c._sourceName))];
+  const metricsMap = await getConnectionMetrics({
+    apmEventClient,
+    start: startMs,
+    end: endMs,
+    serviceNames,
+  });
+
+  return { tracesCount: traceIds.length, connections: finalizeConnections(filtered, metricsMap) };
+}
+
+/**
+ * Get trace IDs from exit spans that target a specific external dependency.
+ * Used as a fallback for upstream topology when the target has no transactions
+ * (e.g., databases like "postgres", caches like "redis").
+ *
+ * Searches by exact `span.destination.service.resource` match only — no heuristic/fuzzy matching.
+ */
+async function getTraceIdsFromExitSpansTargetingDependency({
+  apmEventClient,
+  dependencyName,
+  start,
+  end,
+  maxTraces = 500,
+}: {
+  apmEventClient: APMEventClient;
+  dependencyName: string;
+  start: number;
+  end: number;
+  maxTraces?: number;
+}): Promise<string[]> {
+  const response = await apmEventClient.search(
+    'get_trace_ids_from_exit_spans_targeting_dependency',
+    {
+      apm: {
+        sources: [
+          {
+            documentType: ApmDocumentType.SpanEvent,
+            rollupInterval: RollupInterval.None,
+          },
+        ],
+      },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
+          ],
+        },
+      },
+      aggs: {
+        sample: {
+          sampler: {
+            shard_size: maxTraces,
+          },
+          aggs: {
+            traceIds: {
+              terms: {
+                field: 'trace.id',
+                size: maxTraces,
+              },
+            },
+          },
+        },
+      },
+    }
+  );
+
+  const buckets =
+    (response.aggregations as { sample?: { traceIds?: { buckets?: Array<{ key: string }> } } })
+      ?.sample?.traceIds?.buckets ?? [];
+
+  return buckets.map((bucket) => bucket.key);
+}
+
+async function getDownstreamTopology({
+  apmEventClient,
+  config,
+  logger,
+  serviceName,
+  startMs,
+  endMs,
+}: {
+  apmEventClient: APMEventClient;
+  config: APMConfig;
+  logger: Logger;
+  serviceName: string;
+  startMs: number;
+  endMs: number;
+}): Promise<ServiceTopologyResponse> {
+  const { traceIds } = await getTraceSampleIds({
+    config,
+    apmEventClient,
+    serviceName,
+    environment: ENVIRONMENT_ALL.value,
+    start: startMs,
+    end: endMs,
+  });
+
+  logger.debug(`Found ${traceIds.length} traces for downstream topology`);
+
+  return buildTopologyFromTraceIds({
+    apmEventClient,
+    traceIds,
+    serviceName,
+    startMs,
+    endMs,
+    filterFn: filterDownstreamConnections,
+  });
+}
+
+async function getUpstreamTopology({
+  apmEventClient,
+  config,
+  logger,
+  serviceName,
+  startMs,
+  endMs,
+}: {
+  apmEventClient: APMEventClient;
+  config: APMConfig;
+  logger: Logger;
+  serviceName: string;
+  startMs: number;
+  endMs: number;
+}): Promise<ServiceTopologyResponse> {
+  // Strategy: First try to find traces via the service's own transactions.
+  // If the service has transactions (it's an instrumented service like "checkout-service"),
+  // those traces will contain the full call chain including upstream callers.
+  // This is reliable — no field matching needed.
+  const { traceIds } = await getTraceSampleIds({
+    config,
+    apmEventClient,
+    serviceName,
+    environment: ENVIRONMENT_ALL.value,
+    start: startMs,
+    end: endMs,
+  });
+
+  if (traceIds.length > 0) {
+    logger.debug(`Found ${traceIds.length} traces for upstream topology via service transactions`);
+
+    return buildTopologyFromTraceIds({
+      apmEventClient,
+      traceIds,
+      serviceName,
+      startMs,
+      endMs,
+      filterFn: filterUpstreamConnections,
+    });
   }
 
-  // Get unique service names from connections for metrics query
-  const serviceNames = [...new Set(connectionsWithKeys.map((conn) => conn._sourceName))];
+  // Fallback: the service has no transactions, so it's an external dependency (e.g., "postgres").
+  // Find traces by exact match on span.destination.service.resource.
+  logger.debug(
+    `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
+  );
 
-  logger.debug(`Fetching metrics for ${serviceNames.length} services`);
+  const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
+    apmEventClient,
+    dependencyName: serviceName,
+    start: startMs,
+    end: endMs,
+  });
+
+  logger.debug(`Found ${depTraceIds.length} traces for upstream topology via exit spans`);
+
+  return buildTopologyFromTraceIds({
+    apmEventClient,
+    traceIds: depTraceIds,
+    serviceName,
+    startMs,
+    endMs,
+    filterFn: filterUpstreamConnections,
+  });
+}
+
+/**
+ * Optimized path for direction === 'both': fetches trace samples and exit spans once,
+ * then filters in both directions from the shared connection graph.
+ *
+ * This avoids duplicate ES queries — getTraceSampleIds and fetchExitSpanSamplesFromTraceIds
+ * would otherwise execute identical queries for both downstream and upstream.
+ */
+async function getBothTopology({
+  apmEventClient,
+  config,
+  logger,
+  serviceName,
+  startMs,
+  endMs,
+}: {
+  apmEventClient: APMEventClient;
+  config: APMConfig;
+  logger: Logger;
+  serviceName: string;
+  startMs: number;
+  endMs: number;
+}): Promise<ServiceTopologyResponse> {
+  const { traceIds } = await getTraceSampleIds({
+    config,
+    apmEventClient,
+    serviceName,
+    environment: ENVIRONMENT_ALL.value,
+    start: startMs,
+    end: endMs,
+  });
+
+  // External dependency (no transactions): downstream is empty, only upstream applies.
+  // Fall back to finding traces via exit spans targeting this dependency.
+  if (traceIds.length === 0) {
+    logger.debug(
+      `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
+    );
+
+    const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
+      apmEventClient,
+      dependencyName: serviceName,
+      start: startMs,
+      end: endMs,
+    });
+
+    logger.debug(`Found ${depTraceIds.length} traces for upstream topology via exit spans`);
+
+    return buildTopologyFromTraceIds({
+      apmEventClient,
+      traceIds: depTraceIds,
+      serviceName,
+      startMs,
+      endMs,
+      filterFn: filterUpstreamConnections,
+    });
+  }
+
+  logger.debug(`Found ${traceIds.length} traces for both-direction topology`);
+
+  // Fetch exit spans once, build connection graph once
+  const spans = await fetchExitSpanSamplesFromTraceIds({
+    apmEventClient,
+    traceIds,
+    start: startMs,
+    end: endMs,
+  });
+
+  const allConnections = buildConnectionsFromSpans(spans);
+  const downFiltered = filterDownstreamConnections(allConnections, serviceName);
+  const upFiltered = filterUpstreamConnections(allConnections, serviceName);
+
+  // Single metrics query with union of service names from both directions
+  const serviceNames = [
+    ...new Set([
+      ...downFiltered.map((c) => c._sourceName),
+      ...upFiltered.map((c) => c._sourceName),
+    ]),
+  ];
 
   const metricsMap = await getConnectionMetrics({
     apmEventClient,
@@ -482,11 +657,12 @@ async function getDownstreamConnections({
     serviceNames,
   });
 
-  const connections = enrichConnectionsWithMetrics(connectionsWithKeys, metricsMap);
-
   return {
     tracesCount: traceIds.length,
-    connections,
+    connections: [
+      ...finalizeConnections(downFiltered, metricsMap),
+      ...finalizeConnections(upFiltered, metricsMap),
+    ],
   };
 }
 
@@ -495,69 +671,30 @@ export async function getApmServiceTopology({
   config,
   logger,
   serviceName,
-  environment,
   direction = 'downstream',
-  kuery,
   start,
   end,
-  includeMetrics = true,
 }: {
   apmEventClient: APMEventClient;
   config: APMConfig;
   logger: Logger;
   serviceName: string;
-  environment?: string;
   direction?: TopologyDirection;
-  kuery?: string;
   start: string;
   end: string;
-  includeMetrics?: boolean;
 }): Promise<ServiceTopologyResponse> {
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
-  const env = environment ?? ENVIRONMENT_ALL.value;
 
-  let downstreamResult: { tracesCount: number; connections: ServiceTopologyConnection[] } = {
-    tracesCount: 0,
-    connections: [],
-  };
-  let upstreamConnections: ServiceTopologyConnection[] = [];
+  const params = { apmEventClient, config, logger, serviceName, startMs, endMs };
 
-  // Fetch downstream connections if needed
-  if (direction === 'downstream' || direction === 'both') {
-    downstreamResult = await getDownstreamConnections({
-      apmEventClient,
-      config,
-      logger,
-      serviceName,
-      environment: env,
-      kuery,
-      startMs,
-      endMs,
-      includeMetrics,
-    });
+  if (direction === 'downstream') {
+    return getDownstreamTopology(params);
   }
 
-  // Fetch upstream connections if needed
-  if (direction === 'upstream' || direction === 'both') {
-    logger.debug('Fetching upstream connections');
-    upstreamConnections = await getUpstreamConnections({
-      apmEventClient,
-      serviceName,
-      environment: env,
-      kuery,
-      start: startMs,
-      end: endMs,
-      includeMetrics,
-    });
-    logger.debug(`Found ${upstreamConnections.length} upstream connections`);
+  if (direction === 'upstream') {
+    return getUpstreamTopology(params);
   }
 
-  // Combine connections from both directions
-  const allConnections = [...downstreamResult.connections, ...upstreamConnections];
-
-  return {
-    tracesCount: downstreamResult.tracesCount,
-    connections: allConnections,
-  };
+  return getBothTopology(params);
 }
