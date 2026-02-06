@@ -30,11 +30,7 @@ export const createFeedbackState = ({
 }: FeedbackStateDeps): FeedbackState => {
   const feedbackBtnVisible = createState(false);
 
-  const isBtnVisible$ = combineLatest([
-    feedbackBtnVisible.$,
-    isSideNavCollapsed$,
-    isEnabled$,
-  ]).pipe(
+  const isBtnVisible$ = combineLatest([feedbackBtnVisible.$, isSideNavCollapsed$, isEnabled$]).pipe(
     map(
       ([isVisible, isSideNavCollapsed, isEnabled]) => isVisible && !isSideNavCollapsed && isEnabled
     ),
