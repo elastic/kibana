@@ -192,6 +192,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
+              tableCaption={i18n.RULE_ALERTS_SECTION_TITLE}
             />
             <EuiSpacer size="m" />
             <EuiButton data-test-subj="severityRuleAlertsButton" onClick={navigateToAlerts}>
