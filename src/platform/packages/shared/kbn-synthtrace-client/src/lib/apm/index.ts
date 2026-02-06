@@ -14,7 +14,7 @@ import { browser } from './browser';
 import { serverlessFunction } from './serverless_function';
 import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
 
-import type { ApmException } from './apm_fields';
+import type { ApmException, APMStacktrace } from './apm_fields';
 
 export const apm = {
   service,
@@ -29,4 +29,4 @@ export const apmOtel = {
   service: otelService,
 };
 
-export type { ApmException };
+export type { ApmException, APMStacktrace };
