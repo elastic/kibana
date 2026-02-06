@@ -87,10 +87,22 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
         if (from.type === 'field') fields.push(from.value);
       });
       break;
+    case 'split':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
+    case 'sort':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
     case 'drop_document':
     case 'manual_ingest_pipeline':
       // No field names to validate
       break;
+    default: {
+      const _exhaustiveCheck: never = processor;
+      return _exhaustiveCheck;
+    }
   }
 
   return fields;

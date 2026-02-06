@@ -64,6 +64,8 @@ export function validateProcessorValues(
     case 'trim':
     case 'join':
     case 'concat':
+    case 'split':
+    case 'sort':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

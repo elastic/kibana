@@ -120,6 +120,22 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'split':
+      if (processor.to) {
+        fields.push(processor.to);
+      } else if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
+    case 'sort':
+      if (processor.to) {
+        fields.push(processor.to);
+      } else if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -237,6 +253,12 @@ export function getProcessorOutputType(
     case 'join':
       return 'string';
 
+    case 'split':
+      return 'unknown';
+
+    case 'sort':
+      return 'unknown';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -310,6 +332,14 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'split':
+      // Split expects a string input to split into an array
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'sort':
     case 'rename':
     case 'set':
     case 'append':
@@ -375,6 +405,10 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         fieldsUsed.push(
           ...step.from.filter((from) => from.type === 'field').map((from) => from.value)
         );
+        break;
+      case 'split':
+      case 'sort':
+        if (step.from) fieldsUsed.push(step.from);
         break;
       case 'append':
       case 'drop_document':
