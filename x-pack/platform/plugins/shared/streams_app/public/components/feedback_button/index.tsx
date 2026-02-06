@@ -21,7 +21,7 @@ export function FeedbackButton() {
     services: { version },
     core: { notifications },
   } = useKibana();
-  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
   const deploymentType = isServerless
     ? 'Serverless'
     : cloud?.isCloudEnabled

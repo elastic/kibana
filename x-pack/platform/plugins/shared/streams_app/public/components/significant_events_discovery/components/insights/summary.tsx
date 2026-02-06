@@ -111,6 +111,8 @@ export function Summary({ count }: { count: number }) {
     task?.status === TaskStatus.BeingCanceled ||
     isSchedulingTask;
 
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
+
   if (insights && insights.length > 0) {
     return (
       <EuiFlexGroup direction="column">
@@ -118,9 +120,11 @@ export function Summary({ count }: { count: number }) {
           <EuiPanel hasBorder paddingSize="none">
             <EuiPanel color="subdued" hasShadow={false}>
               <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <FeedbackButtons />
-                </EuiFlexItem>
+                {isFeedbackEnabled && (
+                  <EuiFlexItem grow={false}>
+                    <FeedbackButtons />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill={true}
