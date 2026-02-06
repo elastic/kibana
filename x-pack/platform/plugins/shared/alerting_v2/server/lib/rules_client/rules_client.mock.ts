@@ -20,7 +20,7 @@ export function createRulesClient(): {
   const request = httpServerMock.createKibanaRequest();
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
-  const userService = createUserService();
+  const { userService } = createUserService();
 
   http.basePath.get.mockReturnValue('/s/default');
 
