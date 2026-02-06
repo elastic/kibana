@@ -1076,6 +1076,7 @@ describe('AutomaticImportSavedObjectService', () => {
 
       // Update the data stream with ingest pipeline and completed status
       const ingestPipeline = {
+        name: 'test-pipeline',
         processors: [
           {
             set: {
@@ -1086,13 +1087,30 @@ describe('AutomaticImportSavedObjectService', () => {
         ],
       };
 
-      const results = [{ foo: 'bar' }, { answer: 42 }];
+      const pipelineDocs = [
+        {
+          doc: {
+            _id: '1',
+            _index: 'idx',
+            _ingest: { timestamp: '2020-01-01T00:00:00.000Z' },
+            _source: { foo: 'bar' },
+          },
+        },
+        {
+          doc: {
+            _id: '2',
+            _index: 'idx',
+            _ingest: { timestamp: '2020-01-01T00:00:00.000Z' },
+            _source: { answer: 42 },
+          },
+        },
+      ];
 
       await savedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId: 'test-update-ds-integration',
         dataStreamId: 'test-update-ds',
         ingestPipeline,
-        results,
+        pipelineDocs,
         status: TASK_STATUSES.completed,
       });
 
@@ -1104,7 +1122,7 @@ describe('AutomaticImportSavedObjectService', () => {
       expect(updatedDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
       expect(updatedDataStream.attributes.result).toBeDefined();
       expect(updatedDataStream.attributes.result?.ingest_pipeline).toEqual(ingestPipeline);
-      expect(updatedDataStream.attributes.result?.results).toEqual(results);
+      expect(updatedDataStream.attributes.result?.pipeline_docs).toEqual(pipelineDocs);
 
       // Cleanup
       await savedObjectsClient.delete(
@@ -1119,7 +1137,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: '',
           dataStreamId: 'test-ds',
-          ingestPipeline: {},
+          ingestPipeline: { name: 'test-pipeline', processors: [] },
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Integration ID is required');
@@ -1130,7 +1148,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: 'test-integration',
           dataStreamId: '',
-          ingestPipeline: {},
+          ingestPipeline: { name: 'test-pipeline', processors: [] },
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Data stream ID is required');
@@ -1141,7 +1159,7 @@ describe('AutomaticImportSavedObjectService', () => {
         savedObjectService.updateDataStreamSavedObjectAttributes({
           integrationId: 'non-existent-integration',
           dataStreamId: 'non-existent-ds',
-          ingestPipeline: {},
+          ingestPipeline: { name: 'test-pipeline', processors: [] },
           status: TASK_STATUSES.completed,
         })
       ).rejects.toThrow('Data stream non-existent-ds not found');

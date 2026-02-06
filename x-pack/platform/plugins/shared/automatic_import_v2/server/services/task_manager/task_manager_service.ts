@@ -14,6 +14,7 @@ import type {
   RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
@@ -220,7 +221,7 @@ export class TaskManagerService {
 
       this.logger.debug(`Task ${taskId} completed successfully`);
 
-      const pipelineObject = (result.current_pipeline || {}) as Record<string, unknown>;
+      const pipelineObject = (result.current_pipeline || {}) as Pipeline;
       const pipelineGenerationResultsObjects = result.pipeline_generation_results;
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
@@ -233,7 +234,7 @@ export class TaskManagerService {
         integrationId,
         dataStreamId,
         ingestPipeline: pipelineObject,
-        results: pipelineGenerationResultsObjects,
+        pipelineDocs: pipelineGenerationResultsObjects,
         status: TASK_STATUSES.completed,
       });
 

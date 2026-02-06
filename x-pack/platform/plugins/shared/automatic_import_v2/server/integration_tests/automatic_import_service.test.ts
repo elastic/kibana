@@ -103,7 +103,7 @@ describe('AutomaticImportService Integration Tests', () => {
       integrationId: 'itest-integration',
       dataStreamId: 'itest-ds',
       ingestPipeline: ingestPipelineObj,
-      results,
+      pipelineDocs: results,
       status: TASK_STATUSES.completed,
     });
 

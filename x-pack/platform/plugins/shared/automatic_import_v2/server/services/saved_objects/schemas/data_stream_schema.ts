@@ -51,10 +51,16 @@ export const dataStreamSchemaV1 = schema.object({
   ),
   result: schema.maybe(
     schema.object({
-      ingest_pipeline: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      ingest_pipeline: schema.maybe(
+        schema.object({
+          processors: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+          on_failure: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          name: schema.maybe(schema.string()),
+        })
+      ),
       field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
       connector: schema.maybe(schema.string()),
-      results: schema.maybe(
+      pipeline_docs: schema.maybe(
         schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })
       ),
     })

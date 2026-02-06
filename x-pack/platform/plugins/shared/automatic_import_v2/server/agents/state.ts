@@ -7,6 +7,7 @@
 
 import { MessagesZodState } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
+import type { estypes } from '@elastic/elasticsearch';
 
 export const AutomaticImportAgentState = MessagesZodState.extend({
   current_pipeline: z
@@ -18,7 +19,9 @@ export const AutomaticImportAgentState = MessagesZodState.extend({
         .describe('Optional failure handlers for the pipeline'),
     })
     .describe('The generated ingest pipeline to validate'),
-  pipeline_generation_results: z.array(z.object({})).default([]),
+  pipeline_generation_results: z
+    .array(z.custom<estypes.IngestSimulateDocumentResult>())
+    .default([]),
   failure_count: z.number().min(0).default(0),
   pipeline_validation_results: z
     .object({

@@ -349,7 +349,7 @@ export class AutomaticImportService {
     );
 
     const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline;
-    const results = dataStreamSO.attributes.result?.results ?? [];
+    const results = dataStreamSO.attributes.result?.pipeline_docs ?? [];
 
     if (!ingestPipelineObj) {
       throw new Error(`Data stream ${dataStreamId} has no ingest pipeline results`);

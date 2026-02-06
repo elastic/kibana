@@ -597,7 +597,7 @@ describe('AutomaticImportSetupService', () => {
           job_info: { status: 'completed' },
           result: {
             ingest_pipeline: { processors: [] },
-            results: [{ a: 1 }],
+            pipeline_docs: [{ a: 1 }],
           },
         },
       });
@@ -649,7 +649,7 @@ describe('AutomaticImportSetupService', () => {
       const mockGetDataStream = jest.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'completed' },
-          result: { results: [{ a: 1 }] },
+          result: { pipeline_docs: [{ a: 1 }] },
         },
       });
 
@@ -834,7 +834,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'test-integration',
         dataStreamId: 'test-datastream',
         ingestPipeline: expect.any(Object),
-        results: expect.any(Array),
+        pipelineDocs: expect.any(Array),
         status: 'completed',
       });
     });

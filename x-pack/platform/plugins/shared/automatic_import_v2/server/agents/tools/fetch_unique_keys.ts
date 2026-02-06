@@ -11,15 +11,17 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
+import type { estypes } from '@elastic/elasticsearch';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 
 import type { AutomaticImportAgentState } from '../state';
 
 const collectKeysWithSamples = (
-  value: unknown,
-  uniqueKeySamples: Map<string, unknown>,
+  value: JsonValue,
+  uniqueKeySamples: Map<string, JsonValue>,
   prefix = ''
 ): void => {
-  const storeSample = (key: string, sampleValue: unknown) => {
+  const storeSample = (key: string, sampleValue: JsonValue) => {
     const formattedSample = formatSample(sampleValue);
     const existingSample = uniqueKeySamples.get(key);
 
@@ -47,7 +49,7 @@ const collectKeysWithSamples = (
   }
 
   if (typeof value === 'object') {
-    Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+    Object.entries(value as JsonObject).forEach(([key, val]) => {
       const nextPrefix = prefix ? `${prefix}.${key}` : key;
       storeSample(nextPrefix, val);
       collectKeysWithSamples(val, uniqueKeySamples, nextPrefix);
@@ -60,7 +62,7 @@ const collectKeysWithSamples = (
   }
 };
 
-const formatSample = (value: unknown): unknown => {
+const formatSample = (value: JsonValue): JsonValue => {
   if (Array.isArray(value)) {
     return value.length > 0 ? formatSample(value[0]) : [];
   }
@@ -72,22 +74,11 @@ const formatSample = (value: unknown): unknown => {
   return value ?? '';
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const extractSource = (value: unknown): Record<string, unknown> => {
-  if (!isRecord(value)) return {};
-
-  const docContainer = value.doc;
-  if (isRecord(docContainer) && isRecord(docContainer._source)) {
-    return docContainer._source;
-  }
-
-  if (isRecord(value._source)) {
-    return value._source;
-  }
-
-  return value;
+const extractSource = (result: estypes.IngestSimulateDocumentResult): JsonObject => {
+  const source = result.doc?._source;
+  if (source === undefined || source === null) return {};
+  if (typeof source !== 'object' || Array.isArray(source)) return {};
+  return source as JsonObject;
 };
 
 export function fetchUniqueKeysTool(): DynamicStructuredTool {
@@ -105,11 +96,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
       config?: ToolRunnableConfig
     ) => {
       const state = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
-      const rawPipelineResults = state.pipeline_generation_results;
-      const pipelineDocs = Array.isArray(rawPipelineResults)
-        ? { docs: rawPipelineResults }
-        : rawPipelineResults ?? { docs: [] };
-      const docs = pipelineDocs.docs ?? [];
+      const docs = state.pipeline_generation_results;
 
       if (docs.length === 0) {
         return new Command({
@@ -124,8 +111,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
         });
       }
 
-      const uniqueKeySamples = new Map<string, unknown>();
-
+      const uniqueKeySamples = new Map<string, JsonValue>();
       docs.forEach((doc) => {
         const source = extractSource(doc);
         collectKeysWithSamples(source, uniqueKeySamples);
@@ -133,7 +119,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
 
       const uniqueKeysObject = Array.from(uniqueKeySamples.entries())
         .sort(([a], [b]) => a.localeCompare(b))
-        .reduce<Record<string, unknown>>((acc, [key, sample]) => {
+        .reduce<Record<string, JsonValue>>((acc, [key, sample]) => {
           acc[key] = sample;
           return acc;
         }, {});
