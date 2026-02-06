@@ -62,7 +62,7 @@ export class DispatcherService implements DispatcherServiceContract {
       )
     );
 
-    this.logger.info({
+    this.logger.debug({
       message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressedEpisodes.length} suppressed, ${nonSuppressedEpisodes.length} not suppressed`,
     });
 
