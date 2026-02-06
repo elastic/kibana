@@ -144,6 +144,12 @@ function buildEvalsYaml({
     `    key: kibana-evals`,
     `    depends_on:`,
     `      - build`,
+    `      - quick_checks`,
+    `      - checks`,
+    `      - linting`,
+    `      - linting_with_types`,
+    `      - check_oas_snapshot`,
+    `      - check_types`,
     `    steps:`,
     suiteSteps,
   ].join('\n');

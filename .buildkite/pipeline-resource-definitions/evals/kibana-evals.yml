@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-evals-esql
-  description: 'Runs ES|QL Generation Evaluations'
+  description: 'Runs weekly LLM eval suites (fanout across all LiteLLM models)'
 spec:
   type: buildkite-pipeline
   owner: 'group:obs-ai-team'
@@ -12,8 +12,8 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: 'Kibana / Evals / ES|QL Evals'
-      description: 'Runs ES|QL generation evaluations using @kbn/evals framework'
+      name: 'Kibana / Evals / Weekly LLM Evals'
+      description: 'Runs all @kbn/evals suites against all LiteLLM models on a weekly schedule'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kbn-evals-notifications'
@@ -24,7 +24,7 @@ spec:
       cancel_intermediate_builds: false
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/evals/esql_evals.yml
+      pipeline_file: .buildkite/pipelines/evals/llm_evals.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -47,7 +47,7 @@ spec:
       schedules:
         Weekly build:
           cronline: 0 0 * * 1 GMT
-          message: Weekly ES|QL Generation Evals
+          message: Weekly LLM Evals (all suites, all models)
           branch: main
       tags:
         - kibana

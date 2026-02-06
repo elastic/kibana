@@ -14,7 +14,7 @@ import type { ReportDisplayOptions } from '../../types';
 
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
-  options: { runId: string; taskModelId?: string; suiteId?: string },
+  runIdOrOptions: string | { runId: string; taskModelId?: string; suiteId?: string },
   log: SomeDevLog
 ) => Promise<void>;
 
@@ -31,9 +31,11 @@ export function createDefaultTerminalReporter(
 ): EvaluationReporter {
   return async (
     scoreRepository: EvaluationScoreRepository,
-    { runId, taskModelId, suiteId }: { runId: string; taskModelId?: string; suiteId?: string },
+    runIdOrOptions: string | { runId: string; taskModelId?: string; suiteId?: string },
     log: SomeDevLog
   ) => {
+    const { runId, taskModelId, suiteId } =
+      typeof runIdOrOptions === 'string' ? { runId: runIdOrOptions } : runIdOrOptions;
     const runStats = await scoreRepository.getStatsByRunId(runId, { taskModelId, suiteId });
 
     if (!runStats || runStats.stats.length === 0) {

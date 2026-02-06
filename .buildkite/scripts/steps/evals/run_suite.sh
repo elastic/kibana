@@ -116,7 +116,7 @@ NODE
       FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-fanout.XXXXXX.yml)"
       cat >"$FANOUT_PIPELINE_FILE" <<EOF
 steps:
-  - group: "Evals: ${EVAL_SUITE_ID}"
+  - group: "LLM Evals: ${EVAL_SUITE_ID}"
     key: "kbn-evals-${group_key_safe}-fanout"
     steps:
 EOF
