@@ -16,7 +16,10 @@ import {
   deleteIndexTemplate,
   deleteComponentTemplate,
 } from '../../infra/elasticsearch';
-import type { EntityDefinition, ManagedEntityDefinition } from '../definitions/entity_schema';
+import type {
+  EntityDefinition,
+  ManagedEntityDefinition,
+} from '../../../common/domain/definitions/entity_schema';
 import {
   getLatestEntityIndexTemplateConfig,
   getLatestIndexTemplateId,
@@ -54,7 +57,7 @@ export async function installElasticsearchAssets({
   } catch (error) {
     logger.error(`error installing assets for ${definition.type} in ${namespace}: ${error}`);
 
-    // TODO: We need to uninstall everything, as currently we are in a partial state
+    // TODO: We need toninstall everything, as currently we are in a partial state
     throw error;
   }
 }
