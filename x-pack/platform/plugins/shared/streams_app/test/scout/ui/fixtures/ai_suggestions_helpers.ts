@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type ScoutPage } from '@kbn/scout';
+import { type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createLlmProxy, type LlmProxy } from './llm_proxy';

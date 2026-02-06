@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type ScoutPage } from '@kbn/scout';
+import { type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {

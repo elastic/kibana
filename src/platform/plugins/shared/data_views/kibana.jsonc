@@ -17,7 +17,8 @@
       "contentManagement"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils"

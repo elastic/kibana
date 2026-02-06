@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
-
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/use_doc_viewer_extension_actions';
 export { useSpanFlyoutData } from './use_span_flyout_data';
 export type { UseSpanFlyoutDataParams, SpanFlyoutData } from './use_span_flyout_data';
 
@@ -28,6 +28,7 @@ export interface SpanFlyoutContentProps {
 export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
   const { indexes } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
+  const actions = useDocViewerExtensionActionsContext();
 
   useEffect(() => {
     if (activeSection && flyoutRef) {
@@ -38,6 +39,7 @@ export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutCo
   return (
     <Overview
       ref={setFlyoutRef}
+      docViewActions={actions}
       hit={hit}
       indexes={indexes}
       showWaterfall={false}

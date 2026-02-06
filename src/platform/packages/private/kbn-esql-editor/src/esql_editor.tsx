@@ -464,22 +464,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const styles = useMemo(
     () =>
-      esqlEditorStyles(
-        theme.euiTheme,
-        editorHeight,
-        Boolean(editorMessages.errors.length),
-        Boolean(editorMessages.warnings.length),
-        Boolean(editorIsInline),
-        Boolean(hasOutline)
-      ),
-    [
-      theme.euiTheme,
-      editorHeight,
-      editorMessages.errors.length,
-      editorMessages.warnings.length,
-      editorIsInline,
-      hasOutline,
-    ]
+      esqlEditorStyles(theme.euiTheme, editorHeight, Boolean(editorIsInline), Boolean(hasOutline)),
+    [theme.euiTheme, editorHeight, editorIsInline, hasOutline]
   );
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
@@ -1203,6 +1189,17 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
+      {!hideQuickSearch && (
+        <QuickSearchVisor
+          query={code}
+          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+          isVisible={isVisorOpen}
+          onUpdateAndSubmitQuery={(newQuery) =>
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+          }
+          onToggleVisor={onToggleVisor}
+        />
+      )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
           onMouseDownResizeHandler={(mouseDownEvent) => {
@@ -1223,18 +1220,6 @@ const ESQLEditorInternal = function ESQLEditor({
               setResizableContainerHeight
             )
           }
-        />
-      )}
-      {!hideQuickSearch && (
-        <QuickSearchVisor
-          query={code}
-          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
-          isVisible={isVisorOpen}
-          onUpdateAndSubmitQuery={(newQuery) => {
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH);
-            editorRef.current?.focus();
-          }}
-          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter
