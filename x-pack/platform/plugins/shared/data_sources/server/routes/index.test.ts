@@ -60,9 +60,7 @@ describe('registerRoutes', () => {
     },
   };
   const mockDataCatalog = {
-    getCatalog: jest.fn().mockReturnValue({
-      get: jest.fn().mockReturnValue({ iconType: '.notion' }),
-    }),
+    getCatalog: jest.fn(),
   };
 
   const mockGetStartServices = jest.fn().mockResolvedValue([
@@ -144,6 +142,11 @@ describe('registerRoutes', () => {
         total: 2,
         per_page: DEFAULT_ITEMS_PER_PAGE,
         page: 1,
+      });
+
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
       });
 
       registerRoutes(dependencies);
@@ -467,6 +470,11 @@ describe('registerRoutes', () => {
 
       mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
 
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+      });
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[1][1];
@@ -515,7 +523,7 @@ describe('registerRoutes', () => {
     it('should create a new data source and call the helper with correct params', async () => {
       const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
-        workflows: { directory: '/mock/workflows' },
+        generateWorkflows: jest.fn(),
       };
 
       mockDataCatalog.getCatalog.mockReturnValue({
@@ -585,7 +593,7 @@ describe('registerRoutes', () => {
     it('should handle errors during creation', async () => {
       const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
-        workflows: { directory: '/mock/workflows' },
+        generateWorkflows: jest.fn(),
       };
 
       mockDataCatalog.getCatalog.mockReturnValue({
