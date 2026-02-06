@@ -109,7 +109,7 @@ export const getInvestigationGuideSubFeature = (): SubFeatureConfig => ({
             }
           ),
           savedObject: {
-            all: [], // TODO: this might need to be filled
+            all: [],
             read: [],
           },
           ui: [INVESTIGATION_GUIDE_UI_EDIT],
@@ -141,7 +141,7 @@ export const getCustomHighlightedFieldsSubFeature = (): SubFeatureConfig => ({
             }
           ),
           savedObject: {
-            all: [], // TODO: this might need to be filled
+            all: [],
             read: [],
           },
           ui: [CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT],

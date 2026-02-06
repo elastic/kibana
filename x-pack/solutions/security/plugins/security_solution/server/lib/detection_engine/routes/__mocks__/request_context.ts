@@ -215,7 +215,7 @@ const createSecuritySolutionRequestContextMock = (
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
-    getRulesAuthz: jest.fn(async () => getMockRulesAuthz()),
+    getRulesAuthz: jest.fn(() => getMockRulesAuthz()),
   };
 };
 

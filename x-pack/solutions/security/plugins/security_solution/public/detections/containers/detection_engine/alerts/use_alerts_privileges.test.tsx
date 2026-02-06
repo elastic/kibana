@@ -78,7 +78,13 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
-  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
+  rulesPrivileges: {
+    rules: { edit: true, read: true },
+    exceptions: { read: true, edit: false },
+    enableDisable: { edit: false },
+    investigationGuide: { edit: false },
+    customHighlightedFields: { edit: false },
+  },
   alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
 };
 
