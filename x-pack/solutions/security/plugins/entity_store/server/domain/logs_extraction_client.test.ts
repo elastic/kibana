@@ -16,7 +16,7 @@ import { ingestEntities } from '../infra/elasticsearch/ingest';
 import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
 import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 
 jest.mock('../infra/elasticsearch/esql');
 jest.mock('../infra/elasticsearch/ingest');
