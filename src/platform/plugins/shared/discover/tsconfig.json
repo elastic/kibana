@@ -126,7 +126,10 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
     "@kbn/esql",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
+    "@kbn/flyout-ui",
+    "@kbn/security-solution-common",
+    "@kbn/security-solution-flyout"
   ],
   "exclude": ["target/**/*"]
 }

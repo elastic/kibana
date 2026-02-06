@@ -28,6 +28,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.tsx'
     - '!target/**/*'
 tasks:
   jest:

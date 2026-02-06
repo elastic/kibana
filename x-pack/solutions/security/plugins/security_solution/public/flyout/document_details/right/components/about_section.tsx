@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
-import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { ExpandableSection, useExpandSection } from '@kbn/flyout-ui';
+import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { AlertDescription } from '@kbn/security-solution-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
-import { AlertDescription } from './alert_description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 import { getField } from '../../shared/utils';
@@ -21,7 +28,7 @@ import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { AlertStatus } from './alert_status';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const KEY = 'about';
 
@@ -32,9 +39,20 @@ const KEY = 'about';
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
+  const { telemetry } = useKibana().services;
+  const { dataFormattedForFieldBrowser, getFieldsData, isRulePreview, scopeId, searchHit } =
+    useDocumentDetailsContext();
+  const { rulesPrivileges } = useUserPrivileges();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
+
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -42,10 +60,32 @@ export const AboutSection = memo(() => {
     defaultValue: true,
   });
 
+  const ruleSummaryDisabled =
+    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.rules.read;
+
+  const openRulePreview = useCallback(() => {
+    openPreviewPanel({
+      id: RulePreviewPanelKey,
+      params: {
+        ruleId,
+        banner: RULE_PREVIEW_BANNER,
+        isPreviewMode: true,
+      },
+    });
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, scopeId, ruleId, telemetry]);
+
   const content =
     eventKind === EventKind.signal ? (
       <>
-        <AlertDescription />
+        <AlertDescription
+          hit={hit}
+          onShowRuleSummary={openRulePreview}
+          ruleSummaryDisabled={ruleSummaryDisabled}
+        />
         <Reason />
         <MitreAttack />
         <AlertStatus />

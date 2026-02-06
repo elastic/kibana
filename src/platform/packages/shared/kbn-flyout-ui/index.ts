@@ -6,3 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+export {
+  CONTENT_TEST_ID,
+  ExpandableSection,
+  HEADER_TEST_ID,
+} from './src/components/expandable_section';
+export { useExpandSection } from './src/hooks/use_expand_section';

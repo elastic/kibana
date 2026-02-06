@@ -7,9 +7,7 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
-import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ExpandableSection, useExpandSection } from '@kbn/flyout-ui';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { INSIGHTS_SECTION_TEST_ID } from '../constants/test_ids';
 import { EntitiesOverview } from './entities_overview';

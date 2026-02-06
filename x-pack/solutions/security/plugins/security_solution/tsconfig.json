@@ -275,6 +275,9 @@
     "@kbn/kql",
     "@kbn/babel-register",
     "@kbn/core-security-common",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/flyout-ui",
+    "@kbn/security-solution-common",
+    "@kbn/security-solution-flyout"
   ]
 }
