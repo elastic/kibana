@@ -65,6 +65,17 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
     };
   }, [endpoints]);
 
+  const statItems: StatItemProps[] = [
+    { label: SERVICES_LABEL, count: stats.servicesCount, testSubj: 'endpointStatsServicesCount' },
+    { label: MODELS_LABEL, count: stats.modelsCount, testSubj: 'endpointStatsModelsCount' },
+    {
+      label: ENDPOINTS_LABEL,
+      count: stats.endpointsCount,
+      testSubj: 'endpointStatsEndpointsCount',
+    },
+    { label: TYPES_LABEL, count: stats.typesCount, testSubj: 'endpointStatsTypesCount' },
+  ];
+
   return (
     <EuiFlexGroup
       gutterSize="m"
@@ -72,30 +83,15 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       responsive={false}
       data-test-subj="endpointStats"
     >
-      <EuiFlexItem grow={false} css={statItemStyles}>
-        <StatItem
-          label={SERVICES_LABEL}
-          count={stats.servicesCount}
-          testSubj="endpointStatsServicesCount"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={statItemStyles}>
-        <StatItem
-          label={MODELS_LABEL}
-          count={stats.modelsCount}
-          testSubj="endpointStatsModelsCount"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={statItemStyles}>
-        <StatItem
-          label={ENDPOINTS_LABEL}
-          count={stats.endpointsCount}
-          testSubj="endpointStatsEndpointsCount"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatItem label={TYPES_LABEL} count={stats.typesCount} testSubj="endpointStatsTypesCount" />
-      </EuiFlexItem>
+      {statItems.map((item, index) => (
+        <EuiFlexItem
+          key={item.testSubj}
+          grow={false}
+          css={index < statItems.length - 1 ? statItemStyles : undefined}
+        >
+          <StatItem label={item.label} count={item.count} testSubj={item.testSubj} />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };
