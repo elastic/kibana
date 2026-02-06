@@ -70,6 +70,11 @@ function createEditorInstance() {
     onDidBlurEditorWidget: () => ({
       dispose: jest.fn(),
     }),
+    onDidScrollChange: jest.fn(() => ({
+      dispose: jest.fn(),
+    })),
+    setScrollTop: jest.fn(),
+    getScrollTop: jest.fn(() => 0),
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
