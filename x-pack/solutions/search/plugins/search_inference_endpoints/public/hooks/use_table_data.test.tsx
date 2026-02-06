@@ -151,11 +151,11 @@ describe('useTableData', () => {
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
+    expect(filteredData.every((item) => item.inference_id.includes(searchKey2))).toBeTruthy();
   });
 
   it('should set pagination total to filtered count', () => {
-    const filteredSearchKey = 'third-party';
+    const filteredSearchKey = 'openai';
     const { result } = renderHook(
       () => useTableData(inferenceEndpoints, queryParams, filterOptions, filteredSearchKey),
       { wrapper }
