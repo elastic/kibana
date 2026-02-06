@@ -179,7 +179,9 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
       const body = {
         model: 'mistral',
         tool_choice: 'auto',
-        tools: [{ type: 'function', function: { name: 'foo', description: 'bar', parameters: {} } }],
+        tools: [
+          { type: 'function', function: { name: 'foo', description: 'bar', parameters: {} } },
+        ],
         messages: [{ role: 'user', content: 'This is a test' }],
       };
 
