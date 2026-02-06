@@ -493,6 +493,8 @@ export const WorkflowYAMLEditor = ({
       // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
       const editorUri = editorRef.current?.getModel()?.uri;
       if (model.uri.path !== editorUri?.path) {
+        // skip setting markers for other editors
+        setModelMarkers.call(monaco.editor, model, owner, markers);
         return;
       }
       const transformedMarkers = transformMonacoMarkers(model, owner, markers);

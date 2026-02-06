@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { ALWAYS_CONDITION, convertUIStepsToDSL } from '@kbn/streamlang';
 import type { Streams } from '@kbn/streams-schema';
