@@ -160,4 +160,19 @@ export class WorkflowEditorPage {
     const selector = `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`;
     return this.page.locator(selector);
   }
+
+  async expandStepsTree() {
+    while (true) {
+      const collapsedLocators = await this.page.testSubj
+        .locator('workflowExecutionPanel')
+        .locator('button[aria-expanded="false"]')
+        .all();
+
+      if (!collapsedLocators.length) {
+        break;
+      }
+      await collapsedLocators[0].scrollIntoViewIfNeeded();
+      await collapsedLocators[0].locator('.euiTreeView__expansionArrow[role=presentation]').click();
+    }
+  }
 }
