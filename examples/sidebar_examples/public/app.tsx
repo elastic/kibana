@@ -19,13 +19,11 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+import { useSidebar } from '@kbn/core-chrome-sidebar-components';
 import React from 'react';
-import { counterAppId } from './counter_app';
-import type { TextInputState, TextInputActions } from './text_input_app';
-import { textInputAppId } from './text_input_app';
-import type { TabSelectionState, TabSelectionActions } from './tab_selection_app';
-import { tabSelectionAppId } from './tab_selection_app';
+import { useCounterSidebarApp } from './counter_app';
+import { useTextInputSidebarApp } from './text_input_app';
+import { useTabSelectionSidebarApp } from './tab_selection_app';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
@@ -33,10 +31,10 @@ export interface Props {}
 export function App({}: Props) {
   const { close, setWidth } = useSidebar();
 
-  // Get app-bound APIs for each sidebar app
-  const textApp = useSidebarApp<TextInputState, TextInputActions>(textInputAppId);
-  const counterApp = useSidebarApp(counterAppId);
-  const tabsApp = useSidebarApp<TabSelectionState, TabSelectionActions>(tabSelectionAppId);
+  // Get app-bound APIs using typed hooks from each sidebar app
+  const textApp = useTextInputSidebarApp();
+  const counterApp = useCounterSidebarApp();
+  const tabsApp = useTabSelectionSidebarApp();
 
   // App handlers just for simple demo controls,
   // For real apps, these handlers would be exposed on plugins contracts or as hooks.

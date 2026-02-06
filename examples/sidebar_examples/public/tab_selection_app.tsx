@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiPanel, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
@@ -27,6 +27,10 @@ export const tabSelectionStore = createSidebarStore({
 
 export type TabSelectionState = typeof tabSelectionStore.types.state;
 export type TabSelectionActions = typeof tabSelectionStore.types.actions;
+
+/** Typed hook for the tab selection sidebar app */
+export const useTabSelectionSidebarApp = () =>
+  useSidebarApp<TabSelectionState, TabSelectionActions>(tabSelectionAppId);
 
 /**
  * Tab selection app that demonstrates custom header content.

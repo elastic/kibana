@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiPanel, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
-import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 export const textInputAppId = 'sidebarExampleText';
 
@@ -33,6 +33,10 @@ export const textInputStore = createSidebarStore({
 
 export type TextInputState = typeof textInputStore.types.state;
 export type TextInputActions = typeof textInputStore.types.actions;
+
+/** Typed hook for the text input sidebar app */
+export const useTextInputSidebarApp = () =>
+  useSidebarApp<TextInputState, TextInputActions>(textInputAppId);
 
 /**
  * Text input app that receives state and actions as props.
