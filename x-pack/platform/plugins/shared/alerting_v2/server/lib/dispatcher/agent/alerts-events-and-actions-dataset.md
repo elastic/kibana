@@ -551,3 +551,132 @@ sequenceDiagram
     RE->>R5S2: 16:15 breached (ep-1, active)
     end
 ```
+
+## Dataset follow-up
+
+A follow-up `_bulk` request that adds one more evaluation tick at `16:20` for every currently active episode across all existing rules, plus a brand-new rule (`rule-006`) with a single series appearing for the first time.
+
+```
+POST _bulk
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-001" },
+    "group_hash": "rule-001-series-1",
+    "episode": { "id": "rule-001-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-002" },
+    "group_hash": "rule-002-series-1",
+    "episode": { "id": "rule-002-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-003" },
+    "group_hash": "rule-003-series-1",
+    "episode": { "id": "rule-003-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-003" },
+    "group_hash": "rule-003-series-2",
+    "episode": { "id": "rule-003-series-2-episode-2", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-004" },
+    "group_hash": "rule-004-series-1",
+    "episode": { "id": "rule-004-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-004" },
+    "group_hash": "rule-004-series-2",
+    "episode": { "id": "rule-004-series-2-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-005" },
+    "group_hash": "rule-005-series-1",
+    "episode": { "id": "rule-005-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-005" },
+    "group_hash": "rule-005-series-2",
+    "episode": { "id": "rule-005-series-2-episode-1", "status": "active" },
+    "status": "breached"
+}
+{ "create": { "_index": ".alerts-events" } }
+{
+    "@timestamp": "2026-01-27T16:20:00.000Z", "source": "internal", "type": "alert",
+    "rule": { "id": "rule-006" },
+    "group_hash": "rule-006-series-1",
+    "episode": { "id": "rule-006-series-1-episode-1", "status": "active" },
+    "status": "breached"
+}
+```
+
+
+## Trigger dispatcher manually
+
+Use the following workflow to exercise the dispatcher against the two datasets above and verify the suppress/fire decisions at each step.
+
+### Step 1 -- Ingest the initial dataset
+
+Run the first `POST _bulk` request (the one containing events from `16:00` to `16:15` plus all actions) to populate `.alerts-events` and `.alerts-actions`.
+
+### Step 2 -- Run the dispatcher (first pass)
+
+```bash
+curl --request POST \
+  --url http://localhost:5601/internal/alerting/v2/dispatcher/_run \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui' \
+  --header 'x-elastic-internal-origin: kibana' \
+  --data '{
+	"previousStartedAt": "2026-01-25T00:00:00.000Z"
+}'
+```
+
+### Step 3 -- Assert first-pass results
+
+Verify that the dispatcher produced the expected suppress/fire events for every series across rule-001 through rule-005.
+
+### Step 4 -- Ingest the follow-up dataset
+
+Run the second `POST _bulk` request (the "Dataset follow-up" section -- events at `16:20` for all active episodes plus the new rule-006).
+
+### Step 5 -- Run the dispatcher (second pass)
+
+```bash
+curl --request POST \
+  --url http://localhost:5601/internal/alerting/v2/dispatcher/_run \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui' \
+  --header 'x-elastic-internal-origin: kibana' \
+  --data '{
+	"previousStartedAt": "2026-01-27T16:15:00.000Z"
+}'
+```
+
+### Step 6 -- Assert second-pass results
+
+Verify that the dispatcher produced the expected suppress/fire events for the `16:20` tick, including the newly introduced rule-006 series.

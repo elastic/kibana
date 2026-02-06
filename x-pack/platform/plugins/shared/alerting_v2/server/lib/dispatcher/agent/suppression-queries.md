@@ -16,7 +16,7 @@ POST /_query?format=csv
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status
       | DROP episode.id, rule.id, episode.status
-      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event" BY rule_id, group_hash
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND (action_type == "fire" OR action_type == "suppress") BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ".ds-.alerts-actions-*")
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*"
@@ -194,107 +194,18 @@ rule-004,rule-004-series-2,true
 
 ---
 
-## Combined query: all 3 suppression types at once
-
-The challenge with combining all three suppression types is the different grouping granularity:
-- **Ack** and **Deactivate** group BY `(rule_id, group_hash, episode_id)`
-- **Snooze** groups BY `(rule_id, group_hash)` only — snooze actions have no `episode_id`
-
-A single `STATS ... BY rule_id, group_hash, episode_id` groups snooze rows under `episode_id = NULL`, separate from ack/deactivate rows that carry an `episode_id`. This works correctly: snooze results appear at the `group_hash` level (with `episode_id = NULL`), while ack/deactivate results appear at the `episode_id` level.
-
-```
-POST /_query?format=csv
-{
-  "query": """
-    FROM .alerts-actions
-      | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-      | WHERE action_type != "snooze" OR expiry > "2026-01-27T16:15:00.000Z"::datetime
-      | STATS 
-          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-          last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
-        BY rule_id, group_hash, episode_id
-      | EVAL should_suppress = CASE(
-          last_snooze_action == "snooze", true,
-          last_ack_action == "ack", true,
-          last_deactivate_action == "deactivate", true,
-          false
-        )
-      | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action
-  """
-}
-```
-
-### Expected result
-
-```
-rule_id,group_hash,episode_id,should_suppress,last_ack_action,last_deactivate_action,last_snooze_action
-rule-001,rule-001-series-1,rule-001-series-1-episode-1,false,unack,,
-rule-002,rule-002-series-1,rule-002-series-1-episode-1,true,ack,,
-rule-004,rule-004-series-1,,true,,,snooze
-rule-004,rule-004-series-2,,true,,,snooze
-rule-005,rule-005-series-1,rule-005-series-1-episode-1,true,,deactivate,
-```
-
-> Episodes/series not present in the result have no suppression actions and should be assumed **not suppressed**.
-
-- **rule-001**: last ack action is `unack` → `should_suppress = false`
-- **rule-002**: last ack action is `ack` → `should_suppress = true`
-- **rule-004 series-1**: last snooze action is `snooze` (expiry still valid) → `should_suppress = true` (episode_id is NULL — snooze applies to all episodes in the series)
-- **rule-004 series-2**: same as series-1 → `should_suppress = true`
-- **rule-005 series-1**: last deactivate action is `deactivate` → `should_suppress = true`
-
-### Note on snooze `episode_id`
-
-Snooze rows appear with `episode_id = NULL` because snooze actions are scoped to `group_hash`, not to a specific episode. The consumer of these results needs to match snooze suppression by `(rule_id, group_hash)` rather than by `episode_id`.
-
-### Edge case: mixed snooze + ack/deactivate on the same group_hash
-
-If a `group_hash` has both snooze and ack/deactivate actions, the simple query above produces separate rows: one with `episode_id = NULL` (snooze) and one with the actual `episode_id` (ack/deactivate). The episode-level row won't reflect the snooze status.
-
-To propagate snooze status to episode-level rows, use `INLINE STATS` to first compute snooze at the `group_hash` level before the final `STATS`:
-
-```
-POST /_query?format=csv
-{
-  "query": """
-    FROM .alerts-actions
-      | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-      | WHERE action_type != "snooze" OR expiry > "2026-01-27T16:15:00.000Z"::datetime
-      | INLINE STATS 
-          last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze") 
-          BY rule_id, group_hash
-      | STATS 
-          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-          last_snooze_action = MAX(last_snooze_action)
-        BY rule_id, group_hash, episode_id
-      | EVAL should_suppress = CASE(
-          last_snooze_action == "snooze", true,
-          last_ack_action == "ack", true,
-          last_deactivate_action == "deactivate", true,
-          false
-        )
-      | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action
-  """
-}
-```
-
-With `INLINE STATS`, the snooze status is computed first and added to every row for that `(rule_id, group_hash)`. Then when `STATS` groups by `episode_id`, each episode-level group carries the snooze status. This ensures that if a series is both snoozed and acked, the episode-level row correctly shows `should_suppress = true` (from snooze).
-
-With the current dataset both queries produce the same result since no group_hash has both snooze and ack/deactivate actions.
-
-
----
-
 ## Combined query with alerts-events: dynamic snooze expiry comparison
+
+
+> [!CAUTION]
+> This approach was explored but **not chosen** for the final implementation. It requires reading all `.alerts-events` in the same query, which is expensive and redundant since the dispatcher already fetches the alert episodes in a prior query. The chosen approach uses the dispatcher's alert episodes to build a scoped filter on `.alerts-actions` only — see [Chosen approach: two-query strategy with episode-based filtering](#chosen-approach-two-query-strategy-with-episode-based-filtering) below.
 
 The combined queries above use a hardcoded timestamp (`"2026-01-27T16:15:00.000Z"::datetime`) for the snooze expiry comparison. In the real dispatcher context, the snooze expiry should be compared against the **alert episode's event timestamp** — not a static value or `now()`.
 
 To achieve this, we query both `.alerts-events` and `.alerts-actions` in a single ES|QL query:
 
 1. Read from both indices (same as the dispatcher query)
-2. Apply the **fire-event filter** — use `INLINE STATS` to find the last `fire-event` per `(rule_id, group_hash)` and only consider alert events that haven't been fired yet
+2. Apply the **fire filter** — use `INLINE STATS` to find the last `fire` action per `(rule_id, group_hash)` and only consider alert events that haven't been fired yet
 3. Compute `last_event_timestamp` per `(rule_id, group_hash)` from the alert events using `INLINE STATS`
 4. Filter down to action rows only, and use the dynamically computed `last_event_timestamp` for the snooze expiry comparison
 5. Compute all 3 suppression types as before
@@ -311,7 +222,7 @@ POST /_query?format=csv
           episode_id = COALESCE(episode.id, episode_id)
       | DROP rule.id, episode.id
       | INLINE STATS 
-          last_fired = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event" 
+          last_fired = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND (action_type == "fire" OR action_type == "suppress") 
           BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) OR (_index LIKE ".ds-.alerts-actions-*")
       | INLINE STATS 
@@ -346,7 +257,7 @@ POST /_query?format=csv
 
 2. **Normalize field names** — Alert events store the rule id as `rule.id` and episode id as `episode.id`, while actions store them as `rule_id` and `episode_id`. The `COALESCE` + `DROP` normalizes these into consistent field names.
 
-3. **Fire-event filter** — The `INLINE STATS last_fired = MAX(last_series_event_timestamp) WHERE action_type == "fire-event"` computes the last fired event timestamp per `(rule_id, group_hash)`. The subsequent `WHERE` clause filters out alert events that have already been fired by a previous dispatcher run, while keeping all action rows. With the current dataset, there are no `fire-event` actions, so `last_fired` is NULL and all events pass through.
+3. **Fire filter** — The `INLINE STATS last_fired = MAX(last_series_event_timestamp) WHERE (action_type == "fire" OR action_type == "suppress")` computes the last processed event timestamp per `(rule_id, group_hash)`. Both `fire` and `suppress` actions indicate that the dispatcher has already processed the series. The subsequent `WHERE` clause filters out alert events that have already been processed by a previous dispatcher run, while keeping all action rows. With the current dataset, there are no `fire` or `suppress` actions, so `last_fired` is NULL and all events pass through.
 
 4. **Compute `last_event_timestamp`** — `INLINE STATS last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*" BY rule_id, group_hash` attaches the latest alert event timestamp to every row for that `(rule_id, group_hash)`. This is the timestamp we compare against the snooze expiry.
 
@@ -356,9 +267,9 @@ POST /_query?format=csv
 
 7. **Compute suppression** — Same logic as the previous combined queries: `INLINE STATS` for snooze at the `group_hash` level, then `STATS` for ack/deactivate at the `episode_id` level.
 
-### Note on fire-event filter
+### Note on fire filter
 
-The current dataset has no `fire-event` actions (those are written by the dispatcher after processing). As a result, `last_fired` is NULL for all `(rule_id, group_hash)` pairs, and the filter passes all events through. In production, this filter ensures only unfired alert events contribute to the `last_event_timestamp` computation — avoiding re-processing episodes already handled by a previous dispatcher run.
+The current dataset has no `fire` or `suppress` actions (those are written by the dispatcher after processing). As a result, `last_fired` is NULL for all `(rule_id, group_hash)` pairs, and the filter passes all events through. In production, this filter ensures only unfired alert events contribute to the `last_event_timestamp` computation — avoiding re-processing episodes already handled by a previous dispatcher run.
 
 ### Expected result
 
@@ -380,3 +291,120 @@ The results are identical to the previous combined queries, but now with `last_e
 - **rule-004 series-1**: snooze expiry `2026-01-28T16:03:00.000Z` > last_event_timestamp `2026-01-27T16:15:00.000Z` → snooze is active → `should_suppress = true`
 - **rule-004 series-2**: same as series-1 → `should_suppress = true`
 - **rule-005 series-1**: last deactivate action is `deactivate` → `should_suppress = true` (last_event_timestamp = 16:15)
+
+
+---
+
+## Chosen approach: two-query strategy with episode-based filtering
+
+Instead of a single query that reads both `.alerts-events` and `.alerts-actions`, the dispatcher runs two sequential queries:
+
+1. **Dispatcher query** (documented at the top of this file) — returns the alert episodes with their `last_event_timestamp`, `rule_id`, `group_hash`, `episode_id`, and `episode_status`.
+2. **Suppression query** — reads only `.alerts-actions`, filtered by the `(rule_id, group_hash)` pairs extracted from the alert episodes returned in step 1.
+
+### Why this approach
+
+The dispatcher already has the alert episodes in memory after step 1. We can use them to build a targeted `WHERE` clause that scopes the `.alerts-actions` query to only the relevant series. This avoids reading `.alerts-events` a second time, which is both expensive and redundant. It also removes the need for `METADATA _index`, `COALESCE` normalization, and the `INLINE STATS` fire filter — all of which were required by the single-query approach.
+
+The snooze expiry comparison uses `minLastEventTimestamp` — the minimum `last_event_timestamp` across all alert episodes — as a conservative pre-filter. This ensures no valid snooze is accidentally excluded by the ES|QL query. If a more precise per-episode snooze expiry check is needed, the dispatcher can refine it in code after the query returns, since it already holds the per-episode timestamps.
+
+### TypeScript implementation
+
+```typescript
+export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]): EsqlRequest => {
+  const minLastEventTimestamp = alertEpisodes.reduce(
+    (min, ep) => (ep.last_event_timestamp < min ? ep.last_event_timestamp : min),
+    alertEpisodes[0].last_event_timestamp
+  );
+
+  let whereClause = esql.exp`FALSE`;
+  for (const alertEpisode of alertEpisodes) {
+    whereClause = esql.exp`${whereClause} OR (rule_id == ${alertEpisode.rule_id} AND group_hash == ${alertEpisode.group_hash})`;
+  }
+
+  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+      | WHERE ${whereClause}
+      | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
+      | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+      | INLINE STATS
+          last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+          BY rule_id, group_hash
+      | STATS
+          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
+          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+          last_snooze_action = MAX(last_snooze_action)
+        BY rule_id, group_hash, episode_id
+      | EVAL should_suppress = CASE(
+          last_snooze_action == "snooze", true,
+          last_ack_action == "ack", true,
+          last_deactivate_action == "deactivate", true,
+          false
+        )
+      | KEEP rule_id, group_hash, episode_id, should_suppress`.toRequest();
+};
+```
+
+### Equivalent ES|QL for our dataset
+
+Using the 8 unique `(rule_id, group_hash)` pairs from the dispatcher results and `minLastEventTimestamp = "2026-01-27T16:00:00.000Z"`:
+
+```
+POST /_query?format=csv
+{
+  "query": """
+    FROM .alerts-actions
+      | WHERE (rule_id == "rule-001" AND group_hash == "rule-001-series-1")
+          OR (rule_id == "rule-002" AND group_hash == "rule-002-series-1")
+          OR (rule_id == "rule-003" AND group_hash == "rule-003-series-1")
+          OR (rule_id == "rule-003" AND group_hash == "rule-003-series-2")
+          OR (rule_id == "rule-004" AND group_hash == "rule-004-series-1")
+          OR (rule_id == "rule-004" AND group_hash == "rule-004-series-2")
+          OR (rule_id == "rule-005" AND group_hash == "rule-005-series-1")
+          OR (rule_id == "rule-005" AND group_hash == "rule-005-series-2")
+      | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
+      | WHERE action_type != "snooze" OR expiry > "2026-01-27T16:00:00.000Z"::datetime
+      | INLINE STATS
+          last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+          BY rule_id, group_hash
+      | STATS
+          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
+          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+          last_snooze_action = MAX(last_snooze_action)
+        BY rule_id, group_hash, episode_id
+      | EVAL should_suppress = CASE(
+          last_snooze_action == "snooze", true,
+          last_ack_action == "ack", true,
+          last_deactivate_action == "deactivate", true,
+          false
+        )
+      | KEEP rule_id, group_hash, episode_id, should_suppress
+  """
+}
+```
+
+### Note on `minLastEventTimestamp`
+
+The `minLastEventTimestamp` is the minimum `last_event_timestamp` across all alert episodes returned by the dispatcher query. In our dataset, the dispatcher returns episodes with `last_event_timestamp` values of `16:00` (rule-003-series-2-episode-1) and `16:15` (all others), so `minLastEventTimestamp = "2026-01-27T16:00:00.000Z"`.
+
+This value is used as a conservative pre-filter for snooze expiry: `WHERE action_type != "snooze" OR expiry > minLastEventTimestamp`. By using the earliest timestamp, we ensure no snooze that is still valid for any episode gets filtered out. If a snooze has expired for a later episode but not for an earlier one, it is still included — the dispatcher can perform a per-episode refinement in code using the `last_event_timestamp` it already holds from step 1.
+
+### Expected result
+
+```
+rule_id,group_hash,episode_id,should_suppress
+rule-001,rule-001-series-1,rule-001-series-1-episode-1,false
+rule-002,rule-002-series-1,rule-002-series-1-episode-1,true
+rule-004,rule-004-series-1,,true
+rule-004,rule-004-series-2,,true
+rule-005,rule-005-series-1,rule-005-series-1-episode-1,true
+```
+
+> Episodes/series not present in the result have no suppression actions and should be assumed **not suppressed**.
+
+- **rule-001**: last ack action is `unack` → `should_suppress = false`
+- **rule-002**: last ack action is `ack` → `should_suppress = true`
+- **rule-004 series-1**: last snooze action is `snooze` (expiry `2026-01-28T16:03:00.000Z` > `minLastEventTimestamp`) → `should_suppress = true` (episode_id is NULL — snooze applies to all episodes in the series)
+- **rule-004 series-2**: same as series-1 → `should_suppress = true`
+- **rule-005 series-1**: last deactivate action is `deactivate` → `should_suppress = true`
+
+The results match the previous combined queries. The key difference is that `last_event_timestamp` is no longer in the output — the dispatcher already has it from the first query.
