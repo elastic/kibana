@@ -12,7 +12,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { ACTION_VISUALIZE_LENS_FIELD, ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
-import type { Trigger, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
@@ -40,11 +40,6 @@ const visualizeAction = new ActionInternal({
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')
   .mockResolvedValue([visualizeAction as ActionInternal<object>]);
-
-jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
-  id: ACTION_VISUALIZE_LENS_FIELD,
-  exec: mockExecuteAction,
-} as unknown as Trigger);
 
 describe('UnifiedFieldList <FieldVisualizeButton />', () => {
   it('should render correctly', async () => {
@@ -83,7 +78,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    expect(mockExecuteAction).toHaveBeenCalledWith({
+    expect(uiActions.executeTriggerActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
       contextualFields,
       dataViewSpec: dataView.toSpec(false),
       fieldName: FIELD_NAME_KEYWORD,
@@ -122,7 +117,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    expect(mockExecuteAction).toHaveBeenCalledWith({
+    expect(uiActions.executeTriggerActions).toHaveBeenCalledWith(VISUALIZE_GEO_FIELD_TRIGGER, {
       contextualFields: [],
       dataViewSpec: dataView.toSpec(false),
       fieldName: FIELD_NAME,
