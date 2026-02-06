@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { createRulePipelineState } from '../test_utils';
 import type { RuleExecutionMiddlewareContext } from './types';
 
 export const createRuleExecutionMiddlewareContext = ({
   name,
 }: { name?: string } = {}): RuleExecutionMiddlewareContext => ({
-  step: { name: name ?? 'test_step', execute: jest.fn() },
-  state: createRulePipelineState(),
+  step: { name: name ?? 'test_step', executeStream: jest.fn() },
 });

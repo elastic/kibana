@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
+import { createAlertEventsBatchBuilder } from './build_alert_events';
 
-describe('buildAlertEventsFromEsqlResponse', () => {
+describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -19,7 +18,7 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     jest.useRealTimers();
   });
 
-  it('transforms ES|QL response rows into alert documents', () => {
+  it('transforms ES|QL rows into alert documents', () => {
     const ruleAttributes: RuleSavedObjectAttributes = {
       name: 'My ES|QL Rule',
       kind: 'alert',
@@ -36,26 +35,20 @@ describe('buildAlertEventsFromEsqlResponse', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    const esqlResponse: EsqlEsqlResult = {
-      columns: [
-        { name: 'host.name', type: 'keyword' },
-        { name: 'region', type: 'keyword' },
-        { name: 'count', type: 'number' },
-      ],
-      values: [
-        ['host-a', 'us-east', 10],
-        ['host-b', 'eu-west', 5],
-      ],
-    };
+    const rows = [
+      { 'host.name': 'host-a', region: 'us-east', count: 10 },
+      { 'host.name': 'host-b', region: 'eu-west', count: 5 },
+    ];
 
-    const docs = buildAlertEventsFromEsqlResponse({
+    const buildBatch = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
       ruleAttributes,
-      esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
     });
+
+    const docs = buildBatch(rows);
 
     expect(docs).toHaveLength(2);
 

@@ -16,9 +16,17 @@ export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> 
   docs: TDocument[];
 }
 
+export interface BulkIndexDocsAsStreamParams<TDocument extends Record<string, unknown>> {
+  index: string;
+  docs: AsyncIterable<TDocument[]>;
+}
+
 export interface StorageServiceContract {
   bulkIndexDocs<TDocument extends Record<string, unknown>>(
     params: BulkIndexDocsParams<TDocument>
+  ): Promise<void>;
+  bulkIndexDocsAsStream<TDocument extends Record<string, unknown>>(
+    params: BulkIndexDocsAsStreamParams<TDocument>
   ): Promise<void>;
 }
 
@@ -33,6 +41,24 @@ export class StorageService implements StorageServiceContract {
     index,
     docs,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
+    await this.writeBatch(index, docs);
+  }
+
+  public async bulkIndexDocsAsStream<TDocument extends Record<string, unknown>>({
+    index,
+    docs,
+  }: BulkIndexDocsAsStreamParams<TDocument>): Promise<void> {
+    for await (const batch of docs) {
+      if (batch.length > 0) {
+        await this.writeBatch(index, batch);
+      }
+    }
+  }
+
+  private async writeBatch<TDocument extends Record<string, unknown>>(
+    index: string,
+    docs: TDocument[]
+  ): Promise<void> {
     if (docs.length === 0) {
       return;
     }

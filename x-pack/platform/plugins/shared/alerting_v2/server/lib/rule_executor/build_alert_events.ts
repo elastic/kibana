@@ -6,23 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import type { ESQLRow } from '@kbn/es-types';
 import stringify from 'json-stable-stringify';
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { AlertEvent } from '../../resources/alert_events';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
-}
-
-function rowToDocument(columns: Array<{ name: string }>, row: ESQLRow): Record<string, unknown> {
-  const doc: Record<string, unknown> = {};
-  for (let i = 0; i < columns.length; i++) {
-    doc[columns[i].name] = row[i];
-  }
-  return doc;
 }
 
 function buildGroupHash({
@@ -44,33 +34,30 @@ function buildGroupHash({
   return sha256(`${keyPart}|${valuePart}`);
 }
 
-export interface BuildAlertEventsOpts {
+export interface BuildAlertEventsBaseOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
   ruleAttributes: RuleSavedObjectAttributes;
-  esqlResponse: EsqlQueryResponse;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
   scheduledTimestamp: string;
 }
 
-export function buildAlertEventsFromEsqlResponse({
+export interface BuildAlertEventsStreamOpts extends BuildAlertEventsBaseOpts {
+  rowBatchStream: AsyncIterable<Array<Record<string, unknown>>>;
+}
+
+export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+
+export function createAlertEventsBatchBuilder({
   ruleId,
   ruleVersion,
   spaceId,
   ruleAttributes,
-  esqlResponse,
   scheduledTimestamp,
-}: BuildAlertEventsOpts): AlertEvent[] {
-  const columns = esqlResponse.columns ?? [];
-  const values = esqlResponse.values ?? [];
-
-  if (columns.length === 0 || values.length === 0) {
-    return [];
-  }
-
+}: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
   const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}`);
@@ -78,31 +65,63 @@ export function buildAlertEventsFromEsqlResponse({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+  let index = 0;
 
-  return values.map((row, index) => {
-    const rowDoc = rowToDocument(columns, row);
-    const groupHash = buildGroupHash({
-      rowDoc,
-      groupKeyFields: ruleAttributes.groupingKey ?? [],
-      get fallbackSeed(): string {
-        return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
-      },
-    });
+  return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
+    const alertEventsBatch: AlertEvent[] = [];
 
-    const doc: AlertEvent = {
-      '@timestamp': wroteAt,
-      scheduled_timestamp: scheduledTimestamp,
-      rule: {
-        id: ruleId,
-        version: ruleVersion,
-      },
-      group_hash: groupHash,
-      data: rowDoc,
-      status: 'breached',
-      source,
-      type: 'signal',
-    };
+    for (const rowDoc of batch) {
+      const groupHash = buildGroupHash({
+        rowDoc,
+        groupKeyFields: ruleAttributes.groupingKey ?? [],
+        get fallbackSeed(): string {
+          return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
+        },
+      });
 
-    return doc;
+      const doc: AlertEvent = {
+        '@timestamp': wroteAt,
+        scheduled_timestamp: scheduledTimestamp,
+        rule: {
+          id: ruleId,
+          version: ruleVersion,
+        },
+        group_hash: groupHash,
+        data: rowDoc,
+        status: 'breached',
+        source,
+        type: 'signal',
+      };
+
+      index++;
+      alertEventsBatch.push(doc);
+    }
+
+    return alertEventsBatch;
+  };
+}
+
+export async function* buildAlertEventsFromRowBatchStream({
+  ruleId,
+  ruleVersion,
+  spaceId,
+  ruleAttributes,
+  rowBatchStream,
+  scheduledTimestamp,
+}: BuildAlertEventsStreamOpts): AsyncIterable<AlertEvent[]> {
+  const buildBatch = createAlertEventsBatchBuilder({
+    ruleId,
+    ruleVersion,
+    spaceId,
+    ruleAttributes,
+    scheduledTimestamp,
   });
+
+  for await (const batch of rowBatchStream) {
+    const alertEventsBatch = buildBatch(batch);
+
+    if (alertEventsBatch.length > 0) {
+      yield alertEventsBatch;
+    }
+  }
 }

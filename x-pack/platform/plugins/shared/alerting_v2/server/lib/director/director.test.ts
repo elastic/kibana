@@ -12,9 +12,25 @@ import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import { BasicTransitionStrategy } from './strategies/basic_strategy';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
-import { alertEpisodeStatus } from '../../resources/alert_events';
+import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
 import type { LatestAlertEventState } from './queries';
+
+function toAlertEventStream(events: AlertEvent[]): AsyncIterable<AlertEvent[]> {
+  return (async function* () {
+    if (events.length > 0) {
+      yield events;
+    }
+  })();
+}
+
+async function collectAlertEvents(stream: AsyncIterable<AlertEvent[]>): Promise<AlertEvent[]> {
+  const results: AlertEvent[] = [];
+  for await (const batch of stream) {
+    results.push(...batch);
+  }
+  return results;
+}
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -52,10 +68,12 @@ describe('DirectorService', () => {
 
   describe('run', () => {
     it('returns empty array when no alert events provided', async () => {
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([]),
+        })
+      );
 
       expect(result).toEqual([]);
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
@@ -70,10 +88,12 @@ describe('DirectorService', () => {
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result).toHaveLength(1);
 
@@ -101,10 +121,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result).toHaveLength(1);
 
@@ -132,10 +154,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
@@ -161,10 +185,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -190,10 +216,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -219,10 +247,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -253,10 +283,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents,
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream(alertEvents),
+        })
+      );
 
       expect(result).toHaveLength(2);
 
@@ -289,10 +321,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       // Should generate new UUID, not use old episode
       expect(result[0].episode?.id).toBe('mocked-uuid');
@@ -316,10 +350,12 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await directorService.run({
-        ruleId: 'rule-1',
-        alertEvents: [alertEvent],
-      });
+      const result = await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
 
       expect(result[0].episode?.id).toBe('existing-episode');
     });
@@ -329,10 +365,12 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));
 
       await expect(
-        directorService.run({
-          ruleId: 'rule-1',
-          alertEvents: [alertEvent],
-        })
+        collectAlertEvents(
+          directorService.run({
+            ruleId: 'rule-1',
+            alertEvents: toAlertEventStream([alertEvent]),
+          })
+        )
       ).rejects.toThrow('Query failed');
     });
   });

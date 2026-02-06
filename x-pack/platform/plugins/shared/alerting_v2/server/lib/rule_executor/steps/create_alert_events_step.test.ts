@@ -7,9 +7,10 @@
 
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
+  collectStreamResults,
+  createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
-  createEsqlResponse,
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
@@ -25,20 +26,15 @@ describe('CreateAlertEventsStep', () => {
   it('builds alert events correctly', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();
-    const esqlResponse = createEsqlResponse();
+    const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
-    const state = createRulePipelineState({ input, rule, esqlResponse });
-    const result = await step.execute(state);
+    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');
-    expect(result).toHaveProperty('data.alertEvents');
+    expect(result.state.alertEventsBatch).toHaveLength(2);
 
-    // @ts-expect-error: the above check ensures the alertEvents exists
-    const { alertEvents } = result.data;
-
-    expect(alertEvents).toHaveLength(2);
-
-    expect(alertEvents[0]).toEqual({
+    expect(result.state.alertEventsBatch?.[0]).toEqual({
       '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
@@ -49,7 +45,7 @@ describe('CreateAlertEventsStep', () => {
       type: 'signal',
     });
 
-    expect(alertEvents[1]).toEqual({
+    expect(result.state.alertEventsBatch?.[1]).toEqual({
       '@timestamp': expect.any(String),
       scheduled_timestamp: input.scheduledAt,
       rule: { id: rule.id, version: 1 },
@@ -62,18 +58,18 @@ describe('CreateAlertEventsStep', () => {
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
-    const state = createRulePipelineState({ esqlResponse: createEsqlResponse() });
+    const state = createRulePipelineState({ esqlRowBatch: [{ 'host.name': 'host-a' }] });
 
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 
-  it('halts with state_not_ready when esqlResponse is missing from state', async () => {
+  it('halts with state_not_ready when esqlRowBatch is missing from state', async () => {
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 });

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { RuleExecutionStep, PipelineStateStream } from '../types';
 
 /**
  * Context passed to middleware during step execution.
  */
 export interface RuleExecutionMiddlewareContext {
   readonly step: RuleExecutionStep;
-  readonly state: Readonly<RulePipelineState>;
 }
 
 /**
@@ -36,6 +35,7 @@ export interface RuleExecutionMiddleware {
    */
   execute(
     context: RuleExecutionMiddlewareContext,
-    next: () => Promise<RuleStepOutput>
-  ): Promise<RuleStepOutput>;
+    next: (input: PipelineStateStream) => PipelineStateStream,
+    input: PipelineStateStream
+  ): PipelineStateStream;
 }

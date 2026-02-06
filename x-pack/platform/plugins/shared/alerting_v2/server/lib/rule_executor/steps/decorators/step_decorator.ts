@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../../types';
+import type { PipelineStateStream, RuleExecutionStep } from '../../types';
 
 /**
  * Base class for step decorators.
@@ -28,8 +28,8 @@ export abstract class RuleStepDecorator implements RuleExecutionStep {
   }
 
   /**
-   * Execute the decorated step.
-   * Subclasses should call `this.step.execute(state)` to invoke the wrapped step.
+   * Execute the decorated step as a stream transform.
+   * Subclasses should call `this.step.executeStream(input)` to invoke the wrapped step.
    */
-  public abstract execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput>;
+  public abstract executeStream(input: PipelineStateStream): PipelineStateStream;
 }

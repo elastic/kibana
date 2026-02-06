@@ -14,13 +14,12 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
-import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy } from './strategies/types';
 
 interface RunDirectorParams {
   ruleId: string;
-  alertEvents: AlertEvent[];
+  alertEvents: AsyncIterable<AlertEvent[]>;
 }
 
 interface CalculateNextStateParams {
@@ -43,13 +42,23 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ ruleId, alertEvents }: RunDirectorParams): Promise<AlertEvent[]> {
-    if (alertEvents.length === 0) {
-      return [];
-    }
-
+  async *run({ ruleId, alertEvents }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
     const strategy = this.strategyFactory.getStrategy();
-    const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
+
+    for await (const batch of alertEvents) {
+      const processedBatch = await this.processBatch(ruleId, batch, strategy);
+      if (processedBatch.length > 0) {
+        yield processedBatch;
+      }
+    }
+  }
+
+  private async processBatch(
+    ruleId: string,
+    alertEvents: AlertEvent[],
+    strategy: ITransitionStrategy
+  ): Promise<AlertEvent[]> {
+    const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
 
     const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
@@ -68,7 +77,7 @@ export class DirectorService {
     groupHashes: string[]
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
-    const response = await this.queryService.executeQuery({
+    const rowBatchStream = this.queryService.executeQueryStream<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
@@ -76,7 +85,13 @@ export class DirectorService {
       filter: request.filter,
     });
 
-    const records = queryResponseToRecords<LatestAlertEventState>(response);
+    // Collect all rows from the batch stream (small result set for state lookup)
+    const records: LatestAlertEventState[] = [];
+    for await (const batch of rowBatchStream) {
+      for (const row of batch) {
+        records.push(row);
+      }
+    }
 
     return new Map(records.map((record) => [record.group_hash, record]));
   }

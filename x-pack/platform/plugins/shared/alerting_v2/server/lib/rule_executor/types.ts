@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
@@ -26,17 +25,19 @@ export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
-  readonly esqlResponse?: EsqlQueryResponse;
-  readonly alertEvents?: AlertEvent[];
+  readonly esqlRowBatch?: Array<Record<string, unknown>>;
+  readonly alertEventsBatch?: AlertEvent[];
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
-export type RuleStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<RulePipelineState, 'input'>> }
-  | { type: 'halt'; reason: HaltReason };
+export type StepStreamResult =
+  | { type: 'continue'; state: RulePipelineState }
+  | { type: 'halt'; reason: HaltReason; state: RulePipelineState };
+
+export type PipelineStateStream = AsyncIterableIterator<StepStreamResult>;
 
 export interface RuleExecutionStep {
   readonly name: string;
-  execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput>;
+  executeStream(input: PipelineStateStream): PipelineStateStream;
 }

@@ -10,8 +10,8 @@ import type {
   RuleExecutionInput,
   RuleExecutionStep,
   RulePipelineState,
-  RuleStepOutput,
   HaltReason,
+  PipelineStateStream,
 } from './types';
 import { RuleExecutionMiddlewaresToken, RuleExecutionStepsToken } from './tokens';
 import { type RuleExecutionMiddleware, type RuleExecutionMiddlewareContext } from './middleware';
@@ -41,26 +41,28 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   public async execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult> {
     let pipelineState: RulePipelineState = { input };
 
+    let stream: PipelineStateStream = (async function* () {
+      yield { type: 'continue', state: pipelineState };
+    })();
+
     for (const step of this.steps) {
       this.logger.debug({ message: `RuleExecutor: Executing step: ${step.name}` });
+      stream = this.runMiddlewareChain({ step }, stream);
+    }
 
-      const context: RuleExecutionMiddlewareContext = { step, state: pipelineState };
-      const output = await this.runMiddlewareChain(context);
+    for await (const result of stream) {
+      pipelineState = result.state;
 
-      if (output.type === 'halt') {
+      if (result.type === 'halt') {
         this.logger.debug({
-          message: `RuleExecutor: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
+          message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
         });
 
         return {
           completed: false,
-          haltReason: output.reason,
+          haltReason: result.reason,
           finalState: pipelineState,
         };
-      }
-
-      if (output.data) {
-        pipelineState = { ...pipelineState, ...output.data };
       }
     }
 
@@ -76,15 +78,19 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
    * Middleware are executed in order (first middleware is outermost).
    * Each middleware wraps the next, with the innermost being the step itself.
    */
-  private runMiddlewareChain(context: RuleExecutionMiddlewareContext): Promise<RuleStepOutput> {
-    const { step, state } = context;
+  private runMiddlewareChain(
+    context: RuleExecutionMiddlewareContext,
+    input: PipelineStateStream
+  ): PipelineStateStream {
+    const { step } = context;
 
-    // Build chain from right to left: last middleware wraps step.execute()
+    // Build chain from right to left: last middleware wraps step.executeStream()
     const chain = this.middlewares.reduceRight(
-      (next, middleware) => () => middleware.execute(context, next),
-      () => step.execute(state)
+      (next, middleware) => (stream: PipelineStateStream) =>
+        middleware.execute(context, next, stream),
+      (stream: PipelineStateStream) => step.executeStream(stream)
     );
 
-    return chain();
+    return chain(input);
   }
 }

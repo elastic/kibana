@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { StorageService } from './storage_service';
 import { LoggerService } from '../logger_service/logger_service';
+import { createBatchStream } from '../../test_utils';
 
 describe('StorageService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -28,21 +29,21 @@ describe('StorageService', () => {
     jest.clearAllMocks();
   });
 
-  describe('bulkIndexDocs', () => {
-    const index = 'my-index';
-    const mockDocs = [
-      {
-        '@timestamp': '2024-01-01T00:00:00Z',
-        rule: { id: 'rule-1', version: 1 },
-        group_hash: 'hash-1',
-      },
-      {
-        '@timestamp': '2024-01-01T00:01:00Z',
-        rule: { id: 'rule-2', version: 1 },
-        group_hash: 'hash-2',
-      },
-    ];
+  const index = 'my-index';
+  const mockDocs = [
+    {
+      '@timestamp': '2024-01-01T00:00:00Z',
+      rule: { id: 'rule-1', version: 1 },
+      group_hash: 'hash-1',
+    },
+    {
+      '@timestamp': '2024-01-01T00:01:00Z',
+      rule: { id: 'rule-2', version: 1 },
+      group_hash: 'hash-2',
+    },
+  ];
 
+  describe('bulkIndexDocs', () => {
     it('should return early when docs array is empty', async () => {
       await storageService.bulkIndexDocs({ index, docs: [] });
 
@@ -139,6 +140,101 @@ describe('StorageService', () => {
       await expect(storageService.bulkIndexDocs({ index, docs: mockDocs })).rejects.toThrow(
         'Elasticsearch connection failed'
       );
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkIndexDocsAsStream', () => {
+    it('should not call bulk when batch stream is empty', async () => {
+      await storageService.bulkIndexDocsAsStream({
+        index,
+        docs: createBatchStream<{}>([]),
+      });
+
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should successfully bulk index documents from batch stream', async () => {
+      const mockBulkResponse = {
+        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocsAsStream({
+        index,
+        docs: createBatchStream([mockDocs]),
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _index: index } },
+          mockDocs[0],
+          { create: { _index: index } },
+          mockDocs[1],
+        ],
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should call bulk for each batch in the stream', async () => {
+      const mockBulkResponse = {
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocsAsStream({
+        index,
+        docs: createBatchStream([[mockDocs[0]], [mockDocs[1]]]),
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+
+      expect(mockEsClient.bulk).toHaveBeenNthCalledWith(1, {
+        operations: [{ create: { _index: index } }, mockDocs[0]],
+        refresh: 'wait_for',
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenNthCalledWith(2, {
+        operations: [{ create: { _index: index } }, mockDocs[1]],
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should skip empty batches in the stream', async () => {
+      const mockBulkResponse = {
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocsAsStream({
+        index,
+        docs: createBatchStream([[mockDocs[0]], [], [mockDocs[1]]]),
+      });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw error and log when bulk operation fails', async () => {
+      const error = new Error('Elasticsearch connection failed');
+      mockEsClient.bulk.mockRejectedValue(error);
+
+      await expect(
+        storageService.bulkIndexDocsAsStream({
+          index,
+          docs: createBatchStream([mockDocs]),
+        })
+      ).rejects.toThrow('Elasticsearch connection failed');
 
       expect(mockLogger.error).toHaveBeenCalled();
     });

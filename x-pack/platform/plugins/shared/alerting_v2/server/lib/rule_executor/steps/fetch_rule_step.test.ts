@@ -9,7 +9,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { FetchRuleStep } from './fetch_rule_step';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { createRuleExecutionInput, createRulePipelineState } from '../test_utils';
+import {
+  collectStreamResults,
+  createPipelineStream,
+  createRuleExecutionInput,
+  createRulePipelineState,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRulesClient } from '../../rules_client/rules_client.mock';
 
@@ -56,15 +61,12 @@ describe('FetchRuleStep', () => {
     });
 
     const state = createRulePipelineState();
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');
-    expect(result).toHaveProperty('data.rule');
-
-    // @ts-expect-error: the above check ensures the rule exists
-    const { rule } = result.data;
-    expect(rule.id).toBe('rule-1');
-    expect(rule.name).toBe('test-rule');
+    expect(result.state.rule).toBeDefined();
+    expect(result.state.rule?.id).toBe('rule-1');
+    expect(result.state.rule?.name).toBe('test-rule');
   });
 
   it('halts with rule_deleted when rule is not found', async () => {
@@ -73,11 +75,12 @@ describe('FetchRuleStep', () => {
     );
 
     const state = createRulePipelineState();
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({
       type: 'halt',
       reason: 'rule_deleted',
+      state,
     });
   });
 
@@ -86,7 +89,9 @@ describe('FetchRuleStep', () => {
 
     const state = createRulePipelineState();
 
-    await expect(step.execute(state)).rejects.toThrow('Failed');
+    await expect(
+      collectStreamResults(step.executeStream(createPipelineStream([state])))
+    ).rejects.toThrow('Failed');
   });
 
   it('calls the ruleClient with correct params', async () => {
@@ -102,7 +107,7 @@ describe('FetchRuleStep', () => {
       input: createRuleExecutionInput({ ruleId: 'custom-rule' }),
     });
 
-    await step.execute(state);
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
