@@ -374,7 +374,7 @@ FROM index
 
       expect('\n' + text).toBe(`
 PROMQL
-step = "5m" start = ?_tstart end = ?_tend index = kibana_sample_data_logstsdb
+  step = "5m" start = ?_tstart end = ?_tend index = kibana_sample_data_logstsdb
   col0 = (sum(avg(quantile_over_time(0.9,bytes{event.dataset="job"}[5m]))))`);
     });
   });
@@ -1087,7 +1087,7 @@ FROM index
 
         expect('\n' + text).toBe(`
 PROMQL
-key1 = value1 key2 = value2 key3 = value3
+  key1 = value1 key2 = value2 key3 = value3
   query_name = (some_very_very_very_long_query_that_will_force_wrapping)`);
       });
 

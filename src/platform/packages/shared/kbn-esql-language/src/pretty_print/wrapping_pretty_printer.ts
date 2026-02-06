@@ -730,6 +730,12 @@ export class WrappingPrettyPrinter {
         } else {
           formatted = '{' + txt + '}';
         }
+      } else if (representation === 'assignment') {
+        // Add initial indentation for assignment maps (bare maps)
+        // Only when not in oneArgumentPerLine mode, as that already handles indentation
+        if (!oneArgumentPerLine) {
+          formatted = this.opts.tab + txt;
+        }
       }
 
       return this.decorateWithComments(inp, ctx.node, formatted);
