@@ -93,6 +93,11 @@ EOF
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
+        # Default BK step timeout is 120m to allow slower models/suites without
+        # needing per-suite/per-model special-casing. Can be overridden if needed.
+        timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}"
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${connector_id}"
         key: "kbn-evals-${group_key_safe}-${key_safe}"
@@ -103,7 +108,7 @@ EOF
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
-        timeout_in_minutes: 60
+        timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
         agents:
