@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../../../common/runtime_types';
-import { throttlingFormatter } from './browser';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { browserTimeoutFormatterPublic, throttlingFormatter } from './browser';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -65,6 +65,32 @@ describe('formatters', () => {
           ConfigKey.THROTTLING_CONFIG
         )
       ).toEqual({ download: 1.25, upload: 0.75, latency: 150 });
+    });
+  });
+
+  describe('timeout formatter', () => {
+    it('returns null for browser monitors', () => {
+      expect(
+        browserTimeoutFormatterPublic!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: '60',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+    });
+
+    it('returns timeout for non-browser monitors', () => {
+      expect(
+        browserTimeoutFormatterPublic!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '45',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('45s');
     });
   });
 });

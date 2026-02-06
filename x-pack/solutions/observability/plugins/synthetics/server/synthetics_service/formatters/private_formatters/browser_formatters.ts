@@ -39,11 +39,14 @@ export const browserTimeoutFormatterPrivate: Formatter = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   if (!value) return null;
   
-  // Heartbeat adds an overhead to browser monitor timeouts, so we need to subtract that overhead
-  // to ensure the actual timeout matches the user's expectation.
+  // Heartbeat adds an overhead to browser monitor timeouts, so we subtract it and
+  // clamp to the overhead to avoid generating an invalid/too-small timeout.
   if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
     const timeoutSeconds = parseInt(value, 10);
-    const adjustedTimeout = Math.max(1, timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS);
+    const adjustedTimeout = Math.max(
+      HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
+      timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS
+    );
     return `${adjustedTimeout}s`;
   }
     
