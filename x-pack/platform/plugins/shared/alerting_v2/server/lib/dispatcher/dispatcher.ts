@@ -18,8 +18,13 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
-import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode, DispatcherExecutionParams, DispatcherExecutionResult } from './types';
+import { getAlertEpisodeSuppressionsQuery, getDispatchableAlertEventsQuery } from './queries';
+import type {
+  AlertEpisode,
+  AlertEpisodeSuppression,
+  DispatcherExecutionParams,
+  DispatcherExecutionResult,
+} from './types';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
@@ -35,58 +40,17 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
-    abortController,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
-    const lookback = moment(previousStartedAt)
-      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-      .toISOString();
 
-    this.logger.debug({
-      message: () => `Dispatcher started. Looking for alert episodes since ${lookback}`,
-    });
+    const alertEpisodes = await this.fetchAlertEpisodes(previousStartedAt);
 
-    const { query } = getDispatchableAlertEventsQuery();
-
-    const result = await this.queryService.executeQuery({
-      query,
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: moment(previousStartedAt)
-              .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-              .toISOString(),
-          },
-        },
-      },
-    });
-
-    const dispatchableAlertEvents = queryResponseToRecords<AlertEpisode>({
-      columns: result.columns,
-      values: result.values,
-    });
-    this.logger.debug({
-      message: () =>
-        `Dispatcher found ${dispatchableAlertEvents.length} alert episodes to dispatch.`,
-    });
-
-    const ruleIds = Array.from(new Set(dispatchableAlertEvents.map((event) => event.rule_id)));
-    this.logger.debug({
-      message: () =>
-        `Dispatcher found ${ruleIds.length} unique rules with alert episodes to dispatch.`,
-    });
-
-    // TODO:
-    // Fetch policies associated to ruleIds to determine how to dispatch each alert episode
-    // Suppress dispatchable alert events based on policies
-    // Log suppressed alert events
-    // Call policy defined workflow to dispatch alert events
-    // insert fire-event for non-suppressed alert events
+    const suppressions = await this.fetchAlertEpisodeSuppressions(alertEpisodes);
 
     const now = new Date().toISOString();
     await this.storageService.bulkIndexDocs<AlertAction>({
       index: ALERT_ACTIONS_DATA_STREAM,
-      docs: dispatchableAlertEvents.map((alertEpisode) => ({
+      docs: alertEpisodes.map((alertEpisode) => ({
         '@timestamp': now,
         group_hash: alertEpisode.group_hash,
         last_series_event_timestamp: alertEpisode.last_event_timestamp,
@@ -97,11 +61,35 @@ export class DispatcherService implements DispatcherServiceContract {
       })),
     });
 
-    this.logger.debug({
-      message: () =>
-        `Dispatcher finished processing ${dispatchableAlertEvents.length} alert episodes.`,
+    return { startedAt };
+  }
+
+  private async fetchAlertEpisodeSuppressions(
+    alertEpisodes: AlertEpisode[]
+  ): Promise<AlertEpisodeSuppression[]> {
+    return queryResponseToRecords<AlertEpisodeSuppression>(
+      await this.queryService.executeQuery({
+        query: getAlertEpisodeSuppressionsQuery(alertEpisodes).query,
+      })
+    );
+  }
+
+  private async fetchAlertEpisodes(previousStartedAt: Date): Promise<AlertEpisode[]> {
+    const lookback = moment(previousStartedAt)
+      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+      .toISOString();
+
+    const result = await this.queryService.executeQuery({
+      query: getDispatchableAlertEventsQuery().query,
+      filter: {
+        range: {
+          '@timestamp': {
+            gte: lookback,
+          },
+        },
+      },
     });
 
-    return { startedAt };
+    return queryResponseToRecords<AlertEpisode>(result);
   }
 }

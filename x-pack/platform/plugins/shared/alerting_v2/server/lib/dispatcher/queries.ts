@@ -15,6 +15,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
 } from '../../resources/alert_events';
+import type { AlertEpisode } from './types';
 
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
@@ -33,6 +34,32 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           BY rule_id, group_hash, episode_id, episode_status
       | WHERE last_event_timestamp IS NOT NULL
       | KEEP last_event_timestamp, rule_id, group_hash, episode_id, episode_status
-      | SORT last_event_timestamp desc
+      | SORT last_event_timestamp asc
       | LIMIT 10000`.toRequest();
+};
+
+// expiry > now() to be adjusted to expiry > min(alertEpisodes.last_event_timestamp)
+export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]): EsqlRequest => {
+  let whereClause = esql.exp`TRUE`;
+
+  for (const alertEpisode of alertEpisodes) {
+    whereClause = esql.exp`${whereClause} OR (rule_id == ${alertEpisode.rule_id} AND group_hash == ${alertEpisode.group_hash})`;
+  }
+
+  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+      | WHERE ${whereClause}
+      | WHERE action_type IN ("snooze", "unsnooze", "ack", "unack", "activate", "deactivate")
+      | WHERE action_type != "snooze" OR expiry > now()
+      | STATS
+          last_snooze_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+          last_ack_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
+          last_deactivate_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("activate", "deactivate")
+        BY rule_id, group_hash, episode_id
+      | EVAL should_suppress = CASE(
+          last_snooze_action_type == "snooze", true,
+          last_ack_action_type == "ack", true,
+          last_deactivate_action_type == "deactivate", true,
+          false
+      )
+      | KEEP rule_id, group_hash, episode_id, should_suppress`.toRequest();
 };
