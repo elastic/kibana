@@ -557,11 +557,7 @@ describe('createTransport', () => {
       await transport.request(requestParams, {});
 
       expect(onRequest).toHaveBeenCalledTimes(1);
-      expect(onRequest).toHaveBeenCalledWith(
-        { scoped: false },
-        requestParams,
-        expect.any(Object)
-      );
+      expect(onRequest).toHaveBeenCalledWith({ scoped: false }, requestParams, expect.any(Object));
     });
 
     it('calls onRequest with scoped: true when scoped is true', async () => {
@@ -579,11 +575,7 @@ describe('createTransport', () => {
       await transport.request(requestParams, {});
 
       expect(onRequest).toHaveBeenCalledTimes(1);
-      expect(onRequest).toHaveBeenCalledWith(
-        { scoped: true },
-        requestParams,
-        expect.any(Object)
-      );
+      expect(onRequest).toHaveBeenCalledWith({ scoped: true }, requestParams, expect.any(Object));
     });
 
     it('calls onRequest with scoped: false when scoped is explicitly false', async () => {
@@ -601,11 +593,7 @@ describe('createTransport', () => {
       await transport.request(requestParams, {});
 
       expect(onRequest).toHaveBeenCalledTimes(1);
-      expect(onRequest).toHaveBeenCalledWith(
-        { scoped: false },
-        requestParams,
-        expect.any(Object)
-      );
+      expect(onRequest).toHaveBeenCalledWith({ scoped: false }, requestParams, expect.any(Object));
     });
 
     it('passes the correct options to onRequest', async () => {
@@ -634,9 +622,6 @@ describe('createTransport', () => {
         })
       );
     });
-
-
-    
 
     it('allows onRequest to mutate options (e.g., add querystring params)', async () => {
       const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn((ctx, params, options) => {

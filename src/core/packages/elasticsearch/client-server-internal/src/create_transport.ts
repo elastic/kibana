@@ -82,7 +82,7 @@ export const createTransport = ({
         ...this.headers,
         ...options?.headers,
       };
-      
+
       onRequest?.({ scoped }, params, opts);
 
       try {
