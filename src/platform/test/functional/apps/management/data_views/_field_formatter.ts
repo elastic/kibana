@@ -37,13 +37,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({
+        'data_views:cache_max_age': 0,
+      });
     });
 
     after(async function afterAll() {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
+      await kibanaServer.uiSettings.replace({});
     });
 
     describe('set and change field formatter', function describeIndexTests() {
