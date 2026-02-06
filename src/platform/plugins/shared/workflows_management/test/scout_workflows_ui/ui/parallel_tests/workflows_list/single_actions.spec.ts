@@ -22,16 +22,26 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
       enabled: true,
     };
     await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow]);
-    await pageObjects.workflowList.navigate();
-    await pageObjects.workflowList
-      .getThreeDotsMenuAction(enabledWorkflow.name, 'runWorkflowAction')
-      .then((locator) => locator.click());
-    await page.waitForURL('**/workflows/*?executionId=*');
+
+    // verify run via direct action button
     await pageObjects.workflowList.navigate();
     (
       await pageObjects.workflowList.getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
     ).click();
     await page.waitForURL('**/workflows/*?executionId=*');
+    await expect(
+      page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
+    ).toBeVisible();
+
+    // verify run via three dots menu action
+    await pageObjects.workflowList.navigate();
+    await pageObjects.workflowList
+      .getThreeDotsMenuAction(enabledWorkflow.name, 'runWorkflowAction')
+      .then((locator) => locator.click());
+    await page.waitForURL('**/workflows/*?executionId=*');
+    await expect(
+      page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
+    ).toBeVisible();
   });
 
   test('should not run disabled workflow', async ({ pageObjects }) => {
@@ -42,12 +52,15 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     };
     await pageObjects.workflowList.createDummyWorkflows([disabledWorkflow]);
     await pageObjects.workflowList.navigate();
+
+    // verify disabled via direct action button
     const runAction = await pageObjects.workflowList.getWorkflowAction(
       disabledWorkflow.name,
       'runWorkflowAction'
     );
     await expect(runAction).toBeDisabled();
 
+    // verify disabled via three dots menu action
     const runThreeDotsAction = await pageObjects.workflowList.getThreeDotsMenuAction(
       disabledWorkflow.name,
       'runWorkflowAction'
@@ -108,6 +121,7 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await pageObjects.workflowList.createDummyWorkflows([workflow]);
     await pageObjects.workflowList.navigate();
 
+    // verify edit via direct action button
     const editAction = await pageObjects.workflowList.getWorkflowAction(
       workflow.name,
       'editWorkflowAction'
@@ -116,5 +130,61 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
 
     await page.waitForURL('**/workflows/*');
     await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
+
+    // verify edit via three dots menu action
+    await pageObjects.workflowList.navigate();
+    const editThreeDotsAction = await pageObjects.workflowList.getThreeDotsMenuAction(
+      workflow.name,
+      'editWorkflowAction'
+    );
+    await editThreeDotsAction.click();
+
+    await page.waitForURL('**/workflows/*');
+    await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
+  });
+
+  test('should clone workflow via three dots menu', async ({ page, pageObjects }) => {
+    const workflow = {
+      name: 'Clone Action Test Workflow',
+      description: 'This workflow should be cloned',
+      enabled: true,
+    };
+    await pageObjects.workflowList.createDummyWorkflows([workflow]);
+    await pageObjects.workflowList.navigate();
+
+    const cloneAction = await pageObjects.workflowList.getThreeDotsMenuAction(
+      workflow.name,
+      'cloneWorkflowAction'
+    );
+    await cloneAction.click();
+
+    // Verify the cloned workflow appears in the list with " Copy" suffix
+    const clonedWorkflowName = `${workflow.name} Copy`;
+    await expect(await pageObjects.workflowList.getWorkflowRow(clonedWorkflowName)).toBeVisible();
+  });
+
+  test('should delete workflow via three dots menu', async ({ page, pageObjects }) => {
+    const workflow = {
+      name: 'Delete Action Test Workflow',
+      description: 'This workflow should be deleted',
+      enabled: true,
+    };
+    await pageObjects.workflowList.createDummyWorkflows([workflow]);
+    await pageObjects.workflowList.navigate();
+
+    // Set up dialog handler to accept the confirmation dialog
+    page.once('dialog', async (dialog) => {
+      expect(dialog.message()).toContain('Are you sure you want to delete');
+      await dialog.accept();
+    });
+
+    const deleteAction = await pageObjects.workflowList.getThreeDotsMenuAction(
+      workflow.name,
+      'deleteWorkflowAction'
+    );
+    await deleteAction.click();
+
+    // Verify the workflow is removed from the list
+    await expect(await pageObjects.workflowList.getWorkflowRow(workflow.name)).toBeHidden();
   });
 });
