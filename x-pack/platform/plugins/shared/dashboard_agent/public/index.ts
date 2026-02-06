@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { updateDashboardTool } from './update_dashboard';
-export { initDashboardTool } from './init_dashboard';
-export { addPanelTool } from './add_panel';
-export { finalizeDashboardTool } from './finalize_dashboard';
+import { DashboardAgentPlugin } from './plugin';
+
+export function plugin() {
+  return new DashboardAgentPlugin();
+}
+
+export type { DashboardAgentPluginSetup, DashboardAgentPluginStart } from './types';

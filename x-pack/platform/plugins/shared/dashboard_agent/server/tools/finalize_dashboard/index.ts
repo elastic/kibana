@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { createDashboardTool } from './create_dashboard';
+export { finalizeDashboardTool } from './finalize_dashboard';
+
+
