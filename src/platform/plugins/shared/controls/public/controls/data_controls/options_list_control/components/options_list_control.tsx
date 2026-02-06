@@ -17,11 +17,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiInputPopover,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
   EuiToken,
   EuiToolTip,
   htmlIdGenerator,
@@ -32,6 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
+import { ConditionalLabelWrapper } from '../../../components';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -252,7 +249,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <ConditionallyWrapWithLabel label={panelTitle ?? defaultPanelTitle} isPinned={isPinned}>
+    <ConditionalLabelWrapper label={panelTitle ?? defaultPanelTitle} isPinned={isPinned}>
       <EuiFilterGroup
         className={'kbnGridLayout--hideDragHandle'}
         fullWidth
@@ -282,45 +279,6 @@ export const OptionsListControl = ({
           <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
         </EuiInputPopover>
       </EuiFilterGroup>
-    </ConditionallyWrapWithLabel>
-  );
-};
-
-const ConditionallyWrapWithLabel = ({
-  isPinned,
-  label,
-  children,
-}: React.PropsWithChildren<{
-  isPinned: boolean;
-  label: string | undefined;
-}>) => {
-  return isPinned ? (
-    children
-  ) : (
-    <EuiFlexGroup
-      direction="column"
-      css={css`
-        gap: 2px;
-        padding: 4px 8px 1px 8px;
-      `}
-    >
-      <EuiFlexItem
-        css={css`
-          flex-grow: 0;
-        `}
-      >
-        <EuiText
-          size="s"
-          color="subdued"
-          css={css`
-            line-height: 1rem;
-          `}
-          component="p"
-        >
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+    </ConditionalLabelWrapper>
   );
 };

@@ -15,7 +15,11 @@ import {
   fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  apiCanPinPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -208,6 +212,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -221,6 +227,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value,
             fieldName,
             viewMode,
+            title,
+            defaultPanelTitle,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -230,7 +238,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             editorStateManager.api.step$,
             selections.value$,
             dataControlManager.api.fieldName$,
-            viewMode$
+            viewMode$,
+            dataControlManager.api.title$,
+            dataControlManager.api.defaultTitle$ ?? new BehaviorSubject(undefined)
           );
 
           useEffect(() => {
@@ -257,6 +267,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
+              isPinned={isPinned}
+              label={title ?? defaultPanelTitle}
             />
           );
         },

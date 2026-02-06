@@ -110,6 +110,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
     // Inputs
     fieldNumbers: {
       rangeSliderFieldNumber: css`
+        padding-block: 0px !important;
         font-weight: ${euiTheme.font.weight.medium};
 
         &:placeholder-shown,

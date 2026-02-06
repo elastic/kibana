@@ -85,12 +85,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);
-      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
-
-      // const isPinned$ = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned$(uuid) : of(undefined);
-      // isPinned$.subscribe((isPinned) => {
-      //   console.log({ uuid, isPinned });
-      // });
 
       const dataControlManager: DataControlStateManager =
         await initializeDataControlManager<EditorState>({
@@ -359,6 +353,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
         allowExpensiveQueries$,
       };
+
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
