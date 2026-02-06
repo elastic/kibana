@@ -22,33 +22,14 @@ describe('PROMQL columnsAfter', () => {
       [],
       '',
       {
-        fromFrom: () => Promise.resolve(sourceFields),
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
       }
     );
 
     expect(result).toEqual(sourceFields);
-  });
-
-  it('returns source columns plus the assigned column name', async () => {
-    const sourceFields: ESQLFieldWithMetadata[] = [
-      { name: 'bytes', type: 'double', userDefined: false },
-      { name: 'agent', type: 'keyword', userDefined: false },
-    ];
-
-    const result = await columnsAfter(
-      synth.cmd`PROMQL index=metrics col0=(rate(http_requests_total[5m]))`,
-      [],
-      '',
-      {
-        fromFrom: () => Promise.resolve(sourceFields),
-        fromJoin: () => Promise.resolve([]),
-        fromEnrich: () => Promise.resolve([]),
-      }
-    );
-
-    expect(result.map(({ name }) => name)).toEqual(['bytes', 'agent', 'col0']);
   });
 
   it('returns empty when no index param is present', async () => {
@@ -56,29 +37,31 @@ describe('PROMQL columnsAfter', () => {
       fromFrom: () => Promise.resolve([]),
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
+      fromPromql: () => Promise.resolve([]),
     });
 
     expect(result).toEqual([]);
   });
 
-  it('passes multiple indices to fromFrom', async () => {
-    const fromFrom = jest.fn().mockResolvedValue([]);
-
-    await columnsAfter(
-      synth.cmd`PROMQL index=metrics,logs-tsdb rate(http_requests_total[5m])`,
+  it('returns only derived columns when a pipe follows', async () => {
+    const result = await columnsAfter(
+      synth.cmd`PROMQL index=metrics step=5m col0=(sum by (job) (http_requests_total{env="prod"}))`,
       [],
-      '',
+      'PROMQL index=metrics step=5m col0=(sum by (job) (http_requests_total{env="prod"})) | KEEP job',
       {
-        fromFrom,
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () =>
+          Promise.resolve([
+            { name: 'job', type: 'keyword', userDefined: false },
+            { name: 'env', type: 'keyword', userDefined: false },
+            { name: 'http_requests_total', type: 'double', userDefined: false },
+            { name: 'extra_field', type: 'keyword', userDefined: false },
+          ]),
       }
     );
 
-    expect(fromFrom).toHaveBeenCalledTimes(1);
-
-    const [cmd] = fromFrom.mock.calls[0];
-    expect(String(cmd)).toContain('metrics');
-    expect(String(cmd)).toContain('logs-tsdb');
+    expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
 });

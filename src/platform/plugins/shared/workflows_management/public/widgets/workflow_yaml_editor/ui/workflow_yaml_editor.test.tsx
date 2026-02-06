@@ -117,6 +117,17 @@ jest.mock('../lib/use_register_keyboard_commands', () => ({
   })),
 }));
 
+const mockRegisterHoverCommands = jest.fn();
+const mockUnregisterHoverCommands = jest.fn();
+jest.mock('../lib/use_register_hover_commands', () => ({
+  useRegisterHoverCommands: jest.fn(() => ({
+    registerHoverCommands: (params: any) => {
+      mockRegisterHoverCommands(params);
+    },
+    unregisterHoverCommands: mockUnregisterHoverCommands,
+  })),
+}));
+
 jest.mock('./step_actions', () => ({
   StepActions: () => null,
 }));
@@ -207,6 +218,7 @@ jest.mock('@kbn/monaco', () => ({
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
     onStepRun: jest.fn(),
+    editorRef: { current: null },
   };
 
   const renderWithProviders = (
@@ -531,6 +543,21 @@ steps:
       // Second save should also work since isSaving is false
       capturedKeyboardHandlers.save!();
       expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('hover commands', () => {
+    it('should register keyboard commands when editor mounts', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(mockRegisterHoverCommands).toHaveBeenCalled();
+      });
     });
   });
 });

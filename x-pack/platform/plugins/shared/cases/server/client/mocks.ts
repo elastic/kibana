@@ -54,6 +54,7 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
 } from '../services/mocks';
+import { ConfigSchema } from '../config';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -256,6 +257,7 @@ export const createCasesClientFactoryMockArgs = () => {
     ),
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    config: ConfigSchema.validate({}),
   };
 };
 

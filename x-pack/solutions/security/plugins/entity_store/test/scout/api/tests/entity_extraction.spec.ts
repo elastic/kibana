@@ -54,7 +54,7 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest('Should extract properly generate euid for host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 17;
+    const expectedResultCount = 21;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -72,7 +72,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_host_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'host' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -99,7 +102,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_user_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'user' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -126,7 +132,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_service_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'service' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -153,7 +162,10 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_generic_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        term: { 'entity.EngineMetadata.Type': 'generic' },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 

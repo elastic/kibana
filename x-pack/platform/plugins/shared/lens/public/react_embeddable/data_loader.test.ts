@@ -102,7 +102,7 @@ async function expectRerenderOnDataLoader(
   const services = {
     ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
       visOverrides: { id: 'lnsXY' },
-      dataOverrides: { id: 'form_based' },
+      dataOverrides: { id: 'formBased' },
     }),
     documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
@@ -516,8 +516,8 @@ describe('Data Loader', () => {
         // Mock the testing datasource to return an error when asked for checkIntegrity
         servicesOverrides: {
           datasourceMap: {
-            form_based: {
-              ...createMockDatasource('form_based'),
+            formBased: {
+              ...createMockDatasource('formBased'),
               checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
             },
           },
@@ -528,7 +528,7 @@ describe('Data Loader', () => {
             activeAttributes: {
               ...defaultDoc,
               visualizationType: 'lnsXY',
-              state: { ...defaultDoc.state, datasourceStates: { form_based: {} } },
+              state: { ...defaultDoc.state, datasourceStates: { formBased: {} } },
             },
             mergedSearchContext: {
               now: Date.now(),
