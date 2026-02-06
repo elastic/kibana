@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy, map, isNumber } from 'lodash';
+import { isArray, isEmpty, pickBy, map, isNumber, compact, uniq, flatMap } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -24,7 +24,9 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
-import type { SearchHit } from '../../common/search_strategy';
+import { useBulkGetCases } from './use_bulk_get_cases';
+import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
+import type { SearchHit, ActionDetails } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
@@ -73,6 +75,25 @@ const ActionsTableComponent = () => {
     kuery: isHistoryEnabled ? undefined : 'user_id: *',
     withResultCounts: isHistoryEnabled,
   });
+
+  const items = actionsData?.data?.items ?? EMPTY_ARRAY;
+
+  const caseIds = useMemo(() => {
+    if (!isHistoryEnabled) return [];
+    return uniq(
+      compact(flatMap(items, (item: SearchHit) => (item._source as ActionDetails)?.case_ids))
+    );
+  }, [isHistoryEnabled, items]);
+
+  const profileUids = useMemo(() => {
+    if (!isHistoryEnabled) return [];
+    return uniq(
+      compact(items.map((item: SearchHit) => (item._source as ActionDetails)?.user_profile_uid))
+    );
+  }, [isHistoryEnabled, items]);
+
+  const { data: _casesMap } = useBulkGetCases(caseIds);
+  const { data: _userProfilesMap } = useBulkGetUserProfiles(profileUids);
 
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;

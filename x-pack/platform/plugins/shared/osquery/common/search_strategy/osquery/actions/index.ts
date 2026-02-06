@@ -35,6 +35,9 @@ export interface ActionDetails {
   space_id?: string;
   pack_prebuilt?: boolean;
   status?: string;
+  case_ids?: string[];
+  alert_ids?: string[];
+  event_ids?: string[];
   queries?: Array<{
     action_id: string;
     id: string;
