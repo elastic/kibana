@@ -15,10 +15,9 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { spanFlyoutId } from './waterfall_flyout/span_flyout';
@@ -49,6 +48,24 @@ export const FullScreenWaterfall = ({
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    const style = document.createElement('style');
+
+    style.id = 'flyout-datagrid-popover-z-index-fix';
+    style.textContent = `
+      .euiDataGridRowCell__popover {
+        z-index: ${euiTheme.levels.menu} !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    return () => {
+      style.remove();
+    };
+  }, [euiTheme.levels.menu]);
+
   const [docId, setDocId] = useState<string | null>(null);
   const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
   const [activeFlyoutType, setActiveFlyoutType] = useState<DocumentType | null>(null);
@@ -135,19 +152,6 @@ export const FullScreenWaterfall = ({
       resizable={true}
       minWidth={minWidth}
     >
-      {/**
-       * This global style ensures popovers (field action menus, data grid cell popovers, etc.)
-       * appear above the flyout layer. Popovers use portals and render in document.body,
-       * so they need a z-index higher than the flyout to be visible.
-       */}
-      <Global
-        styles={css`
-          .euiDataGridRowCell__popover,
-          .euiPopover__panel[data-popover-open='true'] {
-            z-index: ${euiTheme.levels.menu} !important;
-          }
-        `}
-      />
       <EuiFlyoutHeader>
         <EuiTitle size="l">
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
