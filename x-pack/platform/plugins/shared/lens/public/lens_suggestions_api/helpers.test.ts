@@ -9,7 +9,7 @@ import {
   mergeSuggestionWithVisContext,
   injectESQLQueryIntoLensLayers,
   getPreferredXyTypeIdForTimeSeries,
-  shouldUseLineChart,
+  shouldPreferLineForTimeSeries,
   switchVisualizationType,
 } from './helpers';
 import { mockAllSuggestions, createMockVisualization } from '../mocks';
@@ -934,7 +934,7 @@ describe('lens suggestions api helpers', () => {
       });
     });
 
-    describe('shouldUseLineChart', () => {
+    describe('shouldPreferLineForTimeSeries', () => {
       const baseTextBasedContext = {
         dataViewSpec: {
           id: 'index1',
@@ -955,7 +955,7 @@ describe('lens suggestions api helpers', () => {
 
       it('returns undefined when context has no textBasedColumns', () => {
         expect(
-          shouldUseLineChart({
+          shouldPreferLineForTimeSeries({
             dataViewSpec: {
               id: 'index1',
               title: 'index1',
@@ -968,7 +968,7 @@ describe('lens suggestions api helpers', () => {
 
       it('returns undefined when context has no query', () => {
         expect(
-          shouldUseLineChart(
+          shouldPreferLineForTimeSeries(
             baseTextBasedContext as unknown as typeof context,
             mockAllSuggestions[0]
           )
@@ -994,7 +994,7 @@ describe('lens suggestions api helpers', () => {
         };
 
         expect(
-          shouldUseLineChart(nonTsContext as unknown as typeof context, mockAllSuggestions[0])
+          shouldPreferLineForTimeSeries(nonTsContext as unknown as typeof context, mockAllSuggestions[0])
         ).toBe(false);
       });
 
@@ -1041,7 +1041,7 @@ describe('lens suggestions api helpers', () => {
         } as unknown as Suggestion;
 
         expect(
-          shouldUseLineChart(tsContext as unknown as typeof context, suggestionWithoutDate)
+          shouldPreferLineForTimeSeries(tsContext as unknown as typeof context, suggestionWithoutDate)
         ).toBe(false);
       });
 
@@ -1084,9 +1084,9 @@ describe('lens suggestions api helpers', () => {
           },
         } as unknown as Suggestion;
 
-        expect(shouldUseLineChart(tsContext as unknown as typeof context, suggestionWithDate)).toBe(
-          true
-        );
+        expect(
+          shouldPreferLineForTimeSeries(tsContext as unknown as typeof context, suggestionWithDate)
+        ).toBe(true);
       });
 
       it('returns true for PROMQL when the suggestion uses a date column on x-axis', () => {
@@ -1129,7 +1129,7 @@ describe('lens suggestions api helpers', () => {
         } as unknown as Suggestion;
 
         expect(
-          shouldUseLineChart(promqlContext as unknown as typeof context, suggestionWithDate)
+          shouldPreferLineForTimeSeries(promqlContext as unknown as typeof context, suggestionWithDate)
         ).toBe(true);
       });
     });

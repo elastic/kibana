@@ -217,18 +217,17 @@ export function switchVisualizationType({
 }
 
 /**
- * Determines whether the given visualization context represents a time series.
- * A time series context implies that a line chart is the appropriate visualization.
+ * Determines whether a line series should be preferred for a TS/PromQL time series.
  *
- * Only applicable to TS/PromQL queries. Considered a time series when:
- *   - The suggestion uses a date column on the x-axis
+ * Only applicable to TS/PromQL ES|QL queries. Considered a time series when the
+ * suggestion uses a date column on the x-axis.
  *
  * @param context the lens suggestions api context as being set by the consumers
  * @param suggestion the suggestion we are about to return/switch (used to detect which columns are actually used)
- * @returns `true` if the context is a time series, `false` if not (including non-TS/PromQL ES|QL queries),
+ * @returns `true` if line should be preferred, `false` if not (including non-TS/PromQL ES|QL queries),
  * or `undefined` if the context is not applicable (e.g., missing query or `textBasedColumns`)
  */
-export const shouldUseLineChart = (
+export const shouldPreferLineForTimeSeries = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   suggestion?: Suggestion
 ): boolean | undefined => {
@@ -288,7 +287,7 @@ export const getPreferredXyTypeIdForTimeSeries = (
   const isPromqlOrTs = root.commands.find(({ name }) => name === 'promql' || name === 'ts');
   if (!isPromqlOrTs) return undefined;
 
-  return shouldUseLineChart(context, suggestion) ? 'line' : 'bar';
+  return shouldPreferLineForTimeSeries(context, suggestion) ? 'line' : 'bar';
 };
 /**
  * Normalizes the suggestion for TS/PromQL queries.

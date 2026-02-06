@@ -20,7 +20,7 @@ import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_
 import {
   normalizeXySuggestionForTimeSeries,
   mergeSuggestionWithVisContext,
-  shouldUseLineChart,
+  shouldPreferLineForTimeSeries,
   switchVisualizationType,
 } from './helpers';
 
@@ -143,7 +143,8 @@ export const suggestionsApi = ({
   // to return line / area instead of a bar chart
   const xySuggestionCandidate = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
   const xyTargetTypeId =
-    chartType ?? (shouldUseLineChart(context, xySuggestionCandidate) ? 'line' : undefined);
+    chartType ??
+    (shouldPreferLineForTimeSeries(context, xySuggestionCandidate) ? 'line' : undefined);
   const xyResult = switchVisualizationType({
     visualizationMap,
     suggestions: newSuggestions,
