@@ -22,12 +22,6 @@ type SloInstance = FindSLOInstancesResponse['results'][number] | typeof ALL_VALU
 const PREPEND_TEXT = i18n.translate('xpack.slo.sloDetails.instanceSelector.prependText', {
   defaultMessage: 'Instance',
 });
-const PLACEHOLDER_TEXT = i18n.translate('xpack.slo.sloDetails.instanceSelector.placeholderText', {
-  defaultMessage: 'None selected, type here to search',
-});
-const ARIA_LABEL_TEXT = i18n.translate('xpack.slo.sloDetails.instanceSelector.ariaLabel', {
-  defaultMessage: 'Select an SLO instance',
-});
 const ERROR_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.slo.sloDetails.instanceSelector.errorPlaceholderText',
   {
@@ -127,7 +121,9 @@ export function SloInstanceComboBox({
       isClearable
       compressed
       prepend={PREPEND_TEXT}
-      aria-label={ARIA_LABEL_TEXT}
+      aria-label={i18n.translate('xpack.slo.sloDetails.instanceSelector.ariaLabel', {
+        defaultMessage: 'Select an SLO instance',
+      })}
       data-test-subj="sloDetailsInstanceSelectorComboBox"
       isLoading={isLoading}
       onChange={(selected: EuiComboBoxOptionOption[]) => {
@@ -142,7 +138,9 @@ export function SloInstanceComboBox({
       }}
       onSearchChange={(value: string) => debouncedSearch(value)}
       options={options}
-      placeholder={PLACEHOLDER_TEXT}
+      placeholder={i18n.translate('xpack.slo.sloDetails.instanceSelector.placeholderText', {
+        defaultMessage: 'None selected, type here to search',
+      })}
       selectedOptions={selectedInstance !== ALL_VALUE ? buildOptions([selectedInstance]) : []}
       singleSelection={{ asPlainText: true }}
     />
