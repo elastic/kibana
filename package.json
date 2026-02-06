@@ -87,6 +87,7 @@
     "**/baseline-browser-mapping": "2.9.14",
     "**/chokidar": "3.5.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
+    "**/fast-xml-parser": "5.3.4",
     "**/globule/minimatch": "3.1.2",
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
