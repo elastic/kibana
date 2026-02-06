@@ -1066,8 +1066,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
             }
           }}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          responsiveBreakpoint={false}
-          tableLayout="auto"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
