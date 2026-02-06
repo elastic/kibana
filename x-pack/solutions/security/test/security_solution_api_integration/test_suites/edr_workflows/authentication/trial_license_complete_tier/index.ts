@@ -13,6 +13,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   const { loadTestFile, getService } = providerContext;
 
   // FLAKY: https://github.com/elastic/kibana/issues/251525
+  // FLAKY: https://github.com/elastic/kibana/issues/251574
   describe.skip('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
