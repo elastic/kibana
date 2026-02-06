@@ -26,7 +26,7 @@ describe('AlertActionsClient', () => {
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    userService.getCurrentUserProfileUid.mockReturnValue('test-uid');
+    userService.getCurrentUserProfileUid.mockResolvedValue('test-uid');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
     client = new AlertActionsClient(queryService, storageService, userService);
   });
@@ -107,7 +107,7 @@ describe('AlertActionsClient', () => {
     it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
-      userService.getCurrentUserProfileUid.mockReturnValueOnce(null);
+      userService.getCurrentUserProfileUid.mockResolvedValueOnce(null);
       const clientWithoutSecurity = new AlertActionsClient(
         queryService,
         storageService,

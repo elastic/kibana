@@ -12,40 +12,36 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { UserService } from './user_service';
+import { createUserProfile } from './user_service.mock';
 
 describe('UserService', () => {
   const request = httpServerMock.createKibanaRequest();
+  const userProfile = userProfileServiceMock.createStart();
+  userProfile.getCurrent.mockResolvedValue(createUserProfile());
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns the current user profile uid when security is available', () => {
-    const security = securityMock.createStart();
-    security.authc.getCurrentUser.mockReturnValue(
-      mockAuthenticatedUser({ username: 'elastic', profile_uid: 'elastic_profile_uid' })
-    );
+  it('returns the current user profile uid when user profile service is available', async () => {
+    const service = new UserService(request, userProfile);
 
-    const service = new UserService(request, security);
-
-    expect(service.getCurrentUserProfileUid()).toBe('elastic_profile_uid');
+    await expect(service.getCurrentUserProfileUid()).resolves.toBe('elastic_profile_uid');
   });
 
-  it('returns null when security is not available', () => {
+  it('returns null when UserService is not available', async () => {
     const service = new UserService(request, undefined);
 
-    expect(service.getCurrentUserProfileUid()).toBeNull();
+    await expect(service.getCurrentUserProfileUid()).resolves.toBeNull();
   });
 
-  it('returns null when current user is not available', () => {
-    const security = securityMock.createStart();
-    security.authc.getCurrentUser.mockReturnValue(null);
+  it('returns null when the profile of current user is not available', async () => {
+    userProfile.getCurrent.mockResolvedValue(null);
 
-    const service = new UserService(request, security);
+    const service = new UserService(request, userProfile);
 
-    expect(service.getCurrentUserProfileUid()).toBeNull();
+    await expect(service.getCurrentUserProfileUid()).resolves.toBeNull();
   });
 });

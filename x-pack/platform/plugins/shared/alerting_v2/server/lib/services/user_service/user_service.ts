@@ -6,23 +6,29 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { inject, injectable, optional } from 'inversify';
-import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
+import { CoreStart, Request } from '@kbn/core-di-server';
 
 export interface UserServiceContract {
-  getCurrentUserProfileUid(): string | null;
+  getCurrentUserProfileUid(): Promise<string | null>;
 }
 
 @injectable()
 export class UserService implements UserServiceContract {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
+    @optional()
+    @inject(CoreStart('userProfile'))
+    private readonly userProfile?: UserProfileServiceStart
   ) {}
 
-  public getCurrentUserProfileUid(): string | null {
-    return this.security?.authc.getCurrentUser(this.request)?.profile_uid ?? null;
+  public async getCurrentUserProfileUid(): Promise<string | null> {
+    if (!this.userProfile) {
+      return null;
+    }
+
+    const profile = await this.userProfile.getCurrent({ request: this.request });
+    return profile?.uid ?? null;
   }
 }

@@ -59,7 +59,7 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = this.userService.getCurrentUserProfileUid();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const ruleAttributes: RuleSavedObjectAttributes = {
@@ -128,7 +128,7 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = this.userService.getCurrentUserProfileUid();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;

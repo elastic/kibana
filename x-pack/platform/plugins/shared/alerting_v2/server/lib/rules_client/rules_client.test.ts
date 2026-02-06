@@ -60,7 +60,7 @@ describe('RulesClient', () => {
 
     // Default space
     http.basePath.get.mockReturnValue('/s/space-1');
-    userService.getCurrentUserProfileUid.mockReturnValue('elastic_profile_uid');
+    userService.getCurrentUserProfileUid.mockResolvedValue('elastic_profile_uid');
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
       type: RULE_SAVED_OBJECT_TYPE,
