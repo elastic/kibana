@@ -62,6 +62,7 @@ export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimati
 // Agent builder settings
 export const AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID = 'agentBuilder:dashboardTools';
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
+export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
