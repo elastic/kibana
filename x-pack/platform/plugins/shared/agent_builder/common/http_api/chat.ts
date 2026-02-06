@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConversationAction,
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
@@ -28,7 +29,7 @@ export interface ChatRequestBodyPayload {
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  resend?: boolean;
+  action?: ConversationAction;
 }
 
 export type ChatResponse = Omit<

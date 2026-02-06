@@ -66,6 +66,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
+    action,
   },
   context
 ) => {

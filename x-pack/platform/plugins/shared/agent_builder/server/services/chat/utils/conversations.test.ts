@@ -17,98 +17,57 @@ import { getConversation, updateConversation$ } from './conversations';
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
-    describe('resend parameter', () => {
-      it('throws error when resend=true but no conversationId is provided', async () => {
-        const conversationClient = createConversationClientMock();
-
-        await expect(
-          getConversation({
-            agentId: 'test-agent',
-            conversationId: undefined,
-            resend: true,
-            conversationClient,
-          })
-        ).rejects.toThrow('conversation_id is required when resend is true');
-      });
-
-      it('throws error when resend=true but conversation has no rounds', async () => {
-        const conversationClient = createConversationClientMock();
-        conversationClient.get.mockResolvedValue(createEmptyConversation({ rounds: [] }));
-
-        await expect(
-          getConversation({
-            agentId: 'test-agent',
-            conversationId: 'test-conversation',
-            resend: true,
-            conversationClient,
-          })
-        ).rejects.toThrow('Cannot resend: conversation has no rounds');
-      });
-
-      it('returns conversation with RESEND operation when resend=true and valid', async () => {
-        const conversationClient = createConversationClientMock();
-        const conversation = createEmptyConversation({
-          rounds: [createRound({ id: 'round-1', input: { message: 'test message' } })],
-        });
-        conversationClient.get.mockResolvedValue(conversation);
-
-        const result = await getConversation({
-          agentId: 'test-agent',
-          conversationId: 'test-conversation',
-          resend: true,
-          conversationClient,
-        });
-
-        expect(result.operation).toBe('RESEND');
-        expect(result.rounds).toHaveLength(1);
-        expect(conversationClient.get).toHaveBeenCalledWith('test-conversation');
-      });
-
-      it('clears last round response when resend=true', async () => {
-        const conversationClient = createConversationClientMock();
-        const conversation = createEmptyConversation({
-          rounds: [
-            createRound({
-              id: 'round-1',
-              input: { message: 'test message' },
-              response: { message: 'original response that should be cleared' },
-            }),
-          ],
-        });
-        conversationClient.get.mockResolvedValue(conversation);
-
-        const result = await getConversation({
-          agentId: 'test-agent',
-          conversationId: 'test-conversation',
-          resend: true,
-          conversationClient,
-        });
-
-        // Verify the last round's response is cleared to empty message
-        expect(result.rounds[0].response).toEqual({ message: '' });
-      });
-
-      it('returns CREATE operation when resend=false and no conversationId', async () => {
+    describe('operation determination', () => {
+      it('returns CREATE operation when no conversationId is provided', async () => {
         const conversationClient = createConversationClientMock();
 
         const result = await getConversation({
           agentId: 'test-agent',
           conversationId: undefined,
-          resend: false,
           conversationClient,
         });
 
         expect(result.operation).toBe('CREATE');
       });
 
-      it('returns UPDATE operation when resend=false and conversationId is provided', async () => {
+      it('returns UPDATE operation when conversationId is provided', async () => {
         const conversationClient = createConversationClientMock();
         conversationClient.get.mockResolvedValue(createEmptyConversation());
 
         const result = await getConversation({
           agentId: 'test-agent',
           conversationId: 'test-conversation',
-          resend: false,
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(conversationClient.get).toHaveBeenCalledWith('test-conversation');
+      });
+
+      it('returns CREATE operation when autoCreateConversationWithId=true and conversation does not exist', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(false);
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'new-conversation',
+          autoCreateConversationWithId: true,
+          conversationClient,
+        });
+
+        expect(result.operation).toBe('CREATE');
+        expect(result.id).toBe('new-conversation');
+      });
+
+      it('returns UPDATE operation when autoCreateConversationWithId=true and conversation exists', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockResolvedValue(createEmptyConversation());
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'existing-conversation',
+          autoCreateConversationWithId: true,
           conversationClient,
         });
 
@@ -118,8 +77,8 @@ describe('conversations utils', () => {
   });
 
   describe('updateConversation$', () => {
-    describe('resend parameter', () => {
-      it('replaces last round when resend=true', async () => {
+    describe('action parameter', () => {
+      it('replaces last round when action=regenerate', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
@@ -140,7 +99,7 @@ describe('conversations utils', () => {
           conversation,
           title$: of('Test Title'),
           roundCompletedEvents$: of(roundCompleteEvent),
-          resend: true,
+          action: 'regenerate',
         });
 
         await new Promise<void>((resolve) => {
@@ -156,7 +115,7 @@ describe('conversations utils', () => {
         );
       });
 
-      it('appends round when resend=false', async () => {
+      it('appends round when no action is provided', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
@@ -177,7 +136,6 @@ describe('conversations utils', () => {
           conversation,
           title$: of('Test Title'),
           roundCompletedEvents$: of(roundCompleteEvent),
-          resend: false,
         });
 
         await new Promise<void>((resolve) => {
@@ -193,7 +151,7 @@ describe('conversations utils', () => {
         );
       });
 
-      it('replaces last round when resumed=true (HITL flow)', async () => {
+      it('replaces last round when resumed=true (HITL flow, auto-detected)', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
@@ -214,7 +172,7 @@ describe('conversations utils', () => {
           conversation,
           title$: of('Test Title'),
           roundCompletedEvents$: of(roundCompleteEvent),
-          resend: false,
+          // No action - auto-detected resume via resumed flag
         });
 
         await new Promise<void>((resolve) => {

@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
-import {
-  type Conversation,
-  type RoundCompleteEvent,
-  createBadRequestError,
+import type {
+  Conversation,
+  RoundCompleteEvent,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -62,13 +62,13 @@ export const updateConversation$ = ({
   conversation,
   title$,
   roundCompletedEvents$,
-  resend = false,
+  action,
 }: {
   conversation: Conversation;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
-  resend?: boolean;
+  action?: ConversationAction;
 }) => {
   return forkJoin({
     title: title$,
@@ -76,8 +76,9 @@ export const updateConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      // Replace last round when resumed (HITL flow) or resend is requested
-      const shouldReplaceLastRound = resumed || resend;
+      // Replace last round when resumed (HITL flow), regenerate, or resume_round action is requested
+      const shouldReplaceLastRound =
+        resumed || action === 'regenerate' || action === 'resume_round';
       const updatedRound = shouldReplaceLastRound
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
@@ -111,47 +112,26 @@ export const conversationExists = async ({
   return conversationClient.exists(conversationId);
 };
 
-export type ConversationOperation = 'CREATE' | 'UPDATE' | 'RESEND';
+export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
 /**
- * Get a conversation by ID, or create a placeholder for new conversations
- * Also determines the operation type (CREATE or UPDATE) based on the same logic
+ * Get a conversation by ID, or create a placeholder for new conversations.
+ * Determines the operation type (CREATE or UPDATE) based on conversationId presence.
+ * Note: Validation and manipulation for regenerate/resume_round is handled in runDefaultAgentMode.
  */
 export const getConversation = async ({
   agentId,
   conversationId,
   autoCreateConversationWithId = false,
-  resend = false,
   conversationClient,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
-  resend?: boolean;
   conversationClient: ConversationClient;
 }): Promise<ConversationWithOperation> => {
-  // Resend case: requires conversationId and at least one round
-  if (resend) {
-    if (!conversationId) {
-      throw createBadRequestError('conversation_id is required when resend is true');
-    }
-    const conversation = await conversationClient.get(conversationId);
-    if (conversation.rounds.length === 0) {
-      throw createBadRequestError('Cannot resend: conversation has no rounds');
-    }
-    // replace response in last round with empty string when resend is true
-    const lastRound = conversation.rounds[conversation.rounds.length - 1];
-    lastRound.response = {
-      message: '',
-    };
-    return {
-      ...conversation,
-      operation: 'RESEND',
-    };
-  }
-
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {

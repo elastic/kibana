@@ -206,7 +206,7 @@ describe('ChatService', () => {
         conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
-        resend: false,
+        action: undefined,
       });
       expect(createConversationMock$).not.toHaveBeenCalled();
     });
@@ -234,7 +234,7 @@ describe('ChatService', () => {
         conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
-        resend: false,
+        action: undefined,
       });
       expect(createConversationMock$).not.toHaveBeenCalled();
     });
@@ -288,7 +288,6 @@ describe('ChatService', () => {
         conversationId: 'test-conversation',
         autoCreateConversationWithId: true,
         conversationClient: expect.anything(),
-        resend: false,
       });
     });
   });
@@ -463,8 +462,8 @@ describe('ChatService', () => {
     });
   });
 
-  describe('resend', () => {
-    it('passes resend parameter to getConversation', async () => {
+  describe('action parameter', () => {
+    it('passes action to executeAgent$', async () => {
       const conversation = {
         ...createEmptyConversation(),
         rounds: [
@@ -486,60 +485,15 @@ describe('ChatService', () => {
           },
         ],
       };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
         conversationId: 'test-conversation',
-        resend: true,
+        action: 'regenerate',
         request,
         nextInput: {
-          message: 'this should be ignored',
-        },
-      });
-
-      await firstValueFrom(obs$.pipe(toArray()));
-
-      expect(getConversationMock).toHaveBeenCalledWith({
-        agentId: 'my-agent',
-        conversationId: 'test-conversation',
-        autoCreateConversationWithId: false,
-        resend: true,
-        conversationClient: expect.anything(),
-      });
-    });
-
-    it('uses last round input when resend=true', async () => {
-      const conversation = {
-        ...createEmptyConversation(),
-        rounds: [
-          {
-            id: 'round-1',
-            status: 'completed',
-            input: { message: 'original message from last round' },
-            response: { message: 'original response' },
-            steps: [],
-            started_at: new Date().toISOString(),
-            time_to_first_token: 100,
-            time_to_last_token: 500,
-            model_usage: {
-              connector_id: 'test-connector',
-              input_tokens: 10,
-              output_tokens: 20,
-              llm_calls: 1,
-            },
-          },
-        ],
-      };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
-
-      const obs$ = chatService.converse({
-        agentId: 'my-agent',
-        conversationId: 'test-conversation',
-        resend: true,
-        request,
-        nextInput: {
-          message: 'this input should be ignored',
+          message: 'hello',
         },
       });
 
@@ -547,16 +501,12 @@ describe('ChatService', () => {
 
       expect(executeAgentMock$).toHaveBeenCalledWith(
         expect.objectContaining({
-          nextInput: {
-            message: 'original message from last round',
-            attachments: undefined,
-            attachment_refs: undefined,
-          },
+          action: 'regenerate',
         })
       );
     });
 
-    it('calls updateConversation$ with resend=true when operation is RESEND', async () => {
+    it('calls updateConversation$ with action when action=regenerate', async () => {
       const conversation = {
         ...createEmptyConversation(),
         rounds: [
@@ -578,12 +528,12 @@ describe('ChatService', () => {
           },
         ],
       };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
         conversationId: 'test-conversation',
-        resend: true,
+        action: 'regenerate',
         request,
         nextInput: {
           message: 'ignored',
@@ -597,12 +547,12 @@ describe('ChatService', () => {
         conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
-        resend: true,
+        action: 'regenerate',
       });
       expect(createConversationMock$).not.toHaveBeenCalled();
     });
 
-    it('does NOT emit conversationIdSetEvent for resend operations', async () => {
+    it('does NOT emit conversationIdSetEvent for existing conversations with action=regenerate', async () => {
       const conversation = {
         ...createEmptyConversation(),
         rounds: [
@@ -624,7 +574,7 @@ describe('ChatService', () => {
           },
         ],
       };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
 
       const mockRoundCompleteEvent = {
         type: ChatEventType.roundComplete,
@@ -642,7 +592,7 @@ describe('ChatService', () => {
       const obs$ = chatService.converse({
         agentId: 'my-agent',
         conversationId: 'test-conversation',
-        resend: true,
+        action: 'regenerate',
         request,
         nextInput: {
           message: 'ignored',
@@ -655,7 +605,7 @@ describe('ChatService', () => {
       expect(conversationIdSetEvents).toHaveLength(0);
     });
 
-    it('strips last round from conversation before passing to agent when resend=true', async () => {
+    it('passes conversation as-is to executeAgent$ (manipulation happens in runDefaultAgentMode)', async () => {
       const round1 = {
         id: 'round-1',
         status: 'completed',
@@ -692,26 +642,27 @@ describe('ChatService', () => {
         ...createEmptyConversation(),
         rounds: [round1, round2],
       };
-      getConversationMock.mockResolvedValue({ ...conversation, operation: 'RESEND' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
         conversationId: 'test-conversation',
-        resend: true,
+        action: 'regenerate',
         request,
         nextInput: {
-          message: 'ignored',
+          message: 'this is passed through',
         },
       });
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      // Verify that executeAgent$ receives conversation with last round stripped
+      // Conversation is passed as-is to executeAgent$ (manipulation happens in runDefaultAgentMode)
       expect(executeAgentMock$).toHaveBeenCalledWith(
         expect.objectContaining({
           conversation: expect.objectContaining({
-            rounds: [round1], // Only round1, round2 should be stripped
+            rounds: [round1, round2],
           }),
+          action: 'regenerate',
         })
       );
     });

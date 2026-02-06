@@ -14,8 +14,8 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
+  type ConversationAction,
   type ChatEvent,
-  type ConverseInput,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
@@ -82,7 +82,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
     browserApiTools,
     configurationOverrides,
-    resend = false,
+    action,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { trackingService, analyticsService } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
@@ -98,12 +98,10 @@ class ChatServiceImpl implements ChatService {
         });
 
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
-        // Get conversation and determine operation (CREATE, UPDATE, or RESEND)
         const conversation = await getConversation({
           agentId,
           conversationId,
           autoCreateConversationWithId,
-          resend,
           conversationClient: services.conversationClient,
         });
 
@@ -124,32 +122,21 @@ class ChatServiceImpl implements ChatService {
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
-          const isResendOperation = context.conversation.operation === 'RESEND';
-
-          // For resend, use the last round's input instead of the provided nextInput
-          const effectiveNextInput =
-            context.conversation.operation === 'RESEND'
-              ? getLastRoundInput(context.conversation)
-              : nextInput;
-
-          const effectiveConversation = isResendOperation
-            ? { ...context.conversation, rounds: context.conversation.rounds.slice(0, -1) }
-            : context.conversation;
-
           // Execute agent
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            nextInput: effectiveNextInput,
+            nextInput,
             capabilities,
             structuredOutput,
             outputSchema,
             abortSignal,
-            conversation: effectiveConversation,
+            conversation: context.conversation,
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
             browserApiTools,
             configurationOverrides,
+            action,
           });
 
           // Generate title (for CREATE) or use existing title (for UPDATE/RESEND)
@@ -158,11 +145,13 @@ class ChatServiceImpl implements ChatService {
               ? generateTitle({
                   chatModel: context.chatModel,
                   conversation: context.conversation,
-                  nextInput: effectiveNextInput,
+                  nextInput,
                 })
               : of(context.conversation.title);
 
           // Persist conversation (optional)
+          // Pass action to persistConversation so updateConversation$ knows to replace
+          // the last round for regenerate/resume_round actions
           const persistenceEvents$ = storeConversation
             ? persistConversation({
                 agentId,
@@ -171,6 +160,7 @@ class ChatServiceImpl implements ChatService {
                 conversationId,
                 title$,
                 agentEvents$,
+                action,
               })
             : EMPTY;
 
@@ -193,11 +183,10 @@ class ChatServiceImpl implements ChatService {
               try {
                 if (isRoundCompleteEvent(event)) {
                   if (requestId) trackingService?.trackQueryEnd(requestId);
-                  // For resend, round count stays the same since we're replacing
-                  const currentRoundCount =
-                    context.conversation.operation === 'RESEND'
-                      ? context.conversation.rounds.length
-                      : (context.conversation.rounds?.length ?? 0) + 1;
+                  const isReplacingRound = action === 'regenerate';
+                  const currentRoundCount = isReplacingRound
+                    ? context.conversation.rounds.length
+                    : (context.conversation.rounds?.length ?? 0) + 1;
                   if (conversationId) {
                     trackingService?.trackConversationRound(conversationId, currentRoundCount);
                   }
@@ -222,15 +211,6 @@ class ChatServiceImpl implements ChatService {
   }
 }
 
-const getLastRoundInput = (conversation: ConversationWithOperation): ConverseInput => {
-  const lastRound = conversation.rounds[conversation.rounds.length - 1];
-  return {
-    message: lastRound.input.message,
-    attachments: lastRound.input.attachments,
-    attachment_refs: lastRound.input.attachment_refs,
-  };
-};
-
 /**
  * Creates events for conversation persistence (create/update/resend)
  */
@@ -241,6 +221,7 @@ const persistConversation = ({
   conversationId,
   title$,
   agentEvents$,
+  action,
 }: {
   agentId: string;
   conversation: ConversationWithOperation;
@@ -248,6 +229,7 @@ const persistConversation = ({
   conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
+  action?: ConversationAction;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -266,6 +248,6 @@ const persistConversation = ({
     conversation,
     title$,
     roundCompletedEvents$,
-    resend: conversation.operation === 'RESEND',
+    action,
   });
 };

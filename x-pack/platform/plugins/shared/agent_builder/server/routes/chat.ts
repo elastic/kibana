@@ -167,11 +167,11 @@ export function registerChatRoutes({
         }
       )
     ),
-    resend: schema.maybe(
-      schema.boolean({
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
         meta: {
           description:
-            'When true, regenerates the last conversation round using its original input. Requires conversation_id.',
+            'The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).',
         },
       })
     ),
@@ -239,7 +239,7 @@ export function registerChatRoutes({
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
-      resend,
+      action,
     } = payload;
 
     return chatService.converse({
@@ -249,7 +249,6 @@ export function registerChatRoutes({
       capabilities,
       browserApiTools,
       configurationOverrides,
-      resend,
       abortSignal,
       nextInput: {
         message: input,
@@ -257,6 +256,7 @@ export function registerChatRoutes({
         attachments,
       },
       request,
+      action,
     });
   };
 

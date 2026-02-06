@@ -22,7 +22,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const log = getService('log');
   const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
-  describe('POST /api/agent_builder/converse: resend', function () {
+  describe('POST /api/agent_builder/converse: action=regenerate', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -36,7 +36,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
       await deleteActionConnector(getService, { actionId: connectorId });
     });
 
-    describe('when resend=true', () => {
+    describe('when action=regenerate', () => {
       const MOCKED_LLM_RESPONSE_1 = 'Original Response';
       const MOCKED_LLM_RESPONSE_2 = 'Regenerated Response';
       const MOCKED_LLM_TITLE = 'Test Conversation';
@@ -64,25 +64,25 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE_1);
         expect(conversation.rounds[0].input.message).to.eql('Original user message');
 
-        // Resend: regenerate the last round
+        // Regenerate the last round
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           continueConversation: true,
           response: MOCKED_LLM_RESPONSE_2,
         });
 
-        const resendResponse = await agentBuilderApiClient.converse({
+        const regenerateResponse = await agentBuilderApiClient.converse({
           conversation_id: conversationId,
           connector_id: connectorId,
-          resend: true,
+          action: 'regenerate',
           // This input should be ignored - the original input should be used
           input: 'This should be ignored',
         });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        // Verify resend response
-        expect(resendResponse.response.message).to.eql(MOCKED_LLM_RESPONSE_2);
+        // Verify regenerate response
+        expect(regenerateResponse.response.message).to.eql(MOCKED_LLM_RESPONSE_2);
 
         // Verify the conversation still has only 1 round (replaced, not appended)
         conversation = await agentBuilderApiClient.getConversation(conversationId);
@@ -92,7 +92,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         expect(conversation.rounds[0].input.message).to.eql('Original user message');
       });
 
-      it('preserves previous rounds when resending the last round of multi-round conversation', async () => {
+      it('preserves previous rounds when regenerating the last round of multi-round conversation', async () => {
         const RESPONSE_1 = 'First response';
         const RESPONSE_2 = 'Second response';
         const RESPONSE_2_REGENERATED = 'Second response regenerated';
@@ -131,7 +131,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         let conversation = await agentBuilderApiClient.getConversation(conversationId);
         expect(conversation.rounds.length).to.eql(2);
 
-        // Resend the last round
+        // Regenerate the last round
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           continueConversation: true,
@@ -141,7 +141,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         await agentBuilderApiClient.converse({
           conversation_id: conversationId,
           connector_id: connectorId,
-          resend: true,
+          action: 'regenerate',
         });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -157,14 +157,14 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
     });
 
     describe('error cases', () => {
-      it('returns 400 when resend=true but no conversation_id is provided', async () => {
+      it('returns 400 when action=regenerate but no conversation_id is provided', async () => {
         const res = (await agentBuilderApiClient.converse({
           connector_id: connectorId,
-          resend: true,
+          action: 'regenerate',
         })) as unknown as Payload;
 
         expect(res.statusCode).to.eql(400);
-        expect(res.message).to.contain('conversation_id is required when resend is true');
+        expect(res.message).to.contain('conversation_id is required when action is regenerate');
       });
     });
   });
