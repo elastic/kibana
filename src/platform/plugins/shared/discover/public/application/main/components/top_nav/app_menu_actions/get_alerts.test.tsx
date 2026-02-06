@@ -16,26 +16,27 @@ import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import { internalStateActions } from '../../../state_management/redux';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../../build_services';
 
-const getAlertsMenuItem = async (
+const getAlertsMenuItem = async ({
   dataView = dataViewMock,
   isEsqlMode = false,
-  authorizedRuleTypeIds = [ES_QUERY_ID]
-): Promise<DiscoverAppMenuItemType> => {
-  const services = createDiscoverServicesMock();
-  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataView], services });
+  authorizedRuleTypeIds = [ES_QUERY_ID],
+  services = createDiscoverServicesMock(),
+}: {
+  dataView?: DataView;
+  isEsqlMode?: boolean;
+  authorizedRuleTypeIds?: string[];
+  services?: DiscoverServices;
+} = {}): Promise<DiscoverAppMenuItemType> => {
+  const toolkit = getDiscoverInternalStateMock({ services });
+
   await toolkit.initializeTabs();
+
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
-
-  toolkit.internalState.dispatch(
-    internalStateActions.assignNextDataView({
-      tabId: toolkit.getCurrentTab().id,
-      dataView,
-    })
-  );
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
@@ -57,7 +58,11 @@ const getAlertsMenuItem = async (
 describe('getAlertsAppMenuItem', () => {
   describe('Authorized Rule Types', () => {
     it('should include the manage alerts button if there is any authorized rule type', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewMock, false, ['anyAuthorizedRule']);
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        authorizedRuleTypeIds: ['anyAuthorizedRule'],
+      });
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
       );
@@ -73,7 +78,11 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should not include the create search threshold rule button if it is not authorized', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewMock, false, []);
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        authorizedRuleTypeIds: [],
+      });
       const createAlertItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverCreateAlertButton'
       );
@@ -90,7 +99,7 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should have the create search threshold rule button enabled if the data view has a time field', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewWithTimefieldMock);
+      const alertsMenuItem = await getAlertsMenuItem({ dataView: dataViewWithTimefieldMock });
       const createAlertItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverCreateAlertButton'
       );
@@ -108,7 +117,7 @@ describe('getAlertsAppMenuItem', () => {
 
   describe('ES|QL mode', () => {
     it('should have the create search threshold rule button enabled if the data view has no timeFieldName but at least one time field', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewMock, true);
+      const alertsMenuItem = await getAlertsMenuItem({ dataView: dataViewMock, isEsqlMode: true });
       const createAlertItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverCreateAlertButton'
       );
@@ -116,7 +125,10 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should have the create search threshold rule button enabled if the data view has a time field', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewWithTimefieldMock, true);
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlMode: true,
+      });
       const createAlertItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverCreateAlertButton'
       );
@@ -124,7 +136,10 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should have the create search threshold rule button disabled if the data view has no time fields at all', async () => {
-      const alertsMenuItem = await getAlertsMenuItem(dataViewWithNoTimefieldMock, true);
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewWithNoTimefieldMock,
+        isEsqlMode: true,
+      });
       const createAlertItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverCreateAlertButton'
       );
@@ -142,11 +157,12 @@ describe('getAlertsAppMenuItem', () => {
 
   describe('Manage rules and connectors link', () => {
     it('should link to the unified rules page when rules app is registered', async () => {
-      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(true);
-      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+      const services = createDiscoverServicesMock();
+      (services.application.isAppRegistered as jest.Mock).mockReturnValue(true);
+      (services.application.getUrlForApp as jest.Mock).mockImplementation(
         (appId: string) => `/app/${appId}`
       );
-      const alertsMenuItem = await getAlertsMenuItem();
+      const alertsMenuItem = await getAlertsMenuItem({ services });
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
       );
@@ -154,11 +170,12 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should link to the management page when rules app is not registered', async () => {
-      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(false);
-      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+      const services = createDiscoverServicesMock();
+      (services.application.isAppRegistered as jest.Mock).mockReturnValue(false);
+      (services.application.getUrlForApp as jest.Mock).mockImplementation(
         (appId: string) => `/app/${appId}`
       );
-      const alertsMenuItem = await getAlertsMenuItem();
+      const alertsMenuItem = await getAlertsMenuItem({ services });
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
       );

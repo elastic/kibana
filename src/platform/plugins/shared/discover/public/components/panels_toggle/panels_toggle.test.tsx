@@ -14,9 +14,8 @@ import { BehaviorSubject } from 'rxjs';
 import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 import type { SidebarToggleState } from '../../application/types';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
 import { internalStateActions } from '../../application/main/state_management/redux';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('Panels toggle component', () => {
   const mountComponent = async ({
@@ -25,25 +24,26 @@ describe('Panels toggle component', () => {
     renderedFor,
     hideChart,
   }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
-    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
-    await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
-      tabId: toolkit.getCurrentTab().id,
-      skipWaitForDataFetching: true,
-    });
+    const toolkit = getDiscoverInternalStateMock();
 
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setAppState)({ appState: { hideChart } })
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { hideChart },
+      })
     );
 
     return mountWithIntl(
-      <DiscoverTestProvider stateContainer={stateContainer}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <PanelsToggle
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}
         />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
   };
 

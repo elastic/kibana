@@ -14,7 +14,6 @@ import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
   DataDocumentsMsg,
@@ -30,6 +29,7 @@ import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-respons
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -67,23 +67,23 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
       skipWaitForDataFetching: true,
     });
-    const { internalState, runtimeStateManager, getCurrentTab } = stateContainer;
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      getCurrentTab().id
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
     );
     deps = {
       dataSubjects: subjects,
       reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      internalState,
+      internalState: toolkit.internalState,
       scopedProfilesManager: scopedProfilesManager$.getValue(),
       scopedEbtManager: scopedEbtManager$.getValue(),
       searchSessionId: '123',
@@ -92,8 +92,8 @@ describe('test fetchAll', () => {
         ...savedSearchMock,
         searchSource,
       },
-      services: discoverServiceMock,
-      getCurrentTab,
+      services,
+      getCurrentTab: toolkit.getCurrentTab,
     };
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });

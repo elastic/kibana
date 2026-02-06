@@ -9,89 +9,66 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
-import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import { internalStateActions } from '../../state_management/redux';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  useGetRuleTypesPermissions: jest.fn().mockReturnValue({ authorizedRuleTypes: [] }),
+}));
 
 describe('useTopNavLinks', () => {
-  const services = {
-    ...createDiscoverServicesMock(),
-    application: {
-      ...createDiscoverServicesMock().application,
-      currentAppId$: new BehaviorSubject('discover'),
-    },
-    capabilities: {
-      discover_v2: {
-        save: true,
-        storeSearchSession: true,
-      },
-    },
-    uiSettings: {
-      get: jest.fn(() => true),
-    },
-  } as unknown as DiscoverServices;
+  const getServices = () => {
+    const services = createDiscoverServicesMock();
+    const uiSettingsGetMock = services.uiSettings.get;
 
-  const getStateContainer = async () => {
-    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
-    await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
-      tabId: toolkit.getCurrentTab().id,
-      skipWaitForDataFetching: true,
-    });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
-        dataView: dataViewMock,
-      })
-    );
-    return stateContainer;
-  };
+    services.share = sharePluginMock.createStartContract();
+    services.application.currentAppId$ = new BehaviorSubject('discover');
+    services.capabilities.discover_v2 = {
+      save: true,
+      storeSearchSession: true,
+    };
+    services.uiSettings.get = <T,>(key: string) => {
+      return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
+    };
 
-  // identifier to denote if share integration is available,
-  // we default to false especially that there a specific test scenario for when this is true
-  const hasShareIntegration = false;
-
-  const Wrapper: React.FC<{
-    children: React.ReactNode;
-    state: Awaited<ReturnType<typeof getStateContainer>>;
-  }> = ({ children, state }) => {
-    return (
-      <DiscoverTestProvider
-        services={services}
-        stateContainer={state}
-        runtimeState={{
-          currentDataView: dataViewMock,
-          adHocDataViews: [],
-        }}
-      >
-        {children}
-      </DiscoverTestProvider>
-    );
+    return services;
   };
 
   const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
-    const state = await getStateContainer();
+    const services = hookAttrs.services ?? getServices();
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
     return renderHook(
       () =>
         useTopNavLinks({
           dataView: dataViewMock,
           onOpenInspector: jest.fn(),
           services,
-          state,
+          state: stateContainer,
           hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
-          hasShareIntegration,
+          hasShareIntegration: false,
           persistedDiscoverSession: undefined,
           ...hookAttrs,
         }),
       {
-        wrapper: ({ children }) => <Wrapper state={state}>{children}</Wrapper>,
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
       }
     ).result.current;
   };
@@ -137,17 +114,12 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when share service included', () => {
-    beforeAll(() => {
-      services.share = sharePluginMock.createStartContract();
-      jest.spyOn(services.share, 'availableIntegrations').mockReturnValue([]);
-    });
-
-    afterAll(() => {
-      services.share = undefined;
-    });
-
     it('should include the share menu item', async () => {
-      const appMenuConfig = await setup();
+      const services = getServices();
+
+      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
+
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
 
       expect(appMenuConfig.items).toBeDefined();
 
@@ -158,6 +130,8 @@ describe('useTopNavLinks', () => {
     });
 
     it('should include the export menu item', async () => {
+      const services = getServices();
+
       jest
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
@@ -174,24 +148,7 @@ describe('useTopNavLinks', () => {
           return [];
         });
 
-      const state = await getStateContainer();
-      const appMenuConfig = renderHook(
-        () =>
-          useTopNavLinks({
-            dataView: dataViewMock,
-            onOpenInspector: jest.fn(),
-            services,
-            state,
-            hasUnsavedChanges: false,
-            isEsqlMode: false,
-            adHocDataViews: [],
-            hasShareIntegration: true,
-            persistedDiscoverSession: undefined,
-          }),
-        {
-          wrapper: ({ children }) => <Wrapper state={state}>{children}</Wrapper>,
-        }
-      ).result.current;
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
 
       const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
       expect(exportItem).toBeDefined();
@@ -206,16 +163,10 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when background search is enabled', () => {
-    beforeEach(() => {
-      services.data.search.isBackgroundSearchEnabled = true;
-    });
-
-    afterEach(() => {
-      services.data.search.isBackgroundSearchEnabled = false;
-    });
-
     it('should return the background search menu item', async () => {
-      const appMenuConfig = await setup();
+      const services = getServices();
+      services.data.search.isBackgroundSearchEnabled = true;
+      const appMenuConfig = await setup({ services });
 
       const backgroundSearchItem = appMenuConfig.items?.find(
         (item) => item.id === 'backgroundSearch'

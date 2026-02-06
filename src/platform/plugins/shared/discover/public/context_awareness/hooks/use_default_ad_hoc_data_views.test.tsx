@@ -43,15 +43,10 @@ const renderDefaultAdHocDataViewsHook = async () => {
   const createDataView = jest
     .spyOn(services.dataViews, 'create')
     .mockImplementation((spec) => Promise.resolve(buildDataViewMock(omit(spec, 'fields'))));
+  const toolkit = getDiscoverInternalStateMock({ services });
 
-  const toolkit = getDiscoverInternalStateMock({
-    services,
-    persistedDataViews: [existingAdHocDataVew],
-  });
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({
-    tabId: toolkit.getCurrentTab().id,
-  });
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
   toolkit.internalState.dispatch(internalStateActions.appendAdHocDataViews(existingAdHocDataVew));
   toolkit.internalState.dispatch(

@@ -21,7 +21,6 @@ import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -34,14 +33,10 @@ describe('getConnectedCustomizationService', () => {
     });
     const customizationCallbacks: CustomizationCallback[] = [callback];
     const services = createDiscoverServicesMock();
-    const toolkit = getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [dataViewMock],
-    });
+    const toolkit = getDiscoverInternalStateMock({ services });
     await toolkit.initializeTabs();
     const { stateContainer } = await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
-      skipWaitForDataFetching: true,
     });
     const servicePromise = getConnectedCustomizationService({
       stateContainer,

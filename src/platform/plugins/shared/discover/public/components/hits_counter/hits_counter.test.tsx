@@ -28,19 +28,18 @@ function getDocuments$(count: number = 5) {
   }) as DataDocuments$;
 }
 
-async function setupStateContainer() {
-  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+async function setup() {
+  const toolkit = getDiscoverInternalStateMock();
   await toolkit.initializeTabs();
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
-    skipWaitForDataFetching: true,
   });
-  return stateContainer;
+  return { stateContainer };
 }
 
 describe('hits counter', function () {
   it('expect to render the number of hits', async function () {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1,
@@ -67,7 +66,7 @@ describe('hits counter', function () {
   });
 
   it('expect to render 1,899 hits if 1899 hits given', async function () {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
@@ -91,7 +90,7 @@ describe('hits counter', function () {
   });
 
   it('renders with custom hit counter labels', async function () {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
@@ -144,7 +143,7 @@ describe('hits counter', function () {
   });
 
   it('should render a EuiLoadingSpinner when status is partial', async () => {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
@@ -161,7 +160,7 @@ describe('hits counter', function () {
   });
 
   it('should render discoverQueryHitsPartial when status is partial', async () => {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.PARTIAL,
       result: 2,
@@ -175,7 +174,7 @@ describe('hits counter', function () {
   });
 
   it('should not render if loading', async () => {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.LOADING,
       result: undefined,
@@ -189,7 +188,7 @@ describe('hits counter', function () {
   });
 
   it('should render discoverQueryHitsPartial when status is error', async () => {
-    const stateContainer = await setupStateContainer();
+    const { stateContainer } = await setup();
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.ERROR,
       result: undefined,

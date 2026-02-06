@@ -11,7 +11,6 @@ import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CommonFetchParams } from './fetch_all';
@@ -20,36 +19,32 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
+import { selectTabRuntimeState } from '../state_management/redux';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 const getDeps = async (): Promise<CommonFetchParams> => {
-  const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+  const services = createDiscoverServicesMock();
+  const toolkit = getDiscoverInternalStateMock({ services });
   await toolkit.initializeTabs();
   const { stateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
-    skipWaitForDataFetching: true,
   });
-  const { internalState, dataState, runtimeStateManager, getCurrentTab, injectCurrentTab } =
-    stateContainer;
   const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
-    runtimeStateManager,
-    getCurrentTab().id
-  );
-  internalState.dispatch(
-    injectCurrentTab(internalStateActions.updateAppState)({ appState: { sampleSize: 100 } })
+    toolkit.runtimeStateManager,
+    toolkit.getCurrentTab().id
   );
   return {
-    dataSubjects: dataState.data$,
-    initialFetchStatus: dataState.getInitialFetchStatus(),
+    dataSubjects: stateContainer.dataState.data$,
+    initialFetchStatus: stateContainer.dataState.getInitialFetchStatus(),
     abortController: new AbortController(),
     inspectorAdapters: { requests: new RequestAdapter() },
     searchSessionId: '123',
-    services: discoverServiceMock,
+    services,
     savedSearch: savedSearchMock,
-    internalState,
+    internalState: toolkit.internalState,
     scopedProfilesManager: scopedProfilesManager$.getValue(),
     scopedEbtManager: scopedEbtManager$.getValue(),
-    getCurrentTab,
+    getCurrentTab: toolkit.getCurrentTab,
   };
 };
 
