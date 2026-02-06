@@ -16,7 +16,7 @@ import type {
   AfterConversationRoundHookContext,
 } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { type ConversationRound } from '@kbn/agent-builder-common';
 
 const TEST_AGENT_ID = 'agent-1';
 const TEST_CONVERSATION_ID = 'conv-1';
