@@ -153,7 +153,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           : '';
 
       // ============================================
-      // STEP 1 & 2: ES|QL QUERY TO GET BUCKETS
+      // STEP 1: ES|QL QUERY TO GET BUCKETS
       // ============================================
       // This replaces Phase 1 (composite aggregation) and Phase 2 (terms aggregation)
       // Query structure matches the example pattern:
@@ -226,7 +226,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       }
 
       // ============================================
-      // STEP 3: FETCH SOURCE DOCUMENTS (Phase 3) - Use msearch
+      // STEP 2: FETCH SOURCE DOCUMENTS (Phase 2) - Use msearch
       // ============================================
       // For each bucket, create a search query to find the first document in the rule execution interval
       // that contains that combination. Use msearch to execute all queries in parallel.
@@ -419,13 +419,6 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       });
 
       return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
-
-      // ============================================
-      // ORIGINAL 3-PHASE DSL IMPLEMENTATION (REMOVED)
-      // ============================================
-      // The original implementation has been replaced with:
-      // - ES|QL query to get buckets (replaces Phase 1 & 2)
-      // - Phase 3: top_hits aggregation to fetch source documents (kept from original)
     },
   };
 };
