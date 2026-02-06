@@ -182,7 +182,7 @@ export const simulateProcessing = async ({
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
-    processorsMetrics,
+    docReports,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -550,7 +550,9 @@ const computePipelineSimulationResult = (
       }
     });
 
-    diff.detected_fields.forEach(({ processor_id, name }) => {
+    // Use intermediate_field_changes for processor metrics - this tracks what each processor touched,
+    // even if the field was later deleted by another processor (useful for debugging/metrics)
+    diff.intermediate_field_changes.forEach(({ processor_id, name }) => {
       processorsMap[processor_id].detected_fields.push(name);
     });
 
@@ -698,8 +700,13 @@ const getLastDoc = (
 /**
  * To improve tracking down the errors and the fields detection to the individual processor,
  * this function computes the detected fields and the errors for each processor.
+ *
+ * Returns:
+ * - `intermediate_field_changes`: All fields touched by each processor (for per-processor metrics/debugging)
+ * - `detected_fields`: Only fields that exist in the final output compared to input (for overall detection)
+ * - `errors`: Processing errors detected during comparison
  */
-const computeSimulationDocDiff = (
+export const computeSimulationDocDiff = (
   base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
@@ -718,12 +725,20 @@ const computeSimulationDocDiff = (
     }),
   ];
 
-  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
+  // Store base and final docs for overall diff computation
+  const baseDoc = comparisonDocs[0];
+  const finalDoc = comparisonDocs[comparisonDocs.length - 1];
+
+  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> & {
+    intermediate_field_changes: Array<{ processor_id: string; name: string }>;
+  } = {
     detected_fields: [],
+    intermediate_field_changes: [],
     errors: [],
   };
 
-  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/udpated fields.
+  // Compare each document outcome with the previous one, flattening for standard comparison and detecting added/updated fields.
+  // This tracks what each processor touches for debugging/metrics purposes.
   // When updated fields are detected compared to the original document, the processor is not additive to the documents, and an error is added to the diff result.
   while (comparisonDocs.length > 1) {
     const currentDoc = comparisonDocs.shift()!; // Safe to use ! here since we check the length
@@ -743,7 +758,8 @@ const computeSimulationDocDiff = (
       name,
     }));
 
-    diffResult.detected_fields.push(...processorDetectedFields);
+    // Track intermediate field changes (includes fields that may be deleted by later processors)
+    diffResult.intermediate_field_changes.push(...processorDetectedFields);
 
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
@@ -753,6 +769,23 @@ const computeSimulationDocDiff = (
       });
     }
   }
+
+  // Compute overall diff between initial input and final output.
+  // This excludes temporary fields that were created then deleted within processing.
+  const { added: finalAdded, updated: finalUpdated } = calculateObjectDiff(
+    flattenObjectNestedLast(baseDoc.value),
+    flattenObjectNestedLast(finalDoc.value)
+  );
+
+  const overallAddedFields = Object.keys(flattenObjectNestedLast(finalAdded));
+  const overallUpdatedFields = Object.keys(flattenObjectNestedLast(finalUpdated));
+  const overallDetectedFieldNames = new Set([...overallAddedFields, ...overallUpdatedFields]);
+
+  // Filter intermediate field changes to only include fields that exist in the final output,
+  // keeping processor attribution for fields that do exist
+  diffResult.detected_fields = diffResult.intermediate_field_changes.filter(({ name }) =>
+    overallDetectedFieldNames.has(name)
+  );
 
   return diffResult;
 };
@@ -902,15 +935,17 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * Uses per-doc detected_fields which have already been filtered to exclude temporary fields (created then deleted).
  */
 const computeDetectedFields = async (
-  processorsMetrics: Record<string, ProcessorMetrics>,
+  docReports: SimulationDocReport[],
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
+  // Aggregate field names from per-doc detected_fields (already filtered to exclude temporary fields)
+  const fields = docReports.flatMap((doc) => doc.detected_fields.map((f) => f.name));
 
   const uniqueFields = uniq(fields);
 
