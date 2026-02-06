@@ -24,6 +24,7 @@ describe('FetchRuleStep', () => {
     overrides: Partial<RuleSavedObjectAttributes> = {}
   ): RuleSavedObjectAttributes => ({
     name: 'test-rule',
+    kind: 'alert',
     tags: [],
     schedule: { custom: '1m' },
     enabled: true,

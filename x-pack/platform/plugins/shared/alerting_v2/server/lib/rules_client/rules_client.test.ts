@@ -42,6 +42,7 @@ describe('RulesClient', () => {
 
   const baseCreateData: CreateRuleParams['data'] = {
     name: 'rule-1',
+    kind: 'alert',
     tags: [],
     schedule: { custom: '1m' },
     enabled: true,
