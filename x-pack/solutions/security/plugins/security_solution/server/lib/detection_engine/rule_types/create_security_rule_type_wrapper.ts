@@ -303,7 +303,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           if (!isMachineLearningParams(params)) {
             try {
-              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
               if (existingIndices.length > 0) {
