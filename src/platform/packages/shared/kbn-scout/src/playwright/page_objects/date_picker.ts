@@ -185,4 +185,8 @@ export class DatePicker {
 
     await this.quickMenuButton.click();
   }
+
+  async waitToBeHidden() {
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
+  }
 }
