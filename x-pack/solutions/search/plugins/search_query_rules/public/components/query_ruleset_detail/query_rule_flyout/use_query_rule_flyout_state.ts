@@ -45,11 +45,10 @@ export const useQueryRuleFlyoutState = ({
   const { control, getValues, reset, setValue, formState, trigger, setFocus } =
     useFormContext<QueryRuleEditorForm>();
   const {
-    fields: criteria,
     remove,
     replace,
-    update,
     append,
+    fields: criteria,
   } = useFieldArray({
     control,
     name: 'criteria',
@@ -78,6 +77,10 @@ export const useQueryRuleFlyoutState = ({
     name: 'actions.ids',
   });
 
+  const criteriaField = useWatch({
+    control,
+    name: 'criteria',
+  });
   useEffect(() => {
     trigger('actions.ids');
   }, [actionIdsFields, trigger]);
@@ -86,7 +89,7 @@ export const useQueryRuleFlyoutState = ({
   }, [actionFields, trigger]);
   useEffect(() => {
     trigger('criteria');
-  }, [criteria, trigger]);
+  }, [trigger, criteriaField]);
 
   const { data: indexNames } = useFetchIndexNames('');
 
@@ -183,7 +186,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' } as QueryRuleEditorForm['criteria'][0]]
-          : criteria.map((c) => {
+          : criteriaField.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -200,7 +203,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' }]
-          : criteria.map((c) => {
+          : criteriaField.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -291,14 +294,14 @@ export const useQueryRuleFlyoutState = ({
 
   const documentCount = actionFields.length || actionIdsFields?.length || 0;
   const shouldShowMetadataEditor = (createMode || !!ruleFromRuleset) && !isAlways;
-  const criteriaCount = criteria.length;
+  const criteriaCount = criteriaField.length;
 
   return {
     actionFields,
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    criteria,
+    criteriaField,
     criteriaCount,
     documentCount,
     dragEndHandle,
@@ -319,7 +322,7 @@ export const useQueryRuleFlyoutState = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
     setFocus,
+    criteria
   };
 };

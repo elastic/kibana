@@ -64,7 +64,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    criteria,
+    criteriaField,
     criteriaCount,
     documentCount,
     dragEndHandle,
@@ -82,7 +82,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
+    criteria,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -91,7 +91,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setIsFormDirty,
     onSave,
   });
-  console.log('formState', formState);
+
   const {
     services: { application },
   } = useKibana();
@@ -101,6 +101,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   const dndBackgroundColor = css`
     background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
   `;
+  console.log('criteria', criteria);
 
   const pinExcludeText =
     pinType === 'pinned' ? (
@@ -323,22 +324,23 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     criteria.map((field, index) => {
                       const error = formState.errors?.criteria?.[index];
                       return (
-                        <React.Fragment key={field.id}>
+                        <React.Fragment key={`${field.type}_${index}`}>
                           <Controller
                             control={control}
                             name={`criteria.${index}`}
-                            // name={`criteria.${index}`}
                             render={({ field: { onChange, value, ref }, fieldState }) => {
                               return (
                                 <div ref={ref}>
                                   <QueryRuleMetadataEditor
                                     criteria={field}
-                                    key={field.id}
+                                    key={`${field.type}_${index}`}
                                     onRemove={() => {
                                       remove(index);
                                     }}
                                     error={isQueryRuleFieldError(error) ? error : undefined}
-                                    onChange={onChange}
+                                    onChange={(newCriteria) => {
+                                      onChange(newCriteria);
+                                    }}
                                     // onChange={(newCriteria) => {
                                     //   update(index, newCriteria);
                                     // }}
