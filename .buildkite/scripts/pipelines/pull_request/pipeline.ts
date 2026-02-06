@@ -78,11 +78,42 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
+function parseGithubPrLabels(raw: string): string[] {
+  // Historically this env var has been provided as a comma/newline separated string,
+  // but some contexts may pass JSON (e.g. ["a","b"]). Handle both.
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map(String)
+        .map((label) => label.trim())
+        .filter(Boolean);
+    }
+  } catch {
+    // fall through
+  }
+
+  return raw
+    .split(/[\n,]+/g)
+    .map((label) => label.trim())
+    .filter(Boolean);
+}
+
+function buildEvalsYaml({
+  selectedSuites,
+  modelGroups,
+}: {
+  selectedSuites: EvalsSuiteMetadataEntry[];
+  modelGroups: string[] | undefined;
+}): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
       const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
       const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
+      const modelGroupsEnv =
+        modelGroups && modelGroups.length > 0
+          ? `          EVAL_MODEL_GROUPS: '${modelGroups.join(',')}'`
+          : null;
       return [
         `      - label: '${label}'`,
         `        key: ${key}`,
@@ -91,6 +122,7 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
         `          KBN_EVALS: '1'`,
         `          EVAL_SUITE_ID: '${suite.id}'`,
         `          EVAL_FANOUT: '1'`,
+        ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          machineType: n2-standard-8`,
@@ -581,8 +613,26 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
           return labels.some((label) => GITHUB_PR_LABELS.includes(label));
         });
 
+    // Optional model filtering for eval fanout (models:* labels).
+    // - No `models:*` labels => run all models returned by LiteLLM (current behavior).
+    // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
+    //   matches one of those model groups.
+    // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
+    const parsedLabels = parseGithubPrLabels(GITHUB_PR_LABELS);
+    const selectedModelGroups = parsedLabels
+      .filter((label) => label.startsWith('models:'))
+      .map((label) => label.slice('models:'.length))
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .filter((value) => value !== 'all');
+
     if (selectedEvalSuites.length > 0) {
-      pipeline.push(buildEvalsYaml(selectedEvalSuites));
+      pipeline.push(
+        buildEvalsYaml({
+          selectedSuites: selectedEvalSuites,
+          modelGroups: selectedModelGroups.length > 0 ? selectedModelGroups : undefined,
+        })
+      );
     }
 
     if (

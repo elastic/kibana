@@ -63,7 +63,38 @@ if (raw) {
 }
 
 const cfg = parsed ?? {};
-process.stdout.write(Object.keys(cfg).join('\n'));
+
+const requestedRaw = process.env.EVAL_MODEL_GROUPS || '';
+const requested = requestedRaw
+  ? requestedRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  : [];
+
+const connectorEntries = Object.entries(cfg);
+const connectorIds =
+  requested.length === 0 || requested.includes('all')
+    ? connectorEntries.map(([id]) => id)
+    : connectorEntries
+        .filter(([id, connector]) => {
+          const defaultModel = connector?.config?.defaultModel;
+          return requested.includes(id) || (typeof defaultModel === 'string' && requested.includes(defaultModel));
+        })
+        .map(([id]) => id);
+
+if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
+  const availableModels = connectorEntries
+    .map(([, connector]) => connector?.config?.defaultModel)
+    .filter((m) => typeof m === 'string');
+  console.error(
+    `No connectors matched EVAL_MODEL_GROUPS="${requested.join(',')}". ` +
+      `Available models: ${availableModels.join(',')}`
+  );
+  process.exit(1);
+}
+
+process.stdout.write(connectorIds.join('\n'));
 NODE
     )"
 
