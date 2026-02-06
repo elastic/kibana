@@ -36,8 +36,6 @@ import { createChromeStyleState, type ChromeStyleState } from './chrome_style_st
 import { createBodyClassesState } from './body_classes_state';
 import { createFeedbackState, type FeedbackState, type FeedbackStateDeps } from './feedback_state';
 
-export type { VisibilityState } from './visibility_state';
-export type { ChromeStyleState } from './chrome_style_state';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 
 export interface ChromeState {
