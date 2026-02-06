@@ -7,7 +7,6 @@
 
 import gte from 'semver/functions/gte';
 import { i18n } from '@kbn/i18n';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type {
   NewPackagePolicy,
@@ -29,6 +28,7 @@ import type {
   GcpCloudConnectorCredentials,
   CloudConnectorCredentials,
   CloudProviders,
+  CloudSetupForCloudConnector,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
@@ -241,7 +241,7 @@ const getTemplateFieldNameByProvider = (provider: CloudProviders): string | unde
  * @param cloud - Cloud setup configuration
  * @returns Elastic Resource ID or undefined
  */
-export const getElasticResourceId = (cloud?: CloudSetup): string | undefined => {
+export const getElasticResourceId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
   if (!cloud) return undefined;
 
   // For serverless, use the project ID

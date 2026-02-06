@@ -14,7 +14,7 @@ import {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars, ORGANIZATION_ACCOUNT } from '../../../../common';
+import { extractRawCredentialVars } from '../../../../common';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
 import {
@@ -63,8 +63,6 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   setCredentials,
   accountType,
 }) => {
-  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
-
   const armTemplateUrl =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({

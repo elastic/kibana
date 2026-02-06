@@ -10,11 +10,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../../common';
 
 import type { UpdatePolicy, CloudConnectorCredentials } from '../types';
-import {
-  updateInputVarsWithCredentials,
-  isAzureCloudConnectorVars,
-  isGcpCloudConnectorVars,
-} from '../utils';
+import { updateInputVarsWithCredentials, isAzureCloudConnectorVars } from '../utils';
 
 import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
@@ -33,10 +29,6 @@ jest.mock('../utils', () => ({
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
   typeof isAzureCloudConnectorVars
 >;
-const mockIsGcpCloudConnectorVars = isGcpCloudConnectorVars as jest.MockedFunction<
-  typeof isGcpCloudConnectorVars
->;
-
 // Mock PackageInfo for testing
 const mockPackageInfo: PackageInfo = {
   name: 'cloud_security_posture',
