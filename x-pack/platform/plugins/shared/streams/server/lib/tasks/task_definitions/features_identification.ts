@@ -80,7 +80,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({
-                    stream,
+                    streamName: stream.name,
                     sampleDocuments,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
