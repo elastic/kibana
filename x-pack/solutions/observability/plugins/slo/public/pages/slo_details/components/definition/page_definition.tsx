@@ -10,7 +10,7 @@ import React from 'react';
 import { DashboardsPanel } from './dashboards_panel';
 import { IndicatorPanel } from './indicator_panel';
 import { SettingsPanel } from './settings_panel';
-import type { SloDetailsDefinitionProps } from '.';
+import type { SloDetailsDefinitionProps } from './types';
 
 export function SloDetailsPageDefinition({ slo }: SloDetailsDefinitionProps) {
   return (
