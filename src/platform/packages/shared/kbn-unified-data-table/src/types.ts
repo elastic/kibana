@@ -8,6 +8,7 @@
  */
 
 import type { FunctionComponent } from 'react';
+import type { MutableRefObject } from 'react';
 import type {
   EuiContextMenuItem,
   EuiDataGridCellValueElementProps,
@@ -84,8 +85,7 @@ export type DataGridScrollOverrides = Pick<EuiDataGridRefProps, 'scrollToItem' |
  * Context object passed to the second argument of renderCustomGridBody.
  * Allows custom grid body implementations to integrate with UnifiedDataTable features.
  */
-export interface CustomGridBodyContext
-  extends Pick<EuiDataGridToolbarProps, 'renderCustomToolbar'> {
+export interface CustomGridBodyContext {
   /**
    * A mutable ref that custom grid body implementations can use to provide
    * their own scroll functions. These will override the default EUI data grid
@@ -105,4 +105,12 @@ export interface CustomGridBodyContext
    * ```
    */
   provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => void;
+  /**
+   * Ref holding the rendered grid toolbar by the grid.
+   * Populated when EUI renders the toolbar. Custom grid bodies (e.g. sticky headers) can
+   * use this to render the same toolbar with the same control elements.
+   */
+  renderedGridToolbarRef: MutableRefObject<ReturnType<
+    NonNullable<EuiDataGridToolbarProps['renderCustomToolbar']>
+  > | null>;
 }

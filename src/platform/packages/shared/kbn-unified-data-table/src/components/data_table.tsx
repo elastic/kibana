@@ -1160,11 +1160,13 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
     ]);
 
+    const renderedGridToolbarRef = useRef<React.ReactElement | null>(null);
+
     const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar']>(
       () =>
         renderCustomToolbar
-          ? (toolbarProps) =>
-              renderCustomToolbar({
+          ? (toolbarProps) => {
+              return (renderedGridToolbarRef.current = renderCustomToolbar({
                 toolbarProps,
                 gridProps: {
                   additionalControls:
@@ -1173,7 +1175,8 @@ const InternalUnifiedDataTable = React.forwardRef<
                       : additionalControls,
                   inTableSearchControl,
                 },
-              })
+              }));
+            }
           : undefined,
       [renderCustomToolbar, additionalControls, inTableSearchControl]
     );
@@ -1185,14 +1188,14 @@ const InternalUnifiedDataTable = React.forwardRef<
       // to the data table in a way that's accessible within the custom grid body
       return (euiCustomGridBodyProps: EuiDataGridCustomBodyProps) => {
         return renderCustomGridBody(euiCustomGridBodyProps, {
-          renderCustomToolbar: renderCustomToolbarFn,
+          renderedGridToolbarRef,
           provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => {
             if (!dataGridRef.current) return;
             Object.assign(dataGridRef.current, overrides);
           },
         });
       };
-    }, [renderCustomGridBody, renderCustomToolbarFn]);
+    }, [renderCustomGridBody, renderedGridToolbarRef]);
 
     const showDisplaySelector = useMemo(():
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions

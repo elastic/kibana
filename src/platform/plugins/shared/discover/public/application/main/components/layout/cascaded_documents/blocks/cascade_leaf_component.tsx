@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
+import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -66,13 +66,6 @@ interface CustomCascadeGridBodyProps
 
 const EMPTY_SORT: SortOrder[] = [];
 
-/**
- * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
- * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
- *
- * Key optimizations:
- * - Fixed row heights prevent measurement-triggered recalculations
- */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
   initialOffset,
@@ -86,7 +79,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   headerRow,
   footerRow,
   stickyHeaderExtensionPoint,
-  renderCustomToolbar,
+  renderedGridToolbarRef,
   provideDataGridRefOverrides,
 }: CustomCascadeGridBodyProps) {
   const { euiTheme } = useEuiTheme();
@@ -186,56 +179,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
         stickyHeaderExtensionPoint.extensionPointRef.current
           ? createPortal(
               <div css={customCascadeGridBodyStyle.stickyHeaderExtensionPointWrapper}>
-                <div>
-                  {renderCustomToolbar?.({
-                    hasRoomForGridControls: false,
-                    fullScreenControl: (
-                      <EuiButtonIcon
-                        size="s"
-                        color="text"
-                        iconType="fullScreen"
-                        aria-label="Full Screen"
-                        css={{ height: '100%' }}
-                      />
-                    ),
-                    keyboardShortcutsControl: (
-                      <EuiButtonIcon
-                        size="s"
-                        color="text"
-                        iconType="keyboard"
-                        aria-label="Keyboard Shortcuts"
-                        css={{ height: '100%' }}
-                      />
-                    ),
-                    displayControl: (
-                      <EuiButtonIcon
-                        size="s"
-                        color="text"
-                        iconType="controls"
-                        aria-label="Display Options"
-                        css={{ height: '100%' }}
-                      />
-                    ),
-                    columnControl: (
-                      <EuiButtonIcon
-                        size="s"
-                        color="text"
-                        iconType="column"
-                        aria-label="Column Options"
-                        css={{ height: '100%' }}
-                      />
-                    ),
-                    columnSortingControl: (
-                      <EuiButtonIcon
-                        size="s"
-                        color="text"
-                        iconType="columnSorting"
-                        aria-label="Column Sorting Options"
-                        css={{ height: '100%' }}
-                      />
-                    ),
-                  })}
-                </div>
+                <div>{renderedGridToolbarRef.current}</div>
                 <>{headerRow}</>
               </div>,
               stickyHeaderExtensionPoint.extensionPointRef.current
@@ -243,7 +187,12 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
           : headerRow}
       </>
     );
-  }, [stickyHeaderExtensionPoint, renderCustomToolbar, headerRow, customCascadeGridBodyStyle]);
+  }, [
+    stickyHeaderExtensionPoint,
+    customCascadeGridBodyStyle.stickyHeaderExtensionPointWrapper,
+    renderedGridToolbarRef,
+    headerRow,
+  ]);
 
   return (
     <div
@@ -378,7 +327,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
           stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
-          renderCustomToolbar={context.renderCustomToolbar}
+          renderedGridToolbarRef={context.renderedGridToolbarRef}
           provideDataGridRefOverrides={context.provideDataGridRefOverrides}
         />
       ),

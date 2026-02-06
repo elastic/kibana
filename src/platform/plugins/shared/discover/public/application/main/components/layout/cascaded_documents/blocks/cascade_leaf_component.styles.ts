@@ -37,6 +37,10 @@ export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme'])
       border: 'none',
     },
 
+    '& .unifiedDataTableToolbarControlGroup': {
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    },
+
     '& .euiDataGridHeaderCell': {
       paddingLeft: euiTheme.size.xs,
     },
