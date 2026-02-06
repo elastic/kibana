@@ -47,10 +47,10 @@ export class MonitoringEntitySourceDataClient {
 
   public async update(update: PartialMonitoringEntitySource): Promise<MonitoringEntitySource> {
     this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
-
+    const isMatcherUpdate = update.matchers !== undefined;
     const sanitizedUpdate: PartialMonitoringEntitySource = {
       ...update,
-      matchersModifiedByUser: true,
+      ...(isMatcherUpdate ? { matchersModifiedByUser: true } : {}),
       matchers: update.matchers?.map((matcher: Matcher) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
