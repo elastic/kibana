@@ -45,7 +45,7 @@ import {
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { UserProfileData } from '../../common';
 import { IMAGE_FILE_TYPES } from '../../common/constants';
-import { canUserChangeDetails, canUserChangePassword } from '../../common/model';
+import { canUserChangeDetails, canUserChangePassword, getUserAvatarInitials, getUserAvatarColor } from '../../common/model';
 import type { AuthenticatedUser } from '../../../common';
 import { ChangePasswordModal } from '../management/users/edit_user/change_password_modal';
 import { useUserProfileForm } from '../account_management/user_profile/user_profile';
@@ -120,6 +120,81 @@ export const ProfileModal: FunctionComponent<ProfileModalProps> = ({
       onClose();
     }, 200);
   }, [formik, formChanges.count, onClose]);
+
+  // Get default values (as if opening deployment for first time)
+  const getDefaultValues = React.useCallback(() => {
+    return {
+      user: {
+        full_name: user.full_name || '',
+        email: user.email || '',
+      },
+      data: formik.values.data ? {
+        avatar: {
+          initials: getUserAvatarInitials(user),
+          color: getUserAvatarColor(user),
+          imageUrl: '',
+        },
+        userSettings: {
+          darkMode: 'space_default' as const,
+          contrastMode: 'system' as const,
+        },
+      } : undefined,
+      avatarType: 'initials' as const,
+    };
+  }, [formik.values.data, user]);
+
+  // Check if current state matches default state
+  const isDefaultState = React.useMemo(() => {
+    const defaultValues = getDefaultValues();
+    const currentValues = formik.values;
+
+    // Check user details
+    if (
+      currentValues.user.full_name !== defaultValues.user.full_name ||
+      currentValues.user.email !== defaultValues.user.email
+    ) {
+      return false;
+    }
+
+    // Check avatar type
+    if (currentValues.avatarType !== defaultValues.avatarType) {
+      return false;
+    }
+
+    // Check data if it exists
+    if (currentValues.data && defaultValues.data) {
+      // Check avatar
+      if (
+        currentValues.data.avatar.initials !== defaultValues.data.avatar.initials ||
+        currentValues.data.avatar.color !== defaultValues.data.avatar.color ||
+        currentValues.data.avatar.imageUrl !== defaultValues.data.avatar.imageUrl
+      ) {
+        return false;
+      }
+
+      // Check user settings
+      if (
+        currentValues.data.userSettings.darkMode !== defaultValues.data.userSettings.darkMode ||
+        currentValues.data.userSettings.contrastMode !== defaultValues.data.userSettings.contrastMode
+      ) {
+        return false;
+      }
+    } else if (currentValues.data !== defaultValues.data) {
+      // One has data and the other doesn't
+      return false;
+    }
+
+    return true;
+  }, [formik.values, getDefaultValues]);
+
+  // Handle reset - reset to default settings (as if opening deployment for first time)
+  const handleReset = React.useCallback(() => {
+    const defaultValues = getDefaultValues();
+    
+    // Reset formik values
+    formik.setValues(defaultValues);
+    formik.setTouched({});
+  }, [formik, getDefaultValues]);
 
   const isCloudUser = user.elastic_cloud_user;
   const isThemeOverridden = services.settings.client.isOverridden('theme:darkMode');
@@ -569,42 +644,48 @@ export const ProfileModal: FunctionComponent<ProfileModalProps> = ({
           border-top: ${euiTheme.border.thin};
         `}
       >
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {formChanges.count > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="success">
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.unsavedChangesMessage"
-                    defaultMessage="{count, plural, one {# unsaved change} other {# unsaved changes}}"
-                    values={{ count: formChanges.count }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty 
-                  onClick={formik.handleReset} 
-                  color="text"
-                >
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.discardChangesButton"
-                    defaultMessage="Discard"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </>
-          )}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={handleApply}
-              fill
-              disabled={formChanges.count === 0}
+            <EuiButtonEmpty 
+              onClick={handleReset} 
+              color="danger"
+              iconType="refresh"
+              disabled={isDefaultState}
             >
               <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.applyChangesButton"
-                defaultMessage="Apply"
+                id="xpack.security.accountManagement.userProfile.resetButton"
+                defaultMessage="Reset"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+              {formChanges.count > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty 
+                    onClick={formik.handleReset} 
+                    color="text"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.userProfile.discardChangesButton"
+                      defaultMessage="Discard"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={handleApply}
+                  fill
+                  disabled={formChanges.count === 0}
+                >
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.applyChangesButton"
+                    defaultMessage="Apply"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

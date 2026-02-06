@@ -29,7 +29,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
 } from '@elastic/eui';
 import type { DropResult } from '@hello-pangea/dnd';
 import { css } from '@emotion/react';
@@ -303,12 +302,64 @@ export const SideNavCollapseButton: FC<Props> = ({
 
   const hasChanges = changeCount > 0;
 
-  // Handle discard - reset to initial state
+  // Get default state (as if opening deployment for first time)
+  const getDefaultState = useCallback(() => {
+    const defaultConfig = primaryItems.map((item: MenuItem) => ({
+      id: item.id,
+      label: item.label,
+      iconType: item.iconType,
+      visible: true, // All items visible by default
+      isLocked: isLocked(item.id),
+    }));
+
+    // Keep locked items first, then unlocked items in original order
+    const lockedItems = defaultConfig.filter((item) => item.isLocked);
+    const unlockedItems = defaultConfig.filter((item) => !item.isLocked);
+    const defaultNavItemsConfig = [...lockedItems, ...unlockedItems];
+
+    return {
+      showLabels: false, // Default is false (collapsed)
+      navItemsConfig: defaultNavItemsConfig,
+    };
+  }, [primaryItems, isLocked]);
+
+  // Check if current state matches default state
+  const isDefaultState = useMemo(() => {
+    const defaultState = getDefaultState();
+    
+    // Check showLabels
+    if (localShowLabels !== defaultState.showLabels) {
+      return false;
+    }
+    
+    // Check navItemsConfig order
+    const defaultOrder = defaultState.navItemsConfig.map((item) => item.id);
+    const currentOrder = navItemsConfig.map((item) => item.id);
+    if (JSON.stringify(defaultOrder) !== JSON.stringify(currentOrder)) {
+    }
+    
+    // Check visibility - all should be visible
+    const allVisible = navItemsConfig.every((item) => item.visible === true);
+    if (!allVisible) {
+      return false;
+    }
+    
+    return true;
+  }, [localShowLabels, navItemsConfig, getDefaultState]);
+
+  // Handle discard - reset to initial state (when modal was opened)
   const handleDiscard = useCallback(() => {
     if (!initialState) return;
     setLocalShowLabels(initialState.showLabels);
     setNavItemsConfig(initialState.navItemsConfig);
   }, [initialState]);
+
+  // Handle reset - reset to default state (as if opening deployment for first time)
+  const handleReset = useCallback(() => {
+    const defaultState = getDefaultState();
+    setNavItemsConfig(defaultState.navItemsConfig);
+    setLocalShowLabels(defaultState.showLabels);
+  }, [getDefaultState]);
 
   // Handle apply - save changes and close modal
   const handleApply = useCallback(() => {
@@ -513,42 +564,48 @@ export const SideNavCollapseButton: FC<Props> = ({
               border-top: ${euiTheme.border.thin};
             `}
           >
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              {hasChanges && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="success">
-                      <FormattedMessage
-                        id="core.ui.chrome.sideNavigation.unsavedChangesMessage"
-                        defaultMessage="{count, plural, one {# unsaved change} other {# unsaved changes}}"
-                        values={{ count: changeCount }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty 
-                      onClick={handleDiscard} 
-                      color="text"
-                    >
-                      <FormattedMessage
-                        id="core.ui.chrome.sideNavigation.discardChangesButton"
-                        defaultMessage="Discard"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </>
-              )}
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={handleApply}
-                  fill
-                  disabled={!hasChanges}
+                <EuiButtonEmpty 
+                  onClick={handleReset} 
+                  color="danger"
+                  iconType="refresh"
+                  disabled={isDefaultState}
                 >
                   <FormattedMessage
-                    id="core.ui.chrome.sideNavigation.applyChangesButton"
-                    defaultMessage="Apply"
+                    id="core.ui.chrome.sideNavigation.resetButton"
+                    defaultMessage="Reset"
                   />
-                </EuiButton>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+                  {hasChanges && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty 
+                        onClick={handleDiscard} 
+                        color="text"
+                      >
+                        <FormattedMessage
+                          id="core.ui.chrome.sideNavigation.discardChangesButton"
+                          defaultMessage="Discard"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={handleApply}
+                      fill
+                      disabled={!hasChanges}
+                    >
+                      <FormattedMessage
+                        id="core.ui.chrome.sideNavigation.applyChangesButton"
+                        defaultMessage="Apply"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
