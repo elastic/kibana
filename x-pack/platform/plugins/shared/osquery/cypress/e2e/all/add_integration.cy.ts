@@ -19,7 +19,6 @@ import {
   cleanupSavedQuery,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
 import {
   createOldOsqueryPath,
   FLEET_AGENT_POLICIES,
