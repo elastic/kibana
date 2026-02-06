@@ -102,7 +102,9 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         hasShadow={false}
         paddingSize="m"
         css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
-        data-test-subj="workflowStepExecutionDetails"
+        data-test-subj={
+          isTriggerPseudoStep ? 'workflowExecutionTrigger' : 'workflowStepExecutionDetails'
+        }
       >
         <EuiFlexGroup
           direction="column"

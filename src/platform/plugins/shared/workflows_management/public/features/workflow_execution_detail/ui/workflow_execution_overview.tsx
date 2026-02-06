@@ -59,6 +59,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
         hasShadow={false}
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
+        data-test-subj="workflowExecutionOverview"
       >
         <EuiFlexGroup
           direction="column"
@@ -76,7 +77,9 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <h3>{getStatusLabel(stepExecution.status)}</h3>
+                          <h3 data-test-subj="workflowExecutionStatus">
+                            {getStatusLabel(stepExecution.status)}
+                          </h3>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
