@@ -73,9 +73,10 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem
-  const fsTools = getStoreTools({ filestore });
-  const convertedFsTools = fsTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+  // create tools for filesystem (only if feature is enabled)
+  const convertedFsTools = experimentalFeatures.filestore
+    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
+    : [];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -88,7 +89,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...staticRegistryTools,
-    ...(experimentalFeatures.filestore ? convertedFsTools : []),
+    ...convertedFsTools,
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();
