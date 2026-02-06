@@ -139,15 +139,15 @@ function podNodeColumns(
     },
     {
       name: i18n.translate(
-        'xpack.metricsData.metricsTable.pod.averageMemoryUsageMegabytesColumnHeader',
+        'xpack.metricsData.metricsTable.pod.averageMemoryUsagePercentColumnHeader',
         {
           defaultMessage: 'Memory usage (avg.)',
         }
       ),
-      field: 'averageMemoryUsageMegabytes',
+      field: 'averageMemoryUsagePercent',
       align: 'right',
-      render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit=" MB" />
+      render: (averageMemoryUsagePercent: number) => (
+        <NumberCell value={averageMemoryUsagePercent} unit="%" />
       ),
     },
   ];

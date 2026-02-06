@@ -39,21 +39,19 @@ const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = 
   },
 };
 
-type ContainerMetricsFieldsOtel =
-  | 'metrics.k8s.container.cpu_limit_utilization'
-  | 'metrics.k8s.container.memory_limit_utilization';
+type ContainerMetricsFieldsOtel = 'metrics.container.cpu.usage' | 'metrics.container.memory.usage';
 
 const containerMetricsQueryConfigOtel: MetricsQueryOptions<ContainerMetricsFieldsOtel> = {
   sourceFilter: '',
   groupByField: 'container.id',
   metricsMap: {
-    'metrics.k8s.container.cpu_limit_utilization': {
+    'metrics.container.cpu.usage': {
       aggregation: 'avg',
-      field: 'metrics.k8s.container.cpu_limit_utilization',
+      field: 'metrics.container.cpu.usage',
     },
-    'metrics.k8s.container.memory_limit_utilization': {
+    'metrics.container.memory.usage': {
       aggregation: 'avg',
-      field: 'metrics.k8s.container.memory_limit_utilization',
+      field: 'metrics.container.memory.usage',
     },
   },
 };
