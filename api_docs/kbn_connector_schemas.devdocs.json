@@ -32,7 +32,7 @@
         "signature": [
           "\".bedrock\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/bedrock/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/bedrock/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -49,7 +49,7 @@
         "signature": [
           "\".cases-webhook\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/cases_webhook/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/cases_webhook/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -66,7 +66,7 @@
         "signature": [
           "\".crowdstrike\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/crowdstrike/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/crowdstrike/constants.ts",
         "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
@@ -83,7 +83,7 @@
         "signature": [
           "\".d3security\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/d3security/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/d3security/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -100,7 +100,7 @@
         "signature": [
           "\".email\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/email/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/email/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -117,7 +117,7 @@
         "signature": [
           "\".index\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/es_index/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/es_index/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -134,7 +134,7 @@
         "signature": [
           "\".gemini\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/gemini/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/gemini/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -151,7 +151,7 @@
         "signature": [
           "\".inference\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/inference/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/inference/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -168,7 +168,7 @@
         "signature": [
           "\".jira\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/jira/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/jira/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -185,7 +185,7 @@
         "signature": [
           "\".jira-service-management\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/jira-service-management/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -202,7 +202,7 @@
         "signature": [
           "\".mcp\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/mcp/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/mcp/constants.ts",
         "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
@@ -219,7 +219,7 @@
         "signature": [
           "\".microsoft_defender_endpoint\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/microsoft_defender_endpoint/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -236,7 +236,7 @@
         "signature": [
           "\".gen-ai\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/openai/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/openai/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -253,7 +253,7 @@
         "signature": [
           "\".opsgenie\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/opsgenie/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/opsgenie/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -270,7 +270,7 @@
         "signature": [
           "\".pagerduty\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/pagerduty/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/pagerduty/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -287,7 +287,7 @@
         "signature": [
           "\".resilient\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/resilient/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/resilient/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -304,7 +304,7 @@
         "signature": [
           "\".sentinelone\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/sentinelone/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/sentinelone/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -321,7 +321,7 @@
         "signature": [
           "\".server-log\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/server_log/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/server_log/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -338,7 +338,7 @@
         "signature": [
           "\".servicenow-itom\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itom/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/servicenow_itom/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -355,7 +355,7 @@
         "signature": [
           "\".servicenow\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itsm/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/servicenow_itsm/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -372,7 +372,7 @@
         "signature": [
           "\".servicenow-sir\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_sir/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/servicenow_sir/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -389,7 +389,7 @@
         "signature": [
           "\".slack\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/slack/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/slack/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -406,7 +406,7 @@
         "signature": [
           "\".slack_api\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/slack_api/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/slack_api/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -423,7 +423,7 @@
         "signature": [
           "\".swimlane\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/swimlane/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/swimlane/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -440,7 +440,7 @@
         "signature": [
           "\".teams\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/teams/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/teams/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -457,7 +457,7 @@
         "signature": [
           "\".thehive\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/thehive/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/thehive/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -474,7 +474,7 @@
         "signature": [
           "\".tines\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/tines/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/tines/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -491,7 +491,7 @@
         "signature": [
           "\".torq\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/torq/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/torq/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -508,7 +508,7 @@
         "signature": [
           "\".webhook\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/webhook/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/webhook/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -525,7 +525,7 @@
         "signature": [
           "\".xmatters\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/xmatters/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/xmatters/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -542,7 +542,7 @@
         "signature": [
           "\".xsoar\""
         ],
-        "path": "src/platform/packages/shared/kbn-connector-schemas/xsoar/constants.ts",
+        "path": "src/platform/packages/shared/kbn_connector_schemas/xsoar/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,

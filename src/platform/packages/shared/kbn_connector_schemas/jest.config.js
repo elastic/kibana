@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-connector-schemas'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn_connector_schemas'],
 };

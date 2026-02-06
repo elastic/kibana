@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-connector-schemas
+    sourceRoot: src/platform/packages/shared/kbn_connector_schemas
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/zod'

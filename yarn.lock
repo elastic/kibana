@@ -5185,7 +5185,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/connector-schemas@link:src/platform/packages/shared/kbn-connector-schemas":
+"@kbn/connector-schemas@link:src/platform/packages/shared/kbn_connector_schemas":
   version "0.0.0"
   uid ""
 

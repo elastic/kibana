@@ -10,8 +10,8 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * These schemas were copied from Zod v3 schemas in src/platform/packages/shared/kbn-connector-schemas/mcp/schemas/v1.ts
- * and will be deprecated once kbn-connector-schemas will switch to Zod v4 or
+ * These schemas were copied from Zod v3 schemas in src/platform/packages/shared/kbn_connector_schemas/mcp/schemas/v1.ts
+ * and will be deprecated once kbn_connector_schemas will switch to Zod v4 or
  * the MCP connector will be refactored as a single-file connector.
  */
 
