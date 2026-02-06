@@ -36,6 +36,7 @@ import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
+import { buildResourceBrowserCommandArgs } from './autocomplete_utils';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
@@ -292,25 +293,18 @@ async function getSuggestionsWithinCommandExpression(
   const isSourceCommand = commandName === 'from' || commandName === 'ts';
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
   if (isSourceCommand && callbacks?.isResourceBrowserEnabled && !isInsideSubquery) {
+    // Limit the number of items and payload size to avoid performance issues
     const { rangeToReplace, filterText } =
       suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
     const insertText = rangeToReplace
       ? fullText.substring(rangeToReplace.start, rangeToReplace.end)
       : '';
-    const commandArgs: Record<string, string> = {};
-    if (context.sources) {
-      commandArgs.sources = JSON.stringify(context.sources);
-    }
-    if (context.timeSeriesSources) {
-      commandArgs.timeSeriesSources = JSON.stringify(context.timeSeriesSources);
-    }
+    const commandArgs = buildResourceBrowserCommandArgs({
+      sources: context.sources,
+      timeSeriesSources: context.timeSeriesSources,
+    });
     suggestions.unshift(
-      createIndicesBrowserSuggestion(
-        rangeToReplace,
-        filterText,
-        insertText,
-        Object.keys(commandArgs).length ? commandArgs : undefined
-      )
+      createIndicesBrowserSuggestion(rangeToReplace, filterText, insertText, commandArgs)
     );
   }
 
