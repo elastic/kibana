@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         securitySolutionRulesV1: 0,
         securitySolutionRulesV2: 0,
         securitySolutionRulesV3: 0,
+        securitySolutionRulesV4: 0,
         securitySolutionAlertsV1: 0,
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,

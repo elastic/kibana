@@ -397,6 +397,24 @@ describe('DetectionRulesClient.patchRule', () => {
   });
 
   describe('RBAC', () => {
+    beforeEach(() => {
+      actionsClient = {
+        isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+      } as unknown as jest.Mocked<ActionsClient>;
+
+      rulesClient = rulesClientMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      detectionRulesClient = createDetectionRulesClient({
+        actionsClient,
+        rulesClient,
+        mlAuthz,
+        rulesAuthz: { ...getMockRulesAuthz(), canEditRules: false },
+        savedObjectsClient,
+        license: licenseMock.createLicenseMock(),
+        productFeaturesService: createProductFeaturesServiceMock(),
+      });
+    });
+
     it('calls the bulkEditRuleParamsWithReadAuth method when all fields are valid fields', async () => {
       // Mock the existing rule
       const existingRule = getRulesSchemaMock();
