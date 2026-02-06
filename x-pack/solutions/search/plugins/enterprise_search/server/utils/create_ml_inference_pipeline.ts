@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { AttachMlInferencePipelineResponse } from '../../common/types/pipelines';
+import type {
+  AttachMlInferencePipelineResponse,
+  IngestPipelineWithManagedFields,
+} from '../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_utils';
 
@@ -27,7 +29,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // Fetch the parent pipeline
-  let parentPipeline: IngestPipeline | undefined;
+  let parentPipeline: IngestPipelineWithManagedFields | undefined;
   try {
     const pipelineResponse = await esClient.ingest.getPipeline({
       id: parentPipelineId,
@@ -65,9 +67,18 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     },
   });
 
+  // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+  const {
+    created_date: _createdDate,
+    created_date_millis: _createdDateMillis,
+    modified_date: _modifiedDate,
+    modified_date_millis: _modifiedDateMillis,
+    ...pipelineWithoutManagedFields
+  } = parentPipeline;
+
   await esClient.ingest.putPipeline({
     id: parentPipelineId,
-    ...parentPipeline,
+    ...pipelineWithoutManagedFields,
   });
 
   return Promise.resolve({

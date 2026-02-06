@@ -63,6 +63,47 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
     });
   });
 
+  it('should strip system-managed date fields before updating the parent pipeline', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve({
+        [parentPipelineId]: {
+          description: 'Parent ML inference pipeline',
+          processors: [],
+          created_date: '2025-01-01T12:00:00.000Z',
+          created_date_millis: 1704110400000,
+          modified_date: '2025-01-15T12:00:00.000Z',
+          modified_date_millis: 1705320000000,
+        },
+      })
+    );
+
+    await addSubPipelineToIndexSpecificMlPipeline(
+      indexName,
+      pipelineName,
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    // Verify the system-managed fields are NOT included in the PUT request
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith({
+      id: parentPipelineId,
+      description: 'Parent ML inference pipeline',
+      processors: expect.arrayContaining([
+        {
+          pipeline: {
+            name: pipelineName,
+          },
+        },
+      ]),
+    });
+
+    // Verify the managed fields are NOT in the call
+    const putPipelineCall = mockClient.ingest.putPipeline.mock.calls[0][0];
+    expect(putPipelineCall).not.toHaveProperty('created_date');
+    expect(putPipelineCall).not.toHaveProperty('created_date_millis');
+    expect(putPipelineCall).not.toHaveProperty('modified_date');
+    expect(putPipelineCall).not.toHaveProperty('modified_date_millis');
+  });
+
   it('should not add the sub-pipeline reference to the parent ML pipeline if the parent is missing', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
 
