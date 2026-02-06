@@ -11,7 +11,7 @@ import React, { useState, useMemo, useEffect, useCallback, type ReactNode } from
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useIsWithinBreakpoints } from '@elastic/eui';
+import { useIsWithinBreakpoints, EuiButton, useEuiTheme } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -111,6 +111,7 @@ export const Navigation = ({
   userMenu,
   ...rest
 }: NavigationProps) => {
+  const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
   const popoverItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-popoverItem`;
@@ -395,38 +396,88 @@ export const Navigation = ({
                         onToggleSecondaryPanel={onSetShowSecondaryPanel}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
-                          <SideNav.NestedSecondaryMenu.Section>
-                            {overflowMenuItems.map((item, index) => {
-                              const hasSubmenu = getHasSubmenu(item);
-                              const { sections, ...itemProps } = item;
-                              const isFirstItem = index === 0;
-                              const ariaDescribedBy =
-                                [
-                                  isFirstItem && panelNavigationInstructionsId,
-                                  hasSubmenu && panelEnterSubmenuInstructionsId,
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ') || undefined;
-                              return (
-                                <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                  key={item.id}
-                                  aria-describedby={ariaDescribedBy}
-                                  isHighlighted={item.id === visuallyActivePageId}
-                                  hasSubmenu={hasSubmenu}
-                                  onClick={() => {
-                                    onItemClick?.(item);
-                                    if (!hasSubmenu) {
-                                      closePopover();
-                                      focusMainContent();
+                          <>
+                            <div
+                              css={css`
+                                // Remove divider after this section
+                                div[role='group'] {
+                                  &::after {
+                                    display: none !important;
+                                  }
+                                  border-bottom: none !important;
+                                }
+                              `}
+                            >
+                              <SideNav.NestedSecondaryMenu.Section>
+                                {overflowMenuItems.map((item, index) => {
+                                  const hasSubmenu = getHasSubmenu(item);
+                                  const { sections, ...itemProps } = item;
+                                  const isFirstItem = index === 0;
+                                  const ariaDescribedBy =
+                                    [
+                                      isFirstItem && panelNavigationInstructionsId,
+                                      hasSubmenu && panelEnterSubmenuInstructionsId,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(' ') || undefined;
+                                  return (
+                                    <SideNav.NestedSecondaryMenu.PrimaryMenuItem
+                                      key={item.id}
+                                      aria-describedby={ariaDescribedBy}
+                                      isHighlighted={item.id === visuallyActivePageId}
+                                      hasSubmenu={hasSubmenu}
+                                      onClick={() => {
+                                        onItemClick?.(item);
+                                        if (!hasSubmenu) {
+                                          closePopover();
+                                          focusMainContent();
+                                        }
+                                      }}
+                                      {...itemProps}
+                                    >
+                                      {item.label}
+                                    </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
+                                  );
+                                })}
+                              </SideNav.NestedSecondaryMenu.Section>
+                            </div>
+                            <div
+                              css={css`
+                                padding: 0 ${euiTheme.size.m} 12px;
+                              `}
+                            >
+                              <EuiButton
+                                iconType="brush"
+                                color="text"
+                                size="s"
+                                fullWidth
+                                onClick={() => {
+                                  closePopover();
+                                  // Use requestAnimationFrame to ensure DOM is ready, then try multiple approaches
+                                  requestAnimationFrame(() => {
+                                    // First try: call global function directly
+                                    if (typeof (window as any).__openNavigationPreferencesModal === 'function') {
+                                      try {
+                                        (window as any).__openNavigationPreferencesModal();
+                                        return;
+                                      } catch (e) {
+                                        // If direct call fails, try event
+                                      }
                                     }
-                                  }}
-                                  {...itemProps}
-                                >
-                                  {item.label}
-                                </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                              );
-                            })}
-                          </SideNav.NestedSecondaryMenu.Section>
+                                    // Fallback: dispatch custom event
+                                    const event = new CustomEvent('openNavigationPreferencesModal', { bubbles: true });
+                                    window.dispatchEvent(event);
+                                    document.dispatchEvent(event);
+                                  });
+                                }}
+                                data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-navigationPreferencesButton`}
+                              >
+                                {i18n.translate('core.ui.chrome.sideNavigation.navigationPreferencesLabel', {
+                                  defaultMessage: 'Navigation preferences',
+                                })}
+                              </EuiButton>
+                            </div>
+                          </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {overflowMenuItems.filter(getHasSubmenu).map((item) => (
