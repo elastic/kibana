@@ -106,6 +106,7 @@
     "@xstate5/react/**/xstate": "5.19.2",
     "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "3.3.3",
+    "lodash": "4.17.23",
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
@@ -1305,7 +1306,7 @@
     "langsmith": "0.3.72",
     "launchdarkly-js-client-sdk": "3.8.1",
     "load-json-file": "6.2.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "lru-cache": "11.2.4",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
@@ -1402,7 +1403,7 @@
     "suricata-sid-db": "1.0.2",
     "swr": "2.3.3",
     "symbol-observable": "4.0.0",
-    "tar": "7.5.4",
+    "tar": "7.5.7",
     "textarea-caret": "3.1.0",
     "tree-dump": "1.0.3",
     "ts-easing": "0.2.0",
