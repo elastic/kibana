@@ -9,6 +9,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
+import {
+  AgentBuilderErrorCode,
+  createAgentBuilderError,
+  type SerializedAgentBuilderError,
+} from '@kbn/agent-builder-common';
 import { AgentBuilderAuditAction } from './audit_events';
 import { AuditLogService } from './audit_log_service';
 
@@ -260,7 +265,7 @@ describe('AuditLogService', () => {
           toolId: 'n.t1',
           mcpToolName: 't1',
           success: false,
-          reason: { error: { message: 'bad' } },
+          reason: createAgentBuilderError(AgentBuilderErrorCode.badRequest, 'bad').toJSON(),
         },
       ],
     });
@@ -280,8 +285,12 @@ describe('AuditLogService', () => {
     const request = {} as KibanaRequest;
     const logToolCreatedSpy = jest.spyOn(service, 'logToolCreated').mockImplementation(() => {});
 
+    // This should be a SerializedAgentBuilderError, but we intentionally simulate a malformed
+    // runtime payload to verify the fallback behavior.
+    const malformedReason = { foo: 'bar' } as unknown as SerializedAgentBuilderError;
+
     service.logBulkCreateMcpToolResults(request, {
-      results: [{ toolId: 'n.t1', mcpToolName: 't1', success: false, reason: { foo: 'bar' } }],
+      results: [{ toolId: 'n.t1', mcpToolName: 't1', success: false, reason: malformedReason }],
     });
 
     expect(logToolCreatedSpy).toHaveBeenCalledWith(
