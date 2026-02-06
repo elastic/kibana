@@ -63,21 +63,33 @@ describe('ResourceInitializer', () => {
 
     await initializer.initialize();
 
-    expect(esClient.ilm.putLifecycle).toHaveBeenCalled();
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
-    expect(esClient.indices.createDataStream).toHaveBeenCalled();
+    expect(esClient.ilm.putLifecycle).toHaveBeenCalledWith({
+      name: resourceDefinition.ilmPolicy.name,
+      policy: resourceDefinition.ilmPolicy.policy,
+    });
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: resourceDefinition.dataStreamName,
+      })
+    );
+    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      name: resourceDefinition.dataStreamName,
+    });
   });
 
-  it('re-throws 409 errors when creating the data stream', async () => {
+  it('ignores 409 errors when creating the data stream', async () => {
     esClient.indices.createDataStream.mockRejectedValueOnce(
       new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
     );
 
     const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
-    await expect(initializer.initialize()).rejects.toThrow();
+    await expect(initializer.initialize()).resolves.toBeUndefined();
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      `Data stream already exists: ${resourceDefinition.dataStreamName}.`
+    );
   });
 
-  it('ignores 400 errors when creating the data stream', async () => {
+  it('ignores 400 errors of type resource_already_exists_exceptionwhen creating the data stream', async () => {
     esClient.indices.createDataStream.mockRejectedValueOnce(
       new errors.ResponseError({
         statusCode: 400,

@@ -10,6 +10,7 @@ import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
+import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 
@@ -40,22 +41,41 @@ export class ResourceInitializer implements IResourceInitializer {
 
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
+      hidden: true,
       version: 1,
       template: {
         aliases: {},
+        priority: 500,
         mappings: this.resourceDefinition.mappings,
         settings: {
           'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
+        _meta: {
+          managed: true,
+          description: `${this.resourceDefinition.dataStreamName} index template`,
+        },
       },
     };
 
-    await DataStreamClient.initialize({
-      logger: this.logger,
-      dataStream: dataStreamDefinition,
-      elasticsearchClient: this.esClient,
-    });
+    try {
+      await DataStreamClient.initialize({
+        logger: this.logger,
+        dataStream: dataStreamDefinition,
+        elasticsearchClient: this.esClient,
+      });
+    } catch (error) {
+      if (!isResponseError(error)) {
+        throw error;
+      }
+
+      if (error.statusCode === 409) {
+        this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+        return;
+      }
+
+      throw error;
+    }
   }
 }
