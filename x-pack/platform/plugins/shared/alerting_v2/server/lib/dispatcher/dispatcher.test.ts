@@ -9,7 +9,7 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
@@ -235,6 +235,236 @@ describe('DispatcherService', () => {
       expect(result.startedAt).toBeInstanceOf(Date);
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(1);
       expect(storageEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    // Based on agent/alerts-events-and-actions-dataset.md
+    it('dispatches correct fire/suppress actions across 5 rules with ack, unack, snooze, and deactivate suppressions', async () => {
+      // Dataset: 5 rules, 9 episodes total
+      // rule-001: single series, ack then unack → fire
+      // rule-002: single series, ack with no unack → suppress
+      // rule-003: two series (series-1 active, series-2 recovered + new episode) → all fire (no actions)
+      // rule-004: two series, both snoozed (null episode_id) → both suppress
+      // rule-005: two series, series-1 deactivated → suppress; series-2 no actions → fire
+      const alertEpisodes: AlertEpisode[] = [
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-001',
+          group_hash: 'rule-001-series-1',
+          episode_id: 'rule-001-series-1-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-002',
+          group_hash: 'rule-002-series-1',
+          episode_id: 'rule-002-series-1-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-003',
+          group_hash: 'rule-003-series-1',
+          episode_id: 'rule-003-series-1-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:05:00.000Z',
+          rule_id: 'rule-003',
+          group_hash: 'rule-003-series-2',
+          episode_id: 'rule-003-series-2-episode-1',
+          episode_status: 'inactive',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-003',
+          group_hash: 'rule-003-series-2',
+          episode_id: 'rule-003-series-2-episode-2',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-004',
+          group_hash: 'rule-004-series-1',
+          episode_id: 'rule-004-series-1-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-004',
+          group_hash: 'rule-004-series-2',
+          episode_id: 'rule-004-series-2-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-005',
+          group_hash: 'rule-005-series-1',
+          episode_id: 'rule-005-series-1-episode-1',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-27T16:15:00.000Z',
+          rule_id: 'rule-005',
+          group_hash: 'rule-005-series-2',
+          episode_id: 'rule-005-series-2-episode-1',
+          episode_status: 'active',
+        },
+      ];
+
+      // Suppression query results:
+      // - rule-001: ack at 16:03, then unack at 16:08 → should_suppress: false
+      // - rule-002: ack at 16:03, no unack → should_suppress: true
+      // - rule-003: no actions → no suppression records
+      // - rule-004: snoozed at 16:03 (null episode_id, applies to all) → should_suppress: true
+      // - rule-005 series-1: deactivated at 16:08 → should_suppress: true
+      // - rule-005 series-2: no actions → no suppression record
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-001',
+          group_hash: 'rule-001-series-1',
+          episode_id: 'rule-001-series-1-episode-1',
+          should_suppress: false,
+        },
+        {
+          rule_id: 'rule-002',
+          group_hash: 'rule-002-series-1',
+          episode_id: 'rule-002-series-1-episode-1',
+          should_suppress: true,
+        },
+        {
+          rule_id: 'rule-004',
+          group_hash: 'rule-004-series-1',
+          episode_id: null,
+          should_suppress: true,
+        },
+        {
+          rule_id: 'rule-004',
+          group_hash: 'rule-004-series-2',
+          episode_id: null,
+          should_suppress: true,
+        },
+        {
+          rule_id: 'rule-005',
+          group_hash: 'rule-005-series-1',
+          episode_id: 'rule-005-series-1-episode-1',
+          should_suppress: true,
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: Array.from({ length: 9 }, (_, i) => ({
+          create: { _id: String(i + 1), status: 201 },
+        })),
+        errors: false,
+      } as BulkResponse);
+
+      const result = await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-25T00:00:00.000Z'),
+      });
+
+      expect(result.startedAt).toBeInstanceOf(Date);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(2);
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+      expect(docs).toHaveLength(9);
+
+      // 5 fire, 4 suppress
+      const fireActions = docs.filter((doc) => doc.action_type === 'fire');
+      const suppressActions = docs.filter((doc) => doc.action_type === 'suppress');
+      expect(fireActions).toHaveLength(5);
+      expect(suppressActions).toHaveLength(4);
+
+      // rule-001: fire (ack then unack cancels suppression)
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-001',
+            group_hash: 'rule-001-series-1',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'fire',
+            actor: 'system',
+            source: 'internal',
+          }),
+        ])
+      );
+
+      // rule-002: suppress (ack with no unack)
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-002',
+            group_hash: 'rule-002-series-1',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'suppress',
+          }),
+        ])
+      );
+
+      // rule-003: all fire (no actions exist)
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-003',
+            group_hash: 'rule-003-series-1',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'fire',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-003',
+            group_hash: 'rule-003-series-2',
+            last_series_event_timestamp: '2026-01-27T16:05:00.000Z',
+            action_type: 'fire',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-003',
+            group_hash: 'rule-003-series-2',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'fire',
+          }),
+        ])
+      );
+
+      // rule-004: both suppress (snoozed with null episode_id)
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-004',
+            group_hash: 'rule-004-series-1',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'suppress',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-004',
+            group_hash: 'rule-004-series-2',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'suppress',
+          }),
+        ])
+      );
+
+      // rule-005: series-1 suppress (deactivated), series-2 fire (no actions)
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            rule_id: 'rule-005',
+            group_hash: 'rule-005-series-1',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'suppress',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-005',
+            group_hash: 'rule-005-series-2',
+            last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
+            action_type: 'fire',
+          }),
+        ])
+      );
     });
   });
 });
