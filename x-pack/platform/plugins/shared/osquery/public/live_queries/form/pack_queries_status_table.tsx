@@ -437,6 +437,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       )}
       <EuiBasicTable
         css={euiBasicTableCss}
+        tableCaption={i18n.translate('xpack.osquery.pack.queriesTable.tableCaption', {
+          defaultMessage: 'Pack queries',
+        })}
         items={data ?? EMPTY_ARRAY}
         itemId={getItemId}
         columns={columns}

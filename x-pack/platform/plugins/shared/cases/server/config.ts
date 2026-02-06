@@ -25,6 +25,9 @@ export const ConfigSchema = schema.object({
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  markdownPlugins: schema.object({
+    lens: schema.boolean({ defaultValue: true }),
+  }),
   files: schema.object({
     allowedMimeTypes: schema.arrayOf(schema.string({ minLength: 1 }), {
       defaultValue: ALLOWED_MIME_TYPES,
@@ -51,9 +54,6 @@ export const ConfigSchema = schema.object({
       defaultValue: DEFAULT_TASK_START_DELAY_MINUTES,
       min: 1,
     }),
-  }),
-  markdownPlugins: schema.object({
-    lens: schema.boolean({ defaultValue: true }),
   }),
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
