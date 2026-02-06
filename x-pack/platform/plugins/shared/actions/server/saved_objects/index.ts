@@ -174,9 +174,6 @@ export function setupSavedObjects(
     attributesToIncludeInAAD: new Set([
       'state',
       'connectorId',
-      'redirectUri',
-      'authorizationUrl',
-      'scope',
       'createdAt',
       'expiresAt',
       'createdBy',
