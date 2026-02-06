@@ -10,6 +10,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
@@ -52,6 +53,7 @@ export interface CreateScopedRunnerDeps {
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;

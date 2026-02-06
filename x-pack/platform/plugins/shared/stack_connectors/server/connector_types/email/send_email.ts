@@ -59,6 +59,7 @@ export interface Routing {
   to: string[];
   cc: string[];
   bcc: string[];
+  replyTo?: string[];
 }
 
 export interface Content {
@@ -78,7 +79,6 @@ export async function sendEmail(
   const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
-
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
     return await sendEmailWithExchange(
       logger,
@@ -176,7 +176,8 @@ async function sendEmailWithNodemailer(
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
-  const { from, to, cc, bcc } = routing;
+  const { from, to, cc, bcc, replyTo } = routing;
+
   const { subject, message } = content;
 
   const email = {
@@ -185,6 +186,7 @@ async function sendEmailWithNodemailer(
     to,
     cc,
     bcc,
+    ...(replyTo && replyTo.length ? { replyTo } : {}),
     // email content
     subject,
     html: messageHTML,
@@ -232,7 +234,6 @@ function getTransportConfig(
   hasAuth: boolean
 ) {
   const { service, host, port, secure, user, password } = transport;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();

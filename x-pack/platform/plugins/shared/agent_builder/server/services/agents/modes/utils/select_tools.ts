@@ -21,8 +21,9 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { getStoreTools, FILESTORE_ENABLED } from '../../../runner/store';
+import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
@@ -36,6 +37,7 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
+  experimentalFeatures,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -47,6 +49,7 @@ export const selectTools = async ({
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -70,9 +73,10 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem
-  const fsTools = getStoreTools({ filestore });
-  const convertedFsTools = fsTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+  // create tools for filesystem (only if feature is enabled)
+  const filestoreTools = experimentalFeatures.filestore
+    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
+    : [];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -85,7 +89,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...staticRegistryTools,
-    ...(FILESTORE_ENABLED ? convertedFsTools : []),
+    ...filestoreTools,
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();

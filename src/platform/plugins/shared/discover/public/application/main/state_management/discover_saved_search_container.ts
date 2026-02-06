@@ -9,10 +9,7 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './redux';
@@ -75,18 +72,6 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current state of the saved search with new time range and refresh interval
    */
   updateTimeRange: () => void;
-  /**
-   * Updates the current value of visContext in saved search
-   * @param params
-   */
-  updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
-  /**
-   * Updates the current value of controlState in saved search
-   * @param params
-   */
-  updateControlState: (params: {
-    nextControlState: ControlPanelsState<OptionsListESQLControlState>;
-  }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -124,7 +109,6 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
-      initialInternalState: undefined,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
       services,
@@ -154,38 +138,6 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
   };
 
-  const updateVisContext = ({
-    nextVisContext,
-  }: {
-    nextVisContext: UnifiedHistogramVisContext | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      visContext: nextVisContext,
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateVisContext done', nextSavedSearch);
-  };
-
-  const updateControlState = ({
-    nextControlState,
-  }: {
-    nextControlState: ControlPanelsState<OptionsListESQLControlState> | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      controlGroupJson: JSON.stringify(nextControlState),
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateControlState done', nextSavedSearch);
-  };
-
   return {
     getCurrent$,
     getInitial$,
@@ -194,8 +146,6 @@ export function getSavedSearchContainer({
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
     updateTimeRange,
-    updateVisContext,
-    updateControlState,
   };
 }
 

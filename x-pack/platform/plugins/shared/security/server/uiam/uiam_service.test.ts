@@ -200,12 +200,11 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#getUserProfileGrant', () => {
-    it('includes shared secret in a profile grant', () => {
-      expect(uiamService.getUserProfileGrant('some-token')).toEqual({
-        type: 'uiamAccessToken',
-        accessToken: 'some-token',
-        sharedSecret: 'secret',
+  describe('#getClientAuthentication', () => {
+    it('includes shared secret in client authentication', () => {
+      expect(uiamService.getClientAuthentication()).toEqual({
+        scheme: 'SharedSecret',
+        value: 'secret',
       });
     });
   });
