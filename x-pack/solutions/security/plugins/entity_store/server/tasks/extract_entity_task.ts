@@ -16,7 +16,7 @@ import moment from 'moment';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
-import type { EntityType } from '../domain/definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 
 function getTaskType(entityType: EntityType): string {
