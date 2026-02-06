@@ -53,7 +53,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param rulesAuthz - The user's detection rules authorization context
  * @param editActions - The bulk edit actions being requested
  */
-const throwRulesAuthError = (
+const throwRulesAuthError = async (
   rulesAuthz: DetectionRulesAuthz,
   editActions: BulkActionEditPayload[]
 ) => {
@@ -65,7 +65,7 @@ const throwRulesAuthError = (
         action.type === 'delete_investigation_fields'
     )
   ) {
-    throwDryRunError(
+    await throwDryRunError(
       () =>
         invariant(
           rulesAuthz.canEditCustomHighlightedFields,
@@ -86,7 +86,7 @@ export const validateBulkEnableRule = async ({
   rulesAuthz,
 }: BulkEnableDisableActionValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
-  throwDryRunError(
+  await throwDryRunError(
     () =>
       invariant(rulesAuthz.canEnableDisableRules, 'User does not have permission to enable rules'),
     BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
@@ -103,7 +103,7 @@ export const validateBulkDisableRule = async ({
   rulesAuthz,
 }: BulkEnableDisableActionValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
-  throwDryRunError(
+  await throwDryRunError(
     () =>
       invariant(rulesAuthz.canEnableDisableRules, 'User does not have permission to disable rules'),
     BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
@@ -161,7 +161,7 @@ export const validateBulkEditRule = async ({
   ruleCustomizationStatus,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
-  throwRulesAuthError(rulesAuthz, edit);
+  await throwRulesAuthError(rulesAuthz, edit);
 
   // Prebuilt rule customization checks
   if (immutable) {
