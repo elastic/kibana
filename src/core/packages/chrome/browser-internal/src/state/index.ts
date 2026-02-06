@@ -18,7 +18,7 @@ export type { ChromeStyleState } from './chrome_style_state';
 export { createFeedbackState } from './feedback_state';
 export type { FeedbackState, FeedbackStateDeps } from './feedback_state';
 
-export { createVisibilityState, isPrinting$ } from './visibility_state';
+export { createVisibilityState } from './visibility_state';
 export type { VisibilityState, VisibilityStateDeps } from './visibility_state';
 
 export { createBodyClassesState } from './body_classes_state';

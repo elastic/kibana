@@ -38,6 +38,12 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
   const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
   const forceHidden = createState(isEmbedded);
 
+  /** Emits true during printing (window.beforeprint), false otherwise. */
+  const isPrinting$ = merge(
+    fromEvent(window, 'beforeprint').pipe(map(() => true)),
+    fromEvent(window, 'afterprint').pipe(map(() => false))
+  ).pipe(startWith(false), distinctUntilChanged(), shareReplay(1));
+
   const appHidden$ = merge(
     // For the isVisible$ logic, having no mounted app is equivalent to having a hidden app
     // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
@@ -64,11 +70,3 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
     setIsVisible: (isVisible: boolean) => forceHidden.set(!isVisible),
   };
 };
-
-/**
- * Emits true during printing (window.beforeprint), false otherwise.
- */
-export const isPrinting$ = merge(
-  fromEvent(window, 'beforeprint').pipe(map(() => true)),
-  fromEvent(window, 'afterprint').pipe(map(() => false))
-).pipe(startWith(false), distinctUntilChanged(), shareReplay(1));
