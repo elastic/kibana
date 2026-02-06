@@ -3482,6 +3482,9 @@
       "sessionId": {
         "type": "keyword"
       },
+      "status": {
+        "type": "keyword"
+      },
       "username": {
         "type": "keyword"
       }
