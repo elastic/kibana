@@ -11,6 +11,8 @@ import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../../server/application/r_rule/types';
 import type { ScheduleRequest } from '../../types/v1';
 
+const DEFAULT_INTERVAL = 1;
+
 const transformFrequencyToEvery = (frequency: Frequency) => {
   switch (frequency) {
     case Frequency.YEARLY:
@@ -21,6 +23,8 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
       return 'w';
     case Frequency.DAILY:
       return 'd';
+    case Frequency.HOURLY:
+      return 'h';
     default:
       return;
   }
@@ -28,20 +32,24 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
 
 const getDurationInString = (duration: number): string => {
   const durationInDays = moment.duration(duration, 'milliseconds').asDays();
-  if (durationInDays > 1) {
+  if (durationInDays > 1 && Number.isInteger(durationInDays)) {
     return `${durationInDays}d`;
   }
 
   const durationInHours = moment.duration(duration, 'milliseconds').asHours();
-  if (durationInHours > 1) {
+  if (durationInHours > 1 && Number.isInteger(durationInHours)) {
     return `${durationInHours}h`;
   }
 
   const durationInSeconds = moment.duration(duration, 'milliseconds').asSeconds();
-  if (durationInSeconds % 60 === 0) {
-    return `${durationInSeconds / 60}m`;
+  const durationInMinutes = durationInSeconds / 60;
+  if (Number.isInteger(durationInMinutes)) {
+    return `${durationInMinutes}m`;
+  } else if (Number.isInteger(durationInSeconds)) {
+    return `${durationInSeconds}s`;
   }
-  return `${durationInSeconds}s`;
+
+  return `${duration}ms`;
 };
 
 export const transformRRuleToCustomSchedule = (snoozeSchedule: {
@@ -52,9 +60,18 @@ export const transformRRuleToCustomSchedule = (snoozeSchedule: {
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
   const transformedDuration = getDurationInString(duration);
 
+  // Determine default every value if interval is not set and frequency is set
+  const defaultEvery =
+    transformedFrequency && !rRule.interval
+      ? `${DEFAULT_INTERVAL}${transformedFrequency}`
+      : undefined;
+
   const recurring = {
     end: rRule.until ? new Date(rRule.until).toISOString() : undefined,
-    every: rRule.interval ? `${rRule.interval}${transformedFrequency}` : undefined,
+    every:
+      rRule.interval && transformedFrequency
+        ? `${rRule.interval}${transformedFrequency}`
+        : defaultEvery,
     onWeekDay: rRule.byweekday === null ? undefined : (rRule.byweekday as string[]),
     onMonthDay: rRule.bymonthday === null ? undefined : rRule.bymonthday,
     onMonth: rRule.bymonth === null ? undefined : rRule.bymonth,

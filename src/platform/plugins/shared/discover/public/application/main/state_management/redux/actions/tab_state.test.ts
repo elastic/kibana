@@ -14,6 +14,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 
 const setup = async () => {
@@ -220,6 +221,119 @@ describe('tab_state actions', () => {
 
       // Verify the query string was updated correctly
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index | WHERE status = 404' });
+    });
+  });
+
+  describe('updateAttributes', () => {
+    it('should update individual tab attributes', async () => {
+      const { internalState, tabId } = await setup();
+
+      let state = internalState.getState();
+      let tab = selectTab(state, tabId);
+
+      expect(tab.attributes.controlGroupState).toBeUndefined();
+
+      // Update the hideChart attribute
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            controlGroupState: mockControlState,
+          },
+        })
+      );
+
+      // Get the updated tab state
+      state = internalState.getState();
+      tab = selectTab(state, tabId);
+
+      // Verify the controlGroupState attribute was updated correctly
+      expect(tab.attributes).toStrictEqual({
+        controlGroupState: mockControlState,
+        visContext: undefined,
+      });
+    });
+
+    it('should not overwrite existing attributes when updating', async () => {
+      const { internalState, tabId } = await setup();
+
+      let state = internalState.getState();
+      let tab = selectTab(state, tabId);
+
+      expect(tab.attributes.visContext).toBeUndefined();
+      const visContext = { some: 'context' };
+
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            visContext,
+          },
+        })
+      );
+
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            controlGroupState: mockControlState,
+          },
+        })
+      );
+
+      // Get the updated tab state
+      state = internalState.getState();
+      tab = selectTab(state, tabId);
+
+      // Verify the visContext attribute was not overwritten
+      expect(tab.attributes.visContext).toBe(visContext);
+      // Verify the controlGroupState attribute was updated correctly
+      expect(tab.attributes.controlGroupState).toBe(mockControlState);
+    });
+
+    it('should not update attributes if they are the same', async () => {
+      const { internalState, tabId } = await setup();
+
+      let state = internalState.getState();
+      let tab = selectTab(state, tabId);
+
+      expect(tab.attributes.visContext).toBeUndefined();
+      const visContext = { some: 'context' };
+
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            visContext,
+          },
+        })
+      );
+
+      // Capture state after first update
+      state = internalState.getState();
+      tab = selectTab(state, tabId);
+      expect(tab.attributes.visContext).toBe(visContext);
+
+      const stateAfterFirstUpdate = state;
+
+      // Dispatch the same update again
+      internalState.dispatch(
+        internalStateActions.updateAttributes({
+          tabId,
+          attributes: {
+            visContext,
+          },
+        })
+      );
+
+      // Get the updated tab state
+      state = internalState.getState();
+      tab = selectTab(state, tabId);
+
+      // Verify the state has not changed
+      expect(state).toBe(stateAfterFirstUpdate);
+      // Verify the visContext attribute remains the same
+      expect(tab.attributes.visContext).toBe(visContext);
     });
   });
 });

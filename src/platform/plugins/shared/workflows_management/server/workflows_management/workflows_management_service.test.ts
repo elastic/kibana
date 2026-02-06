@@ -277,6 +277,43 @@ describe('WorkflowsService', () => {
       });
     });
 
+    it('should filter by tags', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      };
+
+      mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
+
+      await service.getWorkflows({ size: 10, page: 1, tags: ['test', 'production'] }, 'default');
+
+      expect(mockEsClient.search).toHaveBeenCalledWith({
+        size: 10,
+        from: 0,
+        index: '.workflows-workflows',
+        allow_no_indices: true,
+        query: {
+          bool: {
+            must: [
+              { term: { spaceId: 'default' } },
+              {
+                bool: {
+                  must_not: {
+                    exists: { field: 'deleted_at' },
+                  },
+                },
+              },
+              { terms: { tags: ['test', 'production'] } },
+            ],
+          },
+        },
+        sort: [{ updated_at: { order: 'desc' } }],
+        track_total_hits: true,
+      });
+    });
+
     it('should filter by query text', async () => {
       const mockSearchResponse = {
         hits: {
