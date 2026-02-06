@@ -34,6 +34,12 @@ export const i18nMessages = {
   optionalParamLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalParamLabel', {
     defaultMessage: 'Optional',
   }),
+  defaultValueLabel: i18n.translate('xpack.onechat.tools.newTool.defaultValueLabel', {
+    defaultMessage: 'Default value',
+  }),
+  defaultValuePlaceholder: i18n.translate('xpack.onechat.tools.newTool.defaultValuePlaceholder', {
+    defaultMessage: 'Enter default value...',
+  }),
   removeParamButtonLabel: i18n.translate(
     'xpack.agentBuilder.tools.newTool.removeParamButtonLabel',
     {
