@@ -6,8 +6,7 @@
  */
 
 export const triggerLoadData = () => {
-  cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').should('exist');
-  cy.wait(1000);
+  cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').should('exist').and('not.be.disabled');
   cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').click();
   // @ts-expect-error update types for multiple true
   cy.getBySel('nodeContainer', { multiple: true })

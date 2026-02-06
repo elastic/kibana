@@ -40,12 +40,11 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/171279
-// Failing: See https://github.com/elastic/kibana/issues/180424
-describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
-  describe(
+  // TODO: TC - something off with adding integration view
+  describe.skip(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
     { tags: ['@ess'] },
     () => {
@@ -98,7 +97,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         navigateTo('app/osquery/packs');
         cy.contains(REMOVING_PACK).click();
         cy.contains(`${REMOVING_PACK} details`).should('exist');
-        cy.wait(1000);
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.get('span').contains('Edit').click();
 
         cy.getBySel('comboBoxInput').should('have.value', '');
@@ -110,7 +109,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
-    const PREBUILD_PACK_NAME = 'it-compliance';
+    const PREBUILD_PACK_NAME = 'forensic-credential-access';
 
     describe('', () => {
       beforeEach(() => {
@@ -120,7 +119,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should load prebuilt packs', () => {
         cy.contains('Load Elastic prebuilt packs').click();
         cy.contains('Load Elastic prebuilt packs').should('not.exist');
-        cy.wait(1000);
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.get(TABLE_ROWS).should('have.length.above', 5);
       });
 

@@ -21,7 +21,6 @@ import {
   TABLE_ROWS,
   formFieldInputSelector,
   FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
-  customActionRunSavedQuerySelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
@@ -452,64 +451,55 @@ describe(
       });
     });
 
-    describe.skip(
-      'should open discover in new tab',
-      { tags: ['@ess', '@brokenInServerless'] },
-      () => {
-        let packId: string;
-        let packName: string;
+    describe('should open discover in new tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
+      let packId: string;
+      let packName: string;
 
-        before(() => {
-          request<{ items: PackagePolicy[] }>({
-            url: '/internal/osquery/fleet_wrapper/package_policies',
-            headers: {
-              'Elastic-Api-Version': API_VERSIONS.internal.v1,
-            },
-          })
-            .then((response) =>
-              loadPack({
-                policy_ids: response.body.items[0].policy_ids,
-                queries: {
-                  [savedQueryName]: {
-                    ecs_mapping: {},
-                    interval: 3600,
-                    query: 'select * from uptime;',
-                  },
+      before(() => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        })
+          .then((response) =>
+            loadPack({
+              policy_ids: response.body.items[0].policy_ids,
+              queries: {
+                [savedQueryName]: {
+                  ecs_mapping: {},
+                  interval: 3600,
+                  query: 'select * from uptime;',
                 },
-              })
-            )
-            .then((pack) => {
-              packId = pack.saved_object_id;
-              packName = pack.name;
-            });
-        });
+              },
+            })
+          )
+          .then((pack) => {
+            packId = pack.saved_object_id;
+            packName = pack.name;
+          });
+      });
 
-        after(() => {
-          cleanupPack(packId);
-        });
+      after(() => {
+        cleanupPack(packId);
+      });
 
-        it('', () => {
-          preparePack(packName);
-          cy.get(customActionRunSavedQuerySelector(savedQueryName))
-            .should('exist')
-            .within(() => {
-              cy.get('a')
-                .should('have.attr', 'href')
-                .then(($href) => {
-                  // @ts-expect-error-next-line href string - check types
-                  cy.visit($href);
-                  cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-                  cy.contains(`action_id: pack_${PACK_NAME}_${savedQueryName}`);
-                  cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-                  cy.getBySel('superDatePickerCommonlyUsed_Today').click();
-                  cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-                    `pack_${PACK_NAME}_${savedQueryName}`
-                  );
-                });
-            });
-        });
-      }
-    );
+      it('', () => {
+        preparePack(packName);
+        cy.getBySel('docsLoading').should('exist');
+        cy.getBySel('docsLoading').should('not.exist');
+        cy.get(`[aria-label="View in Discover"]`)
+          .eq(0)
+          .should('have.attr', 'href')
+          .then(($href) => {
+            // @ts-expect-error-next-line href string - check types
+            cy.visit($href);
+            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+            // Verify the correct action_id filter is applied
+            cy.contains(`action_id: pack_${packName}_${savedQueryName}`);
+          });
+      });
+    });
 
     describe('deactivate and activate pack', { tags: ['@ess', '@serverless'] }, () => {
       let packId: string;

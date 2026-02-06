@@ -39,8 +39,7 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/170593
-describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -104,8 +103,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/170593
-  describe.skip('Add integration to policy', () => {
+  describe('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
     beforeEach(() => {
@@ -125,19 +123,14 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
       cy.getBySel('addPackagePolicyButton').click();
-      cy.getBySel('epmList.searchBar').type('osquery');
-      cy.getBySel('integration-card:epr:osquery_manager').click();
-      cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
 
-      cy.getBySel('agentPolicySelect').within(() => {
-        cy.contains(policyName);
-      });
-      cy.getBySel('packagePolicyNameInput').clear().wait(500);
+      cy.getBySel('packagePolicyNameInput').clear();
+      cy.getBySel('packagePolicyNameInput').should('have.value', '');
       cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
-      cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
-      cy.getBySel('confirmModalCancelButton').click();
-      cy.get(`[title="${integrationName}"]`).should('exist');
+      cy.getBySel('addIntegrationFlyout.submitBtn').click();
+      cy.get(`[title="${integrationName}"]`, { timeout: 60000 }).should('exist');
       policyContainsIntegration(integrationName, policyName);
       checkDataStreamsInPolicyDetails();
       cy.visit(OSQUERY);
