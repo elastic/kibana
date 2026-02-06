@@ -175,7 +175,9 @@ describe('ScriptsLibraryTable', () => {
 
       const typesPopover = getByTestId('test-typesDisplayPopoverButton');
       // click on types cell and verify popover content
-      await fireEvent.click(typesPopover);
+      await act(async () => {
+        await fireEvent.click(typesPopover);
+      });
       expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
       const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
       expect(badges).toHaveLength(11);
