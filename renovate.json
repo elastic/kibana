@@ -185,8 +185,7 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash",
-        "@arizeai/phoenix-client"
+        "@types/cache-manager-fs-hash"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -196,6 +195,26 @@
       ],
       "labels": [
         "Team:AI Infra",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "@elastic/obs-ai-team dependencies",
+      "matchDepNames": [
+        "@arizeai/phoenix-client",
+        "simple-statistics"
+      ],
+      "reviewers": [
+        "team:obs-ai-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ai-team",
         "release_note:skip",
         "backport:all-open"
       ],
