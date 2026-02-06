@@ -50,9 +50,10 @@ test.describe(
       await kqlDataSourceCard
         .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
         .click();
-      await pageObjects.datePicker.typeAbsoluteRange({
+      await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
         from: DATE_RANGE.from,
         to: DATE_RANGE.to,
+        containerLocator: kqlDataSourceCard,
       });
       await pageObjects.datePicker.waitToBeHidden();
       await kqlDataSourceCard
