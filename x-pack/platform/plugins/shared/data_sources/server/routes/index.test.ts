@@ -515,7 +515,7 @@ describe('registerRoutes', () => {
     it('should create a new data source and call the helper with correct params', async () => {
       const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
-        generateWorkflows: jest.fn(),
+        workflows: { directory: '/mock/workflows' },
       };
 
       mockDataCatalog.getCatalog.mockReturnValue({
@@ -585,7 +585,7 @@ describe('registerRoutes', () => {
     it('should handle errors during creation', async () => {
       const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
-        generateWorkflows: jest.fn(),
+        workflows: { directory: '/mock/workflows' },
       };
 
       mockDataCatalog.getCatalog.mockReturnValue({

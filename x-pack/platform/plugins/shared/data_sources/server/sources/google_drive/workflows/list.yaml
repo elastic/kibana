@@ -1,0 +1,33 @@
+version: '1'
+name: 'sources.google_drive.list'
+description: List files and subfolders in a Google Drive folder
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: folderId
+    type: string
+    default: root
+    description: "Folder ID to list contents of. Use 'root' for the root folder, or a folder ID from search/list results"
+  - name: pageSize
+    type: number
+    required: false
+    description: Number of results to return (default 250, max 1000)
+  - name: pageToken
+    type: string
+    required: false
+    description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
+  - name: orderBy
+    type: string
+    required: false
+    description: "Sort order: 'name', 'modifiedTime', or 'createdTime'"
+steps:
+  - name: list_files
+    type: google_drive.listFiles
+    connector-id: <%= stackConnectorId %>
+    with:
+      folderId: "${{inputs.folderId}}"
+      pageSize: ${{inputs.pageSize}}
+      pageToken: "${{inputs.pageToken}}"
+      orderBy: "${{inputs.orderBy}}"

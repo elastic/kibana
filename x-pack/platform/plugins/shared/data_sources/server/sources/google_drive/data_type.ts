@@ -8,11 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
-import {
-  generateGoogleDriveSearchFilesWorkflow,
-  generateGoogleDriveListFilesWorkflow,
-  generateGoogleDriveDownloadFilesWorkflow,
-} from './workflows';
 
 export const googleDriveDataSource: DataSource = {
   id: 'google_drive',
@@ -34,20 +29,7 @@ export const googleDriveDataSource: DataSource = {
     config: {},
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      {
-        content: generateGoogleDriveSearchFilesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGoogleDriveListFilesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGoogleDriveDownloadFilesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };
