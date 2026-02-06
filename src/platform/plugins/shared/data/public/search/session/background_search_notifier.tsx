@@ -89,7 +89,7 @@ export class BackgroundSearchNotifier {
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.completedToastText"
-            defaultMessage="Background search completed. <link>View results in Search Sessions</link>"
+            defaultMessage="Background search completed. <link>View results in Background Search</link>"
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink href={managementUrl} data-test-subj="backgroundSearchCompletedToastLink">
@@ -111,7 +111,7 @@ export class BackgroundSearchNotifier {
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.failedToastText"
-            defaultMessage="A background search has failed. <link>Check Search Sessions</link>"
+            defaultMessage="A background search has failed. <link>Check Background Search</link>"
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink href={managementUrl} data-test-subj="backgroundSearchFailedToastLink">
