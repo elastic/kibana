@@ -1,6 +1,6 @@
 # Ensemble Workflows
 
-Automated end-to-end testing for Synthetics scalability. These workflows spin up an ESS cluster, create HTTP/TCP/ICMP/Browser monitors via `synthetics_forge`, deploy an Elastic Agent, and run the monitors against the cluster. Used to validate Synthetics performance under load.
+Automated end-to-end testing for Observability products. These workflows use [Ensemble](https://ensemble.elastic.dev) to spin up ESS clusters, deploy resources, and run tests.
 
 ## Prerequisites
 
@@ -14,9 +14,15 @@ GCP auth (for cluster creation):
 gcloud auth application-default login
 ```
 
-## Workflows
+---
 
-### scalability.yaml
+## Synthetics
+
+Scalability testing for Synthetics private locations. Creates monitors, deploys Elastic Agent, and validates performance under load.
+
+### Workflows
+
+#### scalability.yaml
 
 Full workflow - creates cluster from scratch.
 
@@ -35,7 +41,7 @@ GH_PAGER= ensemble client submit --config scalability.yaml --daemon
 7. **Cleanup agent container** - Removes Docker container (if `cleanup_after=y`)
 8. **Cleanup cluster** - Destroys ESS cluster (if `cleanup_after=y`)
 
-### scalability_dev.yaml
+#### scalability_dev.yaml
 
 Uses an existing cluster. For iterating without waiting for cluster creation.
 
@@ -46,7 +52,7 @@ GH_PAGER= ensemble client submit --config scalability_dev.yaml --daemon
 
 > `GH_PAGER=` disables gh CLI pager - required due to an Ensemble bug with `gh api` param execution.
 
-## Without Ensemble
+### Without Ensemble
 
 Run synthetics_forge directly:
 
