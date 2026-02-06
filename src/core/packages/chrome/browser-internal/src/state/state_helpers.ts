@@ -71,16 +71,17 @@ export function createPersistedState<T>(
 ): PersistedState<T> {
   const stored = localStorage.getItem(key);
   let startValue = initialValue;
-  if (stored !== null && stored !== 'undefined') {
+  if (stored !== null) {
     try {
       startValue = deserialize(stored);
     } catch {
+      // Corrupt or unparseable value in localStorage -- fall back to initial value
       startValue = initialValue;
     }
   }
   const base = createState(startValue);
 
-  return {
+  const persistedState: PersistedState<T> = {
     ...base,
     set: (value: T) => {
       try {
@@ -91,13 +92,7 @@ export function createPersistedState<T>(
       base.set(value);
     },
     update: (fn) => {
-      const newValue = fn(base.get());
-      try {
-        localStorage.setItem(key, serialize(newValue));
-      } catch {
-        // Ignore storage errors (quota, disabled storage, etc.)
-      }
-      base.set(newValue);
+      persistedState.set(fn(base.get()));
     },
     reset: () => {
       try {
@@ -108,4 +103,6 @@ export function createPersistedState<T>(
       base.set(initialValue);
     },
   };
+
+  return persistedState;
 }
