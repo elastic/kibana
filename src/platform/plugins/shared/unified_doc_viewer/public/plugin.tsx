@@ -73,7 +73,14 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      render: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
+      render: ({
+        hit,
+        dataView,
+        textBasedHits,
+        decreaseAvailableHeightBy,
+        initialState,
+        onInitialStateChange,
+      }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -85,6 +92,8 @@ export class UnifiedDocViewerPublicPlugin
             esqlHit={Array.isArray(textBasedHits) ? hit : undefined}
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
+            initialState={initialState}
+            onInitialStateChange={onInitialStateChange}
           />
         );
       },
