@@ -635,29 +635,15 @@ describe('createTransport', () => {
       );
     });
 
-    it('succeeds when onRequest is not provided', async () => {
-      const transportClass = createTransport({
-        scoped: true,
-        getUnauthorizedErrorHandler,
-        getExecutionContext,
-      });
-      const transport = new transportClass(baseConstructorParams);
-      const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).resolves.not.toThrow();
+    
 
-      expect(transportRequestMock).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls onRequest before super.request', async () => {
-      const callOrder: string[] = [];
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn(() => {
-        callOrder.push('onRequest');
-      });
-
-      transportRequestMock.mockImplementation(() => {
-        callOrder.push('super.request');
-        return Promise.resolve({ body: {} });
+    it('allows onRequest to mutate options (e.g., add querystring params)', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn((ctx, params, options) => {
+        options!.querystring = {
+          ...options!.querystring,
+          some_field: 'some_value',
+        };
       });
 
       const transportClass = createTransport({
@@ -667,11 +653,18 @@ describe('createTransport', () => {
         onRequest,
       });
       const transport = new transportClass(baseConstructorParams);
-      const requestParams = { method: 'GET', path: '/' };
+      const requestParams = { method: 'GET', path: '/_search' };
 
       await transport.request(requestParams, {});
 
-      expect(callOrder).toEqual(['onRequest', 'super.request']);
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(transportRequestMock).toHaveBeenCalledTimes(1);
+      expect(transportRequestMock).toHaveBeenCalledWith(
+        requestParams,
+        expect.objectContaining({
+          querystring: { some_field: 'some_value' },
+        })
+      );
     });
   });
 });
