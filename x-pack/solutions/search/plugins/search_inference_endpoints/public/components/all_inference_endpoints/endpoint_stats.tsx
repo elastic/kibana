@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { getModelId } from '../../utils/get_model_id';
@@ -19,6 +21,26 @@ import {
 interface EndpointStatsProps {
   endpoints: InferenceInferenceEndpointInfo[];
 }
+
+interface StatItemProps {
+  label: string;
+  count: number;
+  testSubj: string;
+}
+
+const statItemStyles = ({ euiTheme }: UseEuiTheme) => css`
+  border-right: ${euiTheme.border.thin};
+  padding-right: ${euiTheme.size.m};
+`;
+
+const StatItem: React.FC<StatItemProps> = ({ label, count, testSubj }) => (
+  <EuiText size="s">
+    <EuiTextColor color="subdued">{label}</EuiTextColor>&nbsp;
+    <strong>
+      <span data-test-subj={testSubj}>{count}</span>
+    </strong>
+  </EuiText>
+);
 
 export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   const stats = useMemo(() => {
@@ -50,46 +72,29 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       responsive={false}
       data-test-subj="endpointStats"
     >
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{SERVICES_LABEL}</EuiTextColor>&nbsp;
-          <strong>
-            <span data-test-subj="endpointStatsServicesCount">{stats.servicesCount}</span>
-          </strong>
-        </EuiText>
+      <EuiFlexItem grow={false} css={statItemStyles}>
+        <StatItem
+          label={SERVICES_LABEL}
+          count={stats.servicesCount}
+          testSubj="endpointStatsServicesCount"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={statItemStyles}>
+        <StatItem
+          label={MODELS_LABEL}
+          count={stats.modelsCount}
+          testSubj="endpointStatsModelsCount"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={statItemStyles}>
+        <StatItem
+          label={ENDPOINTS_LABEL}
+          count={stats.endpointsCount}
+          testSubj="endpointStatsEndpointsCount"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">|</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{MODELS_LABEL}</EuiTextColor>&nbsp;
-          <strong>
-            <span data-test-subj="endpointStatsModelsCount">{stats.modelsCount}</span>
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">|</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{ENDPOINTS_LABEL}</EuiTextColor>&nbsp;
-          <strong>
-            <span data-test-subj="endpointStatsEndpointsCount">{stats.endpointsCount}</span>
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">|</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{TYPES_LABEL}</EuiTextColor>&nbsp;
-          <strong>
-            <span data-test-subj="endpointStatsTypesCount">{stats.typesCount}</span>
-          </strong>
-        </EuiText>
+        <StatItem label={TYPES_LABEL} count={stats.typesCount} testSubj="endpointStatsTypesCount" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

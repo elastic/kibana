@@ -7,8 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { EndpointStats } from './endpoint_stats';
+
+const renderWithTheme = (component: React.ReactElement) =>
+  render(<EuiThemeProvider>{component}</EuiThemeProvider>);
 
 const mockEndpoints: InferenceInferenceEndpointInfo[] = [
   {
@@ -55,7 +59,7 @@ const mockEndpoints: InferenceInferenceEndpointInfo[] = [
 
 describe('EndpointStats', () => {
   it('renders the stats component with count selectors', () => {
-    render(<EndpointStats endpoints={mockEndpoints} />);
+    renderWithTheme(<EndpointStats endpoints={mockEndpoints} />);
 
     expect(screen.getByTestId('endpointStats')).toBeInTheDocument();
     expect(screen.getByTestId('endpointStatsServicesCount')).toBeInTheDocument();
@@ -65,7 +69,7 @@ describe('EndpointStats', () => {
   });
 
   it('displays correct counts for services, models, types, and endpoints', () => {
-    render(<EndpointStats endpoints={mockEndpoints} />);
+    renderWithTheme(<EndpointStats endpoints={mockEndpoints} />);
 
     // 3 unique services: elasticsearch, elastic, openai
     expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
@@ -81,7 +85,7 @@ describe('EndpointStats', () => {
   });
 
   it('displays zero counts when no endpoints are provided', () => {
-    render(<EndpointStats endpoints={[]} />);
+    renderWithTheme(<EndpointStats endpoints={[]} />);
 
     expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('0');
     expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('0');
@@ -99,7 +103,7 @@ describe('EndpointStats', () => {
       },
     ] as InferenceInferenceEndpointInfo[];
 
-    render(<EndpointStats endpoints={endpointsWithoutModel} />);
+    renderWithTheme(<EndpointStats endpoints={endpointsWithoutModel} />);
 
     expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('1');
     expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('0');
@@ -129,7 +133,7 @@ describe('EndpointStats', () => {
       },
     ] as InferenceInferenceEndpointInfo[];
 
-    render(<EndpointStats endpoints={endpointsWithDuplicates} />);
+    renderWithTheme(<EndpointStats endpoints={endpointsWithDuplicates} />);
 
     // 1 unique service: elasticsearch
     expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('1');
