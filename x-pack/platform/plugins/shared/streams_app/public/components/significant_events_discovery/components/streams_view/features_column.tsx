@@ -7,15 +7,16 @@
 
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useStreamFeatures } from '../../../stream_detail_features/stream_features/hooks/use_stream_features';
+import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
 interface FeaturesColumnProps {
-  streamName: string;
+  stream: Streams.all.Definition;
 }
 
-export function FeaturesColumn({ streamName }: FeaturesColumnProps) {
-  const { features } = useStreamFeatures(streamName);
+export function FeaturesColumn({ stream }: FeaturesColumnProps) {
+  const { features } = useStreamFeatures(stream);
 
   return (
     <EuiText

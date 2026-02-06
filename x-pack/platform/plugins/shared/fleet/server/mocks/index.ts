@@ -148,6 +148,14 @@ export const createAppContextStartContractMock = (
     return internalSoClient;
   });
 
+  mockedSavedObject.getUnsafeInternalClient.mockImplementation((options) => {
+    if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
+      return internalSoClientWithoutSpaceExtension;
+    }
+
+    return internalSoClient;
+  });
+
   return {
     taskManagerStart: taskManagerMock.createStart(),
     elasticsearch: elasticsearchServiceMock.createStart(),
@@ -275,6 +283,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     restoreRollback: jest.fn(),
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
+    compilePackagePolicyForVersions: jest.fn(),
   };
 };
 

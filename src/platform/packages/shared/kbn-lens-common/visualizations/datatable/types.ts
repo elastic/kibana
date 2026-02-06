@@ -83,10 +83,9 @@ export interface ColumnState {
   originalName?: string;
   bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
-  /**
-   * @deprecated use `colorMapping` config
-   */
+  // Color by value configuration for numeric data
   palette?: PaletteOutput<CustomPaletteParams>;
+  // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
   colorMode?: 'none' | 'cell' | 'text';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
@@ -139,4 +138,5 @@ export interface DatatableVisualizationState {
   headerRowHeightLines?: number;
   paging?: PagingState;
   density?: DataGridDensity;
+  showRowNumbers?: boolean;
 }

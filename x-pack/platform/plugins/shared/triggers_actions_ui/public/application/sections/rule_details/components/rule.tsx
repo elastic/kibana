@@ -33,7 +33,6 @@ import {
 } from '../../rules_list/translations';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
-const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
@@ -61,8 +60,6 @@ export function RuleComponent({
   ruleType,
   readOnly,
   ruleSummary,
-  muteAlertInstance,
-  unmuteAlertInstance,
   requestRefresh,
   refreshToken,
   numberOfExecutions,
@@ -86,20 +83,6 @@ export function RuleComponent({
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
 
   const { euiTheme } = useEuiTheme();
-
-  const alerts = Object.entries(ruleSummary.alerts)
-    .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
-    .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
-
-  const onMuteAction = useCallback(
-    async (alert: AlertListItem) => {
-      await (alert.isMuted
-        ? unmuteAlertInstance(rule, alert.alert)
-        : muteAlertInstance(rule, alert.alert));
-      requestRefresh();
-    },
-    [muteAlertInstance, requestRefresh, rule, unmuteAlertInstance]
-  );
 
   const healthColor = getRuleHealthColor(rule, euiTheme);
   const statusMessage = getRuleStatusMessage({
@@ -131,16 +114,7 @@ export function RuleComponent({
         />
       );
     }
-    return suspendedComponentWithProps(
-      RuleAlertList,
-      'xl'
-    )({
-      items: alerts,
-      readOnly,
-      onMuteAction,
-    });
   }, [
-    alerts,
     application,
     data,
     fieldFormats,
@@ -148,8 +122,6 @@ export function RuleComponent({
     lastReloadRequestTime,
     licensing,
     notifications,
-    onMuteAction,
-    readOnly,
     rule.id,
     ruleType.hasAlertsMappings,
     ruleType.id,

@@ -36,6 +36,7 @@ import type {
   ESQLAstCommand,
   ESQLAstItem,
   ESQLAstQueryExpression,
+  ESQLMap,
   ESQLProperNode,
 } from '../types';
 
@@ -83,6 +84,11 @@ export interface BasicPrettyPrinterOptions {
    * Whether to lowercase keywords. Defaults to `false`.
    */
   lowercaseKeywords?: boolean;
+
+  /**
+   * Map representation to use if cannot be determined from parent context.
+   */
+  mapRepresentation?: ESQLMap['representation'];
 }
 
 export type BasicPrettyPrinterMultilineOptions = Omit<BasicPrettyPrinterOptions, 'multiline'>;
@@ -96,7 +102,7 @@ export class BasicPrettyPrinter {
     node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    return node.type === 'query'
+    return node.type === 'query' && 'commands' in node
       ? BasicPrettyPrinter.query(node, opts)
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
@@ -166,6 +172,7 @@ export class BasicPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      mapRepresentation: opts.mapRepresentation ?? 'map',
     };
   }
 
@@ -259,6 +266,18 @@ export class BasicPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
+      if (ctx.node.type === 'unknown') {
+        return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
+      }
+
+      if (ctx.node.text) {
+        let text = ctx.node.text;
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+
+        return this.decorateWithComments(ctx.node, text || '<UNKNOWN>');
+      }
+
       return '<EXPRESSION>';
     })
 
@@ -324,7 +343,13 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
+      const subtype = ctx.node.subtype;
+      const formatted =
+        subtype === 'tuple'
+          ? '(' + elements + ')'
+          : subtype === 'bare'
+          ? elements
+          : '[' + elements + ']';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -332,19 +357,27 @@ export class BasicPrettyPrinter {
     .on('visitMapEntryExpression', (ctx) => {
       const key = ctx.visitKey();
       const value = ctx.visitValue();
-      const formatted = key + ': ' + value;
+      const parentNode = ctx.parent?.node as ESQLMap | undefined;
+      const representation = parentNode?.representation ?? this.opts.mapRepresentation ?? 'map';
+      const separator =
+        representation === 'map' ? ': ' : representation === 'assignment' ? ' = ' : ' ';
+      const formatted = key + separator + value;
 
       return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitMapExpression', (ctx) => {
-      let entriesFormatted = '';
+      const representation = ctx.node.representation ?? 'map';
+      const separator = representation === 'map' ? ', ' : ' ';
+      let formatted = '';
 
       for (const entry of ctx.visitEntries()) {
-        entriesFormatted += (entriesFormatted ? ', ' : '') + entry;
+        formatted += (formatted ? separator : '') + entry;
       }
 
-      const formatted = '{' + entriesFormatted + '}';
+      if (representation === 'map') {
+        formatted = '{' + formatted + '}';
+      }
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -505,7 +538,12 @@ export class BasicPrettyPrinter {
               return undefined;
             }
 
-            if (branch.type === 'parens' && branch.child.type === 'query') {
+            // Check for ESQLAstQueryExpression specifically (has 'commands' property)
+            if (
+              branch.type === 'parens' &&
+              branch.child.type === 'query' &&
+              'commands' in branch.child
+            ) {
               return ctx.visitSubQuery(branch.child);
             }
 

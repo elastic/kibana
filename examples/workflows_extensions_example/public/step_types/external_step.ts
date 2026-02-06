@@ -10,7 +10,6 @@
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
-import type { PropertyValidationContext } from '@kbn/workflows/types/latest';
 import {
   ExternalStepTypeId,
   externalStepCommonDefinition,
@@ -56,57 +55,48 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
     editorHandlers: {
       config: {
         'proxy.id': {
-          completion: {
-            getOptions: async (currentValue) => {
+          selection: {
+            search: async (input, _context) => {
               const proxies = await deps.externalService.getProxies();
-              const currentValueString =
-                typeof currentValue === 'string' ? currentValue.trim() : '';
+              const inputTrimmed = input.trim();
               return proxies
                 .filter(
                   (proxy) =>
-                    currentValueString.length === 0 || proxy.id.includes(currentValueString)
+                    inputTrimmed.length === 0 ||
+                    proxy.id.includes(inputTrimmed) ||
+                    proxy.name.toLowerCase().includes(inputTrimmed.toLowerCase())
                 )
                 .map((proxy) => ({
-                  label: proxy.id,
                   value: proxy.id,
-                  detail: 'URL: ' + proxy.url,
+                  label: proxy.name,
+                  description: 'URL: ' + proxy.url,
                 }));
             },
-          },
-          validation: {
-            validate: async (value, _context: PropertyValidationContext) => {
-              if (value === null) {
-                return { severity: null };
-              }
-              if (typeof value !== 'string') {
-                return { severity: 'error', message: 'Proxy ID must be a string' };
-              }
+            resolve: async (value, _context) => {
               const proxy = await deps.externalService.getProxy(value);
               if (!proxy) {
+                return null;
+              }
+              return {
+                value: proxy.id,
+                label: proxy.name,
+                description: 'URL: ' + proxy.url,
+              };
+            },
+            getDetails: async (value, _context, option) => {
+              if (option) {
                 return {
-                  severity: 'error',
-                  message: 'Proxy not found',
-                  hoverMessage: 'Manage your proxies [here](https://example.com/proxies)',
+                  message: `Proxy "${option.label}" is connected`,
+                  links: [{ text: 'Manage proxies', path: 'https://example.com/proxies' }],
                 };
               }
-              return { severity: null, afterMessage: `✓ Proxy connected (${proxy.url})` };
-            },
-          },
-        },
-      },
-      input: {
-        input: {
-          completion: {
-            getOptions: async (currentValue) => {
-              if (!currentValue || currentValue.length === 0) {
-                return [
-                  {
-                    label: 'Hello World',
-                    value: 'Hello World',
-                  },
-                ];
-              }
-              return [];
+              return {
+                message: `Proxy "${value}" not found. Please select an existing proxy or create a new one.`,
+                links: [
+                  { text: 'Create proxy', path: 'https://example.com/proxies/new' },
+                  { text: 'Manage proxies', path: 'https://example.com/proxies' },
+                ],
+              };
             },
           },
         },

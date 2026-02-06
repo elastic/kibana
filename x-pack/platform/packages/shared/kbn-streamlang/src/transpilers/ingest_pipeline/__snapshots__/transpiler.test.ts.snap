@@ -223,6 +223,65 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "script": Object {
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fields = [];
+boolean allPresent = true;
+
+if (ctx.containsKey('field1') && ctx['field1'] != null) {
+  fields.add(ctx['field1'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field2') && ctx['field2'] != null) {
+  fields.add(ctx['field2'].toString());
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field3') && ctx['field3'] != null) {
+  fields.add(ctx['field3'].toString());
+} else {
+  allPresent = false;
+}
+
+if (false || allPresent) {
+  ctx['my_joined_field'] = fields.stream().collect(Collectors.joining(', '));
+}",
+        "tag": undefined,
+      },
+    },
+    Object {
+      "script": Object {
+        "description": undefined,
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fromValues = [];
+  boolean allFieldsPresent = true;
+
+  if (ctx.containsKey('first_name') && ctx['first_name'] != null) {
+  fromValues.add(ctx['first_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null) {
+  fromValues.add(ctx['last_name'].toString());
+} else {
+  allFieldsPresent = false;
+}
+
+
+  if (allFieldsPresent || false) {
+    ctx['full_name'] = fromValues.stream().collect(Collectors.joining(''));
+  }",
+        "tag": undefined,
+      },
+    },
+    Object {
       "uppercase": Object {
         "field": "message",
         "target_field": "message_uppercase",

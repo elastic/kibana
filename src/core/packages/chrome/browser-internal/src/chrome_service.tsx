@@ -14,6 +14,7 @@ import {
   BehaviorSubject,
   combineLatest,
   filter,
+  from,
   map,
   merge,
   mergeMap,
@@ -23,7 +24,6 @@ import {
   takeUntil,
 } from 'rxjs';
 import { parse } from 'url';
-import useObservable from 'react-use/lib/useObservable';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
@@ -37,6 +37,7 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type {
   AppDeepLinkId,
   ChromeBadge,
@@ -58,7 +59,7 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
-import { Router } from '@kbn/shared-ux-router';
+import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
@@ -67,14 +68,13 @@ import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
-import { Header, LoadingIndicator, ProjectHeader } from './ui';
+import { Header, LoadingIndicator, ProjectHeader, Sidebar } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
-import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
 import type { NavigationProps } from './ui/project/sidenav/types';
 import { HeaderBreadcrumbsBadges } from './ui/header/header_breadcrumbs_badges';
 
@@ -84,6 +84,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  basePath: string;
   coreContext: CoreContext;
 }
 
@@ -116,6 +117,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly sidebar: SidebarService;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
@@ -127,6 +129,7 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
+    this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 
   /**
@@ -166,7 +169,10 @@ export class ChromeService {
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
-    return {};
+
+    return {
+      sidebar: this.sidebar.setup(),
+    };
   }
 
   public async start({
@@ -277,6 +283,8 @@ export class ChromeService {
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
+    const sidebar = this.sidebar.start();
+
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
       helpExtension$.next(undefined);
@@ -357,30 +365,9 @@ export class ChromeService {
 
     /**
      * Classic header is a header for the "classic" navigation with all solutions
-     * It can be customized to be used with either legacy fixed layout or new grid layout.
-     * In fixed layout it is fixed to the top of the page, with display: fixed; and should be responsible for rendering the banner
-     *
-     * @param isFixed
-     * @param includeBanner
      */
-    const getClassicHeader = ({
-      isFixed,
-      includeBanner,
-    }: {
-      /**
-       * Whether the header should be fixed to the top of the page, with display: fixed;
-       */
-      isFixed: boolean;
-      /**
-       * Whether the header should be also responsible the top banner, which is displayed above the header
-       */
-      includeBanner: boolean;
-    }) => (
+    const getClassicHeader = () => (
       <Header
-        /* customizable header variations */
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
-        isFixed={isFixed}
-        /* consistent header properties */
         isServerless={this.isServerless}
         loadingCount$={http.getLoadingCount$()}
         application={application}
@@ -436,6 +423,10 @@ export class ChromeService {
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
 
+    const isFeedbackEnabled = from(
+      getNotifications().then((notifications) => notifications.feedback.isEnabled())
+    );
+
     const navProps: NavigationProps = {
       basePath: http.basePath,
       application,
@@ -451,40 +442,14 @@ export class ChromeService {
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
       onToggleCollapsed: setIsSideNavCollapsed,
+      isFeedbackEnabled$: isFeedbackEnabled,
     };
 
-    const getProjectHeader = ({
-      includeSideNav,
-      isFixed,
-      includeBanner,
-      includeAppMenu,
-    }: {
-      /**
-       * Whether the header should be fixed to the top of the page, with display: fixed;
-       */
-      isFixed: boolean;
-      /**
-       * Whether the header should be also responsible the top banner, which is displayed above the header
-       */
-      includeBanner: boolean;
-
-      /**
-       * Whether the header should include a side navigation
-       */
-      includeSideNav: boolean;
-
-      /**
-       * Whether the header should include the application subheader
-       */
-      includeAppMenu: boolean;
-    }) => (
+    const getProjectHeader = () => (
       <ProjectHeader
         isServerless={this.isServerless}
-        isFixed={isFixed}
         application={application}
         globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-        actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
-        appMenu$={includeAppMenu ? appMenu$.pipe(takeUntil(this.stop$)) : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customBranding$={customBranding$}
@@ -495,76 +460,22 @@ export class ChromeService {
         navControlsCenter$={navControls.getCenter$()}
         navControlsRight$={navControls.getRight$()}
         loadingCount$={http.getLoadingCount$()}
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
         homeHref$={projectNavigation.getProjectHome$()}
         docLinks={docLinks}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
-      >
-        {includeSideNav && (
-          <Router history={application.history}>
-            <FixedLayoutProjectSideNav
-              isCollapsed$={this.isSideNavCollapsed$}
-              navProps={navProps}
-            />
-          </Router>
-        )}
-      </ProjectHeader>
+      />
     );
 
-    const getLegacyHeaderComponentForFixedLayout = () => {
-      const defaultChromeStyle = chromeStyleSubject$.getValue();
-
-      const HeaderComponent = () => {
-        // TODO: remove useObservable usage https://github.com/elastic/kibana/issues/225265
-        const isVisible = useObservable(this.isVisible$);
-        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
-
-        if (!isVisible) {
-          return (
-            <div data-test-subj="kibanaHeaderChromeless">
-              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
-              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
-            </div>
-          );
-        }
-
-        if (chromeStyle === undefined) return null;
-
-        // render header
-        if (chromeStyle === 'project') {
-          return getProjectHeader({
-            isFixed: true,
-            includeBanner: true,
-            includeSideNav: true,
-            includeAppMenu: true,
-          });
-        }
-
-        return getClassicHeader({ isFixed: true, includeBanner: true });
-      };
-
-      return <HeaderComponent />;
+    const getClassicHeaderComponent = () => {
+      return getClassicHeader();
     };
 
-    const getClassicHeaderComponentForGridLayout = () => {
-      return getClassicHeader({ isFixed: false, includeBanner: false });
+    const getProjectHeaderComponent = () => {
+      return getProjectHeader();
     };
 
-    const getProjectHeaderComponentForGridLayout = () => {
-      return getProjectHeader({
-        // in grid layout the project side nav is rendered separately
-        includeSideNav: false,
-        // in grid layout the header is not fixed, but is inside grid's layout header cell
-        isFixed: false,
-        // in grid layout the layout is responsible for rendering the banner
-        includeBanner: false,
-        // in grid layout the application subheader is rendered by the layout service as part of the application slot
-        includeAppMenu: false,
-      });
-    };
-
-    const getProjectSideNavComponentForGridLayout = () => {
+    const getProjectSideNavComponent = () => {
       return (
         <GridLayoutProjectSideNav isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
       );
@@ -573,10 +484,9 @@ export class ChromeService {
     return {
       // TODO: this service does too much and doesn't have to compose these headers components.
       // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
-      getLegacyHeaderComponentForFixedLayout,
-      getClassicHeaderComponentForGridLayout,
-      getProjectHeaderComponentForGridLayout,
-      getProjectSideNavComponentForGridLayout,
+      getClassicHeaderComponent,
+      getProjectHeaderComponent,
+      getProjectSideNavComponent,
       getHeaderBanner: () => {
         return (
           <HeaderTopBanner
@@ -597,9 +507,17 @@ export class ChromeService {
           <AppMenuBar
             appMenuActions$={application.currentActionMenu$}
             appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
-            isFixed={false}
           />
         );
+      },
+
+      getSidebarComponent: () => {
+        return <Sidebar />;
+      },
+
+      withProvider: (children: ReactNode) => {
+        // TODO: we can have more chrome context values here in the future
+        return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
       },
 
       // chrome APIs
@@ -726,6 +644,7 @@ export class ChromeService {
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
+      sidebar,
     };
   }
 

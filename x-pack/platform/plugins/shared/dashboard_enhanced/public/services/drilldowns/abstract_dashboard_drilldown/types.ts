@@ -6,10 +6,10 @@
  */
 
 import type { UiActionsEnhancedBaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public';
-import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 
 export type DashboardDrilldownConfig = {
   dashboardId?: string;
-} & DashboardDrilldownOptions;
+} & DashboardNavigationOptions;
 
 export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext;

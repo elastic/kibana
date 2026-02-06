@@ -64,6 +64,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
         schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject) => {
           walkSchema(ctx, s);
         });
+        mutations.processDiscriminator(ctx, schema);
         mutations.processEnum(schema);
         break;
       }

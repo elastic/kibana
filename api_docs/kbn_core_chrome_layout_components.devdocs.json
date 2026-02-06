@@ -223,7 +223,7 @@
             "signature": [
               "Pick<Partial<",
               "LayoutDimensions",
-              ">, \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"sidebarWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+              ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
               "ChromeStyle",
               " | undefined; }"
             ],
@@ -303,7 +303,7 @@
         "signature": [
           "Pick<Partial<",
           "LayoutDimensions",
-          ">, \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"sidebarWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+          ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
           "ChromeStyle",
           " | undefined; }"
         ],

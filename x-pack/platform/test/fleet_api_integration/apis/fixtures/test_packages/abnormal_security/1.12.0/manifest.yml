@@ -1,0 +1,50 @@
+format_version: 3.4.0
+name: abnormal_security
+title: Abnormal AI
+version: "1.12.0"
+description: Collect logs from Abnormal AI with Elastic Agent.
+type: integration
+categories:
+  - security
+conditions:
+  kibana:
+    version: "^8.17.0 || ^9.0.0"
+  elastic:
+    subscription: basic
+  agent:
+    version: '^9.3.0'
+policy_templates:
+  - name: abnormal_security
+    title: Abnormal AI logs
+    description: Collect Abnormal AI logs.
+    inputs:
+      - type: cel
+        title: Collect Abnormal AI logs via API
+        description: Collecting Abnormal AI logs via API.
+        vars:
+          - name: url
+            type: url
+            title: URL
+            default: https://api.abnormalplatform.com
+            description: By default, the URL is set to `https://api.abnormalplatform.com`. We have observed that Abnormal AI Base URL changes based on location so find your own base URL.
+            multi: false
+            required: true
+            show_user: true
+          - name: access_token
+            type: password
+            title: Access Token
+            description: Access Token used to authenticate the requests.
+            multi: false
+            required: true
+            show_user: true
+            secret: true
+          - name: proxy_url
+            type: text
+            title: Proxy URL
+            multi: false
+            required: false
+            show_user: false
+            description: URL to proxy connections in the form of http[s]://<user>:<password>@<server name/ip>:<port>. Please ensure your username and password are in URL encoded format.
+owner:
+  github: elastic/security-service-integrations
+  type: elastic

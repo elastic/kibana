@@ -17,15 +17,41 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.waitForDataViewSwitch();
+  }
+
+  private async getVisibleDataViewSwitch() {
+    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
+    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
+
+    // There should be exactly one visible data view switch.
+    // If both are visible (bug), fail explicitly instead of picking one
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+
+    const discoverVisible = await discoverSwitch.isVisible();
+    const fallbackVisible = await fallbackSwitch.isVisible();
+
+    if (discoverVisible === fallbackVisible) {
+      throw new Error(
+        `Expected exactly one data view switch link to be visible, but discover=${discoverVisible} fallback=${fallbackVisible}`
+      );
+    }
+
+    return discoverVisible ? discoverSwitch : fallbackSwitch;
+  }
+
+  private async waitForDataViewSwitch() {
+    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
-    const currentValue = await this.page.testSubj.innerText('*dataView-switch-link');
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
-    await this.page.testSubj.click('*dataView-switch-link');
-    await this.page.testSubj.waitForSelector('indexPattern-switcher');
+    await dataViewSwitch.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
@@ -35,12 +61,14 @@ export class DiscoverApp {
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
-    return this.page.testSubj.locator('discover-dataView-switch-link');
+    return this.page.testSubj
+      .locator('discover-dataView-switch-link')
+      .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
   async clickNewSearch() {
@@ -55,7 +83,6 @@ export class DiscoverApp {
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async waitUntilFieldListHasCountOfFields() {
@@ -114,12 +141,61 @@ export class DiscoverApp {
     });
   }
 
+  // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
     await expect(table).toBeVisible();
-    await expect(table).toHaveAttribute('data-render-complete', 'true', {
-      timeout: 30_000,
-    });
+
+    const minDurationMs = 2_000;
+    const pollIntervalMs = 100;
+    const totalTimeoutMs = 30_000;
+
+    let stableSince: number | null = null;
+
+    await expect
+      .poll(
+        async () => {
+          const attr = await table.getAttribute('data-render-complete');
+          const now = Date.now();
+
+          if (attr === 'true') {
+            if (!stableSince) {
+              stableSince = now;
+            }
+            const elapsed = now - stableSince;
+            return elapsed >= minDurationMs;
+          } else {
+            // Reset if it flips to anything other than 'true'
+            stableSince = null;
+            return false;
+          }
+        },
+        {
+          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
+          timeout: totalTimeoutMs,
+          intervals: [pollIntervalMs],
+        }
+      )
+      .toBe(true);
+  }
+
+  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
+    const expandButton = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+    );
+
+    // Ensure button stable after grid render (catches row shifts)
+    await expect(expandButton).toBeVisible();
+
+    // Scroll to, hover, and click the expand button
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click({ delay: 50 });
+  }
+
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -149,10 +225,14 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 
@@ -170,17 +250,6 @@ export class DiscoverApp {
       .locator('[data-test-subj^="dataGridHeaderCell-"]')
       .allInnerTexts();
     return headers.join(',');
-  }
-
-  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = this.page.locator(cssSelector);
-    await element.waitFor({ state: 'visible' });
-
-    const title = (await element.getAttribute('data-title')) || '';
-    const description = (await element.getAttribute('data-description')) || '';
-
-    return { title, description };
   }
 
   async showChart() {

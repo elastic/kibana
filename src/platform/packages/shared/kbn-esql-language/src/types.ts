@@ -8,6 +8,7 @@
  */
 
 import type { inlineCastsMapping } from './commands/definitions/generated/inline_casts_mapping';
+import type { PromQLAstQueryExpression } from './promql/types';
 
 /**
  * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
@@ -48,7 +49,8 @@ export type ESQLSingleAstItem =
   | ESQLOrderExpression
   | ESQLUnknownItem
   | ESQLMap
-  | ESQLMapEntry;
+  | ESQLMapEntry
+  | PromQLAstQueryExpression;
 
 /**
  * A field is either an index field `this.is.field`, or it is a field assignment
@@ -63,7 +65,7 @@ export type ESQLSingleAstItem =
  * EVAL ?param = 123
  * ```
  */
-export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLAstExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -196,7 +198,7 @@ export type ESQLAstPromqlCommandQuery =
  * This will be replaced in the future with a proper PROMQL query AST.
  * For now, we just represent the query as an "unknown" node.
  */
-export type ESQLAstPromqlQuery = ESQLUnknownItem;
+export type ESQLAstPromqlQuery = PromQLAstQueryExpression;
 
 /**
  * Represents a header pseudo-command, such as SET.
@@ -489,12 +491,15 @@ export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
 
   /**
-   * The list can be a literal list (uses square brackets) or a tuple list (uses
-   * round brackets). If not specified, the list is assumed to be a literal list.
+   * Represents various types of lists in ES|QL language.
+   *
+   * - `literal` - a literal list using square brackets, e.g. `[1, 2, 3]`
+   * - `tuple` - a tuple list using round brackets, e.g. `(a, b, c)`
+   * - `bare` - a bare list without any enclosing brackets, e.g. `a, b, c`
    *
    * @default 'literal'
    */
-  subtype?: 'literal' | 'tuple';
+  subtype?: 'literal' | 'tuple' | 'bare';
 
   values: ESQLAstExpression[];
 }
@@ -681,6 +686,7 @@ export interface ESQLMessage {
   code: string;
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
 }
 
 export interface EditorError {

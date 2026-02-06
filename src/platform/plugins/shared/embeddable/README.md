@@ -191,12 +191,11 @@ Embeddable serialized state can not be modified with breaking changes. Fields ca
 Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
 
 #### Minimize required fields
-Avoid unnecessary information to keep public REST APIs concise. Do not require fields that have can have a default behavior. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
+Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable. Where possible, avoid a required field by specifying a default.
 
-#### Do not apply defaults in server
-POST, PUT, and GET requests should return symmetrical data. Do not apply defaults in server transforms. Instead, spread defaults into embeddable state in public when initializing an embeddable.
-
-Defaults can change over time. Changing defaults only effects dashboards created from REST APIs. Dashboards saved from the UI contain embeddable seralized state - which includes spread defaults - thus preserving the exact user configuration at the time the dashboard is last saved.
+#### Apply defaults in your schema
+POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. Any key that has a `defaultValue` must not be wrapped
+in a `schema.maybe`, as this will cause the defaults not to be applied at validation time.
 
 ### Transforms
 Transforms decouple REST API state from stored state, allowing embeddables to have one shape for REST APIs and another for storage.
@@ -213,16 +212,18 @@ Containers use schemas to
 embeddableServerSetup.registerTransforms(
   'myEmbeddableType',
   {
-    transformIn: (state: EmbeddableState) => {
-      return {
-        state: convertToStoredState(state),
-        references: extractReferences(state)
-      };
-    },
-    transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
-      return convertAndInjectReferences(state, references);
-    },
-    schema: schema.object({
+    getTransforms: (drilldownTransfroms) => ({
+      transformIn: (state: EmbeddableState) => {
+        return {
+          state: convertToStoredState(state),
+          references: extractReferences(state)
+        };
+      },
+      transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
+        return convertAndInjectReferences(state, references);
+      },
+    }),
+    getSchema: (getDrilldownsSchema) => schema: schema.object({
       required_field: schema.string(),
       optional_field: schema.maybe(schema.string()),
     })

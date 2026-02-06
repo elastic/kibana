@@ -10,6 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { throttle } from 'lodash';
+import { from, type Observable } from 'rxjs';
 import {
   type PayloadAction,
   type PayloadActionCreator,
@@ -167,11 +168,28 @@ export const internalStateSlice = createSlice({
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         initialDocViewerTabId?: string;
+        initialDocViewerTabState?: object;
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
+          // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
+          tab.initialDocViewerTabId = undefined;
+          tab.uiState.docViewer = {};
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+
+        if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
+          tab.uiState.docViewer = {
+            ...tab.uiState.docViewer,
+            docViewerTabsState: {
+              ...(tab.uiState.docViewer?.docViewerTabsState ?? {}),
+              [action.payload.initialDocViewerTabId]: action.payload.initialDocViewerTabState,
+            },
+          };
+        }
       });
     },
 
@@ -224,6 +242,14 @@ export const internalStateSlice = createSlice({
         tab.appState = action.payload.appState;
       }),
 
+    /**
+     * Set the tab attributes state
+     */
+    setAttributes: (state, action: TabAction<Pick<TabState, 'attributes'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.attributes = action.payload.attributes;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
@@ -233,14 +259,20 @@ export const internalStateSlice = createSlice({
           action.payload.overriddenVisContextAfterInvalidation;
       }),
 
-    setControlGroupState: (
+    setCascadedDocumentsState: (
       state,
-      action: TabAction<{
-        controlGroupState: TabState['controlGroupState'];
-      }>
+      action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
     ) =>
       withTab(state, action.payload, (tab) => {
-        tab.controlGroupState = action.payload.controlGroupState;
+        tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
+      }),
+
+    setSelectedCascadeGroups: (
+      state,
+      actions: TabAction<Pick<TabState['cascadedDocumentsState'], 'selectedCascadeGroups'>>
+    ) =>
+      withTab(state, actions.payload, (tab) => {
+        tab.cascadedDocumentsState.selectedCascadeGroups = actions.payload.selectedCascadeGroups;
       }),
 
     setEsqlVariables: (
@@ -280,6 +312,7 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.initialDocViewerTabId = undefined;
+        tab.uiState.docViewer = {};
       }),
 
     setESQLEditorUiState: (
@@ -351,6 +384,14 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
+
+    setDocViewerUiState: (
+      state,
+      action: TabAction<{ docViewerUiState: Partial<TabState['uiState']['docViewer']> }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.docViewer = action.payload.docViewerUiState;
       }),
   },
   extraReducers: (builder) => {
@@ -451,6 +492,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
           });
@@ -468,20 +510,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
-  startListening({
-    actionCreator: initializeTabs.fulfilled,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-
-      // Initialize CPS manager with session-level projectRouting after state is updated
-      if (services.cps?.cpsManager) {
-        services.cps.cpsManager.setProjectRouting(
-          services.cps.cpsManager.getDefaultProjectRouting()
-        );
-      }
-    },
-  });
-
   return listenerMiddleware.middleware;
 };
 
@@ -492,22 +520,32 @@ export interface InternalStateDependencies {
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
+  getInternalState$: () => Observable<DiscoverInternalState>;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
-export const createInternalStateStore = (options: InternalStateDependencies) => {
-  return configureStore({
+export const createInternalStateStore = (
+  options: Omit<InternalStateDependencies, 'getInternalState$'>
+) => {
+  const optionsWithStore: InternalStateDependencies = {
+    ...options,
+    getInternalState$: () => from(internalState),
+  };
+
+  const internalState = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        thunk: { extraArgument: options },
+        thunk: { extraArgument: optionsWithStore },
         serializableCheck: !IS_JEST_ENVIRONMENT,
-      }).prepend(createMiddleware(options)),
+      }).prepend(createMiddleware(optionsWithStore)),
     devTools: {
       name: 'DiscoverInternalState',
     },
   });
+
+  return internalState;
 };
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 
 /**
  * Availability handler for Observability Agent Builder resources.
@@ -23,10 +20,7 @@ export async function getAgentBuilderResourceAvailability({
   request,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   request: KibanaRequest;
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {

@@ -14,6 +14,7 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -23,6 +24,12 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
+import {
+  createAttachmentRefs,
+  migrateRoundAttachments,
+  needsMigration,
+  applyAttachmentRefsToRounds,
+} from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -98,12 +105,46 @@ export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
-  const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const deserializedRounds = deserializeStepResults(rawRounds);
+
+  const existingAttachments = document._source!.attachments;
+  const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
+  const attachmentsForRefs =
+    existingAttachments && existingAttachments.length > 0
+      ? existingAttachments
+      : hasLegacyRoundAttachments
+      ? migrateRoundAttachments(deserializedRounds)
+      : [];
+
+  const refsByRound =
+    attachmentsForRefs.length > 0
+      ? createAttachmentRefs(deserializedRounds, attachmentsForRefs)
+      : new Map<number, AttachmentVersionRef[]>();
+
+  const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
+
+  if (existingAttachments && existingAttachments.length > 0) {
+    return {
+      ...base,
+      rounds: roundsWithRefs,
+      attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
+    };
+  }
+
+  if (hasLegacyRoundAttachments) {
+    return {
+      ...base,
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
+    };
+  }
 
   return {
     ...base,
-    rounds: deserializeStepResults(rounds),
-    ...(document._source!.attachments && { attachments: document._source!.attachments }),
+    rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };

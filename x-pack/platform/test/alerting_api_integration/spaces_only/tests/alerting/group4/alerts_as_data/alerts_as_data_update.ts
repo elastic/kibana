@@ -42,6 +42,13 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   describe('alerts as data update persisted alerts', function () {
     this.tags('skipFIPS');
+    before(async () => {
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+    });
     afterEach(async () => {
       await objectRemover.removeAll();
       await es.deleteByQuery({

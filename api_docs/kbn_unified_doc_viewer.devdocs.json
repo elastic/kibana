@@ -48,7 +48,7 @@
                   },
                   " | ",
                   "DocView",
-                  "[] | undefined"
+                  "<object>[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "lineNumber": 27,
@@ -70,7 +70,7 @@
             "signature": [
               "() => ",
               "DocView",
-              "[]"
+              "<object>[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "lineNumber": 39,
@@ -90,7 +90,7 @@
             "signature": [
               "(docView: ",
               "DocView",
-              ") => void"
+              "<object>) => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "lineNumber": 43,
@@ -106,7 +106,8 @@
                 "label": "docView",
                 "description": [],
                 "signature": [
-                  "DocView"
+                  "DocView",
+                  "<object>"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "lineNumber": 43,
@@ -285,7 +286,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -443,7 +444,7 @@
             "description": [],
             "signature": [
               "DocView",
-              "[]"
+              "<object>[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
             "lineNumber": 25,
@@ -469,6 +470,79 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.DocViewerProps.initialDocViewerState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialDocViewerState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.DocViewerProps.onInitialDocViewerStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialDocViewerStateChange",
+            "description": [],
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-public.DocViewerRestorableState",
+                "text": "DocViewerRestorableState"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-doc-viewer",
+                "id": "def-public.DocViewerProps.onInitialDocViewerStateChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-doc-viewer",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedDocViewerPluginApi",
+                    "section": "def-public.DocViewerRestorableState",
+                    "text": "DocViewerRestorableState"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
+                "lineNumber": 28,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
             "id": "def-public.DocViewerProps.onUpdateSelectedTabId",
             "type": "Function",
             "tags": [],
@@ -478,7 +552,7 @@
               "((tabId: string | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
-            "lineNumber": 27,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -494,7 +568,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/doc_viewer/doc_viewer.tsx",
-                "lineNumber": 27,
+                "lineNumber": 29,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -502,6 +576,41 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-doc-viewer",
+        "id": "def-public.DocViewerRestorableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocViewerRestorableState",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-public.DocViewerRestorableState.docViewerTabsState",
+            "type": "Object",
+            "tags": [],
+            "label": "docViewerTabsState",
+            "description": [
+              "\nRepresents the restorable state for all doc viewer tabs, keyed by tab ID.\nEach tab can store its own state as needed."
+            ],
+            "signature": [
+              "DocViewerTabsState",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/services/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

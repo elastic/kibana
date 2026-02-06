@@ -84,6 +84,7 @@ export const UpsertViewModal = ({
         <EuiSpacer size="xl" />
         <EuiSwitch
           id={'saved-view-save-time-checkbox'}
+          data-test-subj="savedViews-includeTimeCheckbox"
           label={
             <FormattedMessage
               defaultMessage="Store time with view"

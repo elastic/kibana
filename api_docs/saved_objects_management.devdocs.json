@@ -348,11 +348,11 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; readOnly?: boolean | undefined; headers?: string | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"baseline\" | \"middle\" | \"top\" | \"bottom\" | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; render?: ((value: any, item: ",
+              " | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"baseline\" | \"middle\" | \"top\" | \"bottom\" | undefined; render?: ((value: any, item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -920,7 +920,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "lineNumber": 82,
@@ -2300,7 +2300,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "lineNumber": 82,

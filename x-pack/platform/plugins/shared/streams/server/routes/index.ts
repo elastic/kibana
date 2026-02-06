@@ -28,6 +28,10 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/streams/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
+import { internalInsightsRoutes } from './internal/streams/insights/route';
+import { internalTasksRoutes } from './internal/streams/tasks/route';
+import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
+import { internalQueriesRoutes } from './internal/streams/queries/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -45,6 +49,10 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalFeatureRoutes,
+  ...internalInsightsRoutes,
+  ...internalTasksRoutes,
+  ...internalOnboardingRoutes,
+  ...internalQueriesRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

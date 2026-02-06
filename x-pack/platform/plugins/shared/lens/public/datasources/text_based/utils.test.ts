@@ -631,41 +631,16 @@ describe('Text based languages utils', () => {
 
     it('should return true if there are many columns regardless the types', async () => {
       const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'c',
-          name: 'Test 3',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          id: 'd',
-          name: 'Test 4',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'e',
-          name: 'Test 5',
-          meta: {
-            type: 'string',
-          },
-        },
+        { id: 'a', name: 'Test 1', meta: { type: 'number' } },
+        { id: 'b', name: 'Test 2', meta: { type: 'number' } },
+        { id: 'c', name: 'Test 3', meta: { type: 'date' } },
+        { id: 'd', name: 'Test 4', meta: { type: 'string' } },
+        { id: 'e', name: 'Test 5', meta: { type: 'string' } },
+        { id: 'f', name: 'Test 6', meta: { type: 'string' } },
+        { id: 'g', name: 'Test 7', meta: { type: 'string' } },
+        { id: 'h', name: 'Test 8', meta: { type: 'string' } },
+        { id: 'i', name: 'Test 9', meta: { type: 'string' } },
+        { id: 'j', name: 'Test 10', meta: { type: 'string' } },
       ] as DatatableColumn[];
       const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
       expect(flag).toBeTruthy();

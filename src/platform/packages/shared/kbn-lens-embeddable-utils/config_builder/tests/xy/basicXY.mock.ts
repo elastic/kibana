@@ -17,6 +17,7 @@ import type {
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import type { LensApiState } from '../../schema';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -454,7 +455,7 @@ export const breakdownXY: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
       ],
       legend: {
@@ -583,7 +584,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -592,7 +593,7 @@ export const barWithTwoLayersAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
       ],
       legend: {
@@ -768,7 +769,7 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'line',
           xAccessor: '315033e2-8172-4213-87e0-d4e7f09ccca7',
-          splitAccessor: '315033e2-8172-4213-87e0-d4e7f09cccaX',
+          splitAccessors: ['315033e2-8172-4213-87e0-d4e7f09cccaX'],
         },
         {
           accessors: ['layer2_metric1'],
@@ -777,16 +778,16 @@ export const mixedChartAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'bar',
           xAccessor: 'layer2_date_histogram',
-          splitAccessor: 'layer2_terms',
+          splitAccessors: ['layer2_terms'],
         },
         {
           accessors: ['layer3_metric1'],
-          isHistogram: true,
+          isHistogram: 'jello',
           layerId: 'layer3',
-          layerType: 'data',
+          layerType: 'xxx',
           seriesType: 'area',
-          xAccessor: 'layer3_date_histogram',
-          splitAccessor: 'layer3_terms',
+          xAccessor: 123,
+          splitAccessors: ['layer3_terms'],
         },
       ],
       legend: {
@@ -1062,5 +1063,175 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
+};
+
+export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visibility: 'visible',
+    inside: true,
+    alignment: 'top_right',
+  },
+  fitting: {
+    type: 'linear',
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    left: {
+      title: {
+        visible: false,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    right: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+  },
+  decorations: {
+    show_value_labels: false,
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      dataset: {
+        type: 'dataView',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        size: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'column',
+          metric: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    query: '',
+    language: 'kuery',
+  },
+};
+
+export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visibility: 'visible',
+    inside: false,
+    position: 'bottom',
+  },
+  fitting: {
+    type: 'linear',
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    left: {
+      title: {
+        visible: false,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    right: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+  },
+  decorations: {
+    show_value_labels: false,
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      dataset: {
+        type: 'dataView',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        size: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'column',
+          metric: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    query: '',
+    language: 'kuery',
+  },
 };

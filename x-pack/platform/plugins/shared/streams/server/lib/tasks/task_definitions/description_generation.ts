@@ -9,6 +9,8 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { generateStreamDescription } from '@kbn/streams-ai';
+import type { GenerateDescriptionResult } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -25,10 +27,7 @@ export interface DescriptionGenerationTaskParams {
   connectorId: string;
   start: number;
   end: number;
-}
-
-export interface GenerateDescriptionResult {
-  description: string;
+  streamName: string;
 }
 
 export function createStreamsDescriptionGenerationTask(taskContext: TaskContext) {
@@ -42,9 +41,8 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, _task } = runContext.taskInstance
+              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<DescriptionGenerationTaskParams>;
-              const { stream: name } = _task;
 
               const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
                 await taskContext.getScopedClients({
@@ -58,7 +56,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
 
               try {
                 const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
-                const stream = await streamsClient.getStream(name);
+                const stream = await streamsClient.getStream(streamName);
 
                 const { description, tokensUsed } = await generateStreamDescription({
                   stream,
@@ -81,7 +79,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                 await taskClient.complete<
                   DescriptionGenerationTaskParams,
                   GenerateDescriptionResult
-                >(_task, { connectorId, start, end }, { description });
+                >(_task, { connectorId, start, end, streamName }, { description });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -94,7 +92,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -107,9 +105,11 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                     connectorId,
                     start,
                     end,
+                    streamName,
                   },
                   errorMessage
                 );
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

@@ -720,4 +720,78 @@ describe('<Graph />', () => {
       });
     });
   });
+
+  describe('interactive class', () => {
+    const testNodes: NodeViewModel[] = [
+      {
+        id: 'entity1',
+        label: 'Entity Node',
+        color: 'primary',
+        shape: 'hexagon',
+      },
+      {
+        id: 'label1',
+        label: 'Label Node',
+        color: 'primary',
+        shape: 'label',
+      },
+    ];
+
+    it('should add non-interactive class to nodes when interactive is false', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should not add non-interactive class to nodes when interactive is true', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).not.toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should add non-interactive class to relationship nodes when interactive is false', async () => {
+      const nodesWithRelationship: NodeViewModel[] = [
+        ...testNodes,
+        {
+          id: 'rel1',
+          label: 'Owns',
+          shape: 'relationship',
+        },
+      ];
+
+      const { container } = renderGraphPreview({
+        nodes: nodesWithRelationship,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const relationshipNode = container.querySelector('[data-id="rel1"]');
+        expect(relationshipNode).not.toBeNull();
+        expect(relationshipNode).toHaveClass('non-interactive');
+      });
+    });
+  });
 });

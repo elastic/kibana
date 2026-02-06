@@ -32,6 +32,9 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
   useWorkflowActions: () => mockUseWorkflowActions(),
 }));
+jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
+  useFetchConnector: () => jest.fn(() => ({ data: undefined, isLoading: false })),
+}));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: (selector: any) => mockUseSelector(selector),
@@ -67,7 +70,7 @@ jest.mock('../../../features/workflow_visual_editor', () => ({
   ),
 }));
 
-jest.mock('../../../features/debug-graph/execution_graph', () => ({
+jest.mock('../../../features/debug_graph/execution_graph', () => ({
   ExecutionGraph: () => (
     <div data-test-subj="execution-graph">
       <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
@@ -80,7 +83,7 @@ jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
     <div data-test-subj="test-step-modal">
       <button
         type="button"
-        data-test-subj="submit-step"
+        data-test-subj="submit-step-run"
         onClick={() => onSubmit({ stepInputs: {} })}
       >
         {'Submit'}
@@ -146,6 +149,7 @@ describe('WorkflowDetailEditor', () => {
             return false;
           }),
         },
+        notifications: { toasts: { addError: jest.fn() } },
       },
     });
 
@@ -228,6 +232,38 @@ describe('WorkflowDetailEditor', () => {
 
       // The component should handle the step run internally
       expect(mockUseWorkflowActions).toHaveBeenCalled();
+    });
+
+    it('should show toast error when step run fails', async () => {
+      const { getByTestId, queryByTestId } = renderEditor();
+      const runButton = getByTestId('test-step-run');
+
+      mockUseWorkflowActions.mockReturnValue({
+        runIndividualStep: {
+          mutateAsync: jest.fn().mockRejectedValue(new Error('Failed to run step')),
+        },
+      });
+
+      await act(async () => {
+        runButton.click();
+      });
+
+      // Wait for the modal to appear
+      await waitFor(() => {
+        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
+      });
+
+      const submitButton = getByTestId('submit-step-run');
+      await act(async () => {
+        submitButton.click();
+      });
+
+      expect(mockUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
+        new Error('Failed to run step'),
+        {
+          title: 'Failed to run step',
+        }
+      );
     });
   });
 });

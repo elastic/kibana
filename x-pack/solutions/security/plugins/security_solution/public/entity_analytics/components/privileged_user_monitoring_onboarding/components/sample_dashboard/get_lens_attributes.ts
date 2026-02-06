@@ -60,7 +60,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
             seriesType: 'bar_stacked',
             xAccessor: columnTimestampId,
             accessors: [columnResultId],
-            splitAccessor: columnUserId,
+            splitAccessors: [columnUserId],
             layerType: 'data',
             showGridlines: false,
           },

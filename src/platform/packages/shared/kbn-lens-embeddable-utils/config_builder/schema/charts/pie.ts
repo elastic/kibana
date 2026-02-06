@@ -9,21 +9,29 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
+import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendSizeSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
+  validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 /**
  * Shared visualization options for pie/donut charts including legend, value display, and label positioning
@@ -37,7 +45,7 @@ const pieStateSharedSchema = {
         visible: legendVisibleSchema,
         size: legendSizeSchema,
       },
-      { meta: { description: 'Legend configuration for pie/donut chart' } }
+      { meta: { id: 'pieLegend', description: 'Legend configuration for pie/donut chart' } }
     )
   ),
   value_display: valueDisplaySchema,
@@ -62,29 +70,17 @@ const pieStateSharedSchema = {
 /**
  * Color configuration for primary metric in pie/donut chart
  */
-const partitionStatePrimaryMetricOptionsSchema = schema.object(
-  {
-    color: schema.maybe(staticColorSchema),
-  },
-  { meta: { description: 'Primary metric visual options including static color' } }
-);
+const partitionStatePrimaryMetricOptionsSchema = {
+  color: schema.maybe(staticColorSchema),
+};
 
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = schema.object(
-  {
-    color: schema.maybe(
-      schema.oneOf([colorByValueSchema, colorMappingSchema], {
-        meta: {
-          description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
-        },
-      })
-    ),
-    collapse_by: schema.maybe(collapseBySchema),
-  },
-  { meta: { description: 'Breakdown dimension options with color and collapse configuration' } }
-);
+const partitionStateBreakdownByOptionsSchema = {
+  color: schema.maybe(colorMappingSchema),
+  collapse_by: schema.maybe(collapseBySchema),
+};
 
 /**
  * Pie/donut chart type
@@ -93,18 +89,24 @@ const pieTypeSchema = schema.oneOf([schema.literal('pie'), schema.literal('donut
   meta: { description: 'Chart type: pie or donut' },
 });
 
-function validateGroupings(obj: {
-  metrics: unknown[];
-  group_by?: Array<{ collapse_by?: unknown }>;
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
 }) {
-  if (obj.metrics.length > 1) {
-    if ((obj.group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 2) {
-      return 'When using multiple metrics, the number of group by dimensions must not exceed 2 (collapsed dimensions do not count).';
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 3) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 3';
+    }
+  } else {
+    if (groupByDimensionNumber > 2) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2';
     }
   }
-  if ((obj.group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 3) {
-    return 'The number of non-collapsed group by dimensions must not exceed 3.';
-  }
+  return validateColoringAssignments({ metrics, group_by });
 }
 
 /**
@@ -116,7 +118,9 @@ export const pieStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...pieStateSharedSchema,
+    ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
@@ -133,14 +137,14 @@ export const pieStateSchemaNoESQL = schema.object(
         {
           minSize: 1,
           maxSize: 100,
-          meta: { description: 'Array of breakdown dimensions (minimum 1, maximum 3)' },
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
         }
       )
     ),
   },
   {
-    meta: { description: 'Pie/donut chart configuration for standard queries' },
-    validate: validateGroupings,
+    meta: { id: 'pieNoESQL', description: 'Pie/donut chart configuration for standard queries' },
+    validate: validateForMultipleMetrics,
   }
 );
 
@@ -155,12 +159,8 @@ const pieStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
-      schema.allOf(
-        [
-          schema.object(genericOperationOptionsSchema),
-          partitionStatePrimaryMetricOptionsSchema,
-          esqlColumnSchema,
-        ],
+      esqlColumnOperationWithLabelAndFormatSchema.extends(
+        partitionStatePrimaryMetricOptionsSchema,
         { meta: { description: 'ES|QL column reference for primary metric' } }
       ),
       {
@@ -170,21 +170,16 @@ const pieStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(
-        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-          meta: { description: 'ES|QL column reference for breakdown dimension' },
-        }),
-        {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Array of breakdown dimensions (minimum 1, maximum 3)' },
-        }
-      )
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      })
     ),
   },
   {
-    meta: { description: 'Pie/donut chart configuration for ES|QL queries' },
-    validate: validateGroupings,
+    meta: { id: 'pieESQL', description: 'Pie/donut chart configuration for ES|QL queries' },
+    validate: validateForMultipleMetrics,
   }
 );
 
@@ -192,7 +187,10 @@ const pieStateSchemaESQL = schema.object(
  * Complete pie/donut chart configuration supporting both standard and ES|QL queries
  */
 export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
-  meta: { description: 'Pie/donut chart state: standard query or ES|QL query' },
+  meta: {
+    description: 'Pie/donut chart state: standard query or ES|QL query',
+    id: 'pieChartSchema',
+  },
 });
 
 export type PieState = TypeOf<typeof pieStateSchema>;

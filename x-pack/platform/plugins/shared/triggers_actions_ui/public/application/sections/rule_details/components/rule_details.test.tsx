@@ -47,6 +47,10 @@ const queryClient = new QueryClient({
 
 jest.mock('../../../../common/lib/kibana');
 
+const { getIsExperimentalFeatureEnabled } = jest.requireMock(
+  '../../../../common/get_experimental_features'
+);
+
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
@@ -522,12 +526,23 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('links to the app that created the rule', () => {
+      it('renders view in app button in management context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
         const rule = mockRule();
         expect(
           shallowWithIntl(
             <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
           ).find('ViewInApp')
+        ).toBeTruthy();
+      });
+
+      it('renders view linked object button in rules app context', () => {
+        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        const rule = mockRule();
+        expect(
+          shallowWithIntl(
+            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+          ).find('ViewLinkedObject')
         ).toBeTruthy();
       });
 

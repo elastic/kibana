@@ -66,9 +66,15 @@ export interface SearchSessionSavedObjectAttributes {
    * `true` if session was cancelled
    */
   isCanceled?: boolean;
+
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status?: SearchSessionStatus;
 }
 
-export interface SearchSessionRequestInfo {
+// For this type we need to omit status because we can't go from it being present to optional
+export interface SearchSessionRequestInfo extends Omit<SearchSessionRequestStatus, 'status'> {
   /**
    * ID of the async search request
    */
@@ -77,14 +83,30 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status?: SearchStatus;
 }
 
 export interface SearchSessionRequestStatus {
   status: SearchStatus;
+
+  /**
+   * Optional start time. May be undefined if ES doesn't return it.
+   */
+  startedAt?: string;
+  /**
+   * Optional completion time. May be undefined if the search is still in progress
+   */
+  completedAt?: string;
   /**
    * An optional error. Set if status is set to error.
    */
-  error?: string;
+  error?: {
+    code: number;
+    message?: string;
+  };
 }
 
 /**

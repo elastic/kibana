@@ -34,3 +34,10 @@ export const DETAILS = i18n.translate(
     defaultMessage: 'Details',
   }
 );
+
+export const INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.attackDetails.tabs.attackSummaryTab.investigateInTimelineButtonLabel',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);

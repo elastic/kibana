@@ -6,19 +6,15 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import { subj } from '@kbn/test-subj-selector';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
 
-export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
-  kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
-})
-
-  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await kibanaPage.waitForListViewTable();
-  })
-
-  .step('Go to Flights Dashboard', async ({ page, kibanaPage }) => {
-    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    await kibanaPage.waitForVisualizations({ count: 14 });
-  });
+export const journey = setupDashboardJourney({
+  // call the journey constructor in this file so the name is set correctly
+  journey: new Journey({
+    esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
+    kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
+  }),
+  dashboardName: 'Flights Dashboard',
+  dashboardLinkSubj: 'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard',
+  visualizationCount: 14,
+});
