@@ -166,7 +166,13 @@ export async function runJestAll() {
     }
   }
 
-  log.write('--- Combined Jest run summary');
+  // Output result summary without block header so it folds under "Jest configs complete (combined)"
+  const passedCount = results.filter((r) => r.code === 0).length;
+  const failedCount = results.filter((r) => r.code !== 0).length;
+  const status = globalExit === 0 ? '✅ PASSED' : '❌ FAILED';
+  
+  log.info(`${status} - ${passedCount} passed, ${failedCount} failed`);
+  log.info('');
 
   await writeSummary(results, log, totalMs);
 
