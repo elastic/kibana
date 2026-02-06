@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-import type { services } from './services';
-import type { pageObjects } from './page_objects';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
