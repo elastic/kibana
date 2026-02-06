@@ -78,11 +78,7 @@ const baseEntitySourceSchema = {
 const baseEntitySourceSchemaV2 = {
   ...baseEntitySourceSchema,
   matchersModifiedByUser: schema.boolean({ defaultValue: false }),
-};
-
-const baseEntitySourceSchemaV3 = {
-  ...baseEntitySourceSchemaV2,
-  managedVersion: schema.maybe(schema.number()),
+  managedVersion: schema.maybe(schema.number()), // or schema.number({ defaultValue: MANAGED_SOURCES_VERSION })
 };
 
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
@@ -99,49 +95,23 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         matchersModifiedByUser: { type: 'boolean' },
-      },
-    },
-    {
-      type: 'data_backfill',
-      backfillFn: (document) => {
-        return {
-          attributes: {
-            ...document.attributes,
-            matchersModifiedByUser: document.attributes.matchersModifiedByUser ?? false,
-          },
-        };
-      },
-    },
-  ],
-  schemas: {
-    forwardCompatibility: schema.object(baseEntitySourceSchemaV2, { unknowns: 'ignore' }),
-    create: schema.object(baseEntitySourceSchemaV2),
-  },
-};
-
-const monitoringEntitySourceModelVersion3: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
         managedVersion: { type: 'integer' },
       },
     },
     {
       type: 'data_backfill',
-      backfillFn: (document) => {
-        return {
-          attributes: {
-            ...document.attributes,
-            managedVersion: MANAGED_SOURCES_VERSION,
-          },
-        };
-      },
+      backfillFn: (document) => ({
+        attributes: {
+          ...document.attributes,
+          matchersModifiedByUser: document.attributes.matchersModifiedByUser ?? false,
+          managedVersion: document.attributes.managedVersion ?? MANAGED_SOURCES_VERSION,
+        },
+      }),
     },
   ],
   schemas: {
-    forwardCompatibility: schema.object(baseEntitySourceSchemaV3, { unknowns: 'ignore' }),
-    create: schema.object(baseEntitySourceSchemaV3),
+    forwardCompatibility: schema.object(baseEntitySourceSchemaV2, { unknowns: 'ignore' }),
+    create: schema.object(baseEntitySourceSchemaV2),
   },
 };
 
@@ -154,6 +124,5 @@ export const monitoringEntitySourceType: SavedObjectsType = {
   modelVersions: {
     '1': monitoringEntitySourceModelVersion1,
     '2': monitoringEntitySourceModelVersion2,
-    '3': monitoringEntitySourceModelVersion3,
   },
 };
