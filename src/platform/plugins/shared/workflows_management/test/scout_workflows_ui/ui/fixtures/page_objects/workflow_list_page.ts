@@ -10,23 +10,15 @@
 import { expect, KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
 
 export class WorkflowListPage {
-  public yamlEditor: Locator;
-  public saveButton: Locator;
-  public runButton: Locator;
-  public validationErrorsAccordion: Locator;
+  constructor(private readonly page: ScoutPage) {}
 
-  constructor(private readonly page: ScoutPage) {
-    this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
-    this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('runWorkflowHeaderButton');
-    this.validationErrorsAccordion = this.page.testSubj.locator(
-      'wf-yaml-editor-validation-errors-list'
-    );
+  async navigate() {
+    await this.page.gotoApp('workflows');
   }
 
   async createDummyWorkflows(workflows: { name: string; description: string; enabled: boolean }[]) {
     for (const workflow of workflows) {
-      await this.page.gotoApp('workflows');
+      await this.navigate();
       await this.page.testSubj.click('createWorkflowButton');
 
       const yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -53,7 +45,7 @@ steps:
   }
 
   async selectWorkflows(workflowNamesToCheck: string[]) {
-    await this.page.gotoApp('workflows');
+    await this.navigate();
 
     for (const workflowName of workflowNamesToCheck) {
       await this.page
@@ -73,6 +65,32 @@ steps:
     await this.page.testSubj.click(`workflows-bulk-action-${action}`);
   }
 
+  async getThreeDotsMenuAction(
+    workflowName: string,
+    action:
+      | 'runWorkflowAction'
+      | 'editWorkflowAction'
+      | 'cloneWorkflowAction'
+      | 'deleteWorkflowAction'
+  ) {
+    await this.page
+      .locator('tr')
+      .filter({ hasText: workflowName })
+      .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
+      .click();
+    return this.page.locator(`.euiContextMenuPanel button[data-test-subj="${action}"]`);
+  }
+
+  async getWorkflowAction(
+    workflowName: string,
+    action: 'runWorkflowAction' | 'editWorkflowAction'
+  ) {
+    return this.page
+      .locator('tr')
+      .filter({ hasText: workflowName })
+      .locator(`[data-test-subj="${action}"]`);
+  }
+
   async getSelectCheckboxForWorkflow(workflowName: string) {
     return this.page
       .locator('tr')
@@ -80,7 +98,7 @@ steps:
       .locator('td:first-child input[type="checkbox"]');
   }
 
-  async getWorkflowEnabledToggle(workflowName: string): Promise<Locator> {
+  async getWorkflowStateToggle(workflowName: string): Promise<Locator> {
     return this.page
       .locator('tr')
       .filter({ hasText: workflowName })
