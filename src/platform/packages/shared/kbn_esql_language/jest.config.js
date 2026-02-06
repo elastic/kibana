@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-language'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn_esql_language'],
 };

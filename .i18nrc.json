@@ -109,7 +109,7 @@
       "src/platform/packages/private/react"
     ],
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
-    "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
+    "esqlUtils": "src/platform/packages/shared/kbn_esql_utils",
     "reporting": "src/platform/packages/private/kbn-reporting",
     "savedObjects": "src/platform/plugins/shared/saved_objects",
     "savedObjectsFinder": "src/platform/plugins/shared/saved_objects_finder",

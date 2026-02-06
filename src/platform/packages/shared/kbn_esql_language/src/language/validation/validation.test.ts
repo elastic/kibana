@@ -250,7 +250,7 @@ describe('validation logic', () => {
     });
 
     // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-language/src/parser/esql_error_listener.ts
+    // by suppressing the parser error in src/platform/packages/shared/kbn_esql_language/src/parser/esql_error_listener.ts
     describe('EMPTY query does NOT produce syntax error', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);

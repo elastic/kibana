@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-esql'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-utils
+    sourceRoot: src/platform/packages/shared/kbn_esql_utils
 dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/crypto-browser'

@@ -6829,7 +6829,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-language@link:src/platform/packages/shared/kbn-esql-language":
+"@kbn/esql-language@link:src/platform/packages/shared/kbn_esql_language":
   version "0.0.0"
   uid ""
 
@@ -6845,7 +6845,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
+"@kbn/esql-utils@link:src/platform/packages/shared/kbn_esql_utils":
   version "0.0.0"
   uid ""
 

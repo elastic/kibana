@@ -16,8 +16,8 @@
     "build:antlr4:promql:lexer": "antlr -Dlanguage=TypeScript src/parser/antlr/promql_lexer.g4",
     "make:defs": "./scripts/make_defs.sh",
     "postmake:defs": "yarn run lint:fix:generated",
-    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated",
-    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts"
+    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn_esql_language/src/commands/definitions/generated",
+    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn_esql_language/src/language/validation/validation.test.ts"
   },
   "sideEffects": false,
   "devDependencies": {

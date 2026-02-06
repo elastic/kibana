@@ -3,7 +3,7 @@
 >[!WARNING]
 > This package is deprecated and will be removed in a future version.
 > Please migrate to the Composer API in `@kbn/esql-language`.
-> See: [src/platform/packages/shared/kbn-esql-language/src/composer/README.md](../kbn-esql-language/src/composer/README.md)
+> See: [src/platform/packages/shared/kbn_esql_language/src/composer/README.md](../kbn_esql_language/src/composer/README.md)
 
 This package provides a high-level, functional ESQL composer for safely and programmatically building Elasticsearch queries. It serves as a user-friendly abstraction over the `@kbn/esql-language` package.
 

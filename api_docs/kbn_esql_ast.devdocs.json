@@ -11302,19 +11302,19 @@
               },
               {
                 "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+                "path": "src/platform/packages/shared/kbn_esql_utils/src/utils/query_parsing_helpers.test.ts"
               },
               {
                 "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+                "path": "src/platform/packages/shared/kbn_esql_utils/src/utils/query_parsing_helpers.test.ts"
               },
               {
                 "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+                "path": "src/platform/packages/shared/kbn_esql_utils/src/utils/query_parsing_helpers.test.ts"
               },
               {
                 "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+                "path": "src/platform/packages/shared/kbn_esql_utils/src/utils/query_parsing_helpers.test.ts"
               }
             ]
           }

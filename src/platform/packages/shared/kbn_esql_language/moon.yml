@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-esql'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-language
+    sourceRoot: src/platform/packages/shared/kbn_esql_language
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-types'
