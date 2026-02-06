@@ -23,12 +23,14 @@ import { InventoryPage } from './page_objects/inventory';
 import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
 import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 import { NodeDetailsPage } from './page_objects/node_details/node_details';
+import { SavedViews } from './page_objects/saved_views';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
     assetDetailsPage: AssetDetailsPage;
     nodeDetailsPage: NodeDetailsPage;
+    savedViews: SavedViews;
   };
 }
 
@@ -44,11 +46,14 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
     { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
+    const savedViews = createLazyPageObject(SavedViews, page);
+
     const extendedPageObjects = {
       ...pageObjects,
-      inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl),
+      inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl, savedViews),
       assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
       nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
+      savedViews,
     };
 
     await use(extendedPageObjects);
