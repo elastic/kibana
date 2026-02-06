@@ -101,6 +101,21 @@ export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
+export const userConnectorTokenMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    profileUid: {
+      type: 'keyword',
+    },
+    connectorId: {
+      type: 'keyword',
+    },
+    credentialType: {
+      type: 'keyword',
+    },
+  },
+};
+
 export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
