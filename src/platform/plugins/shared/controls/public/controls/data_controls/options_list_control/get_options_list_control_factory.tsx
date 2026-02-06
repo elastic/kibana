@@ -67,8 +67,6 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
-import { EuiFormRow, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,

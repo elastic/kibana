@@ -14,7 +14,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiCanPinPanels, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   type PublishingSubject,
   initializeStateManager,
@@ -36,7 +36,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
-      const titlesManager = initializeTitleManager(state);
+      const titlesManager = initializeTitleManager({ ...state, hide_title: true });
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
@@ -193,6 +193,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => (
@@ -216,6 +218,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             <OptionsListControl
               // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
               disableMultiValueEmptySelection={true}
+              isPinned={isPinned}
             />
           </OptionsListControlContext.Provider>
         ),
