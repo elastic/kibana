@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/core-chrome-app-menu'
   - '@kbn/es-query-constants'
   - '@kbn/controls-renderer'
+  - '@kbn/esql'
 tags:
   - plugin
   - prod
