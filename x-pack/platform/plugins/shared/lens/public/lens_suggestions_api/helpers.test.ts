@@ -994,7 +994,10 @@ describe('lens suggestions api helpers', () => {
         };
 
         expect(
-          shouldPreferLineForTimeSeries(nonTsContext as unknown as typeof context, mockAllSuggestions[0])
+          shouldPreferLineForTimeSeries(
+            nonTsContext as unknown as typeof context,
+            mockAllSuggestions[0]
+          )
         ).toBe(false);
       });
 
@@ -1041,7 +1044,10 @@ describe('lens suggestions api helpers', () => {
         } as unknown as Suggestion;
 
         expect(
-          shouldPreferLineForTimeSeries(tsContext as unknown as typeof context, suggestionWithoutDate)
+          shouldPreferLineForTimeSeries(
+            tsContext as unknown as typeof context,
+            suggestionWithoutDate
+          )
         ).toBe(false);
       });
 
@@ -1129,7 +1135,10 @@ describe('lens suggestions api helpers', () => {
         } as unknown as Suggestion;
 
         expect(
-          shouldPreferLineForTimeSeries(promqlContext as unknown as typeof context, suggestionWithDate)
+          shouldPreferLineForTimeSeries(
+            promqlContext as unknown as typeof context,
+            suggestionWithDate
+          )
         ).toBe(true);
       });
     });
