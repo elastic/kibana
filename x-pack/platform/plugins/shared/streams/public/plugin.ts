@@ -62,7 +62,7 @@ export class Plugin implements StreamsPluginClass {
             signal: new AbortController().signal,
           });
         } catch (error) {
-          this.logger.error(error);
+          this.logger.error(error instanceof Error ? error : String(error));
           return UNKNOWN_WIRED_STATUS;
         }
       },
@@ -72,7 +72,7 @@ export class Plugin implements StreamsPluginClass {
             signal: new AbortController().signal,
           });
         } catch (error) {
-          this.logger.error(error);
+          this.logger.error(error instanceof Error ? error : String(error));
           return UNKNOWN_CLASSIC_STATUS;
         }
       },

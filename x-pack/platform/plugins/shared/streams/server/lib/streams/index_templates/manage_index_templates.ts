@@ -7,6 +7,7 @@
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getErrorMessage } from '../errors/get_error_message';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface TemplateManagementOptions {
@@ -26,7 +27,7 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(template), { logger });
     logger.debug(() => `Installed index template: ${JSON.stringify(template)}`);
   } catch (error) {
-    logger.error(`Error updating index template: ${(error as Error).message}`);
+    logger.error(`Error updating index template: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -38,7 +39,7 @@ export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateO
       { logger }
     );
   } catch (error) {
-    logger.error(`Error deleting index template: ${(error as Error).message}`);
+    logger.error(`Error deleting index template: ${getErrorMessage(error)}`);
     throw error;
   }
 }

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getErrorMessage } from '../errors/get_error_message';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DeletePipelineOptions {
@@ -28,7 +29,7 @@ export async function deleteIngestPipeline({ esClient, id, logger }: DeletePipel
       logger,
     });
   } catch (error) {
-    logger.error(`Error deleting ingest pipeline: ${(error as Error).message}`);
+    logger.error(`Error deleting ingest pipeline: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -42,7 +43,7 @@ export async function upsertIngestPipeline({
     await retryTransientEsErrors(() => esClient.ingest.putPipeline(pipeline), { logger });
     logger.debug(() => `Installed ingest pipeline: ${JSON.stringify(pipeline)}`);
   } catch (error) {
-    logger.error(`Error updating ingest pipeline: ${(error as Error).message}`);
+    logger.error(`Error updating ingest pipeline: ${getErrorMessage(error)}`);
     throw error;
   }
 }

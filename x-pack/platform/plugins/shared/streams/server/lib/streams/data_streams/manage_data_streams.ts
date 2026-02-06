@@ -25,6 +25,7 @@ import {
   isEnabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { getErrorMessage } from '../errors/get_error_message';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -67,11 +68,13 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
   } catch (error) {
-    if (
-      (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type !==
-      'resource_already_exists_exception'
-    ) {
-      logger.error(`Error creating data stream: ${(error as Error).message}`);
+    const isAlreadyExists =
+      error instanceof Object &&
+      'meta' in error &&
+      (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
+        'resource_already_exists_exception';
+    if (!isAlreadyExists) {
+      logger.error(`Error creating data stream: ${getErrorMessage(error)}`);
       throw error;
     }
   }
@@ -84,7 +87,7 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
       { logger }
     );
   } catch (error) {
-    logger.error(`Error deleting data stream: ${(error as Error).message}`);
+    logger.error(`Error deleting data stream: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -254,7 +257,7 @@ export async function updateDataStreamsLifecycle({
       );
     }
   } catch (err) {
-    logger.error(`Error updating data stream lifecycle: ${(err as Error).message}`);
+    logger.error(`Error updating data stream lifecycle: ${getErrorMessage(err)}`);
     throw err;
   }
 }
@@ -348,7 +351,7 @@ export async function updateDataStreamsFailureStore({
       { logger }
     );
   } catch (err) {
-    logger.error(`Error updating data stream failure store: ${(err as Error).message}`);
+    logger.error(`Error updating data stream failure store: ${getErrorMessage(err)}`);
     throw err;
   }
 }

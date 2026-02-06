@@ -27,6 +27,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { getErrorMessage } from '../../errors/get_error_message';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
 import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
@@ -107,7 +108,7 @@ export class ExecutionPlan {
       );
     } catch (error) {
       throw new FailedToPlanElasticsearchActionsError(
-        `Failed to plan Elasticsearch action execution: ${error.message}`
+        `Failed to plan Elasticsearch action execution: ${getErrorMessage(error)}`
       );
     }
 
@@ -236,7 +237,7 @@ export class ExecutionPlan {
       ]);
     } catch (error) {
       throw new FailedToExecuteElasticsearchActionsError(
-        `Failed to execute Elasticsearch actions: ${error.message}`
+        `Failed to execute Elasticsearch actions: ${getErrorMessage(error)}`
       );
     }
   }

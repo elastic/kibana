@@ -229,7 +229,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
        * N.B. THIS IS A BANDAID FIX THAT SHOULD BE REMOVED AS QUICKLY AS POSSIBLE WHEN THE ISSUE IS FIXED.
        *
        */
-      if (error.message.includes('time_series_dimension')) {
+      if (error instanceof Error && error.message.includes('time_series_dimension')) {
         sampleResults = await scopedClusterClient.asCurrentUser.search({
           index: params.path.name,
           ...documentSamplesSearchBody,
