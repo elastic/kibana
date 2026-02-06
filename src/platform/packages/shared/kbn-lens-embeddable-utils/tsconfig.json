@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "config_builder/tests/integrations/download_integrations_panels.js"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
