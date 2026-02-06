@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
-import type { EntityType } from './definitions/entity_schema';
 import { DocumentVersionConflictError, EntityNotFoundError } from './errors';
 import type { Entity } from './schemas/entity.gen';
 
@@ -44,13 +43,9 @@ export class EntityManager {
     // TODO: getFlattenedObject()
 
     const id = this.getEntityId(document);
-    if (document.entity.type === undefined) {
-      throw new Error(`Entity ID ${id} type undefined`);
-    }
     this.logger.info(`Upserting entity ID ${id}`);
     const { result } = await this.esClient.update({
-      // TODO: remove entity type after single index merge
-      index: getLatestEntitiesIndexName(document.entity.type as EntityType, this.namespace),
+      index: getLatestEntitiesIndexName(this.namespace),
       id,
       doc: document,
       doc_as_upsert: true,
@@ -78,8 +73,7 @@ export class EntityManager {
 
   public async deleteEntity(id: string) {
     const resp = await this.esClient.deleteByQuery({
-      // TODO: remove entity type after single index merge
-      index: getLatestEntitiesIndexName('generic', this.namespace),
+      index: getLatestEntitiesIndexName(this.namespace),
       query: {
         term: {
           'entity.id': id,
