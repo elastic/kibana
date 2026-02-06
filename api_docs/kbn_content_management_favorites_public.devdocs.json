@@ -28,7 +28,7 @@
           "<Metadata>"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-        "lineNumber": 40,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 43,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -60,7 +60,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 44,
+                "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -77,7 +77,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 45,
+                "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -91,7 +91,7 @@
                 "label": "deps",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 46,
+                "lineNumber": 51,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -107,7 +107,7 @@
                       "HttpSetup"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "lineNumber": 47,
+                    "lineNumber": 52,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -123,7 +123,7 @@
                       "UserProfileService"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "lineNumber": 48,
+                    "lineNumber": 53,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -146,7 +146,7 @@
                       " | undefined"
                     ],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "lineNumber": 49,
+                    "lineNumber": 54,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -167,7 +167,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 53,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +187,7 @@
               "<Metadata>>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 62,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -213,7 +213,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 67,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -229,7 +229,7 @@
                   "AddFavoriteRequest<Metadata>"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 67,
+                "lineNumber": 78,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -257,7 +257,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 75,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -270,7 +270,7 @@
                 "label": "{ id }",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 88,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -283,7 +283,7 @@
                     "label": "id",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "lineNumber": 75,
+                    "lineNumber": 88,
                     "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false
@@ -304,7 +304,7 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 82,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -322,7 +322,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 86,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -340,7 +340,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 89,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -723,7 +723,7 @@
           "<Metadata>"
         ],
         "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-        "lineNumber": 29,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -741,7 +741,7 @@
               "<Metadata>>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 30,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -767,7 +767,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 31,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -783,7 +783,7 @@
                   "AddFavoriteRequest<Metadata>"
                 ],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 31,
+                "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -811,7 +811,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 32,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -824,7 +824,7 @@
                 "label": "params",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                "lineNumber": 32,
+                "lineNumber": 37,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -837,7 +837,7 @@
                     "label": "id",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "lineNumber": 32,
+                    "lineNumber": 37,
                     "columnNumber": 28,
                     "deprecated": false,
                     "trackAdoption": false
@@ -858,7 +858,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 34,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -876,7 +876,7 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 35,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -894,7 +894,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 36,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -912,7 +912,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/favorites_client.ts",
-            "lineNumber": 37,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

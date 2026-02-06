@@ -3628,9 +3628,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.EmbeddableApiContext",
+                "section": "def-common.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<boolean>"
@@ -3651,9 +3651,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.EmbeddableApiContext",
+                    "section": "def-common.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],

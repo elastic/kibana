@@ -32,7 +32,7 @@
           "<Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-        "lineNumber": 278,
+        "lineNumber": 286,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-            "lineNumber": 279,
+            "lineNumber": 287,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +202,7 @@
           "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 107,
+        "lineNumber": 111,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -218,7 +218,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 108,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4649,6 +4649,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
               }
             ]
           },
@@ -6369,7 +6373,7 @@
           "<Readonly<{} & { names: string[]; }>[] | undefined>; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 78,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6433,7 +6437,7 @@
           "<Readonly<{} & {}> | undefined>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 68,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

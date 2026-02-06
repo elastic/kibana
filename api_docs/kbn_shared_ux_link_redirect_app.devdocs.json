@@ -386,6 +386,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -432,18 +444,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",
@@ -1003,6 +1003,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -1049,18 +1061,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",
@@ -1620,6 +1620,18 @@
             "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
           },
           {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
+            "plugin": "slo",
+            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
           },
@@ -1666,18 +1678,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
-          },
-          {
-            "plugin": "slo",
-            "path": "x-pack/solutions/observability/plugins/slo/public/application.tsx"
           },
           {
             "plugin": "synthetics",

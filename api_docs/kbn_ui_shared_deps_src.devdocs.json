@@ -1108,6 +1108,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncorechromesidebarcontext",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/core-chrome-sidebar-context'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "lineNumber": 151,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

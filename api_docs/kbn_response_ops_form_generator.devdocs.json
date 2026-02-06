@@ -15,8 +15,8 @@
           "GenerateFormFieldsParams",
           "<TSchema>) => React.JSX.Element[]"
         ],
-        "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
-        "lineNumber": 36,
+        "path": "x-pack/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,8 +32,8 @@
               "GenerateFormFieldsParams",
               "<TSchema>"
             ],
-            "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
-            "lineNumber": 36,
+            "path": "x-pack/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+            "lineNumber": 34,
             "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,

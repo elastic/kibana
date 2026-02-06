@@ -1,0 +1,116 @@
+{
+  "id": "@kbn/core-chrome-sidebar-context",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarServiceProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SidebarServiceProvider",
+        "description": [],
+        "signature": [
+          "({ children, value }: ",
+          "SidebarProviderProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarServiceProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, value }",
+            "description": [],
+            "signature": [
+              "SidebarProviderProps"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 24,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-context",
+        "id": "def-common.SidebarProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarProviderProps",
+        "description": [],
+        "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-context",
+            "id": "def-common.SidebarProviderProps.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "SidebarContextValue"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-context/index.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
