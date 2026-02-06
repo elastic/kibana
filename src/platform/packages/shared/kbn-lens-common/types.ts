@@ -259,16 +259,20 @@ export interface PublicAPIProps<T> {
   indexPatterns: IndexPatternMap;
 }
 
-export type FieldOnlyDataType =
-  | 'document'
-  | 'ip'
-  | 'histogram'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'counter'
-  | 'gauge'
-  | 'murmur3';
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
+export const FIELD_ONLY_DATA_TYPES = [
+  'document',
+  'ip',
+  'histogram',
+  'geo_point',
+  'geo_shape',
+  'counter',
+  'gauge',
+  'murmur3',
+] as const;
+export type FieldOnlyDataType = (typeof FIELD_ONLY_DATA_TYPES)[number];
+
+export const DATA_TYPES = ['string', 'number', 'date', 'boolean', ...FIELD_ONLY_DATA_TYPES] as const;
+export type DataType = (typeof DATA_TYPES)[number];
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.

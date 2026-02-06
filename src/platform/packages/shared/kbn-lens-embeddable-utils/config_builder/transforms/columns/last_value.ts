@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
+import { DATA_TYPES, type DataType, type LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
+const validDataTypes = new Set<string>(DATA_TYPES);
+const isDataType = (value: string): value is DataType => validDataTypes.has(value);
+
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
 ): LastValueIndexPatternColumn => {
-  const { field, format, sort_by, show_array_values } = options;
+  const { field, format, sort_by, show_array_values, data_type } = options;
+  const dataType = data_type != null && isDataType(data_type) ? data_type : 'number';
 
   return {
     operationType: 'last_value',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options),
+    ...getLensStateMetricSharedProps(options, dataType),
     params: {
       sortField: sort_by,
       showArrayValues: show_array_values,
@@ -39,5 +43,6 @@ export const fromLastValueLensStateToAPI = (
     show_array_values: options.params.showArrayValues,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
+    ...(options.dataType !== 'number' ? { data_type: options.dataType } : {}),
   };
 };

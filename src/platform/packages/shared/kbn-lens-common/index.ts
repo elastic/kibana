@@ -94,6 +94,7 @@ export type {
   DatasourceFixAction,
   LensAttributesService,
 } from './types';
+export { FIELD_ONLY_DATA_TYPES, DATA_TYPES } from './types';
 export type {
   FormBasedLayer,
   FormBasedPersistedState,

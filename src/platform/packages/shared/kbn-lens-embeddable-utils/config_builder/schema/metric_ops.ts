@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
+import { DATA_TYPES } from '@kbn/lens-common';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
 import {
@@ -191,6 +192,23 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
       meta: { description: 'Handle array values' },
       defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
     }),
+    /**
+     * Data type of the field (e.g. 'number', 'string', 'date', 'boolean', 'ip').
+     * Unlike other metric operations that always return numbers,
+     * last_value returns the actual field value whose type varies.
+     * Defaults to 'number' for backward compatibility.
+     */
+    data_type: schema.maybe(
+      schema.string({
+        validate: (value) => {
+          const validTypes = new Set<string>(DATA_TYPES);
+          if (!validTypes.has(value)) {
+            return `must be one of: ${DATA_TYPES.join(', ')}`;
+          }
+        },
+        meta: { description: 'Data type of the field' },
+      })
+    ),
   },
   { meta: { id: 'lastValueOperation' } }
 );

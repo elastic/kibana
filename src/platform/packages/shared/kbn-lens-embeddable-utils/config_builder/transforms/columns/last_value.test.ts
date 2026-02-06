@@ -39,6 +39,31 @@ describe('Last Value Transforms', () => {
       expect(fromLastValueAPItoLensState(input)).toEqual(expected);
     });
 
+    it('should default to number dataType when data_type is not specified', () => {
+      const input: LensApiLastValueOperation = {
+        operation: 'last_value',
+        field: 'status',
+        sort_by: '@timestamp',
+        show_array_values: false,
+      };
+
+      const result = fromLastValueAPItoLensState(input);
+      expect(result.dataType).toBe('number');
+    });
+
+    it('should use data_type when specified', () => {
+      const input: LensApiLastValueOperation = {
+        operation: 'last_value',
+        field: 'status',
+        sort_by: '@timestamp',
+        show_array_values: false,
+        data_type: 'string',
+      };
+
+      const result = fromLastValueAPItoLensState(input);
+      expect(result.dataType).toBe('string');
+    });
+
     it('should handle format configuration', () => {
       const input: LensApiLastValueOperation = {
         operation: 'last_value',
@@ -106,9 +131,44 @@ describe('Last Value Transforms', () => {
         field: 'status',
         sort_by: '@timestamp',
         show_array_values: false,
+        data_type: 'string',
       };
 
       expect(fromLastValueLensStateToAPI(input)).toEqual(expected);
+    });
+
+    it('should not include data_type when dataType is number', () => {
+      const input: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'price',
+        label: 'Last value of price',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+        },
+      };
+
+      const result = fromLastValueLensStateToAPI(input);
+      expect(result.data_type).toBeUndefined();
+    });
+
+    it('should include data_type for non-number types', () => {
+      const input: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'client_ip',
+        label: 'Last value of client_ip',
+        isBucketed: false,
+        dataType: 'ip',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+        },
+      };
+
+      const result = fromLastValueLensStateToAPI(input);
+      expect(result.data_type).toBe('ip');
     });
 
     it('should handle format configuration', () => {
@@ -169,6 +229,68 @@ describe('Last Value Transforms', () => {
 
       const result = fromLastValueLensStateToAPI(input);
       expect(result.show_array_values).toBe(true);
+    });
+  });
+
+  describe('round-trip', () => {
+    it('should preserve string dataType through API round-trip', () => {
+      const lensState: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'status',
+        label: '',
+        isBucketed: false,
+        dataType: 'string',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: false,
+        },
+        customLabel: false,
+      };
+
+      const api = fromLastValueLensStateToAPI(lensState);
+      const restored = fromLastValueAPItoLensState(api);
+
+      expect(restored.dataType).toBe('string');
+    });
+
+    it('should preserve number dataType through API round-trip', () => {
+      const lensState: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'price',
+        label: '',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: false,
+        },
+        customLabel: false,
+      };
+
+      const api = fromLastValueLensStateToAPI(lensState);
+      const restored = fromLastValueAPItoLensState(api);
+
+      expect(restored.dataType).toBe('number');
+    });
+
+    it('should preserve ip dataType through API round-trip', () => {
+      const lensState: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'client_ip',
+        label: '',
+        isBucketed: false,
+        dataType: 'ip',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: false,
+        },
+        customLabel: false,
+      };
+
+      const api = fromLastValueLensStateToAPI(lensState);
+      const restored = fromLastValueAPItoLensState(api);
+
+      expect(restored.dataType).toBe('ip');
     });
   });
 });
