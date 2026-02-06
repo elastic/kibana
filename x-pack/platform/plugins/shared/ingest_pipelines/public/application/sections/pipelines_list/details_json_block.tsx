@@ -8,6 +8,9 @@
 import type { FunctionComponent } from 'react';
 import React, { useRef } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
+import { XJson } from '../../../shared_imports';
+
+const { expandLiteralStrings } = XJson;
 
 export interface Props {
   json: Record<string, any>;
@@ -20,7 +23,7 @@ export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => 
   uuid.current++;
 
   // Convert JSON object to string
-  const jsonString = JSON.stringify(json, null, 2);
+  const jsonString = expandLiteralStrings(JSON.stringify(json, null, 2));
   // Replace all newline characters with empty spaces
   const formattedString = jsonString.replace(/\\n/g, ' ');
 
