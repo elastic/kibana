@@ -12,6 +12,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { Store } from 'redux';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 
 interface TestWrapperProps {
@@ -30,10 +31,20 @@ interface TestWrapperProps {
  */
 export function TestWrapper({ store, routerHistory, children }: TestWrapperProps) {
   const reduxStore = store ?? createMockStore();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   return (
     <MemoryRouter initialEntries={routerHistory}>
       <I18nProvider>
-        <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
+        <ReduxProvider store={reduxStore}>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </ReduxProvider>
       </I18nProvider>
     </MemoryRouter>
   );

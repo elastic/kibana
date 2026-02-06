@@ -13,12 +13,14 @@ import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
 import { collectAllVariables } from './collect_all_variables';
+import { collectAllWorkflowInputs } from './collect_all_workflow_inputs';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
+import { validateWorkflowInputsInYaml } from './validate_workflow_inputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -26,6 +28,7 @@ import {
   selectEditorWorkflowLookup,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
+  selectWorkflows,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -56,6 +59,7 @@ export function useYamlValidation(
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
+  const workflows = useSelector(selectWorkflows);
   const { application } = useKibana().services;
 
   useEffect(() => {
@@ -116,6 +120,9 @@ export function useYamlValidation(
         absolute: true,
       });
 
+      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+      const workflowInputsItems = collectAllWorkflowInputs(yamlDocument, lineCounter);
+
       // Build validation results - only include validations that don't require workflowDefinition
       // Monaco YAML's schema validation will show errors independently
       const validationResults: YamlValidationResult[] = [
@@ -127,7 +134,6 @@ export function useYamlValidation(
 
       // Only run validations that require workflowDefinition if it's available
       if (workflowGraph && workflowDefinition) {
-        const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
           ...validateVariablesInternal(
             variableItems,
@@ -135,7 +141,8 @@ export function useYamlValidation(
             workflowDefinition,
             yamlDocument
           ),
-          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model),
+          ...validateWorkflowInputsInYaml(workflowInputsItems, workflows, lineCounter)
         );
       }
 
@@ -169,6 +176,7 @@ export function useYamlValidation(
     isWorkflowTab,
     connectors?.connectorTypes,
     workflowLookup,
+    workflows,
   ]);
 
   return {
@@ -283,6 +291,25 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
       decorations.push({
         range: createRange(validationResult),
         options: createSelectionDecoration(validationResult),
+      });
+    } else if (validationResult.owner === 'workflow-inputs-validation') {
+      if (validationResult.severity !== null) {
+        markers.push({
+          ...marker,
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          source: 'workflow-inputs-validation',
+        });
+      }
+      decorations.push({
+        range: createRange(validationResult),
+        options: {
+          inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
+          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
+        },
       });
     } else {
       if (validationResult.severity !== null) {

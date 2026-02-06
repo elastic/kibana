@@ -16,6 +16,7 @@ import type {
   IfStep,
   KibanaStep,
   WaitStep,
+  WorkflowExecuteStep,
   WorkflowYaml,
 } from '../../../spec/schema';
 import type {
@@ -30,6 +31,7 @@ import type {
   HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
+  WorkflowExecuteGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
@@ -220,6 +222,78 @@ describe('convertToWorkflowGraph', () => {
           },
         },
       } as HttpGraphNode);
+    });
+  });
+
+  describe('workflow.execute step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep1',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testWorkflowExecuteStep',
+          type: 'workflow.execute',
+          with: {
+            'workflow-id': 'child-workflow-id',
+            inputs: {
+              param1: 'value1',
+            },
+            await: true,
+          },
+        } as WorkflowExecuteStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 2',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for workflow.execute step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(3);
+      expect(topSort).toEqual(['testAtomicStep1', 'testWorkflowExecuteStep', 'testAtomicStep2']);
+    });
+
+    it('should return correct edges for workflow.execute step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'testAtomicStep1', w: 'testWorkflowExecuteStep' },
+        { v: 'testWorkflowExecuteStep', w: 'testAtomicStep2' },
+      ]);
+    });
+
+    it('should configure the workflow.execute step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testWorkflowExecuteStep');
+      expect(node).toEqual({
+        id: 'testWorkflowExecuteStep',
+        type: 'workflow.execute',
+        stepId: 'testWorkflowExecuteStep',
+        stepType: 'workflow.execute',
+        configuration: {
+          name: 'testWorkflowExecuteStep',
+          type: 'workflow.execute',
+          with: {
+            'workflow-id': 'child-workflow-id',
+            inputs: {
+              param1: 'value1',
+            },
+            await: true,
+          },
+        },
+      } as WorkflowExecuteGraphNode);
     });
   });
 
