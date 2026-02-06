@@ -21,6 +21,7 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
   const { mutate, isLoading } = useMutation(
     (formValues: FormValues) => {
       const ruleData: CreateRuleData = {
+        kind: 'signal',
         name: formValues.name,
         tags: formValues.tags,
         schedule: formValues.schedule,

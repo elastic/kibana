@@ -91,3 +91,17 @@ export const updateRuleDataSchema = z
   .strip();
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/**
+ * Schema for rule response data returned from the API.
+ * Extends the create rule schema with server-generated fields.
+ */
+export const ruleResponseSchema = createRuleDataSchema.extend({
+  id: z.string().describe('Unique rule identifier.'),
+  createdBy: z.string().nullable().describe('User who created the rule.'),
+  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
+  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
+  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+});
+
+export type RuleResponse = z.infer<typeof ruleResponseSchema>;
