@@ -17,7 +17,7 @@
           "ChromeLayoutComponentProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout.tsx",
         "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
@@ -33,7 +33,7 @@
             "signature": [
               "ChromeLayoutComponentProps"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout.tsx",
             "lineNumber": 30,
             "columnNumber": 30,
             "deprecated": false,
@@ -60,7 +60,7 @@
           "LayoutConfigProviderProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
         "lineNumber": 84,
         "columnNumber": 14,
         "deprecated": false,
@@ -76,7 +76,7 @@
             "signature": [
               "LayoutConfigProviderProps"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
             "lineNumber": 84,
             "columnNumber": 38,
             "deprecated": false,
@@ -99,7 +99,7 @@
         "signature": [
           "({ colors }: LayoutDebugOverlayProps) => React.JSX.Element"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/layout_debug_overlay.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/debug/layout_debug_overlay.tsx",
         "lineNumber": 168,
         "columnNumber": 14,
         "deprecated": false,
@@ -115,7 +115,7 @@
             "signature": [
               "LayoutDebugOverlayProps"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/layout_debug_overlay.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/debug/layout_debug_overlay.tsx",
             "lineNumber": 168,
             "columnNumber": 71,
             "deprecated": false,
@@ -140,7 +140,7 @@
         "signature": [
           "({ label, background, color, style, children, }: SimpleDebugOverlayProps) => React.JSX.Element"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/debug/simple_debug_overlay.tsx",
         "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
@@ -156,7 +156,7 @@
             "signature": [
               "SimpleDebugOverlayProps"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/debug/simple_debug_overlay.tsx",
             "lineNumber": 28,
             "columnNumber": 71,
             "deprecated": false,
@@ -185,7 +185,7 @@
           "LayoutConfig",
           ">) => void"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
         "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
@@ -207,7 +207,7 @@
         "description": [
           "\nProps for the LayoutConfigProvider component."
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
         "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
@@ -227,7 +227,7 @@
               "ChromeStyle",
               " | undefined; }"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
@@ -243,7 +243,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
@@ -267,7 +267,7 @@
         "signature": [
           "ChromeLayoutComponentProps"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout.tsx",
         "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
@@ -307,7 +307,7 @@
           "ChromeStyle",
           " | undefined; }"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_components/layout_config_context.tsx",
         "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,

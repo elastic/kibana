@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/chrome/layout/core-chrome-layout
+    sourceRoot: src/core/packages/chrome/layout/core_chrome_layout
 dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser-internal'

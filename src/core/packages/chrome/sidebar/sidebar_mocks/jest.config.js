@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/sidebar/sidebar-mocks'],
+  roots: ['<rootDir>/src/core/packages/chrome/sidebar/sidebar_mocks'],
 };

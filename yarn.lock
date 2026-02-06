@@ -5437,23 +5437,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core-chrome-layout-components":
+"@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core_chrome_layout_components":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core-chrome-layout-constants":
+"@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core_chrome_layout_constants":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
+"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core_chrome_layout_feature_flags":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout-utils@link:src/core/packages/chrome/layout/core-chrome-layout-utils":
+"@kbn/core-chrome-layout-utils@link:src/core/packages/chrome/layout/core_chrome_layout_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
+"@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core_chrome_layout":
   version "0.0.0"
   uid ""
 
@@ -5461,19 +5461,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar-components":
+"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar/sidebar_components":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar/sidebar-context":
+"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar/sidebar_context":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar/sidebar-internal":
+"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar/sidebar_internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar/sidebar-mocks":
+"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar/sidebar_mocks":
   version "0.0.0"
   uid ""
 

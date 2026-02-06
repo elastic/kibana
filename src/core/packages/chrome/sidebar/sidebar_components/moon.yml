@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/chrome/sidebar/sidebar-components
+    sourceRoot: src/core/packages/chrome/sidebar/sidebar_components
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/use-observable'

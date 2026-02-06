@@ -23,7 +23,7 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
 
 ## CSS Variables
 
-Use type-safe helpers from [`@kbn/core-chrome-layout-constants`](../core-chrome-layout-constants):
+Use type-safe helpers from [`@kbn/core-chrome-layout-constants`](../core_chrome_layout_constants):
 
 ```typescript
 import { layoutVar } from '@kbn/core-chrome-layout-constants';

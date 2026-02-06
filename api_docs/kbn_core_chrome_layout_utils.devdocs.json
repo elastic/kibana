@@ -17,7 +17,7 @@
           "UseEuiTheme",
           "<{}>) => string"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
         "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
@@ -36,7 +36,7 @@
               "UseEuiTheme",
               "<{}>"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 20,
             "columnNumber": 39,
             "deprecated": false,
@@ -65,7 +65,7 @@
           "HighContrastSeparatorOptions",
           ") => string"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
         "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
@@ -82,7 +82,7 @@
               "UseEuiTheme",
               "<{}>"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
@@ -101,7 +101,7 @@
             "signature": [
               "HighContrastSeparatorOptions"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
@@ -126,7 +126,7 @@
         "signature": [
           "() => HTMLElement"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
@@ -149,7 +149,7 @@
         "signature": [
           "(container?: HTMLElement) => { scrollTop: number; scrollHeight: number; clientHeight: number; }"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
@@ -167,7 +167,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
@@ -192,7 +192,7 @@
         "signature": [
           "(container?: HTMLElement) => number"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
@@ -210,7 +210,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 56,
             "columnNumber": 35,
             "deprecated": false,
@@ -235,7 +235,7 @@
         "signature": [
           "(container?: HTMLElement) => { top: number; bottom: number; }"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
@@ -253,7 +253,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
@@ -278,7 +278,7 @@
         "signature": [
           "(container?: HTMLElement) => number"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
@@ -296,7 +296,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 31,
             "columnNumber": 35,
             "deprecated": false,
@@ -321,7 +321,7 @@
         "signature": [
           "(container?: HTMLElement) => boolean"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 147,
         "columnNumber": 14,
         "deprecated": false,
@@ -339,7 +339,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 147,
             "columnNumber": 34,
             "deprecated": false,
@@ -364,7 +364,7 @@
         "signature": [
           "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
@@ -377,7 +377,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 130,
             "columnNumber": 9,
             "deprecated": false,
@@ -390,7 +390,7 @@
                 "tags": [],
                 "label": "top",
                 "description": [],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -406,7 +406,7 @@
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -426,7 +426,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
@@ -449,7 +449,7 @@
         "signature": [
           "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
@@ -462,7 +462,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 68,
             "columnNumber": 9,
             "deprecated": false,
@@ -475,7 +475,7 @@
                 "tags": [],
                 "label": "top",
                 "description": [],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 69,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -491,7 +491,7 @@
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 70,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -511,7 +511,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
@@ -534,7 +534,7 @@
         "signature": [
           "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 98,
         "columnNumber": 14,
         "deprecated": false,
@@ -547,7 +547,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 99,
             "columnNumber": 9,
             "deprecated": false,
@@ -563,7 +563,7 @@
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 100,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -583,7 +583,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
@@ -606,7 +606,7 @@
         "signature": [
           "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
@@ -619,7 +619,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 84,
             "columnNumber": 9,
             "deprecated": false,
@@ -635,7 +635,7 @@
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
-                "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
@@ -655,7 +655,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
             "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
@@ -675,7 +675,7 @@
         "tags": [],
         "label": "HighContrastSeparatorOptions",
         "description": [],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
         "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
@@ -693,7 +693,7 @@
             "signature": [
               "\"top\" | \"bottom\" | undefined"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -711,7 +711,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -729,7 +729,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
@@ -747,7 +747,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/high_contrast.ts",
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
@@ -769,7 +769,7 @@
         "signature": [
           "HTMLElement"
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout_utils/src/scroll.ts",
         "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,

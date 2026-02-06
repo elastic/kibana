@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/chrome/sidebar/sidebar-internal
+    sourceRoot: src/core/packages/chrome/sidebar/sidebar_internal
 dependsOn:
   - '@kbn/core-chrome-sidebar'
   - '@kbn/zod'

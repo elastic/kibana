@@ -25,5 +25,5 @@ Set `core.chrome.layoutDebug: true` in your Kibana config to enable debug overla
 
 ## Related
 
-- [`@kbn/core-chrome-layout-feature-flags`](../core-chrome-layout-feature-flags) - Feature flag utilities for debug mode
+- [`@kbn/core-chrome-layout-feature-flags`](../core_chrome_layout_feature_flags) - Feature flag utilities for debug mode
 - [Layout overview](../layout_overview.mdx) - Architecture and data flow

@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/layout/core-chrome-layout-utils'],
+  roots: ['<rootDir>/src/core/packages/chrome/layout/core_chrome_layout_utils'],
 };

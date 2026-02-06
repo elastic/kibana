@@ -16,7 +16,7 @@
         "signature": [
           "\"core.chrome.layoutDebug\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout/layout_feature_flag.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -31,7 +31,7 @@
         "signature": [
           "\"core.chrome.layoutType\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout/layout_feature_flag.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -46,7 +46,7 @@
         "signature": [
           "\"core.chrome.projectSideNav\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout/layout_feature_flag.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61,7 +61,7 @@
         "signature": [
           "\"grid\" | \"legacy-fixed\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout/layout_feature_flag.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -76,7 +76,7 @@
         "signature": [
           "\"v2\" | \"v1\""
         ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "path": "src/core/packages/chrome/layout/core_chrome_layout/layout_feature_flag.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
