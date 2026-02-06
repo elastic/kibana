@@ -22,8 +22,7 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { AuthStatus } from '@kbn/core-http-server';
+import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
@@ -32,6 +31,7 @@ import type {
   HttpServiceSetup,
   IAuthHeadersStorage,
   IRouter,
+  KibanaRequest,
   KibanaRequestState,
   KibanaRouteOptions,
   OnPostAuthHandler,
@@ -199,6 +199,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
+  private truncatedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -216,6 +217,13 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  /** @internal */
+  public setTruncatedSessionIdGetter(
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) {
+    this.truncatedSessionIdGetter = getter;
   }
 
   private registerRouter(router: IRouter) {
@@ -593,14 +601,31 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
+    this.server!.ext('onPostAuth', async (request, responseToolkit) => {
+      if (this.truncatedSessionIdGetter) {
+        try {
+          // Store the truncated session ID on the request state so the user
+          // activity service can read it later. We cannot call the service
+          // directly here because this handler is async and would use its
+          // own user-activity
+          const kibanaRequest = CoreKibanaRequest.from(request);
+          (request.app as KibanaRequestState).truncatedSessionId =
+            await this.truncatedSessionIdGetter(kibanaRequest);
+        } catch {
+          // If session retrieval fails, leave truncatedSessionId undefined
+        }
+      }
+      return responseToolkit.continue;
+    });
+
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
       (request.app as KibanaRequestState).span?.end();
       (request.app as KibanaRequestState).span = null;
 
-      const { state: user, status } = this.authState.get<AuthenticatedUser>(request);
-      const isUserAuthenticated = status === AuthStatus.authenticated;
+      const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
+      const { truncatedSessionId } = request.app as KibanaRequestState;
       userActivity?.setInjectedContext({
-        user: isUserAuthenticated
+        user: user
           ? {
               ip: request.info.remoteAddress,
               id: user.profile_uid,
@@ -610,7 +635,7 @@ export class HttpServer {
             }
           : { ip: request.info.remoteAddress },
         session: {
-          id: request.state?.sid?.sid,
+          id: truncatedSessionId,
         },
         http: {
           request: {

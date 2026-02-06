@@ -24,5 +24,13 @@ export interface CoreAuthenticationService {
    * @param request The request to retrieve the authenticated user for.
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  /**
+   * Retrieve the truncated session ID for the provided request.
+   * Returns the last 10 characters of the session ID for logging/debugging purposes.
+   * Returns undefined if no session exists for the request.
+   *
+   * @param request The request to retrieve the session ID for.
+   */
+  getTruncatedSessionId(request: KibanaRequest): Promise<string | undefined>;
   apiKeys: APIKeysType;
 }

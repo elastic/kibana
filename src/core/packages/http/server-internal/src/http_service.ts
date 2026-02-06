@@ -242,6 +242,9 @@ export class HttpService
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
+      setTruncatedSessionIdGetter: (getter) => {
+        this.httpServer.setTruncatedSessionIdGetter(getter);
+      },
     };
   }
 
