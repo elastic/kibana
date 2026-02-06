@@ -53,8 +53,7 @@ export interface AgentHandlerReturn {
 }
 
 /**
- * Experimental features configuration for the agent builder.
- * These features are gated behind a UI setting and can be enabled/disabled by administrators.
+ * Experimental features configuration for agent builder.
  */
 export interface ExperimentalFeatures {
   /** Whether the filestore feature is enabled */
