@@ -99,7 +99,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                 defaultMessage: 'Field type',
               })}
             </strong>
-            <EuiSpacer size="xs" />
           </EuiText>
         ),
         description: <EuiBadge>{metric.type}</EuiBadge>,
@@ -117,7 +116,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                       defaultMessage: 'Metric unit',
                     })}
                   </strong>
-                  <EuiSpacer size="xs" />
                 </EuiText>
               ),
               description: <EuiBadge>{unitLabel}</EuiBadge>,
@@ -137,7 +135,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                       defaultMessage: 'Metric type',
                     })}
                   </strong>
-                  <EuiSpacer size="xs" />
                 </EuiText>
               ),
               description: <EuiBadge>{metric.instrument}</EuiBadge>,
@@ -177,10 +174,12 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
       <TabTitleAndDescription metric={metric} description={description} />
 
       <EuiDescriptionList
-        compressed
+        type="responsiveColumn"
         rowGutterSize="m"
         data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
         listItems={descriptionListItems}
+        columnGutterSize='s'
+        columnWidths={['190px', 'auto']}
       />
 
       {metric.dimensions && metric.dimensions.length > 0 && (
