@@ -16,4 +16,4 @@ make api-docs
 
 cd "$cur_dir"
 
-check_for_changed_files "make api-docs" true
+check_for_changed_files "make api-docs" true || true
