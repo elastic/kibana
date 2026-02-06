@@ -455,6 +455,7 @@ src/platform/packages/shared/feedback-components @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
+src/platform/packages/shared/kbn_lens_embeddable_utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
@@ -552,7 +553,6 @@ src/platform/packages/shared/kbn-jest-benchmarks @elastic/observability-ui
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-team
 src/platform/packages/shared/kbn-logging @elastic/kibana-core

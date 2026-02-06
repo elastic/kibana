@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-visualizations'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lens-embeddable-utils
+    sourceRoot: src/platform/packages/shared/kbn_lens_embeddable_utils
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'

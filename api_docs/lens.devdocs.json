@@ -7271,7 +7271,7 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/breakdown.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/metric/breakdown.mock.ts"
               }
             ]
           }
@@ -8848,23 +8848,23 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/gauge/lens_state_config.mock.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/gauge/lens_state_config.mock.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/gauge/lens_state_config.mock.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/heatmap/dsl.mocks.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/heatmap/dsl.mocks.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/breakdown.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/metric/breakdown.mock.ts"
               }
             ]
           },
@@ -16268,11 +16268,11 @@
             "references": [
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/xy/basicXY.mock.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/tests/xy/basicXY.mock.ts"
               }
             ]
           },

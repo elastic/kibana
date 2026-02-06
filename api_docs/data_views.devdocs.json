@@ -14962,7 +14962,7 @@
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+                "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "lens",

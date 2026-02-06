@@ -733,7 +733,7 @@
     "@kbn/lens-common": "link:src/platform/packages/shared/kbn-lens-common",
     "@kbn/lens-common-2": "link:src/platform/packages/shared/kbn-lens-common-2",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
-    "@kbn/lens-embeddable-utils": "link:src/platform/packages/shared/kbn-lens-embeddable-utils",
+    "@kbn/lens-embeddable-utils": "link:src/platform/packages/shared/kbn_lens_embeddable_utils",
     "@kbn/lens-formula-docs": "link:src/platform/packages/private/kbn-lens-formula-docs",
     "@kbn/lens-inline-editing-example-plugin": "link:x-pack/examples/lens_embeddable_inline_editing_example",
     "@kbn/lens-plugin": "link:x-pack/platform/plugins/shared/lens",

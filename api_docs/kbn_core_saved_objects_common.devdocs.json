@@ -1808,79 +1808,79 @@
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/legacy_metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/legacy_metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/legacy_metric.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/legacy_metric.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/gauge.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/gauge.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/gauge.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/tagcloud.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/tagcloud.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/tagcloud.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/tagcloud.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/tagcloud.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "@kbn/lens-embeddable-utils",
-            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+            "path": "src/platform/packages/shared/kbn_lens_embeddable_utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "maps",
