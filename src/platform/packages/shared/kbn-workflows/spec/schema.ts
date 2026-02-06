@@ -406,6 +406,35 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+// Base schema shared by both workflow.execute and workflow.executeAsync
+const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
+  with: z.object({
+    'workflow-id': z.string().min(1),
+    inputs: z.record(z.string(), z.any()).optional(),
+  }),
+})
+  .extend(StepWithIfConditionSchema.shape)
+  .extend(StepWithForEachSchema.shape)
+  .extend(TimeoutPropSchema.shape)
+  .extend(StepWithOnFailureSchema.shape);
+
+export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.execute'),
+});
+export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()), // Accepts any key-value pairs
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -494,6 +523,53 @@ export const JsonModelSchema = JsonModelShapeSchema.refine(
 );
 export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
+/* --- Outputs --- */
+// Outputs support the same types as inputs
+export const WorkflowOutputTypeEnum = WorkflowInputTypeEnum;
+
+const WorkflowOutputBaseSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  required: z.boolean().optional(),
+});
+
+export const WorkflowOutputStringSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('string'),
+});
+export type WorkflowOutputString = z.infer<typeof WorkflowOutputStringSchema>;
+
+export const WorkflowOutputNumberSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('number'),
+});
+export type WorkflowOutputNumber = z.infer<typeof WorkflowOutputNumberSchema>;
+
+export const WorkflowOutputBooleanSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('boolean'),
+});
+export type WorkflowOutputBoolean = z.infer<typeof WorkflowOutputBooleanSchema>;
+
+export const WorkflowOutputChoiceSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('choice'),
+  options: z.array(z.string()),
+});
+export type WorkflowOutputChoice = z.infer<typeof WorkflowOutputChoiceSchema>;
+
+export const WorkflowOutputArraySchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+});
+export type WorkflowOutputArray = z.infer<typeof WorkflowOutputArraySchema>;
+
+export const WorkflowOutputSchema = z.union([
+  WorkflowOutputStringSchema,
+  WorkflowOutputNumberSchema,
+  WorkflowOutputBooleanSchema,
+  WorkflowOutputChoiceSchema,
+  WorkflowOutputArraySchema,
+]);
+export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -518,6 +594,9 @@ const StepSchema = z.lazy(() =>
     KibanaStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
+    WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -531,6 +610,9 @@ export const BuiltInStepTypes = [
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
+  WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -552,6 +634,7 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
+  outputs: z.array(WorkflowOutputSchema).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
@@ -706,15 +789,23 @@ export const WorkflowContextSchema = z.object({
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z.record(z.string(), WorkflowInputValueSchema).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
+  parent: z
+    .object({
+      workflowId: z.string(),
+      executionId: z.string(),
+    })
+    .optional(),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs and consts of different types
+  // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
@@ -751,6 +842,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
+  details: z.any().optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
