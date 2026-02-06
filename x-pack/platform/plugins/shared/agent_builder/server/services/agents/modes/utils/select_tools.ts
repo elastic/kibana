@@ -21,8 +21,9 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { getStoreTools, FILESTORE_ENABLED } from '../../../runner/store';
+import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
@@ -36,6 +37,7 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
+  experimentalFeatures,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -47,6 +49,7 @@ export const selectTools = async ({
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -85,7 +88,7 @@ export const selectTools = async ({
     ...versionedAttachmentBoundTools,
     ...versionedAttachmentTools,
     ...staticRegistryTools,
-    ...(FILESTORE_ENABLED ? convertedFsTools : []),
+    ...(experimentalFeatures.filestore ? convertedFsTools : []),
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableTool>();

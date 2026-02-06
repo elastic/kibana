@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -44,6 +45,24 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage:
+            'Enables experimental features in Elastic Agent Builder such as filestore and skills.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.experimentalFeatures.name', {
+        defaultMessage: 'Elastic Agent Builder: Experimental Features',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      technicalPreview: true,
+      requiresPageReload: false,
       readonly: true,
       readonlyMode: 'ui',
     },
