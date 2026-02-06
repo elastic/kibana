@@ -293,7 +293,6 @@ async function getSuggestionsWithinCommandExpression(
   const isSourceCommand = commandName === 'from' || commandName === 'ts';
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
   if (isSourceCommand && callbacks?.isResourceBrowserEnabled && !isInsideSubquery) {
-    // Limit the number of items and payload size to avoid performance issues
     const { rangeToReplace, filterText } =
       suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
     const insertText = rangeToReplace
