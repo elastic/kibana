@@ -1,6 +1,6 @@
 # TO_UPPER
 
-Converts the input string to upper case and returns the result.
+Returns a new string with all characters in the input string converted to upper case.
 
 ## Syntax
 
@@ -8,13 +8,13 @@ Converts the input string to upper case and returns the result.
 
 ### Parameters
 
-#### `str`
+#### str
 
-String expression. If `null`, the function returns `null`.
+String expression to be converted to upper case. If the value is `null`, the function returns `null`. The input can be a single-valued or multi-valued column or expression.
 
 ## Examples
 
-Convert a string to upper case:
+Converts the contents of the `message` column to upper case and stores the result in a new column called `message_upper`:
 
 ```esql
 ROW message = "Some Text"
