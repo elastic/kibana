@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '@kbn/code-editor';
+import { ESQLLangEditor } from '@kbn/esql/public';
+import type { AggregateQuery } from '@kbn/es-query';
 
 interface QueryEditorProps {
   value: string;
@@ -21,23 +22,31 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   onBlur,
   isReadOnly = false,
 }) => {
+  const query: AggregateQuery = { esql: value };
+
+  const handleQueryChange = (newQuery: AggregateQuery) => {
+    onChange(newQuery.esql || '');
+  };
+
   return (
-    <CodeEditor
-      languageId="esql"
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      options={{
-        readOnly: isReadOnly,
-        fontSize: 14,
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-        lineNumbers: 'on',
-        automaticLayout: true,
+    <ESQLLangEditor
+      query={query}
+      onTextLangQueryChange={handleQueryChange}
+      onTextLangQuerySubmit={async () => {
+        // Submit is handled by the form
+        if (onBlur) {
+          onBlur();
+        }
       }}
-      height="200px"
+      isDisabled={isReadOnly}
+      hideRunQueryText={true}
+      hideRunQueryButton={true}
+      editorIsInline={true}
+      disableSubmitAction={true}
+      hasOutline={true}
+      hideQueryHistory={true}
+      hideQuickSearch={true}
+      expandToFitQueryOnMount={true}
     />
   );
 };

@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { useService } from '@kbn/core-di-browser';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,10 +36,21 @@ const getErrorMessage = (error: unknown) => {
 export const RulesListPage = () => {
   const history = useHistory();
   const rulesApi = useService(RulesApi);
+  const chrome = useService(CoreStart('chrome'));
   const isMounted = useMountedState();
   const [rules, setRules] = useState<RuleListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('xpack.alertingV2.breadcrumb.home', {
+          defaultMessage: 'Alerting v2',
+        }),
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     const loadRules = async () => {

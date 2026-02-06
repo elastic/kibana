@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dump, load } from 'js-yaml';
 import { useHistory, useParams } from 'react-router-dom';
@@ -69,20 +70,40 @@ export const CreateRulePage = () => {
   const rulesApi = useService(RulesApi);
   const http = useService(CoreStart('http'));
   const application = useService(CoreStart('application'));
+  const chrome = useService(CoreStart('chrome'));
   const notifications = useService(CoreStart('notifications'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
 
   const [stagedRule, setStagedRule] = useState<Partial<CreateRuleData>>(DEFAULT_RULE_VALUES);
   const [yaml, setYaml] = useState(DEFAULT_RULE_YAML);
+  const getFormValuesRef = React.useRef<(() => FormValues) | null>(null);
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingRule, setIsLoadingRule] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<'yaml' | 'form'>('yaml');
 
-  // Store a ref to get current form values
-  const getFormValuesRef = React.useRef<(() => FormValues) | null>(null);
+  // Set breadcrumbs
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('xpack.alertingV2.breadcrumb.home', {
+          defaultMessage: 'Alerting v2',
+        }),
+        href: '#/',
+      },
+      {
+        text: isEditing
+          ? i18n.translate('xpack.alertingV2.breadcrumb.edit', {
+              defaultMessage: 'Edit',
+            })
+          : i18n.translate('xpack.alertingV2.breadcrumb.create', {
+              defaultMessage: 'Create',
+            }),
+      },
+    ]);
+  }, [chrome, isEditing]);
 
   const syncYamlToStaged = useCallback(():
     | { success: true; data: CreateRuleData }
@@ -282,6 +303,27 @@ export const CreateRulePage = () => {
       onSave,
     ]
   );
+
+  useEffect(() => {
+    const homeBreadcrumb = {
+      text: i18n.translate('xpack.alertingV2.breadcrumb.home', {
+        defaultMessage: 'Alerting v2',
+      }),
+      href: application.getUrlForApp('alertingV2'),
+    };
+
+    const actionBreadcrumb = {
+      text: isEditing
+        ? i18n.translate('xpack.alertingV2.breadcrumb.edit', {
+            defaultMessage: 'Edit',
+          })
+        : i18n.translate('xpack.alertingV2.breadcrumb.create', {
+            defaultMessage: 'Create',
+          }),
+    };
+
+    chrome.setBreadcrumbs([homeBreadcrumb, actionBreadcrumb]);
+  }, [chrome, application, isEditing]);
 
   useEffect(() => {
     if (!ruleId) {

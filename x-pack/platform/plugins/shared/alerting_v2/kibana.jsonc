@@ -15,7 +15,8 @@
       "spaces",
       "data",
       "dataViews",
-      "security"
+      "security",
+      "esql"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []
