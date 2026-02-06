@@ -682,6 +682,102 @@ describe('params validation', () => {
       `"error validating action params: Field \\"bcc.0\\": String must contain at most 512 character(s)"`
     );
   });
+
+  test('params validation succeeds with valid replyTo', async () => {
+    const params: Record<string, unknown> = {
+      to: ['bob@example.com'],
+      replyTo: ['reply@example.com'],
+      subject: 'this is a test',
+      message: 'this is the message',
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [],
+        "cc": Array [],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Elastic",
+        },
+        "message": "this is the message",
+        "messageHTML": null,
+        "replyTo": Array [
+          "reply@example.com",
+        ],
+        "subject": "this is a test",
+        "to": Array [
+          "bob@example.com",
+        ],
+      }
+    `);
+  });
+
+  test('params validation fails with invalid replyTo', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['to@example.com'],
+          cc: ['cc@example.com'],
+          bcc: ['bcc@example.com'],
+          replyTo: ['badmail'],
+          subject: 'test',
+          message: 'msg',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [to/cc/bcc/replyTo]: stub for actual message"`
+    );
+    const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com', 'badmail'];
+    expect(configUtils.validateEmailAddresses).toHaveBeenCalledWith(allEmails, {
+      treatMustacheTemplatesAsValid: true,
+    });
+  });
+
+  test('throws for too long "replyTo" address', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const longReplyToEmail = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['bob@example.com'],
+          replyTo: [longReplyToEmail],
+          subject: 'this is a test',
+          message: 'this is a message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"replyTo.0\\": String must contain at most 512 character(s)"`
+    );
+  });
+
+  test('throws for more than 10 "replyTo" addresses', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const replyToAddresses = Array.from({ length: 11 }, (_, i) => `reply${i}@example.com`);
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['bob@example.com'],
+          replyTo: replyToAddresses,
+          subject: 'this is a test',
+          message: 'this is a message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"replyTo\\": Array must contain at most 10 element(s)"`
+    );
+  });
 });
 
 describe('execute()', () => {
@@ -767,6 +863,64 @@ describe('execute()', () => {
             "james@example.com",
           ],
           "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
+  test('ensure parameters are as expected when replyTo provided', async () => {
+    sendEmailMock.mockReset();
+
+    const execOptionsWithReplyTo = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        replyTo: ['replyTo@example.com'],
+      },
+    };
+
+    const result = await connectorType.executor(execOptionsWithReplyTo);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "attachments": undefined,
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "a message to you
+
+      ---
+
+      This message was sent by Elastic.",
+          "messageHTML": null,
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "replyTo": Array [
+            "replyTo@example.com",
+          ],
           "to": Array [
             "jim@example.com",
           ],
@@ -1618,6 +1772,30 @@ describe('execute()', () => {
 
     const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('includes replyTo in routing when provided', async () => {
+    sendEmailMock.mockReset();
+
+    await connectorType.executor({
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        replyTo: ['reply@example.com'],
+      },
+    });
+
+    const routing = sendEmailMock.mock.calls[0][1].routing;
+    expect(routing.replyTo).toEqual(['reply@example.com']);
+  });
+
+  test('does not include replyTo in routing when not provided', async () => {
+    sendEmailMock.mockReset();
+
+    await connectorType.executor(executorOptions);
+
+    const routing = sendEmailMock.mock.calls[0][1].routing;
+    expect(routing).not.toHaveProperty('replyTo');
   });
 });
 

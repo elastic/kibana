@@ -10,9 +10,8 @@ import type { Logger } from '@kbn/logging';
 
 // Mocking dependencies
 jest.mock('fs/promises');
-jest.mock('node-fetch');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+
+const fetchMock = jest.spyOn(global, 'fetch');
 
 const mockLogger: Logger = {
   warn: jest.fn(),
@@ -101,7 +100,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockCatalog),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
         await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual({
           notebooks: [
             {
@@ -135,7 +134,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockCatalog),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
         await getNotebookCatalog(dynamicOptions);
         expect(dynamicOptions.cache.catalog).toBeDefined();
@@ -150,7 +149,7 @@ describe('Notebook Catalog', () => {
           status: 404,
           statusText: 'NOT_FOUND',
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
         await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual(DEFAULT_NOTEBOOKS);
       });
       it('defaults to static notebooks if fetch fails with error', async () => {
@@ -172,7 +171,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockBadCatalog),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
         await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual(DEFAULT_NOTEBOOKS);
       });
       it('returns cached catalog if within TTL', async () => {
@@ -219,7 +218,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockCatalog),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
         dynamicOptions.cache.catalog = {
           ...mockCatalog,
           timestamp: new Date('1999-12-31T23:58:59.999Z'),
@@ -306,7 +305,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockCatalog),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
         const result = await getNotebookCatalog(dynamicOptions);
         expect(result).toEqual({
@@ -353,7 +352,7 @@ describe('Notebook Catalog', () => {
             ok: true,
             json: jest.fn().mockResolvedValue(mockCatalog),
           };
-          fetchMock.mockResolvedValue(mockResp);
+          fetchMock.mockResolvedValue(mockResp as unknown as Response);
         });
 
         it('can return a custom notebook list', async () => {
@@ -529,7 +528,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockNotebook),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
         await expect(getNotebook(fakeNotebookId, dynamicOptions)).resolves.toEqual(mockNotebook);
         expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -574,7 +573,7 @@ describe('Notebook Catalog', () => {
           ok: true,
           json: jest.fn().mockResolvedValue(mockNotebook),
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
         await getNotebook(fakeNotebookId, dynamicOptions);
         expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -589,7 +588,7 @@ describe('Notebook Catalog', () => {
           statusText: 'NOT_FOUND',
           ok: false,
         };
-        fetchMock.mockResolvedValue(mockResp);
+        fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
         await expect(getNotebook(fakeNotebookId, dynamicOptions)).resolves.toBeUndefined();
       });
