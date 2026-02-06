@@ -37,6 +37,7 @@ import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
+import { GroupBySelect } from './group_by_select';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
@@ -209,6 +210,14 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
                   optionKeys={filterOptions.type}
                   onChange={onFilterChangedCallback}
                   uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <GroupBySelect
+                  value={queryParams.groupBy}
+                  onChange={(value) => {
+                    setQueryParams({ groupBy: value });
+                  }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
