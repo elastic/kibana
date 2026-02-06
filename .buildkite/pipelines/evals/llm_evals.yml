@@ -68,6 +68,7 @@ steps:
 
       - label: 'Evals: Streams'
         key: kbn-evals-weekly-streams
+        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
@@ -128,6 +129,7 @@ steps:
 
       - label: 'Evals: Observability AI Assistant (AI Insights)'
         key: kbn-evals-weekly-obs-ai-assistant-ai-insights
+        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
