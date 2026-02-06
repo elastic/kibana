@@ -109,10 +109,11 @@ components:
           type: object
           additionalProperties: false
           properties:
-            calculated_level:
-              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskLevels'
-              example: 'Critical'
-              description: Lexical description of the entity's risk.
+            ## TODO: KUBA I'll skip risk and asset criticality for now
+            # calculated_level:
+            #  $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskLevels'
+            #  example: 'Critical'
+            #  description: Lexical description of the entity's risk.
             calculated_score:
               type: number
               format: double
@@ -142,8 +143,9 @@ components:
           type: string
         environment:
           type: string
-        criticality:
-          $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+        ## TODO: KUBA I'll skip risk and asset criticality for now
+        # criticality:
+        #  $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
         business_unit:
           type: string
 
@@ -188,9 +190,10 @@ components:
               type: array
               items:
                 type: string
-            risk:
-              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
-              additionalProperties: false
+            ## TODO: KUBA I'll skip risk and asset criticality for now
+            # risk:
+            #  $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            #  additionalProperties: false
           required:
             - name
         asset:
@@ -249,8 +252,9 @@ components:
               type: array
               items:
                 type: string
-            risk:
-              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            ## TODO: KUBA I'll skip risk and asset criticality for now
+            # risk:
+            #   $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
           required:
@@ -283,8 +287,9 @@ components:
           properties:
             name:
               type: string
-            risk:
-              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            ## TODO: KUBA I'll skip risk and asset criticality for now# 
+            # risk:
+            #   $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
           required:
