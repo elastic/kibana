@@ -61,7 +61,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('generic', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.generic} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -82,7 +82,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.host} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -106,7 +106,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.host} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -127,7 +127,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.user} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -151,7 +151,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.user} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -175,7 +175,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.service} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -196,7 +196,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX.service} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,

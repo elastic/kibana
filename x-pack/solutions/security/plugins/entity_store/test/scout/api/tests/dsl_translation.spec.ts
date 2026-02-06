@@ -68,7 +68,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.generic,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -88,7 +88,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.host,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -111,7 +111,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.host,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -132,7 +132,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.user,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -156,7 +156,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.user,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -178,7 +178,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.service,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });
@@ -199,7 +199,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX.service,
+        index: UPDATES_INDEX,
         query: { ...dsl },
         size: 10,
       });

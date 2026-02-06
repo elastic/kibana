@@ -71,7 +71,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         const emitScript = toRuntimeFieldEmitScript(returnScript);
 
         const result = await esClient.search({
-          index: UPDATES_INDEX[entityType],
+          index: UPDATES_INDEX,
           body: {
             query: { match_all: {} },
             runtime_mappings: {

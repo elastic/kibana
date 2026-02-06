@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/scout-security/src/playwright/constants/entity_analytics';
-
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
@@ -28,9 +26,4 @@ export const ENTITY_STORE_ROUTES = {
 // ESS Only until we have LAST/FIRST enabled for serverless
 export const ENTITY_STORE_TAGS = ['@ess' /* '@svlSecurity'*/];
 
-export const UPDATES_INDEX: Record<EntityType, string> = {
-  generic: '.entities.v2.updates.security_generic_default',
-  host: '.entities.v2.updates.security_host_default',
-  user: '.entities.v2.updates.security_user_default',
-  service: '.entities.v2.updates.security_service_default',
-} as const;
+export const UPDATES_INDEX = '.entities.v2.updates.security_default';
