@@ -7,6 +7,9 @@
 
 import type { BaseFeature } from '@kbn/streams-schema';
 import { datasetAnalysisGenerator } from './dataset_analysis';
+import { errorLogsGenerator } from './error_logs';
+import { logPatternsGenerator } from './log_patterns';
+import { logSamplesGenerator } from './log_samples';
 import type { ComputedFeatureGenerator, ComputedFeatureGeneratorOptions } from './types';
 
 /**
@@ -33,10 +36,18 @@ class ComputedFeatureRegistry {
  *
  * To add a new computed feature:
  * 1. Create a new file in this folder implementing ComputedFeatureGenerator
- * 2. Import and register your generator below
+ * 2. Import and add your generator to the array below
  */
 const registry = new ComputedFeatureRegistry();
-registry.register(datasetAnalysisGenerator);
+
+const generators: ComputedFeatureGenerator[] = [
+  datasetAnalysisGenerator,
+  logSamplesGenerator,
+  logPatternsGenerator,
+  errorLogsGenerator,
+];
+
+generators.forEach((generator) => registry.register(generator));
 
 /**
  * Returns formatted LLM instructions for all computed feature types.

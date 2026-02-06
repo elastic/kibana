@@ -45,5 +45,5 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
  * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
  */
 export function normalizeToolIdForTelemetry(toolId: string): string {
-  return BUILTIN_TOOL_IDS.has(toolId) ? toolId : toCustomHashedId(toolId);
+  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) ? toolId : toCustomHashedId(toolId);
 }
