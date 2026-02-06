@@ -47,8 +47,6 @@ import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request
 import { APP_UI_ID } from '../../../common/constants';
 import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 
-const DEFAULT_DATE_FIELD = '@timestamp';
-
 export interface TimelineArgs {
   events: TimelineItem[];
   id: string;
