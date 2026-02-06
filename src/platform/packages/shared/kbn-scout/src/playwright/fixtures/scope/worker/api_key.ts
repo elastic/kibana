@@ -34,12 +34,35 @@ export interface RoleApiCredentials {
 }
 
 export interface RequestAuthFixture {
+  /**
+   * Creates an API key for a predefined role (e.g. 'admin', 'viewer', 'editor').
+   * Role privileges are resolved from the corresponding roles.yml file.
+   * @param role - The predefined role name.
+   */
   getApiKey: (role: string) => Promise<RoleApiCredentials>;
+  /**
+   * Creates an API key for a custom role defined inline via a Kibana or Elasticsearch
+   * role descriptor. The role is created on-the-fly and cleaned up after the worker completes.
+   * @param role - A Kibana or Elasticsearch role descriptor with specific permissions.
+   */
   getApiKeyForCustomRole: (
     role: KibanaRole | ElasticsearchRoleDescriptor
   ) => Promise<RoleApiCredentials>;
+  /**
+   * Shorthand for `getApiKey('admin')`.
+   * Creates an API key with administrative privileges.
+   */
   getApiKeyForAdmin: () => Promise<RoleApiCredentials>;
+  /**
+   * Shorthand for `getApiKey('viewer')`.
+   * Creates an API key with viewer-only permissions.
+   */
   getApiKeyForViewer: () => Promise<RoleApiCredentials>;
+  /**
+   * Creates an API key for a non-admin user with elevated privileges.
+   * Resolves the role based on the environment: `developer` for serverless
+   * Elasticsearch projects, `editor` for all other deployments and project types.
+   */
   getApiKeyForPrivilegedUser: () => Promise<RoleApiCredentials>;
 }
 
