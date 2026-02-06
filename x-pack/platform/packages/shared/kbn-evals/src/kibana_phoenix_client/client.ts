@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type {
+  ExperimentRun,
+  ExperimentEvaluationRun,
+} from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
@@ -223,13 +226,61 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         concurrency,
       });
 
+      // Translate Phoenix's ExperimentRun structure to Kibana's TaskRun format
+      const phoenixRuns: Record<string, ExperimentRun> = ran.runs ?? {};
+
+      // Group runs by datasetExampleId to compute repetition indices
+      const runsByExampleId = new Map<
+        string,
+        Array<{ runKey: string; phoenixRun: ExperimentRun }>
+      >();
+      for (const [runKey, phoenixRun] of Object.entries(phoenixRuns)) {
+        const group = runsByExampleId.get(phoenixRun.datasetExampleId) ?? [];
+        group.push({ runKey, phoenixRun });
+        runsByExampleId.set(phoenixRun.datasetExampleId, group);
+      }
+
+      // Assign stable example indices based on insertion order
+      const exampleIds = Array.from(runsByExampleId.keys());
+      const exampleIdToIndex = new Map(exampleIds.map((id, index) => [id, index]));
+
+      // Build TaskRun records
+      const runs: RanExperiment['runs'] = {};
+      for (const [exampleId, group] of runsByExampleId) {
+        const exampleIndex = exampleIdToIndex.get(exampleId)!;
+        const matchingExample = dataset.examples[exampleIndex] ?? {};
+
+        group.forEach(({ runKey, phoenixRun }, repetition) => {
+          runs[runKey] = {
+            exampleIndex,
+            repetition,
+            input: matchingExample.input ?? {},
+            expected: matchingExample.output ?? null,
+            metadata: matchingExample.metadata ?? {},
+            output: phoenixRun.output,
+            traceId: phoenixRun.traceId,
+          };
+        });
+      }
+
+      // Map evaluation runs with their corresponding exampleId
+      const evaluationRuns: RanExperiment['evaluationRuns'] = (ran.evaluationRuns ?? []).map(
+        (evalRun: ExperimentEvaluationRun) => ({
+          name: evalRun.name,
+          result: evalRun.result ?? undefined,
+          experimentRunId: evalRun.experimentRunId,
+          traceId: evalRun.traceId,
+          exampleId: phoenixRuns[evalRun.experimentRunId]?.datasetExampleId,
+        })
+      );
+
       const ranExperiment: RanExperiment = {
         id: ran.id ?? '',
         datasetId: ran.datasetId,
         datasetName: dataset.name,
         datasetDescription: dataset.description,
-        runs: (ran.runs ?? {}) as any,
-        evaluationRuns: (ran.evaluationRuns ?? []) as any,
+        runs,
+        evaluationRuns,
         experimentMetadata: (ran as any).experimentMetadata as any,
       };
 
@@ -240,32 +291,5 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
 
   async getRanExperiments(): Promise<RanExperiment[]> {
     return this.experiments;
-  }
-
-  /**
-   * Phoenix-only helper retained for parity/debugging.
-   */
-  async getDatasets(ids: string[]): Promise<DatasetInfo[]> {
-    const limiter = pLimit(5);
-
-    const datasets = await Promise.all(
-      ids.map(async (id) => {
-        return limiter(() =>
-          this.phoenixClient
-            .GET('/v1/datasets/{id}', {
-              params: { path: { id } },
-            })
-            .then((response) => {
-              const dataset = response.data?.data;
-              if (!dataset) {
-                throw new Error(`Could not find dataset for ${id}`);
-              }
-              return dataset;
-            })
-        );
-      })
-    );
-
-    return datasets;
   }
 }
