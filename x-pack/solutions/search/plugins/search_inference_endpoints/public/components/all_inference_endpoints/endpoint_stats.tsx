@@ -85,8 +85,8 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       responsive={false}
       data-test-subj="endpointStats"
     >
-      {statItems.map((item) => (
-        <EuiFlexItem key={item.testSubj} grow={false} css={statItemStyles}>
+      {statItems.map((item, index) => (
+        <EuiFlexItem key={`stat-${index}`} grow={false} css={statItemStyles}>
           <StatItem label={item.label} count={item.count} testSubj={item.testSubj} />
         </EuiFlexItem>
       ))}
