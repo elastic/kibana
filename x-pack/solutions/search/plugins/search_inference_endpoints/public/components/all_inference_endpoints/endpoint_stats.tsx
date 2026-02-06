@@ -29,8 +29,10 @@ interface StatItemProps {
 }
 
 const statItemStyles = ({ euiTheme }: UseEuiTheme) => css`
-  border-right: ${euiTheme.border.thin};
-  padding-right: ${euiTheme.size.m};
+  &:not(:last-child) {
+    border-right: ${euiTheme.border.thin};
+    padding-right: ${euiTheme.size.m};
+  }
 `;
 
 const StatItem: React.FC<StatItemProps> = ({ label, count, testSubj }) => (
@@ -83,12 +85,8 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
       responsive={false}
       data-test-subj="endpointStats"
     >
-      {statItems.map((item, index) => (
-        <EuiFlexItem
-          key={item.testSubj}
-          grow={false}
-          css={index < statItems.length - 1 ? statItemStyles : undefined}
-        >
+      {statItems.map((item) => (
+        <EuiFlexItem key={item.testSubj} grow={false} css={statItemStyles}>
           <StatItem label={item.label} count={item.count} testSubj={item.testSubj} />
         </EuiFlexItem>
       ))}
