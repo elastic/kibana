@@ -110,6 +110,33 @@ export class GenAiSettingsPage {
   }
 
   /**
+   * Get the AI Assistants side nav setting
+   */
+  getAIAssistantSideNavSetting() {
+    return this.page.testSubj.locator(
+      'nav-item nav-item-stack_management.management_ai.management:aiAssistantManagementSelection nav-item-deepLinkId-management:aiAssistantManagementSelection nav-item-id-management:aiAssistantManagementSelection'
+    );
+  }
+
+  /**
+   * Get the AI Assistant side nav button for Observability
+   */
+  getAIAssistantSideNavButtonObservability() {
+    return this.page.testSubj.locator(
+      'nav-item nav-item-aiAssistantContainer nav-item-deepLinkId-observabilityAIAssistant nav-item-id-aiAssistantContainer'
+    );
+  }
+
+  /**
+   * Get the AI Assistant side nav button for Security
+   */
+  getAIAssistantSideNavButtonSecurity() {
+    return this.page.testSubj.locator(
+      'nav-item nav-item-stack_management.node-3.management:aiAssistantManagementSelection nav-item-deepLinkId-management:aiAssistantManagementSelection nav-item-id-management:aiAssistantManagementSelection'
+    );
+  }
+
+  /**
    * Get the AI Assistant nav button
    */
   getAiAssistantNavButton() {
@@ -117,10 +144,33 @@ export class GenAiSettingsPage {
   }
 
   /**
+   * Get the AI Assistant nav button for Security
+   */
+  getAiAssistantNavButtonSecurity() {
+    return this.page.testSubj.locator('assistantNavLink');
+  }
+
+  /**
+   * Get the AI Assistant nav button for Observability
+   */
+  getAIAssistantNavButtonObltSearch() {
+    return this.page.testSubj.locator('observabilityAiAssistantAppNavControlButton');
+  }
+
+  /**
    * Get the AI Agent nav button
    */
   getAIAgentNavButton() {
     return this.page.testSubj.locator('AgentBuilderNavControlButton');
+  }
+
+  /**
+   * Get the Agent side nav button
+   */
+  getAgentSideNavButton() {
+    return this.page.testSubj.locator(
+      'nav-item nav-item-agent_builder nav-item-deepLinkId-agent_builder nav-item-id-agent_builder'
+    );
   }
 
   /**
@@ -177,5 +227,12 @@ export class GenAiSettingsPage {
    */
   getAIAgentFlyout() {
     return this.page.testSubj.locator('agent-builder-conversation-flyout-wrapper');
+  }
+
+  /**
+   * Get the More menu button element
+   */
+  getMoreMenuButton() {
+    return this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 }

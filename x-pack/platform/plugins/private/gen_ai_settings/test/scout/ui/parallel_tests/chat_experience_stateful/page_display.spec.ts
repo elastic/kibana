@@ -10,7 +10,7 @@ import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Page Display',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsFullAIPrivilegesUser();

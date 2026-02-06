@@ -35,11 +35,6 @@ spaceTest.describe(
       await spaceTest.step('switch to Agent mode', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
         await chatExperienceField.selectOption({ value: AIChatExperience.Agent });
-      });
-
-      await spaceTest.step('confirm Agent selection', async () => {
-        const confirmationModal = pageObjects.genAiSettings.getConfirmModal();
-        await expect(confirmationModal).toBeVisible();
         await pageObjects.genAiSettings.getConfirmModalConfirmButton().click();
       });
 
