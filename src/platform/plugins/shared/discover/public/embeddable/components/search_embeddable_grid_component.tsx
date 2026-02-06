@@ -87,9 +87,9 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
-    tabs,
     selectedTabId,
     selectedTabNotFound,
+    tabs,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -107,9 +107,9 @@ export function SearchEmbeddableGridComponent({
     api.defaultTitle$,
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
-    stateManager.tabs,
     stateManager.selectedTabId,
-    stateManager.selectedTabNotFound
+    stateManager.selectedTabNotFound,
+    stateManager.tabs
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -275,10 +275,10 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
-      tabs={tabs}
+      onTabChange={api.setSelectedTabId}
       selectedTabId={selectedTabId}
       selectedTabNotFound={selectedTabNotFound}
-      onTabChange={api.setSelectedTabId}
+      tabs={tabs}
     />
   );
 }

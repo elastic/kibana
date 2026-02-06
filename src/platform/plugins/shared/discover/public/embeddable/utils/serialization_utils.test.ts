@@ -133,7 +133,6 @@ describe('Serialization utils', () => {
         searchSource,
       };
 
-      // Omit tabs from initialState since SearchEmbeddableRuntimeState expects flattened tabs format
       const { tabs: _tabs, ...initialStateWithoutTabs } = mockedSavedSearchAttributes;
       const serializedState = serializeState({
         uuid,
@@ -147,7 +146,6 @@ describe('Serialization utils', () => {
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
         serializeDynamicActions: jest.fn(),
-        serializeTabState: jest.fn().mockReturnValue({ tabs: [], selectedTabId: undefined }),
       });
 
       const attributes = toSavedSearchAttributes(
@@ -193,7 +191,7 @@ describe('Serialization utils', () => {
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
           serializeDynamicActions: jest.fn(),
-          serializeTabState: jest.fn().mockReturnValue({ tabs: [], selectedTabId: undefined }),
+          selectedTabId: undefined,
           savedObjectId: 'test-id',
         });
 
@@ -215,7 +213,7 @@ describe('Serialization utils', () => {
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
           serializeDynamicActions: jest.fn(),
-          serializeTabState: jest.fn().mockReturnValue({ tabs: [], selectedTabId: undefined }),
+          selectedTabId: undefined,
           savedObjectId: 'test-id',
         });
 

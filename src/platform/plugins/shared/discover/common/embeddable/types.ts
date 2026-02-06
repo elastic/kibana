@@ -32,7 +32,6 @@ type SearchEmbeddableBaseState = SerializedTitles &
   Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-    selectedTabId?: string;
   };
 
 export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
@@ -41,6 +40,7 @@ export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
 
 export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
   savedObjectId: string;
+  selectedTabId?: string;
 };
 
 export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;

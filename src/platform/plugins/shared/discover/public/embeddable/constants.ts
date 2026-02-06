@@ -35,5 +35,4 @@ export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableState>> =
   'timeRange', // panel custom time range
   'hidePanelTitles', // panel hidden title
   'enhancements', // panel enhancements (e.g. drilldowns)
-  'selectedTabId', // selected discover session tab
 ] as const;

@@ -114,10 +114,7 @@ export const getSearchEmbeddableFactory = ({
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: dynamicActionsManager?.getLatestState,
-          serializeTabState: () => ({
-            tabs: searchEmbeddable.stateManager.tabs.getValue(),
-            selectedTabId: searchEmbeddable.stateManager.selectedTabId.getValue(),
-          }),
+          selectedTabId: searchEmbeddable.stateManager.selectedTabId.getValue(),
           savedObjectId,
         });
 

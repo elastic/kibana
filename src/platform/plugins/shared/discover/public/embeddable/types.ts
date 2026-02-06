@@ -57,9 +57,9 @@ export type SearchEmbeddablePublicState = Pick<
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
-  tabs: DiscoverSessionTab[];
-  selectedTabId: string | undefined;
+  selectedTabId?: string;
   selectedTabNotFound: boolean;
+  tabs: DiscoverSessionTab[];
 };
 
 export type SearchEmbeddableStateManager = {
@@ -75,9 +75,9 @@ export type SearchEmbeddableSerializedAttributes = Omit<
   | 'totalHitCount'
   | 'searchSource'
   | 'inspectorAdapters'
-  | 'tabs'
   | 'selectedTabId'
   | 'selectedTabNotFound'
+  | 'tabs'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
@@ -90,9 +90,10 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-    tabs?: DiscoverSessionTab[];
     selectedTabId?: string;
     selectedTabNotFound?: boolean;
+    tabs?: DiscoverSessionTab[];
+    deletedTabOverrides?: EditableSavedSearchAttributes;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &

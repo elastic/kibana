@@ -21,7 +21,8 @@ import {
   getRowHeight,
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
-import { EuiSuperSelect, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiSuperSelect, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
@@ -48,15 +49,17 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
+const DELETED_TAB_ID = '__deleted_tab__';
+
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const {
     interceptedWarnings,
     isEditMode,
     enableDocumentViewer,
-    tabs,
+    onTabChange,
     selectedTabId,
     selectedTabNotFound,
-    onTabChange,
+    tabs,
     ...gridProps
   } = props;
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
@@ -149,6 +152,36 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
+  const tabSelectorOptions = useMemo(() => {
+    const options = tabs.map((tab) => ({
+      inputDisplay: tab.label,
+      value: tab.id,
+    }));
+
+    // Add a disabled "deleted tab" entry when the saved tab is no longer found
+    if (selectedTabNotFound) {
+      options.unshift({
+        inputDisplay: i18n.translate('discover.embeddable.search.deletedTab', {
+          defaultMessage: '(Deleted tab)',
+        }),
+        value: DELETED_TAB_ID,
+      });
+    }
+
+    return options;
+  }, [tabs, selectedTabNotFound]);
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      if (value !== DELETED_TAB_ID) {
+        onTabChange(value);
+      }
+    },
+    [onTabChange]
+  );
+
+  const tabSelectorValue = selectedTabNotFound ? DELETED_TAB_ID : selectedTabId ?? tabs[0]?.id;
+
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
@@ -156,35 +189,56 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
-      {selectedTabNotFound && (
-        <>
+      {isEditMode && selectedTabNotFound && (
+        <EuiPanel hasShadow={false} paddingSize="s">
           <EuiCallOut
-            title="The previously selected tab no longer exists"
+            announceOnMount
             color="warning"
             iconType="warning"
             size="s"
-            announceOnMount
+            title={i18n.translate('discover.embeddable.search.tabNotFoundTitle', {
+              defaultMessage: 'The previously selected tab no longer exists',
+            })}
           >
             <p>
-              The tab that was saved with this panel has been deleted from the Discover session.
-              Showing the first available tab instead.
+              {i18n.translate('discover.embeddable.search.tabNotFoundDescription', {
+                defaultMessage:
+                  'The tab that was saved with this panel has been deleted from the Discover session. Showing the first available tab instead. Select a different tab to dismiss this warning.',
+              })}
             </p>
           </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
+        </EuiPanel>
       )}
       {isEditMode && tabs.length > 1 && (
-        <EuiSuperSelect
-          aria-label="Select discover tab you want to explore"
-          options={tabs.map((tab) => ({
-            value: tab.id,
-            inputDisplay: tab.label,
-          }))}
-          valueOfSelected={selectedTabId ?? tabs[0]?.id}
-          onChange={(value) => {
-            onTabChange(value);
-          }}
-        />
+        <EuiPanel hasShadow={false} paddingSize="s">
+          <EuiFormRow
+            helpText={i18n.translate('discover.embeddable.search.tabSelectorHelp', {
+              defaultMessage: 'This select determines the data that is displayed in the grid',
+            })}
+            label={i18n.translate('discover.embeddable.search.tabSelectorLabel', {
+              defaultMessage: 'Discover session tab',
+            })}
+            isInvalid={selectedTabNotFound}
+            error={
+              selectedTabNotFound
+                ? i18n.translate('discover.embeddable.search.tabSelectorError', {
+                    defaultMessage: 'The saved tab was deleted. Please select a valid tab.',
+                  })
+                : undefined
+            }
+          >
+            <EuiSuperSelect
+              aria-label={i18n.translate('discover.embeddable.search.tabSelectorAriaLabel', {
+                defaultMessage: 'Select discover tab you want to explore',
+              })}
+              compressed={true}
+              onChange={handleTabChange}
+              options={tabSelectorOptions}
+              valueOfSelected={tabSelectorValue}
+              isInvalid={selectedTabNotFound}
+            />
+          </EuiFormRow>
+        </EuiPanel>
       )}
       <DiscoverGridMemoized
         {...gridProps}

@@ -70,7 +70,11 @@ const initializeSearchSource = async (
 };
 
 // Keys that are not part of SavedSearch and should be excluded when building it
-const NON_SAVED_SEARCH_KEYS: Array<keyof SearchEmbeddableStateManager> = ['tabs', 'selectedTabId'];
+const NON_SAVED_SEARCH_KEYS: Array<keyof SearchEmbeddableStateManager> = [
+  'selectedTabId',
+  'selectedTabNotFound',
+  'tabs',
+];
 
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
@@ -137,11 +141,11 @@ export const initializeSearchEmbeddableApi = async (
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
-  const tabs$ = new BehaviorSubject<DiscoverSessionTab[]>(initialState.tabs ?? []);
-  const selectedTabId$ = new BehaviorSubject<string | undefined>(initialState.selectedTabId);
+  const selectedTabId$ = new BehaviorSubject<string | undefined>(initialState?.selectedTabId);
   const selectedTabNotFound$ = new BehaviorSubject<boolean>(
-    initialState.selectedTabNotFound ?? false
+    initialState?.selectedTabNotFound ?? false
   );
+  const tabs$ = new BehaviorSubject<DiscoverSessionTab[]>(initialState?.tabs ?? []);
 
   /**
    * This is the state that comes from the search source that needs individual publishing subjects for the API
@@ -186,9 +190,9 @@ export const initializeSearchEmbeddableApi = async (
     viewMode: savedSearchViewMode$,
     density: density$,
     inspectorAdapters: inspectorAdapters$,
-    tabs: tabs$,
     selectedTabId: selectedTabId$,
     selectedTabNotFound: selectedTabNotFound$,
+    tabs: tabs$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -227,7 +231,14 @@ export const initializeSearchEmbeddableApi = async (
   const setSelectedTabId = async (tabId: string) => {
     const tabs = tabs$.getValue();
     const tab = tabs.find((t) => t.id === tabId);
+
     if (!tab) return;
+    const newRawAttrs = pick(tab, EDITABLE_SAVED_SEARCH_KEYS);
+    newRawAttrs.sort = newRawAttrs.sort ?? [];
+    newRawAttrs.columns = newRawAttrs.columns ?? [];
+    newRawAttrs.grid = newRawAttrs.grid ?? {};
+    initialState.rawSavedObjectAttributes = newRawAttrs;
+    initialState.deletedTabOverrides = undefined;
 
     selectedTabId$.next(tabId);
     selectedTabNotFound$.next(false);
@@ -239,9 +250,8 @@ export const initializeSearchEmbeddableApi = async (
 
     newSearchSource.setParent(searchSource$.getValue().getParent());
     searchSource$.next(newSearchSource);
-    if (newDataView) {
-      dataViews$.next([newDataView]);
-    }
+
+    if (newDataView) dataViews$.next([newDataView]);
 
     columns$.next(tab.columns);
     sort$.next(tab.sort);
@@ -264,11 +274,13 @@ export const initializeSearchEmbeddableApi = async (
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
       skip(1),
-      map(([newState, newSearchSource]) => ({
-        ...savedSearch$.getValue(),
-        ...newState,
-        searchSource: newSearchSource,
-      }))
+      map(([newState, newSearchSource]) => {
+        return {
+          ...savedSearch$.getValue(),
+          ...newState,
+          searchSource: newSearchSource,
+        };
+      })
     )
     .subscribe((newSavedSearch) => {
       savedSearch$.next(newSavedSearch);
