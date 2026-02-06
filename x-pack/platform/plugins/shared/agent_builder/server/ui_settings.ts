@@ -52,8 +52,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.experimentalFeatures.description',
         {
-          defaultMessage:
-            'Enables experimental features in Elastic Agent Builder such as filestore and skills.',
+          defaultMessage: 'Enables experimental features for Elastic Agent Builder.',
         }
       ),
       name: i18n.translate('xpack.agentBuilder.uiSettings.experimentalFeatures.name', {
@@ -63,8 +62,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: false,
-      readonly: true,
-      readonlyMode: 'ui',
+      readonly: false,
     },
   });
 };
