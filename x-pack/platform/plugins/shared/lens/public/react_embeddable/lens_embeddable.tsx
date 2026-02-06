@@ -152,8 +152,7 @@ export const createLensEmbeddableFactory = (
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
           stateConfig.anyStateChange$,
-          searchContextConfig.anyStateChange$,
-          internalApi.editingState$
+          searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
           const comparators = {

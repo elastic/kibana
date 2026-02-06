@@ -47,7 +47,6 @@ import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { Ast } from '@kbn/interpreter';
-import type { Observable } from 'rxjs';
 import type {
   IndexPatternMap,
   IndexPatternRef,
@@ -351,10 +350,7 @@ export type LensRuntimeState = Simplify<
 >;
 
 export interface LensHasEditPanel {
-  getEditPanel?: (options?: {
-    closeFlyout?: () => void;
-    showOnly?: boolean;
-  }) => Promise<JSX.Element | undefined>;
+  getEditPanel?: (options?: { closeFlyout?: () => void }) => Promise<JSX.Element | undefined>;
 }
 
 export interface LensInspectorAdapters {
@@ -403,7 +399,6 @@ export type LensInternalApi = Simplify<
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;
-      editingState$: Observable<void>;
     }
 >;
 
