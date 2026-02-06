@@ -120,10 +120,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(sequences).to.have.length(1);
 
         const sequence = sequences[0];
-        expect(sequence.correlation_identifier.identifier.field).to.be('trace.id');
-        expect(sequence.correlation_identifier.identifier.value).to.be(
-          DEFAULT_TRACE_CONFIGS[0].traceId
-        );
+        expect(sequence.correlation_identifier.field).to.be('trace.id');
+        expect(sequence.correlation_identifier.value).to.be(DEFAULT_TRACE_CONFIGS[0].traceId);
         expect(sequence.traceItems.length).to.be.greaterThan(0);
         expect(sequence.logs.length).to.be.greaterThan(0);
         expect(sequence.errorItems.length).to.be.greaterThan(0);
@@ -141,8 +139,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { correlation_identifier, traceItems, logs, errorItems } =
           results[0].data.sequences[0];
-        expect(correlation_identifier.identifier.field).to.be('trace.id');
-        expect(correlation_identifier.identifier.value).to.be('trace-does-not-exist');
+        expect(correlation_identifier.field).to.be('trace.id');
+        expect(correlation_identifier.value).to.be('trace-does-not-exist');
         expect(traceItems).to.have.length(0);
         expect(logs).to.have.length(0);
         expect(errorItems).to.have.length(0);
