@@ -36,6 +36,46 @@ export const registerDashboardAttachmentUiDefinition = ({
   share?: SharePluginStart;
   core: CoreStart;
 }) => {
+  // Helper function to open the flyout
+  const openFlyout = (attachmentId: string, data: DashboardAttachmentData) => {
+    // Set the current attachment in the store
+    attachmentStore.setAttachment(attachmentId, data);
+
+    let flyoutSession: ReturnType<typeof core.overlays.openFlyout> | undefined;
+
+    const onClose = () => {
+      attachmentStore.clear();
+      flyoutSession?.close();
+    };
+
+    flyoutSession = core.overlays.openFlyout(
+      toMountPoint(
+        <KibanaRenderContextProvider {...core}>
+          <DashboardFlyout
+            initialData={data}
+            attachmentId={attachmentId}
+            attachmentStore={attachmentStore}
+            onClose={onClose}
+            share={share}
+          />
+        </KibanaRenderContextProvider>,
+        core
+      ),
+      {
+        'data-test-subj': 'dashboardAttachmentFlyoutOverlay',
+        ownFocus: true,
+        onClose,
+        size: 'l',
+        maxWidth: '50vw',
+        paddingSize: 'none',
+        type: 'push',
+      }
+    );
+  };
+
+  // Register the callback so the store can open the flyout when updates arrive
+  attachmentStore.registerOpenFlyoutCallback(openFlyout);
+
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -51,39 +91,7 @@ export const registerDashboardAttachmentUiDefinition = ({
       const data = attachment.data as DashboardAttachmentData | undefined;
       if (!data) return;
 
-      // Set the current attachment in the store
-      attachmentStore.setAttachment(attachment.id, data);
-
-      let flyoutSession: ReturnType<typeof core.overlays.openFlyout> | undefined;
-
-      const onClose = () => {
-        attachmentStore.clear();
-        flyoutSession?.close();
-      };
-
-      flyoutSession = core.overlays.openFlyout(
-        toMountPoint(
-          <KibanaRenderContextProvider {...core}>
-            <DashboardFlyout
-              initialData={data}
-              attachmentId={attachment.id}
-              attachmentStore={attachmentStore}
-              onClose={onClose}
-              share={share}
-            />
-          </KibanaRenderContextProvider>,
-          core
-        ),
-        {
-          'data-test-subj': 'dashboardAttachmentFlyoutOverlay',
-          ownFocus: true,
-          onClose,
-          size: 'l',
-          maxWidth: '50vw',
-          paddingSize: 'none',
-          type: 'push',
-        }
-      );
+      openFlyout(attachment.id, data);
     },
   });
 };
