@@ -18,7 +18,7 @@ export const ensureValidInput = ({
   conversation?: Conversation;
   action?: ConversationAction;
 }) => {
-  // Regenerate use the last round's input via prepareConversation - skip standard input check
+  // Regenerate uses the last round's input via prepareConversation - skip standard input check
   if (action === 'regenerate') {
     return;
   }
