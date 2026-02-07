@@ -183,7 +183,8 @@ class ChatServiceImpl implements ChatService {
               try {
                 if (isRoundCompleteEvent(event)) {
                   if (requestId) trackingService?.trackQueryEnd(requestId);
-                  const isReplacingRound = action === 'regenerate';
+                  const isReplacingRound =
+                    action === 'regenerate' || event.data?.resumed === true;
                   const currentRoundCount = isReplacingRound
                     ? context.conversation.rounds.length
                     : (context.conversation.rounds?.length ?? 0) + 1;
