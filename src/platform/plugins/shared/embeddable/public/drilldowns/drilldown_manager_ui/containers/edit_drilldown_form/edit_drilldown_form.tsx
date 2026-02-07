@@ -11,7 +11,7 @@ import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { ActionFactoryView } from '../action_factory_view';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
@@ -39,7 +39,7 @@ export interface EditDrilldownFormProps {
 
 export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId }) => {
   const isMounted = useMountedState();
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const drilldownState = React.useMemo(
     () => drilldowns.createEventDrilldownState(eventId),
     [drilldowns, eventId]

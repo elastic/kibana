@@ -17,7 +17,7 @@ import { DrilldownDefinition, HasDrilldowns } from '../types';
  * exposed from this plugin's contract, user can change these props every time
  * the public <DrilldownManager> is re-rendered.
  */
-export interface PublicDrilldownManagerProps extends HasDrilldowns {
+export interface PublicDrilldownsManagerProps extends HasDrilldowns {
   /**
    * Initial screen which Drilldown Manager should display when it first opens.
    * Afterwards the state of the currently visible screen is controlled by the
@@ -110,7 +110,7 @@ export interface DrilldownType extends DrilldownDefinition { id: string, isCompa
  * These are static global dependencies of the <DrilldownManager> wired in
  * during the setup life-cycle of the plugin.
  */
-export interface DrilldownManagerDependencies {
+export interface DrilldownsManagerDependencies {
   /**
    * List of registered drilldowns
    */

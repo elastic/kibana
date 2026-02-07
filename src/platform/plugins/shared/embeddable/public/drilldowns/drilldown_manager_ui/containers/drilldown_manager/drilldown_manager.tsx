@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownManagerContent } from './drilldown_manager_content';
 import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
@@ -16,7 +16,7 @@ import { RenderDrilldownManagerFooter } from '../drilldown_manager_footer';
 import { HelloBar } from '../hello_bar';
 
 export const DrilldownManager: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const route = drilldowns.useRoute();
 
   const handleBack =

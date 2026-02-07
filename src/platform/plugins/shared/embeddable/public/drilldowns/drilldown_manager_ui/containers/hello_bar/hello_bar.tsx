@@ -8,11 +8,11 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 
 export const HelloBar: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const hideWelcomeMessage = drilldowns.useWelcomeMessage();
 
   if (hideWelcomeMessage) return null;

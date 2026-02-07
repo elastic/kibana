@@ -12,7 +12,7 @@ import * as React from 'react';
 import type { DrilldownTemplateTableItem } from '../../components/drilldown_template_table';
 import { DrilldownTemplateTable } from '../../components/drilldown_template_table';
 import type { DrilldownTemplate } from '../../types';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { txtLabel } from './i18n';
 
 export interface TemplateListProps {
@@ -20,7 +20,7 @@ export interface TemplateListProps {
 }
 
 export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
     DrilldownTemplateTableItem[]
   >(() => {

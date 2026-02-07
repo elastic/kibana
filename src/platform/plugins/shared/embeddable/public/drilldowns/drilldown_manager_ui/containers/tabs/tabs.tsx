@@ -11,7 +11,7 @@ import * as React from 'react';
 import type { EuiTabbedContentProps } from '@elastic/eui';
 import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownList } from '../drilldown_list';
 import { TemplatePicker } from '../template_picker';
@@ -56,7 +56,7 @@ const tabs: EuiTabbedContentProps['tabs'] = [
 ];
 
 export const Tabs: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const route = drilldowns.useRoute();
 
   return (

@@ -8,17 +8,17 @@
  */
 
 import React from 'react';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { DrilldownForm } from '../../components/drilldown_form';
-import type { DrilldownState } from '../../state';
+import type { DrilldownManger } from '../../state';
 import type { TriggerPickerProps } from '../../components/trigger_picker';
 
 export interface CreateDrilldownFormProps {
-  state: DrilldownState;
+  drilldown: DrilldownManager;
 }
 
 export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state }) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const name = state.useName();
   const triggers = state.useTriggers();
   const config = state.useConfig();

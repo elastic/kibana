@@ -9,13 +9,13 @@
 
 import * as React from 'react';
 import { DrilldownTable } from '../../components/drilldown_table';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { CloningNotification } from './cloning_notification';
 
 const FIVE_SECONDS = 5e3;
 
 export const DrilldownList: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const events = drilldowns.useEvents();
   const cloningNotificationCount = React.useMemo<number>(
     () =>

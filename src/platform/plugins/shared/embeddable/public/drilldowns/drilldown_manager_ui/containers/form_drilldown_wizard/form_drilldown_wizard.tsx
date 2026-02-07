@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { ActionFactoryPicker } from '../action_factory_picker';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { CreateDrilldownForm } from './create_drilldown_form';
 
 export const FormDrilldownWizard: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const actionFactory = drilldowns.useActionFactory();
 
   const drilldownState = drilldowns.getDrilldownState();

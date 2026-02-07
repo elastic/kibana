@@ -8,9 +8,9 @@
  */
 
 import * as React from 'react';
-import type { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
+import type { DrilldownsManagerDependencies, PublicDrilldownsManagerProps } from '../../types';
 
-export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
+export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownsManagerProps>;
 
 const LazyDrilldownManager = React.lazy(() =>
   import('./drilldown_manager_with_provider').then((m) => ({
@@ -23,7 +23,7 @@ const LazyDrilldownManager = React.lazy(() =>
  * which can be exported from plugin contract for other plugins to consume.
  */
 export const createPublicDrilldownManager = (
-  dependencies: DrilldownManagerDependencies
+  dependencies: DrilldownsManagerDependencies
 ): PublicDrilldownManagerComponent => {
   const PublicDrilldownManager: PublicDrilldownManagerComponent = (drilldownManagerProps) => {
     const filteredActionFactories = dependencies.actionFactories.filter((factory) => {

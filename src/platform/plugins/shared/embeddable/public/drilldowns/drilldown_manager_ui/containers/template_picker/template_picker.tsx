@@ -8,11 +8,11 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { TemplateList } from './template_list';
 
 export const TemplatePicker: React.FC = () => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
 
   const { templates } = drilldowns.deps;
 

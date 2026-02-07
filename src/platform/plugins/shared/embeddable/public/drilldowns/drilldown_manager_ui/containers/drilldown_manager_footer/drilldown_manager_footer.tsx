@@ -9,10 +9,10 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 
 export const DrilldownManagerFooter: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   React.useEffect(() => {
     drilldowns.setFooter(children);
     return () => {
@@ -23,7 +23,7 @@ export const DrilldownManagerFooter: FC<PropsWithChildren<unknown>> = ({ childre
 };
 
 export const RenderDrilldownManagerFooter: React.FC = () => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const footer = drilldowns.useFooter();
   return <>{footer}</>;
 };

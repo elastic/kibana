@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { DrilldownForm } from '../../components/drilldown_form';
-import type { DrilldownState } from '../../state';
+import type { DrilldownManager } from '../../state';
 import type { TriggerPickerProps } from '../../components/trigger_picker';
 
 export const txtDeleteDrilldownButtonLabel = i18n.translate(
@@ -23,11 +23,11 @@ export const txtDeleteDrilldownButtonLabel = i18n.translate(
 );
 
 export interface EditDrilldownFormProps {
-  state: DrilldownState;
+  drilldown: DrilldownManager;
 }
 
 export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ state }) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const name = state.useName();
   const triggers = state.useTriggers();
   const config = state.useConfig();

@@ -11,8 +11,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import type {
-  PublicDrilldownManagerProps,
-  DrilldownManagerDependencies,
+  PublicDrilldownsManagerProps,
+  DrilldownsManagerDependencies,
   DrilldownType,
 } from '../types';
 import {
@@ -26,22 +26,22 @@ import { DrilldownState } from '../../../../server/drilldowns/types';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
-export interface DrilldownManagerStateDeps
-  extends DrilldownManagerDependencies,
-    PublicDrilldownManagerProps {}
+export interface DrilldownsManagerStateDeps
+  extends DrilldownsManagerDependencies,
+    PublicDrilldownsManagerProps {}
 
 /**
  * An instance of this class holds all the state necessary for Drilldown
  * Manager. It also holds all the necessary controllers to change the state.
  *
  * `<DrilldownManager>` and other container components access this state using
- * the `useDrilldownManager()` React hook:
+ * the `useDrilldownsManager()` React hook:
  *
  * ```ts
- * const state = useDrilldownManager();
+ * const drilldowns = useDrilldownsManager();
  * ```
  */
-export class DrilldownManagerState {
+export class DrilldownsManagerState {
   /**
    * Title displayed at the top of <DrilldownManager> flyout.
    */

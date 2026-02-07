@@ -10,7 +10,7 @@
 import React from 'react';
 import { ActionFactory as ActionFactoryUi } from '../../components/action_factory';
 import type { ActionFactory, BaseActionFactoryContext } from '../../../../dynamic_actions';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 
 export interface ActionFactoryViewProps {
   factory: ActionFactory;
@@ -23,7 +23,7 @@ export const ActionFactoryView: React.FC<ActionFactoryViewProps> = ({
   context,
   constant,
 }) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const name = React.useMemo(() => factory.getDisplayName(context), [factory, context]);
   const icon = React.useMemo(() => factory.getIconType(context), [factory, context]);
   const handleChange = React.useMemo(() => {

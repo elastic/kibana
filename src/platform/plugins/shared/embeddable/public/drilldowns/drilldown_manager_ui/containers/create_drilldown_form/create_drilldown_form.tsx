@@ -11,7 +11,7 @@ import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { ActionFactoryPicker } from '../action_factory_picker';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
@@ -35,7 +35,7 @@ const txtCreateDrilldownButton = i18n.translate(
 
 export const CreateDrilldownForm: React.FC = () => {
   const isMounted = useMountedState();
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const drilldownState = drilldowns.getDrilldownState()!;
   const error = drilldownState.useError();
   const [disabled, setDisabled] = React.useState(false);

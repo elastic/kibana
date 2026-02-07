@@ -10,11 +10,11 @@
 import * as React from 'react';
 import { CreateDrilldownForm } from '../create_drilldown_form';
 import { Tabs } from '../tabs';
-import { useDrilldownManager } from '../context';
+import { useDrilldownsManager } from '../context';
 import { EditDrilldownForm } from '../edit_drilldown_form';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
-  const drilldowns = useDrilldownManager();
+  const drilldowns = useDrilldownsManager();
   const route = drilldowns.useRoute();
 
   if (route[0] === 'new' && !!route[1]) return <CreateDrilldownForm />;

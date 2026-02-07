@@ -9,20 +9,20 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import type { DrilldownManagerStateDeps } from '../../state';
-import { DrilldownManagerState } from '../../state';
+import type { DrilldownsManagerStateDeps } from '../../state';
+import { DrilldownsManagerState } from '../../state';
 
-const context = React.createContext<DrilldownManagerState | null>(null);
+const context = React.createContext<DrilldownsManagerState | null>(null);
 
-export const useDrilldownManager = () => React.useContext(context)!;
+export const useDrilldownsManager = () => React.useContext(context)!;
 
-export type DrilldownManagerProviderProps = DrilldownManagerStateDeps;
+export type DrilldownsManagerProviderProps = DrilldownsManagerStateDeps;
 
 export const DrilldownManagerProvider: React.FC<
-  PropsWithChildren<DrilldownManagerProviderProps>
+  PropsWithChildren<DrilldownsManagerProviderProps>
 > = ({ children, ...deps }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const value = React.useMemo(() => new DrilldownManagerState(deps), []);
+  const value = React.useMemo(() => new DrilldownsManagerState(deps), []);
 
   return <context.Provider value={value}>{children}</context.Provider>;
 };
