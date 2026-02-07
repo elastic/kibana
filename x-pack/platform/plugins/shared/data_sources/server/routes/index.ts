@@ -37,6 +37,7 @@ import {
   WORKFLOWS_SCOPE,
   TOOLS_SCOPE,
 } from '../../common/constants';
+import type { BulkDeleteTaskParams } from '../tasks/bulk_delete_task';
 import { TYPE } from '../tasks/bulk_delete_task';
 
 function createErrorResponse(
@@ -295,11 +296,17 @@ export function registerRoutes(dependencies: RouteDependencies) {
     }
   );
 
-  // Delete all data sources
+  // Delete data sources (all or selective by IDs)
   router.delete(
     {
       path: API_BASE_PATH,
-      validate: false,
+      validate: {
+        body: schema.nullable(
+          schema.object({
+            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+          })
+        ),
+      },
       security: {
         authz: {
           enabled: false,
@@ -325,22 +332,29 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
-        // Snapshot all data source IDs at queue time so the task only deletes these;
-        // any datasource created after the user clicks "delete all" is left intact.
-        const dataSourceIds: string[] = [];
-        const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          perPage: 1000,
-          fields: [],
-        });
-        try {
-          for await (const resp of finder.find()) {
-            for (const so of resp.saved_objects) {
-              dataSourceIds.push(so.id);
+        let dataSourceIds: string[];
+
+        if (request.body?.ids) {
+          // Selective bulk delete: use the provided IDs directly
+          dataSourceIds = request.body.ids;
+        } else {
+          // Delete all: snapshot all data source IDs at queue time so the task only deletes these;
+          // any datasource created after the user clicks "delete all" is left intact.
+          dataSourceIds = [];
+          const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            perPage: 1000,
+            fields: [],
+          });
+          try {
+            for await (const resp of finder.find()) {
+              for (const so of resp.saved_objects) {
+                dataSourceIds.push(so.id);
+              }
             }
+          } finally {
+            await finder.close();
           }
-        } finally {
-          await finder.close();
         }
 
         const taskId = v4();
@@ -424,11 +438,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
           errors: Array<{ dataSourceId: string; error: string }>;
         };
 
+        const params = (task.params || {}) as BulkDeleteTaskParams;
+
         return response.ok({
           body: {
             isDone: state.isDone || false,
             deletedCount: state.deletedCount || 0,
             errors: state.errors || [],
+            dataSourceIds: params.dataSourceIds || [],
           },
         });
       } catch (error) {
