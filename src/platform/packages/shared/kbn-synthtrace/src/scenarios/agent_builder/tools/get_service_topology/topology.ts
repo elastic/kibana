@@ -53,6 +53,45 @@ import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 
+// NOTE: These resource names intentionally differ from service.name to prevent
+// heuristic matching from accidentally passing tests. See scenario comment above.
+export const FRONTEND_SERVICE = {
+  serviceName: 'frontend',
+} as const;
+
+export const CHECKOUT_SERVICE = {
+  serviceName: 'checkout-service',
+  resource: 'checkout-proxy:5050',
+} as const;
+
+const EXTERNAL_HTTP_SPAN = {
+  spanType: 'external',
+  spanSubtype: 'http',
+} as const;
+
+export const RECOMMENDATION_SERVICE = {
+  serviceName: 'recommendation-service',
+  resource: 'recommendation-lb:8080',
+} as const;
+
+export const POSTGRES_DEPENDENCY = {
+  resource: 'postgres',
+  spanType: 'db',
+  spanSubtype: 'postgresql',
+} as const;
+
+export const REDIS_DEPENDENCY = {
+  resource: 'redis',
+  spanType: 'db',
+  spanSubtype: 'redis',
+} as const;
+
+export const KAFKA_DEPENDENCY = {
+  resource: 'kafka',
+  spanType: 'messaging',
+  spanSubtype: 'kafka',
+} as const;
+
 export function generateTopologyData({
   range,
   apmEsClient,
@@ -60,12 +99,14 @@ export function generateTopologyData({
   range: Timerange;
   apmEsClient: ApmSynthtraceEsClient;
 }): ScenarioReturnType<ApmFields> {
-  const frontend = apm.service('frontend', 'production', 'nodejs').instance('frontend-01');
+  const frontend = apm
+    .service(FRONTEND_SERVICE.serviceName, 'production', 'nodejs')
+    .instance('frontend-01');
   const checkoutService = apm
-    .service('checkout-service', 'production', 'java')
+    .service(CHECKOUT_SERVICE.serviceName, 'production', 'java')
     .instance('checkout-01');
   const recommendationService = apm
-    .service('recommendation-service', 'production', 'python')
+    .service(RECOMMENDATION_SERVICE.serviceName, 'production', 'python')
     .instance('recommendation-01');
 
   const data = range
@@ -81,8 +122,8 @@ export function generateTopologyData({
         .success()
         .children(
           frontend
-            .span('POST /api/checkout', 'external', 'http')
-            .destination('checkout-proxy:5050')
+            .span('POST /api/checkout', EXTERNAL_HTTP_SPAN.spanType, EXTERNAL_HTTP_SPAN.spanSubtype)
+            .destination(CHECKOUT_SERVICE.resource)
             .timestamp(timestamp + 10)
             .duration(180)
             .success()
@@ -95,20 +136,24 @@ export function generateTopologyData({
                 .success()
                 .children(
                   checkoutService
-                    .span('SELECT FROM orders', 'db', 'postgresql')
-                    .destination('postgres')
+                    .span(
+                      'SELECT FROM orders',
+                      POSTGRES_DEPENDENCY.spanType,
+                      POSTGRES_DEPENDENCY.spanSubtype
+                    )
+                    .destination(POSTGRES_DEPENDENCY.resource)
                     .timestamp(timestamp + 20)
                     .duration(30)
                     .success(),
                   checkoutService
-                    .span('GET cart:*', 'db', 'redis')
-                    .destination('redis')
+                    .span('GET cart:*', REDIS_DEPENDENCY.spanType, REDIS_DEPENDENCY.spanSubtype)
+                    .destination(REDIS_DEPENDENCY.resource)
                     .timestamp(timestamp + 60)
                     .duration(5)
                     .success(),
                   checkoutService
-                    .span('order.created', 'messaging', 'kafka')
-                    .destination('kafka')
+                    .span('order.created', KAFKA_DEPENDENCY.spanType, KAFKA_DEPENDENCY.spanSubtype)
+                    .destination(KAFKA_DEPENDENCY.resource)
                     .timestamp(timestamp + 80)
                     .duration(10)
                     .success()
@@ -126,8 +171,12 @@ export function generateTopologyData({
         .success()
         .children(
           recommendationService
-            .span('SELECT FROM products', 'db', 'postgresql')
-            .destination('postgres')
+            .span(
+              'SELECT FROM products',
+              POSTGRES_DEPENDENCY.spanType,
+              POSTGRES_DEPENDENCY.spanSubtype
+            )
+            .destination(POSTGRES_DEPENDENCY.resource)
             .timestamp(timestamp + 60)
             .duration(40)
             .success()
@@ -141,8 +190,12 @@ export function generateTopologyData({
         .success()
         .children(
           frontend
-            .span('GET /api/recommendations', 'external', 'http')
-            .destination('recommendation-lb:8080')
+            .span(
+              'GET /api/recommendations',
+              EXTERNAL_HTTP_SPAN.spanType,
+              EXTERNAL_HTTP_SPAN.spanSubtype
+            )
+            .destination(RECOMMENDATION_SERVICE.resource)
             .timestamp(timestamp + 410)
             .duration(90)
             .success()
