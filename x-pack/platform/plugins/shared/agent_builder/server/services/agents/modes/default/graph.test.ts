@@ -38,4 +38,3 @@ describe('createAgentGraph', () => {
     expect((chatModel as any).bindTools).toHaveBeenCalledWith(tools, { tool_choice: 'none' });
   });
 });
-
