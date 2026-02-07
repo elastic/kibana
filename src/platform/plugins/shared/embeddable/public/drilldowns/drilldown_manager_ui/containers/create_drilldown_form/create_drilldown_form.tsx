@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownsManager } from '../context';
-import { ActionFactoryPicker } from '../action_factory_picker';
+// import { ActionFactoryPicker } from '../action_factory_picker';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
 import { ButtonSubmit } from '../../components/button_submit';
@@ -36,8 +36,8 @@ const txtCreateDrilldownButton = i18n.translate(
 export const CreateDrilldownForm: React.FC = () => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownsManager();
-  const drilldownState = drilldowns.getDrilldownState()!;
-  const error = drilldownState.useError();
+  const drilldown = drilldowns.getDrilldownManager();
+  const error = drilldown?.useError();
   const [disabled, setDisabled] = React.useState(false);
 
   const handleCreate = () => {
@@ -51,9 +51,9 @@ export const CreateDrilldownForm: React.FC = () => {
   return (
     <>
       <DrilldownManagerTitle>{txtCreateDrilldown}</DrilldownManagerTitle>
-      <ActionFactoryPicker />
-      {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
-      {!!drilldownState && (
+      <div>ActionFactoryPicker</div>
+      {!!drilldown && <DrilldownStateForm drilldown={drilldown} disabled={disabled} />}
+      {!!drilldown && (
         <DrilldownManagerFooter>
           <ButtonSubmit disabled={disabled || !!error} onClick={handleCreate}>
             {txtCreateDrilldownButton}

@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './drilldowns_manager_state';
+export * from './drilldown_manager';
+export * from './drilldowns_manager';

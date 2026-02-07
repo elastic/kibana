@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ActionFactoryPicker } from '../action_factory_picker';
+// import { ActionFactoryPicker } from '../action_factory_picker';
 import { useDrilldownsManager } from '../context';
 import { CreateDrilldownForm } from './create_drilldown_form';
 
@@ -16,15 +16,15 @@ export const FormDrilldownWizard: React.FC = ({}) => {
   const drilldowns = useDrilldownsManager();
   const actionFactory = drilldowns.useActionFactory();
 
-  const drilldownState = drilldowns.getDrilldownState();
+  const drilldown = drilldowns.getDrilldownManager();
   let content: React.ReactNode = null;
 
   if (!actionFactory) content = null;
-  if (drilldownState) content = <CreateDrilldownForm state={drilldownState} />;
+  if (drilldown) content = <CreateDrilldownForm drilldown={drilldown} />;
 
   return (
     <>
-      <ActionFactoryPicker />
+      <div>ActionFactoryPicker</div>
       {content}
     </>
   );

@@ -29,7 +29,7 @@ export interface DrilldownTableItem {
   drilldownName: string;
   icon?: string;
   error?: string;
-  triggers?: Trigger[];
+  trigger?: Trigger;
   triggerIncompatible?: boolean;
 }
 

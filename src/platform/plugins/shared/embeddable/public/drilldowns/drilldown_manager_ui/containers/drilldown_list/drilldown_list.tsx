@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
+import React from 'react';
 import { DrilldownTable } from '../../components/drilldown_table';
 import { useDrilldownsManager } from '../context';
 import { CloningNotification } from './cloning_notification';
@@ -16,7 +16,7 @@ const FIVE_SECONDS = 5e3;
 
 export const DrilldownList: React.FC = ({}) => {
   const drilldowns = useDrilldownsManager();
-  const events = drilldowns.useEvents();
+  const tableItems = drilldowns.useTableItems();
   const cloningNotificationCount = React.useMemo<number>(
     () =>
       !!drilldowns.lastCloneRecord && drilldowns.lastCloneRecord.time > Date.now() - FIVE_SECONDS
@@ -37,7 +37,7 @@ export const DrilldownList: React.FC = ({}) => {
     <>
       {notification}
       <DrilldownTable
-        items={events}
+        items={tableItems}
         onDelete={drilldowns.onDelete}
         onEdit={(id) => {
           drilldowns.setRoute(['manage', id]);

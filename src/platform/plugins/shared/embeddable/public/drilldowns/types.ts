@@ -20,6 +20,12 @@ export type DrilldownDefinition<
   TContext extends object = object
 > = {
   /**
+   * Drilldown type display name. i.e. "Go to dashboard"
+   * Should be i18n string
+   */
+  displayName: string;
+
+  /**
    * Implements the "navigation" action of the drilldown. This happens when
    * user interacts with something in the UI that executes the drilldown trigger.
    *
@@ -33,9 +39,7 @@ export type DrilldownDefinition<
    */
   euiIcon?: string;
 
-  getInitialLabel(): string;
-
-  getInitialState(): Partial<Omit<TDrilldownState, 'label' | 'trigger' | 'type'>>;
+  getInitialState(): Partial<Omit<TDrilldownState, 'trigger' | 'type'>>;
 
   /**
    * Returns a link where drilldown should navigate on middle click or Ctrl + click.

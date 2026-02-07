@@ -34,19 +34,9 @@ export interface DrilldownManagerDeps {
   // placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
 
   /**
-   * Initial drilldown name
+   * Initial drilldown state.
    */
-  name?: string;
-
-  /**
-   * Initially selected trigger.
-   */
-  trigger?: string;
-
-  /**
-   * Initial drilldown configuration.
-   */
-  config?: {};
+  initialState?: Partial<DrilldownState>;
 }
 
 /**
@@ -112,13 +102,12 @@ export class DrilldownManager {
     factory,
     triggers,
     // placeContext,
-    name = '',
-    trigger,
-    config = {},
+    initialState,
   }: DrilldownManagerDeps) {
     this.factory = factory;
     // this.placeContext = placeContext;
-    this.name$ = new BehaviorSubject<string>(name);
+    const { label, trigger, type, ...config } = initialState ?? {};
+    this.name$ = new BehaviorSubject<string>(label ?? '');
     this.trigger$ = new BehaviorSubject<string | undefined>(trigger);
     this.config$ = new BehaviorSubject<Partial<DrilldownState>>(config);
 

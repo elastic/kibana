@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownsManager } from '../context';
-import { ActionFactoryView } from '../action_factory_view';
+// import { ActionFactoryView } from '../action_factory_view';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
 import { ButtonSubmit } from '../../components/button_submit';
@@ -34,23 +34,23 @@ const txtEditDrilldownButton = i18n.translate(
 );
 
 export interface EditDrilldownFormProps {
-  eventId: string;
+  actionId: string;
 }
 
-export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId }) => {
+export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ actionId }) => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownsManager();
-  const drilldownState = React.useMemo(
-    () => drilldowns.createEventDrilldownState(eventId),
-    [drilldowns, eventId]
+  const drilldown = React.useMemo(
+    () => drilldowns.createDrilldownManager(actionId),
+    [drilldowns, actionId]
   );
   const [disabled, setDisabled] = React.useState(false);
 
-  if (!drilldownState) return null;
+  if (!drilldown) return null;
 
   const handleSave = () => {
     setDisabled(true);
-    drilldowns.updateEvent(eventId, drilldownState).finally(() => {
+    drilldowns.updateDrilldown(actionId, drilldown).finally(() => {
       if (!isMounted()) return;
       setDisabled(false);
     });
@@ -59,13 +59,9 @@ export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId })
   return (
     <>
       <DrilldownManagerTitle>{txtEditDrilldown}</DrilldownManagerTitle>
-      <ActionFactoryView
-        constant
-        factory={drilldownState.factory}
-        context={drilldownState.getFactoryContext()}
-      />
-      {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
-      {!!drilldownState && (
+      <div>ActionFactoryView</div>
+      {drilldown && <DrilldownStateForm drilldown={drilldown} disabled={disabled} />}
+      {drilldown && (
         <DrilldownManagerFooter>
           <ButtonSubmit disabled={disabled} onClick={handleSave}>
             {txtEditDrilldownButton}

@@ -20,9 +20,10 @@ import {
   txtDefaultTitle,
   toastDrilldownDeleted,
   toastDrilldownsDeleted,
+  toastDrilldownEdited,
 } from './i18n';
-import { DrilldownState } from '../../../../server/drilldowns/types';
 import { DrilldownManager } from './drilldown_manager';
+import { useTableItems } from '../hooks/use_table_items';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -75,7 +76,7 @@ export class DrilldownsManager {
    * switches between drilldown types the configuration of the previous
    * drilldown is preserved.
    */
-  public readonly drilldownCache = new Map<string, DrilldownManager>();
+  public readonly drilldownManagers = new Map<string, DrilldownManager>();
 
   /**
    * Whether user can unlock more drilldown types if they subscribe to a higher
@@ -160,15 +161,14 @@ export class DrilldownsManager {
       return;
     }
 
-    if (!this.drilldownCache.has(nextFactory.type)) {
+    if (!this.drilldownManagers.has(nextFactory.type)) {
       const drilldown = new DrilldownManager({
         factory: nextFactory,
         triggers: this.deps.triggers,
+        initialState: nextFactory.getInitialState(),
         // placeContext: this.deps.placeContext || {},
-        name: nextFactory.getInitialLabel(),
-        config: nextFactory.getInitialState(),
       });
-      this.drilldownCache.set(nextFactory.type, drilldown);
+      this.drilldownManagers.set(nextFactory.type, drilldown);
     }
 
     this.route$.next(['new', nextFactory.type]);
@@ -216,11 +216,9 @@ export class DrilldownsManager {
   /**
    * Get state object of the drilldown which is currently being created.
    */
-  public getDrilldownState(): undefined | Partial<DrilldownState> {
+  public getDrilldownManager(): undefined | DrilldownManager {
     const [, type] = this.route$.getValue();
-    if (!type) return undefined;
-    const drilldown = this.drilldownCache.get(type);
-    return drilldown?.serialize();
+    return this.drilldownManagers.get(type);
   }
 
   /**
@@ -229,20 +227,22 @@ export class DrilldownsManager {
    */
   public async createDrilldown(): Promise<void> {
     const { drilldowns$, setDrilldowns, toastService } = this.deps;
-    const drilldownState = this.getDrilldownState() as DrilldownState;
+    const drilldown = this.getDrilldownManager();
 
-    if (!drilldownState) return;
+    if (!drilldown) return;
+
+    const serializedDrilldown = drilldown.serialize();
 
     try {
       setDrilldowns([
         ...drilldowns$.getValue(),
-        drilldownState
+        serializedDrilldown
       ]);
       toastService.addSuccess({
-        title: toastDrilldownCreated.title(drilldownState.label),
+        title: toastDrilldownCreated.title(serializedDrilldown.label),
         text: toastDrilldownCreated.text,
       });
-      this.drilldownCache.delete(drilldownState.type);
+      this.drilldownManagers.delete(serializedDrilldown.type);
       if (this.deps.closeAfterCreate) {
         this.deps.onClose();
       } else {
@@ -376,42 +376,42 @@ export class DrilldownsManager {
   /**
    * Returns the state object of an existing drilldown for editing purposes.
    *
-   * @param eventId ID of the saved dynamic action event.
+   * @param actionId ID of the drilldown action.
    */
-  /*public createEventDrilldownState(eventId: string): null | DrilldownState {
-    const { dynamicActionManager, actionFactories, triggers: placeTriggers } = this.deps;
-    const { events } = dynamicActionManager.state.get();
-    const event = events.find((ev) => ev.eventId === eventId);
-    if (!event) return null;
-    const factory = actionFactories.find(({ id }) => id === event.action.factoryId);
+  public createDrilldownManager(actionId: string): null | DrilldownManager {
+    const { drilldowns$, factories, triggers } = this.deps;
+    const drilldownState = drilldowns$.getValue().find((drilldown) => drilldown.actionId === actionId);
+    if (!drilldownState) return null;
+
+    const factory = factories.find(({ type }) => type === drilldownState.type);
     if (!factory) return null;
-    const { action, triggers } = event;
-    const { name, config } = action;
-    const state = new DrilldownState({
+    const state = new DrilldownManager({
       factory,
-      placeContext: this.getActionFactoryContext(),
-      placeTriggers,
-      name,
-      config,
+      // placeContext: this.getActionFactoryContext(),
       triggers,
+      initialState: drilldownState,
     });
     return state;
-  }*/
+  }
 
   /**
    * Save edits to an existing drilldown.
    *
-   * @param eventId ID of the saved dynamic action event.
-   * @param drilldownState Latest state of the drilldown as edited by the user.
+   * @param actionId ID of the saved dynamic action event.
+   * @param drilldown DrilldownManager
    */
-  /*public async updateEvent(eventId: string, drilldownState: DrilldownState): Promise<void> {
-    const { dynamicActionManager, toastService } = this.deps;
-    const action = drilldownState.serialize();
-
+  public async updateDrilldown(actionId: string, drilldown: DrilldownManager): Promise<void> {
+    const { drilldowns$, setDrilldowns, toastService } = this.deps;
     try {
-      await dynamicActionManager.updateEvent(eventId, action, drilldownState.triggers$.getValue());
+      const drilldownState = drilldown.serialize();
+      setDrilldowns(
+        [
+          ...drilldowns$.getValue().filter(drilldown => drilldown.actionId !== actionId),
+          drilldownState
+        ]
+      )
       toastService.addSuccess({
-        title: toastDrilldownEdited.title(action.name),
+        title: toastDrilldownEdited.title(drilldownState.label),
         text: toastDrilldownEdited.text,
       });
       this.setRoute(['manage']);
@@ -421,7 +421,7 @@ export class DrilldownsManager {
       });
       throw error;
     }
-  }*/
+  }
 
   // Below are convenience React hooks for consuming observables in connected
   // React components.
@@ -433,7 +433,7 @@ export class DrilldownsManager {
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
   // public readonly useActionFactory = () =>
   //  useObservable(this.actionFactory$, this.actionFactory$.getValue());
-  //public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
+  public readonly useTableItems = () => useTableItems(this.deps.drilldowns$, this.deps.factories, this.deps.getTrigger, this.deps.triggers);
   /*public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
     useObservable(
       useMemo(() => this.getCompatibleActionFactories(context), [context]),
