@@ -6,7 +6,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { SavedObjectReference } from '@kbn/core/types';
+import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';
 import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
@@ -19,11 +19,6 @@ interface Arguments {
   title: string | null;
   timerange: TimeRangeArg | null;
 }
-
-const defaultTimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
@@ -70,7 +65,7 @@ export function savedMap(): ExpressionFunctionDefinition<
         input: {
           id: args.id,
           savedObjectId: args.id,
-          timeRange: args.timerange || defaultTimeRange,
+          timeRange: args.timerange || DEFAULT_TIME_RANGE,
           mapCenter: args.center
             ? {
                 lat: args.center.lat,
@@ -86,31 +81,6 @@ export function savedMap(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.map,
         generatedAt: Date.now(),
       };
-    },
-    extract(state) {
-      const refName = 'savedMap.id';
-      const references: SavedObjectReference[] = [
-        {
-          name: refName,
-          type: 'map',
-          id: state.id[0] as string,
-        },
-      ];
-      return {
-        state: {
-          ...state,
-          id: [refName],
-        },
-        references,
-      };
-    },
-
-    inject(state, references) {
-      const reference = references.find((ref) => ref.name === 'savedMap.id');
-      if (reference) {
-        state.id[0] = reference.id;
-      }
-      return state;
     },
   };
 }

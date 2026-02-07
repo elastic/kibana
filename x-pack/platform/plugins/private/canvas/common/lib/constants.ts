@@ -43,3 +43,7 @@ export const LAUNCHED_FULLSCREEN_AUTOPLAY = 'workpad-full-screen-launch-with-aut
 export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;
 export const CONTEXT_MENU_TOP_BORDER_CLASSNAME = 'canvasContextMenu--topBorder';
 export const API_ROUTE_FUNCTIONS = `${INTERNAL_API_ROUTE}/fns`;
+export const DEFAULT_TIME_RANGE = {
+  from: 'now-15m',
+  to: 'now',
+};
