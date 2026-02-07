@@ -87,9 +87,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
               SCOUT_CONFIG_GROUP_TYPE: group,
               ...envFromlabels,
               ...scoutExtraEnv,
-              ...(earlyStartEnabled
-                ? { [PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV]: 'true' }
-                : {}),
+              ...(earlyStartEnabled ? { [PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV]: 'true' } : {}),
             },
             retry: {
               automatic: [

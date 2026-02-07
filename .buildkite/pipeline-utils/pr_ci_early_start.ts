@@ -220,7 +220,9 @@ export function isPrCiCancelableCommand(command: string): boolean {
 }
 
 export function prefixPrCiCancelableCommand(command: string): string {
-  return isPrCiCancelableCommand(command) ? command : `${PR_CI_CANCELABLE_COMMAND_PREFIX} ${command}`;
+  return isPrCiCancelableCommand(command)
+    ? command
+    : `${PR_CI_CANCELABLE_COMMAND_PREFIX} ${command}`;
 }
 
 export function appendPrCiCancelableEnv(

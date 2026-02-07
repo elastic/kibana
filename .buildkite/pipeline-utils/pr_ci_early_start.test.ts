@@ -106,7 +106,9 @@ describe('pr_ci_early_start', () => {
 
   describe('command helpers', () => {
     it('prefixes cancelable commands and recognizes already-prefixed commands', () => {
-      const prefixed = prefixPrCiCancelableCommand('.buildkite/scripts/steps/functional/apm_cypress.sh');
+      const prefixed = prefixPrCiCancelableCommand(
+        '.buildkite/scripts/steps/functional/apm_cypress.sh'
+      );
 
       expect(prefixed).toBe(
         `${PR_CI_CANCELABLE_COMMAND_PREFIX} .buildkite/scripts/steps/functional/apm_cypress.sh`
@@ -168,7 +170,13 @@ describe('pr_ci_early_start', () => {
 
     it('transforms object steps even when wait scalar steps are present', () => {
       const pipeline = {
-        steps: ['wait', { command: '.buildkite/scripts/steps/test/ftr_configs.sh', depends_on: ['build', 'checks'] }],
+        steps: [
+          'wait',
+          {
+            command: '.buildkite/scripts/steps/test/ftr_configs.sh',
+            depends_on: ['build', 'checks'],
+          },
+        ],
       };
 
       const transformed = transformPipelineForPrCiEarlyStart(pipeline);
