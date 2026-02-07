@@ -196,6 +196,12 @@ export function registerChatRoutes({
     return results;
   };
 
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
+
   const validateConfigurationOverrides = async ({
     payload,
     request,
@@ -308,10 +314,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        // Validate action-specific requirements before invoking chat service
-        if (payload.action === 'regenerate' && !payload.conversation_id) {
-          throw createBadRequestError('conversation_id is required when action is regenerate');
-        }
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,
@@ -393,10 +396,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        // Validate action-specific requirements before invoking chat service
-        if (payload.action === 'regenerate' && !payload.conversation_id) {
-          throw createBadRequestError('conversation_id is required when action is regenerate');
-        }
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,
