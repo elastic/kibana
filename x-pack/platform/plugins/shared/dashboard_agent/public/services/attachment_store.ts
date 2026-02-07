@@ -26,6 +26,8 @@ export type OpenFlyoutCallback = (attachmentId: string, data: DashboardAttachmen
 export class AttachmentStore {
   private readonly state$ = new BehaviorSubject<AttachmentState | null>(null);
   private openFlyoutCallback?: OpenFlyoutCallback;
+  // Cache of last known attachment data by ID (used when flyout is closed)
+  private attachmentCache = new Map<string, DashboardAttachmentData>();
 
   /**
    * Observable of the current attachment state.
@@ -57,16 +59,28 @@ export class AttachmentStore {
 
   /**
    * Set the current attachment being viewed in the flyout.
+   * Also caches the data so it's available if flyout closes and reopens.
    */
   setAttachment(attachmentId: string, data: DashboardAttachmentData): void {
+    // Cache the data so it's available when flyout is closed
+    this.attachmentCache.set(attachmentId, data);
     this.state$.next({ attachmentId, data });
   }
 
   /**
    * Update the attachment data. If flyout is open and matches, update it.
    * If flyout is closed, open it with the new data.
+   * Also caches the data for future use when flyout is closed.
    */
   updateAttachment(attachmentId: string, data: DashboardAttachmentData): void {
+    // Always cache the latest data
+    this.attachmentCache.set(attachmentId, data);
+    console.log('AttachmentStore: cached attachment data', {
+      attachmentId,
+      panelCount: data.panels.length,
+      cacheSize: this.attachmentCache.size,
+    });
+
     const current = this.state$.getValue();
     console.log('AttachmentStore.updateAttachment:', {
       incomingId: attachmentId,
@@ -87,7 +101,7 @@ export class AttachmentStore {
 
   /**
    * Add a panel progressively to the current attachment.
-   * If no flyout is open, opens it with a new dashboard containing this panel.
+   * If no flyout is open, opens it with cached data plus the new panel.
    */
   addPanel(attachmentId: string, panel: PanelAddedEventData['panel']): void {
     const current = this.state$.getValue();
@@ -95,6 +109,8 @@ export class AttachmentStore {
       incomingId: attachmentId,
       currentId: current?.attachmentId,
       panelId: panel.panelId,
+      hasCachedData: this.attachmentCache.has(attachmentId),
+      cachedKeys: Array.from(this.attachmentCache.keys()),
     });
 
     // Convert UI event panel to AttachmentPanel format
@@ -111,17 +127,28 @@ export class AttachmentStore {
         ...current.data,
         panels: [...current.data.panels, attachmentPanel],
       };
+      // Update cache with new state
+      this.attachmentCache.set(attachmentId, updatedData);
       console.log('AttachmentStore: adding panel to existing flyout');
       this.state$.next({ attachmentId, data: updatedData });
     } else if (current === null && this.openFlyoutCallback) {
-      // Flyout is closed - open it with a new dashboard containing this panel
-      const newData: DashboardAttachmentData = {
+      // Flyout is closed - use cached data if available, otherwise create new
+      const cachedData = this.attachmentCache.get(attachmentId);
+      const baseData: DashboardAttachmentData = cachedData ?? {
         title: 'Dashboard',
         description: '',
-        panels: [attachmentPanel],
+        panels: [],
       };
-      console.log('AttachmentStore: opening flyout with new panel');
-      this.openFlyoutCallback(attachmentId, newData);
+      const updatedData: DashboardAttachmentData = {
+        ...baseData,
+        panels: [...baseData.panels, attachmentPanel],
+      };
+      // Update cache with new state
+      this.attachmentCache.set(attachmentId, updatedData);
+      console.log('AttachmentStore: opening flyout with cached data + new panel', {
+        cachedPanelCount: cachedData?.panels.length ?? 0,
+      });
+      this.openFlyoutCallback(attachmentId, updatedData);
     }
   }
 
