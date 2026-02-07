@@ -10,13 +10,15 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
-import type { GrantUiamAPIKeyParams } from '@kbn/security-plugin-types-server';
+import type {
+  ClientAuthentication,
+  GrantUiamAPIKeyParams,
+} from '@kbn/security-plugin-types-server';
 
 import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
-import type { UserProfileGrant } from '../user_profile';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -63,10 +65,10 @@ export interface UiamServicePublic {
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
-   * Creates a user profile grant based on the provided access token.
-   * @param accessToken UIAM session access token.
+   * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
+   * `client_authentication` option in Elasticsearch client.
    */
-  getUserProfileGrant(accessToken: string): UserProfileGrant;
+  getClientAuthentication(): ClientAuthentication;
 
   /**
    * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
@@ -148,23 +150,17 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * See {@link UiamServicePublic.getUserProfileGrant}.
+   * See {@link UiamServicePublic.getClientAuthentication}.
    */
-  getUserProfileGrant(accessToken: string): UserProfileGrant {
-    return {
-      type: 'uiamAccessToken' as const,
-      accessToken,
-      sharedSecret: this.#config.sharedSecret,
-    };
+  getClientAuthentication(): ClientAuthentication {
+    return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
   }
 
   /**
    * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
    */
   getEsClientAuthenticationHeader(): Record<string, string> {
-    return {
-      [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-    };
+    return { [ES_CLIENT_AUTHENTICATION_HEADER]: this.getClientAuthentication().value };
   }
 
   /**
