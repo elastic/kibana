@@ -33,7 +33,7 @@ import type { APMEventClient } from '../../helpers/create_es_client/create_apm_e
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
 const MAX_ITEMS = 1500;
-export const getStats = async ({
+export const getConnectionStatsItems = async ({
   apmEventClient,
   start,
   end,
@@ -56,7 +56,7 @@ export const getStats = async ({
     offset,
   });
 
-  const response = await getConnectionStats({
+  const response = await getConnectionStatsAggregations({
     apmEventClient,
     startWithOffset,
     endWithOffset,
@@ -104,7 +104,7 @@ export const getStats = async ({
   );
 };
 
-async function getConnectionStats({
+async function getConnectionStatsAggregations({
   apmEventClient,
   startWithOffset,
   endWithOffset,

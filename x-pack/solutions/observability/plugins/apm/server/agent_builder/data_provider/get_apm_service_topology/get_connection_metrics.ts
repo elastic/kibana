@@ -9,7 +9,7 @@ import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getStats } from '../../../lib/connections/get_connection_stats/get_stats';
+import { getConnectionStatsItems } from '../../../lib/connections/get_connection_stats/get_connection_stats_items';
 import { buildConnectionKey } from './build_connections_from_spans';
 import type { ConnectionMetrics, ConnectionWithKey, ServiceTopologyConnection } from './types';
 
@@ -32,7 +32,7 @@ export async function getConnectionMetrics({
     return {};
   }
 
-  const statsItems = await getStats({
+  const statsItems = await getConnectionStatsItems({
     apmEventClient,
     start,
     end,
