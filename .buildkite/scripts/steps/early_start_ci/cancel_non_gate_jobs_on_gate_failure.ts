@@ -23,6 +23,14 @@ const toStepLabel = (job: Job): string => job.step_key || job.name || job.id;
 const toStepCancelTarget = (job: Job): string | null => job.step_key || job.step?.id || null;
 
 async function run() {
+  const currentStepKey = process.env.BUILDKITE_STEP_KEY;
+  if (!isPrCiGateKey(currentStepKey)) {
+    console.log(
+      `Current step key "${currentStepKey ?? ''}" is not a gate key (${PR_CI_GATE_KEYS.join(', ')}), skipping.`
+    );
+    return;
+  }
+
   const bk = new BuildkiteClient();
   const build = await bk.getCurrentBuild(true);
 

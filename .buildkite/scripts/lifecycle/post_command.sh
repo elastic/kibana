@@ -74,13 +74,13 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
   fi
 
-  # Cancel early-start jobs when a gate step fails
+  # PR CI early-start: expensive jobs (FTR, Scout) are allowed to start before
+  # gate steps (type checks, linting, etc.) finish. If a gate step fails, cancel
+  # those in-flight jobs so they don't waste resources. The TS script checks
+  # whether the current step is a gate key (via PR_CI_GATE_KEYS) and exits early
+  # if not. || true prevents cancellation errors from masking the gate failure.
   if [[ "${PR_CI_EARLY_START_ENABLED:-}" == "true" ]]; then
-    case "${BUILDKITE_STEP_KEY:-}" in
-      quick_checks|checks|linting|linting_with_types|check_types|check_oas_snapshot)
-        echo '--- PR CI early-start gate-failure cancellation'
-        ts-node .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.ts || true
-        ;;
-    esac
+    echo '--- PR CI early-start gate-failure cancellation'
+    ts-node .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.ts || true
   fi
 fi
