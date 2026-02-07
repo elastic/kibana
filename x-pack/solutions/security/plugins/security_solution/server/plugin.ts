@@ -260,7 +260,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAgents(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
     });
-    registerSkills(agentBuilder).catch((error) => {
+    registerSkills(agentBuilder, {
+      malwareAnalysis: this.config.malwareAnalysis
+        ? {
+            orchestratorUrl: this.config.malwareAnalysis.orchestratorUrl,
+            apiToken: this.config.malwareAnalysis.apiToken,
+            timeout: this.config.malwareAnalysis.timeout,
+          }
+        : undefined,
+    }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
   }

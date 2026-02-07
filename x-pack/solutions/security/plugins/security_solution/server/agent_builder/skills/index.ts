@@ -6,4 +6,5 @@
  */
 
 export { alertAnalysisSampleSkill as alertAnalysisSkill } from './alert_analysis_skill';
+export { createMalwareAnalysisSkill } from './malware_analysis_skill';
 export { registerSkills } from './register_skills';
