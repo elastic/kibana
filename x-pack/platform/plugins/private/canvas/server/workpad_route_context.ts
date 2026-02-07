@@ -11,12 +11,12 @@ import type {
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
 import type { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
-import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
 import type { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
+import { transformWorkpadIn } from './embeddable/transform_workpad_in';
+import { transformWorkpadOut } from './embeddable/transform_workpad_out';
 
 export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   canvas: {
@@ -33,13 +33,10 @@ export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   };
 }>;
 
-interface Deps {
-  expressions: ExpressionsServiceStart;
-}
-
-export const createWorkpadRouteContext: (
-  deps: Deps
-) => IContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
+export const createWorkpadRouteContext: () => IContextProvider<
+  CanvasRouteHandlerContext,
+  'canvas'
+> = () => {
   return async (context) => {
     const soClient = (await context.core).savedObjects.client;
     return {
@@ -50,15 +47,13 @@ export const createWorkpadRouteContext: (
 
           const id = maybeId ? maybeId : getId('workpad');
 
-          const { workpad: extractedAttributes, references } = extractReferences(
-            attributes,
-            expressions
-          );
+          // embeddables transform in
+          const { attributes: transformedAttributes, references } = transformWorkpadIn(attributes);
 
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,
             {
-              ...extractedAttributes,
+              ...transformedAttributes,
               '@timestamp': now,
               '@created': now,
             },
@@ -77,11 +72,14 @@ export const createWorkpadRouteContext: (
 
           const id = maybeId ? maybeId : getId('workpad');
 
+          // embeddables transform in
+          const { attributes, references } = transformWorkpadIn(
+            workpadWithoutId as WorkpadAttributes
+          );
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,
             {
-              isWriteable: true,
-              ...workpadWithoutId,
+              ...attributes,
               '@timestamp': now,
               '@created': now,
             },
@@ -89,27 +87,25 @@ export const createWorkpadRouteContext: (
               migrationVersion: DEFAULT_MIGRATION_VERSION,
               coreMigrationVersion: DEFAULT_CORE_MIGRATION_VERSION,
               id,
+              references,
             }
           );
         },
         get: async (id: string) => {
           const workpad = await soClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
 
-          workpad.attributes = injectReferences(
-            workpad.attributes,
-            workpad.references,
-            expressions
-          );
+          // embeddables transform out
+          workpad.attributes = transformWorkpadOut(workpad.attributes, workpad.references);
 
           return workpad;
         },
         resolve: async (id: string) => {
           const resolved = await soClient.resolve<WorkpadAttributes>(CANVAS_TYPE, id);
 
-          resolved.saved_object.attributes = injectReferences(
+          // embeddables transform out
+          resolved.saved_object.attributes = transformWorkpadOut(
             resolved.saved_object.attributes,
-            resolved.saved_object.references,
-            expressions
+            resolved.saved_object.references
           );
 
           return resolved;
@@ -119,25 +115,27 @@ export const createWorkpadRouteContext: (
 
           const workpadObject = await soClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
 
-          const injectedAttributes = injectReferences(
+          // embeddables transform out
+          const transformedAttributesOut = transformWorkpadOut(
             workpadObject.attributes,
-            workpadObject.references,
-            expressions
+            workpadObject.references
           );
 
           const updatedAttributes = {
-            ...injectedAttributes,
+            ...transformedAttributesOut,
             ...workpad,
             '@timestamp': now, // always update the modified time
             '@created': workpadObject.attributes['@created'], // ensure created is not modified
           } as WorkpadAttributes;
 
-          const extracted = extractReferences(updatedAttributes, expressions);
+          // embeddables transform in
+          const { attributes: transformedAttributes, references } =
+            transformWorkpadIn(updatedAttributes);
 
-          return await soClient.create(CANVAS_TYPE, extracted.workpad, {
+          return await soClient.create(CANVAS_TYPE, transformedAttributes, {
             overwrite: true,
             id,
-            references: extracted.references,
+            references,
           });
         },
       },

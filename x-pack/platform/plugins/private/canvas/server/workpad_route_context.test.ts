@@ -6,18 +6,75 @@
  */
 
 import sinon from 'sinon';
-import { fromExpression } from '@kbn/interpreter';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import { createWorkpadRouteContext } from './workpad_route_context';
 import type { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
 import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
-import type { CanvasWorkpad } from '../types';
-import { CANVAS_TYPE } from '../common/lib/constants';
 
-const mockedExpressionService = {
-  inject: jest.fn(),
-  extract: jest.fn(),
+import { CANVAS_TYPE } from '../common/lib/constants';
+import { encode } from '../common/lib/embeddable_dataurl';
+import type { CanvasWorkpad } from '../types';
+
+import { createWorkpadRouteContext } from './workpad_route_context';
+
+jest.mock('./kibana_services', () => ({
+  embeddableService: {
+    getTransforms: () => ({
+      transformIn: jest.fn((config: any) => {
+        const { savedObjectId, ...remainingConfig } = config;
+        return {
+          state: { ...remainingConfig },
+          references: [
+            { id: savedObjectId, name: 'savedObjectRef', type: 'lens' },
+          ] as SavedObjectReference[],
+        };
+      }),
+      transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
+        return { ...config, savedObjectId: references![0].id };
+      }),
+    }),
+  },
+}));
+
+const runtimeExpression = `embeddable type="lens" 
+  config="${encode({
+    title: 'Test lens embeddable',
+    savedObjectId: 'test-id',
+  })}"`;
+
+const storedExpression = `embeddable type="lens" config="${encode({
+  title: 'Test lens embeddable',
+})}"`;
+
+const runtimeWorkpad = {
+  id: 'workpad-id',
+  pages: [
+    {
+      elements: [
+        {
+          id: 'element-id',
+          expression: runtimeExpression,
+        },
+      ],
+    },
+  ],
 };
+
+const storedWorkpad = {
+  pages: [
+    {
+      elements: [
+        {
+          id: 'element-id',
+          expression: storedExpression,
+        },
+      ],
+    },
+  ],
+};
+
+const references: SavedObjectReference[] = [
+  { id: 'test-id', name: 'savedObjectRef', type: 'lens' },
+];
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -29,46 +86,13 @@ const mockContext = {
   },
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 
-const workpadRouteContext = createWorkpadRouteContext({
-  expressions: mockedExpressionService as any,
-});
+const workpadRouteContext = createWorkpadRouteContext();
 
 const now = new Date();
 
-const injectedExpression = 'fn extracted=false';
-const extractedExpression = 'fn extracted=true';
-
-const injectedWorkpad = {
-  id: 'workpad-id',
-  pages: [
-    {
-      elements: [
-        {
-          id: 'element-id',
-          expression: injectedExpression,
-        },
-      ],
-    },
-  ],
-};
-
-const extractedWorkpad = {
-  pages: [
-    {
-      elements: [
-        {
-          id: 'element-id',
-          expression: extractedExpression,
-        },
-      ],
-    },
-  ],
-};
-
-const references: SavedObjectReference[] = [{ id: 'my-id', name: 'name', type: 'type' }];
-
 describe('workpad route context', () => {
   let clock: sinon.SinonFakeTimers;
+
   beforeEach(() => {
     jest.resetAllMocks();
     clock = sinon.useFakeTimers(now);
@@ -79,11 +103,11 @@ describe('workpad route context', () => {
   });
 
   describe('CREATE', () => {
-    it('extracts references before saving', async () => {
+    it('applies transformIn before saving', async () => {
       const expectedBody = {
         '@created': now.toISOString(),
         '@timestamp': now.toISOString(),
-        ...extractedWorkpad,
+        ...storedWorkpad,
       };
 
       const canvasContext = await workpadRouteContext(
@@ -92,33 +116,26 @@ describe('workpad route context', () => {
         undefined as any
       );
 
-      mockedExpressionService.extract.mockReturnValue({
-        state: fromExpression(extractedExpression),
-        references,
-      });
-
       const soResponse = {};
       (mockContext.core.savedObjects.client.create as jest.Mock).mockResolvedValue(soResponse);
 
-      const result = await canvasContext.workpad.create(injectedWorkpad as CanvasWorkpad);
+      const result = await canvasContext.workpad.create(runtimeWorkpad as CanvasWorkpad);
 
       expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
         CANVAS_TYPE,
         expectedBody,
         {
-          id: injectedWorkpad.id,
-          references: references.map((r) => ({
-            ...r,
-            name: `element-id:${r.name}`,
-          })),
+          id: runtimeWorkpad.id,
+          references,
         }
       );
+
       expect(result).toBe(soResponse);
     });
   });
 
   describe('GET', () => {
-    it('injects references to the saved object', async () => {
+    it('applies transformOut to the workpad saved object', async () => {
       const id = 'so-id';
       const canvasContext = await workpadRouteContext(
         coreMock.createCustomRequestHandlerContext(mockContext),
@@ -127,23 +144,20 @@ describe('workpad route context', () => {
       );
 
       (mockContext.core.savedObjects.client.get as jest.Mock).mockResolvedValue({
-        attributes: extractedWorkpad,
+        attributes: storedWorkpad,
         references,
       });
 
-      mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
-
       const result = await canvasContext.workpad.get(id);
-      const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
+      const { id: ingnoredId, ...expectedAttributes } = runtimeWorkpad;
 
       expect(mockContext.core.savedObjects.client.get).toBeCalledWith(CANVAS_TYPE, id);
-
       expect(result.attributes).toEqual(expectedAttributes);
     });
   });
 
   describe('RESOLVE', () => {
-    it('injects references to the saved object', async () => {
+    it('applies transformOut to the workpad saved object', async () => {
       const id = 'so-id';
       const canvasContext = await workpadRouteContext(
         coreMock.createCustomRequestHandlerContext(mockContext),
@@ -152,23 +166,20 @@ describe('workpad route context', () => {
       );
 
       (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
-        saved_object: { attributes: extractedWorkpad, references },
+        saved_object: { attributes: storedWorkpad, references },
         outcome: 'exactMatch',
       });
 
-      mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
-
       const result = await canvasContext.workpad.resolve(id);
-      const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
+      const { id: ingnoredId, ...expectedAttributes } = runtimeWorkpad;
 
       expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
-
       expect(result.saved_object.attributes).toEqual(expectedAttributes);
     });
   });
 
   describe('UPDATE', () => {
-    it('extracts from the given attributes', async () => {
+    it('applies transformIn before saving', async () => {
       const id = 'workpad-id';
       const createdDate = new Date(2020, 1, 1).toISOString();
 
@@ -180,29 +191,36 @@ describe('workpad route context', () => {
 
       (mockContext.core.savedObjects.client.get as jest.Mock).mockReturnValue({
         attributes: {
-          ...extractedWorkpad,
+          ...storedWorkpad,
           '@created': createdDate,
         },
         references,
       });
 
-      const updatedInjectedExpression = 'fn ref="my-value"';
-      const updatedExtractedExpression = 'fn ref="extracted"';
-      const updatedWorkpad = {
+      const updatedRuntimeExpression = `embeddable type="lens" 
+config="${encode({
+        savedObjectId: 'test-id',
+        title: 'Test lens embeddable with a new title',
+      })}"`;
+      const updatedStoredExpression = `embeddable type="lens" config="${encode({
+        title: 'Test lens embeddable with a new title',
+      })}"`;
+
+      const updatedRuntimeWorkpad = {
         id: 'workpad-id',
         pages: [
           {
             elements: [
               {
                 id: 'new-element-id',
-                expression: updatedInjectedExpression,
+                expression: updatedRuntimeExpression,
               },
             ],
           },
         ],
       };
 
-      const expectedWorkpad = {
+      const updatedStoredWorkpad = {
         '@created': createdDate,
         '@timestamp': now.toISOString(),
         pages: [
@@ -210,30 +228,20 @@ describe('workpad route context', () => {
             elements: [
               {
                 id: 'new-element-id',
-                expression: updatedExtractedExpression,
+                expression: updatedStoredExpression,
               },
             ],
           },
         ],
       };
 
-      mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
-      mockedExpressionService.extract.mockReturnValue({
-        state: fromExpression(updatedExtractedExpression),
-        references,
-      });
-
-      await canvasContext.workpad.update(id, updatedWorkpad as CanvasWorkpad);
-
+      await canvasContext.workpad.update(id, updatedRuntimeWorkpad as CanvasWorkpad);
       expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
         CANVAS_TYPE,
-        expectedWorkpad,
+        updatedStoredWorkpad,
         {
           id,
-          references: references.map((r) => ({
-            ...r,
-            name: `new-element-id:${r.name}`,
-          })),
+          references,
           overwrite: true,
         }
       );
