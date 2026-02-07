@@ -53,6 +53,16 @@ export interface AgentHandlerReturn {
   result: AgentResponse;
 }
 
+/**
+ * Experimental features configuration for agent builder.
+ */
+export interface ExperimentalFeatures {
+  /** Whether the filestore feature is enabled */
+  filestore: boolean;
+  /** Whether the skills feature is enabled */
+  skills: boolean;
+}
+
 export interface AgentHandlerContext {
   /**
    * The request that was provided when initiating that tool execution.
@@ -130,6 +140,11 @@ export interface AgentHandlerContext {
    * File store to access data from the agent's virtual filesystem
    */
   filestore: IFileStore;
+  /**
+   * Experimental features configuration for this agent execution.
+   * Determined by the UI setting at the start of execution.
+   */
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**

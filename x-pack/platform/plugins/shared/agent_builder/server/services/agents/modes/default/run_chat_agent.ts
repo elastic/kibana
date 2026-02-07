@@ -17,7 +17,6 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
-import { FILESTORE_ENABLED } from '../../../runner/store';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -83,6 +82,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filestore,
     skills,
     toolManager,
+    experimentalFeatures,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -121,6 +121,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachmentsService: attachments,
     filestore,
     request,
+    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
   });
@@ -156,7 +157,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resultTransformer = createResultTransformer({
     toolRegistry,
     filestore,
-    filestoreEnabled: FILESTORE_ENABLED,
+    filestoreEnabled: experimentalFeatures.filestore,
   });
 
   const promptFactory = createPromptFactory({
@@ -167,6 +168,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     resultTransformer,
     outputSchema,
     conversationTimestamp,
+    experimentalFeatures,
   });
 
   const agentGraph = createAgentGraph({
