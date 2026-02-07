@@ -4,7 +4,8 @@ steps:
     timeout_in_minutes: 10
     id: pre_build
     agents:
-      machineType: n2-standard-2
+      provider: k8s
+      image: family/kibana-ubuntu-2404
 
   - wait
 
@@ -123,7 +124,8 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      machineType: n2-standard-2
+      provider: k8s
+      image: family/kibana-ubuntu-2404
     timeout_in_minutes: 10
     depends_on:
       - build

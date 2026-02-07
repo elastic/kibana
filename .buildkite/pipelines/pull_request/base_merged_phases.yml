@@ -126,8 +126,8 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      machineType: n2-standard-2
-      diskSizeGb: 115
+      provider: k8s
+      image: family/kibana-ubuntu-2404
     timeout_in_minutes: 10
     env:
       KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
