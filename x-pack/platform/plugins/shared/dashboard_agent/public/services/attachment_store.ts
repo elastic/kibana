@@ -6,7 +6,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type {
+  DashboardAttachmentData,
+  PanelAddedEventData,
+  AttachmentPanel,
+} from '@kbn/dashboard-agent-common';
 
 export interface AttachmentState {
   attachmentId: string;
@@ -78,6 +82,67 @@ export class AttachmentStore {
       // Flyout is closed - open it with the new data
       console.log('AttachmentStore: flyout closed, opening with new data');
       this.openFlyoutCallback(attachmentId, data);
+    }
+  }
+
+  /**
+   * Add a panel progressively to the current attachment.
+   * If no flyout is open, opens it with a new dashboard containing this panel.
+   */
+  addPanel(attachmentId: string, panel: PanelAddedEventData['panel']): void {
+    const current = this.state$.getValue();
+    console.log('AttachmentStore.addPanel:', {
+      incomingId: attachmentId,
+      currentId: current?.attachmentId,
+      panelId: panel.panelId,
+    });
+
+    // Convert UI event panel to AttachmentPanel format
+    const attachmentPanel: AttachmentPanel = {
+      type: 'lens',
+      panelId: panel.panelId,
+      visualization: panel.visualization,
+      title: panel.title,
+    };
+
+    if (current?.attachmentId === attachmentId) {
+      // Flyout is open with this attachment - add panel to it
+      const updatedData: DashboardAttachmentData = {
+        ...current.data,
+        panels: [...current.data.panels, attachmentPanel],
+      };
+      console.log('AttachmentStore: adding panel to existing flyout');
+      this.state$.next({ attachmentId, data: updatedData });
+    } else if (current === null && this.openFlyoutCallback) {
+      // Flyout is closed - open it with a new dashboard containing this panel
+      const newData: DashboardAttachmentData = {
+        title: 'Dashboard',
+        description: '',
+        panels: [attachmentPanel],
+      };
+      console.log('AttachmentStore: opening flyout with new panel');
+      this.openFlyoutCallback(attachmentId, newData);
+    }
+  }
+
+  /**
+   * Remove a panel progressively from the current attachment.
+   */
+  removePanel(attachmentId: string, panelId: string): void {
+    const current = this.state$.getValue();
+    console.log('AttachmentStore.removePanel:', {
+      incomingId: attachmentId,
+      currentId: current?.attachmentId,
+      panelId,
+    });
+
+    if (current?.attachmentId === attachmentId) {
+      const updatedData: DashboardAttachmentData = {
+        ...current.data,
+        panels: current.data.panels.filter((p) => p.panelId !== panelId),
+      };
+      console.log('AttachmentStore: removing panel from flyout');
+      this.state$.next({ attachmentId, data: updatedData });
     }
   }
 

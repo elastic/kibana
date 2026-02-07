@@ -8,10 +8,15 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { isToolUiEvent } from '@kbn/agent-builder-common/chat';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_PANEL_ADDED_EVENT,
+  DASHBOARD_PANEL_REMOVED_EVENT,
   type DashboardAttachmentData,
+  type PanelAddedEventData,
+  type PanelRemovedEventData,
 } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
@@ -50,13 +55,28 @@ export class DashboardAgentPlugin
     registerDashboardAttachmentUiDefinition({
       attachments: plugins.agentBuilder.attachments,
       attachmentStore: this.attachmentStore,
+      chat$: plugins.agentBuilder.events.chat$,
       share: plugins.share,
       core,
     });
 
     this.eventsSubscription = plugins.agentBuilder.events.chat$.subscribe((event) => {
+      // Handle progressive panel additions
+      if (isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(event, DASHBOARD_PANEL_ADDED_EVENT)) {
+        const { dashboardAttachmentId, panel } = event.data.data;
+        console.log('Panel added event:', { dashboardAttachmentId, panel });
+        this.attachmentStore.addPanel(dashboardAttachmentId, panel);
+      }
+
+      // Handle progressive panel removals
+      if (isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(event, DASHBOARD_PANEL_REMOVED_EVENT)) {
+        const { dashboardAttachmentId, panelId } = event.data.data;
+        console.log('Panel removed event:', { dashboardAttachmentId, panelId });
+        this.attachmentStore.removePanel(dashboardAttachmentId, panelId);
+      }
+
+      // Handle final attachment update (round complete)
       if (isRoundCompleteEvent(event) && event.data.attachments) {
-        // Find dashboard attachments and update the store
         for (const attachment of event.data.attachments) {
           if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
             console.log('Dashboard attachment updated:', attachment);

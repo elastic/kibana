@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import type { Observable } from 'rxjs';
 import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -21,7 +22,15 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import { isToolUiEvent } from '@kbn/agent-builder-common/chat';
+import {
+  DASHBOARD_PANEL_ADDED_EVENT,
+  DASHBOARD_PANEL_REMOVED_EVENT,
+  type DashboardAttachmentData,
+  type PanelAddedEventData,
+  type PanelRemovedEventData,
+} from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { normalizePanels, buildMarkdownPanel, getMarkdownPanelHeight } from '../utils/panel_utils';
@@ -31,6 +40,7 @@ export interface DashboardFlyoutProps {
   initialData: DashboardAttachmentData;
   attachmentId: string;
   attachmentStore: AttachmentStore;
+  chat$: Observable<ChatEvent>;
   onClose: () => void;
   share?: SharePluginStart;
 }
@@ -39,6 +49,7 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
   initialData,
   attachmentId,
   attachmentStore,
+  chat$,
   onClose,
   share,
 }) => {
@@ -46,22 +57,64 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
   const [version, setVersion] = useState(0);
   const { panels, markdownContent, title, description, savedObjectId } = data;
 
+  // Subscribe to attachment store for final state updates
   useEffect(() => {
     console.log('DashboardFlyout: subscribing to attachmentStore, attachmentId:', attachmentId);
     const subscription = attachmentStore.state.subscribe((state) => {
-      console.log('DashboardFlyout: subscription received:', {
+      console.log('DashboardFlyout: attachment store update:', {
         stateAttachmentId: state?.attachmentId,
         expectedAttachmentId: attachmentId,
         hasData: !!state?.data,
       });
-      if (state.data) {
-        console.log('new version received');
+      if (state?.attachmentId === attachmentId && state.data) {
+        console.log('DashboardFlyout: attachment updated, refreshing dashboard');
         setData(state.data);
         setVersion((v) => v + 1);
       }
     });
     return () => subscription.unsubscribe();
   }, [attachmentStore, attachmentId]);
+
+  // Subscribe to UI events for progressive panel updates
+  useEffect(() => {
+    console.log('DashboardFlyout: subscribing to chat$ for UI events');
+    const subscription = chat$.subscribe((event) => {
+      // Handle panel added event
+      if (isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(event, DASHBOARD_PANEL_ADDED_EVENT)) {
+        const { dashboardAttachmentId, panel } = event.data.data;
+        if (dashboardAttachmentId === attachmentId) {
+          console.log('DashboardFlyout: panel added, refreshing dashboard', panel);
+          setData((prev) => ({
+            ...prev,
+            panels: [
+              ...prev.panels,
+              {
+                type: 'lens' as const,
+                panelId: panel.panelId,
+                visualization: panel.visualization,
+                title: panel.title,
+              },
+            ],
+          }));
+          setVersion((v) => v + 1);
+        }
+      }
+
+      // Handle panel removed event
+      if (isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(event, DASHBOARD_PANEL_REMOVED_EVENT)) {
+        const { dashboardAttachmentId, panelId } = event.data.data;
+        if (dashboardAttachmentId === attachmentId) {
+          console.log('DashboardFlyout: panel removed, refreshing dashboard', panelId);
+          setData((prev) => ({
+            ...prev,
+            panels: prev.panels.filter((p) => p.panelId !== panelId),
+          }));
+          setVersion((v) => v + 1);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [chat$, attachmentId]);
 
   const dashboardPanels = useMemo(() => {
     const markdownPanel = markdownContent ? buildMarkdownPanel(markdownContent) : undefined;
@@ -147,6 +200,11 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
             flex: 1;
             min-height: 400px;
             height: 100%;
+
+            /* Hide panel hover actions in preview mode */
+            .embPanel__hoverActions {
+              display: none !important;
+            }
           `}
         >
           <DashboardRenderer

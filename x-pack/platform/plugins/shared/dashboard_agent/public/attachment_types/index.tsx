@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -28,11 +30,13 @@ type DashboardAttachment = Attachment<
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
   attachmentStore,
+  chat$,
   share,
   core,
 }: {
   attachments: AttachmentServiceStartContract;
   attachmentStore: AttachmentStore;
+  chat$: Observable<ChatEvent>;
   share?: SharePluginStart;
   core: CoreStart;
 }) => {
@@ -55,6 +59,7 @@ export const registerDashboardAttachmentUiDefinition = ({
             initialData={data}
             attachmentId={attachmentId}
             attachmentStore={attachmentStore}
+            chat$={chat$}
             onClose={onClose}
             share={share}
           />
