@@ -117,7 +117,7 @@ steps:
   - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
-      machineType: n2-standard-4
+      machineType: c4d-standard-8
     key: build_scout_tests
     timeout_in_minutes: 20
     depends_on:
