@@ -45,7 +45,6 @@
     "@kbn/sse-utils-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/observability-plugin",
     "@kbn/apm-types"
   ],
   "exclude": ["target/**/*"]
