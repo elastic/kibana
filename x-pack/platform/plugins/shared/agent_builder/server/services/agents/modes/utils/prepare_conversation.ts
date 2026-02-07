@@ -11,7 +11,7 @@ import type {
   ConverseInput,
   RoundInput,
 } from '@kbn/agent-builder-common';
-import { createInternalError } from '@kbn/agent-builder-common';
+import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
@@ -146,20 +146,11 @@ const prepareForAction = ({
   // Regenerate: strip the last round and use its original input
   if (action === 'regenerate') {
     if (previousRounds.length === 0) {
-      throw createInternalError('Cannot regenerate: conversation has no rounds');
+      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
     }
     const lastRound = previousRounds[previousRounds.length - 1];
-    // Use the last round's input as the effective input for regeneration
-    const regenerateInput: ConverseInput = {
-      message: lastRound.input.message,
-      attachments: lastRound.input.attachments?.map((attachment) => ({
-        id: attachment.id,
-        type: attachment.type,
-        data: attachment.data,
-        hidden: attachment.hidden,
-      })),
-      attachment_refs: lastRound.input.attachment_refs,
-    };
+    // Faithfully replay the original request by copying the full stored input shape
+    const regenerateInput: ConverseInput = { ...lastRound.input };
     // Strip the last round from previous rounds
     return {
       effectiveRounds: previousRounds.slice(0, -1),
