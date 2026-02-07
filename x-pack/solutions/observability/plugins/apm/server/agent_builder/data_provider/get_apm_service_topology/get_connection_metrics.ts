@@ -8,7 +8,6 @@
 import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getStats } from '../../../lib/connections/get_connection_stats/get_stats';
 import { buildConnectionKey } from './build_connections_from_spans';
@@ -20,13 +19,11 @@ interface MetricsMap {
 
 export async function getConnectionMetrics({
   apmEventClient,
-  randomSampler: _randomSampler,
   start,
   end,
   serviceNames,
 }: {
   apmEventClient: APMEventClient;
-  randomSampler: RandomSampler;
   start: number;
   end: number;
   serviceNames: string[];

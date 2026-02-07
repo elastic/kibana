@@ -186,7 +186,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmServiceTopology',
     async ({ request, serviceName, direction, start, end }) => {
-      const { apmEventClient, randomSampler } = await buildApmToolResources({
+      const { apmEventClient } = await buildApmToolResources({
         core,
         plugins,
         request,
@@ -195,7 +195,6 @@ export function registerDataProviders({
 
       return getApmServiceTopology({
         apmEventClient,
-        randomSampler,
         config,
         logger,
         serviceName,
