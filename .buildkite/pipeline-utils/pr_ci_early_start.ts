@@ -71,14 +71,17 @@ export interface PrCiEarlyStartDecision {
 }
 
 export type PrCiPipelineStep = Record<string, unknown> & {
+  key?: string;
   command?: string;
   depends_on?: string | string[];
   env?: Record<string, string | number>;
   steps?: unknown[];
 };
 
-type PrCiPipeline = Record<string, unknown> & {
-  steps: PrCiPipelineStep[];
+export type PrCiPipelineEntry = PrCiPipelineStep | string;
+
+export type PrCiPipeline = Record<string, unknown> & {
+  steps: PrCiPipelineEntry[];
 };
 
 export function parsePrLabels(labels = process.env.GITHUB_PR_LABELS ?? ''): string[] {
@@ -267,16 +270,37 @@ export function transformPipelineStepForPrCiEarlyStart(
 }
 
 export function transformPipelineForPrCiEarlyStart(pipeline: unknown): PrCiPipeline | null {
-  if (
-    !isPrCiPipelineStep(pipeline) ||
-    !Array.isArray(pipeline.steps) ||
-    !pipeline.steps.every(isPrCiPipelineStep)
-  ) {
+  if (!isPrCiPipelineStep(pipeline) || !Array.isArray(pipeline.steps)) {
     return null;
   }
 
   return {
     ...pipeline,
-    steps: pipeline.steps.map((step) => transformPipelineStepForPrCiEarlyStart(step)),
+    steps: pipeline.steps.map((step) =>
+      isPrCiPipelineStep(step) ? transformPipelineStepForPrCiEarlyStart(step) : step
+    ),
+  };
+}
+
+const isWaitStep = (step: PrCiPipelineEntry): boolean => step === 'wait';
+
+export function removePostGateWaitStepsForPrCiEarlyStart(pipeline: PrCiPipeline): PrCiPipeline {
+  let hasSeenGateStep = false;
+
+  const steps = pipeline.steps.filter((step) => {
+    if (isPrCiPipelineStep(step) && isPrCiGateKey(step.key)) {
+      hasSeenGateStep = true;
+    }
+
+    if (isWaitStep(step) && hasSeenGateStep) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return {
+    ...pipeline,
+    steps,
   };
 }

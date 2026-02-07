@@ -32,6 +32,7 @@ import {
   parsePrCiEarlyStartRolloutPercent,
   parsePrLabels,
   prHasFIPSLabel,
+  removePostGateWaitStepsForPrCiEarlyStart,
   transformPipelineForPrCiEarlyStart,
 } from '#pipeline-utils';
 
@@ -65,7 +66,12 @@ const getPipelineForPrCiEarlyStart = ({
     return getPipeline(filename, removeSteps);
   }
 
-  const transformedPipelineYaml = dump(transformedPipeline, { noRefs: true, lineWidth: -1 });
+  const normalizedPipeline =
+    filename === '.buildkite/pipelines/pull_request/base.yml'
+      ? removePostGateWaitStepsForPrCiEarlyStart(transformedPipeline)
+      : transformedPipeline;
+
+  const transformedPipelineYaml = dump(normalizedPipeline, { noRefs: true, lineWidth: -1 });
   return removeSteps ? transformedPipelineYaml.replace(/^steps:\n/, '') : transformedPipelineYaml;
 };
 

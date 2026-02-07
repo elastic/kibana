@@ -19,6 +19,7 @@ import {
   parsePrCiEarlyStartRolloutPercent,
   prefixPrCiCancelableCommand,
   relaxDependsOnForPrCiEarlyStart,
+  removePostGateWaitStepsForPrCiEarlyStart,
   shouldRelaxDependsOnForPrCiEarlyStart,
   transformPipelineForPrCiEarlyStart,
 } from './pr_ci_early_start';
@@ -163,6 +164,41 @@ describe('pr_ci_early_start', () => {
     it('returns null for invalid pipeline documents', () => {
       expect(transformPipelineForPrCiEarlyStart({})).toBeNull();
       expect(transformPipelineForPrCiEarlyStart({ steps: 'invalid' })).toBeNull();
+    });
+
+    it('transforms object steps even when wait scalar steps are present', () => {
+      const pipeline = {
+        steps: ['wait', { command: '.buildkite/scripts/steps/test/ftr_configs.sh', depends_on: ['build', 'checks'] }],
+      };
+
+      const transformed = transformPipelineForPrCiEarlyStart(pipeline);
+      expect(transformed).not.toBeNull();
+      expect(transformed?.steps[0]).toBe('wait');
+      expect((transformed?.steps[1] as { command?: string }).command).toBe(
+        `${PR_CI_CANCELABLE_COMMAND_PREFIX} .buildkite/scripts/steps/test/ftr_configs.sh`
+      );
+    });
+  });
+
+  describe('removePostGateWaitStepsForPrCiEarlyStart', () => {
+    it('removes wait steps that appear after gate steps', () => {
+      const pipeline = {
+        steps: [
+          'wait',
+          { key: 'build', command: 'build.sh' },
+          { key: 'quick_checks', command: 'quick_checks.sh' },
+          'wait',
+          { key: 'post_build', command: 'post_build.sh' },
+        ],
+      };
+
+      const normalized = removePostGateWaitStepsForPrCiEarlyStart(pipeline);
+      expect(normalized.steps).toEqual([
+        'wait',
+        { key: 'build', command: 'build.sh' },
+        { key: 'quick_checks', command: 'quick_checks.sh' },
+        { key: 'post_build', command: 'post_build.sh' },
+      ]);
     });
   });
 });
