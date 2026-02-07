@@ -5,18 +5,5 @@
  * 2.0.
  */
 
-export interface AttacksVolumeBucket {
-  key: string;
-  doc_count: number;
-}
-
-export interface AttacksVolumeAgg {
-  attacks: {
-    buckets: AttacksVolumeBucket[];
-  };
-}
-
-export interface AttacksVolumeChartPoint {
-  x: number;
-  y: number;
-}
+export const MAX_ATTACKS_COUNT = 10000;
+export const ATTACK_IDS_FIELD = 'kibana.alert.attack_ids';
