@@ -3884,6 +3884,14 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/indices_get.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/indices_stats.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/inference_models/register_get_route.ts"
               },
               {
@@ -3936,6 +3944,10 @@
               },
               {
                 "plugin": "crossClusterReplication",
+                "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_get_follower_info.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_permissions_route.ts"
               },
               {
@@ -3953,6 +3965,10 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_fetch_route.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_explain_route.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -4045,6 +4061,10 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_validate_index_pattern_route.ts"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/platform/plugins/private/rollup/server/routes/api/indices/register_get_index_caps.ts"
               },
               {
                 "plugin": "rollup",
@@ -4275,6 +4295,14 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
               },
@@ -4337,6 +4365,10 @@
               {
                 "plugin": "dataCatalog",
                 "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "dataSources",
@@ -5333,6 +5365,34 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -7023,6 +7083,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts"
               },
               {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/routes/search.ts"
               },
@@ -7243,8 +7307,24 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.ts"
               },
               {
                 "plugin": "contentConnectors",
@@ -8131,6 +8211,18 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/server/routes/send_feedback.test.ts"
+              },
+              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/routes/get_global_execution_kpi.test.ts"
               },
@@ -8692,6 +8784,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
               },
               {
@@ -8937,6 +9033,14 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/rotate_api_key.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -9349,6 +9453,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -10207,6 +10315,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
               },
@@ -10353,6 +10465,10 @@
               {
                 "plugin": "cloudConnect",
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "dataSources",
@@ -15201,7 +15317,7 @@
           "\nReturn type from a function to validate cookie contents."
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 69,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15216,7 +15332,7 @@
               "\nWhether the cookie is valid or not."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 74,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15234,7 +15350,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 78,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15256,7 +15372,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 12,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15274,7 +15390,7 @@
               "() => Promise<T | null>"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 17,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15291,10 +15407,12 @@
               "\nPuts current session value into the session storage."
             ],
             "signature": [
-              "(sessionValue: T) => void"
+              "(sessionValue: T, options?: ",
+              "SessionStorageSetOptions",
+              " | undefined) => void"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 22,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15312,11 +15430,31 @@
                   "T"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 26,
+                "lineNumber": 42,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-server.SessionStorage.set.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- optional overrides for cookie attributes"
+                ],
+                "signature": [
+                  "SessionStorageSetOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/http/server/src/session_storage.ts",
+                "lineNumber": 42,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -15334,7 +15472,7 @@
               "() => void"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 28,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15358,7 +15496,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 41,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15373,7 +15511,7 @@
               "\nName of the session cookie."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 46,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15388,7 +15526,7 @@
               "\nA key used to encrypt a cookie's value. Should be at least 32 characters long."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 50,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15407,7 +15545,7 @@
               "SessionCookieValidationResult"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 54,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15423,7 +15561,7 @@
                   "T | T[]"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 57,
+                "lineNumber": 73,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15442,7 +15580,7 @@
               "\nFlag indicating whether the cookie should be sent only via a secure connection."
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 58,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15460,7 +15598,7 @@
               "\"None\" | \"Strict\" | \"Lax\" | undefined"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 62,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -15482,7 +15620,7 @@
           "<T>"
         ],
         "path": "src/core/packages/http/server/src/session_storage.ts",
-        "lineNumber": 34,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -15502,7 +15640,7 @@
               "<T>"
             ],
             "path": "src/core/packages/http/server/src/session_storage.ts",
-            "lineNumber": 38,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -15519,7 +15657,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/http/server/src/session_storage.ts",
-                "lineNumber": 38,
+                "lineNumber": 54,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -15527,6 +15665,60 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.SessionStorageSetOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SessionStorageSetOptions",
+        "description": [
+          "\nOptional overrides for cookie attributes when setting or clearing session cookies."
+        ],
+        "path": "src/core/packages/http/server/src/session_storage.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.SessionStorageSetOptions.isSecure",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSecure",
+            "description": [
+              "\nOptional override for the isSecure cookie attribute."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/session_storage.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.SessionStorageSetOptions.sameSite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sameSite",
+            "description": [
+              "\nOptional override for the sameSite cookie attribute."
+            ],
+            "signature": [
+              "\"None\" | \"Strict\" | \"Lax\" | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/session_storage.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -16022,6 +16214,10 @@
               {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -17412,6 +17608,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/routes/data_generator/register_data_generator_routes.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.ts"
               },
               {
@@ -17548,6 +17748,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
@@ -17828,6 +18032,10 @@
               {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_api_route.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -18342,6 +18550,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/update_anonymization_fields_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/create_attack_discovery_alerts_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
@@ -18631,6 +18843,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_mitre_data_indices_docs_count.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
               },
               {
@@ -18732,6 +18948,10 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_log_extraction.ts"
               },
               {
                 "plugin": "entityStore",

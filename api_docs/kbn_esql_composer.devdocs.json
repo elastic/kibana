@@ -47,12 +47,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           }
         ],
         "children": [
@@ -109,28 +109,36 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
+          },
+          {
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
+          },
+          {
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -207,6 +215,14 @@
           },
           {
             "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
           },
           {
@@ -214,36 +230,20 @@
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
             "plugin": "apm",
@@ -356,6 +356,14 @@
           {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links/filters.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
           },
           {
             "plugin": "unifiedDocViewer",
@@ -432,12 +440,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -620,12 +628,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_aggregation.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_aggregation.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_aggregation.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_aggregation.ts"
           }
         ],
         "children": [
@@ -710,20 +718,12 @@
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -925,60 +925,28 @@
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           }
         ],
         "children": [
@@ -1046,12 +1014,12 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
             "plugin": "infra",
@@ -1161,6 +1129,14 @@
           },
           {
             "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/trace_waterfall/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/trace_waterfall/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/index.ts"
           },
           {
@@ -1168,28 +1144,20 @@
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/index.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/common/utils/esql/create_esql_query.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
-          },
-          {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "plugin": "@kbn/unified-chart-section-viewer",
+            "path": "src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/observability/traces/trace_charts_definition.ts"
           },
           {
             "plugin": "apm",
@@ -1242,6 +1210,14 @@
           {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/app/service_inventory/traces_in_discover_callout/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
           }
         ],
         "children": [
@@ -1306,16 +1282,7 @@
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       }
     ],

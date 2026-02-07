@@ -379,7 +379,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -427,7 +427,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -475,7 +475,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; saved_id: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -523,7 +523,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; threshold: { value: number; field: string | string[]; cardinality?: { value: number; field: string; }[] | undefined; }; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -571,7 +571,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; threat_query: string; threat_mapping: { entries: { value: string; type: \"mapping\"; field: string; negate?: boolean | undefined; }[]; }[]; threat_index: string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -619,7 +619,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; anomaly_threshold: number; machine_learning_job_id: string | string[]; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -667,7 +667,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; new_terms_fields: string[]; history_window_start: string; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -715,7 +715,7 @@
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
-              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; risk_score: number; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
+              ", \"strip\"> | undefined; }[]; setup: string; from: string; to: string; description: string; revision: number; query: string; interval: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; risk_score: number; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; references: string[]; author: string[]; rule_id: string; immutable: boolean; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; operator: \"equals\"; field: string; risk_score?: number | undefined; }[]; severity_mapping: { value: string; operator: \"equals\"; field: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; rule_source: { type: \"external\"; is_customized: boolean; has_base_version: boolean; customized_fields: { field_name: string; }[]; } | { type: \"internal\"; }; meta?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -880,7 +880,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 42,
@@ -970,7 +970,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"bulkEditAlertSuppressionEnabled\" | \"doesNotMatchForIndicatorMatchRuleEnabled\" | \"entityStoreDisabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"attacksAlertsAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"gapAutoFillSchedulerEnabled\" | \"linuxDnsEvents\" | undefined"
+              "\"assistantModelEvaluation\" | \"defendInsightsPolicyResponseFailure\" | \"previewTelemetryUrlEnabled\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsSentinelOneRunScriptEnabled\" | \"responseActionsEndpointMemoryDump\" | \"responseActionsEndpointRunScript\" | \"responseActionsScriptLibraryManagement\" | \"enableRiskScoreResetToZero\" | \"enableRiskScorePrivmonModifier\" | \"riskScoreAssistantToolDisabled\" | \"entityDetailsHighlightsEnabled\" | \"entityThreatHuntingEnabled\" | \"esqlRulesDisabled\" | \"microsoftDefenderEndpointDataInAnalyzerEnabled\" | \"storeGapsInEventLogEnabled\" | \"bulkFillRuleGapsEnabled\" | \"filterProcessDescendantsForTrustedAppsEnabled\" | \"entityStoreDisabled\" | \"aiRuleCreationEnabled\" | \"siemMigrationsDisabled\" | \"endpointExceptionsMovedUnderManagement\" | \"crowdstrikeRunScriptEnabled\" | \"newDataViewPickerEnabled\" | \"microsoftDefenderEndpointRunScriptEnabled\" | \"trustedAppsAdvancedMode\" | \"trustedDevices\" | \"automaticDashboardsMigration\" | \"siemReadinessDashboard\" | \"microsoftDefenderEndpointCancelEnabled\" | \"enableAlertsAndAttacksAlignment\" | \"qradarRulesMigration\" | \"kubernetesEnabled\" | \"entityAnalyticsWatchlistEnabled\" | \"trialCompanionEnabled\" | \"linuxDnsEvents\" | \"splunkV2DashboardsEnabled\" | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/links/types.ts",
             "lineNumber": 64,
@@ -2342,24 +2342,6 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.confirmingNoteId",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "confirmingNoteId",
-            "description": [
-              "the note id pending deletion"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
-            "lineNumber": 140,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2409,7 +2391,7 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "lineNumber": 230,
@@ -2968,7 +2950,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 165,
+        "lineNumber": 166,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2984,7 +2966,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 197,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3001,7 +2983,7 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 197,
+                "lineNumber": 198,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3032,7 +3014,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 264,
+            "lineNumber": 268,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3048,7 +3030,7 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 265,
+                "lineNumber": 269,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3065,7 +3047,7 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 266,
+                "lineNumber": 270,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3096,7 +3078,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 683,
+            "lineNumber": 691,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3112,7 +3094,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 684,
+                "lineNumber": 692,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3129,7 +3111,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 685,
+                "lineNumber": 693,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3149,7 +3131,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 974,
+            "lineNumber": 982,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3980,7 +3962,7 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
-              "lineNumber": 101,
+              "lineNumber": 108,
               "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false
@@ -3997,7 +3979,7 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+            "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
           "lineNumber": 104,
@@ -4055,7 +4037,7 @@
         "label": "ADD_DATA_PATH",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 38,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4074,7 +4056,7 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4091,7 +4073,7 @@
           "\"/app/security\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4108,7 +4090,7 @@
           "\"securitySolutionUI\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4125,7 +4107,7 @@
           "\"securitySolutionCasesV3\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4142,7 +4124,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 289,
+        "lineNumber": 294,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4197,7 +4179,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 562,
+        "lineNumber": 567,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4211,7 +4193,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly bulkEditAlertSuppressionEnabled: boolean; readonly doesNotMatchForIndicatorMatchRuleEnabled: boolean; readonly entityStoreDisabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly attacksAlertsAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly gapAutoFillSchedulerEnabled: boolean; readonly linuxDnsEvents: boolean; }"
+          "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityThreatHuntingEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly bulkFillRuleGapsEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 8,
@@ -4231,7 +4213,24 @@
           "\"/manage\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 95,
+        "lineNumber": 99,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.RULES_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RULES_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionRulesV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4248,7 +4247,7 @@
           "\"siemV5\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 32,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4284,7 +4283,7 @@
           "\"siem\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 31,
+        "lineNumber": 35,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4302,7 +4301,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: false; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly bulkFillRuleGapsEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: false; readonly bulkEditAlertSuppressionEnabled: true; readonly doesNotMatchForIndicatorMatchRuleEnabled: true; readonly entityStoreDisabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly attacksAlertsAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly gapAutoFillSchedulerEnabled: false; readonly linuxDnsEvents: false; }"
+          "{ readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsSentinelOneRunScriptEnabled: true; readonly responseActionsEndpointMemoryDump: true; readonly responseActionsEndpointRunScript: false; readonly responseActionsScriptLibraryManagement: false; readonly assistantModelEvaluation: false; readonly enableRiskScoreResetToZero: true; readonly enableRiskScorePrivmonModifier: true; readonly riskScoreAssistantToolDisabled: false; readonly entityDetailsHighlightsEnabled: true; readonly entityThreatHuntingEnabled: false; readonly esqlRulesDisabled: false; readonly microsoftDefenderEndpointDataInAnalyzerEnabled: true; readonly storeGapsInEventLogEnabled: true; readonly bulkFillRuleGapsEnabled: true; readonly filterProcessDescendantsForTrustedAppsEnabled: true; readonly entityStoreDisabled: false; readonly aiRuleCreationEnabled: false; readonly siemMigrationsDisabled: false; readonly defendInsightsPolicyResponseFailure: true; readonly endpointExceptionsMovedUnderManagement: false; readonly crowdstrikeRunScriptEnabled: true; readonly newDataViewPickerEnabled: true; readonly microsoftDefenderEndpointRunScriptEnabled: true; readonly trustedAppsAdvancedMode: true; readonly trustedDevices: true; readonly automaticDashboardsMigration: true; readonly siemReadinessDashboard: false; readonly microsoftDefenderEndpointCancelEnabled: true; readonly enableAlertsAndAttacksAlignment: false; readonly qradarRulesMigration: true; readonly kubernetesEnabled: true; readonly entityAnalyticsWatchlistEnabled: false; readonly trialCompanionEnabled: false; readonly linuxDnsEvents: true; readonly splunkV2DashboardsEnabled: false; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "lineNumber": 14,

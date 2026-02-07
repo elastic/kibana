@@ -1,0 +1,1191 @@
+{
+  "id": "@kbn/content-list-provider",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentListProvider",
+        "description": [
+          "\nMain provider component for content list functionality, including data fetching\n(via React Query) and sorting.\n\nProps like `dataSource` and `features` should be stable references to avoid\nunnecessary re-renders. Configuration from `features.sorting` is read once at\nmount; use a `key` prop to remount if you need to change initial sort dynamically."
+        ],
+        "signature": [
+          "({ children, dataSource, labels, item, isReadOnly, id, queryKeyScope: queryKeyScopeProp, features, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListProviderProps",
+            "text": "ContentListProviderProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  dataSource,\n  labels,\n  item,\n  isReadOnly,\n  id,\n  queryKeyScope: queryKeyScopeProp,\n  features = {},\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListProviderProps",
+                "text": "ContentListProviderProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
+            "lineNumber": 63,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useContentListConfig",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useContentListConfig",
+        "description": [
+          "\nHook to access the content list configuration context.\n\nThis is a low-level hook that provides access to configuration and support flags.\nFor most use cases, prefer the feature-specific hooks like `useContentListItems`,\n`useContentListSort`, etc.\n"
+        ],
+        "signature": [
+          "() => ",
+          "ContentListProviderContextValue"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
+        "lineNumber": 119,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The content list context including configuration and support flags."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useContentListItems",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useContentListItems",
+        "description": [
+          "\nHook to access the current list of items and loading state.\n"
+        ],
+        "signature": [
+          "() => { items: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListItem",
+            "text": "ContentListItem"
+          },
+          "<Record<string, unknown>>[]; totalItems: number; isLoading: boolean; error: Error | undefined; refetch: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/use_content_list_items.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Object containing items, totalItems, isLoading, error, and refetch."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useContentListSort",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useContentListSort",
+        "description": [
+          "\nHook to access and control sorting functionality.\n\nUse this hook when you need to read or update the sort configuration.\nWhen sorting is disabled via `features.sorting: false`, `setSort` becomes a no-op\nand `isSupported` returns `false`.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UseContentListSortReturn",
+            "text": "UseContentListSortReturn"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "Object containing field, direction, setSort function, and isSupported flag."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListFeatures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListFeatures",
+        "description": [
+          "\nFeature configuration for enabling/customizing content list capabilities."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListFeatures.sorting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sorting",
+            "description": [
+              "Sorting configuration."
+            ],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SortingConfig",
+                "text": "SortingConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListItemConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListItemConfig",
+        "description": [
+          "\nPer-item configuration for link behavior and actions."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListItemConfig.getHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getHref",
+            "description": [
+              "\nFunction to generate the href for an item link.\nWhen provided, item titles become clickable links."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => string) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.ContentListItemConfig.getHref.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListLabels",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListLabels",
+        "description": [
+          "\nUser-facing labels for the content type.\n\nThese should be i18n-translated strings for display in the UI.\n"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListLabels.entity",
+            "type": "string",
+            "tags": [],
+            "label": "entity",
+            "description": [
+              "Singular form of the entity name (e.g., \"dashboard\"). Should be i18n-translated."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListLabels.entityPlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityPlural",
+            "description": [
+              "Plural form of the entity name (e.g., \"dashboards\"). Should be i18n-translated."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListSupports",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListSupports",
+        "description": [
+          "\nResolved feature support flags.\n\nThese flags represent the **effective** availability of features after evaluating:\n- Explicit configuration (e.g., `features.sorting: true` or `features.sorting: { ... }`)\n- Implicit enablement (e.g., providing required services enabling a feature)\n- Explicit disablement (e.g., `features.sorting: false` overrides defaults)\n- Implicit disablement (e.g., missing services)\n\nUse these flags to conditionally render UI elements or enable functionality based on\nwhat's actually available, rather than checking raw configuration values.\n"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListSupports.sorting",
+            "type": "boolean",
+            "tags": [],
+            "label": "sorting",
+            "description": [
+              "Whether sorting is supported."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DataSourceConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataSourceConfig",
+        "description": [
+          "\nData source configuration properties."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DataSourceConfig.findItems",
+            "type": "Function",
+            "tags": [],
+            "label": "findItems",
+            "description": [
+              "Fetches items from the data source."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsParams",
+                "text": "FindItemsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsResult",
+                "text": "FindItemsResult"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.DataSourceConfig.findItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.FindItemsParams",
+                    "text": "FindItemsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+                "lineNumber": 69,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DataSourceConfig.onFetchSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onFetchSuccess",
+            "description": [
+              "Called after successful fetch."
+            ],
+            "signature": [
+              "((result: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsResult",
+                "text": "FindItemsResult"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.DataSourceConfig.onFetchSuccess.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.FindItemsResult",
+                    "text": "FindItemsResult"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.FindItemsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindItemsParams",
+        "description": [
+          "\nParameters for the `findItems` function."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsParams.searchQuery",
+            "type": "string",
+            "tags": [],
+            "label": "searchQuery",
+            "description": [
+              "Search query text with filter syntax already extracted."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsParams.filters",
+            "type": "Object",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "Active filters."
+            ],
+            "signature": [
+              "ActiveFilters"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsParams.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nSort configuration.\n\nWhen sorting is disabled via `features.sorting: false`, this will be `undefined`.\nImplementations should return items in their natural order (e.g., server default)."
+            ],
+            "signature": [
+              "{ field: string; direction: \"asc\" | \"desc\"; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsParams.page",
+            "type": "Object",
+            "tags": [],
+            "label": "page",
+            "description": [
+              "Pagination configuration."
+            ],
+            "signature": [
+              "{ index: number; size: number; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsParams.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [
+              "AbortSignal for request cancellation."
+            ],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.FindItemsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindItemsResult",
+        "description": [
+          "\nResult from the `findItems` function."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsResult.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "Items for the current page."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [
+              "Total matching items for pagination."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.SortingConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SortingConfig",
+        "description": [
+          "\nSorting configuration.\n\nUse `fields` for the simpler API where asc/desc options are auto-generated.\nUse `options` for full control over each dropdown option."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.SortingConfig.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "Simplified sortable fields - auto-generates asc/desc options for each field."
+            ],
+            "signature": [
+              "SortField",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.SortingConfig.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nExplicit sort options with full control over labels.\nIgnored if `fields` is provided."
+            ],
+            "signature": [
+              "SortOption",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.SortingConfig.initialSort",
+            "type": "Object",
+            "tags": [],
+            "label": "initialSort",
+            "description": [
+              "Initial sort state."
+            ],
+            "signature": [
+              "{ field: string; direction: \"asc\" | \"desc\"; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.UseContentListSortReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseContentListSortReturn",
+        "description": [
+          "\nReturn type for the `useContentListSort` hook."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseContentListSortReturn.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "Current sort field name."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseContentListSortReturn.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [
+              "Current sort direction."
+            ],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseContentListSortReturn.setSort",
+            "type": "Function",
+            "tags": [],
+            "label": "setSort",
+            "description": [
+              "Updates the sort configuration. No-op if sorting is disabled."
+            ],
+            "signature": [
+              "(field: string, direction: \"asc\" | \"desc\") => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.UseContentListSortReturn.setSort.$1",
+                "type": "string",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+                "lineNumber": 24,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.UseContentListSortReturn.setSort.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "direction",
+                "description": [],
+                "signature": [
+                  "\"asc\" | \"desc\""
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+                "lineNumber": 24,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.UseContentListSortReturn.isSupported",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSupported",
+            "description": [
+              "Whether sorting is supported (enabled via features)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/use_content_list_sort.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListConfig",
+        "type": "Type",
+        "tags": [
+          "template"
+        ],
+        "label": "ContentListConfig",
+        "description": [
+          "\nComplete configuration for a content list.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListCoreConfig",
+            "text": "ContentListCoreConfig"
+          },
+          " & { dataSource: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DataSourceConfig",
+            "text": "DataSourceConfig"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListCoreConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListCoreConfig",
+        "description": [
+          "\nCore configuration - entity metadata and base settings."
+        ],
+        "signature": [
+          "ContentListCoreConfigBase & ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListIdentity",
+            "text": "ContentListIdentity"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListIdentity",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListIdentity",
+        "description": [
+          "\nIdentity configuration for content lists.\n\nAt least one of `id` or `queryKeyScope` must be provided:\n\n- **`id` only**: `queryKeyScope` is derived as `${id}-listing`. Use when you want a simple\n  identifier that also serves as the cache key base.\n\n- **`queryKeyScope` only**: Use when you only need cache isolation without a semantic identifier.\n\n- **Both**: `queryKeyScope` is used for caching/persistence, `id` is available for other\n  purposes (e.g., `data-test-subj`, analytics)."
+        ],
+        "signature": [
+          "{ id: string; queryKeyScope?: string | undefined; } | { id?: string | undefined; queryKeyScope: string; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListItem",
+        "type": "Type",
+        "tags": [
+          "template"
+        ],
+        "label": "ContentListItem",
+        "description": [
+          "\nStandardized item structure for rendering components (tables, grids, etc.).\n\nThis is the common interface that all rendering components work with,\nregardless of the underlying datasource type. The `findItems` function\nin `DataSourceConfig` must return items in this format.\n"
+        ],
+        "signature": [
+          "T & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListProviderProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListProviderProps",
+        "description": [
+          "\nProps for the `ContentListProvider` component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListConfig",
+            "text": "ContentListConfig"
+          },
+          " & { children: React.ReactNode; services?: ",
+          "ContentListServices",
+          " | undefined; features?: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListFeatures",
+            "text": "ContentListFeatures"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.FindItemsFn",
+        "type": "Type",
+        "tags": [],
+        "label": "FindItemsFn",
+        "description": [
+          "\nFunction signature for fetching items from a data source."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FindItemsParams",
+            "text": "FindItemsParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FindItemsResult",
+            "text": "FindItemsResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FindItemsFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsParams",
+                "text": "FindItemsParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 28,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.contentListKeys",
+        "type": "Object",
+        "tags": [],
+        "label": "contentListKeys",
+        "description": [
+          "\nQuery keys for content list items.\n\nUses `queryKeyScope` (a stable identifier) to prevent cache collisions.\nIntentionally does not use user-facing labels (which may be i18n-translated)\nto ensure cache stability across locales.\n"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.contentListKeys.all",
+            "type": "Function",
+            "tags": [],
+            "label": "all",
+            "description": [
+              "/**\n   * Base query key for all content list queries.\n   *\n   * @param queryKeyScope - Stable scope identifier for cache isolation.\n   */"
+            ],
+            "signature": [
+              "(queryKeyScope: string) => readonly [\"content-list\", string]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.contentListKeys.all.$1",
+                "type": "string",
+                "tags": [],
+                "label": "queryKeyScope",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+                "lineNumber": 31,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.contentListKeys.items",
+            "type": "Function",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "/**\n   * Query key for items queries with specific parameters.\n   *\n   * @param queryKeyScope - Stable scope identifier for cache isolation.\n   * @param params - Query parameters (search, filters, sort, page).\n   */"
+            ],
+            "signature": [
+              "(queryKeyScope: string, params: Omit<",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsParams",
+                "text": "FindItemsParams"
+              },
+              ", \"signal\">) => readonly [\"content-list\", string, \"items\", Omit<",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsParams",
+                "text": "FindItemsParams"
+              },
+              ", \"signal\">]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.contentListKeys.items.$1",
+                "type": "string",
+                "tags": [],
+                "label": "queryKeyScope",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+                "lineNumber": 39,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.contentListKeys.items.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.FindItemsParams",
+                    "text": "FindItemsParams"
+                  },
+                  ", \"signal\">"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query/keys.ts",
+                "lineNumber": 39,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -191,7 +191,7 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "lineNumber": 139,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -219,7 +219,7 @@
               ") => Promise<boolean | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "lineNumber": 147,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -241,7 +241,7 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-                "lineNumber": 152,
+                "lineNumber": 157,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -279,7 +279,7 @@
               " | undefined) => Promise<boolean | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "lineNumber": 229,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -302,7 +302,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-                "lineNumber": 233,
+                "lineNumber": 238,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -326,7 +326,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-                "lineNumber": 233,
+                "lineNumber": 238,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -356,7 +356,7 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "lineNumber": 258,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -378,7 +378,7 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-                "lineNumber": 261,
+                "lineNumber": 266,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -400,7 +400,7 @@
               ") => Promise<boolean | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "lineNumber": 316,
+            "lineNumber": 321,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -416,7 +416,7 @@
                   "PerformanceMetrics"
                 ],
                 "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-                "lineNumber": 316,
+                "lineNumber": 321,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,

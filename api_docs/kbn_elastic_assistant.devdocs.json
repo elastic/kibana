@@ -115,7 +115,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/index.tsx",
-        "lineNumber": 658,
+        "lineNumber": 655,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2980,7 +2980,7 @@
             "label": "update",
             "description": [],
             "signature": [
-              "Record<string, { id: string; title?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
+              "Record<string, { id: string; title?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
@@ -3086,7 +3086,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "Record<string, { title: string; id?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; replacements?: ",
+              "Record<string, { title: string; id?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
@@ -3531,7 +3531,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
