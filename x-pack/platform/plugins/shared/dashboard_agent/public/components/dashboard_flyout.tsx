@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import type { Observable } from 'rxjs';
 import {
   EuiFlyoutHeader,
@@ -36,6 +36,16 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { normalizePanels, buildMarkdownPanel, getMarkdownPanelHeight } from '../utils/panel_utils';
 import type { AttachmentStore } from '../services/attachment_store';
 
+const arePanelsEqual = (
+  a: DashboardAttachmentData['panels'],
+  b: DashboardAttachmentData['panels']
+): boolean => {
+  if (a.length !== b.length) return false;
+  const aIds = a.map((p) => p.panelId).sort();
+  const bIds = b.map((p) => p.panelId).sort();
+  return aIds.every((id, i) => id === bIds[i]);
+};
+
 export interface DashboardFlyoutProps {
   initialData: DashboardAttachmentData;
   attachmentId: string;
@@ -57,6 +67,9 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
   const [version, setVersion] = useState(0);
   const { panels, markdownContent, title, description, savedObjectId } = data;
 
+  // Track current panels to avoid unnecessary re-renders
+  const currentPanelsRef = useRef(initialData.panels);
+
   // Subscribe to attachment store for final state updates
   useEffect(() => {
     console.log('DashboardFlyout: subscribing to attachmentStore, attachmentId:', attachmentId);
@@ -67,9 +80,17 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
         hasData: !!state?.data,
       });
       if (state?.attachmentId === attachmentId && state.data) {
-        console.log('DashboardFlyout: attachment updated, refreshing dashboard');
-        setData(state.data);
-        setVersion((v) => v + 1);
+        // Only update if panels actually changed
+        if (!arePanelsEqual(currentPanelsRef.current, state.data.panels)) {
+          console.log('DashboardFlyout: panels changed, refreshing dashboard');
+          currentPanelsRef.current = state.data.panels;
+          setData(state.data);
+          setVersion((v) => v + 1);
+        } else {
+          console.log('DashboardFlyout: panels unchanged, skipping refresh');
+          // Still update non-panel data (title, description, etc.) without re-rendering dashboard
+          setData(state.data);
+        }
       }
     });
     return () => subscription.unsubscribe();
@@ -83,19 +104,23 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
       if (isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(event, DASHBOARD_PANEL_ADDED_EVENT)) {
         const { dashboardAttachmentId, panel } = event.data.data;
         if (dashboardAttachmentId === attachmentId) {
+          // Check if panel already exists
+          if (currentPanelsRef.current.some((p) => p.panelId === panel.panelId)) {
+            console.log('DashboardFlyout: panel already exists, skipping', panel.panelId);
+            return;
+          }
           console.log('DashboardFlyout: panel added, refreshing dashboard', panel);
-          setData((prev) => ({
-            ...prev,
-            panels: [
-              ...prev.panels,
-              {
-                type: 'lens' as const,
-                panelId: panel.panelId,
-                visualization: panel.visualization,
-                title: panel.title,
-              },
-            ],
-          }));
+          const newPanel = {
+            type: 'lens' as const,
+            panelId: panel.panelId,
+            visualization: panel.visualization,
+            title: panel.title,
+          };
+          setData((prev) => {
+            const newPanels = [...prev.panels, newPanel];
+            currentPanelsRef.current = newPanels;
+            return { ...prev, panels: newPanels };
+          });
           setVersion((v) => v + 1);
         }
       }
@@ -104,11 +129,17 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
       if (isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(event, DASHBOARD_PANEL_REMOVED_EVENT)) {
         const { dashboardAttachmentId, panelId } = event.data.data;
         if (dashboardAttachmentId === attachmentId) {
+          // Check if panel exists before removing
+          if (!currentPanelsRef.current.some((p) => p.panelId === panelId)) {
+            console.log('DashboardFlyout: panel not found, skipping removal', panelId);
+            return;
+          }
           console.log('DashboardFlyout: panel removed, refreshing dashboard', panelId);
-          setData((prev) => ({
-            ...prev,
-            panels: prev.panels.filter((p) => p.panelId !== panelId),
-          }));
+          setData((prev) => {
+            const newPanels = prev.panels.filter((p) => p.panelId !== panelId);
+            currentPanelsRef.current = newPanels;
+            return { ...prev, panels: newPanels };
+          });
           setVersion((v) => v + 1);
         }
       }
