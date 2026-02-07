@@ -104,7 +104,7 @@ export interface DrilldownTemplate {
   config: unknown;
 }
 
-export interface DrilldownType extends DrilldownDefinition { id: string, isCompatibleLicense: boolean }
+export interface DrilldownFactory extends Pick<DrilldownDefinition, 'getInitialLabel' | 'getInitialState' | 'isStateValid' | 'supportedTriggers'> { type: string, isCompatibleLicense: boolean }
 
 /**
  * These are static global dependencies of the <DrilldownManager> wired in
@@ -114,7 +114,7 @@ export interface DrilldownsManagerDependencies {
   /**
    * List of registered drilldowns
    */
-  drilldownTypes: DrilldownType[];
+  factories: DrilldownFactory[];
 
   /**
    * Trigger getter from UI Actions trigger registry.

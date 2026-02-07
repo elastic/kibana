@@ -33,14 +33,18 @@ export type DrilldownDefinition<
    */
   euiIcon?: string;
 
+  getInitialLabel(): string;
+
+  getInitialState(): Partial<Omit<TDrilldownState, 'label' | 'trigger' | 'type'>>;
+
   /**
    * Returns a link where drilldown should navigate on middle click or Ctrl + click.
    */
   getHref?(drilldownState: TDrilldownState, context: TContext): Promise<string | undefined>;
 
-  getInitialState(): Partial<TDrilldownState>;
-
   isCompatible?: ActionDefinition['isCompatible'];
+
+  isStateValid(state: Partial<Omit<TDrilldownState, 'label' | 'trigger' | 'type'>>): boolean;
 
   license?: {
     /**

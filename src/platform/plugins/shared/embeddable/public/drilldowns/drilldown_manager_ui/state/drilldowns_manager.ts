@@ -9,11 +9,10 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs';
 import type {
   PublicDrilldownsManagerProps,
   DrilldownsManagerDependencies,
-  DrilldownType,
+  DrilldownFactory,
 } from '../types';
 import {
   toastDrilldownCreated,
@@ -23,10 +22,11 @@ import {
   toastDrilldownsDeleted,
 } from './i18n';
 import { DrilldownState } from '../../../../server/drilldowns/types';
+import { DrilldownManager } from './drilldown_manager';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
-export interface DrilldownsManagerStateDeps
+export interface DrilldownsManagerDeps
   extends DrilldownsManagerDependencies,
     PublicDrilldownsManagerProps {}
 
@@ -41,7 +41,7 @@ export interface DrilldownsManagerStateDeps
  * const drilldowns = useDrilldownsManager();
  * ```
  */
-export class DrilldownsManagerState {
+export class DrilldownsManager {
   /**
    * Title displayed at the top of <DrilldownManager> flyout.
    */
@@ -71,16 +71,11 @@ export class DrilldownsManagerState {
   public readonly hideWelcomeMessage$: BehaviorSubject<boolean>;
 
   /**
-   * Currently selected drilldown type.
-   */
-  public readonly activeDrilldownType$: BehaviorSubject<undefined | DrilldownType>;
-
-  /**
-   * State for each drilldown type used for new drilldown creation, so when user
-   * switched between drilldown types the configuration of the previous
+   * Drilldown manager for each drilldown type used for new drilldown creation, so when user
+   * switches between drilldown types the configuration of the previous
    * drilldown is preserved.
    */
-  public readonly drilldownStateCache = new Map<string, Partial<DrilldownState>>();
+  public readonly drilldownCache = new Map<string, DrilldownManager>();
 
   /**
    * Whether user can unlock more drilldown types if they subscribe to a higher
@@ -93,10 +88,10 @@ export class DrilldownsManagerState {
    */
   public lastCloneRecord: null | { time: number; templateIds: string[] } = null;
 
-  constructor(public readonly deps: DrilldownManagerStateDeps) {
+  constructor(public readonly deps: DrilldownsManagerDeps) {
     const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
-    this.canUnlockMoreDrilldowns = deps.drilldownTypes.some(
+    this.canUnlockMoreDrilldowns = deps.factories.some(
       ({ isCompatibleLicense }) => !isCompatibleLicense
     );
 
@@ -112,11 +107,6 @@ export class DrilldownsManagerState {
     if (!initialRoute) initialRoute = 'manage';
     else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
     this.route$ = new BehaviorSubject(initialRoute.split('/'));
-
-    this.activeDrilldownType$ = new BehaviorSubject<undefined | DrilldownType>(
-      this.getActiveDrilldownType()
-    );
-    this.route$.pipe(map(() => this.getActiveDrilldownType())).subscribe(this.activeDrilldownType$);
   }
 
   /**
@@ -163,27 +153,25 @@ export class DrilldownsManagerState {
   /**
    * Select a different drilldown.
    */
-  public setDrilldownType(drilldownType: undefined | DrilldownType): void {
-    if (!drilldownType) {
+  public setDrilldownFactory(nextFactory: undefined | DrilldownFactory): void {
+    if (!nextFactory) {
       const route = this.route$.getValue();
       if (route[0] === 'new' && route.length > 1) this.setRoute(['new']);
       return;
     }
 
-    if (!this.drilldownStateCache.has(drilldownType.id)) {
-      this.drilldownStateCache.set(drilldownType.id, {
-        ...drilldownType.getInitialState(),
-        type: drilldownType.id
+    if (!this.drilldownCache.has(nextFactory.type)) {
+      const drilldown = new DrilldownManager({
+        factory: nextFactory,
+        triggers: this.deps.triggers,
+        // placeContext: this.deps.placeContext || {},
+        name: nextFactory.getInitialLabel(),
+        config: nextFactory.getInitialState(),
       });
+      this.drilldownCache.set(nextFactory.type, drilldown);
     }
 
-    this.route$.next(['new', drilldownType.id]);
-  }
-
-  public getActiveDrilldownType(): undefined | DrilldownType {
-    const [step1, id] = this.route$.getValue();
-    if (step1 !== 'new' || !id) return undefined;
-    return this.deps.drilldownTypes.find((drilldownType) => drilldownType.id === id);
+    this.route$.next(['new', nextFactory.type]);
   }
 
   /**
@@ -229,10 +217,10 @@ export class DrilldownsManagerState {
    * Get state object of the drilldown which is currently being created.
    */
   public getDrilldownState(): undefined | Partial<DrilldownState> {
-    const activeDrilldownType = this.getActiveDrilldownType();
-    if (!activeDrilldownType) return undefined;
-    const drilldownState = this.drilldownStateCache.get(activeDrilldownType.id);
-    return drilldownState;
+    const [, type] = this.route$.getValue();
+    if (!type) return undefined;
+    const drilldown = this.drilldownCache.get(type);
+    return drilldown?.serialize();
   }
 
   /**
@@ -254,7 +242,7 @@ export class DrilldownsManagerState {
         title: toastDrilldownCreated.title(drilldownState.label),
         text: toastDrilldownCreated.text,
       });
-      this.drilldownStateCache.delete(drilldownState.type);
+      this.drilldownCache.delete(drilldownState.type);
       if (this.deps.closeAfterCreate) {
         this.deps.onClose();
       } else {
@@ -332,15 +320,15 @@ export class DrilldownsManagerState {
   /**
    * Checks if drilldown with such a name already exists.
    */
-  /*private hasDrilldownWithName(name: string): boolean {
+  private hasDrilldownWithName(name: string): boolean {
     return this.deps.drilldowns$.getValue().some(({ label }) => label === name);
-  }*/
+  }
 
   /**
    * Picks a unique name for the cloned drilldown. Adds "(copy)", "(copy 1)",
    * "(copy 2)", etc. if drilldown with such name already exists.
    */
-  /*private pickName(name: string): string {
+  private pickName(name: string): string {
     if (this.hasDrilldownWithName(name)) {
       const matches = name.match(/(.*) (\(copy[^\)]*\))/);
       if (matches) name = matches[1];
@@ -351,7 +339,7 @@ export class DrilldownsManagerState {
       }
     }
     return name;
-  }*/
+  }
 
   /*public readonly onCreateFromTemplate = async (templateId: string) => {
     const { templates } = this.deps;
