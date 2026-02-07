@@ -26,7 +26,9 @@ async function run() {
   const currentStepKey = process.env.BUILDKITE_STEP_KEY;
   if (!isPrCiGateKey(currentStepKey)) {
     console.log(
-      `Current step key "${currentStepKey ?? ''}" is not a gate key (${PR_CI_GATE_KEYS.join(', ')}), skipping.`
+      `Current step key "${currentStepKey ?? ''}" is not a gate key (${PR_CI_GATE_KEYS.join(
+        ', '
+      )}), skipping.`
     );
     return;
   }
