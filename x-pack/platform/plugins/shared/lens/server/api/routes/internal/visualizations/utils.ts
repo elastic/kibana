@@ -8,17 +8,18 @@
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 
-import type { LensSavedObject, LensUpdateIn } from '../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../../content_management';
 import type {
   LensCreateRequestBody,
   LensItemMeta,
   LensResponseItem,
   LensUpdateRequestBody,
 } from './types';
+
 /**
  * Converts Lens request data to Lens Config
  */
-export function getLensRequestConfig(
+export function getLensInternalRequestConfig(
   builder: LensConfigBuilder,
   request: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
@@ -67,13 +68,13 @@ export type ExtendedLensResponseItem<M extends Record<string, string | boolean> 
 /**
  * Converts Lens Saved Object to Lens Response Item
  */
-export function getLensResponseItem<M extends Record<string, string | boolean>>(
+export function getLensInternalResponseItem<M extends Record<string, string | boolean>>(
   builder: LensConfigBuilder,
   item: LensSavedObject,
   extraMeta: M = {} as M
 ): ExtendedLensResponseItem<M> {
   const { id, references, attributes } = item;
-  const meta = getLensResponseItemMeta<M>(item, extraMeta);
+  const meta = getLensInternalResponseItemMeta<M>(item, extraMeta);
   const useApiFormat = builder.isSupported(attributes.visualizationType);
 
   if (useApiFormat) {
@@ -104,7 +105,7 @@ export function getLensResponseItem<M extends Record<string, string | boolean>>(
 /**
  * Converts Lens Saved Object to Lens Response Item
  */
-function getLensResponseItemMeta<M extends Record<string, string | boolean>>(
+function getLensInternalResponseItemMeta<M extends Record<string, string | boolean>>(
   { type, createdAt, updatedAt, createdBy, updatedBy, managed, originId }: LensSavedObject,
   extraMeta: M = {} as M
 ): LensItemMeta & M {

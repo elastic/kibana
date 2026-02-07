@@ -11,7 +11,7 @@ import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builde
 import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
-import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
+import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
 import type { LensAttributes, LensItem } from '../../server/content_management';
 import {
   type LensGetResponseBody,
@@ -54,8 +54,8 @@ export class LensClient {
       data,
       meta,
       id: responseId,
-    } = await this.http.get<LensGetResponseBody>(`${LENS_VIS_API_PATH}/${id}`, {
-      version: LENS_API_VERSION,
+    } = await this.http.get<LensGetResponseBody>(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
+      version: LENS_INTERNAL_API_VERSION,
     });
 
     const chartType = this.builder?.getType(data);
@@ -116,11 +116,11 @@ export class LensClient {
           };
 
     const { data, meta, ...rest } = await this.http.post<LensCreateResponseBody>(
-      LENS_VIS_API_PATH,
+      LENS_INTERNAL_VIS_API_PATH,
       {
         body: JSON.stringify(body),
         query: options,
-        version: LENS_API_VERSION,
+        version: LENS_INTERNAL_API_VERSION,
       }
     );
 
@@ -181,11 +181,11 @@ export class LensClient {
           };
 
     const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
-      `${LENS_VIS_API_PATH}/${id}`,
+      `${LENS_INTERNAL_VIS_API_PATH}/${id}`,
       {
         body: JSON.stringify(body),
         query: options,
-        version: LENS_API_VERSION,
+        version: LENS_INTERNAL_API_VERSION,
       }
     );
 
@@ -216,9 +216,9 @@ export class LensClient {
   }
 
   async delete(id: string): Promise<{ success: boolean }> {
-    const response = await this.http.delete(`${LENS_VIS_API_PATH}/${id}`, {
+    const response = await this.http.delete(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
       asResponse: true,
-      version: LENS_API_VERSION,
+      version: LENS_INTERNAL_API_VERSION,
     });
     const success = response.response?.ok ?? false;
 
@@ -232,7 +232,7 @@ export class LensClient {
     fields,
     searchFields,
   }: LensSearchRequestQuery): Promise<LensItem[]> {
-    const result = await this.http.get<LensSearchResponseBody>(LENS_VIS_API_PATH, {
+    const result = await this.http.get<LensSearchResponseBody>(LENS_INTERNAL_VIS_API_PATH, {
       query: {
         query,
         page,
@@ -240,7 +240,7 @@ export class LensClient {
         fields,
         searchFields,
       } satisfies LensSearchRequestQuery,
-      version: LENS_API_VERSION,
+      version: LENS_INTERNAL_API_VERSION,
     });
 
     return result.data.map(({ id, data }) => {

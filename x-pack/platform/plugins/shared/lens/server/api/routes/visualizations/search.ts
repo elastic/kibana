@@ -9,22 +9,19 @@ import { isBoom, boomify } from '@hapi/boom';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import {
-  LENS_INTERNAL_VIS_API_PATH,
-  LENS_INTERNAL_API_VERSION,
-} from '../../../../../common/constants';
-import type { LensSearchIn, LensSavedObject } from '../../../../content_management';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import type { LensSearchIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
-import { getLensInternalResponseItem } from './utils';
+import { getLensResponseItem } from './utils';
 
-export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
+export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {
   const searchRoute = router.get({
-    path: LENS_INTERNAL_VIS_API_PATH,
-    access: 'internal',
+    path: LENS_VIS_API_PATH,
+    access: 'public',
     enableQueryVersion: true,
     summary: 'Search Lens visualizations',
     description: 'Get list of Lens visualizations.',
@@ -44,7 +41,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
 
   searchRoute.addVersion(
     {
-      version: LENS_INTERNAL_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
           query: lensSearchRequestQuerySchema,
@@ -75,7 +72,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { query: q, page, perPage, ...reqOptions } = req.query;
+      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
 
       try {
         // Note: these types are to enforce loose param typings of client methods
@@ -99,7 +96,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
         return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
           body: {
             data: hits.map((item) => {
-              return getLensInternalResponseItem(builder, item);
+              return getLensResponseItem(builder, item);
             }),
             meta: {
               page,

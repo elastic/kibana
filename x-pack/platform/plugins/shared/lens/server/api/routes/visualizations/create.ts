@@ -8,27 +8,24 @@
 import { boomify, isBoom } from '@hapi/boom';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import {
-  LENS_INTERNAL_VIS_API_PATH,
-  LENS_INTERNAL_API_VERSION,
-} from '../../../../../common/constants';
-import type { LensCreateIn, LensSavedObject } from '../../../../content_management';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import { getLensRequestConfig, getLensResponseItem } from './utils';
 import {
   lensCreateRequestBodySchema,
   lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
 } from './schema';
-import { getLensInternalRequestConfig, getLensInternalResponseItem } from './utils';
 
-export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
+export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement, builder }
 ) => {
   const createRoute = router.post({
-    path: `${LENS_INTERNAL_VIS_API_PATH}/{id?}`,
-    access: 'internal',
+    path: `${LENS_VIS_API_PATH}/{id?}`,
+    access: 'public',
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',
@@ -48,7 +45,7 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
 
   createRoute.addVersion(
     {
-      version: LENS_INTERNAL_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
           query: lensCreateRequestQuerySchema,
@@ -76,19 +73,12 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body;
-      if ('state' in requestBodyData && !requestBodyData.visualizationType) {
-        throw new Error('visualizationType is required');
-      }
-
-      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        // Note: these types are to enforce loose param typings of client methods
-        const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
+        const { references, ...data } = getLensRequestConfig(builder, req.body);
         const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
         const { result } = await client.create(data, options);
 
@@ -96,7 +86,7 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
           throw result.item.error;
         }
 
-        const responseItem = getLensInternalResponseItem(builder, result.item);
+        const responseItem = getLensResponseItem(builder, result.item);
         return res.created<LensCreateResponseBody>({
           body: responseItem,
         });
