@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { apiTest as baseApiTest } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('dashboards', () => {
-    loadTestFile(require.resolve('./create_dashboard'));
-    loadTestFile(require.resolve('./delete_dashboard'));
-    loadTestFile(require.resolve('./get_dashboard'));
-    loadTestFile(require.resolve('./update_dashboard'));
-    loadTestFile(require.resolve('./search_dashboards'));
-  });
-}
+export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+
+/** The base API path for dashboard endpoints (no leading slash for apiClient). */
+export const DASHBOARD_API_PATH = 'api/dashboards';
