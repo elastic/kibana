@@ -85,7 +85,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation });
+  ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -104,10 +104,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
+    action,
   });
 
   const { staticTools, dynamicTools } = await selectTools({

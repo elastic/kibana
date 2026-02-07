@@ -308,6 +308,11 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
+        // Validate action-specific requirements before invoking chat service
+        if (payload.action === 'regenerate' && !payload.conversation_id) {
+          throw createBadRequestError('conversation_id is required when action is regenerate');
+        }
+
         const chatEvents$ = callConverse({
           payload,
           attachments,
@@ -387,6 +392,11 @@ export function registerChatRoutes({
           : [];
 
         await validateConfigurationOverrides({ payload, request });
+
+        // Validate action-specific requirements before invoking chat service
+        if (payload.action === 'regenerate' && !payload.conversation_id) {
+          throw createBadRequestError('conversation_id is required when action is regenerate');
+        }
 
         const chatEvents$ = callConverse({
           payload,

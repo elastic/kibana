@@ -76,9 +76,8 @@ export const updateConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      // Replace last round when resumed (HITL flow), regenerate, or resume_round action is requested
-      const shouldReplaceLastRound =
-        resumed || action === 'regenerate' || action === 'resume_round';
+      // Replace last round when resumed (HITL flow), regenerate action is requested
+      const shouldReplaceLastRound = resumed || action === 'regenerate';
       const updatedRound = shouldReplaceLastRound
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
@@ -119,7 +118,7 @@ export type ConversationWithOperation = Conversation & { operation: Conversation
 /**
  * Get a conversation by ID, or create a placeholder for new conversations.
  * Determines the operation type (CREATE or UPDATE) based on conversationId presence.
- * Note: Validation and manipulation for regenerate/resume_round is handled in runDefaultAgentMode.
+ * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
  */
 export const getConversation = async ({
   agentId,

@@ -151,7 +151,7 @@ class ChatServiceImpl implements ChatService {
 
           // Persist conversation (optional)
           // Pass action to persistConversation so updateConversation$ knows to replace
-          // the last round for regenerate/resume_round actions
+          // the last round for regenerate action
           const persistenceEvents$ = storeConversation
             ? persistConversation({
                 agentId,
