@@ -73,4 +73,14 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   if [ -n "${PING_SLACK_TEAM:-}" ]; then
     buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
   fi
+
+  # Cancel early-start jobs when a gate step fails
+  if [[ "${PR_CI_EARLY_START_ENABLED:-}" == "true" ]]; then
+    case "${BUILDKITE_STEP_KEY:-}" in
+      quick_checks|checks|linting|linting_with_types|check_types|check_oas_snapshot)
+        echo '--- PR CI early-start gate-failure cancellation'
+        ts-node .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.ts || true
+        ;;
+    esac
+  fi
 fi
