@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { round } from 'lodash';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getConnectionStats } from '../../../lib/connections/get_connection_stats';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -54,8 +55,7 @@ export async function getApmDownstreamDependencies({
     const metrics = {
       errorRate: errorRate?.value ?? undefined,
       latencyMs: latency?.value != null ? latency.value / 1000 : undefined,
-      throughputPerMin:
-        throughput?.value != null ? Math.round(throughput.value * 1000) / 1000 : undefined,
+      throughputPerMin: throughput?.value != null ? round(throughput.value, 3) : undefined,
     };
 
     if (location.type === NodeType.service) {
