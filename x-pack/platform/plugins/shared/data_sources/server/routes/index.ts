@@ -37,6 +37,7 @@ import {
   WORKFLOWS_SCOPE,
   TOOLS_SCOPE,
 } from '../../common/constants';
+import type { BulkDeleteTaskStatusResponse } from '../../common/types';
 import type { BulkDeleteTaskParams } from '../tasks/bulk_delete_task';
 import { TYPE } from '../tasks/bulk_delete_task';
 
@@ -432,22 +433,20 @@ export function registerRoutes(dependencies: RouteDependencies) {
           throw error;
         }
 
-        const state = (task.state || {}) as {
-          isDone: boolean;
-          deletedCount: number;
-          errors: Array<{ dataSourceId: string; error: string }>;
-        };
-
+        const state = (task.state || {}) as Pick<
+          BulkDeleteTaskStatusResponse,
+          'isDone' | 'deletedCount' | 'errors'
+        >;
         const params = (task.params || {}) as BulkDeleteTaskParams;
 
-        return response.ok({
-          body: {
-            isDone: state.isDone || false,
-            deletedCount: state.deletedCount || 0,
-            errors: state.errors || [],
-            dataSourceIds: params.dataSourceIds || [],
-          },
-        });
+        const body: BulkDeleteTaskStatusResponse = {
+          isDone: state.isDone || false,
+          deletedCount: state.deletedCount || 0,
+          errors: state.errors || [],
+          dataSourceIds: params.dataSourceIds || [],
+        };
+
+        return response.ok({ body });
       } catch (error) {
         logger.error(`Failed to get bulk delete status: ${(error as Error).message}`);
         return createErrorResponse(
