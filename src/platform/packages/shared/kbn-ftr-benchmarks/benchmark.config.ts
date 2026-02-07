@@ -11,9 +11,8 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
-const KIBANA_BUILD_VERSION = `kibana-${kibanaPackageJson.version}-SNAPSHOT-linux-${
-  process.arch === 'arm64' ? 'aarch64' : 'x86_64'
-}`;
+const KIBANA_BUILD_VERSION = `kibana-${kibanaPackageJson.version}-SNAPSHOT-linux-${process.arch === 'arm64' ? 'aarch64' : 'x86_64'
+  }`;
 
 function createBenchmark(name: string, config: string) {
   return {
@@ -45,7 +44,7 @@ const config: InitialBenchConfig = {
       'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts'
     ),
   ],
-  runs: 2,
+  runs: 1,
   timeout: 10 * 300_000,
 };
 
