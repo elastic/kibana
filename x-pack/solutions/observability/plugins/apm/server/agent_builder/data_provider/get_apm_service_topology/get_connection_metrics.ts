@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getApmDownstreamDependencies } from '../get_apm_downstream_dependencies';
+import { getStats } from '../../../lib/connections/get_connection_stats/get_stats';
 import { buildConnectionKey } from './build_connections_from_spans';
 import type { ConnectionMetrics, ConnectionWithKey, ServiceTopologyConnection } from './types';
 
@@ -19,7 +20,7 @@ interface MetricsMap {
 
 export async function getConnectionMetrics({
   apmEventClient,
-  randomSampler,
+  randomSampler: _randomSampler,
   start,
   end,
   serviceNames,
@@ -34,33 +35,45 @@ export async function getConnectionMetrics({
     return {};
   }
 
-  const metricsEntries = (
-    await Promise.all(
-      serviceNames.map(async (serviceName) => {
-        const dependencies = await getApmDownstreamDependencies({
-          apmEventClient,
-          randomSampler,
-          start,
-          end,
-          filter: [...termQuery(SERVICE_NAME, serviceName)],
-        });
+  const statsItems = await getStats({
+    apmEventClient,
+    start,
+    end,
+    filter:
+      serviceNames.length > 1
+        ? [{ terms: { [SERVICE_NAME]: serviceNames } }]
+        : termQuery(SERVICE_NAME, serviceNames[0]),
+    numBuckets: 1,
+    withTimeseries: false,
+  });
 
-        return dependencies.map((dependency) => {
-          const dependencyName = dependency['span.destination.service.resource'];
-          const key = buildConnectionKey(serviceName, dependencyName);
+  const metricsEntries = statsItems.flatMap((item) => {
+    const serviceName = item.from.serviceName;
+    const dependencyName = item.to.dependencyName;
+    if (!serviceName || !dependencyName) {
+      return [];
+    }
 
-          return [
-            key,
-            {
-              errorRate: dependency.errorRate,
-              latencyMs: dependency.latencyMs,
-              throughputPerMin: dependency.throughputPerMin,
-            },
-          ] as const;
-        });
-      })
-    )
-  ).flat();
+    const key = buildConnectionKey(serviceName, dependencyName);
+    const { error_count, success_count, latency_count, latency_sum } = item.value;
+    const totalCount = error_count + success_count;
+
+    return [
+      [
+        key,
+        {
+          errorRate: totalCount > 0 ? error_count / totalCount : undefined,
+          latencyMs: latency_count > 0 ? latency_sum / latency_count / 1000 : undefined,
+          throughputPerMin:
+            latency_count > 0
+              ? Math.round(
+                  calculateThroughputWithRange({ start, end, value: latency_count }) * 1000
+                ) / 1000
+              : undefined,
+        },
+      ] as const,
+    ];
+  });
 
   return Object.fromEntries(metricsEntries);
 }
