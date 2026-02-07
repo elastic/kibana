@@ -15,8 +15,9 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
+    await pageObjects.globalSearch.navigateToHome();
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -24,7 +25,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('SavedObject provider - can search for data views', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:index-pattern logstash');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -33,7 +33,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('SavedObject provider - can search for visualizations', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:visualization pie');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -42,7 +41,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('SavedObject provider - can search for maps', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:map just');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -51,7 +49,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('SavedObject provider - can search for dashboards', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard Amazing');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -62,7 +59,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   test('SavedObject provider - returns all objects matching the search', async ({
     pageObjects,
   }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -73,7 +69,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('SavedObject provider - can search by prefix', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard Amaz');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -84,7 +79,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   test('Applications provider - can search for root-level applications', async ({
     pageObjects,
   }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('discover');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -92,7 +86,6 @@ test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('Applications provider - can search for application deep links', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('saved objects');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();

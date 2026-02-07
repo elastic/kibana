@@ -15,8 +15,9 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
     await kbnClient.importExport.load(KBN_ARCHIVES.SEARCH_SYNTAX);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
+    await pageObjects.globalSearch.navigateToHome();
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -24,7 +25,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('shows the popover on focus', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.focus();
     expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(true);
 
@@ -33,7 +33,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('redirects to the correct page', async ({ page, pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:application discover');
     await pageObjects.globalSearch.clickOnOption(0);
 
@@ -41,7 +40,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('shows a suggestion when searching for a term matching a type', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('dashboard');
 
     let results = await pageObjects.globalSearch.getDisplayedResults();
@@ -67,7 +65,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   test('shows a suggestion when searching for a term matching a tag name', async ({
     pageObjects,
   }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag-1');
 
     let results = await pageObjects.globalSearch.getDisplayedResults();
@@ -104,7 +101,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by multiple types', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization)');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -124,7 +120,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by tag', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag:tag-1');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -138,7 +133,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by multiple tags', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag:tag-1 tag:tag-3');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -163,7 +157,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by multiple types and tags', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor(
       'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
     );
@@ -180,7 +173,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by term and type', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:visualization awesome');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -190,7 +182,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by term and tag', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag:tag-4 awesome');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -200,7 +191,6 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('allows to filter by tags containing special characters', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag:"my%tag"');
 
     const results = await pageObjects.globalSearch.getDisplayedResults();
@@ -210,14 +200,12 @@ test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('returns no results when searching for an unknown tag', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('tag:unknown', { wait: false });
 
     expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
   });
 
   test('returns no results when searching for an unknown type', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:unknown', { wait: false });
 
     expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
