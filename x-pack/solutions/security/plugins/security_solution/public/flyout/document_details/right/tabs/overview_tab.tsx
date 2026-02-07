@@ -13,6 +13,7 @@ import { InvestigationSection } from '../components/investigation_section';
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { VisualizationsSection } from '../components/visualizations_section';
+import { MalwareReAnalysisSection } from '../components/malware_re_analysis_section';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -35,6 +36,8 @@ export const OverviewTab = memo(() => {
       <VisualizationsSection />
       <EuiHorizontalRule margin="m" />
       <InsightsSection />
+      <EuiHorizontalRule margin="m" />
+      <MalwareReAnalysisSection />
       <EuiHorizontalRule margin="m" />
       <ResponseSection />
     </EuiPanel>
