@@ -27,8 +27,6 @@ export interface Correlation {
   value: string;
 }
 export interface Anchor {
-  '@timestamp': string;
-  correlation: Correlation & {
-    anchorId: string;
-  };
+  '@timestamp': string | undefined;
+  correlation: Correlation;
 }

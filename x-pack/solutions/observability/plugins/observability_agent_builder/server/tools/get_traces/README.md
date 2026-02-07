@@ -1,10 +1,10 @@
 # get_traces
 
-Retrieves trace data (APM transactions/spans/errors) plus logs for a single request/flow.
+Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
 
-This tool is KQL-driven: it finds one or more anchor logs within the time range, extracts the best available correlation identifier from each anchor log (prefers `trace.id`), then fetches APM events and logs for that identifier.
+This tool is KQL-driven: it finds one or more anchor documents (logs or APM events) within the time range, extracts one or more `trace.id` values from those documents, then fetches APM events and logs for each trace.
 
-If the anchor only contains non-APM identifiers (e.g., `request.id`), APM results may be empty while logs still return.
+If a matching document does not contain `trace.id`, it cannot be used to fetch a trace.
 
 ## Examples
 
@@ -36,9 +36,7 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
-### Anchor from a log query (`kqlFilter`)
-
-By default, anchors are selected from warning-and-above logs (ERROR, WARN, FATAL, HTTP 5xx). Set `errorLogsOnly: false` to anchor on any log lines.
+### Anchor from a query (`kqlFilter`)
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
@@ -53,7 +51,9 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
-### Use custom log indices
+### Use custom indices for anchor discovery
+
+The optional `index` parameter applies to the anchor discovery step (finding documents matching `kqlFilter`). APM/log results are fetched from the configured Observability data sources.
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
@@ -70,6 +70,5 @@ POST kbn://api/agent_builder/tools/_execute
 
 ## Notes
 
-- Results are returned as sequences. Each sequence contains `traceItems` (APM events), `errorItems` (APM error documents), and `logs` (log events).
+- Results are returned as sequences. Each sequence contains `traceItems` (APM events) and `logs` (log events).
 - Each array is sorted by `@timestamp`, but the tool does not merge APM + logs into a single timeline.
-- When anchoring from logs, the correlation window is expanded to +/- 1 hour around the anchor timestamp.

@@ -27,18 +27,12 @@ const getTracesSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'KQL filter used to find anchor log(s). Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool will pick an anchor log matching this filter, extract the best available correlation identifier (prefers trace.id), then return APM trace docs and logs for that identifier.'
-    ),
-  errorLogsOnly: z
-    .boolean()
-    .default(true)
-    .describe(
-      'When true, only sequences containing error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
+      'KQL filter used to find anchor documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxSequences`) and returns APM trace events and logs for each discovered trace.id.'
     ),
   maxSequences: z
     .number()
     .default(10)
-    .describe('Maximum number of unique log sequences to return.'),
+    .describe('Maximum number of unique traces (trace.id values) to return.'),
 });
 
 export function createGetTracesTool({
@@ -53,15 +47,17 @@ export function createGetTracesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTracesSchema> = {
     id: OBSERVABILITY_GET_TRACES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves trace data (APM transactions/spans/errors) plus logs for a single request/flow.
+    description: `Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
 
-  This tool is KQL-driven: it first finds one or more anchor logs within the time range, then extracts the best available correlation identifier from each anchor (prefers trace.id). For each identifier it returns:
+  This tool is KQL-driven: it searches for matching documents (logs or APM events) within the time range, extracts one or more trace.id values, then returns for each trace.id:
   - APM events (transactions, spans, errors)
   - Logs
 
   Common patterns:
   - Retrieve a specific trace: kqlFilter: "trace.id: abc123"
-  - Expand from a specific log doc: kqlFilter: "_id: a1b2c3" (useful when you have a log document id)
+  - Expand from a specific document id: kqlFilter: "_id: a1b2c3" (only works if that document has a trace.id)
+
+  Note: The optional "index" parameter is used for anchor discovery. The returned APM/log documents are fetched from the configured Observability data sources.
 
   Do NOT use for:
   - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
@@ -73,22 +69,17 @@ export function createGetTracesTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { start, end, index, kqlFilter, errorLogsOnly, maxSequences },
-      { esClient, request }
-    ) => {
+    handler: async ({ start, end, index, kqlFilter, maxSequences }, { esClient }) => {
       try {
         const { sequences } = await getToolHandler({
           core,
           plugins,
-          request,
           logger,
           esClient,
           start,
           end,
           index,
           kqlFilter,
-          errorLogsOnly,
           maxSequences,
         });
 

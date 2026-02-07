@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -67,46 +67,40 @@ export async function getDocuments({
 export async function getToolHandler({
   core,
   plugins,
-  request,
   logger,
   esClient,
   start,
   end,
   index,
   kqlFilter,
-  errorLogsOnly,
   maxSequences,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
   end: string;
   index?: string;
   kqlFilter?: string;
-  errorLogsOnly: boolean;
   maxSequences: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
-  const logsIndices = index?.split(',') ?? dataSources.logIndexPatterns;
   const apmIndexPatterns = [
     dataSources.apmIndexPatterns.transaction,
     dataSources.apmIndexPatterns.span,
     dataSources.apmIndexPatterns.error,
   ];
+  const indices = index?.split(',') ?? [...dataSources.logIndexPatterns, ...apmIndexPatterns];
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 
   const correlationIdentifiers = await getCorrelationIdentifiers({
     esClient,
-    logsIndices,
-    apmIndexPatterns,
+    indices,
     startTime,
     endTime,
     kqlFilter,
-    errorLogsOnly,
     logger,
     maxSequences,
   });
@@ -127,7 +121,7 @@ export async function getToolHandler({
       const logHits = await getDocuments({
         esClient,
         correlationIdentifier,
-        index: logsIndices,
+        index: dataSources.logIndexPatterns,
         startTime,
         endTime,
         size: DEFAULT_MAX_LOG_EVENTS,

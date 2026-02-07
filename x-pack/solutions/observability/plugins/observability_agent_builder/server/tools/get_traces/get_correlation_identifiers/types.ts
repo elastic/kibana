@@ -24,14 +24,9 @@ interface UniqueValuesTermsAgg {
   }>;
 }
 
-interface DiverseSamplerAgg {
+interface DiversifiedSamplerAgg {
   doc_count: number;
   unique_values?: UniqueValuesTermsAgg;
 }
 
-interface FieldFilterAgg {
-  doc_count: number;
-  diverse_sampler: DiverseSamplerAgg;
-}
-
-export type CorrelationFieldAggregations = Record<string, FieldFilterAgg>;
+export type CorrelationFieldAggregations = Record<string, DiversifiedSamplerAgg>;

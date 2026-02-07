@@ -5,187 +5,98 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
-import { createHash } from 'crypto';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
 import type { Anchor } from '../types';
 import type { CorrelationFieldAggregations } from './types';
 
+const TRACE_ID_FIELD = 'trace.id';
+const TRACE_ID_AGG_NAME = 'trace_id';
+
 export async function getAnchors({
   esClient,
-  logsIndices,
+  indices,
   startTime,
   endTime,
   kqlFilter,
-  correlationFields,
   logger,
   maxSequences,
-  query,
 }: {
   esClient: IScopedClusterClient;
-  logsIndices: string[];
+  indices: string[];
   startTime: number;
   endTime: number;
   kqlFilter: string | undefined;
-  correlationFields: string[];
   logger: Logger;
   maxSequences: number;
-  query?: QueryDslQueryContainer[];
 }): Promise<Anchor[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
-  // Use aggregation-based approach to get diverse samples across all correlation fields.
-  // This prevents "starvation" where a single sequence with many anchors would prevent other sequences from being discovered.
+  // aggregation to get diverse samples across trace.id field.
+  const aggs: Record<string, AggregationsAggregationContainer> = {
+    [TRACE_ID_AGG_NAME]: {
+      diversified_sampler: {
+        shard_size: Math.max(100, maxSequences * 10),
+        field: TRACE_ID_FIELD,
+        max_docs_per_value: 1,
+      },
+      aggs: {
+        unique_values: {
+          terms: {
+            field: TRACE_ID_FIELD,
+            size: maxSequences,
+            execution_hint: 'map' as const,
+          },
+          aggs: {
+            anchor_doc: {
+              top_hits: {
+                size: 1,
+                _source: ['@timestamp'],
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   const searchRequest = {
     size: 0,
     track_total_hits: false,
-    index: logsIndices,
+    index: indices,
     query: {
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
           ...buildKqlFilter(kqlFilter),
-          ...(query ?? []),
-          // must have at least one correlation field
-          {
-            bool: {
-              should: correlationFields.map((field) => ({ exists: { field } })),
-              minimum_should_match: 1,
-            },
-          },
+          // Only consider documents that contain trace.id
+          { exists: { field: TRACE_ID_FIELD } },
         ],
       },
     },
-    aggs: buildDiversifiedSamplerAggregations(correlationFields, maxSequences),
+    aggs,
   };
 
   const response = await search(searchRequest);
 
-  const anchors = parseAnchorFromAggregations(
-    response.aggregations as CorrelationFieldAggregations | undefined,
-    correlationFields
-  );
+  const aggregations = response.aggregations as CorrelationFieldAggregations | undefined;
+  const buckets = aggregations?.[TRACE_ID_AGG_NAME]?.unique_values?.buckets ?? [];
+
+  const anchors: Anchor[] = buckets.map((bucket) => {
+    const firstHit = bucket.anchor_doc.hits.hits[0];
+
+    return {
+      '@timestamp': firstHit?._source?.['@timestamp'],
+      correlation: {
+        field: TRACE_ID_FIELD,
+        value: String(bucket.key),
+      },
+    };
+  });
 
   logger.debug(`Found ${anchors.length} unique anchors across correlation fields`);
 
-  return anchors.slice(0, maxSequences);
-}
-
-/**
- * Generates a unique aggregation key from a field name.
- * Combines a human-readable sanitized name with a short hash to guarantee uniqueness.
- * e.g., 'trace.id' -> 'field_trace_id_a1b2c3', 'trace_id' -> 'field_trace_id_d4e5f6'
- */
-function getAggNameForField(field: string): string {
-  const sanitized = field.replace(/[^a-zA-Z0-9]/g, '_');
-  const hash = createHash('sha256').update(field).digest('hex').slice(0, 6);
-  return `field_${sanitized}_${hash}`;
-}
-
-/**
- * Builds aggregations for diverse sampling of anchor logs across multiple correlation fields.
- *
- * This uses a layered approach to handle high-cardinality fields efficiently:
- * 1. Filter (exists): Skips documents without the field (fast, uses inverted index)
- * 2. Diversified Sampler: Limits scope and ensures unique values per field
- * 3. Terms with execution_hint 'map': Avoids Global Ordinals memory overhead
- * 4. Top Hits: Fetches document metadata in a single pass
- */
-export function buildDiversifiedSamplerAggregations(
-  correlationFields: string[],
-  maxSequences: number
-): Record<string, AggregationsAggregationContainer> {
-  return correlationFields.reduce((acc, field, index) => {
-    const aggName = getAggNameForField(field);
-
-    const fieldAgg: AggregationsAggregationContainer = {
-      filter: {
-        bool: {
-          filter: [
-            { exists: { field } },
-            // must not have previously checked correlation fields (e.g., if we're currently checking 'request.id', exclude docs with 'trace.id' since they would have been captured in the 'trace.id' aggregation)
-            ...(index > 0
-              ? correlationFields.slice(0, index - 1).map((f) => ({
-                  bool: {
-                    must_not: {
-                      exists: { field: f },
-                    },
-                  },
-                }))
-              : []),
-          ],
-        },
-      },
-      aggs: {
-        diverse_sampler: {
-          diversified_sampler: {
-            shard_size: Math.max(100, maxSequences * 10), // Oversample to improve diversity
-            field,
-            max_docs_per_value: 1,
-          },
-          aggs: {
-            unique_values: {
-              terms: {
-                field,
-                size: maxSequences,
-                execution_hint: 'map', // Disables "Global Ordinals". This is critically important for high-cardinality fields
-              },
-              aggs: {
-                anchor_doc: {
-                  top_hits: {
-                    size: 1,
-                    _source: ['@timestamp'],
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    return { ...acc, [aggName]: fieldAgg };
-  }, {} as Record<string, AggregationsAggregationContainer>);
-}
-
-export function parseAnchorFromAggregations(
-  aggregations: CorrelationFieldAggregations | undefined,
-  correlationFields: string[]
-): Anchor[] {
-  if (!aggregations) return [];
-
-  const allAnchors = correlationFields.flatMap((field) => {
-    const aggName = getAggNameForField(field);
-    const filterAgg = aggregations[aggName];
-    if (!filterAgg) return [];
-
-    const buckets = filterAgg.diverse_sampler?.unique_values?.buckets ?? [];
-
-    return buckets.map((bucket): Anchor => {
-      const firstHit = bucket.anchor_doc.hits.hits[0];
-
-      return {
-        '@timestamp': firstHit?._source?.['@timestamp'] ?? '',
-        correlation: {
-          field,
-          value: String(bucket.key),
-          anchorId: firstHit?._id ?? 'unknown',
-        },
-      };
-    });
-  });
-
-  // Dedupe by anchor document ID first (keeps first occurrence = highest priority field).
-  // When the same document has multiple correlation fields (e.g., trace.id AND request.id),
-  // we keep only the one from the highest priority field since correlationFields is ordered.
-  // Then dedupe by field+value to ensure each correlation identity appears only once.
-  const dedupedByDocId = uniqBy(allAnchors, (anchor) => anchor.correlation.anchorId);
-  return uniqBy(
-    dedupedByDocId,
-    (anchor) => `${anchor.correlation.field}_${anchor.correlation.value}`
-  );
+  return anchors;
 }
