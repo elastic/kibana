@@ -1,27 +1,57 @@
 [
   {
-    "type": "object",
-    "description": "Markdown embeddable schema",
-    "properties": {
-      "content": {
-        "type": "string"
+    "anyOf": [
+      {
+        "additionalProperties": false,
+        "description": "Markdown by-value embeddable schema",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
       },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+      {
+        "additionalProperties": false,
+        "description": "Markdown by-reference embeddable schema",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "savedObjectId": {
+            "description": "The ID of the saved markdown object",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }  
+        },
+        "required": [
+          "savedObjectId"
+        ],
+        "type": "object"
       }
-    },
-    "additionalProperties": false,
-    "required": ["content"]
+    ],
+    "description": "Markdown embeddable schema"
   },
   {
-    "type": "object",
+    "additionalProperties": true,
     "properties": {},
-    "additionalProperties": true
+    "type": "object"
   }
 ]

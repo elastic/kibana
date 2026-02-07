@@ -70,7 +70,7 @@ export interface MarkdownEditorProps {
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
   onCancel: () => void;
-  onSave: (value: string) => void;
+  onSave: (value: string) => Promise<void>;
   isPreview$: PublishingSubject<boolean>;
   uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
@@ -124,7 +124,7 @@ export const MarkdownEditor = ({
       )}
       <MarkdownFooter
         onCancel={onCancel}
-        onSave={() => onSave(value)}
+        onSave={async () => await onSave(value)}
         isPreview={isPreview}
         cancelButtonRef={cancelButtonRef}
         isSaveable={isSaveable}
