@@ -55,7 +55,6 @@ steps:
     key: checks
     agents:
       machineType: n4d-standard-4
-      diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
@@ -69,7 +68,6 @@ steps:
     label: 'Linting'
     agents:
       machineType: n4d-standard-32
-      diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
@@ -83,8 +81,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n4d-highcpu-32
-      diskType: hyperdisk-balanced
+      machineType: n4d-standard-32
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
@@ -111,7 +108,7 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4d-standard-4
+      machineType: n4d-standard-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
