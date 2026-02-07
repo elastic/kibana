@@ -15,6 +15,7 @@ import {
   guessChartType,
   getSchemaForChartType,
 } from '@kbn/agent-builder-platform-plugin/server';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
@@ -353,7 +354,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             throw new Error(`Attachment "${currentAttachmentId}" is not a dashboard attachment.`);
           }
 
-          const latestVersion = dashboardAttachment.versions[dashboardAttachment.current_version];
+          const latestVersion = getLatestVersion(dashboardAttachment);
           if (!latestVersion) {
             throw new Error(
               `Could not retrieve latest version of dashboard attachment "${currentAttachmentId}".`
