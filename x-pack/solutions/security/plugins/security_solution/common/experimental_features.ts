@@ -210,6 +210,11 @@ export const allowedExperimentalValues = Object.freeze({
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
   linuxDnsEvents: true,
+
+  /**
+   * Enables the Automatic Migration of Splunk dashboards in Security Solution
+   */
+  splunkV2DashboardsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GrokCollection } from '@kbn/grok-ui';
 import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
@@ -47,7 +46,6 @@ import {
   simulationMachine,
 } from '../simulation_state_machine';
 import { yamlModeMachine } from '../yaml_mode_machine';
-import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
   createFailureStoreDataSource,
@@ -73,7 +71,6 @@ export const streamEnrichmentMachine = setup({
     initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
-    setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
     interactiveModeMachine: getPlaceholderFor(() => interactiveModeMachine),
     yamlModeMachine: getPlaceholderFor(() => yamlModeMachine),
@@ -167,6 +164,7 @@ export const streamEnrichmentMachine = setup({
             newStepIds: additiveChanges.newStepIds ?? [],
             simulationMode,
             streamName: context.definition.stream.name,
+            grokCollection: context.grokCollection,
           },
         }),
         yamlModeRef: undefined, // Clear YAML mode ref when switching to interactive
@@ -321,7 +319,7 @@ export const streamEnrichmentMachine = setup({
     hasChanges: false,
     schemaErrors: [], // Schema errors from Zod parsing
     dataSourcesRefs: [],
-    grokCollection: new GrokCollection(),
+    grokCollection: input.grokCollection,
     interactiveModeRef: undefined, // Will be spawned when in interactive mode
     yamlModeRef: undefined, // Will be spawned when in YAML mode
     urlState: defaultEnrichmentUrlState,
@@ -349,22 +347,10 @@ export const streamEnrichmentMachine = setup({
             { type: 'storeUrlState', params: ({ event }) => event },
             { type: 'syncUrlState' },
           ],
-          target: 'setupGrokCollection',
+          target: 'ready',
         },
       },
     },
-    setupGrokCollection: {
-      invoke: {
-        id: 'setupGrokCollection',
-        src: 'setupGrokCollection',
-        input: ({ context }) => ({
-          grokCollection: context.grokCollection,
-        }),
-        onDone: 'ready',
-        onError: 'grokCollectionFailure',
-      },
-    },
-    grokCollectionFailure: {},
     ready: {
       id: 'ready',
       type: 'parallel',
@@ -630,7 +616,6 @@ export const createStreamEnrichmentMachineImplementations = ({
   actors: {
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
-    setupGrokCollection: setupGrokCollectionActor(),
     interactiveModeMachine: interactiveModeMachine.provide(
       createInteractiveModeMachineImplementations({
         toasts: core.notifications.toasts,
