@@ -341,21 +341,22 @@ export class DrilldownsManager {
     return name;
   }
 
-  /*public readonly onCreateFromTemplate = async (templateId: string) => {
+  public readonly onCreateFromTemplate = async (templateId: string) => {
     const { templates } = this.deps;
     if (!templates) return;
     const template = templates.find(({ id }) => id === templateId);
     if (!template) return;
-    const actionFactory = this.deps.actionFactories.find(({ id }) => id === template.factoryId);
-    if (!actionFactory) return;
-    this.setActionFactory(actionFactory);
-    const drilldownState = this.getDrilldownState();
-    if (drilldownState) {
-      drilldownState.setName(this.pickName(template.name));
-      drilldownState.setTriggers(template.triggers);
-      drilldownState.setConfig(template.config as SerializableRecord);
+    const factory = this.deps.factories.find(({ type }) => type === template.type);
+    if (!factory) return;
+    this.setDrilldownFactory(factory);
+    const drilldownManager = this.getDrilldownManager();
+    if (drilldownManager) {
+      drilldownManager.setName(this.pickName(template.name));
+      drilldownManager.setTrigger(template.trigger);
+      const { label, type, trigger, ...config } = template.drilldownState;
+      drilldownManager.setConfig(config);
     }
-  };*/
+  };
 
   /*public readonly onCreateFromDrilldown = async (eventId: string) => {
     const { dynamicActionManager } = this.deps;

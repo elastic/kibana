@@ -92,14 +92,14 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
       ),
     },
     {
-      field: 'triggers',
+      field: 'trigger',
       name: txtTrigger,
       textOnly: true,
       sortable: (drilldown: DrilldownTableItem) =>
-        drilldown.triggers ? drilldown.triggers[0].title : '',
+        drilldown.trigger ? drilldown.trigger.title : '',
       render: (triggers: unknown, drilldown: DrilldownTableItem) => {
-        if (!drilldown.triggers) return null;
-        const trigger = drilldown.triggers[0];
+        if (!drilldown.trigger) return null;
+        const trigger = drilldown.trigger;
         return (
           <TriggerLineItem
             incompatible={drilldown.triggerIncompatible}

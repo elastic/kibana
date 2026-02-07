@@ -25,7 +25,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
     DrilldownTemplateTableItem[]
   >(() => {
     return items.map((item) => {
-      const factory = drilldowns.deps.actionFactories.find(({ id }) => id === item.factoryId);
+      const factory = drilldowns.deps.factories.find(({ type }) => type === item.factoryId);
       const trigger = drilldowns.deps.getTrigger(item.triggers[0]);
       const tableItem: DrilldownTemplateTableItem = {
         id: item.id,
@@ -36,9 +36,8 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
       };
 
       if (factory) {
-        const context = drilldowns.getActionFactoryContext();
-        tableItem.actionName = factory.getDisplayName(context);
-        tableItem.actionIcon = factory.getIconType(context);
+        tableItem.actionName = factory.displayName;
+        tableItem.actionIcon = factory.euiIcon;
       }
       if (trigger) {
         tableItem.trigger = trigger.title;

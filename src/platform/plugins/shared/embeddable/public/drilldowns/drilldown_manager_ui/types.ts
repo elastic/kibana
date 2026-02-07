@@ -11,6 +11,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { DrilldownDefinition, HasDrilldowns } from '../types';
+import { DrilldownState } from '../../../server/drilldowns/types';
 
 /**
  * This are props of the public <DrilldownManager> React component which is
@@ -83,9 +84,9 @@ export interface DrilldownTemplate {
   description: string;
 
   /**
-   * Drilldown type, dynamic action factory ID.
+   * Drilldown type
    */
-  factoryId: string;
+  type: string;
 
   /**
    * Suggested new name of the cloned drilldown. If a drilldown with such suggested
@@ -94,14 +95,14 @@ export interface DrilldownTemplate {
   name: string;
 
   /**
-   * Pre-selected triggers.
+   * Selected trigger.
    */
-  triggers: string[];
+  trigger: string;
 
   /**
    * Preliminary configuration of the new drilldown, to be used in the dynamicaction factory.
    */
-  config: unknown;
+  drilldownState: DrilldownState;
 }
 
 export interface DrilldownFactory extends Pick<DrilldownDefinition, 'displayName' | 'euiIcon' |  'getInitialState' | 'isStateValid' | 'supportedTriggers'> { type: string, isCompatibleLicense: boolean }
