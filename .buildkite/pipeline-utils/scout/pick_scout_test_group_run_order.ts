@@ -11,6 +11,11 @@ import Fs from 'fs';
 import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
+import {
+  PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV,
+  PR_CI_EARLY_START_ENABLED_ENV,
+  prefixPrCiCancelableCommand,
+} from '../pr_ci_early_start';
 import { getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
@@ -35,6 +40,7 @@ if (process.env.SERVERLESS_TESTS_ONLY) {
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
+  const earlyStartEnabled = process.env[PR_CI_EARLY_START_ENABLED_ENV] === 'true';
 
   if (!Fs.existsSync(scoutConfigsPath)) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
@@ -71,7 +77,9 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
         steps: scoutCiRunGroups.map(
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            command: earlyStartEnabled
+              ? prefixPrCiCancelableCommand(getRequiredEnv('SCOUT_CONFIGS_SCRIPT'))
+              : getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
             agents,
             env: {
@@ -79,6 +87,9 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
               SCOUT_CONFIG_GROUP_TYPE: group,
               ...envFromlabels,
               ...scoutExtraEnv,
+              ...(earlyStartEnabled
+                ? { [PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV]: 'true' }
+                : {}),
             },
             retry: {
               automatic: [

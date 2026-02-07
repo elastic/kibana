@@ -105,6 +105,84 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (quick_checks)'
+    key: early_start_cancel_non_gate_jobs_quick_checks
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: quick_checks
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (checks)'
+    key: early_start_cancel_non_gate_jobs_checks
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: checks
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (linting)'
+    key: early_start_cancel_non_gate_jobs_linting
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: linting
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (linting_with_types)'
+    key: early_start_cancel_non_gate_jobs_linting_with_types
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: linting_with_types
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (check_types)'
+    key: early_start_cancel_non_gate_jobs_check_types
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: check_types
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
+  - command: .buildkite/scripts/steps/early_start_ci/cancel_non_gate_jobs_on_gate_failure.sh
+    label: 'Early Start CI: cancel non-gate jobs (check_oas_snapshot)'
+    key: early_start_cancel_non_gate_jobs_check_oas_snapshot
+    if: "build.env('PR_CI_EARLY_START_ENABLED') == 'true'"
+    allow_dependency_failure: true
+    depends_on: check_oas_snapshot
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 115
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:

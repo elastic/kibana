@@ -21,3 +21,8 @@ if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-
 <summary>Agent information from gobld</summary>
 EOF
 fi
+
+if [[ "${PR_CI_CANCELABLE_ON_GATE_FAILURE:-}" =~ ^(1|true)$ ]]; then
+  buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_pr_ci_cancelable" 'true' || \
+    echo "Failed to mark ${BUILDKITE_JOB_ID} as pr-ci-cancelable" >&2
+fi

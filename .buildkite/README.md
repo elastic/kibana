@@ -9,3 +9,9 @@
 - `scripts/lifecycle` - general scripts for tasks that run before or after individual steps or the entire build
 - `scripts/steps` - scripts that define something that will run for a step defined in a pipeline
 - `scripts/*` - all other scripts are building blocks that make up the tasks in pipelines. They may be run by other scripts, but should not be `source`d
+
+## Pilot Labels
+
+- Use `ci:pilot:<feature>` for opt-in CI behavior that is being evaluated before broad adoption.
+- For PR early-start behavior, use `ci:pilot:early-start`.
+- Reserve `ci:<feature>` labels for stable, non-pilot behavior.

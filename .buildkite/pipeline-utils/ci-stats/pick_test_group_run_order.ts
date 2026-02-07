@@ -23,7 +23,16 @@ import { CiStatsClient } from './client';
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
-import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+import {
+  PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV,
+  PR_CI_EARLY_START_ENABLED_ENV,
+  collectEnvFromLabels,
+  expandAgentQueue,
+  getRequiredEnv,
+  prefixPrCiCancelableCommand,
+  relaxDependsOnForPrCiEarlyStart,
+  shouldRelaxDependsOnForPrCiEarlyStart,
+} from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -127,6 +136,17 @@ export async function pickTestGroupRunOrder() {
           .map((t) => t.trim())
           .filter(Boolean)
       : ['build'];
+
+  const earlyStartEnabled = process.env[PR_CI_EARLY_START_ENABLED_ENV] === 'true';
+  const maybeRelaxedFtrDependsOn =
+    earlyStartEnabled && shouldRelaxDependsOnForPrCiEarlyStart(FTR_CONFIGS_DEPS)
+      ? relaxDependsOnForPrCiEarlyStart(FTR_CONFIGS_DEPS)
+      : FTR_CONFIGS_DEPS;
+  const relaxedFtrConfigsDeps = Array.isArray(maybeRelaxedFtrDependsOn)
+    ? maybeRelaxedFtrDependsOn
+    : maybeRelaxedFtrDependsOn
+    ? [maybeRelaxedFtrDependsOn]
+    : FTR_CONFIGS_DEPS;
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -381,7 +401,7 @@ export async function pickTestGroupRunOrder() {
         ? {
             group: 'FTR Configs',
             key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
+            depends_on: relaxedFtrConfigsDeps,
             steps: functionalGroups
               .sort((a, b) =>
                 // if both groups are sorted by number then sort by that
@@ -398,7 +418,9 @@ export async function pickTestGroupRunOrder() {
               .map(
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                  command: earlyStartEnabled
+                    ? prefixPrCiCancelableCommand(getRequiredEnv('FTR_CONFIGS_SCRIPT'))
+                    : getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue, 105),
                   env: {
@@ -406,6 +428,9 @@ export async function pickTestGroupRunOrder() {
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,
+                    ...(earlyStartEnabled
+                      ? { [PR_CI_CANCELABLE_ON_GATE_FAILURE_ENV]: 'true' }
+                      : {}),
                   },
                   retry: {
                     automatic: [

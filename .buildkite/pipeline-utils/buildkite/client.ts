@@ -368,6 +368,17 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
+  cancelJob = async (jobId: string): Promise<void> => {
+    if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
+      throw new Error(
+        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to cancel a job'
+      );
+    }
+
+    const url = `v2/organizations/elastic/pipelines/${process.env.BUILDKITE_PIPELINE_SLUG}/builds/${process.env.BUILDKITE_BUILD_NUMBER}/jobs/${jobId}/cancel`;
+    await this.http.put(url);
+  };
+
   setMetadata = (key: string, value: string) => {
     this.exec(`buildkite-agent meta-data set '${key}'`, {
       input: value,

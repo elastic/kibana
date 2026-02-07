@@ -256,4 +256,37 @@ describe('BuildkiteClient', () => {
       expect(result.success).toEqual(true);
     });
   });
+
+  describe('cancelJob', () => {
+    const originalPipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG;
+    const originalBuildNumber = process.env.BUILDKITE_BUILD_NUMBER;
+
+    afterEach(() => {
+      process.env.BUILDKITE_PIPELINE_SLUG = originalPipelineSlug;
+      process.env.BUILDKITE_BUILD_NUMBER = originalBuildNumber;
+      jest.restoreAllMocks();
+    });
+
+    it('calls the Buildkite cancel endpoint for the specified job', async () => {
+      process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-pull-request';
+      process.env.BUILDKITE_BUILD_NUMBER = '42';
+
+      const putSpy = jest.spyOn(buildkite.http, 'put').mockResolvedValue({} as never);
+
+      await buildkite.cancelJob('job-id-1');
+
+      expect(putSpy).toHaveBeenCalledWith(
+        'v2/organizations/elastic/pipelines/kibana-pull-request/builds/42/jobs/job-id-1/cancel'
+      );
+    });
+
+    it('throws when required build context environment variables are missing', async () => {
+      delete process.env.BUILDKITE_PIPELINE_SLUG;
+      delete process.env.BUILDKITE_BUILD_NUMBER;
+
+      await expect(buildkite.cancelJob('job-id-1')).rejects.toThrow(
+        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to cancel a job'
+      );
+    });
+  });
 });

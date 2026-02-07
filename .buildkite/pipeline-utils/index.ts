@@ -10,6 +10,7 @@
 export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
+export * from './pr_ci_early_start';
 export * from './github';
 export * as TestFailures from './test-failures';
 export * from './utils';
