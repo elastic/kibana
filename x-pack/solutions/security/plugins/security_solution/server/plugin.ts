@@ -274,7 +274,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
-      options: { endpointAppContextService },
+      options: {
+        endpointAppContextService,
+        malwareAnalysis: this.config.malwareAnalysis
+          ? {
+              orchestratorUrl: this.config.malwareAnalysis.orchestratorUrl,
+              apiToken: this.config.malwareAnalysis.apiToken,
+              timeout: this.config.malwareAnalysis.timeout,
+            }
+          : undefined,
+      },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });

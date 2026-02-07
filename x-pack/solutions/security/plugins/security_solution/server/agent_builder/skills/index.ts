@@ -7,4 +7,5 @@
 
 export { alertAnalysisSampleSkill as alertAnalysisSkill } from './alert_analysis_skill';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+export { createMalwareAnalysisSkill } from './malware_analysis_skill';
 export { registerSkills } from './register_skills';

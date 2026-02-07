@@ -13,6 +13,8 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import type { MalwareAnalysisConfig } from '../../lib/malware_analysis';
+import { createMalwareAnalysisSkill } from './malware_analysis_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -23,6 +25,7 @@ interface RegisterSkillsOpts {
   ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
     endpointAppContextService: EndpointAppContextService;
+    malwareAnalysis?: MalwareAnalysisConfig;
   };
 }
 
@@ -48,4 +51,8 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
+
+  if (options.malwareAnalysis) {
+    await agentBuilder.skills.register(createMalwareAnalysisSkill(options.malwareAnalysis));
+  }
 };
