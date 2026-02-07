@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { Correlation } from '../types';
 import { getAnchors } from './get_anchors';
@@ -36,5 +37,14 @@ export async function getCorrelationIdentifiers({
     maxSequences,
   });
 
-  return anchors.map((anchor) => anchor.correlation);
+  return anchors.map((anchor) => {
+    const { correlation, '@timestamp': timestamp } = anchor;
+    const start = moment(timestamp).subtract(1, 'hour').valueOf();
+    const end = moment(timestamp).add(1, 'hour').valueOf();
+    return {
+      identifier: correlation,
+      start,
+      end,
+    };
+  });
 }

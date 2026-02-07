@@ -36,7 +36,7 @@ export async function getDocuments({
   fields,
 }: {
   esClient: IScopedClusterClient;
-  correlationIdentifier: Correlation;
+  correlationIdentifier: Correlation['identifier'];
   index: string[];
   startTime: number;
   endTime: number;
@@ -107,29 +107,29 @@ export async function getToolHandler({
 
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
   const sequences: TraceSequence[] = await Promise.all(
-    correlationIdentifiers.map(async (correlationIdentifier) => {
+    correlationIdentifiers.map(async (correlation) => {
       const apmHits = await getDocuments({
         esClient,
-        correlationIdentifier,
+        correlationIdentifier: correlation.identifier,
         index: apmIndexPatterns,
-        startTime,
-        endTime,
+        startTime: correlation.start,
+        endTime: correlation.end,
         size: DEFAULT_MAX_APM_EVENTS,
         fields: DEFAULT_TRACE_FIELDS,
       });
 
       const logHits = await getDocuments({
         esClient,
-        correlationIdentifier,
+        correlationIdentifier: correlation.identifier,
         index: dataSources.logIndexPatterns,
-        startTime,
-        endTime,
+        startTime: correlation.start,
+        endTime: correlation.end,
         size: DEFAULT_MAX_LOG_EVENTS,
         fields: DEFAULT_LOG_SOURCE_FIELDS,
       });
 
       return {
-        correlation_identifier: correlationIdentifier,
+        correlation,
         traceItems: mapHitsToEntries(apmHits),
         logs: mapHitsToEntries(logHits),
       };
