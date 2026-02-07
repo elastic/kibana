@@ -257,35 +257,35 @@ describe('BuildkiteClient', () => {
     });
   });
 
-  describe('cancelJob', () => {
-    const originalPipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG;
-    const originalBuildNumber = process.env.BUILDKITE_BUILD_NUMBER;
+  describe('cancelStep', () => {
+    const originalBuildId = process.env.BUILDKITE_BUILD_ID;
 
     afterEach(() => {
-      process.env.BUILDKITE_PIPELINE_SLUG = originalPipelineSlug;
-      process.env.BUILDKITE_BUILD_NUMBER = originalBuildNumber;
+      process.env.BUILDKITE_BUILD_ID = originalBuildId;
       jest.restoreAllMocks();
     });
 
-    it('calls the Buildkite cancel endpoint for the specified job', async () => {
-      process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-pull-request';
-      process.env.BUILDKITE_BUILD_NUMBER = '42';
+    it('calls buildkite-agent step cancel for the specified step', async () => {
+      process.env.BUILDKITE_BUILD_ID = 'build-id-42';
 
-      const putSpy = jest.spyOn(buildkite.http, 'put').mockResolvedValue({} as never);
+      const execSpy = jest.fn().mockReturnValue('' as never);
+      buildkite.exec = execSpy;
 
-      await buildkite.cancelJob('job-id-1');
+      await buildkite.cancelStep('step-id-1');
 
-      expect(putSpy).toHaveBeenCalledWith(
-        'v2/organizations/elastic/pipelines/kibana-pull-request/builds/42/jobs/job-id-1/cancel'
+      expect(execSpy).toHaveBeenCalledWith(
+        'buildkite-agent step cancel --build "build-id-42" --step "step-id-1"',
+        {
+          stdio: ['pipe', 'inherit', 'inherit'],
+        }
       );
     });
 
     it('throws when required build context environment variables are missing', async () => {
-      delete process.env.BUILDKITE_PIPELINE_SLUG;
-      delete process.env.BUILDKITE_BUILD_NUMBER;
+      delete process.env.BUILDKITE_BUILD_ID;
 
-      await expect(buildkite.cancelJob('job-id-1')).rejects.toThrow(
-        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to cancel a job'
+      await expect(buildkite.cancelStep('step-id-1')).rejects.toThrow(
+        'BUILDKITE_BUILD_ID must be set to cancel a step'
       );
     });
   });

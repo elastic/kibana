@@ -36,7 +36,17 @@ export interface Job {
   id: string;
   type: string;
   name: string;
-  step_key: string;
+  step_key: string | null;
+  /**
+   * A job is an execution of a step. When a step is run with `parallelism`,
+   * multiple jobs will share the same `step.id`.
+   *
+   * This is present in the Buildkite Builds API response for jobs.
+   */
+  step?: {
+    id: string;
+    signature?: string | null;
+  };
   state: JobState;
   logs_url: string;
   raw_log_url: string;

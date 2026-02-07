@@ -20,6 +20,7 @@ import {
 const ANNOTATION_CONTEXT = 'pr-ci-early-start-gate-canceler';
 
 const toStepLabel = (job: Job): string => job.step_key || job.name || job.id;
+const toStepCancelTarget = (job: Job): string | null => job.step_key || job.step?.id || null;
 
 async function run() {
   const bk = new BuildkiteClient();
@@ -72,9 +73,25 @@ async function run() {
   const canceledJobs: Job[] = [];
   const cancelFailures: string[] = [];
 
+  // De-dupe parallel jobs which share the same step ID/key.
+  const cancelTargets = new Map<string, Job>();
   for (const job of candidateJobs) {
+    const target = toStepCancelTarget(job);
+    if (!target) {
+      cancelFailures.push(
+        `${toStepLabel(job)} (${job.id}): could not determine step id/key to cancel`
+      );
+      continue;
+    }
+
+    if (!cancelTargets.has(target)) {
+      cancelTargets.set(target, job);
+    }
+  }
+
+  for (const [target, job] of cancelTargets) {
     try {
-      await bk.cancelJob(job.id);
+      await bk.cancelStep(target);
       canceledJobs.push(job);
     } catch (error) {
       const message = error instanceof Error ? error.message : `${error}`;
@@ -84,7 +101,7 @@ async function run() {
 
   const summary = [
     `Gate failure(s) detected: ${failedGateJobs.map(toStepLabel).join(', ')}`,
-    `Canceled ${canceledJobs.length} pr-ci-cancelable job(s): ${
+    `Canceled ${canceledJobs.length} pr-ci-cancelable step(s): ${
       canceledJobs.length ? canceledJobs.map(toStepLabel).join(', ') : 'none'
     }`,
     ...(cancelFailures.length

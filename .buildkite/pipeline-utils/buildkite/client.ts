@@ -368,15 +368,18 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
-  cancelJob = async (jobId: string): Promise<void> => {
-    if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
-      throw new Error(
-        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to cancel a job'
-      );
+  cancelStep = async (stepIdOrKey: string): Promise<void> => {
+    if (!process.env.BUILDKITE_BUILD_ID) {
+      throw new Error('BUILDKITE_BUILD_ID must be set to cancel a step');
     }
 
-    const url = `v2/organizations/elastic/pipelines/${process.env.BUILDKITE_PIPELINE_SLUG}/builds/${process.env.BUILDKITE_BUILD_NUMBER}/jobs/${jobId}/cancel`;
-    await this.http.put(url);
+    // Buildkite's REST API does not expose a "cancel job" endpoint, but the agent can cancel steps.
+    // Use step ID (BUILDKITE_STEP_ID) or key (BUILDKITE_STEP_KEY) for cancellation.
+    const buildId = JSON.stringify(process.env.BUILDKITE_BUILD_ID);
+    const step = JSON.stringify(stepIdOrKey);
+    this.exec(`buildkite-agent step cancel --build ${buildId} --step ${step}`, {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
   };
 
   setMetadata = (key: string, value: string) => {
