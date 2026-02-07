@@ -43,13 +43,21 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
   share,
 }) => {
   const [data, setData] = useState<DashboardAttachmentData>(initialData);
+  const [version, setVersion] = useState(0);
   const { panels, markdownContent, title, description, savedObjectId } = data;
 
   useEffect(() => {
+    console.log('DashboardFlyout: subscribing to attachmentStore, attachmentId:', attachmentId);
     const subscription = attachmentStore.state.subscribe((state) => {
-      if (state?.attachmentId === attachmentId && state.data) {
-        console.log('DashboardFlyout: Attachment updated', state.data);
+      console.log('DashboardFlyout: subscription received:', {
+        stateAttachmentId: state?.attachmentId,
+        expectedAttachmentId: attachmentId,
+        hasData: !!state?.data,
+      });
+      if (state.data) {
+        console.log('new version received');
         setData(state.data);
+        setVersion((v) => v + 1);
       }
     });
     return () => subscription.unsubscribe();
@@ -142,6 +150,7 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
           `}
         >
           <DashboardRenderer
+            key={version}
             getCreationOptions={getCreationOptions}
             showPlainSpinner
             savedObjectId={savedObjectId}

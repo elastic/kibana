@@ -46,7 +46,13 @@ export class AttachmentStore {
    */
   updateAttachment(attachmentId: string, data: DashboardAttachmentData): void {
     const current = this.state$.getValue();
+    console.log('AttachmentStore.updateAttachment:', {
+      incomingId: attachmentId,
+      currentId: current?.attachmentId,
+      matches: current?.attachmentId === attachmentId,
+    });
     if (current?.attachmentId === attachmentId) {
+      console.log('AttachmentStore: emitting new state');
       this.state$.next({ attachmentId, data });
     }
   }

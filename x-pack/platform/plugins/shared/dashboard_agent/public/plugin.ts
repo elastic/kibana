@@ -8,7 +8,11 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { DASHBOARD_ATTACHMENT_TYPE, type DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  type DashboardAttachmentData,
+} from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -56,10 +60,16 @@ export class DashboardAgentPlugin
         for (const attachment of event.data.attachments) {
           if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
             console.log('Dashboard attachment updated:', attachment);
-            this.attachmentStore.updateAttachment(
-              attachment.id,
-              attachment.data as DashboardAttachmentData
-            );
+            const latestVersion = getLatestVersion(attachment);
+            console.log('Latest version:', latestVersion);
+            if (latestVersion?.data) {
+              this.attachmentStore.updateAttachment(
+                attachment.id,
+                latestVersion.data as DashboardAttachmentData
+              );
+            } else {
+              console.log('No latestVersion.data found');
+            }
           }
         }
       }
