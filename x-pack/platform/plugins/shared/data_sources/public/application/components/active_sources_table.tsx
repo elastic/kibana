@@ -42,6 +42,7 @@ interface ActiveSourcesTableProps {
   onEdit?: (source: ActiveSource) => void;
   onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
+  onBulkDelete?: (sources: ActiveSource[]) => void;
 }
 
 const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
@@ -194,6 +195,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   onEdit,
   onClone,
   onDelete,
+  onBulkDelete,
 }) => {
   const {
     services: { chrome },
@@ -346,8 +348,11 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                 size="s"
                 color="danger"
                 iconType="trash"
-                onClick={() => {}}
-                disabled
+                onClick={() => {
+                  onBulkDelete?.(selectedItems);
+                  setSelectedItems([]);
+                }}
+                disabled={!onBulkDelete}
                 data-test-subj="bulkDeleteButton"
               >
                 {i18n.translate('xpack.dataSources.activeSources.deleteSelected', {
