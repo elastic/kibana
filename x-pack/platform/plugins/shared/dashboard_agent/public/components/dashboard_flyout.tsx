@@ -154,6 +154,10 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
             getCreationOptions={getCreationOptions}
             showPlainSpinner
             savedObjectId={savedObjectId}
+            onApiAvailable={(api) => {
+              // Force view mode since DashboardRenderer defaults to edit when no savedObjectId
+              api.setViewMode('view');
+            }}
           />
         </div>
       </EuiFlyoutBody>
