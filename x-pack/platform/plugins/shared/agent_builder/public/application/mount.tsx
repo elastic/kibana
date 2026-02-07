@@ -37,7 +37,6 @@ export const mountApp = async ({
 }) => {
   const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
-  await services.accessChecker.initAccess();
 
   ReactDOM.render(
     core.rendering.addContext(
