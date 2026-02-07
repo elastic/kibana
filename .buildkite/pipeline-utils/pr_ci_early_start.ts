@@ -117,7 +117,7 @@ export function getPrCiEarlyStartRolloutSeed(env = process.env): string {
 }
 
 export function getPrCiEarlyStartRolloutBucket(seed: string): number {
-  const digest = createHash('sha1')
+  const digest = createHash('sha256')
     .update(seed || 'pr-ci-early-start-default-seed')
     .digest('hex')
     .slice(0, 8);
