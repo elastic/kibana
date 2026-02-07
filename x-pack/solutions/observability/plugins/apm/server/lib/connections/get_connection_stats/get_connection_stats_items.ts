@@ -8,7 +8,7 @@
 import objectHash from 'object-hash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
+import { RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -151,7 +151,7 @@ async function getConnectionStatsAggregations({
       sources: [
         {
           documentType: ApmDocumentType.ServiceDestinationMetric,
-          rollupInterval: getRollupIntervalForTimeRange(startWithOffset, endWithOffset),
+          rollupInterval: RollupInterval.OneMinute, // TODO: use getRollupIntervalForTimeRange
         },
       ],
     },
