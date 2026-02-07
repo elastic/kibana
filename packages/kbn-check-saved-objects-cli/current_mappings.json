@@ -2971,6 +2971,45 @@
       }
     }
   },
+  "malware-analysis-result": {
+    "properties": {
+      "alert_id": {
+        "type": "keyword"
+      },
+      "analysis": {
+        "index": false,
+        "type": "text"
+      },
+      "cost_usd": {
+        "type": "float"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "error": {
+        "index": false,
+        "type": "text"
+      },
+      "input_tokens": {
+        "type": "long"
+      },
+      "output_tokens": {
+        "type": "long"
+      },
+      "sha256": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "task_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  },
   "map": {
     "properties": {
       "bounds": {

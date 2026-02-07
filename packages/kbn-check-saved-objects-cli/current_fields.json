@@ -914,6 +914,19 @@
     "title",
     "updatedAt"
   ],
+  "malware-analysis-result": [
+    "alert_id",
+    "analysis",
+    "cost_usd",
+    "created_at",
+    "error",
+    "input_tokens",
+    "output_tokens",
+    "sha256",
+    "status",
+    "task_id",
+    "updated_at"
+  ],
   "map": [
     "bounds",
     "description",
