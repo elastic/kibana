@@ -236,6 +236,10 @@ export function isPrCiPipelineStep(value: unknown): value is PrCiPipelineStep {
   return typeof value === 'object' && value !== null;
 }
 
+export function isPrCiPipeline(value: unknown): value is PrCiPipeline {
+  return isPrCiPipelineStep(value) && Array.isArray((value as { steps?: unknown }).steps);
+}
+
 export function transformPipelineStepForPrCiEarlyStart(
   step: PrCiPipelineStep,
   inheritedCancelable = false
@@ -270,7 +274,7 @@ export function transformPipelineStepForPrCiEarlyStart(
 }
 
 export function transformPipelineForPrCiEarlyStart(pipeline: unknown): PrCiPipeline | null {
-  if (!isPrCiPipelineStep(pipeline) || !Array.isArray(pipeline.steps)) {
+  if (!isPrCiPipeline(pipeline)) {
     return null;
   }
 

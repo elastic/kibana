@@ -9,4 +9,21 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:beta-faster-pr-build"* ]]; then
    && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 fi
 
-ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+tmp_pipeline_file="$(mktemp)"
+cleanup() {
+  rm -f "$tmp_pipeline_file"
+}
+trap cleanup EXIT
+
+if ! ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts > "$tmp_pipeline_file"; then
+  cat <<'YAML'
+steps:
+  - label: ':x: PR pipeline generation failed'
+    command: |
+      echo 'Failed to generate dynamic PR pipeline. See the uploader step logs for details.' >&2
+      exit 1
+YAML
+  exit 0
+fi
+
+cat "$tmp_pipeline_file"
