@@ -13,17 +13,19 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiButton,
   EuiSpacer,
   EuiTablePagination,
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ActiveSource } from '../../types/connector';
@@ -324,46 +326,131 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     },
   ];
 
+  const selectAll = useCallback(() => {
+    setSelectedItems([...paginatedSources]);
+  }, [paginatedSources]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedItems([]);
+  }, []);
+
+  const deleteSelection = useCallback(() => {
+    onBulkDelete?.(selectedItems);
+    setSelectedItems([]);
+  }, [onBulkDelete, selectedItems]);
+
   const selection = {
     selectable: () => true,
     onSelectionChange: (items: ActiveSource[]) => setSelectedItems(items),
     selected: selectedItems,
   };
 
+  const startItem = activePage * itemsPerPage + 1;
+  const endItem = Math.min((activePage + 1) * itemsPerPage, sources.length);
+
   return (
     <>
-      {selectedItems.length > 0 && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                {i18n.translate('xpack.dataSources.activeSources.selectedCount', {
-                  defaultMessage: 'Sources selected: {count}',
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        css={css`
+          min-height: 24px;
+        `}
+      >
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.dataSources.activeSources.tableSummary"
+            defaultMessage="Showing {start}-{end} of {total} {sources}"
+            values={{
+              start: <strong>{startItem}</strong>,
+              end: <strong>{endItem}</strong>,
+              total: sources.length,
+              sources: (
+                <strong>
+                  {i18n.translate('xpack.dataSources.activeSources.sourcesLabel', {
+                    defaultMessage: 'Data Sources',
+                  })}
+                </strong>
+              ),
+            }}
+          />
+        </EuiText>
+        {selectedItems.length > 0 && (
+          <EuiFlexGroup gutterSize="none">
+            {onBulkDelete && (
+              <EuiButtonEmpty
+                aria-label={i18n.translate('xpack.dataSources.activeSources.deleteSelectedLabel', {
+                  defaultMessage:
+                    'Delete {count, plural, one {# Data Source} other {# Data Sources}}',
                   values: { count: selectedItems.length },
                 })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="danger"
-                iconType="trash"
-                onClick={() => {
-                  onBulkDelete?.(selectedItems);
-                  setSelectedItems([]);
-                }}
-                disabled={!onBulkDelete}
                 data-test-subj="bulkDeleteButton"
+                iconType="trash"
+                iconSize="m"
+                size="xs"
+                color="danger"
+                onClick={deleteSelection}
               >
-                {i18n.translate('xpack.dataSources.activeSources.deleteSelected', {
-                  defaultMessage: 'Delete selected',
+                <EuiText
+                  size="xs"
+                  css={({ euiTheme }) => ({
+                    fontWeight: euiTheme.font.weight.semiBold,
+                  })}
+                >
+                  {i18n.translate('xpack.dataSources.activeSources.deleteSelectedLabel', {
+                    defaultMessage:
+                      'Delete {count, plural, one {# Data Source} other {# Data Sources}}',
+                    values: { count: selectedItems.length },
+                  })}
+                </EuiText>
+              </EuiButtonEmpty>
+            )}
+            <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.dataSources.activeSources.selectAllLabel', {
+                defaultMessage: 'Select all',
+              })}
+              data-test-subj="selectAllButton"
+              iconType="pagesSelect"
+              iconSize="m"
+              size="xs"
+              onClick={selectAll}
+            >
+              <EuiText
+                size="xs"
+                css={({ euiTheme }) => ({
+                  fontWeight: euiTheme.font.weight.semiBold,
                 })}
-              </EuiButton>
-            </EuiFlexItem>
+              >
+                {i18n.translate('xpack.dataSources.activeSources.selectAllLabel', {
+                  defaultMessage: 'Select all',
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.dataSources.activeSources.clearSelectionLabel', {
+                defaultMessage: 'Clear selection',
+              })}
+              data-test-subj="clearSelectionButton"
+              iconType="cross"
+              iconSize="m"
+              size="xs"
+              onClick={clearSelection}
+            >
+              <EuiText
+                size="xs"
+                css={({ euiTheme }) => ({
+                  fontWeight: euiTheme.font.weight.semiBold,
+                })}
+              >
+                {i18n.translate('xpack.dataSources.activeSources.clearSelectionLabel', {
+                  defaultMessage: 'Clear selection',
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
-      )}
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiBasicTable
         items={paginatedSources}
         itemId="id"
