@@ -430,7 +430,7 @@ export interface PromQLParseResult<T extends PromQLAstNode = PromQLAstQueryExpre
 }
 
 /**
- * Result of findPromqlAstPosition.
+ * Result of PromQL AST position detection (via PromqlWalker).
  */
 export interface PromQLPositionResult {
   /**

@@ -17,7 +17,6 @@ import {
   getPromqlFunctionSuggestionsForReturnTypes,
   getPromqlParamTypesForFunction,
 } from '../../definitions/utils/promql';
-import { getFunctionParamIndexAtCursor } from './utils';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../shared/sorting';
 import {
@@ -67,6 +66,8 @@ export async function autocomplete(
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
   const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
+  const promqlCommand = command as ESQLAstPromqlCommand;
+
   switch (position.type) {
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
@@ -110,57 +111,42 @@ export async function autocomplete(
 
     case 'inside_grouping':
     case 'after_label_brace':
-      return suggestLabels(context);
+      return position.isCompleteLabel ? [commaCompleteItem] : suggestLabels(context);
 
     case 'after_label_name':
       // Future: suggest label operators (=, !=, =~, !~) when ES defines them
       return [];
 
-    case 'inside_label_value':
-      return [];
+    case 'after_label_operator':
+      return [valuePlaceholderConstant];
 
     case 'after_metric': {
-      const types = getParamTypesAtCursor(
-        command as ESQLAstPromqlCommand,
-        commandText,
-        cursorPosition
-      );
-
-      return types.includes('range_vector')
+      const types = getParamTypesAtCursor(promqlCommand, commandText, cursorPosition);
+      return types.includes('range_vector') && !position.selector?.duration
         ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
         : [promqlLabelSelectorItem];
     }
 
     case 'after_label_selector': {
-      const types = getParamTypesAtCursor(
-        command as ESQLAstPromqlCommand,
-        commandText,
-        cursorPosition
-      );
-
-      return types.includes('range_vector') ? [promqlRangeSelectorItem] : [];
+      const types = getParamTypesAtCursor(promqlCommand, commandText, cursorPosition);
+      return types.includes('range_vector') && !position.selector?.duration
+        ? [promqlRangeSelectorItem]
+        : [];
     }
 
     case 'inside_query':
-      return [];
+      return position.canAddGrouping ? [promqlByCompleteItem] : [];
 
     case 'after_open_paren':
     case 'inside_function_args': {
-      const promqlCommand = command as ESQLAstPromqlCommand;
-
-      const { functionNode, fallback } = resolveFunctionAtCursor(
+      if (position.canSuggestCommaInFunctionArgs) {
+        return [commaCompleteItem];
+      }
+      const { functionName, paramIndex } = resolveFunctionAtCursor(
         promqlCommand,
         commandText,
         cursorPosition
       );
-      const functionName = functionNode?.name ?? fallback?.name;
-      const astParamIndex = functionNode
-        ? getFunctionParamIndexAtCursor(promqlCommand, commandText, cursorPosition, functionNode)
-        : 0;
-      const paramIndex =
-        fallback && fallback.name === functionName && fallback.paramIndex > astParamIndex
-          ? fallback.paramIndex
-          : astParamIndex;
 
       const signatureTypes = getPromqlParamTypesForFunction(functionName, paramIndex);
       const types = getMetricTypesForSignature(signatureTypes);
@@ -179,13 +165,6 @@ export async function autocomplete(
 
       return [...scalarValues, ...metrics, ...functions];
     }
-
-    case 'after_complete_expression':
-      // Future: suggest binary operators (+, -, *, /, etc.) when ES defines them
-      return [];
-
-    case 'before_grouping':
-      return [promqlByCompleteItem];
 
     case 'after_query': {
       const suggestions: ISuggestionItem[] = [pipeCompleteItem];

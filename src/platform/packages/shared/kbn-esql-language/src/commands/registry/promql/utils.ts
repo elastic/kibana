@@ -11,12 +11,14 @@ import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import { getBracketsToClose } from '../../definitions/utils/ast';
-import { childrenOfPromqlNode, findPromqlAstPosition } from '../../../promql/traversal';
+import { PromqlWalker } from '../../../promql/walker';
 import { PromQLParser } from '../../../promql';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLFunction,
+  PromQLLabel,
+  PromQLLabelMap,
   PromQLPositionResult,
   PromQLSelector,
 } from '../../../promql/types';
@@ -37,13 +39,11 @@ type PromqlPositionType =
   | 'inside_query' // fallback inside query zone → [] (no suggestions)
   | 'after_query' // PROMQL (rate(x)) | → pipe, operators, by
   | 'inside_grouping' // sum(...) by (| → labels (not yet implemented)
-  | 'before_grouping' // sum(rate(x))| → by/without
-  | 'after_complete_expression' // rate(bytes)  | → operators
   | 'inside_function_args' // sum( | → functions
   | 'after_open_paren' // (|, col0 = | → functions
   | 'after_label_brace' // metric{| or metric{job="api",| → labels
-  | 'after_label_name' // metric{job| → label operators (=", !=", =~", !~")
-  | 'inside_label_value' // metric{job="| → label values (future)
+  | 'after_label_name' // metric{job| → TODO: label operators when ES provides them
+  | 'after_label_operator' // metric{job=| → label value placeholder
   | 'after_label_selector' // metric{job="api"} | → range selector [5m]
   | 'after_metric'; // http_requests| → labels
 
@@ -51,8 +51,13 @@ interface PromqlPosition {
   type: PromqlPositionType;
   currentParam?: string;
   canAddGrouping?: boolean;
-  /** Absolute position where replacement should start (for selector items). */
-  replaceStart?: number;
+  selector?: PromQLSelector;
+  isCompleteLabel?: boolean;
+  canSuggestCommaInFunctionArgs?: boolean;
+}
+
+function isLabelMapNode(node?: PromQLAstNode): node is PromQLLabelMap {
+  return node?.type === 'label-map';
 }
 
 // Shared identifier pattern for param names, column names, etc.
@@ -61,6 +66,7 @@ export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
 // Param zone detection
 const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
 const FUNCTION_ARG_START_TOKENS = ['(', ','];
+const AFTER_LABEL_OPERATOR_REGEX = /\{[^}]*[=~]$/;
 
 // ============================================================================
 // Main Entry Point
@@ -69,14 +75,21 @@ const FUNCTION_ARG_START_TOKENS = ['(', ','];
 export function getPosition(
   innerText: string,
   command: ESQLAstAllCommands,
-  commandText?: string
+  commandText: string | undefined
 ): PromqlPosition {
   const promqlCommand = command as ESQLAstPromqlCommand;
+  const ctx = commandText
+    ? getPromQLQueryContext(promqlCommand, commandText, innerText.length)
+    : undefined;
 
-  const queryZonePosition = getQueryZonePosition(innerText, promqlCommand, commandText);
+  const queryZonePosition = getQueryZonePosition(innerText, promqlCommand, ctx);
 
   if (queryZonePosition) {
     return queryZonePosition;
+  }
+
+  if (commandText && isInsideQueryParen(commandText)) {
+    return { type: 'after_open_paren' };
   }
 
   // Fallback to param zone detection (text-based, for transitional states)
@@ -96,12 +109,11 @@ export function getPosition(
 function getQueryZonePosition(
   innerText: string,
   promqlCommand: ESQLAstPromqlCommand,
-  commandText?: string
+  ctx?: PromQLQueryContext
 ): PromqlPosition | undefined {
   const queryNode = promqlCommand.query;
-  const cursorPosition = innerText.length;
 
-  // For assignments, use inner location (the PromQL expr) not outer (includes parens)
+  // For wrapped queries, use inner location (the PromQL expr) not outer (includes parens)
   const assignmentLocs = queryNode ? extractAssignmentLocations(queryNode) : undefined;
   const queryLocation = assignmentLocs?.inner ?? queryNode?.location;
 
@@ -111,40 +123,26 @@ function getQueryZonePosition(
 
   // After query zone: cursor past inner expression
   if (queryLocation && innerText.length > queryLocation.max) {
-    const isInsideAssignmentParens = assignmentLocs && innerText.length <= assignmentLocs.outer.max;
+    const wrappedParens =
+      assignmentLocs?.outer ?? (queryNode?.type === 'parens' ? queryNode.location : undefined);
+    const isInsideWrappedParens = wrappedParens && innerText.length <= wrappedParens.max;
 
-    // Only check grouping when inside assignment parens or when there's no assignment
-    const shouldCheckGrouping = isInsideAssignmentParens || !assignmentLocs;
-    const ctx =
-      shouldCheckGrouping && commandText
-        ? getPromQLQueryContext(promqlCommand, commandText, cursorPosition)
-        : undefined;
-    const canAddGrouping = ctx ? checkCanAddGrouping(ctx) : false;
-    const hasTrailingWhitespace = innerText.trimEnd() !== innerText;
+    // Only check grouping when inside wrapped parens or when there's no wrapper
+    const shouldCheckGrouping = isInsideWrappedParens || !wrappedParens;
+    const ctxForGrouping = shouldCheckGrouping ? ctx : undefined;
+    const canAddGrouping = ctxForGrouping ? checkCanAddGrouping(ctxForGrouping) : false;
 
-    if (!hasTrailingWhitespace && canAddGrouping) {
-      return { type: 'before_grouping' };
-    }
-
-    if (hasTrailingWhitespace && canAddGrouping) {
-      return { type: 'after_query', canAddGrouping: true };
-    }
-
-    // No grouping: inside assignments get operators, outside get after_query
-    return isInsideAssignmentParens
-      ? { type: 'after_complete_expression' }
-      : { type: 'after_query', canAddGrouping: false };
+    return isInsideWrappedParens
+      ? { type: 'inside_query', canAddGrouping }
+      : { type: 'after_query', canAddGrouping };
   }
 
   // Inside query zone: cursor within query bounds
   if (queryNode && within(innerText.length, queryNode)) {
-    const ctx = commandText
-      ? getPromQLQueryContext(promqlCommand, commandText, cursorPosition)
-      : undefined;
-
     if (ctx) {
-      if (checkInsideGrouping(ctx)) {
-        return { type: 'inside_grouping' };
+      const groupingPosition = getGroupingPosition(ctx);
+      if (groupingPosition) {
+        return groupingPosition;
       }
 
       const labelPosition = getLabelSelectorPosition(ctx);
@@ -152,28 +150,46 @@ function getQueryZonePosition(
         return labelPosition;
       }
 
-      const labelSelectorPos = checkAfterLabelSelector(ctx);
-      if (labelSelectorPos !== false) {
-        const replaceStart = promqlCommand.location.min + ctx.start + labelSelectorPos;
-        return { type: 'after_label_selector', replaceStart };
+      // Text fallback: ANTLR loses label structure inside functions (e.g. `rate(metric{job= `)
+      if (AFTER_LABEL_OPERATOR_REGEX.test(ctx.textBeforeCursorTrimmed)) {
+        return { type: 'after_label_operator' };
       }
 
-      const metricPos = checkAfterMetric(ctx);
-      if (metricPos !== false) {
-        const replaceStart = promqlCommand.location.min + ctx.start + metricPos;
-        return { type: 'after_metric', replaceStart };
+      const selectorAfterLabels = findSelectorAfterLabelSelector(ctx);
+      if (selectorAfterLabels) {
+        return { type: 'after_label_selector', selector: selectorAfterLabels };
       }
 
-      if (checkCanAddGrouping(ctx)) {
-        return { type: 'before_grouping' };
+      const selectorAfterMetric = findSelectorAfterMetric(ctx);
+      if (selectorAfterMetric) {
+        return { type: 'after_metric', selector: selectorAfterMetric };
       }
 
-      if (checkAfterCompleteExpression(ctx)) {
-        return { type: 'after_complete_expression' };
+      const canAddGrouping = checkCanAddGrouping(ctx);
+
+      if (canAddGrouping || checkAfterCompleteExpression(ctx)) {
+        return { type: 'inside_query', canAddGrouping };
       }
 
       if (checkAfterCompleteArgInFunction(ctx)) {
-        return { type: 'after_complete_expression' };
+        const func =
+          getFunctionFromPosition(ctx.position.node, ctx.position.parent) ??
+          findInnermostFunctionAt(ctx.root.expression, ctx.relativeCursor);
+        if (!func || ctx.textBeforeCursorTrimmed.endsWith(',')) {
+          return { type: 'inside_function_args' };
+        }
+
+        const maxParams = getMaxParamsForFunction(func.name);
+        if (!maxParams || maxParams <= 1) {
+          return { type: 'inside_function_args' };
+        }
+
+        const paramIndex = computeParamIndexFromArgs(func, ctx.relativeCursor, ctx.text);
+
+        return {
+          type: 'inside_function_args',
+          canSuggestCommaInFunctionArgs: paramIndex < maxParams - 1,
+        };
       }
 
       if (checkInsideFunctionArgs(ctx)) {
@@ -186,7 +202,7 @@ function getQueryZonePosition(
     }
 
     // Fallback: cursor is inside query but no specific suggestion context detected
-    return { type: 'inside_query' };
+    return { type: 'inside_query', canAddGrouping: ctx ? checkCanAddGrouping(ctx) : false };
   }
 
   return undefined;
@@ -215,7 +231,15 @@ function getLabelSelectorPosition(ctx: PromQLQueryContext): PromqlPosition | und
   const { node, parent } = ctx.position;
 
   // Inside label-map but not on a specific label: `{|}` or `{job="api",|}`
-  if (node?.type === 'label-map') {
+  if (isLabelMapNode(node)) {
+    return { type: 'after_label_brace' };
+  }
+
+  // After a comma inside label-map: `{job="api", |}` → suggest labels
+  if (
+    ctx.textBeforeCursorTrimmed.endsWith(',') &&
+    (parent?.type === 'label-map' || parent?.type === 'label' || isLabelMapNode(node))
+  ) {
     return { type: 'after_label_brace' };
   }
 
@@ -224,33 +248,45 @@ function getLabelSelectorPosition(ctx: PromQLQueryContext): PromqlPosition | und
     return { type: 'after_label_name' };
   }
 
-  // Inside a parsed label node
+  // Inside a parsed label node or on a label node inside a label-map
   if (parent?.type === 'label') {
-    if (node?.type === 'identifier') {
-      return { type: 'after_label_name' };
-    }
-
-    if (node?.type === 'literal') {
-      return { type: 'inside_label_value' };
+    const labelPosition = getPositionFromLabel(parent as PromQLLabel);
+    if (labelPosition) {
+      return labelPosition;
     }
   }
 
-  // Cursor on selector: check if we're inside the labelMap region
+  if (parent?.type === 'label-map' && node?.type === 'label') {
+    const labelPosition = getPositionFromLabel(node as PromQLLabel);
+    if (labelPosition) {
+      return labelPosition;
+    }
+  }
+
+  // Cursor on selector: determine position within its parts
   if (node?.type === 'selector') {
-    return getLabelPositionFromSelector(ctx, node as PromQLSelector);
+    return getPositionFromSelector(ctx, node as PromQLSelector);
   }
 
   return undefined;
 }
 
-/** Determines label position when cursor is on a selector node. */
-function getLabelPositionFromSelector(
+/** Determines position when cursor is on a selector node (metric, labels, range). */
+function getPositionFromSelector(
   ctx: PromQLQueryContext,
   selector: PromQLSelector
 ): PromqlPosition | undefined {
-  const { labelMap } = selector;
+  const { metric, labelMap } = selector;
 
-  // No labelMap: let checkAfterMetric handle this case
+  // Cursor after metric, before labelMap (or no labelMap) → after_metric
+  if (
+    metric &&
+    ctx.relativeCursor > metric.location.max &&
+    (!labelMap || ctx.relativeCursor < labelMap.location.min)
+  ) {
+    return { type: 'after_metric', selector };
+  }
+
   if (!labelMap) {
     return undefined;
   }
@@ -264,16 +300,66 @@ function getLabelPositionFromSelector(
   }
 
   const lastLabel = labelMap.args[labelMap.args.length - 1];
-  if (!lastLabel.value) {
-    return { type: 'after_label_name' };
-  }
-
-  // Label complete and cursor after it
-  if (ctx.relativeCursor > lastLabel.location.max) {
+  if (ctx.textBeforeCursorTrimmed.endsWith(',')) {
     return { type: 'after_label_brace' };
   }
 
+  const labelPosition = getPositionFromLabel(lastLabel);
+  if (labelPosition) {
+    return labelPosition;
+  }
+
+  // Incomplete label map (no closing `}`): suggest more labels
+  if (labelMap.incomplete) {
+    return { type: 'after_label_brace' };
+  }
+
+  // Both labelMap and lastLabel complete → cursor is past closing `}`
+  if (ctx.relativeCursor > lastLabel.location.max) {
+    return { type: 'after_label_selector', selector };
+  }
+
   return undefined;
+}
+
+function getPositionFromLabel(label: PromQLLabel): PromqlPosition | undefined {
+  if (label.incomplete && !label.value) {
+    return { type: 'after_label_operator' };
+  }
+
+  if (!label.value) {
+    return { type: 'after_label_name' };
+  }
+
+  return { type: 'after_label_brace', isCompleteLabel: true };
+}
+
+/** Position detection for grouping clause (by/without). */
+function getGroupingPosition(ctx: PromQLQueryContext): PromqlPosition | undefined {
+  const { node, parent } = ctx.position;
+
+  // Cursor is on a child of grouping (an identifier) → label is complete
+  if (parent?.type === 'grouping') {
+    return { type: 'inside_grouping', isCompleteLabel: true };
+  }
+
+  // Cursor is on grouping node itself (between identifiers, after `(`, after `,`)
+  if (node?.type === 'grouping') {
+    const trailingIdentifier = getTrailingIdentifier(ctx.textBeforeCursorTrimmed);
+    return { type: 'inside_grouping', isCompleteLabel: trailingIdentifier !== undefined };
+  }
+
+  // Check if cursor is inside any function's grouping (from position or root)
+  const { expression } = ctx.root;
+  const funcsToCheck = [parent, expression].filter(
+    (expr): expr is PromQLFunction => expr?.type === 'function'
+  );
+
+  const isInside = funcsToCheck.some(
+    ({ grouping }) => grouping && isCursorInsideGrouping(ctx.relativeCursor, grouping)
+  );
+
+  return isInside ? { type: 'inside_grouping', isCompleteLabel: false } : undefined;
 }
 
 /**
@@ -319,12 +405,24 @@ function getPromQLQueryContext(
   }
 
   const { text, start, originalLength } = querySlice;
-  // ES|QL parser treats PromQL as opaque text, must parse separately for typed AST
   const { root } = PromQLParser.parse(text);
-  // Clamp cursor to original text length (cursor shouldn't appear on added closing brackets)
   const relativeCursor = Math.min(cursorPosition - start, originalLength);
-  const position = findPromqlAstPosition(root, relativeCursor);
   const textBeforeCursorTrimmed = text.slice(0, relativeCursor).trimEnd();
+
+  const position: PromQLPositionResult = { node: undefined, parent: undefined };
+  if (root.expression) {
+    PromqlWalker.walk(root, {
+      visitPromqlAny: (node, parent) => {
+        if (
+          within(relativeCursor, node) ||
+          (node.incomplete && relativeCursor > node.location.max)
+        ) {
+          position.node = node;
+          position.parent = parent as PromQLAstNode | undefined;
+        }
+      },
+    });
+  }
 
   return {
     text,
@@ -336,36 +434,16 @@ function getPromQLQueryContext(
   };
 }
 
-/** Checks if cursor is inside a grouping clause (by/without). */
-function checkInsideGrouping(ctx: PromQLQueryContext): boolean {
-  const { node, parent } = ctx.position;
-
-  // Direct match: cursor is on or inside a grouping node
-  if (node?.type === 'grouping' || parent?.type === 'grouping') {
-    return true;
-  }
-
-  // Check if cursor is inside any function's grouping (from position or root)
-  const { expression } = ctx.root;
-  const funcsToCheck = [parent, expression].filter(
-    (expr): expr is PromQLFunction => expr?.type === 'function'
-  );
-
-  return funcsToCheck.some(
-    ({ grouping }) => grouping && isCursorInsideGrouping(ctx.relativeCursor, grouping)
-  );
-}
-
 /** Generic helper to check if cursor is after a specific part of a selector. */
-function checkCursorAfterSelectorPart(
+function findSelectorAfterPart(
   ctx: PromQLQueryContext,
   condition: (arg: PromQLSelector) => boolean,
   getLocationMax: (arg: PromQLSelector) => number
-): number | false {
+): PromQLSelector | undefined {
   const { node } = ctx.position;
 
   if (node?.type !== 'function') {
-    return false;
+    return undefined;
   }
 
   for (const arg of node.args) {
@@ -380,25 +458,25 @@ function checkCursorAfterSelectorPart(
     const locationMax = getLocationMax(arg);
 
     if (ctx.relativeCursor > locationMax) {
-      return locationMax;
+      return arg;
     }
   }
 
-  return false;
+  return undefined;
 }
 
-/** Checks if cursor is right after a selector metric name. Returns relative position or false. */
-function checkAfterMetric(ctx: PromQLQueryContext): number | false {
-  return checkCursorAfterSelectorPart(
+/** Checks if cursor is right after a selector metric name. Returns the selector or undefined. */
+function findSelectorAfterMetric(ctx: PromQLQueryContext): PromQLSelector | undefined {
+  return findSelectorAfterPart(
     ctx,
     (arg) => Boolean(arg.metric && !arg.labelMap && !arg.duration),
     (arg) => arg.metric!.location.max
   );
 }
 
-/** Checks if cursor is after a closed label selector. Returns relative position or false. */
-function checkAfterLabelSelector(ctx: PromQLQueryContext): number | false {
-  return checkCursorAfterSelectorPart(
+/** Checks if cursor is after a closed label selector. Returns the selector or undefined. */
+function findSelectorAfterLabelSelector(ctx: PromQLQueryContext): PromQLSelector | undefined {
+  return findSelectorAfterPart(
     ctx,
     (arg) => Boolean(arg.labelMap && !arg.duration),
     (arg) => arg.labelMap!.location.max
@@ -432,7 +510,7 @@ function checkCanAddGrouping(ctx: PromQLQueryContext): boolean {
   const beforePosition = logicalCursor - 1;
   const nearest = findNearestAggregationForGrouping(ctx.root, beforePosition);
 
-  return !!nearest;
+  return nearest ? nearest.location.max === beforePosition : false;
 }
 
 /** Traverses the full PromQL AST to find the nearest across-series aggregation */
@@ -443,29 +521,20 @@ function findNearestAggregationForGrouping(
   let nearest: PromQLFunction | undefined;
   let nearestMax = -1;
 
-  function traverse(node: PromQLAstNode): void {
-    for (const child of childrenOfPromqlNode(node)) {
-      traverse(child);
-    }
-
-    if (node.type !== 'function') {
-      return;
-    }
-
-    const func = node as PromQLFunction;
-    if (
-      func.location.max <= beforePosition &&
-      func.location.max > nearestMax &&
-      func.args.length > 0 &&
-      !func.grouping &&
-      isPromqlAcrossSeriesFunction(func.name)
-    ) {
-      nearest = func;
-      nearestMax = func.location.max;
-    }
-  }
-
-  traverse(root);
+  PromqlWalker.walk(root, {
+    visitPromqlFunction: (func) => {
+      if (
+        func.location.max <= beforePosition &&
+        func.location.max > nearestMax &&
+        func.args.length > 0 &&
+        !func.grouping &&
+        isPromqlAcrossSeriesFunction(func.name)
+      ) {
+        nearest = func;
+        nearestMax = func.location.max;
+      }
+    },
+  });
 
   return nearest;
 }
@@ -521,12 +590,13 @@ function findInnermostFunctionAt(
 
   let match: PromQLFunction | undefined = node.type === 'function' ? node : undefined;
 
-  for (const child of childrenOfPromqlNode(node)) {
-    const childMatch = findInnermostFunctionAt(child, offset);
-    if (childMatch) {
-      match = childMatch;
-    }
-  }
+  PromqlWalker.walk(node, {
+    visitPromqlFunction: (func) => {
+      if (within(offset, func)) {
+        match = func;
+      }
+    },
+  });
 
   return match;
 }
@@ -621,7 +691,8 @@ function checkAtExpressionStart(ctx: PromQLQueryContext): boolean {
 
 interface FunctionResolutionResult {
   functionNode: PromQLFunction | undefined;
-  fallback: { name: string; paramIndex: number } | undefined;
+  functionName: string | undefined;
+  paramIndex: number;
 }
 
 /* Resolves the PromQL function at cursor with AST + text-based fallback (single parse). */
@@ -630,54 +701,69 @@ export function resolveFunctionAtCursor(
   commandText: string,
   cursorPosition: number
 ): FunctionResolutionResult {
+  const noResult: FunctionResolutionResult = {
+    functionNode: undefined,
+    functionName: undefined,
+    paramIndex: 0,
+  };
+
   const ctx = getPromQLQueryContext(promqlCommand, commandText, cursorPosition);
   if (!ctx) {
-    return { functionNode: undefined, fallback: undefined };
+    return noResult;
   }
 
   const { node, parent } = ctx.position;
-  // Function directly found on the immediate node/parent (no nested traversal).
   const direct = getFunctionFromPosition(node, parent);
   const functionNode = direct ?? findInnermostFunctionAt(ctx.root.expression, ctx.relativeCursor);
 
-  const beforeCursor = ctx.text.slice(0, ctx.relativeCursor);
-  const openParenIndex = beforeCursor.lastIndexOf('(');
-  let fallback: FunctionResolutionResult['fallback'];
+  if (functionNode) {
+    // AST has real args → trust it (handles commas in strings correctly).
+    // Empty args → ANTLR recovery issue, use text fallback for paramIndex only.
+    const textFallback =
+      functionNode.args.length === 0
+        ? getTextBasedFunctionFallback(ctx.text, ctx.relativeCursor)
+        : undefined;
 
-  if (openParenIndex !== -1) {
-    const beforeParen = beforeCursor.slice(0, openParenIndex).trimEnd();
-    const name = getTrailingIdentifier(beforeParen);
+    let paramIndex =
+      functionNode.args.length > 0
+        ? computeParamIndexFromArgs(functionNode, ctx.relativeCursor, ctx.text)
+        : textFallback?.paramIndex ?? 0;
 
-    if (name) {
-      const argsText = beforeCursor.slice(openParenIndex + 1);
-      const paramIndex = argsText.split(',').length - 1;
-      fallback = { name, paramIndex };
+    // ANTLR recovery can yield a paramIndex past the last signature param; clamp for correct suggestions.
+    // Example: quantile_over_time(0, |) can resolve past param[1] during recovery.
+    const maxParams = getMaxParamsForFunction(functionNode.name);
+    if (maxParams !== undefined && paramIndex >= maxParams) {
+      paramIndex = maxParams - 1;
     }
+    return { functionNode, functionName: functionNode.name, paramIndex };
   }
 
-  return { functionNode, fallback };
+  const textFallback = getTextBasedFunctionFallback(ctx.text, ctx.relativeCursor);
+  if (textFallback) {
+    return {
+      functionNode: undefined,
+      functionName: textFallback.name,
+      paramIndex: textFallback.paramIndex,
+    };
+  }
+
+  return noResult;
 }
 
-/** Determines which function parameter the cursor is currently editing. */
-export function getFunctionParamIndexAtCursor(
-  command: ESQLAstPromqlCommand,
-  commandText: string,
-  cursorPosition: number,
-  functionNode: PromQLFunction | undefined
+/**
+ * Computes param index by walking function args and comparing cursor position.
+ * Smart clamping: when cursor is past the last arg but no comma follows it,
+ * stays on the current param (e.g., `rate(metric{job="a,b"} |)` → param 0).
+ */
+function computeParamIndexFromArgs(
+  func: PromQLFunction,
+  relativeCursor: number,
+  text: string
 ): number {
-  if (!functionNode) {
-    return 0;
-  }
-
-  const querySlice = getPromqlQuerySlice(command, commandText);
-  if (!querySlice) {
-    return 0;
-  }
-
-  const relativeCursor = cursorPosition - querySlice.start;
+  const { args } = func;
   let index = 0;
 
-  for (const arg of functionNode.args) {
+  for (const arg of args) {
     if (within(relativeCursor, arg)) {
       return index;
     }
@@ -692,7 +778,38 @@ export function getFunctionParamIndexAtCursor(
     }
   }
 
+  if (args.length > 0 && index >= args.length) {
+    const lastArg = args[args.length - 1];
+    const textBetween = text.slice(lastArg.location.max + 1, relativeCursor);
+    if (!textBetween.includes(',')) {
+      return args.length - 1;
+    }
+  }
+
   return index;
+}
+
+/** Text-based function detection: finds function name and param index by counting commas. */
+function getTextBasedFunctionFallback(
+  text: string,
+  cursor: number
+): { name: string; paramIndex: number } | undefined {
+  const beforeCursor = text.slice(0, cursor);
+  const openParenIndex = beforeCursor.lastIndexOf('(');
+  if (openParenIndex === -1) {
+    return undefined;
+  }
+
+  const beforeParen = beforeCursor.slice(0, openParenIndex).trimEnd();
+  const name = getTrailingIdentifier(beforeParen);
+  if (!name) {
+    return undefined;
+  }
+
+  const argsText = beforeCursor.slice(openParenIndex + 1);
+  const paramIndex = argsText.split(',').length - 1;
+
+  return { name, paramIndex };
 }
 
 /** Returns the expected PromQL param types at the current cursor position. */
@@ -701,14 +818,15 @@ export function getParamTypesAtCursor(
   commandText: string,
   cursorPosition: number
 ): string[] {
-  const { functionNode, fallback } = resolveFunctionAtCursor(command, commandText, cursorPosition);
-  const functionName = functionNode?.name ?? fallback?.name;
+  const { functionName, paramIndex } = resolveFunctionAtCursor(
+    command,
+    commandText,
+    cursorPosition
+  );
 
   if (!functionName) {
     return [];
   }
-
-  const paramIndex = fallback?.paramIndex ?? 0;
 
   return getPromqlParamTypesForFunction(functionName, paramIndex);
 }
@@ -716,13 +834,6 @@ export function getParamTypesAtCursor(
 // ============================================================================
 // Param Text Helpers
 // ============================================================================
-  // Check if cursor is inside an open paren for query context (e.g., "PROMQL (" or "col0 = (")
-  if (isInsideQueryParen(commandText)) {
-    return { type: 'after_open_paren' };
-  }
-
-  return { type: 'after_command' };
-}
 
 /**
  * Detects if cursor is inside an open paren that starts a query context.
@@ -815,10 +926,18 @@ function getPromqlQuerySlice(
   const commandStart = command.location.min;
   const relativeMin = min - commandStart;
 
-  // For assignments, use inner.max to avoid including outer `)`. Otherwise take all text.
-  const rawText = assignmentLocs
-    ? commandText.slice(relativeMin, assignmentLocs.inner.max - commandStart + 1).trimEnd()
-    : commandText.slice(relativeMin).trimEnd();
+  // For assignments, find the matching `)` for the outer `(` in the full commandText.
+  // We can't use inner.max from the ES|QL AST because it was parsed from truncated text
+  // (up to cursor), so its positions don't correspond to the full commandText.
+  let endIndex = commandText.length;
+  if (assignmentLocs) {
+    const outerOpenRelative = assignmentLocs.outer.min - commandStart;
+    const outerCloseRelative = findMatchingCloseParen(commandText, outerOpenRelative);
+    if (outerCloseRelative !== -1) {
+      endIndex = outerCloseRelative;
+    }
+  }
+  const rawText = commandText.slice(relativeMin, endIndex).trimEnd();
 
   if (rawText.length === 0) {
     return undefined;
@@ -829,6 +948,21 @@ function getPromqlQuerySlice(
 
   // Return original length to clamp cursor (cursor shouldn't appear on added brackets)
   return { text, start: min, originalLength: rawText.length };
+}
+
+/** Finds the index of the closing `)` that matches the `(` at openIndex. */
+function findMatchingCloseParen(text: string, openIndex: number): number {
+  let depth = 0;
+  for (let i = openIndex; i < text.length; i++) {
+    if (text[i] === '(') {
+      depth++;
+    } else if (text[i] === ')') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+
+  return -1;
 }
 
 /** Extracts inner and outer locations from `col=(query)` assignment. */
@@ -868,12 +1002,6 @@ function extractAssignmentLocations(node: NonNullable<ESQLAstPromqlCommand['quer
 
   return { inner, outer };
 }
-
-// Param Definitions
-// ============================================================================
-
-export const PROMQL_KEYWORD = 'promql';
-
 export enum PromqlParamValueType {
   TimeseriesSources = 'timeseries_sources',
   DateLiterals = 'date_literals',
@@ -943,8 +1071,7 @@ export function areRequiredPromqlParamsPresent(usedParams: Set<string>): boolean
   return PROMQL_REQUIRED_PARAMS.every((param) => usedParams.has(param));
 }
 
-export const isPromqlParamName = (name: string): name is string =>
-  PROMQL_PARAM_NAMES.includes(name);
+export const isPromqlParamName = (name: string): boolean => PROMQL_PARAM_NAMES.includes(name);
 
 // ============================================================================
 // Param Detection Helpers (Text Scanning)
@@ -1009,13 +1136,11 @@ export function isParamValueComplete(
     return false;
   }
 
-  // Cache the type guard result to avoid narrowing firstToken to never.
-  const isParamToken = isPromqlParamName(firstToken);
-  if (isParamToken) {
+  if (isPromqlParamName(firstToken)) {
     return false;
   }
 
-  const assignmentKey = `${firstToken}`.split('=')[0].toLowerCase();
+  const assignmentKey = firstToken.split('=')[0];
   if (assignmentKey && isPromqlParamName(assignmentKey)) {
     return false;
   }
@@ -1038,8 +1163,7 @@ export function isParamValueComplete(
   }
 
   if (definition.valueType === PromqlParamValueType.TimeseriesSources) {
-    const token = firstToken as string;
-    return !token.includes('=') && !token.includes('(');
+    return !firstToken.includes('=') && !firstToken.includes('(');
   }
 
   return true;
@@ -1108,10 +1232,7 @@ export function getIndexAssignmentContext(commandText: string): IndexAssignmentC
   const beforeEquals = commandText.slice(0, equalsIndex).trimEnd();
   const key = findFinalWord(beforeEquals);
 
-  const indexParam = PROMQL_PARAMS.find(
-    ({ valueType }) => valueType === PromqlParamValueType.TimeseriesSources
-  );
-  if (!indexParam || key.toLowerCase() !== indexParam.name) {
+  if (key.toLowerCase() !== PromqlParamName.Index) {
     return undefined;
   }
 

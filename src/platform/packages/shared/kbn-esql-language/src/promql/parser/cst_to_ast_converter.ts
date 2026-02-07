@@ -294,7 +294,7 @@ export class PromQLCstToAstConverter {
         duration: range,
         evaluation,
       },
-      parserFields
+      this.getParserFields(ctx)
     );
 
     if (metric) {
