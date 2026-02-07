@@ -108,7 +108,7 @@ describe('Partition', () => {
       // The group should have color mapping (since empty string collapseFns means no collapse)
       expect(apiConfig.group_by?.[0].color).toHaveProperty('mode', 'categorical');
 
-      // The Group should have collapse_by (empty strings should be stripped)
+      // The group shouldn't have collapse_by (empty strings should be stripped)
       expect(apiConfig.group_by?.[0]).not.toHaveProperty('collapse_by');
     });
   });
