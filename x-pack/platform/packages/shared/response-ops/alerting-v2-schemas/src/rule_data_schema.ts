@@ -37,6 +37,46 @@ export const ruleKindSchema = z.enum(['alert', 'signal']).describe('The kind of 
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
+const stateTransitionOperatorSchema = z
+  .enum(['AND', 'OR'])
+  .describe('How to combine count and timeframe thresholds.');
+
+const stateTransitionSchema = z
+  .object({
+    pendingOperator: stateTransitionOperatorSchema
+      .optional()
+      .describe('How to combine count and timeframe for pending.'),
+    pendingCount: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Number of consecutive breaches before transitioning to active. Zero moves directly to active.'
+      ),
+    pendingTimeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
+    recoveringOperator: stateTransitionOperatorSchema
+      .optional()
+      .describe('How to combine count and timeframe for recovering.'),
+    recoveringCount: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Number of consecutive recoveries before transitioning to inactive. Zero moves directly to inactive.'
+      ),
+    recoveringTimeframe: durationSchema
+      .optional()
+      .describe('Time window for recovering evaluation.'),
+  })
+  .strict()
+  .nullable()
+  .optional()
+  .describe('Controls episode state transition thresholds for alert rules. Set to null to remove.');
+
+export type StateTransition = z.infer<typeof stateTransitionSchema>;
+
 export const createRuleDataSchema = z
   .object({
     name: z.string().min(1).max(64).describe('Human-readable rule name.'),
@@ -61,8 +101,13 @@ export const createRuleDataSchema = z
       .max(16)
       .default([])
       .describe('Fields to group alert events by.'),
+    stateTransition: stateTransitionSchema,
   })
-  .strip();
+  .strip()
+  .refine((data) => !(data.kind !== 'alert' && data.stateTransition != null), {
+    message: 'stateTransition is only allowed when kind is "alert".',
+    path: ['stateTransition'],
+  });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
@@ -87,6 +132,7 @@ export const updateRuleDataSchema = z
       .max(16)
       .optional()
       .describe('Fields to group alert events by.'),
+    stateTransition: stateTransitionSchema,
   })
   .strip();
 

@@ -75,6 +75,7 @@ export class RulesClient {
       timeField: parsed.data.timeField,
       lookbackWindow: parsed.data.lookbackWindow,
       groupingKey: parsed.data.groupingKey,
+      stateTransition: parsed.data.stateTransition,
       createdBy: username,
       createdAt: nowIso,
       updatedBy: username,
@@ -146,6 +147,10 @@ export class RulesClient {
         throw Boom.notFound(`Rule with id "${id}" not found`);
       }
       throw e;
+    }
+
+    if (existingAttrs.kind === 'signal' && parsed.data.stateTransition != null) {
+      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
     }
 
     const wasEnabled = Boolean(existingAttrs.enabled);

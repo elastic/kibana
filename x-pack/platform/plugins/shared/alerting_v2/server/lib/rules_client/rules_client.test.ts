@@ -234,9 +234,7 @@ describe('RulesClient', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
       );
 
-      await expect(
-        client.updateRule({ id: 'rule-id-1', data: {} as UpdateRuleData })
-      ).rejects.toMatchObject({
+      await expect(client.updateRule({ id: 'rule-id-1', data: {} })).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
     });
@@ -262,7 +260,7 @@ describe('RulesClient', () => {
 
       await client.updateRule({
         id: 'rule-id-1',
-        data: { enabled: false } as UpdateRuleData,
+        data: { enabled: false },
       });
 
       expect(getRuleExecutorTaskIdMock).toHaveBeenCalledWith({
@@ -299,7 +297,7 @@ describe('RulesClient', () => {
 
       await client.updateRule({
         id: 'rule-id-2',
-        data: { enabled: true } as UpdateRuleData,
+        data: { enabled: true },
       });
 
       expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
@@ -334,11 +332,107 @@ describe('RulesClient', () => {
         SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-4')
       );
 
-      await expect(
-        client.updateRule({ id: 'rule-id-4', data: {} as UpdateRuleData })
-      ).rejects.toMatchObject({
+      await expect(client.updateRule({ id: 'rule-id-4', data: {} })).rejects.toMatchObject({
         output: { statusCode: 409 },
       });
+    });
+
+    it('throws 400 when setting stateTransition on a signal rule', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseCreateData,
+        kind: 'signal',
+        enabled: true,
+        createdBy: 'elastic',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-signal',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal',
+          data: { stateTransition: { pendingCount: 3 } },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'stateTransition is only allowed for rules of kind "alert".',
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('allows setting stateTransition on an alert rule', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseCreateData,
+        kind: 'alert',
+        enabled: true,
+        createdBy: 'elastic',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-alert',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-alert',
+          data: {
+            stateTransition: { pendingCount: 3, recoveringCount: 5 },
+          },
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('allows setting stateTransition to null on a signal rule (removing it)', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseCreateData,
+        kind: 'signal',
+        enabled: true,
+        createdBy: 'elastic',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-null',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-signal-null',
+        data: { stateTransition: null } as unknown as UpdateRuleData,
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-alert',
+          data: {
+            stateTransition: { pendingCount: 3, recoveringCount: 5 },
+          },
+        })
+      ).resolves.not.toThrow();
     });
   });
 

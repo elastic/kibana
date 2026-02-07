@@ -19,12 +19,24 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     custom: schema.string(),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-
   query: schema.string(),
   timeField: schema.string(),
   lookbackWindow: schema.string(),
   groupingKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
-
+  stateTransition: schema.maybe(
+    schema.nullable(
+      schema.object({
+        pendingOperator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
+        pendingCount: schema.maybe(schema.number()),
+        pendingTimeframe: schema.maybe(schema.string()),
+        recoveringOperator: schema.maybe(
+          schema.oneOf([schema.literal('AND'), schema.literal('OR')])
+        ),
+        recoveringCount: schema.maybe(schema.number()),
+        recoveringTimeframe: schema.maybe(schema.string()),
+      })
+    )
+  ),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   updatedAt: schema.string(),

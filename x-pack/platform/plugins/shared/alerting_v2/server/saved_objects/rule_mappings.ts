@@ -22,12 +22,20 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         custom: { type: 'keyword' },
       },
     },
-
     query: { type: 'text' },
     timeField: { type: 'keyword' },
     lookbackWindow: { type: 'keyword' },
     groupingKey: { type: 'keyword' },
-
+    stateTransition: {
+      properties: {
+        pendingOperator: { type: 'keyword' },
+        pendingCount: { type: 'unsigned_long' },
+        pendingTimeframe: { type: 'keyword' },
+        recoveringOperator: { type: 'keyword' },
+        recoveringCount: { type: 'unsigned_long' },
+        recoveringTimeframe: { type: 'keyword' },
+      },
+    },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },
