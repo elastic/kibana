@@ -6,6 +6,9 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { DASHBOARD_ATTACHMENT_TYPE, type DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -13,6 +16,7 @@ import type {
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { AttachmentStore } from './services/attachment_store';
 
 export class DashboardAgentPlugin
   implements
@@ -23,6 +27,9 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
+  private eventsSubscription?: Subscription;
+  private readonly attachmentStore = new AttachmentStore();
+
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
@@ -33,16 +40,35 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     registerDashboardAttachmentUiDefinition({
       attachments: plugins.agentBuilder.attachments,
+      attachmentStore: this.attachmentStore,
       share: plugins.share,
+      core,
+    });
+
+    this.eventsSubscription = plugins.agentBuilder.events.chat$.subscribe((event) => {
+      if (isRoundCompleteEvent(event) && event.data.attachments) {
+        // Find dashboard attachments and update the store
+        for (const attachment of event.data.attachments) {
+          if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
+            console.log('Dashboard attachment updated:', attachment);
+            this.attachmentStore.updateAttachment(
+              attachment.id,
+              attachment.data as DashboardAttachmentData
+            );
+          }
+        }
+      }
     });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.eventsSubscription?.unsubscribe();
+  }
 }

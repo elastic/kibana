@@ -325,6 +325,15 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
       },
       { logger, attachments, esClient, modelProvider, events }
     ) => {
+      console.log('attachments', {
+        dashboardAttachmentId,
+        title,
+        description,
+        markdownContent,
+        visualizationQueries,
+        existingVisualizationIds,
+        removePanelIds,
+      });
       try {
         let currentAttachmentId: string;
         let previousData: DashboardAttachmentData;
@@ -335,7 +344,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           // Updating existing dashboard
           currentAttachmentId = dashboardAttachmentId;
 
-          const dashboardAttachment = attachments.get(currentAttachmentId);
+          const dashboardAttachment = attachments.getAttachmentRecord(currentAttachmentId);
           if (!dashboardAttachment) {
             throw new Error(`Dashboard attachment "${currentAttachmentId}" not found.`);
           }
@@ -344,7 +353,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             throw new Error(`Attachment "${currentAttachmentId}" is not a dashboard attachment.`);
           }
 
-          const latestVersion = attachments.getLatest(currentAttachmentId);
+          const latestVersion = dashboardAttachment.versions[dashboardAttachment.current_version];
           if (!latestVersion) {
             throw new Error(
               `Could not retrieve latest version of dashboard attachment "${currentAttachmentId}".`

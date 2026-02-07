@@ -9,8 +9,8 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "dashboardAgent"],
-    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "dashboard"],
+    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "dashboard", "data"],
     "optionalPlugins": ["share"],
-    "requiredBundles": ["data"]
+    "requiredBundles": []
   }
 }
