@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ConversationRound,
-  ConverseInput,
-  RoundInput,
-} from '@kbn/agent-builder-common';
+import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
@@ -444,9 +440,7 @@ describe('prepareConversation', () => {
     it('uses the last round input and ignores nextInput from request', async () => {
       const lastRoundInput: RoundInput = {
         message: 'Original message',
-        attachment_refs: [
-          { attachment_id: 'a-1', version: 1, actor: 'user' as const },
-        ],
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
       };
       const previousRounds = [
         createRound({
