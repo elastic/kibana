@@ -792,7 +792,7 @@ steps:
             lastUpdatedBy: 'test-user',
             spaceId: 'default',
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );
@@ -871,7 +871,7 @@ steps:
             lastUpdatedBy: 'test-user',
             spaceId: 'default',
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );
@@ -1053,7 +1053,7 @@ steps:
             lastUpdatedBy: 'test-user',
             spaceId: 'default',
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );
@@ -1120,7 +1120,7 @@ steps:
             spaceId: 'default',
             definition: undefined,
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );
@@ -1169,7 +1169,7 @@ steps:
             spaceId: 'default',
             definition: undefined,
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );
@@ -1215,7 +1215,7 @@ steps:
             spaceId: 'default',
             definition: undefined,
           }),
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: true,
         })
       );

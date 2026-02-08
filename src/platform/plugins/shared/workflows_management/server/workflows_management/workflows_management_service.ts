@@ -244,6 +244,7 @@ export class WorkflowsService {
     await this.workflowStorage.getClient().index({
       id,
       document: workflowData,
+      refresh: true,
     });
 
     // Schedule the workflow if it has triggers
@@ -409,6 +410,7 @@ export class WorkflowsService {
       await this.workflowStorage.getClient().index({
         id,
         document: finalData,
+        refresh: true,
       });
 
       // Update task scheduler if needed
@@ -514,6 +516,7 @@ export class WorkflowsService {
       try {
         const bulkResponse = await client.bulk({
           operations: bulkOperations,
+          refresh: true,
         });
 
         // Process bulk response to track successes and failures
