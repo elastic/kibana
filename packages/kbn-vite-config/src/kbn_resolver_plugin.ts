@@ -76,6 +76,11 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
 
   let packageMap: Map<string, string>;
 
+  // Cache resolved paths to avoid redundant multi-step this.resolve() calls.
+  // Keyed by the raw import source (e.g. '@kbn/i18n/react'), value is the
+  // resolved result or null when we know it can't be resolved.
+  const resolveCache = new Map<string, { id: string } | null>();
+
   return {
     name: 'kbn-resolver',
 
@@ -91,6 +96,11 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
           return null;
         }
 
+        // Check the cache first — same source always resolves the same way
+        if (resolveCache.has(source)) {
+          return resolveCache.get(source) ?? null;
+        }
+
         // Parse the import request to extract package ID and sub-path
         const parts = source.split('/');
         const pkgId = `${parts[0]}/${parts[1]}`; // @kbn/package-name
@@ -100,6 +110,7 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
         const pkgDir = packageMap.get(pkgId);
         if (!pkgDir) {
           // Package not found in the map, let Vite handle it (might be a node_module)
+          resolveCache.set(source, null);
           return null;
         }
 
@@ -115,6 +126,7 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
         });
 
         if (resolved) {
+          resolveCache.set(source, resolved);
           return resolved;
         }
 
@@ -126,6 +138,7 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
             skipSelf: true,
           });
           if (withExt) {
+            resolveCache.set(source, withExt);
             return withExt;
           }
         }
@@ -137,10 +150,12 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
             skipSelf: true,
           });
           if (indexPath) {
+            resolveCache.set(source, indexPath);
             return indexPath;
           }
         }
 
+        resolveCache.set(source, null);
         return null;
       },
     },

@@ -24,7 +24,8 @@ export {
   type PluginBuildResult,
   type PluginBuildConfig,
   type PluginInfo,
+  type PreloadedModules,
 } from './src/optimizer';
-export { buildPlugin } from './src/build_plugin';
+export { buildPlugin, preloadBuildModules } from './src/build_plugin';
 export { discoverUiPlugins, type DiscoverPluginsOptions } from './src/discover_plugins';
 export { createDevServer, type DevServerConfig, type DevServer } from './src/dev_server';

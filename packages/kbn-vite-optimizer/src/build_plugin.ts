@@ -71,12 +71,39 @@ export interface PluginBuildResult {
 }
 
 /**
+ * Pre-imported Vite and @kbn/vite-config modules.
+ * Pass these to buildPlugin() to avoid redundant dynamic imports.
+ */
+export interface PreloadedModules {
+  vite: { build: (...args: any[]) => Promise<any> };
+  kbnViteConfig: {
+    createKbnBrowserConfig: (...args: any[]) => any;
+    kbnBundleRemotesPlugin: (...args: any[]) => any;
+    kbnStylesPlugin: (...args: any[]) => any;
+    kbnPeggyPlugin: (...args: any[]) => any;
+    kbnDotTextPlugin: (...args: any[]) => any;
+  };
+}
+
+/**
+ * Import vite and @kbn/vite-config once. Reuse across all plugin builds.
+ */
+export async function preloadBuildModules(): Promise<PreloadedModules> {
+  const [vite, kbnViteConfig] = await Promise.all([import('vite'), import('@kbn/vite-config')]);
+  return { vite, kbnViteConfig };
+}
+
+/**
  * Build a single plugin bundle using Vite
  *
  * @param config Plugin build configuration
+ * @param modules Optional pre-imported modules (from preloadBuildModules)
  * @returns Build result
  */
-export async function buildPlugin(config: PluginBuildConfig): Promise<PluginBuildResult> {
+export async function buildPlugin(
+  config: PluginBuildConfig,
+  modules?: PreloadedModules
+): Promise<PluginBuildResult> {
   const {
     repoRoot,
     pluginDir,
@@ -91,16 +118,9 @@ export async function buildPlugin(config: PluginBuildConfig): Promise<PluginBuil
   const bundleId = manifest.id;
 
   try {
-    // Dynamic imports for ESM-only modules
-    // Using Function constructor to avoid Babel transpiling import() to require()
-    // eslint-disable-next-line no-new-func
-    const dynamicImport = new Function('specifier', 'return import(specifier)');
-    const [viteModule, kbnViteConfig] = await Promise.all([
-      dynamicImport('vite'),
-      dynamicImport('@kbn/vite-config'),
-    ]);
-    const { build } = viteModule;
-
+    // Use pre-imported modules if available, otherwise import on demand
+    const { vite, kbnViteConfig } = modules ?? (await preloadBuildModules());
+    const { build } = vite;
     const {
       createKbnBrowserConfig,
       kbnBundleRemotesPlugin,

@@ -24,20 +24,6 @@ export interface ViteServerOptions {
   hmr?: boolean;
 
   /**
-   * Whether to use the transpile cache for faster startup.
-   * When enabled, pre-transpiled files from .transpile-cache/ are used.
-   * Run `yarn transpile` to populate the cache.
-   * @default true
-   */
-  useCache?: boolean;
-
-  /**
-   * Path to the transpile cache directory.
-   * @default '.transpile-cache'
-   */
-  cacheDir?: string;
-
-  /**
    * Callback when a module is invalidated (for HMR)
    */
   onModuleInvalidated?: (moduleId: string) => void;

@@ -8,14 +8,15 @@
  */
 
 // Main exports
-export { ViteServer, createViteServerRuntime } from './src/vite_server.js';
-export { createModuleRunner, resolveModulePath } from './src/module_runner.js';
-export { createServerRuntimeConfig } from './src/server_config.js';
-export { HmrHandler, createHmrHandler } from './src/hmr_handler.js';
-export { kbnCacheResolverPlugin } from './src/cache_resolver_plugin.js';
+export { ViteServer, createViteServerRuntime } from './src/vite_server.ts';
+export { createModuleRunner, resolveModulePath } from './src/module_runner.ts';
+export { createServerRuntimeConfig } from './src/server_config.ts';
+export { HmrHandler, createHmrHandler } from './src/hmr_handler.ts';
+export { kbnCacheResolverPlugin } from './src/cache_resolver_plugin.ts';
+export { kbnTransformDiskCachePlugins } from './src/transform_disk_cache_plugin.ts';
 
-// ViteModuleLoader - pre-compiled ESM module loader for use in Kibana core
-export { ViteModuleLoader, createViteModuleLoader } from './src/vite_module_loader.js';
+// ViteModuleLoader - module loader for use in Kibana core
+export { ViteModuleLoader, createViteModuleLoader } from './src/vite_module_loader.ts';
 
 // Type exports
 export type {
@@ -25,7 +26,7 @@ export type {
   HmrContext,
   HmrPluginLifecycle,
   KbnViteDevServer,
-} from './src/types.js';
+} from './src/types.ts';
 
 // HMR type exports
 export type {
@@ -33,7 +34,7 @@ export type {
   HmrUpdateEvent,
   HmrUpdateCallback,
   HmrHandlerOptions,
-} from './src/hmr_handler.js';
+} from './src/hmr_handler.ts';
 
 // ViteModuleLoader type exports
 export type {
@@ -42,4 +43,4 @@ export type {
   PluginHmrUpdateEvent,
   PluginHmrCallback,
   ViteModuleLoaderOptions,
-} from './src/vite_module_loader.js';
+} from './src/vite_module_loader.ts';

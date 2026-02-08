@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createViteServerRuntime } from './vite_server.js';
-import type { ViteServer } from './vite_server.js';
+import { createViteServerRuntime } from './vite_server.ts';
+import type { ViteServer } from './vite_server.ts';
 
 /**
  * Interface for module loaders - matches @kbn/core-plugins-server-internal ModuleLoader
@@ -59,6 +59,12 @@ export interface ViteModuleLoaderOptions {
   repoRoot: string;
   onModuleInvalidated?: (modulePath: string) => void;
   onPluginHmrUpdate?: PluginHmrCallback;
+  /**
+   * An existing ViteServer instance to reuse instead of creating a new one.
+   * This avoids the cost of spinning up a second Vite dev server when the
+   * bootstrap runtime (from scripts/kibana.mts) is already running.
+   */
+  existingRuntime?: ViteServer;
 }
 
 /**
@@ -77,8 +83,10 @@ export class ViteModuleLoader implements ModuleLoader {
   private onModuleInvalidated?: (modulePath: string) => void;
   private hmrCallbacks: PluginHmrCallback[] = [];
   private unsubscribeHmr?: () => void;
+  private readonly options: ViteModuleLoaderOptions;
 
-  constructor(private readonly options: ViteModuleLoaderOptions) {
+  constructor(options: ViteModuleLoaderOptions) {
+    this.options = options;
     this.onModuleInvalidated = options.onModuleInvalidated;
     if (options.onPluginHmrUpdate) {
       this.hmrCallbacks.push(options.onPluginHmrUpdate);
@@ -94,11 +102,20 @@ export class ViteModuleLoader implements ModuleLoader {
       return;
     }
 
-    this.viteServer = await createViteServerRuntime({
-      repoRoot: this.options.repoRoot,
-      hmr: true,
-      onModuleInvalidated: this.onModuleInvalidated,
-    });
+    if (this.options.existingRuntime) {
+      // Reuse the bootstrap Vite Runtime that was already created by
+      // scripts/kibana.mts. This avoids the cost of creating a second
+      // Vite dev server (~4-5s startup, ~50-100MB RAM, extra file watcher).
+      this.viteServer = this.options.existingRuntime;
+      // eslint-disable-next-line no-console
+      console.log('[vite-module-loader] Reusing existing Vite server runtime');
+    } else {
+      this.viteServer = await createViteServerRuntime({
+        repoRoot: this.options.repoRoot,
+        hmr: true,
+        onModuleInvalidated: this.onModuleInvalidated,
+      });
+    }
 
     // Subscribe to HMR updates from the Vite server
     this.unsubscribeHmr = this.viteServer.onHmrUpdate(

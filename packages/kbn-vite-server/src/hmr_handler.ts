@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import type { ViteDevServer, HmrContext as ViteHmrContext, ModuleNode } from 'vite';
-import type { ViteModuleRunner, HmrPluginLifecycle } from './types.js';
+import type { ViteModuleRunner, HmrPluginLifecycle } from './types.ts';
 
 /**
  * Plugin registration info for HMR tracking
@@ -73,17 +73,40 @@ export interface HmrHandlerOptions {
  */
 export class HmrHandler {
   private plugins = new Map<string, HmrPluginInfo>();
-  private pendingUpdates = new Map<string, HmrUpdateEvent>();
+  // Sorted array of [normalizedServerPath, pluginId] for fast O(log n) prefix lookup
+  private sortedPluginPaths: Array<[string, string]> = [];
+  // Cache for file-to-plugin lookups — avoids repeated path normalization + search
+  private filePluginCache = new Map<string, HmrPluginInfo | undefined>();
   private updateCallbacks: HmrUpdateCallback[] = [];
   private isProcessingUpdate = false;
   private updateQueue: HmrUpdateEvent[] = [];
+  private readonly viteServer: ViteDevServer;
+  private readonly moduleRunner: ViteModuleRunner;
+  private readonly options: HmrHandlerOptions;
 
   constructor(
-    private readonly viteServer: ViteDevServer,
-    private readonly moduleRunner: ViteModuleRunner,
-    private readonly options: HmrHandlerOptions
+    viteServer: ViteDevServer,
+    moduleRunner: ViteModuleRunner,
+    options: HmrHandlerOptions
   ) {
+    this.viteServer = viteServer;
+    this.moduleRunner = moduleRunner;
+    this.options = options;
     this.setupHmrListeners();
+  }
+
+  /**
+   * Rebuild the sorted path index after plugin registration changes.
+   * Sorted by path descending so longest (most specific) prefix matches first.
+   */
+  private rebuildPathIndex(): void {
+    this.sortedPluginPaths = Array.from(this.plugins.values()).map(
+      (p) => [Path.normalize(p.serverPath), p.pluginId] as [string, string]
+    );
+    // Sort descending by path length so the longest prefix matches first
+    this.sortedPluginPaths.sort((a, b) => b[0].length - a[0].length);
+    // Clear the lookup cache when the index changes
+    this.filePluginCache.clear();
   }
 
   /**
@@ -91,6 +114,7 @@ export class HmrHandler {
    */
   registerPlugin(info: HmrPluginInfo): void {
     this.plugins.set(info.pluginId, info);
+    this.rebuildPathIndex();
     this.log(`Registered plugin for HMR: ${info.pluginId}`);
   }
 
@@ -99,6 +123,7 @@ export class HmrHandler {
    */
   unregisterPlugin(pluginId: string): void {
     this.plugins.delete(pluginId);
+    this.rebuildPathIndex();
     this.log(`Unregistered plugin from HMR: ${pluginId}`);
   }
 
@@ -143,18 +168,27 @@ export class HmrHandler {
   }
 
   /**
-   * Check if a file path belongs to a registered plugin
+   * Check if a file path belongs to a registered plugin.
+   * Uses a cached sorted-path index for fast prefix matching.
    */
   getPluginForFile(filePath: string): HmrPluginInfo | undefined {
+    // Check the file→plugin cache first
+    if (this.filePluginCache.has(filePath)) {
+      return this.filePluginCache.get(filePath);
+    }
+
     const normalizedPath = Path.normalize(filePath);
 
-    for (const plugin of this.plugins.values()) {
-      const pluginServerPath = Path.normalize(plugin.serverPath);
-      if (normalizedPath.startsWith(pluginServerPath)) {
+    // Walk the sorted path index (longest-first) for a prefix match
+    for (const [pluginPath, pluginId] of this.sortedPluginPaths) {
+      if (normalizedPath.startsWith(pluginPath)) {
+        const plugin = this.plugins.get(pluginId);
+        this.filePluginCache.set(filePath, plugin);
         return plugin;
       }
     }
 
+    this.filePluginCache.set(filePath, undefined);
     return undefined;
   }
 
@@ -418,9 +452,10 @@ export class HmrHandler {
     }
 
     this.plugins.clear();
+    this.sortedPluginPaths.length = 0;
+    this.filePluginCache.clear();
     this.updateCallbacks.length = 0;
     this.updateQueue.length = 0;
-    this.pendingUpdates.clear();
   }
 
   /**

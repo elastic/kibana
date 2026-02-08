@@ -8,11 +8,19 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 import type { InlineConfig, PluginOption } from 'vite';
-import { kbnResolverPlugin, kbnSpecialModulesPlugin, kbnPeggyPlugin } from '@kbn/vite-config';
+import {
+  kbnResolverPlugin,
+  kbnSpecialModulesPlugin,
+  kbnPeggyPlugin,
+  kbnDotTextPlugin,
+} from '@kbn/vite-config';
 
-import type { ViteServerOptions } from './types.js';
-import { kbnCacheResolverPlugin } from './cache_resolver_plugin.js';
+import type { ViteServerOptions } from './types.ts';
+import { kbnCacheResolverPlugin } from './cache_resolver_plugin.ts';
+import { kbnTransformDiskCachePlugins } from './transform_disk_cache_plugin.ts';
+import { kbnTypescriptTransformPlugin } from './kbn_typescript_transform_plugin.ts';
 
 /**
  * Creates a Vite configuration optimized for server-side runtime execution.
@@ -29,7 +37,19 @@ import { kbnCacheResolverPlugin } from './cache_resolver_plugin.js';
  * - SSR noExternal: Transform @kbn/* packages
  */
 export function createServerRuntimeConfig(options: ViteServerOptions): InlineConfig {
-  const { repoRoot, hmr = true, useCache = true, cacheDir } = options;
+  const { repoRoot, hmr = true } = options;
+  const isVerbose = process.env.KBN_VITE_DEBUG === 'true';
+
+  // Automatic disk-backed transform cache — persists transform results to disk
+  // so subsequent startups skip TypeScript compilation for unchanged files.
+  // Returns three plugins: a 'pre' reader, a 'post' writer, and a 'post' inline
+  // source map stripper (prevents the module runner from expensively decoding
+  // inline source maps on every module load).
+  const [transformCacheReader, transformCacheWriter, sourceMapStripper] =
+    kbnTransformDiskCachePlugins({
+      repoRoot,
+      verbose: isVerbose,
+    });
 
   return {
     // Use repo root as the project root
@@ -40,22 +60,36 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
 
     // Plugin configuration - order matters!
     plugins: [
-      // Cache resolver plugin - resolves from transpile cache if available
-      // Must run before other resolvers to short-circuit resolution for cached packages
+      // Transform disk cache reader — check for cached transform results FIRST
+      // (must be the earliest 'pre' plugin so it can short-circuit all transforms)
+      transformCacheReader as PluginOption,
+      // Module resolver — externalizes node_modules, resolves @kbn/* to source
       kbnCacheResolverPlugin({
         repoRoot,
-        cacheDir,
-        disabled: !useCache,
-        verbose: process.env.KBN_VITE_DEBUG === 'true',
+        verbose: isVerbose,
       }) as PluginOption,
       // CJS interop plugin - must run before transforms
       cjsInteropPlugin(),
-      // Kibana-specific plugins for module resolution (fallback if not in cache)
+      // Kibana-specific plugins for module resolution (fallback)
       kbnResolverPlugin({ repoRoot }) as PluginOption,
       kbnSpecialModulesPlugin({ repoRoot }) as PluginOption,
       kbnPeggyPlugin() as PluginOption,
+      kbnDotTextPlugin() as PluginOption,
       // Custom plugin for server-specific transformations
       kbnServerPlugin(options),
+      // TypeScript transform — replaces vite:oxc with a direct Rolldown/OXC
+      // call that uses pre-configured options instead of resolving tsconfig.json
+      // per-file. This eliminates the tsconfck replaceTokens hotspot (~20% CPU).
+      kbnTypescriptTransformPlugin() as PluginOption,
+      // Transform disk cache writer — persist transform results LAST
+      // (must be the latest 'post' plugin so it captures the final output)
+      transformCacheWriter as PluginOption,
+
+      // Strip inline sourceMappingURL data URIs from all transformed code.
+      // The Vite module runner decodes these on every module load via
+      // replaceTokens/parse$4, which consumes ~25% of CPU during startup.
+      // Stripping them eliminates this overhead entirely.
+      sourceMapStripper as PluginOption,
     ],
 
     // Configure module resolution for Node.js
@@ -64,25 +98,34 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       mainFields: ['module', 'main'],
       conditions: ['node', 'module', 'import', 'default'],
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.node'],
-      // Note: moment/moment-timezone are externalized (loaded by Node.js directly)
-      // so we don't alias them here - aliases would cause Vite to transform them
-    },
 
-    // SSR configuration for server-side execution
-    ssr: {
-      // Only transform @kbn/* packages (ESM/TypeScript ones).
-      // Most node_modules packages are externalized by default.
-      //
-      // For CJS packages imported with named exports (like lodash, moment),
-      // we use the cjsInteropPlugin to transform the import statements.
+      // Externalization config (Vite 8 uses resolve.external/noExternal)
+      // Externalize everything by default, then only transform @kbn/* packages.
+      // This prevents packages like axios (which has "type": "module") from
+      // being loaded through the Module Runner.
+      external: true,
       noExternal: [
         // Kibana packages - these are written in TypeScript and are safe to transform
-        /@kbn\/.*/,
+        // EXCEPT infrastructure packages (@kbn/vite-server, @kbn/vite-config) which
+        // must be externalized to avoid circular deps with the Module Runner.
+        /^@kbn\/(?!vite-server$|vite-config$).*/,
         // lodash-es is the ESM version, safe to transform
         'lodash-es',
         // Packages with ESM issues (missing .js extensions)
         '@n8n/json-schema-to-zod',
       ],
+    },
+
+    // SSR configuration for server-side execution
+    ssr: {
+      // Externalization also configured here for backward compatibility.
+      // In Vite 8, the primary externalization config is under `resolve`.
+      noExternal: [
+        /^@kbn\/(?!vite-server$|vite-config$).*/,
+        'lodash-es',
+        '@n8n/json-schema-to-zod',
+      ],
+      external: true,
 
       // Target Node.js
       target: 'node',
@@ -93,21 +136,36 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       // Don't start HTTP server - we only need the transformation pipeline
       middlewareMode: true,
 
-      // HMR configuration
-      hmr: hmr
-        ? {
-            // Use WebSocket for HMR communication
-            protocol: 'ws',
-          }
-        : false,
+      // SSR HMR is handled via file watcher + module graph invalidation,
+      // not WebSocket. Disable both HMR and the standalone WebSocket server
+      // to avoid binding port 24678 (which conflicts when parent/child
+      // both run Vite).
+      hmr: false,
+      ws: false,
 
-      // Watch configuration for file changes
-      watch: {
-        // Use polling for better cross-platform support
-        usePolling: false,
-        // Ignore node_modules and build outputs
-        ignored: ['**/node_modules/**', '**/target/**', '**/build/**', '**/.git/**'],
-      },
+      // When HMR is disabled (parent/bootstrap process), skip file watching
+      // entirely — the parent only loads CliDevMode once and doesn't need
+      // ongoing change detection. When HMR is enabled (child process), watch
+      // with patterns aligned to the Parcel watcher in @kbn/cli-dev-mode.
+      watch: hmr
+        ? {
+            usePolling: false,
+            ignored: [
+              '**/node_modules/**',
+              '**/target/**',
+              '**/build/**',
+              '**/.git/**',
+              '**/public/**',
+              '**/coverage/**',
+              '**/__*__/**',
+              '**/.chromium/**',
+              '**/.es/**',
+              '**/.yarn-local-mirror/**',
+              '**/*.{test,spec,story,stories}.*',
+              '**/*.{md,sh,txt,log,pid}',
+            ],
+          }
+        : null, // No watcher for bootstrap-only instances
     },
 
     // Build configuration (used by Module Runner for transformation)
@@ -118,8 +176,9 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       // No minification for development
       minify: false,
 
-      // Always generate source maps
-      sourcemap: true,
+      // Source maps disabled by default for faster startup.
+      // Enable with: KBN_VITE_SOURCEMAPS=true yarn start
+      sourcemap: process.env.KBN_VITE_SOURCEMAPS === 'true',
 
       // SSR build
       ssr: true,
@@ -133,21 +192,14 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       },
     },
 
-    // esbuild options for fast transformation
-    esbuild: {
-      // Target Node.js
-      target: 'node18',
-
-      // Preserve names for debugging
-      keepNames: true,
-
-      // Platform is Node.js
-      platform: 'node',
-
-      // Support JSX for React components used in server code
-      jsx: 'automatic',
-      jsxImportSource: 'react',
-    },
+    // Disable Vite's built-in OXC transform — we use our own TS transform
+    // plugin (kbn-typescript-transform) which calls Rolldown's OXC directly
+    // with pre-configured options, bypassing expensive tsconfig.json resolution.
+    // The built-in vite:oxc plugin calls loadTsconfigJsonForFile() → tsconfck
+    // for every TypeScript file, which runs replaceTokens (JSON.stringify →
+    // replaceAll → JSON.parse) on large tsconfig objects. In Kibana's monorepo
+    // with 1256+ packages, this costs ~20% of startup CPU.
+    oxc: false,
 
     // Optimize deps configuration
     optimizeDeps: {
@@ -173,20 +225,50 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
 }
 
 /**
- * CJS packages that need import transformation for ESM compatibility.
- * Named imports from these packages will be transformed to:
- *   import { x } from 'pkg' -> import _pkg from 'pkg'; const { x } = _pkg;
- *   import { x as y } from 'pkg' -> import _pkg from 'pkg'; const { x: y } = _pkg;
- *
- * This is necessary because Vite's Module Runner enforces strict ESM semantics
- * and CJS modules don't expose named exports properly.
+ * Cache for package type detection (CJS vs ESM).
+ * Shared with cache_resolver_plugin for consistency.
  */
-const CJS_PACKAGES_NEEDING_TRANSFORM = [
-  'lodash',
-  'moment',
-  'moment-timezone',
-  'joi', // Joi validation library
-];
+const cjsPackageTypeCache = new Map<string, boolean>();
+
+/**
+ * Node.js builtin modules that support ESM named exports natively.
+ * These should NOT be transformed by the CJS interop plugin.
+ */
+import { builtinModules } from 'module';
+const NODE_BUILTINS = new Set([
+  ...builtinModules,
+  ...builtinModules.map((m: string) => `node:${m}`),
+]);
+
+/**
+ * Check whether a bare specifier package is CJS.
+ * Returns true if the package does NOT have "type": "module".
+ * Returns false for Node.js builtins (they support named exports).
+ */
+function isPackageCJS(packageName: string, repoRoot: string): boolean {
+  // Node.js builtins support named exports natively
+  if (NODE_BUILTINS.has(packageName)) {
+    return false;
+  }
+
+  const cached = cjsPackageTypeCache.get(packageName);
+  if (cached !== undefined) return cached;
+
+  try {
+    const pkgJsonPath = Path.resolve(repoRoot, 'node_modules', packageName, 'package.json');
+    if (Fs.existsSync(pkgJsonPath)) {
+      const pkgJson = JSON.parse(Fs.readFileSync(pkgJsonPath, 'utf-8'));
+      const isCJS = pkgJson.type !== 'module';
+      cjsPackageTypeCache.set(packageName, isCJS);
+      return isCJS;
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  cjsPackageTypeCache.set(packageName, true); // Default to CJS
+  return true;
+}
 
 /**
  * Parse a single import specifier and convert to destructuring syntax.
@@ -240,25 +322,47 @@ function toDestructuring(parsed: ParsedImport): string {
  * Plugin to handle CommonJS interop in Vite's ESM Module Runner.
  *
  * Transforms:
- * 1. Named imports from CJS packages:
+ * 1. Named imports from CJS packages (auto-detected):
  *    import { x, y as z } from 'pkg' -> import _pkg from 'pkg'; const { x, y: z } = _pkg;
  * 2. require() calls to use createRequire (added at module level)
+ * 3. __dirname/__filename shimming for ESM context
+ *
+ * CJS detection is automatic: any non-@kbn bare specifier that resolves to a
+ * package without "type": "module" in its package.json is treated as CJS.
+ * This is critical because Vite's Module Runner externalizes bare specifiers
+ * and loads them via Node.js import(), which doesn't support named exports
+ * from CJS modules reliably.
  */
 function cjsInteropPlugin(): import('vite').Plugin {
-  // Regex to match named imports from CJS packages
-  const importRegex = new RegExp(
-    `import\\s+(type\\s+)?\\{([^}]+)\\}\\s*from\\s*['"](${CJS_PACKAGES_NEEDING_TRANSFORM.map((p) =>
-      p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    ).join('|')})['"]`,
-    'g'
-  );
+  // Regex to match ALL named imports from bare specifiers (not relative/absolute paths)
+  // Anchored to start-of-line (m flag) to avoid matching inside strings/template literals.
+  // Captures: typeKeyword, namedImports, packageName
+  const namedImportRegex = /^\s*import\s+(type\s+)?\{([^}]+)\}\s*from\s*['"]([^'"./][^'"]*)['"]/gm;
 
-  // Regex to match require() calls
-  const requireRegex = /\brequire\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g;
+  // Regex to match default imports from bare specifiers
+  // Anchored to start-of-line (m flag) to avoid matching inside strings/template literals.
+  // Captures: defaultName, packageName
+  // Matches: import Foo from 'pkg' but NOT: import { Foo } from 'pkg' or import type Foo from 'pkg'
+  const defaultImportRegex =
+    /^\s*import\s+(?!type\s)([A-Za-z_$][A-Za-z0-9_$]*)\s+from\s*['"]([^'"./][^'"]*)['"]/gm;
+
+  // Regex to match combined default + named imports from bare specifiers
+  // Anchored to start-of-line (m flag) to avoid matching inside strings/template literals.
+  // Matches: import Foo, { bar, baz } from 'pkg'
+  // Captures: defaultName, namedImports, packageName
+  const combinedImportRegex =
+    /^\s*import\s+(?!type\s)([A-Za-z_$][A-Za-z0-9_$]*)\s*,\s*\{([^}]+)\}\s*from\s*['"]([^'"./][^'"]*)['"]/gm;
+
+  let resolvedRepoRoot = '';
+  let cjsVarCounter = 0;
 
   return {
     name: 'kbn-cjs-interop',
     enforce: 'pre', // Run before other transforms
+
+    configResolved(config) {
+      resolvedRepoRoot = config.root || '';
+    },
 
     transform(code, id) {
       // Skip node_modules - we only need to transform source code
@@ -266,78 +370,325 @@ function cjsInteropPlugin(): import('vite').Plugin {
         return null;
       }
 
+      // Guard: if the code already contains CJS interop output from a
+      // previous transform pass (e.g., the transform disk cache returning
+      // a fully-transformed result), skip entirely to avoid duplicate
+      // variable declarations that would fail in vite:oxc.
+      if (/\bimport \* as _cjs_/.test(code)) {
+        return null;
+      }
+
+      // Fast-path: skip files that don't contain any patterns we'd transform.
+      // This avoids running 4 regex replacements on files that have no CJS patterns.
+      const hasImport = code.includes('import');
+      const hasRequire = code.includes('require');
+      const hasDirname = code.includes('__dirname') || code.includes('__filename');
+      const hasModuleExports = code.includes('module.exports');
+      if (!hasImport && !hasRequire && !hasDirname && !hasModuleExports) {
+        return null;
+      }
+
       let transformed = code;
       let hasChanges = false;
       let needsRequireShim = false;
+      let needsDirnameShim = false;
+      cjsVarCounter = 0; // Reset per file
 
-      // Transform require() calls to use __require (createRequire-based)
-      // This is synchronous - createRequire is set up at module load time
-      if (code.includes('require(') && !code.includes('import { createRequire }')) {
-        const newCode = transformed.replace(requireRegex, (match, quote, moduleName) => {
+      // Shim __dirname and __filename for ESM context
+      // These CJS globals are widely used in @kbn/* source files
+      if (hasDirname) {
+        // Only shim if the code doesn't already define them
+        if (
+          !code.includes('fileURLToPath(import.meta.url)') &&
+          !code.includes('var __dirname =') &&
+          !code.includes('const __dirname =') &&
+          !code.includes('let __dirname =')
+        ) {
+          needsDirnameShim = true;
           hasChanges = true;
-          needsRequireShim = true;
-          return `__require('${moduleName}')`;
-        });
-        if (newCode !== transformed) {
-          transformed = newCode;
         }
       }
 
-      // Transform named imports from CJS packages
+      // Shim require() for ESM context.
+      // Instead of rewriting individual require() calls (which fails for dynamic calls
+      // like require(variable) or require.resolve(path)), we inject a `require` variable
+      // using createRequire. This handles all require patterns naturally:
+      // require(), require.resolve(), require.cache, etc.
       if (
-        CJS_PACKAGES_NEEDING_TRANSFORM.some(
-          (pkg) => code.includes(`from '${pkg}'`) || code.includes(`from "${pkg}"`)
-        )
+        code.includes('require') &&
+        !code.includes('import { createRequire }') &&
+        !code.includes('__createRequire') &&
+        !code.includes('const require =') &&
+        // Check for actual require usage (not just the word in strings/comments)
+        /\brequire\s*[.(]/.test(code)
       ) {
-        transformed = transformed.replace(
-          importRegex,
-          (match, typeKeyword, imports, packageName) => {
-            // Skip pure type imports
-            if (typeKeyword) {
-              return match;
-            }
-
-            const parsedImports = imports
-              .split(',')
-              .map((s: string) => parseImportSpecifier(s))
-              .filter((p: ParsedImport | null): p is ParsedImport => p !== null);
-
-            const typeImports = parsedImports.filter((p) => p.isType);
-            const valueImports = parsedImports.filter((p) => !p.isType);
-
-            if (valueImports.length === 0) {
-              return match;
-            }
-
-            hasChanges = true;
-            const safeVarName = `_${packageName.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const parts: string[] = [];
-
-            if (typeImports.length > 0) {
-              const typeNames = typeImports.map((p) =>
-                p.alias ? `${p.name} as ${p.alias}` : p.name
-              );
-              parts.push(`import type { ${typeNames.join(', ')} } from '${packageName}'`);
-            }
-
-            parts.push(`import ${safeVarName} from '${packageName}'`);
-            const destructured = valueImports.map((p) => toDestructuring(p)).join(', ');
-            parts.push(`const { ${destructured} } = ${safeVarName}`);
-
-            return parts.join(';\n');
-          }
-        );
+        needsRequireShim = true;
+        hasChanges = true;
       }
 
+      // Shim module.exports / exports for CJS files running in ESM context.
+      // Vite's Module Runner evaluates all code as ESM, so CJS globals like
+      // `module` and `exports` are not defined. We inject a shim object and
+      // extract named + default ESM exports at the bottom of the file.
+      let needsModuleShim = false;
+      if (hasModuleExports) {
+        if (
+          !code.includes('var module =') &&
+          !code.includes('const module =') &&
+          !code.includes('let module =')
+        ) {
+          needsModuleShim = true;
+          hasChanges = true;
+        }
+      }
+
+      // Helper: check if a match at a given offset is inside a single-line comment
+      function isInsideComment(code: string, matchIndex: number): boolean {
+        const lineStart = code.lastIndexOf('\n', matchIndex - 1) + 1;
+        const linePrefix = code.substring(lineStart, matchIndex);
+        return linePrefix.includes('//');
+      }
+
+      // Transform combined default + named imports from CJS packages
+      // e.g. import _, { omit } from 'lodash' -> import * as _ns from 'lodash'; const _ = ...; const { omit } = ...;
+      // Must run BEFORE the separate named/default transforms since the combined pattern is more specific.
+      transformed = transformed.replace(
+        combinedImportRegex,
+        (
+          match: string,
+          defaultName: string,
+          imports: string,
+          packageName: string,
+          offset: number
+        ) => {
+          if (isInsideComment(transformed, offset)) return match;
+          if (packageName.startsWith('@kbn/')) return match;
+          const basePackage = packageName.startsWith('@')
+            ? packageName.split('/').slice(0, 2).join('/')
+            : packageName.split('/')[0];
+          if (!isPackageCJS(basePackage, resolvedRepoRoot)) return match;
+
+          hasChanges = true;
+          const safeVarName = `_cjs_${basePackage.replace(
+            /[^a-zA-Z0-9]/g,
+            '_'
+          )}_${cjsVarCounter++}`;
+
+          const parsedImports = imports
+            .split(',')
+            .map((s: string) => parseImportSpecifier(s))
+            .filter((p: ParsedImport | null): p is ParsedImport => p !== null);
+
+          const typeImports = parsedImports.filter((p: ParsedImport) => p.isType);
+          const valueImports = parsedImports.filter((p: ParsedImport) => !p.isType);
+
+          const parts: string[] = [];
+
+          if (typeImports.length > 0) {
+            const typeNames = typeImports.map((p: ParsedImport) =>
+              p.alias ? `${p.name} as ${p.alias}` : p.name
+            );
+            parts.push(`import type { ${typeNames.join(', ')} } from '${packageName}'`);
+          }
+
+          parts.push(`import * as ${safeVarName} from '${packageName}'`);
+          const rawVar = `${safeVarName}_raw`;
+          parts.push(`const ${rawVar} = ${safeVarName}.default || ${safeVarName}`);
+          parts.push(`const ${defaultName} = ${rawVar}.__esModule ? ${rawVar}.default : ${rawVar}`);
+
+          // Filter out `default` specifiers — they're already handled above
+          // via the defaultName assignment. Destructuring `default` would cause
+          // a double .default lookup and yield undefined.
+          const regularImports = valueImports.filter((p: ParsedImport) => p.name !== 'default');
+          if (regularImports.length > 0) {
+            const destructured = regularImports
+              .map((p: ParsedImport) => toDestructuring(p))
+              .join(', ');
+            parts.push(
+              `const { ${destructured} } = ${rawVar}.__esModule ? ${rawVar}.default : ${rawVar}`
+            );
+          }
+
+          return parts.join(';\n');
+        }
+      );
+
+      // Transform named imports from CJS packages (auto-detected)
+      // This is critical: when the Module Runner externalizes a CJS module and
+      // loads it via Node.js import(), named exports may not be available.
+      // We rewrite: import { x } from 'pkg' -> import * as _pkg from 'pkg'; const { x } = _pkg.default || _pkg;
+      transformed = transformed.replace(
+        namedImportRegex,
+        (
+          match: string,
+          typeKeyword: string | undefined,
+          imports: string,
+          packageName: string,
+          offset: number
+        ) => {
+          // Skip matches inside comments
+          if (isInsideComment(transformed, offset)) {
+            return match;
+          }
+          // Skip pure type imports
+          if (typeKeyword) {
+            return match;
+          }
+
+          // Skip @kbn packages — they're transformed by Vite, not externalized
+          if (packageName.startsWith('@kbn/')) {
+            return match;
+          }
+
+          // Extract base package name for CJS check
+          const basePackage = packageName.startsWith('@')
+            ? packageName.split('/').slice(0, 2).join('/')
+            : packageName.split('/')[0];
+
+          // Only transform if the package is CJS
+          if (!isPackageCJS(basePackage, resolvedRepoRoot)) {
+            return match;
+          }
+
+          const parsedImports = imports
+            .split(',')
+            .map((s: string) => parseImportSpecifier(s))
+            .filter((p: ParsedImport | null): p is ParsedImport => p !== null);
+
+          const typeImports = parsedImports.filter((p: ParsedImport) => p.isType);
+          const valueImports = parsedImports.filter((p: ParsedImport) => !p.isType);
+
+          if (valueImports.length === 0) {
+            return match;
+          }
+
+          hasChanges = true;
+          const safeVarName = `_cjs_${basePackage.replace(
+            /[^a-zA-Z0-9]/g,
+            '_'
+          )}_${cjsVarCounter++}`;
+          const parts: string[] = [];
+
+          if (typeImports.length > 0) {
+            const typeNames = typeImports.map((p: ParsedImport) =>
+              p.alias ? `${p.name} as ${p.alias}` : p.name
+            );
+            parts.push(`import type { ${typeNames.join(', ')} } from '${packageName}'`);
+          }
+
+          parts.push(`import * as ${safeVarName} from '${packageName}'`);
+
+          // Separate `default` specifier from regular named imports.
+          // `import { default as X }` is equivalent to `import X from 'pkg'` and
+          // must be assigned directly (single .default), NOT destructured (which
+          // would cause a double .default lookup and yield undefined).
+          const defaultImport = valueImports.find((p: ParsedImport) => p.name === 'default');
+          const regularImports = valueImports.filter((p: ParsedImport) => p.name !== 'default');
+
+          const nsValue = `${safeVarName}.default || ${safeVarName}`;
+
+          if (defaultImport) {
+            const localName = defaultImport.alias || 'default';
+            parts.push(`const ${localName} = ${nsValue}`);
+          }
+
+          if (regularImports.length > 0) {
+            const destructured = regularImports
+              .map((p: ParsedImport) => toDestructuring(p))
+              .join(', ');
+            parts.push(`const { ${destructured} } = ${nsValue}`);
+          }
+
+          return parts.join(';\n');
+        }
+      );
+
+      // Transform default imports from CJS packages.
+      // Some CJS packages have dual entry points (CJS + ESM via `exports` field).
+      // Their ESM entry may only have named exports and no `default` export.
+      // We rewrite: import X from 'pkg' → import * as __X_ns from 'pkg'; const X = __X_ns.default !== undefined ? __X_ns.default : __X_ns;
+      // This handles both cases:
+      //   - Package has default export: X = default export
+      //   - Package has no default: X = namespace object (behaves like CJS module.exports)
+      transformed = transformed.replace(
+        defaultImportRegex,
+        (match: string, defaultName: string, packageName: string, offset: number) => {
+          // Skip matches inside comments
+          if (isInsideComment(transformed, offset)) {
+            return match;
+          }
+
+          // Skip imports generated by the named import transform above
+          if (defaultName.startsWith('_cjs_')) {
+            return match;
+          }
+
+          // Skip @kbn packages
+          if (packageName.startsWith('@kbn/')) {
+            return match;
+          }
+
+          // Extract base package name for CJS check
+          const basePackage = packageName.startsWith('@')
+            ? packageName.split('/').slice(0, 2).join('/')
+            : packageName.split('/')[0];
+
+          // Only transform if the package is CJS
+          if (!isPackageCJS(basePackage, resolvedRepoRoot)) {
+            return match;
+          }
+
+          hasChanges = true;
+          const nsVarName = `_cjs_ns_${basePackage.replace(
+            /[^a-zA-Z0-9]/g,
+            '_'
+          )}_${cjsVarCounter++}`;
+          // Handle three cases:
+          // 1. Pure CJS: module.exports = value → ns.default = value
+          // 2. Babel/TS CJS: exports.default = value; exports.__esModule = true → ns.default = { default: value, __esModule: true }
+          // 3. ESM: export default value → ns.default = value
+          const rawVar = `${nsVarName}_raw`;
+          return `import * as ${nsVarName} from '${packageName}';\nconst ${rawVar} = ${nsVarName}.default || ${nsVarName};\nconst ${defaultName} = ${rawVar}.__esModule ? ${rawVar}.default : ${rawVar}`;
+        }
+      );
+
       if (hasChanges) {
-        // Add createRequire shim at the top if needed
-        let preamble = '';
+        // Build preamble with necessary shims
+        const preambleLines: string[] = [];
+
+        if (needsDirnameShim || needsRequireShim) {
+          preambleLines.push(`import { fileURLToPath as __cjs_fileURLToPath } from 'url';`);
+          preambleLines.push(`import { dirname as __cjs_dirname } from 'path';`);
+        }
+
+        if (needsDirnameShim) {
+          preambleLines.push(`var __filename = __cjs_fileURLToPath(import.meta.url);`);
+          preambleLines.push(`var __dirname = __cjs_dirname(__filename);`);
+        }
+
         if (needsRequireShim) {
-          preamble = `import { createRequire as __createRequire } from 'module';\nconst __require = __createRequire(import.meta.url);\n`;
+          preambleLines.push(`import { createRequire as __createRequire } from 'module';`);
+          // Define `require` as a variable so all existing require() calls,
+          // require.resolve(), require.cache, etc. work naturally in ESM context.
+          preambleLines.push(`var require = __createRequire(import.meta.url);`);
+        }
+
+        if (needsModuleShim) {
+          preambleLines.push(`var module = { exports: {} };`);
+          preambleLines.push(`var exports = module.exports;`);
+        }
+
+        const preamble = preambleLines.length > 0 ? preambleLines.join('\n') + '\n' : '';
+
+        // For CJS files, extract ESM exports from module.exports so that
+        // `import { name } from './cjs-file'` works in the Module Runner.
+        let appendix = '';
+        if (needsModuleShim) {
+          appendix = extractCjsExports(transformed);
         }
 
         return {
-          code: preamble + transformed,
+          code: preamble + transformed + appendix,
           map: null,
         };
       }
@@ -345,6 +696,52 @@ function cjsInteropPlugin(): import('vite').Plugin {
       return null;
     },
   };
+}
+
+/**
+ * Extract ESM exports from a CJS file that uses module.exports.
+ *
+ * Handles two patterns:
+ * 1. module.exports = { key1, key2, key3: value } → named re-exports
+ * 2. exports.key1 = value; exports.key2 = value  → named re-exports
+ *
+ * Uses uniquely-prefixed variable names to avoid conflicts with
+ * existing local declarations in the original CJS source.
+ */
+function extractCjsExports(code: string): string {
+  // Pattern 1: module.exports = { ... }
+  const moduleExportsMatch = code.match(/module\.exports\s*=\s*\{([^}]+)\}/);
+  if (moduleExportsMatch) {
+    const keys = moduleExportsMatch[1]
+      .split(',')
+      .map((s: string) => s.trim().split(':')[0].trim())
+      .filter((k: string) => /^[a-zA-Z_$]\w*$/.test(k));
+
+    if (keys.length > 0) {
+      const destructured = keys.map((k: string) => `${k}: __cjs_re_${k}`).join(', ');
+      const reExports = keys.map((k: string) => `__cjs_re_${k} as ${k}`).join(', ');
+      return `\nconst { ${destructured} } = module.exports;\nexport { ${reExports} };\nexport default module.exports;\n`;
+    }
+  }
+
+  // Pattern 2: exports.prop = value (multiple assignments)
+  const exportsRegex = /\bexports\.([a-zA-Z_$]\w*)\s*=/g;
+  const exportProps: string[] = [];
+  let match;
+  while ((match = exportsRegex.exec(code)) !== null) {
+    if (!exportProps.includes(match[1])) {
+      exportProps.push(match[1]);
+    }
+  }
+
+  if (exportProps.length > 0) {
+    const destructured = exportProps.map((k: string) => `${k}: __cjs_re_${k}`).join(', ');
+    const reExports = exportProps.map((k: string) => `__cjs_re_${k} as ${k}`).join(', ');
+    return `\nconst { ${destructured} } = module.exports;\nexport { ${reExports} };\nexport default module.exports;\n`;
+  }
+
+  // Fallback: just export default
+  return '\nexport default module.exports;\n';
 }
 
 /**

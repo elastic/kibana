@@ -1,14 +1,12 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": ["index.ts", "src/**/*.ts"],
   "exclude": ["target/**/*", "scripts/**/*"]

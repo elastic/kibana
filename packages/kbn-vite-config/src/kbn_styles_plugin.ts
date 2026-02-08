@@ -52,6 +52,15 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
 
   const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
 
+  // Cache for rewritten EUI SCSS file content — these files never change at
+  // runtime (they're in node_modules) so we can cache them indefinitely.
+  const scssContentCache = new Map<string, { code: string; map: null } | undefined>();
+
+  // Pre-compiled regex for theme query matching (avoid re-compiling per call)
+  const themeQueryRegex = /^(.+\.scss)\?(\w+)$/;
+  const themeVirtualRegex = /^\0kbn-theme:(\w+):(.+)$/;
+  const elasticImportRegex = /@import\s+['"]node_modules\/@elastic\/([^'"]+)['"]/g;
+
   return {
     name: 'kbn-styles',
     // Run before other plugins to rewrite imports
@@ -59,7 +68,7 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
 
     resolveId(source, importer) {
       // Handle SCSS imports with theme query parameters
-      const match = source.match(/^(.+\.scss)\?(\w+)$/);
+      const match = source.match(themeQueryRegex);
       if (match) {
         const [, filePath, theme] = match;
         if (themeTags.includes(theme)) {
@@ -74,7 +83,7 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
     load(id) {
       // Handle virtual themed SCSS modules
       if (id.startsWith('\0kbn-theme:')) {
-        const [, theme, filePath] = id.match(/^\0kbn-theme:(\w+):(.+)$/) || [];
+        const [, theme, filePath] = id.match(themeVirtualRegex) || [];
         if (!theme || !filePath) {
           return null;
         }
@@ -91,14 +100,19 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
         };
       }
 
-      // Intercept EUI theme SCSS files in node_modules to rewrite problematic imports
+      // Intercept EUI theme SCSS files in node_modules to rewrite problematic imports.
+      // These files don't change at runtime, so we cache the result.
       if (id.includes('node_modules/@elastic/') && id.endsWith('.scss')) {
+        if (scssContentCache.has(id)) {
+          return scssContentCache.get(id) ?? null;
+        }
+
         try {
           const content = Fs.readFileSync(id, 'utf-8');
 
           // Rewrite node_modules/@elastic/... imports to absolute paths
           const rewrittenContent = content.replace(
-            /@import\s+['"]node_modules\/@elastic\/([^'"]+)['"]/g,
+            elasticImportRegex,
             (_match: string, importPath: string) => {
               const absolutePath = Path.resolve(nodeModulesPath, '@elastic', importPath).replace(
                 /\\/g,
@@ -109,12 +123,14 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
           );
 
           if (rewrittenContent !== content) {
-            return {
-              code: rewrittenContent,
-              map: null,
-            };
+            const result = { code: rewrittenContent, map: null as null };
+            scssContentCache.set(id, result);
+            return result;
           }
+
+          scssContentCache.set(id, undefined);
         } catch (e) {
+          scssContentCache.set(id, undefined);
           // If we can't read the file, let Vite handle it normally
         }
       }
@@ -141,6 +157,7 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
       // - theme_light.scss (imports global_styling/index from eui-theme-common)
       //
       // Instead, we import the dependencies directly and inline the color variables.
+      // Note: This string is only computed once per config() call (Vite calls it once at startup).
       const additionalData = `
 // 1. Import functions from eui-theme-common (needed by colors)
 @import "${euiThemeCommon.replace(/\\/g, '/')}/global_styling/functions/index";

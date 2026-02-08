@@ -10,17 +10,110 @@
 import Path from 'path';
 import Fs from 'fs';
 import { getPackages } from '@kbn/repo-packages';
+import { transformSync } from 'rolldown/experimental';
 import type { Connect } from 'vite';
 import { discoverUiPlugins, type PluginInfo } from './discover_plugins';
 
 // Vite types - loaded dynamically
 type ViteDevServer = Awaited<ReturnType<typeof import('vite')['createServer']>>;
 type Plugin = import('vite').Plugin;
-type ResolvedConfig = import('vite').ResolvedConfig;
 
-// esbuild types for plugin API
+// esbuild-compatible plugin types — Rolldown supports esbuild's plugin API
 type PluginBuild = import('esbuild').PluginBuild;
 type OnLoadArgs = import('esbuild').OnLoadArgs;
+
+/**
+ * Browser-side TypeScript transform plugin that replaces Vite's built-in OXC
+ * transform. The built-in vite:oxc plugin calls tsconfck for every TypeScript
+ * file, running `replaceTokens` which costs ~40% of startup CPU in Kibana's
+ * monorepo. This plugin bypasses tsconfig resolution by providing pre-configured
+ * options directly to Rolldown's OXC transform.
+ *
+ * Key differences from the server-side plugin (kbn-vite-server):
+ *   - JSX importSource: @emotion/react (for css prop support in browser)
+ *   - Also transforms .js files (many Kibana packages use JSX in .js)
+ */
+function kbnBrowserTransformPlugin(): Plugin {
+  // Match TypeScript and JSX files
+  const tsRE = /\.(ts|tsx|mts|cts)$/;
+  const jsxRE = /\.(tsx|jsx)$/;
+  // Also transform .js files — many Kibana packages use JSX in .js files
+  const jsRE = /\.js$/;
+
+  return {
+    name: 'kbn-browser-transform',
+
+    // Forcibly remove the built-in vite:oxc plugin after config is resolved.
+    // Setting `oxc: false` in the config should do this, but in practice the
+    // built-in plugin still runs. This hook guarantees it's removed.
+    configResolved(resolvedConfig: any) {
+      const plugins = resolvedConfig.plugins as { name: string }[];
+      for (let i = plugins.length - 1; i >= 0; i--) {
+        if (plugins[i].name === 'vite:oxc') {
+          plugins.splice(i, 1);
+        }
+      }
+    },
+
+    transform(code: string, id: string) {
+      // Skip virtual modules and node_modules
+      if (id.startsWith('\0') || id.includes('node_modules')) {
+        return null;
+      }
+
+      const isTs = tsRE.test(id);
+      const isJs = jsRE.test(id);
+
+      // Only transform TypeScript and JavaScript files
+      if (!isTs && !isJs) {
+        return null;
+      }
+
+      // Determine the language from the file extension
+      const ext = Path.extname(id).slice(1);
+      let lang: 'ts' | 'tsx' | 'js' | 'jsx';
+      if (ext === 'tsx') lang = 'tsx';
+      else if (ext === 'jsx') lang = 'jsx';
+      else if (ext === 'js') lang = 'js';
+      else lang = 'ts'; // ts, mts, cts
+
+      const needsJsx = jsxRE.test(id) || isJs; // .js files may contain JSX
+
+      const result = transformSync(id, code, {
+        lang,
+        sourcemap: true, // Browser always needs source maps for devtools
+
+        // JSX settings — uses @emotion/react for css prop support
+        jsx: needsJsx
+          ? {
+              runtime: 'automatic',
+              importSource: '@emotion/react',
+              development: true,
+            }
+          : undefined,
+
+        // TypeScript settings
+        assumptions: {
+          setPublicClassFields: false,
+        },
+        typescript: {
+          onlyRemoveTypeImports: false,
+          removeClassFieldsWithoutInitializer: false,
+        },
+      });
+
+      if (result.errors.length > 0) {
+        const firstError = result.errors[0];
+        throw new Error(`Browser transform error in ${id}: ${firstError.message}`);
+      }
+
+      return {
+        code: result.code,
+        map: result.map ?? null,
+      };
+    },
+  };
+}
 
 export interface DevServerConfig {
   repoRoot: string;
@@ -47,28 +140,47 @@ export interface DevServer {
 }
 
 /**
- * Generate @kbn/* package aliases pointing to source
+ * Generate @kbn/* package aliases pointing to source.
+ * Uses parallel async I/O to check candidate paths concurrently,
+ * which is faster than sequential Fs.existsSync for hundreds of packages.
  */
-function generateKbnAliases(repoRoot: string): Record<string, string> {
+async function generateKbnAliases(repoRoot: string): Promise<Record<string, string>> {
   const packages = getPackages(repoRoot);
   const aliases: Record<string, string> = {};
+  const fsPromises = Fs.promises;
 
-  for (const pkg of packages) {
-    if (pkg.manifest.id.startsWith('@kbn/')) {
+  // Helper: check if a path exists (async, non-throwing)
+  const exists = async (p: string): Promise<boolean> => {
+    try {
+      await fsPromises.access(p);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Resolve all @kbn/* aliases in parallel
+  const kbnPackages = packages.filter((pkg) => pkg.manifest.id.startsWith('@kbn/'));
+  const results = await Promise.all(
+    kbnPackages.map(async (pkg) => {
       const srcDir = Path.resolve(pkg.directory, 'src');
       const indexTs = Path.resolve(pkg.directory, 'index.ts');
       const indexTsx = Path.resolve(pkg.directory, 'index.tsx');
 
-      if (Fs.existsSync(srcDir)) {
-        aliases[pkg.manifest.id] = srcDir;
-      } else if (Fs.existsSync(indexTs)) {
-        aliases[pkg.manifest.id] = indexTs;
-      } else if (Fs.existsSync(indexTsx)) {
-        aliases[pkg.manifest.id] = indexTsx;
+      if (await exists(srcDir)) {
+        return [pkg.manifest.id, srcDir] as const;
+      } else if (await exists(indexTs)) {
+        return [pkg.manifest.id, indexTs] as const;
+      } else if (await exists(indexTsx)) {
+        return [pkg.manifest.id, indexTsx] as const;
       } else {
-        aliases[pkg.manifest.id] = pkg.directory;
+        return [pkg.manifest.id, pkg.directory] as const;
       }
-    }
+    })
+  );
+
+  for (const [id, path] of results) {
+    aliases[id] = path;
   }
 
   return aliases;
@@ -81,6 +193,13 @@ function generateKbnAliases(repoRoot: string): Record<string, string> {
 function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin {
   const pluginMap = new Map(plugins.map((p) => [p.id, p]));
 
+  // Cache resolved file paths — plugin source files don't move at runtime.
+  // Keyed by "pluginId/filePath", value is the resolved absolute path or null.
+  const fileResolveCache = new Map<string, string | null>();
+
+  // Pre-compiled regex for URL matching (avoids re-compiling per request)
+  const pluginRouteRegex = /^\/@kbn-plugin\/([^/]+)\/(.*)$/;
+
   return {
     name: 'kbn-plugin-routes',
 
@@ -90,7 +209,7 @@ function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin 
         const url = req.url || '';
 
         // Match /@kbn-plugin/{id}/{path}
-        const match = url.match(/^\/@kbn-plugin\/([^/]+)\/(.*)$/);
+        const match = url.match(pluginRouteRegex);
         if (!match) return next();
 
         const [, pluginId, filePath] = match;
@@ -101,27 +220,37 @@ function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin 
           return next();
         }
 
-        // Resolve file path
-        let resolvedPath: string;
-        const basePath = !filePath || filePath === 'index.ts' ? 'index' : filePath;
-        const fullBasePath = Path.resolve(plugin.publicDir, basePath);
+        // Check the file-resolution cache first
+        const cacheKey = `${pluginId}/${filePath}`;
+        let resolvedPath: string | null | undefined = fileResolveCache.get(cacheKey);
 
-        // Try common extensions for the resolved path
-        resolvedPath = fullBasePath;
-        if (!Fs.existsSync(resolvedPath)) {
-          for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
-            if (Fs.existsSync(fullBasePath + ext)) {
-              resolvedPath = fullBasePath + ext;
-              break;
+        if (resolvedPath === undefined) {
+          // Cache miss — resolve the file path
+          const basePath = !filePath || filePath === 'index.ts' ? 'index' : filePath;
+          const fullBasePath = Path.resolve(plugin.publicDir, basePath);
+
+          // Try common extensions for the resolved path
+          resolvedPath = fullBasePath;
+          if (!Fs.existsSync(resolvedPath)) {
+            resolvedPath = null;
+            for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
+              if (Fs.existsSync(fullBasePath + ext)) {
+                resolvedPath = fullBasePath + ext;
+                break;
+              }
             }
           }
+
+          if (resolvedPath && !Fs.existsSync(resolvedPath)) {
+            resolvedPath = null;
+          }
+
+          fileResolveCache.set(cacheKey, resolvedPath);
         }
 
-        if (!Fs.existsSync(resolvedPath)) {
+        if (!resolvedPath) {
           // eslint-disable-next-line no-console
-          console.warn(
-            `[vite] Plugin file not found: ${pluginId}/${filePath} (tried ${resolvedPath})`
-          );
+          console.warn(`[vite] Plugin file not found: ${pluginId}/${filePath}`);
           return next();
         }
 
@@ -182,8 +311,37 @@ function euiIconsPlugin(repoRoot: string): Plugin {
     name: 'kbn-eui-icons',
     enforce: 'pre',
 
+    // Intercept requests for EUI icon assets from pre-bundled code.
+    // After pre-bundling, @elastic/eui.js still contains:
+    //   import("./assets/" + typeToPathMap[iconType])
+    // These resolve relative to .vite/deps/, producing requests like:
+    //   /node_modules/.vite/deps/assets/logo_elastic
+    // Vite's optimized dep serving handles these BEFORE resolveId hooks,
+    // so we must intercept at the middleware level instead.
+    configureServer(server) {
+      server.middlewares.use((req: any, res: any, next: any) => {
+        const url = req.url as string | undefined;
+        if (url && url.includes('/.vite/deps/assets/')) {
+          // Extract icon name and query string from URL:
+          //   /node_modules/.vite/deps/assets/logo_elastic?import
+          const match = url.match(/\/\.vite\/deps\/assets\/([^?]+)(\?.*)?$/);
+          if (match) {
+            const iconName = match[1].replace('.js', '');
+            const query = match[2] || '';
+            const iconPath = Path.resolve(euiIconsPath, `${iconName}.js`);
+            if (Fs.existsSync(iconPath)) {
+              // Rewrite to /@fs/ path so Vite serves the real file through its
+              // transform pipeline, preserving any query params (e.g. ?import)
+              req.url = `/@fs/${iconPath}${query}`;
+            }
+          }
+        }
+        next();
+      });
+    },
+
     resolveId(source, importer) {
-      // Handle dynamic icon imports from EUI's icon component
+      // Handle dynamic icon imports from EUI's icon component (non-pre-bundled path)
       if (importer && importer.includes('@elastic/eui') && source.startsWith('./assets/')) {
         const iconName = source.replace('./assets/', '').replace('.js', '');
         const iconPath = Path.resolve(euiIconsPath, `${iconName}.js`);
@@ -200,52 +358,6 @@ function euiIconsPlugin(repoRoot: string): Plugin {
         return null; // Let Vite handle it normally
       }
       return null;
-    },
-  };
-}
-
-/**
- * Create Vite plugin for handling JSX in .js files and CJS-to-ESM conversion
- */
-function jsxInJsPlugin(): Plugin {
-  return {
-    name: 'kbn-jsx-in-js',
-    enforce: 'pre',
-    async transform(code, id) {
-      // Skip node_modules except for @kbn packages that might be symlinked
-      if (id.includes('node_modules') && !id.includes('@kbn')) {
-        return null;
-      }
-
-      if (!id.endsWith('.js')) {
-        return null;
-      }
-
-      const hasJsx = /<[A-Z][a-zA-Z0-9]*|<[a-z]+[\s>\/]/.test(code);
-      const hasCjs = /\b(exports\.|module\.exports|require\s*\()/.test(code);
-
-      if (!hasJsx && !hasCjs) {
-        return null;
-      }
-
-      // eslint-disable-next-line no-new-func
-      const dynamicImport = new Function('specifier', 'return import(specifier)');
-      const esbuild = await dynamicImport('esbuild');
-
-      try {
-        const result = await esbuild.transform(code, {
-          loader: hasJsx ? 'jsx' : 'js',
-          jsx: 'automatic',
-          jsxImportSource: '@emotion/react',
-          format: 'esm',
-          sourcefile: id,
-          sourcemap: true,
-          target: 'es2020',
-        });
-        return { code: result.code, map: result.map };
-      } catch {
-        return null;
-      }
     },
   };
 }
@@ -281,7 +393,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
   // eslint-disable-next-line no-console
   console.log(`[vite] Discovered ${plugins.length} UI plugins for ESM serving`);
 
-  const kbnAliases = generateKbnAliases(repoRoot);
+  const kbnAliases = await generateKbnAliases(repoRoot);
 
   // Create plugin path aliases and collect entry points for pre-bundling
   const pluginAliases: Record<string, string> = {};
@@ -316,11 +428,6 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
   // eslint-disable-next-line no-console
   console.log(
     `[vite] Pre-analyzing ${pluginEntryPoints.length} plugin entry points for dependency discovery`
-  );
-  // eslint-disable-next-line no-console
-  console.log(
-    `[vite] Plugin entry points sample:`,
-    pluginEntryPoints.slice(0, 5).map((p) => Path.relative(repoRoot, p))
   );
 
   const server = await vite.createServer({
@@ -365,25 +472,152 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
     },
 
     plugins: [
-      // Debug plugin to track optimization
+
+      // TypeScript/JSX transform — replaces Vite's built-in OXC transform to
+      // bypass expensive tsconfck tsconfig resolution (replaceTokens hotspot).
+      kbnBrowserTransformPlugin(),
+
+      // Fix d3 v3's use of `this` which is undefined in ESM strict mode.
+      // d3 v3 wraps all code in `!function() { ... }()` — an IIFE called without
+      // a `this` binding. In strict mode `this` is `undefined`, breaking all
+      // references like `this.document`, `this.d3`, `this.navigator`, and
+      // `d3_vendorSymbol(this, ...)`. The fix is to change the IIFE invocation
+      // from `}()` to `}.call(globalThis)`, giving d3 a proper global `this`.
+      //
+      // d3 is in optimizeDeps.exclude so the rolldown `d3-this-fix` plugin
+      // never runs. A `load` hook (unlike `transform`) fires for all modules
+      // including excluded deps.
       {
-        name: 'kbn-optimize-debug',
-        configResolved(resolvedConfig: ResolvedConfig) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `[vite-optimize] Config resolved. optimizeDeps.entries count:`,
-            Array.isArray(resolvedConfig.optimizeDeps.entries)
-              ? resolvedConfig.optimizeDeps.entries.length
-              : 'not set'
+        name: 'kbn-d3-load-fix',
+        enforce: 'pre' as const,
+        load(id: string) {
+          if (id.includes('node_modules/d3/d3.js')) {
+            // Strip Vite's query string (e.g. ?v=588468d2) before reading from disk
+            const filePath = id.replace(/\?.*$/, '');
+            const contents = Fs.readFileSync(filePath, 'utf8');
+            // d3 v3 structure: `!function() { ... }();`
+            // Replace the final `}();` with `.call(globalThis);` to bind `this`
+            // to the global object throughout the entire IIFE.
+            const globalRef =
+              "typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : {}";
+            const fixed = contents.replace(
+              /\}\(\);?\s*$/,
+              `}.call(${globalRef});`
+            );
+            return { code: fixed, map: null };
+          }
+          return null;
+        },
+      },
+
+      // Fallback CJS-to-ESM interop for node_modules packages that aren't
+      // pre-bundled via optimizeDeps.include. With noDiscovery: true, any CJS
+      // module NOT in the include list would be served raw, breaking browser
+      // imports. This plugin:
+      //   1. Converts require() calls to ESM imports
+      //   2. Provides module/exports shim for CJS code to write to
+      //   3. Extracts named exports (exports.x = ...) as ESM named exports
+      //   4. Adds ESM default export with __esModule interop
+      {
+        name: 'kbn-cjs-browser-interop',
+        enforce: 'pre' as const,
+        transform(code: string, id: string) {
+          // Only process node_modules files that aren't pre-bundled
+          if (!id.includes('/node_modules/') || id.includes('/.vite/deps/')) return null;
+
+          // Skip JSON, CSS, and other non-JS files
+          if (/\.(json|css|scss|less|svg|png|jpg|gif|woff2?|ttf|eot)(\?|$)/.test(id)) return null;
+
+          // Skip if file already uses ESM export syntax
+          if (/\bexport\s+(default\b|{|\*|function\b|class\b|const\b|let\b|var\b)/.test(code)) {
+            return null;
+          }
+
+          // Detect CJS/UMD patterns
+          const isCjs =
+            /typeof\s+exports\s*===?\s*['"]object['"]/.test(code) || // UMD check
+            /\bmodule\.exports\b/.test(code) || // module.exports
+            /\bexports\.\w+\s*=/.test(code) || // exports.prop = ...
+            /Object\.defineProperty\s*\(\s*exports/.test(code); // Object.defineProperty(exports, ...)
+
+          if (!isCjs) return null;
+
+          // --- Step 1: Convert require() calls to ESM imports ---
+          // Static require('specifier') calls are replaced with import references.
+          // The imports are hoisted by ESM semantics, but for most CJS modules
+          // the require() calls are at the top anyway.
+          let requireCounter = 0;
+          const requireImports: string[] = [];
+          let processedCode = code.replace(
+            /\brequire\s*\(\s*(['"])([^'"]+)\1\s*\)/g,
+            (_match: string, _quote: string, specifier: string) => {
+              const varName = `__cjs_req_${requireCounter++}`;
+              requireImports.push(`import ${varName} from '${specifier}';`);
+              return varName;
+            }
           );
-        },
-        buildStart() {
-          // eslint-disable-next-line no-console
-          console.log(`[vite-optimize] Build starting - dependency pre-bundling will begin...`);
-        },
-        buildEnd() {
-          // eslint-disable-next-line no-console
-          console.log(`[vite-optimize] Build ended`);
+
+          // --- Step 2: Extract named exports from CJS patterns ---
+          const namedExports: string[] = [];
+
+          // Pattern 1: exports.propName = ... (e.g. exports.timeFormatter = timeFormatter)
+          const exportsPropRegex = /\bexports\.([a-zA-Z_$]\w*)\s*=/g;
+          let propMatch;
+          while ((propMatch = exportsPropRegex.exec(code)) !== null) {
+            const name = propMatch[1];
+            if (name !== '__esModule' && name !== 'default' && !namedExports.includes(name)) {
+              namedExports.push(name);
+            }
+          }
+
+          // Pattern 2: Object.defineProperty(exports, "propName", ...)
+          const definePropertyRegex =
+            /Object\.defineProperty\s*\(\s*exports\s*,\s*['"]([a-zA-Z_$]\w*)['"]/g;
+          let defPropMatch;
+          while ((defPropMatch = definePropertyRegex.exec(code)) !== null) {
+            const name = defPropMatch[1];
+            if (name !== '__esModule' && name !== 'default' && !namedExports.includes(name)) {
+              namedExports.push(name);
+            }
+          }
+
+          // Pattern 3: module.exports = { prop1, prop2: value, ... }
+          const moduleExportsObjMatch = code.match(/module\.exports\s*=\s*\{([^}]+)\}/);
+          if (moduleExportsObjMatch) {
+            const props = moduleExportsObjMatch[1]
+              .split(',')
+              .map((s: string) => s.trim().split(/[:\s]/)[0].trim())
+              .filter((k: string) => /^[a-zA-Z_$]\w*$/.test(k) && !namedExports.includes(k));
+            namedExports.push(...props);
+          }
+
+          // --- Step 3: Build named export statements ---
+          // Uses aliased destructuring to avoid conflicts with original identifiers.
+          let namedExportCode = '';
+          if (namedExports.length > 0) {
+            const destructured = namedExports.map((k) => `${k}: __cjs_named_${k}`).join(', ');
+            const reExports = namedExports.map((k) => `__cjs_named_${k} as ${k}`).join(', ');
+            namedExportCode = `\nvar { ${destructured} } = module.exports;\nexport { ${reExports} };\n`;
+          }
+
+          // --- Step 4: Assemble the ESM-wrapped module ---
+          return {
+            code: [
+              // ESM imports from require() conversion (hoisted by the engine)
+              ...requireImports,
+              // CJS module/exports shim
+              'var module = { exports: {} };',
+              'var exports = module.exports;',
+              // Original module code (with require() calls replaced)
+              processedCode,
+              // Default export with __esModule interop
+              'var __cjs_mod__ = module.exports;',
+              'export default (__cjs_mod__ && __cjs_mod__.__esModule ? __cjs_mod__.default : __cjs_mod__);',
+              // Named re-exports from module.exports properties
+              namedExportCode,
+            ].join('\n'),
+            map: null,
+          };
         },
       },
 
@@ -419,6 +653,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
       // Provide stubs for server-only Node.js modules used in client code
       {
         name: 'node-server-module-stubs',
+        enforce: 'pre' as const,
         resolveId(id: string) {
           // Stub out server-only modules that can't run in browsers
           if (
@@ -428,13 +663,16 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
             id === 'tls' ||
             id === 'dns' ||
             id === 'fs' ||
-            id === 'crypto'
+            id === 'crypto' ||
+            id === 'http-proxy-agent' ||
+            id === 'https-proxy-agent'
           ) {
             return `\0virtual:${id}-stub`;
           }
           return null;
         },
         load(id: string) {
+          // Handle virtual stubs (from resolveId above)
           if (id.startsWith('\0virtual:') && id.endsWith('-stub')) {
             const moduleName = id.replace('\0virtual:', '').replace('-stub', '');
             // Provide minimal stubs that won't crash but log warnings
@@ -455,6 +693,19 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
                 export default { createHash, randomBytes };
               `;
             }
+            // Stubs for server-only npm proxy-agent packages
+            if (moduleName === 'http-proxy-agent') {
+              return `
+                export class HttpProxyAgent { constructor() { console.warn('http-proxy-agent is not available in browser'); } }
+                export default HttpProxyAgent;
+              `;
+            }
+            if (moduleName === 'https-proxy-agent') {
+              return `
+                export class HttpsProxyAgent { constructor() { console.warn('https-proxy-agent is not available in browser'); } }
+                export default HttpsProxyAgent;
+              `;
+            }
             // Default stub for network modules (http, https, net, tls, dns)
             return `
               const warn = () => console.warn('${moduleName} module is not available in browser');
@@ -465,15 +716,28 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
               export default { Agent, request, get, globalAgent };
             `;
           }
+          // Fallback: intercept actual file paths for server-only npm packages.
+          // If another plugin resolved the bare specifier before our resolveId
+          // could intercept it, catch the resolved file path here.
+          const cleanId = id.replace(/\?.*$/, '');
+          if (cleanId.includes('node_modules/http-proxy-agent/')) {
+            return `
+              export class HttpProxyAgent { constructor() { console.warn('http-proxy-agent is not available in browser'); } }
+              export default HttpProxyAgent;
+            `;
+          }
+          if (cleanId.includes('node_modules/https-proxy-agent/')) {
+            return `
+              export class HttpsProxyAgent { constructor() { console.warn('https-proxy-agent is not available in browser'); } }
+              export default HttpsProxyAgent;
+            `;
+          }
           return null;
         },
       },
 
       // Handle EUI icon dynamic imports
       euiIconsPlugin(repoRoot),
-
-      // Handle JSX in .js files
-      jsxInJsPlugin(),
 
       // Serve plugin source files
       kbnPluginRoutesPlugin(plugins, repoRoot),
@@ -489,77 +753,292 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
       kbnViteConfig.kbnDotTextPlugin(),
     ],
 
-    // Pre-bundle common dependencies for faster loading
+    // Pre-bundle common dependencies for faster loading.
+    // The include list must be comprehensive because Kibana loads 210+ plugins
+    // and discovering deps at runtime triggers full page reloads.
     optimizeDeps: {
       include: [
+        // --- Core React ---
         'react',
         'react-dom',
         'react-dom/client',
+        'react-dom/server',
         'react/jsx-runtime',
         'react/jsx-dev-runtime',
+        'react-is',
+        'react-fast-compare',
+        'scheduler',
+        'prop-types',
+        'hoist-non-react-statics',
+        'object-assign',
+
+        // --- Emotion ---
         '@emotion/react',
         '@emotion/cache',
+        '@emotion/css',
+        '@emotion/styled',
+
+        // --- Elastic UI ---
+        '@elastic/eui',
+        '@elastic/eui-theme-borealis',
+        '@elastic/eui/lib/services/theme/warning',
+        '@elastic/eui/lib/components/provider/nested',
+        '@elastic/eui/es/components/icon/assets/sparkles',
+        '@elastic/eui/es/components/icon/assets/filter',
+        '@elastic/eui/es/components/icon/assets/search',
+        '@elastic/eui/es/components/icon/assets/pencil',
+        '@elastic/eui/es/components/icon/assets/list',
+        '@elastic/eui/es/components/icon/assets/sortable',
+        '@elastic/eui/es/components/icon/assets/logo_elastic',
+        '@elastic/eui/es/components/icon/assets/warning',
+        '@elastic/eui/es/components/icon/assets/eye',
+        '@elastic/eui/es/components/icon/assets/lock',
+
+        // --- Elastic packages ---
+        '@elastic/apm-rum',
+        '@elastic/apm-rum-core',
+        '@elastic/charts',
+        '@elastic/charts/dist/utils/data/formatters',
+        '@elastic/charts/dist/chart_types/partition_chart/layout/config',
+        '@elastic/datemath',
+        '@elastic/ebt/client',
+        '@elastic/ebt/shippers/fullstory',
+        '@elastic/filesaver',
+        '@elastic/numeral',
+        '@elastic/numeral/languages',
+        '@elastic/monaco-esql',
+        '@elastic/monaco-esql/lib/definitions',
+
+        // --- Lodash (main + sub-paths) ---
         'lodash',
         'lodash/set',
         'lodash/setWith',
-        'moment',
+        'lodash/fp',
+        'lodash/uniqBy',
+        'lodash/camelCase',
+        'lodash/isFunction',
+        'lodash/isObject',
+        'lodash/_isIndex',
+        'lodash/_toKey',
+        'lodash/_assignValue',
+        'lodash/_castPath',
+
+        // --- React ecosystem ---
+        'react-router-dom',
+        'react-router',
+        'react-router-dom-v5-compat',
+        'react-redux',
+        'react-redux/lib/utils/shallowEqual',
+        'react-intl',
+        'react-markdown',
+        'react-use',
+        'react-use/lib/useObservable',
+        'react-use/lib/usePrevious',
+        'react-use/lib/useInterval',
+        'react-use/lib/useDeepCompareEffect',
+        'react-use/lib/useDebounce',
+        'react-use/lib/useAsync',
+        'react-use/lib/useAsyncFn',
+        'react-use/lib/useEvent',
+        'react-use/lib/useLocalStorage',
+        'react-use/lib/useSessionStorage',
+        'react-use/lib/useMeasure',
+        'react-use/lib/useLatest',
+        'react-use/lib/useRafState',
+        'react-use/lib/useMountedState',
+        'react-use/lib/useUnmount',
+        'react-use/lib/useMount',
+        'react-use/lib/useToggle',
+        'react-use/lib/useUpdateEffect',
+        'react-use/lib/useTimeoutFn',
+        'react-use/lib/useList',
+        'react-use/lib/useEffectOnce',
+        'react-use/lib/useBoolean',
+        'react-use/lib/useWindowSize',
+        'react-use/lib/useFirstMountState',
+
+        // --- State management ---
+        '@reduxjs/toolkit',
+        'redux',
+        'reselect',
+        'immer',
+        'xstate',
+        'xstate/lib/waitFor',
+        '@xstate/react',
+        'constate',
+        'use-sync-external-store',
+        'use-sync-external-store/shim',
+        'use-sync-external-store/shim/with-selector',
+
+        // --- DnD ---
+        '@hello-pangea/dnd',
+        '@hello-pangea/dnd/dist/dnd',
+
+        // --- Data / query ---
+        '@tanstack/react-query',
+        '@tanstack/react-query-devtools',
+        '@tanstack/query-core',
         'rxjs',
-        'history',
+        'io-ts',
+        'io-ts/lib/Reporter',
+        'io-ts/lib/PathReporter',
+        'io-ts/lib/ThrowReporter',
+        'fp-ts',
+        'fp-ts/Either',
+        'fp-ts/pipeable',
+        'fp-ts/function',
+        'fp-ts/Option',
+        'fp-ts/Task',
+        'fp-ts/Set',
+        'fp-ts/Ord',
+        'fp-ts/Array',
+        'zod/v3',
+        'zod/v4',
+
+        // --- Monaco editor + sub-paths ---
+        'monaco-editor',
+        'monaco-editor/esm/vs/editor/editor.api',
+        'monaco-editor/esm/vs/editor/browser/coreCommands.js',
+        'monaco-editor/esm/vs/base/browser/defaultWorkerFactory',
+        'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js',
+        'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution.js',
+        'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations.js',
+        'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js',
+        'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js',
+        'monaco-editor/esm/vs/editor/contrib/links/browser/links.js',
+        'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeAction.js',
+        'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js',
+        'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionCommands.js',
+        'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions.js',
+        'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js',
+        'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js',
+        'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js',
+        'monaco-editor/esm/vs/editor/contrib/comment/browser/comment.js',
+        'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js',
+        'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js',
+        'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js',
+        'monaco-editor/esm/vs/editor/contrib/find/browser/findController',
+        'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js',
+        'monaco-editor/esm/vs/base/common/worker/simpleWorker',
+        'monaco-editor/esm/vs/language/json/monaco.contribution.js',
+        'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js',
+        'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js',
+        'monaco-editor/esm/vs/basic-languages/markdown/markdown',
+        'monaco-editor/esm/vs/basic-languages/yaml/yaml',
+        'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution',
+        'monaco-editor/esm/vs/basic-languages/css/css',
+        'monaco-yaml',
+
+        // --- Semver sub-paths ---
+        'semver/functions/compare',
+        'semver/functions/compare-build',
+        'semver/functions/coerce',
+        'semver/functions/eq',
+        'semver/functions/gt',
+        'semver/functions/gte',
+        'semver/functions/lt',
+        'semver/functions/major',
+        'semver/functions/minor',
+        'semver/functions/valid',
+        'semver/classes/semver',
+
+        // --- Validation ---
+        'joi',
+        'type-detect',
+
+        // --- jQuery (used in kbn-ui-shared-deps-src entry) ---
+        'jquery',
+
+        // --- Utilities ---
+        'moment',
+        'moment-timezone',
         'numeral',
         'classnames',
         'uuid',
         'query-string',
+        'history',
+        'memoize-one',
+        'axios',
+        'date-fns',
+        'rison-node',
+        'tslib',
+        'deepmerge',
+        'deep-equal',
+        'fast-deep-equal',
+        'shallowequal',
+        'deep-freeze-strict',
+        'json-stable-stringify',
+        'dedent',
+        'lz-string',
+        'lru-cache',
+        'fastest-levenshtein',
+        'email-addresses',
+        'p-map',
+        'base64-js',
+        'eventsource-parser',
+        'tree-dump',
+        'antlr4',
+        'inversify',
+        'reflect-metadata/lite',
+        'styled-components',
+        'resize-observer-polyfill',
+        'chroma-js',
+        'usng.js',
+        // cytoscape-dagre -> dagre -> graphlib has CJS code with
+        // `typeof require === "function"` guards that break when served raw
+        // through the CJS interop plugin. Pre-bundling handles this correctly.
+        'cytoscape-dagre',
+
+        // --- Browser polyfills ---
         'os-browserify/browser',
         'path-browserify',
         'buffer',
         'stream-browserify',
         'util',
-        'chroma-js',
-        '@elastic/eui',
-        'memoize-one',
-        // Additional common dependencies to reduce reload cycles
-        'react-router-dom',
-        'react-router',
-        '@tanstack/react-query',
-        'immer',
-        'react-use',
-        'resize-observer-polyfill',
-        'io-ts',
-        'fp-ts',
-        'styled-components',
-        '@reduxjs/toolkit',
-        'redux',
-        'react-redux',
-        'reselect',
-        'axios',
-        'date-fns',
-        'rison-node',
+        'url',
+        'events',
+        'querystring',
+        'assert',
+
+        // --- Feature flags / telemetry ---
+        '@openfeature/web-sdk',
+        '@openfeature/launchdarkly-client-provider',
+        'launchdarkly-js-client-sdk',
+
+        // --- Formatjs / i18n ---
+        '@formatjs/intl',
+        '@formatjs/intl-utils',
+
+        // --- AWS / network ---
+        '@smithy/util-utf8',
+        '@smithy/eventstream-codec',
+        'ipaddr.js',
+
+        // --- DnD kit ---
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
-        // More dependencies to prevent discovery-triggered reloads
-        '@emotion/css',
-        '@emotion/styled',
-        '@elastic/datemath',
-        '@elastic/numeral',
-        'tslib',
-        'prop-types',
-        'hoist-non-react-statics',
-        'use-sync-external-store',
-        'use-sync-external-store/shim',
-        'use-sync-external-store/shim/with-selector',
-        'scheduler',
-        'object-assign',
-        'react-is',
-        'deep-equal',
-        'fast-deep-equal',
-        'shallowequal',
-        '@tanstack/react-query-devtools',
-        'monaco-editor',
-        'xstate',
-        '@xstate/react',
+
+        // --- Testing (used in some browser code) ---
+        'jest-diff',
+
+        // --- Additional deps discovered at runtime ---
+        'react-hook-form',
+        'react-use/lib/useKey',
+        'textarea-caret',
+        'p-retry',
+        'lodash/capitalize',
+        '@elastic/ebt/helpers/global_session',
+        '@elastic/ebt/shippers/elastic_v3/browser',
+        'typescript-fsa',
+        'typescript-fsa-reducers',
+        'd3-interpolate',
+        'd3-array',
+        'fp-ts/TaskEither',
+        'hjson',
       ],
-      // Force pre-bundling on startup to avoid reload cycles from dependency discovery
+      // Force a fresh scan when the include list changes. Set to false once
+      // the .vite cache is populated with a good set of dependencies.
       force: true,
       exclude: [
         '@kbn/*',
@@ -568,23 +1047,23 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         // Exclude d3 v3 - it accesses window.navigator during init which fails in pre-bundling
         'd3',
       ],
-      // Analyze all plugin entry points upfront to discover their dependencies
-      // This prevents reload cycles when navigating to new plugins
-      entries: [
-        // Core entry point
-        Path.resolve(repoRoot, 'src/core/packages/root/browser-internal/index.ts'),
-        // All plugin entry points
-        ...pluginEntryPoints,
-      ],
-      // Wait for dependency crawling to complete before serving
-      // This prevents multiple reloads when new dependencies are discovered
+      // CRITICAL: Disable runtime dependency discovery. Kibana dynamically loads
+      // 210+ plugins, each importing various npm packages — many through deep
+      // sub-paths (lodash/*, react-use/lib/*, monaco-editor/esm/*, etc.). With
+      // discovery enabled, every newly found dep triggers re-optimization which
+      // replaces the bundled files (changing content hashes), causing "file does
+      // not exist" errors and full page reloads in an infinite loop.
+      //
+      // With noDiscovery: true, ONLY deps listed in `include` are pre-bundled.
+      // Any import not in the list is served directly from node_modules through
+      // Vite's on-the-fly transform pipeline — slightly slower per-request but
+      // no reloads. This is the correct trade-off for a project of Kibana's size.
+      noDiscovery: true,
       holdUntilCrawlEnd: true,
       // Packages with mixed ESM/CJS that need interop handling
       needsInterop: ['monaco-editor'],
-      esbuildOptions: {
-        loader: { '.js': 'jsx' },
-        jsx: 'automatic',
-        jsxImportSource: '@emotion/react',
+      rolldownOptions: {
+        moduleTypes: { '.js': 'jsx' },
         plugins: [
           {
             name: 'eui-icons-transform',
@@ -654,15 +1133,10 @@ ${contents
       },
     },
 
-    // esbuild for fast transformation
-    esbuild: {
-      jsx: 'automatic',
-      // Use Emotion's JSX runtime to support the css prop on DOM elements
-      // Emotion's jsx is a drop-in replacement that handles css prop when present
-      jsxImportSource: '@emotion/react',
-      target: 'es2020',
-      keepNames: true,
-    },
+    // Disable Vite's built-in OXC transform — we use kbnBrowserTransformPlugin
+    // which calls Rolldown's OXC directly with pre-configured options, bypassing
+    // expensive tsconfck tsconfig resolution (replaceTokens: ~40% of startup CPU).
+    oxc: false,
 
     // Define global constants
     define: {
@@ -679,51 +1153,30 @@ ${contents
     // Note: CSS/SCSS config is handled by kbnStylesPlugin
   });
 
-  // eslint-disable-next-line no-console
-  console.log(`[vite-optimize] Starting server and dependency optimization...`);
-  // eslint-disable-next-line no-console
-  console.log(
-    `[vite-optimize] Entries configured: ${pluginEntryPoints.length + 1} (core + ${
-      pluginEntryPoints.length
-    } plugins)`
-  );
   const optimizeStartTime = Date.now();
 
   await server.listen();
 
   const url = `http://${host}:${port}`;
 
-  // eslint-disable-next-line no-console
-  console.log(`[vite-optimize] Server listen() completed in ${Date.now() - optimizeStartTime}ms`);
-
-  // Try to wait for deps optimization to complete
-  // The _optimizedDeps or similar internal API might have a promise we can wait on
+  // Wait for dependency pre-bundling to complete before reporting ready
   try {
-    // Access Vite's internal optimization state
     const depsOptimizer =
       (server as any)._depsOptimizer || (server as any).environments?.client?.depsOptimizer;
     if (depsOptimizer) {
-      // eslint-disable-next-line no-console
-      console.log(`[vite-optimize] DepsOptimizer found, waiting for optimization...`);
       if (depsOptimizer.scanProcessing) {
         await depsOptimizer.scanProcessing;
-        // eslint-disable-next-line no-console
-        console.log(
-          `[vite-optimize] Scan processing completed in ${Date.now() - optimizeStartTime}ms`
-        );
       }
-      if (depsOptimizer.metadata) {
-        const depCount = Object.keys(depsOptimizer.metadata.optimized || {}).length;
-        // eslint-disable-next-line no-console
-        console.log(`[vite-optimize] Optimized ${depCount} dependencies`);
-      }
-    } else {
+      const depCount = depsOptimizer.metadata
+        ? Object.keys(depsOptimizer.metadata.optimized || {}).length
+        : 0;
       // eslint-disable-next-line no-console
-      console.log(`[vite-optimize] DepsOptimizer not found on server instance`);
+      console.log(
+        `[vite-optimize] Pre-bundled ${depCount} dependencies in ${Date.now() - optimizeStartTime}ms`
+      );
     }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`[vite-optimize] Error accessing optimization state:`, e);
+  } catch {
+    // Optimization state not accessible — not critical
   }
 
   // eslint-disable-next-line no-console
@@ -731,47 +1184,6 @@ ${contents
   if (hmr) {
     // eslint-disable-next-line no-console
     console.log(`[vite] HMR enabled at ws://${host}:${hmrPort}`);
-  }
-
-  // Add diagnostic logging for HMR and reload events
-  server.ws.on('connection', () => {
-    // eslint-disable-next-line no-console
-    console.log(`[vite-debug] New WebSocket connection established`);
-  });
-
-  // Listen for when Vite sends messages to clients
-  const originalSend = server.ws.send.bind(server.ws);
-  server.ws.send = (...args: Parameters<typeof server.ws.send>) => {
-    const payload = args[0];
-    if (typeof payload === 'object' && payload !== null) {
-      const msg = payload as { type?: string; path?: string; updates?: unknown[] };
-      if (msg.type === 'full-reload') {
-        // eslint-disable-next-line no-console
-        console.log(`[vite-debug] FULL RELOAD triggered for path: ${msg.path || '(all)'}`);
-        // Log stack trace to see what triggered the reload
-        // eslint-disable-next-line no-console
-        console.log(`[vite-debug] Reload stack:`, new Error().stack);
-      } else if (msg.type === 'update') {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[vite-debug] HMR update:`,
-          (msg.updates as Array<{ path?: string }>)?.map((u) => u.path).join(', ')
-        );
-      }
-    }
-    return originalSend(...args);
-  };
-
-  // Log when new dependencies are discovered during runtime
-  const depsOptimizer =
-    (server as any)._depsOptimizer || (server as any).environments?.client?.depsOptimizer;
-  if (depsOptimizer && depsOptimizer.registerMissingImport) {
-    const originalRegister = depsOptimizer.registerMissingImport.bind(depsOptimizer);
-    depsOptimizer.registerMissingImport = (id: string, resolved: string) => {
-      // eslint-disable-next-line no-console
-      console.log(`[vite-debug] NEW DEPENDENCY DISCOVERED: ${id} -> ${resolved}`);
-      return originalRegister(id, resolved);
-    };
   }
 
   // Build plugin dependencies map
