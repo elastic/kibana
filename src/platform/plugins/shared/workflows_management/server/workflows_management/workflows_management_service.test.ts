@@ -1160,6 +1160,123 @@ steps:
       expect(result.failed).toHaveLength(0);
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
+
+    it('should reject malformed custom IDs and include them in failed', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: valid workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+        {
+          yaml: `
+name: bad id workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "World"
+`,
+          id: 'not-a-valid-id',
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.created[0].name).toBe('valid workflow');
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0].index).toBe(1);
+      expect(result.failed[0].error).toContain('Invalid workflow ID format');
+    });
+
+    it('should schedule triggers for created workflows with scheduled triggers', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockResolvedValue(undefined),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: scheduled workflow
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(mockTaskScheduler.scheduleWorkflowTask).toHaveBeenCalled();
+    });
+
+    it('should log warning when trigger scheduling fails without affecting result', async () => {
+      const mockTaskScheduler = {
+        scheduleWorkflowTask: jest.fn().mockRejectedValue(new Error('scheduling failed')),
+      };
+      service.setTaskScheduler(mockTaskScheduler as any);
+
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: scheduled workflow
+triggers:
+  - type: 'scheduled'
+    with:
+      every: '5m'
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      // Workflow should still be in created despite scheduling failure
+      expect(result.created).toHaveLength(1);
+      expect(result.failed).toHaveLength(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to schedule trigger')
+      );
+    });
   });
 
   describe('updateWorkflow', () => {
