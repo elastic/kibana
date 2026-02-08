@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// NOTE: babel-register removed - @kbn/repo-packages and @kbn/repo-info are now pre-built ESM
+// @kbn/repo-packages and @kbn/repo-info are loaded as TypeScript source directly
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 

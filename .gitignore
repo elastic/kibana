@@ -187,8 +187,8 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
 
-# Transpile cache for pre-compiled packages
-.transpile-cache
+# Automatic Vite server-side transform cache
+.vite-server-cache
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker

@@ -37,11 +37,11 @@ export interface CliArgs {
   dist: boolean;
   serverless?: boolean;
   retrictInternalApis?: boolean;
-  /** Use Vite for both browser and server-side (experimental) */
+  /** Use Vite for both browser and server-side (default: true, disable with --no-vite) */
   useVite?: boolean;
-  /** Use Vite dev server for browser bundles instead of webpack optimizer (experimental) */
+  /** Use Vite dev server for browser bundles instead of webpack optimizer (default: true) */
   useViteBrowser?: boolean;
-  /** Use Vite for server-side plugin loading with HMR support (experimental) */
+  /** Use Vite for server-side plugin loading with HMR support (default: true) */
   useViteServer?: boolean;
 }
 
