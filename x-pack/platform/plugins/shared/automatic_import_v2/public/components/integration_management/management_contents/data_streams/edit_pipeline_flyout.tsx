@@ -24,9 +24,11 @@ import {
   EuiLoadingSpinner,
   EuiCallOut,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import React, { useState, useMemo } from 'react';
 import type { DataStreamResponse } from '../../../../../common';
 import { useGetDataStreamResults } from '../../../../common';
+import { useUIState } from '../../contexts';
 
 export const getIconFromType = (type: string | null | undefined): EuiTokenProps['iconType'] => {
   switch (type) {
@@ -106,7 +108,7 @@ export const EditPipelineFlyout = ({
   onClose,
 }: EditPipelineFlyoutProps) => {
   const [activeDocument, setActiveDocument] = useState(0);
-  const [selectedTab, setSelectedTab] = useState('table');
+  const { selectedPipelineTab, selectPipelineTab } = useUIState();
 
   const { data, isLoading, isError } = useGetDataStreamResults(
     integrationId,
@@ -183,12 +185,15 @@ export const EditPipelineFlyout = ({
           )}
         </EuiFlexItem>
         <EuiTabs>
-          <EuiTab isSelected={selectedTab === 'table'} onClick={() => setSelectedTab('table')}>
+          <EuiTab
+            isSelected={selectedPipelineTab === 'table'}
+            onClick={() => selectPipelineTab('table')}
+          >
             Table
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'pipeline'}
-            onClick={() => setSelectedTab('pipeline')}
+            isSelected={selectedPipelineTab === 'pipeline'}
+            onClick={() => selectPipelineTab('pipeline')}
           >
             Ingest pipeline
           </EuiTab>
@@ -210,7 +215,7 @@ export const EditPipelineFlyout = ({
           </EuiCallOut>
         )}
 
-        {!isLoading && !isError && selectedTab === 'table' && (
+        {!isLoading && !isError && selectedPipelineTab === 'table' && (
           <EuiInMemoryTable
             items={tableData}
             columns={columns}
@@ -221,16 +226,20 @@ export const EditPipelineFlyout = ({
           />
         )}
 
-        {!isLoading && !isError && selectedTab === 'pipeline' && data?.ingest_pipeline && (
-          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-            {(() => {
-              try {
-                return JSON.stringify(JSON.parse(data.ingest_pipeline), null, 2);
-              } catch {
-                return data.ingest_pipeline;
-              }
-            })()}
-          </pre>
+        {!isLoading && !isError && selectedPipelineTab === 'pipeline' && data?.ingest_pipeline && (
+          <CodeEditor
+            isCopyable
+            enableFindAction
+            languageId="json"
+            height="calc(100vh - 280px)"
+            width="100%"
+            options={{
+              readOnly: true,
+              tabSize: 2,
+              wordWrap: 'on',
+            }}
+            value={JSON.stringify(data.ingest_pipeline, null, 2)}
+          />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

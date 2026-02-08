@@ -134,7 +134,7 @@ export interface GetDataStreamResultsRequest {
 }
 
 export interface GetDataStreamResultsResponse {
-  ingest_pipeline: string;
+  ingest_pipeline: Record<string, unknown>;
   results: Array<Record<string, unknown>>;
 }
 

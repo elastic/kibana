@@ -19,6 +19,7 @@ export interface UIStateProviderProps {
 export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) => {
   const [isCreateDataStreamFlyoutOpen, setIsCreateDataStreamFlyoutOpen] = useState(false);
   const [selectedDataStream, setSelectedDataStream] = useState<DataStreamResponse | null>(null);
+  const [selectedPipelineTab, setSelectedPipelineTab] = useState<'table' | 'pipeline'>('table');
 
   const openCreateDataStreamFlyout = useCallback(() => {
     setIsCreateDataStreamFlyoutOpen(true);
@@ -36,6 +37,10 @@ export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) =>
     setSelectedDataStream(null);
   }, []);
 
+  const selectPipelineTab = useCallback((tab: 'table' | 'pipeline') => {
+    setSelectedPipelineTab(tab);
+  }, []);
+
   const isEditPipelineFlyoutOpen = selectedDataStream !== null;
 
   const value = useMemo<UIStateContextValue>(
@@ -47,6 +52,8 @@ export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) =>
       selectedDataStream,
       openEditPipelineFlyout,
       closeEditPipelineFlyout,
+      selectedPipelineTab,
+      selectPipelineTab,
     }),
     [
       isCreateDataStreamFlyoutOpen,
@@ -56,6 +63,8 @@ export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) =>
       selectedDataStream,
       openEditPipelineFlyout,
       closeEditPipelineFlyout,
+      selectedPipelineTab,
+      selectPipelineTab,
     ]
   );
 

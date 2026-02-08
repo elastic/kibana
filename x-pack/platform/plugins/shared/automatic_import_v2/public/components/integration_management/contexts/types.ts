@@ -18,6 +18,8 @@ export interface UIStateActions {
   closeCreateDataStreamFlyout: () => void;
   openEditPipelineFlyout: (dataStream: DataStreamResponse) => void;
   closeEditPipelineFlyout: () => void;
+  selectPipelineTab: (tab: 'table' | 'pipeline') => void;
+  selectedPipelineTab: 'table' | 'pipeline';
 }
 
 export type UIStateContextValue = UIState & UIStateActions;
