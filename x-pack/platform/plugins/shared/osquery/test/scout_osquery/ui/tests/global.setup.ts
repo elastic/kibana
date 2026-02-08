@@ -247,7 +247,7 @@ globalSetupHook(
       path: '/api/fleet/service_tokens',
       body: {},
     });
-    const serviceToken = tokenResponse.value;
+    const serviceToken = (tokenResponse as any).value;
     log.info('[osquery-setup] Service token generated');
 
     // ── 5. Create Fleet Server agent policy ────────────────────────────

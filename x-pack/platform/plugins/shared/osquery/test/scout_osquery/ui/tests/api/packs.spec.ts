@@ -52,7 +52,7 @@ test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
           shards: {},
         },
       });
-      packId = data.data.saved_object_id;
+      packId = (data as any).data.saved_object_id;
     });
 
     test.afterEach(async ({ kbnClient }) => {

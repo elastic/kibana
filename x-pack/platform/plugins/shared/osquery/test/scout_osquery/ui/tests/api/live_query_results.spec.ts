@@ -24,7 +24,7 @@ test.describe('Live query', { tag: ['@ess', '@svlSecurity'] }, () => {
   test('GET getLiveQueryDetailsRoute - validates we get successful response', async ({
     kbnClient,
   }) => {
-    const { data, status } = await kbnClient.request({
+    const { status } = await kbnClient.request({
       method: 'GET',
       path: `/api/osquery/live_queries/${liveQueryId}`,
     });
@@ -34,7 +34,7 @@ test.describe('Live query', { tag: ['@ess', '@svlSecurity'] }, () => {
   test('GET getLiveQueryResultsRoute - validates we get successful response', async ({
     kbnClient,
   }) => {
-    const { data, status } = await kbnClient.request({
+    const { status } = await kbnClient.request({
       method: 'GET',
       path: `/api/osquery/live_queries/${liveQueryId}/results/${queriesQueryActionId}`,
     });

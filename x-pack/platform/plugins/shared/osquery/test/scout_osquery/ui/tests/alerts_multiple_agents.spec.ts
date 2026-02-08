@@ -14,12 +14,10 @@ import { waitForPageReady } from '../../common/constants';
 
 test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecurity'] }, () => {
   let ruleId: string;
-  let ruleName: string;
 
   test.beforeAll(async ({ kbnClient }) => {
     const rule = await loadRule(kbnClient, true); // true for response actions
     ruleId = rule.id;
-    ruleName = rule.name;
   });
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {

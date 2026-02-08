@@ -45,7 +45,7 @@ roles.forEach(({ name, role }) => {
         query: 'select * from uptime;',
         saved_query_id: savedQueryName,
         kuery: '',
-      });
+      } as any);
       liveQueryQuery = liveQuery.queries?.[0].query || '';
     });
 

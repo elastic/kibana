@@ -16,12 +16,10 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 
 test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecurity'] }, () => {
   let ruleId: string;
-  let ruleName: string;
 
   test.beforeAll(async ({ kbnClient }) => {
     const rule = await loadRule(kbnClient, true); // true for response actions
     ruleId = rule.id;
-    ruleName = rule.name;
   });
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
