@@ -7,9 +7,6 @@
 
 import { expect } from '@kbn/scout';
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
-import type { KbnClient } from '@kbn/test';
-import { loadRule, cleanupRule } from './api_helpers';
-import { socManagerRole } from './roles';
 import { waitForPageReady } from './constants';
 
 const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';

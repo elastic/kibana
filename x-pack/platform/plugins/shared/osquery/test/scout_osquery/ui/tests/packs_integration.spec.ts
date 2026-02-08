@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole, platformEngineerRole } from '../common/roles';
 import {
-  loadPack,
   cleanupPack,
   loadAgentPolicy,
   cleanupAgentPolicy,
@@ -24,9 +23,9 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
   test.describe('Validate that agent policy is removed from pack when agent policy is removed', {
     tag: ['@ess'],
   }, () => {
-    let agentPolicyId: string;
+    let agentPolicyId: string | undefined;
     let agentPolicyName: string;
-    let packId: string;
+    let packId: string | undefined;
     const removingPack = `removing-pack-${Date.now()}`;
 
     test.beforeEach(async ({ browserAuth, kbnClient }) => {
@@ -36,7 +35,7 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
       const agentPolicy = await loadAgentPolicy(kbnClient);
       agentPolicyId = agentPolicy.id;
       agentPolicyName = agentPolicy.name;
-      await addOsqueryToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName);
+      await addOsqueryToAgentPolicy(kbnClient, agentPolicy.id, agentPolicyName);
     });
 
     test.afterEach(async ({ kbnClient }) => {
@@ -143,7 +142,7 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
       await page.waitForTimeout(1000);
 
       const rows = page.locator('tbody > tr');
-      await expect(rows).toHaveCount(expect.any(Number), { timeout: 30_000 });
+      await rows.first().waitFor({ state: 'visible', timeout: 30_000 });
       expect(await rows.count()).toBeGreaterThan(5);
     });
 
@@ -218,7 +217,7 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
         // Create agent policy with osquery integration
         const agentPolicy = await loadAgentPolicy(kbnClient);
         agentPolicyId = agentPolicy.id;
-        await addOsqueryToAgentPolicy(kbnClient, agentPolicyId, agentPolicy.name);
+        await addOsqueryToAgentPolicy(kbnClient, agentPolicy.id, agentPolicy.name);
 
         // Verify the global pack is attached to the new agent policy
         const { data: policiesData } = await kbnClient.request({

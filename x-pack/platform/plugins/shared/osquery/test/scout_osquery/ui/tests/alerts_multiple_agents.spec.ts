@@ -144,11 +144,13 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
 
     // At least 2 agents should respond
     const flyoutBody = page.testSubj.locator('flyout-body-osquery');
-    await expect(flyoutBody.locator('[data-grid-row-index]')).toHaveCount(
-      expect.any(Number),
-      { timeout: 600_000 }
-    );
-    expect(await flyoutBody.locator('[data-grid-row-index]').count()).toBeGreaterThanOrEqual(2);
+    // Wait for results to appear, then verify at least 2 agents responded
+    await flyoutBody.locator('[data-grid-row-index]').first().waitFor({
+      state: 'visible',
+      timeout: 600_000,
+    });
+    const rowCount = await flyoutBody.locator('[data-grid-row-index]').count();
+    expect(rowCount).toBeGreaterThanOrEqual(2);
   });
 
   test.skip('should substitute params in osquery ran from timelines alerts', async ({

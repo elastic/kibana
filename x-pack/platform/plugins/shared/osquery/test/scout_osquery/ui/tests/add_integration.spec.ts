@@ -70,7 +70,7 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Add and upgrade integration', { tag: ['@ess', '@svlSecurity'] }, () => {
     const oldVersion = '0.7.4';
-    let policyId: string;
+    let policyId: string | undefined;
 
     test.afterEach(async ({ kbnClient }) => {
       if (policyId) {
@@ -136,7 +136,7 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
   // FLAKY: https://github.com/elastic/kibana/issues/170593
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe.skip('Add integration to policy', () => {
-    let policyId: string;
+    let policyId: string | undefined;
 
     test.afterEach(async ({ kbnClient }) => {
       if (policyId) {
@@ -198,8 +198,8 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
-    let policyId: string;
-    let packId: string;
+    let policyId: string | undefined;
+    let packId: string | undefined;
 
     test.afterEach(async ({ kbnClient }) => {
       if (packId) {
