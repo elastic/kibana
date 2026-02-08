@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
@@ -14,6 +15,7 @@ interface Services {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   logger: Logger;
+  spaces: SpacesPluginStart;
 }
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
@@ -28,14 +30,21 @@ const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
  */
 export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
-    // TODO: check v1 opt-out status before initializing
+    // TODO: check v1 opt-out status before sinitializing
     const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
     if (!isEntityStoreV2Enabled) return;
 
-    services.http.post(installAllEntitiesRequest).catch((e) => {
-      const logger = services.logger.get('InitEntityStoreV2');
-      logger.error('Failed to initialize');
-      logger.error(e);
-    });
-  }, [services.http, services.uiSettings, services.logger]);
+    async function install() {
+      try {
+        const space = await services.spaces.getActiveSpace();
+        if (space.id !== 'default') return;
+
+        await services.http.post(installAllEntitiesRequest);
+      } catch (e) {
+        services.logger.error('Failed to initialize Entity Store V2');
+        services.logger.error(e);
+      }
+    }
+    install();
+  }, [services.http, services.uiSettings, services.logger, services.spaces]);
 };
