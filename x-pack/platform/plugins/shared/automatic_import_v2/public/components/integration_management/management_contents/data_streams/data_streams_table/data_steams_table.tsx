@@ -19,6 +19,7 @@ import * as i18n from '../translations';
 import { useDeleteDataStream } from '../../../../../common';
 import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
+import { useUIState } from '../../../contexts';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -28,6 +29,7 @@ interface DataStreamsTableProps {
 export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
+  const { openEditPipelineFlyout } = useUIState();
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
@@ -96,8 +98,8 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             icon: 'expand',
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
-            onClick: () => {
-              // TODO: Implement expand action
+            onClick: (item: DataStreamResponse) => {
+              openEditPipelineFlyout(item);
             },
             enabled: (item: DataStreamResponse) =>
               item.status === 'completed' && item.dataStreamId !== deletingDataStreamId,
@@ -173,7 +175,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '80px',
       },
     ];
-  }, [deletingDataStreamId, euiTheme]);
+  }, [deletingDataStreamId, euiTheme, openEditPipelineFlyout]);
 
   return (
     <>

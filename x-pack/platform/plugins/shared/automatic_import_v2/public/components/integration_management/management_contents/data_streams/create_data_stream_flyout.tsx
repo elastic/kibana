@@ -242,7 +242,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     if (!formData) return;
 
     const integrationId = currentIntegrationId ?? generateId();
-    const dataStreamId = integrationId + '-' + generateId();
+    const dataStreamId = generateId();
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
