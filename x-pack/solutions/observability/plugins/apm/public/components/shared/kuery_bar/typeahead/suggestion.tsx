@@ -6,13 +6,21 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { EuiIcon, useEuiFontSize } from '@elastic/eui';
+import type { Theme } from '@emotion/react';
 import { unit } from '../../../../utils/style';
 import { tint } from 'polished';
 
-function getIconColor(type, theme) {
+export interface QuerySuggestion {
+  type: 'field' | 'value' | 'operator' | 'conjunction' | 'recentSearch';
+  text: string;
+  start: number;
+  end: number;
+  description?: React.ReactNode;
+}
+
+function getIconColor(type: QuerySuggestion['type'], theme: Theme) {
   switch (type) {
     case 'field':
       return theme.euiTheme.colors.vis.euiColorVis7;
@@ -42,7 +50,7 @@ const Description = styled.div`
   }
 `;
 
-const ListItem = styled.li`
+const ListItem = styled.li<{ selected: boolean }>`
   font-size: ${() => useEuiFontSize('xs').fontSize};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   align-items: center;
@@ -60,7 +68,7 @@ const ListItem = styled.li`
   }
 `;
 
-const Icon = styled.div`
+const Icon = styled.div<{ type: QuerySuggestion['type'] }>`
   flex: 0 0 ${({ theme }) => theme.euiTheme.size.xl};
   background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
   color: ${({ type, theme }) => getIconColor(type, theme)};
@@ -76,7 +84,7 @@ const TextValue = styled.div`
   padding: 0 ${({ theme }) => theme.euiTheme.size.s};
 `;
 
-function getEuiIconType(type) {
+function getEuiIconType(type: QuerySuggestion['type']) {
   switch (type) {
     case 'field':
       return 'kqlField';
@@ -89,33 +97,33 @@ function getEuiIconType(type) {
     case 'operator':
       return 'kqlOperand';
     default:
-      throw new Error('Unknown type', type);
+      throw new Error(`Unknown type: ${type}`);
   }
 }
 
-function Suggestion(props) {
+interface SuggestionProps {
+  innerRef: (node: HTMLLIElement | null) => void;
+  selected: boolean;
+  suggestion: QuerySuggestion;
+  onClick: (suggestion: QuerySuggestion) => void;
+  onMouseEnter: () => void;
+}
+
+function Suggestion({ innerRef, selected, suggestion, onClick, onMouseEnter }: SuggestionProps) {
   return (
     <ListItem
-      innerRef={props.innerRef}
-      selected={props.selected}
-      onClick={() => props.onClick(props.suggestion)}
-      onMouseEnter={props.onMouseEnter}
+      ref={innerRef}
+      selected={selected}
+      onClick={() => onClick(suggestion)}
+      onMouseEnter={onMouseEnter}
     >
-      <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+      <Icon type={suggestion.type}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
       </Icon>
-      <TextValue>{props.suggestion.text}</TextValue>
-      <Description>{props.suggestion.description}</Description>
+      <TextValue>{suggestion.text}</TextValue>
+      <Description>{suggestion.description}</Description>
     </ListItem>
   );
 }
-
-Suggestion.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  selected: PropTypes.bool,
-  suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired,
-};
 
 export default Suggestion;

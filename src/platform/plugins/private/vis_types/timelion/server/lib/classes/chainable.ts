@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimelionFunctionInterface } from '../types';
+import TimelionFunction from './timelion_function';
 
-declare function loadFunctions(directory: string): LoadFunctions;
+export default class Chainable extends TimelionFunction {
+  chainable: boolean;
 
-export interface LoadFunctions {
-  [key: string]: TimelionFunctionInterface;
+  constructor(name: string, config: any) {
+    super(name, config);
+    this.chainable = true;
+    Object.freeze(this);
+  }
 }
-
-// eslint-disable-next-line import/no-default-export
-export default loadFunctions;

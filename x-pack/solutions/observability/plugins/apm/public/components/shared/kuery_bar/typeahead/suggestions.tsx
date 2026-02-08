@@ -7,11 +7,11 @@
 
 import { isEmpty } from 'lodash';
 import { tint } from 'polished';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import styled from '@emotion/styled';
 import { unit } from '../../../../utils/style';
 import Suggestion from './suggestion';
+import type { QuerySuggestion } from './suggestion';
 
 const List = styled.ul`
   width: 100%;
@@ -31,12 +31,21 @@ const List = styled.ul`
   overflow: scroll;
 `;
 
-class Suggestions extends Component {
-  childNodes = [];
+interface SuggestionsProps {
+  index: number | null;
+  onClick: (suggestion: QuerySuggestion) => void;
+  onMouseEnter: (index: number) => void;
+  show: boolean;
+  suggestions: QuerySuggestion[];
+}
+
+class Suggestions extends Component<SuggestionsProps> {
+  private childNodes: Array<HTMLLIElement | null> = [];
+  private parentNode: HTMLUListElement | null = null;
 
   scrollIntoView = () => {
     const parent = this.parentNode;
-    const child = this.childNodes[this.props.index];
+    const child = this.props.index != null ? this.childNodes[this.props.index] : null;
 
     if (this.props.index == null || !parent || !child) {
       return;
@@ -50,7 +59,7 @@ class Suggestions extends Component {
     parent.scrollTop = scrollTop;
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: SuggestionsProps) {
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
     }
@@ -62,7 +71,7 @@ class Suggestions extends Component {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const key = suggestion + '_' + index;
+      const key = suggestion.text + '_' + index;
       return (
         <Suggestion
           innerRef={(node) => (this.childNodes[index] = node)}
@@ -76,19 +85,14 @@ class Suggestions extends Component {
     });
 
     return (
-      <List data-test-subj="suggestionContainer" innerRef={(node) => (this.parentNode = node)}>
+      <List
+        data-test-subj="suggestionContainer"
+        ref={(node) => (this.parentNode = node)}
+      >
         {suggestions}
       </List>
     );
   }
 }
-
-Suggestions.propTypes = {
-  index: PropTypes.number,
-  onClick: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired,
-};
 
 export default Suggestions;

@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
-import loadFunctions from '../lib/load_functions';
-const fitFunctions = loadFunctions('fit_functions');
+// Import directly to break circular dependency with load_functions
+import { fitFunctions } from '../fit_functions';
 
 export default new Chainable('fit', {
   args: [
@@ -38,15 +38,15 @@ export default new Chainable('fit', {
   help: i18n.translate('timelion.help.functions.fitHelpText', {
     defaultMessage: 'Fills null values using a defined fit function',
   }),
-  fn: function absFn(args) {
-    return alter(args, function (eachSeries, mode) {
-      const noNulls = eachSeries.data.filter((item) => item[1] === 0 || item[1]);
+  fn: function absFn(args: any) {
+    return alter(args, function (eachSeries: any, mode: string) {
+      const noNulls = eachSeries.data.filter((item: any) => item[1] === 0 || item[1]);
 
       if (noNulls.length === 0) {
         return eachSeries;
       }
 
-      eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
+      eachSeries.data = (fitFunctions as any)[mode](noNulls, eachSeries.data);
       return eachSeries;
     });
   },

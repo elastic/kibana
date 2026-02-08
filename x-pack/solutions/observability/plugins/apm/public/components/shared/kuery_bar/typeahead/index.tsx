@@ -6,10 +6,10 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import Suggestions from './suggestions';
 import ClickOutside from './click_outside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
+import type { QuerySuggestion } from './suggestion';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -21,15 +21,41 @@ const KEY_CODES = {
   TAB: 9,
 };
 
-export class Typeahead extends Component {
-  state = {
+interface TypeaheadProps {
+  initialValue?: string;
+  isLoading?: boolean;
+  disabled?: boolean;
+  onChange: (value: string, selectionStart: number | null) => void;
+  onSubmit: (value: string) => void;
+  suggestions: QuerySuggestion[];
+  placeholder: string;
+  prepend?: React.ReactNode;
+}
+
+interface TypeaheadState {
+  isSuggestionsVisible: boolean;
+  index: number | null;
+  value: string;
+  initialValue: string;
+}
+
+export class Typeahead extends Component<TypeaheadProps, TypeaheadState> {
+  private inputRef: HTMLInputElement | null = null;
+
+  static defaultProps = {
+    isLoading: false,
+    disabled: false,
+    suggestions: [],
+  };
+
+  state: TypeaheadState = {
     isSuggestionsVisible: false,
     index: null,
     value: '',
     initialValue: '',
   };
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: TypeaheadProps, state: TypeaheadState) {
     const initialValue = props.initialValue ? props.initialValue : '';
     if (initialValue !== state.initialValue) {
       return {
@@ -41,24 +67,24 @@ export class Typeahead extends Component {
     return null;
   }
 
-  incrementIndex = (currentIndex) => {
-    let nextIndex = currentIndex + 1;
+  incrementIndex = (currentIndex: number | null) => {
+    let nextIndex = (currentIndex ?? -1) + 1;
     if (currentIndex === null || nextIndex >= this.props.suggestions.length) {
       nextIndex = 0;
     }
     this.setState({ index: nextIndex });
   };
 
-  decrementIndex = (currentIndex) => {
-    let previousIndex = currentIndex - 1;
+  decrementIndex = (currentIndex: number | null) => {
+    let previousIndex = (currentIndex ?? 0) - 1;
     if (previousIndex < 0) {
-      previousIndex = null;
+      previousIndex = null as unknown as number;
     }
     this.setState({ index: previousIndex });
   };
 
-  onKeyUp = (event) => {
-    const { selectionStart } = event.target;
+  onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const { selectionStart } = event.target as HTMLInputElement;
     const { value } = this.state;
     switch (event.keyCode) {
       case KEY_CODES.LEFT:
@@ -72,7 +98,7 @@ export class Typeahead extends Component {
     }
   };
 
-  onKeyDown = (event) => {
+  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const { isSuggestionsVisible, index, value } = this.state;
     switch (event.keyCode) {
       case KEY_CODES.DOWN:
@@ -91,7 +117,7 @@ export class Typeahead extends Component {
         break;
       case KEY_CODES.ENTER:
         event.preventDefault();
-        if (isSuggestionsVisible && this.props.suggestions[index]) {
+        if (isSuggestionsVisible && index !== null && this.props.suggestions[index]) {
           this.selectSuggestion(this.props.suggestions[index]);
         } else {
           this.setState({ isSuggestionsVisible: false });
@@ -110,7 +136,7 @@ export class Typeahead extends Component {
 
   onBlur = () => {
     const { isSuggestionsVisible, index, value } = this.state;
-    if (isSuggestionsVisible && this.props.suggestions[index]) {
+    if (isSuggestionsVisible && index !== null && this.props.suggestions[index]) {
       this.selectSuggestion(this.props.suggestions[index]);
     } else {
       this.setState({ isSuggestionsVisible: false });
@@ -118,7 +144,7 @@ export class Typeahead extends Component {
     }
   };
 
-  selectSuggestion = (suggestion) => {
+  selectSuggestion = (suggestion: QuerySuggestion) => {
     const nextInputValue =
       this.state.value.substr(0, suggestion.start) +
       suggestion.text +
@@ -132,7 +158,7 @@ export class Typeahead extends Component {
     this.setState({ isSuggestionsVisible: false });
   };
 
-  onChangeInputValue = (event) => {
+  onChangeInputValue = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, selectionStart } = event.target;
     const hasValue = Boolean(value.trim());
     this.setState({
@@ -147,17 +173,17 @@ export class Typeahead extends Component {
     this.props.onChange(value, selectionStart);
   };
 
-  onClickInput = (event) => {
-    const { selectionStart } = event.target;
+  onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
+    const { selectionStart } = event.target as HTMLInputElement;
     this.props.onChange(this.state.value, selectionStart);
   };
 
-  onClickSuggestion = (suggestion) => {
+  onClickSuggestion = (suggestion: QuerySuggestion) => {
     this.selectSuggestion(suggestion);
-    this.inputRef.focus();
+    this.inputRef?.focus();
   };
 
-  onMouseEnterSuggestion = (index) => {
+  onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
 
@@ -220,20 +246,3 @@ export class Typeahead extends Component {
     );
   }
 }
-
-Typeahead.propTypes = {
-  initialValue: PropTypes.string,
-  isLoading: PropTypes.bool,
-  disabled: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  suggestions: PropTypes.array.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  prepend: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-};
-
-Typeahead.defaultProps = {
-  isLoading: false,
-  disabled: false,
-  suggestions: [],
-};

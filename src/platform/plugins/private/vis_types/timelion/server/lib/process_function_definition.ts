@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import TimelionFunction from './timelion_function';
+import _ from 'lodash';
 
-export default class Chainable extends TimelionFunction {
-  constructor(name, config) {
-    super(name, config);
-    this.chainable = true;
-    Object.freeze(this);
+export default function processFunctionDefinition(func: any): Record<string, any> {
+  const functions: Record<string, any> = {};
+  functions[func.name] = func;
+  if (func.aliases) {
+    _.each(func.aliases, function (alias: string) {
+      const aliasFn = _.clone(func);
+      aliasFn.isAlias = true;
+      functions[alias] = aliasFn;
+    });
   }
+
+  return functions;
 }

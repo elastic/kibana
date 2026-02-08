@@ -12,12 +12,12 @@ const functions = loadFunctions('series_functions/');
 import _ from 'lodash';
 
 export default (function () {
-  const functionArray = _.map(functions, function (val, key) {
+  const functionArray = _.map(functions, function (val: any, key: string) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
     return _.extend({}, val, { name: key });
   });
 
-  function toDocBlock(fn) {
+  function toDocBlock(fn: any) {
     let help = '';
 
     if (fn.isAlias) return help;
@@ -35,7 +35,7 @@ export default (function () {
     help += 'Argument | Accepts | Description\n';
     help += '--- | --- | ---\n';
 
-    _.each(args, function (arg) {
+    _.each(args, function (arg: any) {
       help += arg.name + ' | *' + _.without(arg.types, 'null').join('/') + '* | ';
       help += arg.help ? arg.help : '*no help available*';
       help += '  \n';

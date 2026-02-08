@@ -8,11 +8,20 @@
  */
 
 import _ from 'lodash';
-import loadFunctions from '../load_functions';
-const fitFunctions = loadFunctions('fit_functions');
+// Import fitFunctions directly to break circular dependency with load_functions
+import { fitFunctions } from '../../fit_functions';
 
 export default class TimelionFunction {
-  constructor(name, config) {
+  name: string;
+  args: any[];
+  argsByName: Record<string, any>;
+  help: string;
+  aliases: string[];
+  extended: boolean;
+  originalFn: (...args: any[]) => any;
+  fn: (args: any, tlConfig: any) => Promise<any>;
+
+  constructor(name: string, config: any) {
     this.name = name;
     this.args = config.args || [];
     this.argsByName = _.keyBy(this.args, 'name');
@@ -23,23 +32,23 @@ export default class TimelionFunction {
     // WTF is this? How could you not have a fn? Wtf would the thing be used for?
     const originalFunction =
       config.fn ||
-      function (input) {
+      function (input: any) {
         return input;
       };
 
     // Currently only re-fits the series.
     this.originalFn = originalFunction;
 
-    this.fn = function (args, tlConfig) {
-      const config = _.clone(tlConfig);
-      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
-        seriesList.list = _.map(seriesList.list, function (series) {
+    this.fn = function (args: any, tlConfig: any) {
+      const cfg = _.clone(tlConfig);
+      return Promise.resolve(originalFunction(args, cfg)).then(function (seriesList: any) {
+        seriesList.list = _.map(seriesList.list, function (series: any) {
           const target = tlConfig.getTargetSeries();
 
           // Don't fit if the series are already the same
           if (_.isEqual(_.map(series.data, 0), _.map(target, 0))) return series;
 
-          let fit;
+          let fit: string;
           if (args.byName.fit) {
             fit = args.byName.fit;
           } else if (series.fit) {
@@ -48,7 +57,7 @@ export default class TimelionFunction {
             fit = 'nearest';
           }
 
-          series.data = fitFunctions[fit](series.data, tlConfig.getTargetSeries());
+          series.data = (fitFunctions as any)[fit](series.data, tlConfig.getTargetSeries());
           return series;
         });
         return seriesList;

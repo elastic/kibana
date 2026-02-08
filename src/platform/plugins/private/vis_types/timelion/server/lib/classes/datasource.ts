@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import loadFunctions from '../load_functions';
-const fitFunctions = loadFunctions('fit_functions');
+// Import fitFunctions directly to break circular dependency with load_functions
+import { fitFunctions } from '../../fit_functions';
 import TimelionFunction from './timelion_function';
 import { offsetTime, preprocessOffset } from '../offset_time';
 import _ from 'lodash';
 
-function offsetSeries(response, offset) {
+function offsetSeries(response: any[], offset: string) {
   if (offset) {
     response = _.map(response, function (point) {
       return [offsetTime(point[0], offset, true), point[1]];
@@ -24,7 +24,11 @@ function offsetSeries(response, offset) {
 }
 
 export default class Datasource extends TimelionFunction {
-  constructor(name, config) {
+  timelionFn: (...args: any[]) => any;
+  datasource: boolean;
+  cacheKey: (item: any) => string;
+
+  constructor(name: string, config: any) {
     // Additional arguments that every dataSource take
     config.args.push({
       name: 'offset',
@@ -53,18 +57,18 @@ export default class Datasource extends TimelionFunction {
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit
     const originalFunction = config.fn;
-    config.fn = function (args, tlConfig) {
-      const config = _.clone(tlConfig);
+    config.fn = function (args: any, tlConfig: any) {
+      const cfg = _.clone(tlConfig);
       let offset = args.byName.offset;
       if (offset) {
         offset = preprocessOffset(offset, tlConfig.time.from, tlConfig.time.to);
-        config.time = _.cloneDeep(tlConfig.time);
-        config.time.from = offsetTime(config.time.from, offset);
-        config.time.to = offsetTime(config.time.to, offset);
+        cfg.time = _.cloneDeep(tlConfig.time);
+        cfg.time.from = offsetTime(cfg.time.from, offset);
+        cfg.time.to = offsetTime(cfg.time.to, offset);
       }
 
-      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
-        seriesList.list = _.map(seriesList.list, function (series) {
+      return Promise.resolve(originalFunction(args, cfg)).then(function (seriesList: any) {
+        seriesList.list = _.map(seriesList.list, function (series: any) {
           if (series.data.length === 0) throw new Error(name + '() returned no results');
           series.data = offsetSeries(series.data, offset);
           series.fit = args.byName.fit || series.fit || 'nearest';
@@ -76,8 +80,8 @@ export default class Datasource extends TimelionFunction {
 
     super(name, config);
 
-    // You  need to call timelionFn if calling up a datasource from another datasource,
-    // otherwise teh series will end up being offset twice.
+    // You need to call timelionFn if calling up a datasource from another datasource,
+    // otherwise the series will end up being offset twice.
     this.timelionFn = originalFunction;
     this.datasource = true;
     this.cacheKey = function (item) {

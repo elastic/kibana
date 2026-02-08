@@ -9,30 +9,30 @@
 
 import _ from 'lodash';
 import processFunctionDefinition from './process_function_definition';
-import { seriesFunctions } from '../series_functions';
 import { fitFunctions } from '../fit_functions';
+import { seriesFunctions } from '../series_functions';
 
-const functionModules = {
+// Static module registry replaces the dynamic require() + globSync approach.
+// This is compatible with ESM/Vite and avoids circular dependency issues.
+const functionModules: Record<string, Record<string, any>> = {
   series_functions: seriesFunctions,
-  // Handle trailing slash variant
   'series_functions/': seriesFunctions,
   fit_functions: fitFunctions,
 };
 
-export default function loadFunctions(directory) {
+export default function loadFunctions(directory: string): Record<string, any> {
   const moduleMap = functionModules[directory];
-
   if (!moduleMap) {
     throw new Error(`Unknown function directory: ${directory}`);
   }
 
-  // For fit_functions, return as-is (they're simple functions keyed by name)
+  // Fit functions are returned as-is (they're simple transform functions)
   if (directory === 'fit_functions') {
     return moduleMap;
   }
 
-  // For series_functions, process each function definition to handle aliases
-  const functions = {};
+  // Process series functions through processFunctionDefinition to register aliases
+  const functions: Record<string, any> = {};
   _.each(moduleMap, function (func) {
     _.assign(functions, processFunctionDefinition(func));
   });
