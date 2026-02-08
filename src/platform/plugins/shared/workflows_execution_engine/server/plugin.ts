@@ -16,12 +16,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -31,6 +31,7 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
+import { UsageReportingService, WorkflowsMeteringService } from './metering';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -67,13 +68,16 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly kibanaVersion: string;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
+  private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -89,6 +93,25 @@ export class WorkflowsExecutionEnginePlugin
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
+
+    // Initialize metering if enabled and Usage API is configured
+    if (this.config.metering.enabled && this.config.metering.usageApi.url) {
+      const usageReportingService = new UsageReportingService(
+        this.config.metering,
+        this.kibanaVersion
+      );
+      this.meteringService = new WorkflowsMeteringService(
+        usageReportingService,
+        this.logger.get('metering')
+      );
+      this.logger.debug('Workflows metering service initialized');
+    } else {
+      this.logger.debug(
+        'Workflows metering service not initialized: ' +
+          `enabled=${this.config.metering.enabled}, ` +
+          `usageApiUrl=${this.config.metering.usageApi.url ? 'configured' : 'not configured'}`
+      );
+    }
 
     plugins.taskManager.registerTaskDefinitions({
       'workflow:run': {
@@ -150,6 +173,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest,
                 dependencies,
+                meteringService: this.meteringService,
               });
             },
             cancel: async () => {
@@ -224,6 +248,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest,
                 dependencies,
+                meteringService: this.meteringService,
               });
             },
             cancel: async () => {
@@ -410,6 +435,7 @@ export class WorkflowsExecutionEnginePlugin
                 config,
                 fakeRequest,
                 dependencies,
+                meteringService: this.meteringService,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -561,6 +587,7 @@ export class WorkflowsExecutionEnginePlugin
           config: this.config,
           fakeRequest: request,
           dependencies,
+          meteringService: this.meteringService,
         });
       } else {
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);

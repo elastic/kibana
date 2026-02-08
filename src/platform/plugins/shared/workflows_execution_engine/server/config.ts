@@ -11,6 +11,29 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
+const tlsConfigSchema = schema.object({
+  certificate: schema.string(),
+  key: schema.string(),
+  ca: schema.string(),
+});
+
+const meteringConfigSchema = schema.object({
+  enabled: schema.boolean({
+    defaultValue: true,
+    meta: {
+      description:
+        'When enabled, reports workflow execution usage records to the Usage API for billing. ' +
+        'Requires a cloud environment (Serverless or ECH) with a valid projectId or deploymentId.',
+    },
+  }),
+  usageApi: schema.object({
+    url: schema.maybe(schema.string()),
+    tls: schema.maybe(tlsConfigSchema),
+  }),
+});
+
+export type MeteringConfig = TypeOf<typeof meteringConfigSchema>;
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   logging: schema.object({
@@ -32,6 +55,7 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
+  metering: meteringConfigSchema,
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
