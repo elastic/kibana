@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/no-nth-methods */
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { platformEngineerRole } from '../common/roles';
@@ -203,7 +204,7 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
     });
   });
 
-  // eslint-disable-next-line playwright/max-nested-describe
+  // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
   test.describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     let policyId: string | undefined;

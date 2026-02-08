@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable playwright/no-nth-methods */
+/* eslint-disable playwright/no-nth-methods, playwright/no-conditional-expect */
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';

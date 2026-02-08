@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/no-nth-methods */
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole, platformEngineerRole } from '../common/roles';
@@ -136,7 +137,7 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     }
   );
 
-  // eslint-disable-next-line playwright/max-nested-describe
+  // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
   test.describe('Load prebuilt packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
@@ -195,7 +196,7 @@ test.describe.skip('ALL - Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     });
   });
 
-  // eslint-disable-next-line playwright/max-nested-describe
+  // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
   test.describe('Global packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginWithCustomRole(platformEngineerRole);

@@ -73,12 +73,10 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
     page,
     pageObjects,
   }) => {
-    let initialNotificationCount: number;
-
     await page.testSubj.locator('expand-event').first().click();
     const notificationBadge = page.testSubj.locator('response-actions-notification');
     await expect(notificationBadge).not.toHaveText('0');
-    initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
+    const initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
 
     // Take osquery action with params
     await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/no-nth-methods */
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/no-nth-methods */
 import { expect } from '@kbn/scout';
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
 import { waitForPageReady } from './constants';
