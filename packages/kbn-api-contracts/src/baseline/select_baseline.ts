@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { resolve } from 'path';
+import semver from 'semver';
+
+export type Distribution = 'stack' | 'serverless';
+
+export interface BaselineSelection {
+  distribution: Distribution;
+  path: string;
+}
+
+export function selectBaseline(
+  distribution: Distribution,
+  version?: string,
+  overridePath?: string
+): BaselineSelection {
+  if (overridePath) {
+    return { distribution, path: overridePath };
+  }
+
+  const baselinesDir = resolve(__dirname, '../../baselines');
+
+  if (distribution === 'serverless') {
+    return {
+      distribution,
+      path: resolve(baselinesDir, 'serverless/current.yaml'),
+    };
+  }
+
+  if (!version) {
+    throw new Error('Version is required for stack baseline selection');
+  }
+
+  const parsed = semver.parse(version);
+  if (!parsed) {
+    throw new Error(`Invalid semver version: ${version}`);
+  }
+
+  const minorVersion = `${parsed.major}.${parsed.minor}`;
+  return {
+    distribution,
+    path: resolve(baselinesDir, `stack/${minorVersion}.yaml`),
+  };
+}
