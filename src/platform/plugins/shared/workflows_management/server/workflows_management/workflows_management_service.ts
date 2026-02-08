@@ -180,7 +180,7 @@ export class WorkflowsService {
    */
   private prepareWorkflowDocument(
     workflow: CreateWorkflowCommand,
-    zodSchema: z.core.$ZodType,
+    zodSchema: z.ZodType,
     authenticatedUser: string,
     now: Date,
     spaceId: string
