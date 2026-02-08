@@ -4,6 +4,7 @@ exports[`IndicesList should render normally 1`] = `
 <div>
   <table
     class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
+    id="generated-id_indices-list-table"
     tabindex="-1"
   >
     <tbody>
@@ -71,17 +72,17 @@ exports[`IndicesList should render normally 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
+    class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class="euiPopover emotion-euiPopover-inline-block"
-        id="customizablePagination"
       >
         <button
-          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text"
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+          data-test-subj="tablePaginationPopoverButton"
           type="button"
         >
           <span
@@ -90,7 +91,9 @@ exports[`IndicesList should render normally 1`] = `
             <span
               class="eui-textTruncate euiButtonEmpty__text"
             >
-              Rows per page: 10
+              Rows per page
+              : 
+              10
             </span>
             <span
               color="inherit"
@@ -99,6 +102,78 @@ exports[`IndicesList should render normally 1`] = `
           </span>
         </button>
       </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <nav
+        aria-label="Indices list pagination"
+        class="euiPagination emotion-euiPagination"
+      >
+        <span
+          aria-atomic="true"
+          aria-relevant="additions text"
+          class="emotion-euiScreenReaderOnly"
+          role="status"
+        >
+          Page 1 of 1
+        </span>
+        <button
+          aria-label="Previous page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-previous"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowLeft"
+          />
+        </button>
+        <ul
+          class="euiPagination__list emotion-euiPagination__list"
+        >
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-controls="generated-id_indices-list-table"
+              aria-current="page"
+              aria-label="Page 1 of 1"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+              data-test-subj="pagination-button-0"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+        <button
+          aria-label="Next page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-next"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </nav>
     </div>
   </div>
 </div>

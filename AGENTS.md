@@ -23,12 +23,19 @@
 
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
+- Config is auto-discovered from the test file path (walks up to nearest `jest.config.js`). Simplest usage:
+  `yarn test:jest src/core/packages/http/server-internal/src/http_server.test.ts`
+- Only one `--config` per run. To test multiple packages, run separate commands.
 
 ### Jest integration
 `yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
+- Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
 ### Type check
 `yarn test:type_check [--project path/to/tsconfig.json]`
+- Without `--project` it checks **all** projects (very slow). Always scope to a single project:
+  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+- Only one `--project` per run. To check multiple packages, run separate commands.
 
 ### Function Test Runner (FTR)
 `yarn test:ftr [--config <file1> [--config <file2> ...]]`
@@ -52,7 +59,6 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
-- `yarn llm` runs ESLint `--fix` on changed JS/TS files and may apply formatting-style fixes.
 - Prefer single quotes in TS/JS unless the file uses double quotes.
 
 ### Naming
