@@ -427,7 +427,7 @@ export function StreamsTreeTable({
                       content={i18n.translate(
                         'xpack.streams.streamsTreeTable.deprecatedLogsBadgeTooltip',
                         {
-                          defaultMessage: 'The logs stream is replaced by logs.otel and logs.ecs',
+                          defaultMessage: 'The logs root stream is deprecated.',
                         }
                       )}
                     >
@@ -438,7 +438,7 @@ export function StreamsTreeTable({
                           onClickAriaLabel={i18n.translate(
                             'xpack.streams.streamsTreeTable.deprecatedLogsBadgeAriaLabel',
                             {
-                              defaultMessage: 'Logs stream is deprecated',
+                              defaultMessage: 'The logs root stream is deprecated.',
                             }
                           )}
                         >

@@ -8,8 +8,10 @@
 import React from 'react';
 import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { getLegacyLogsStatus } from './utils';
+import { LEGACY_LOGS_CALLOUT_DISMISSED_KEY } from './constants';
 
 interface LegacyLogsDeprecationCalloutProps {
   streamsStatus: WiredStreamsStatus | undefined;
@@ -20,11 +22,17 @@ export function LegacyLogsDeprecationCallout({
   streamsStatus,
   openFlyout,
 }: LegacyLogsDeprecationCalloutProps) {
+  const [isDismissed, setIsDismissed] = useLocalStorage(LEGACY_LOGS_CALLOUT_DISMISSED_KEY, false);
+
   const shouldShowCallout = React.useMemo(() => {
-    if (!streamsStatus) return false;
+    if (isDismissed || !streamsStatus) return false;
     const { hasLegacyLogs, hasNewStreams } = getLegacyLogsStatus(streamsStatus);
     return hasLegacyLogs && !hasNewStreams;
-  }, [streamsStatus]);
+  }, [isDismissed, streamsStatus]);
+
+  const handleDismiss = React.useCallback(() => {
+    setIsDismissed(true);
+  }, [setIsDismissed]);
 
   if (!shouldShowCallout) {
     return null;
@@ -34,17 +42,18 @@ export function LegacyLogsDeprecationCallout({
     <>
       <EuiCallOut
         title={i18n.translate('xpack.streams.legacyLogsDeprecationCallout.title', {
-          defaultMessage: 'Welcome to Streams 9.4',
+          defaultMessage: 'New root streams for 9.4',
         })}
         color="warning"
         iconType="warning"
-        size="m"
+        size="s"
+        onDismiss={handleDismiss}
         data-test-subj="legacyLogsDeprecationCallout"
       >
         <p>
           {i18n.translate('xpack.streams.legacyLogsDeprecationCallout.message', {
             defaultMessage:
-              "You've upgraded your Kibana and Elasticsearch, and from that point we now split Streams into two main roots: ECS and OTEL",
+              'To improve data storage, wired streams now have two root streams, logs.ecs and logs.otel. You need to enable wired streams to align your configuration with this update.',
           })}
         </p>
         <EuiButton
@@ -54,7 +63,7 @@ export function LegacyLogsDeprecationCallout({
           data-test-subj="legacyLogsDeprecationCalloutEnableButton"
         >
           {i18n.translate('xpack.streams.legacyLogsDeprecationCallout.enableButton', {
-            defaultMessage: 'Enable',
+            defaultMessage: 'Enable wired streams',
           })}
         </EuiButton>
       </EuiCallOut>

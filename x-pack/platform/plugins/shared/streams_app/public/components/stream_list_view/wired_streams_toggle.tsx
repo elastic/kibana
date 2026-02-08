@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSwitch, EuiLoadingSpinner, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { LOGS_ECS_STREAM_NAME, LOGS_OTEL_STREAM_NAME } from '@kbn/streams-schema';
+import { getLegacyLogsStatus } from './utils';
 
 interface WiredStreamsToggleProps {
   streamsStatus: WiredStreamsStatus | undefined;
@@ -34,11 +35,15 @@ export function WiredStreamsToggle({
     );
   }, [streamsStatus]);
 
+  const { hasLegacyLogs, hasNewStreams } = getLegacyLogsStatus(streamsStatus);
+
   // Toggle is ON ONLY when both new streams are enabled AND no conflicts
   const isToggleOn = React.useMemo(() => {
     if (!streamsStatus || hasAnyConflict) return false;
-    return streamsStatus['logs.otel'] === true && streamsStatus['logs.ecs'] === true;
-  }, [streamsStatus, hasAnyConflict]);
+    return hasNewStreams;
+  }, [streamsStatus, hasAnyConflict, hasNewStreams]);
+
+  const shouldShowConflictCallout = hasAnyConflict || (hasLegacyLogs && !hasNewStreams);
 
   if (loading) {
     return <EuiLoadingSpinner size="l" />;
@@ -55,6 +60,28 @@ export function WiredStreamsToggle({
         data-test-subj="streamsWiredSwitch"
         disabled={disabled}
       />
+      <EuiSpacer size="m" />
+      {shouldShowConflictCallout && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.streams.streamsListView.conflictCalloutTitle', {
+              defaultMessage: 'Configuration conflict',
+            })}
+            color="warning"
+            iconType="warning"
+            size="s"
+            announceOnMount
+            data-test-subj="streamsConflictCallout"
+          >
+            <p>
+              {i18n.translate('xpack.streams.streamsListView.conflictCalloutMessage', {
+                defaultMessage:
+                  'Enable wired streams to align your Streams configuration with the current Elasticsearch state.',
+              })}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
     </>
   );
 }
