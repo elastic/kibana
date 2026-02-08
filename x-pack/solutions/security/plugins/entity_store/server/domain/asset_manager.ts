@@ -9,8 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from './definitions/registry';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import type {
+  EntityType,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type {
@@ -192,7 +195,7 @@ export class AssetManager {
     ] = await Promise.all([
       this.getEntityDefinitionComponent(definition),
       this.getIndexTemplateComponents(definition),
-      this.getIndexComponents(type),
+      this.getIndexComponents(),
       this.getComponentTemplateComponents(definition),
       this.getIlmPolicyComponents(),
       this.getExtractEntityTaskComponent(type),
@@ -220,8 +223,8 @@ export class AssetManager {
     definition: ManagedEntityDefinition
   ): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
-    const latestId = getLatestIndexTemplateId(definition);
-    const updatesId = getUpdatesIndexTemplateId(definition);
+    const latestId = getLatestIndexTemplateId(this.namespace);
+    const updatesId = getUpdatesIndexTemplateId(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: latestId })),
       this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: updatesId })),
@@ -232,10 +235,10 @@ export class AssetManager {
     ];
   }
 
-  private async getIndexComponents(type: EntityType): Promise<EngineComponentStatus[]> {
+  private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
-    const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
-    const updatesDataStreamName = getUpdatesEntitiesDataStreamName(type, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.esClient.indices.exists({ index: latestIndex }),
       this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
@@ -250,8 +253,8 @@ export class AssetManager {
     definition: ManagedEntityDefinition
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
-    const latestName = getComponentTemplateName(definition.id);
-    const updatesName = getUpdatesComponentTemplateName(definition.id);
+    const latestName = getComponentTemplateName(definition.type, this.namespace);
+    const updatesName = getUpdatesComponentTemplateName(definition.type, this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: latestName })),
       this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: updatesName })),

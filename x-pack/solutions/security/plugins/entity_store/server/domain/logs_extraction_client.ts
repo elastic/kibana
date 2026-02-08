@@ -10,8 +10,11 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
-import { getEntityDefinition } from './definitions/registry';
+import type {
+  EntityType,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
   HASHED_ID,
@@ -131,7 +134,7 @@ export class LogsExtractionClient {
       engineDescriptor.type,
       engineDescriptor.logExtractionState.additionalIndexPattern
     );
-    const latestIndex = getLatestEntitiesIndexName(engineDescriptor.type, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
     const { fromDateISO, toDateISO } =
       opts?.specificWindow ||
@@ -234,7 +237,7 @@ export class LogsExtractionClient {
   }
 
   private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string) {
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
+    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const cleanAdditionalIndicesPatterns = additionalIndexPatterns
       .split(',')
       .filter((index) => index !== '');
