@@ -11,8 +11,8 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
+import type { FC } from 'react';
 import type { SerializedDrilldowns, DrilldownState } from '../../server';
-import { FC } from 'react';
 
 export type DrilldownActionState = DrilldownState & { actionId: string };
 
@@ -77,12 +77,12 @@ export type DrilldownDefinition<
   supportedTriggers: string[];
 };
 
+export type DrilldownRegistryEntry = [string, () => Promise<DrilldownDefinition>];
+
 /**
  * Props provided to `Editor` component on every re-render.
  */
-export interface EditorProps<
-  TDrilldownState extends DrilldownState = DrilldownState,
-> {
+export interface EditorProps<TDrilldownState extends DrilldownState = DrilldownState> {
   /**
    * Current (latest) state.
    */

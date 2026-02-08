@@ -24,7 +24,7 @@ import {
 } from './i18n';
 import { DrilldownManager } from './drilldown_manager';
 import { useTableItems } from '../hooks/use_table_items';
-import { DrilldownState } from '../../../../server/drilldowns/types';
+import type { DrilldownState } from '../../../../server/drilldowns/types';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -97,7 +97,7 @@ export class DrilldownsManager {
       ({ isCompatibleLicense }) => !isCompatibleLicense
     );
 
-    /*this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
+    /* this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
       this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
     );
 
@@ -186,7 +186,7 @@ export class DrilldownsManager {
    * Get action factory context, which also contains a custom place context
    * provided by the user who triggered rendering of the <DrilldownManager>.
    */
-  /*public getActionFactoryContext(): BaseActionFactoryContext {
+  /* public getActionFactoryContext(): BaseActionFactoryContext {
     const placeContext = this.deps.placeContext ?? [];
     const context: BaseActionFactoryContext = {
       ...placeContext,
@@ -196,7 +196,7 @@ export class DrilldownsManager {
     return context;
   }*/
 
-  /*public getCompatibleActionFactories(
+  /* public getCompatibleActionFactories(
     context: BaseActionFactoryContext
   ): Observable<ActionFactory[] | undefined> {
     const compatibleActionFactories$ = new BehaviorSubject<undefined | ActionFactory[]>(undefined);
@@ -235,10 +235,7 @@ export class DrilldownsManager {
     const serializedDrilldown = drilldown.serialize();
 
     try {
-      setDrilldowns([
-        ...drilldowns$.getValue(),
-        serializedDrilldown
-      ]);
+      setDrilldowns([...drilldowns$.getValue(), serializedDrilldown]);
       toastService.addSuccess({
         title: toastDrilldownCreated.title(serializedDrilldown.label),
         text: toastDrilldownCreated.text,
@@ -265,9 +262,7 @@ export class DrilldownsManager {
   public readonly onDelete = (ids: string[]) => {
     const { drilldowns$, setDrilldowns, toastService } = this.deps;
     try {
-      setDrilldowns([
-        ...drilldowns$.getValue().filter(({ actionId }) => !ids.includes(actionId))
-      ])
+      setDrilldowns([...drilldowns$.getValue().filter(({ actionId }) => !ids.includes(actionId))]);
       this.deps.toastService.addSuccess(
         ids.length === 1
           ? {
@@ -301,12 +296,9 @@ export class DrilldownsManager {
       .filter(Boolean) as DrilldownState[];
 
     if (clonedDrilldowns.length) {
-      setDrilldowns([
-        ...drilldowns$.getValue(),
-        ...clonedDrilldowns
-      ]);
+      setDrilldowns([...drilldowns$.getValue(), ...clonedDrilldowns]);
     }
-    
+
     this.lastCloneRecord = {
       time: Date.now(),
       templateIds,
@@ -356,7 +348,9 @@ export class DrilldownsManager {
 
   public readonly cloneDrilldown = async (actionId: string) => {
     const { drilldowns$, factories } = this.deps;
-    const drilldownState = drilldowns$.getValue().find((drilldown) => drilldown.actionId === actionId);
+    const drilldownState = drilldowns$
+      .getValue()
+      .find((drilldown) => drilldown.actionId === actionId);
     if (!drilldownState) return null;
 
     const factory = factories.find(({ type }) => type === drilldownState.type);
@@ -378,7 +372,9 @@ export class DrilldownsManager {
    */
   public createDrilldownManager(actionId: string): null | DrilldownManager {
     const { drilldowns$, factories, triggers } = this.deps;
-    const drilldownState = drilldowns$.getValue().find((drilldown) => drilldown.actionId === actionId);
+    const drilldownState = drilldowns$
+      .getValue()
+      .find((drilldown) => drilldown.actionId === actionId);
     if (!drilldownState) return null;
 
     const factory = factories.find(({ type }) => type === drilldownState.type);
@@ -403,12 +399,10 @@ export class DrilldownsManager {
     const { drilldowns$, setDrilldowns, toastService } = this.deps;
     try {
       const drilldownState = drilldown.serialize();
-      setDrilldowns(
-        [
-          ...drilldowns$.getValue().filter(drilldown => drilldown.actionId !== actionId),
-          drilldownState
-        ]
-      )
+      setDrilldowns([
+        ...drilldowns$.getValue().filter((d) => d.actionId !== actionId),
+        drilldownState,
+      ]);
       toastService.addSuccess({
         title: toastDrilldownEdited.title(drilldownState.label),
         text: toastDrilldownEdited.text,
@@ -432,8 +426,14 @@ export class DrilldownsManager {
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
   // public readonly useActionFactory = () =>
   //  useObservable(this.actionFactory$, this.actionFactory$.getValue());
-  public readonly useTableItems = () => useTableItems(this.deps.drilldowns$, this.deps.factories, this.deps.getTrigger, this.deps.triggers);
-  /*public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
+  public readonly useTableItems = () =>
+    useTableItems(
+      this.deps.drilldowns$,
+      this.deps.factories,
+      this.deps.getTrigger,
+      this.deps.triggers
+    );
+  /* public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
     useObservable(
       useMemo(() => this.getCompatibleActionFactories(context), [context]),
       undefined

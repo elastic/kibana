@@ -8,24 +8,23 @@
  */
 
 import { useMemo } from 'react';
-import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { DrilldownActionState } from '../../types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { DrilldownActionState } from '../../types';
 import { insufficientLicenseLevel, invalidDrilldownType } from '../state/i18n';
-import { DrilldownsManagerDeps } from '../state';
+import type { DrilldownsManagerDeps } from '../state';
 
 export const useTableItems = (
   drilldowns$: PublishingSubject<DrilldownActionState[]>,
   factories: DrilldownsManagerDeps['factories'],
   getTrigger: DrilldownsManagerDeps['getTrigger'],
-  triggers: DrilldownsManagerDeps['triggers'],
+  triggers: DrilldownsManagerDeps['triggers']
 ) => {
   const drilldowns = useStateFromPublishingSubject(drilldowns$);
 
   const items = useMemo(() => {
     return drilldowns.map((drilldownState) => {
-      const factory = factories.find(
-        ({ type }) => type === drilldownState.type
-      );
+      const factory = factories.find(({ type }) => type === drilldownState.type);
       return {
         id: drilldownState.actionId,
         drilldownName: drilldownState.label,
@@ -39,8 +38,8 @@ export const useTableItems = (
         trigger: getTrigger(drilldownState.trigger),
         triggerIncompatible: !triggers.find((t) => t === drilldownState.trigger),
       };
-    })
-  }, [drilldowns]);
+    });
+  }, [drilldowns, factories, getTrigger, triggers]);
 
-  return items
+  return items;
 };

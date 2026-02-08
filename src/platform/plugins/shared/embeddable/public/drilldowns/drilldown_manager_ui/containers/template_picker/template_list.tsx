@@ -25,7 +25,9 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
     DrilldownTemplateTableItem[]
   >(() => {
     return items.map((item) => {
-      const factory = drilldowns.deps.factories.find(({ type }) => type === item.drilldownState.type);
+      const factory = drilldowns.deps.factories.find(
+        ({ type }) => type === item.drilldownState.type
+      );
       const trigger = drilldowns.deps.getTrigger(item.trigger);
       const tableItem: DrilldownTemplateTableItem = {
         id: item.id,

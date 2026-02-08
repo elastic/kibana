@@ -9,7 +9,7 @@
 
 import { asyncForEach } from '@kbn/std';
 import type { DrilldownDefinition } from './types';
-import { isCompatibleLicense } from './is_compatible_license';
+import { isCompatibleLicense } from '../kibana_services';
 
 export async function getDrilldownTriggers(
   drilldownGetFns: Array<() => Promise<DrilldownDefinition>>

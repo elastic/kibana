@@ -12,8 +12,8 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import { useSyncObservable } from '../hooks/use_sync_observable';
-import { DrilldownState } from '../../../../server/drilldowns/types';
-import { DrilldownFactory } from '../types';
+import type { DrilldownState } from '../../../../server/drilldowns/types';
+import type { DrilldownFactory } from '../types';
 
 export interface DrilldownManagerDeps {
   /**
@@ -111,9 +111,7 @@ export class DrilldownManager {
     this.trigger$ = new BehaviorSubject<string | undefined>(trigger);
     this.config$ = new BehaviorSubject<Partial<DrilldownState>>(config);
 
-    this.uiTriggers = this.factory.supportedTriggers.filter((trigger) =>
-      triggers.includes(trigger)
-    );
+    this.uiTriggers = this.factory.supportedTriggers.filter((t) => triggers.includes(t));
 
     // Pre-select a trigger if there is only one trigger for user to choose from.
     // In case there is only one possible trigger, UI will not display a trigger picker.

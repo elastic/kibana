@@ -25,8 +25,7 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ drilld
   const triggerPickerProps: TriggerPickerProps = React.useMemo(
     () => ({
       items: drilldown.uiTriggers.map((id) => {
-        const trigger = drilldowns.deps.getTrigger(id);
-        return trigger;
+        return drilldowns.deps.getTrigger(id);
       }),
       selected: trigger,
       onChange: drilldown.setTrigger,

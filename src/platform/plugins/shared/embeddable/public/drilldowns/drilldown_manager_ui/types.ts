@@ -10,8 +10,8 @@
 import type { ToastsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { DrilldownDefinition, HasDrilldowns } from '../types';
-import { DrilldownState } from '../../../server/drilldowns/types';
+import type { DrilldownDefinition, HasDrilldowns } from '../types';
+import type { DrilldownState } from '../../../server/drilldowns/types';
 
 /**
  * This are props of the public <DrilldownManager> React component which is
@@ -19,6 +19,11 @@ import { DrilldownState } from '../../../server/drilldowns/types';
  * the public <DrilldownManager> is re-rendered.
  */
 export interface PublicDrilldownsManagerProps extends HasDrilldowns {
+  /**
+   * List of registered drilldowns
+   */
+  factories: DrilldownFactory[];
+
   /**
    * Initial screen which Drilldown Manager should display when it first opens.
    * Afterwards the state of the currently visible screen is controlled by the
@@ -105,18 +110,20 @@ export interface DrilldownTemplate {
   drilldownState: DrilldownState;
 }
 
-export interface DrilldownFactory extends Pick<DrilldownDefinition, 'displayName' | 'Editor' | 'euiIcon' |  'getInitialState' | 'isStateValid' | 'supportedTriggers'> { type: string, isCompatibleLicense: boolean }
+export interface DrilldownFactory
+  extends Pick<
+    DrilldownDefinition,
+    'displayName' | 'Editor' | 'euiIcon' | 'getInitialState' | 'isStateValid' | 'supportedTriggers'
+  > {
+  type: string;
+  isCompatibleLicense: boolean;
+}
 
 /**
  * These are static global dependencies of the <DrilldownManager> wired in
  * during the setup life-cycle of the plugin.
  */
 export interface DrilldownsManagerDependencies {
-  /**
-   * List of registered drilldowns
-   */
-  factories: DrilldownFactory[];
-
   /**
    * Trigger getter from UI Actions trigger registry.
    */

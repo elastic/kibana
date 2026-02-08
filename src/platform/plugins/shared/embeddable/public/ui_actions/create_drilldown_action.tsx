@@ -28,7 +28,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { HasDrilldowns } from '../drilldowns/types';
-import { getDrilldownTriggers } from '../drilldowns/registry';
+import { getDrilldownRegistryEntries, getDrilldownTriggers } from '../drilldowns/registry';
 import { getEmbeddableTriggers } from './get_embeddable_triggers';
 import { core } from '../kibana_services';
 import { CREATE_DRILLDOWN_ACTION, DRILLDOWN_ACTION_GROUP } from './constants';
@@ -78,7 +78,23 @@ export const createDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        return <div>Create drilldowns placehodler</div>;
+        const { DrilldownManager, getDrilldownFactories } = await import(
+          '../drilldowns/drilldown_manager_ui'
+        );
+        const factories = await getDrilldownFactories(getDrilldownRegistryEntries());
+
+        return (
+          <DrilldownManager
+            closeAfterCreate
+            initialRoute={'/new'}
+            drilldowns$={embeddable.drilldowns$}
+            setDrilldowns={embeddable.setDrilldowns}
+            triggers={getEmbeddableTriggers(embeddable)}
+            templates={[]}
+            onClose={closeFlyout}
+            factories={factories}
+          />
+        );
       },
       flyoutProps: {
         'data-test-subj': 'createDrilldownFlyout',

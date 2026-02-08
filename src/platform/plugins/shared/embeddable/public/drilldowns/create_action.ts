@@ -10,9 +10,8 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { getDrilldown, hasDrilldown } from './registry';
-import { licensing, uiActions } from '../kibana_services';
+import { isCompatibleLicense, licensing, uiActions } from '../kibana_services';
 import type { DrilldownActionState } from './types';
-import { isCompatibleLicense } from './is_compatible_license';
 
 export function createAction(embeddableUuid: string, drilldownState: DrilldownActionState) {
   const { actionId, label, trigger, type } = drilldownState;

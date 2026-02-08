@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 
+import type { LicenseType } from '@kbn/licensing-types';
 import type { EmbeddableStart, EmbeddableStartDependencies } from './types';
 
 export let core: CoreStart;
@@ -53,3 +54,11 @@ export const setKibanaServices = (
 
   servicesReady$.next(true);
 };
+
+// isCompatibleLicense used in multiple async modules
+// Putting into page load to avoid having it split into a seperate async module
+export async function isCompatibleLicense(minimalLicense?: LicenseType) {
+  if (!minimalLicense || !licensing) return true;
+  const license = await licensing?.getLicense();
+  return license.isAvailable && license.isActive && license.hasAtLeast(minimalLicense);
+}
