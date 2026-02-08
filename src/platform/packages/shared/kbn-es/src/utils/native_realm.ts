@@ -7,21 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const chalk = require('chalk');
-
-const { log: defaultLog } = require('./log');
+import chalk from 'chalk';
+import { log as defaultLog } from './log';
 
 export const SYSTEM_INDICES_SUPERUSER =
   process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser';
 
-exports.NativeRealm = class NativeRealm {
-  constructor({ elasticPassword, log = defaultLog, client }) {
+interface NativeRealmOptions {
+  elasticPassword: string;
+  log?: typeof defaultLog;
+  client: any;
+}
+
+interface RetryOpts {
+  attempt?: number;
+  maxAttempts?: number;
+}
+
+export class NativeRealm {
+  private _elasticPassword: string;
+  private _client: any;
+  private _log: typeof defaultLog;
+
+  constructor({ elasticPassword, log = defaultLog, client }: NativeRealmOptions) {
     this._elasticPassword = elasticPassword;
     this._client = client;
     this._log = log;
   }
 
-  async setPassword(username, password = this._elasticPassword, retryOpts = {}) {
+  async setPassword(
+    username: string,
+    password: string = this._elasticPassword,
+    retryOpts: RetryOpts = {}
+  ) {
     await this._autoRetry(retryOpts, async () => {
       try {
         await this._client.security.changePassword({
@@ -29,7 +47,7 @@ exports.NativeRealm = class NativeRealm {
           refresh: 'wait_for',
           password,
         });
-      } catch (err) {
+      } catch (err: any) {
         const isAnonymousUserPasswordChangeError =
           err.statusCode === 400 &&
           err.body &&
@@ -46,7 +64,7 @@ exports.NativeRealm = class NativeRealm {
     });
   }
 
-  async setPasswords(options) {
+  async setPasswords(options: Record<string, string>) {
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to set native realm passwords');
       return;
@@ -62,7 +80,7 @@ exports.NativeRealm = class NativeRealm {
     ]);
   }
 
-  async getReservedUsers(retryOpts = {}) {
+  async getReservedUsers(retryOpts: RetryOpts = {}): Promise<string[]> {
     return await this._autoRetry(retryOpts, async () => {
       const resp = await this._client.security.getUser();
       const usernames = Object.keys(resp).filter((user) => resp[user].metadata._reserved === true);
@@ -75,13 +93,13 @@ exports.NativeRealm = class NativeRealm {
     });
   }
 
-  async isSecurityEnabled(retryOpts = {}) {
+  async isSecurityEnabled(retryOpts: RetryOpts = {}): Promise<boolean> {
     try {
       return await this._autoRetry(retryOpts, async () => {
         const { features } = await this._client.xpack.info({ categories: 'features' });
         return features.security && features.security.enabled && features.security.available;
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error.meta && error.meta.statusCode === 400) {
         return false;
       }
@@ -90,7 +108,7 @@ exports.NativeRealm = class NativeRealm {
     }
   }
 
-  async _autoRetry(opts, fn) {
+  private async _autoRetry<T>(opts: RetryOpts, fn: (attempt: number) => Promise<T>): Promise<T> {
     const { attempt = 1, maxAttempts = 3 } = opts;
 
     try {
@@ -112,7 +130,7 @@ exports.NativeRealm = class NativeRealm {
     }
   }
 
-  async _createSystemIndicesUser() {
+  private async _createSystemIndicesUser() {
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to create role and user');
       return;
@@ -146,4 +164,4 @@ exports.NativeRealm = class NativeRealm {
       roles: [SYSTEM_INDICES_SUPERUSER],
     });
   }
-};
+}

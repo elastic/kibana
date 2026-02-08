@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
-const Path = require('path');
+import Fs from 'fs';
+import Path from 'path';
 
 /**
  * @param {string} path
  * @returns {any}
  */
-function loadJsonFile(path) {
+function loadJsonFile(path: string): any {
   try {
     return JSON.parse(Fs.readFileSync(path, 'utf8'));
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       throw new Error(`Missing file: ${path}`);
     }
@@ -28,6 +28,4 @@ function loadJsonFile(path) {
   }
 }
 
-module.exports = {
-  loadJsonFile,
-};
+export { loadJsonFile };

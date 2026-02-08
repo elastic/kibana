@@ -8,27 +8,26 @@
  */
 
 module.exports = {
-  /** @returns {import('@kbn/repo-packages')} */
-  ['@kbn/repo-packages']() {
+  ['@kbn/repo-packages'](): any {
     // we need to load this package before we install node modules so we can't use @kbn/* imports here
     // eslint-disable-next-line import/no-dynamic-require
     return require('../../../../../' + 'src/platform/packages/private/kbn-repo-packages');
   },
 
   // NOTE: babel-register removed - these packages must be pre-built ESM
-  ['@kbn/ci-stats-reporter']() {
+  ['@kbn/ci-stats-reporter'](): any {
     return require('@kbn/ci-stats-reporter');
   },
 
-  ['@kbn/yarn-lock-validator']() {
+  ['@kbn/yarn-lock-validator'](): any {
     return require('@kbn/yarn-lock-validator');
   },
 
-  ['@kbn/sort-package-json']() {
+  ['@kbn/sort-package-json'](): any {
     return require('@kbn/sort-package-json');
   },
 
-  ['@kbn/get-repo-files']() {
+  ['@kbn/get-repo-files'](): any {
     return require('@kbn/get-repo-files');
   },
 };

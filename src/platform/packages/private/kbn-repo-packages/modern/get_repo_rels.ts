@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const Fs = require('fs');
-const ChildProcess = require('child_process');
-const { promisify } = require('util');
+import Path from 'path';
+import Fs from 'fs';
+import ChildProcess from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(ChildProcess.execFile);
 
@@ -19,8 +19,8 @@ const execAsync = promisify(ChildProcess.execFile);
  * @param {string} output
  * @returns {Iterable<string>}
  */
-function parseLsFilesOutput(repoRoot, output) {
-  const files = new Set();
+function parseLsFilesOutput(repoRoot: string, output: string): Iterable<string> {
+  const files = new Set<string>();
 
   for (const line of output.split('\n').map((l) => l.trim())) {
     if (!line) {
@@ -48,7 +48,11 @@ function parseLsFilesOutput(repoRoot, output) {
  * @param {string[] | undefined} exclude
  * @returns {string[]}
  */
-function getGitFlags(repoRoot, include = undefined, exclude = undefined) {
+function getGitFlags(
+  repoRoot: string,
+  include: string[] | undefined = undefined,
+  exclude: string[] | undefined = undefined
+): string[] {
   return [
     'ls-files',
     '-comt',
@@ -66,7 +70,11 @@ function getGitFlags(repoRoot, include = undefined, exclude = undefined) {
  * @param {string[] | undefined} exclude exclude specific absolute paths
  * @returns {Promise<Iterable<string>>}
  */
-async function getRepoRels(repoRoot, include = undefined, exclude = undefined) {
+async function getRepoRels(
+  repoRoot: string,
+  include: string[] | undefined = undefined,
+  exclude: string[] | undefined = undefined
+): Promise<Iterable<string>> {
   const proc = await execAsync('git', getGitFlags(repoRoot, include, exclude), {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -84,7 +92,11 @@ async function getRepoRels(repoRoot, include = undefined, exclude = undefined) {
  * @param {string[] | undefined} exclude exclude specific absolute paths
  * @returns {Iterable<string>}
  */
-function getRepoRelsSync(repoRoot, include = undefined, exclude = undefined) {
+function getRepoRelsSync(
+  repoRoot: string,
+  include: string[] | undefined = undefined,
+  exclude: string[] | undefined = undefined
+): Iterable<string> {
   const stdout = ChildProcess.execFileSync('git', getGitFlags(repoRoot, include, exclude), {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -93,4 +105,4 @@ function getRepoRelsSync(repoRoot, include = undefined, exclude = undefined) {
   return parseLsFilesOutput(repoRoot, stdout);
 }
 
-module.exports = { getRepoRels, getRepoRelsSync };
+export { getRepoRels, getRepoRelsSync };

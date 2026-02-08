@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
+import Path from 'path';
 
 /**
  * @param {{ rootDir: string }} options
  * @returns {string[]}
  */
-function getPluginSearchPaths({ rootDir }) {
-  return [Path.resolve(rootDir, '../kibana-extra'), Path.resolve(rootDir, 'plugins')];
+function getPluginSearchPaths(options: { rootDir: string }): string[] {
+  return [
+    Path.resolve(options.rootDir, '../kibana-extra'),
+    Path.resolve(options.rootDir, 'plugins'),
+  ];
 }
 
 /**
@@ -22,7 +25,7 @@ function getPluginSearchPaths({ rootDir }) {
  * @param {import('./types').PluginCategoryInfo} category
  * @returns {boolean}
  */
-function matchCategory(selector, category) {
+function matchCategory(selector: any, category: any): boolean {
   if (!category.oss && selector.oss) {
     return false;
   }
@@ -43,12 +46,12 @@ function matchCategory(selector, category) {
  * @param {string} pkgDir
  * @returns {boolean}
  */
-function matchPluginPaths(selector, pkgDir) {
+function matchPluginPaths(selector: any, pkgDir: string): boolean {
   if (!selector.paths) {
     return false;
   }
 
-  return selector.paths.some((p) => p === pkgDir);
+  return selector.paths.some((p: string) => p === pkgDir);
 }
 
 /**
@@ -56,12 +59,12 @@ function matchPluginPaths(selector, pkgDir) {
  * @param {string} pkgDir
  * @returns {boolean}
  */
-function matchPluginParentDirs(selector, pkgDir) {
+function matchPluginParentDirs(selector: any, pkgDir: string): boolean {
   if (!selector.parentDirs) {
     return false;
   }
 
-  return selector.parentDirs.some((p) => pkgDir.startsWith(p + Path.sep));
+  return selector.parentDirs.some((p: string) => pkgDir.startsWith(p + Path.sep));
 }
 
 /**
@@ -69,10 +72,10 @@ function matchPluginParentDirs(selector, pkgDir) {
  * @param {string} pkgDir
  * @returns {boolean}
  */
-function matchParentDirsLimit(selector, pkgDir) {
+function matchParentDirsLimit(selector: any, pkgDir: string): boolean {
   return !selector.limitParentDirs
     ? true
-    : selector.limitParentDirs.some((p) => pkgDir.startsWith(p + Path.sep));
+    : selector.limitParentDirs.some((p: string) => pkgDir.startsWith(p + Path.sep));
 }
 
 /**
@@ -80,7 +83,7 @@ function matchParentDirsLimit(selector, pkgDir) {
  * @param {import('./types').PluginPackage} pkg
  * @returns {boolean}
  */
-function matchBrowserServer(selector, pkg) {
+function matchBrowserServer(selector: any, pkg: any): boolean {
   if (selector.browser && !pkg.manifest.plugin.browser) {
     return false;
   }
@@ -96,7 +99,7 @@ function matchBrowserServer(selector, pkg) {
  * @param {import('./types').PluginPackage} pkg
  * @returns {boolean}
  */
-function matchPluginGroups(selector, pkg) {
+function matchPluginGroups(selector: any, pkg: any): boolean {
   if (Array.isArray(selector.allowlistPluginGroups)) {
     return (
       // if the allowlist is defined, ensure the plugin belongs to one of the groups
@@ -113,12 +116,12 @@ function matchPluginGroups(selector, pkg) {
  * @param {import('./types').PluginSelector} selector
  * @returns {(pkg: import('./package').Package) => pkg is import('./types').PluginPackage}
  */
-function getPluginPackagesFilter(selector = {}) {
+function getPluginPackagesFilter(selector: any = {}): (pkg: any) => boolean {
   /**
    * @param {import('./package').Package} pkg
    * @returns {pkg is import('./types').PluginPackage}
    */
-  return (pkg) =>
+  return (pkg: any) =>
     pkg.isPlugin() &&
     matchBrowserServer(selector, pkg) &&
     matchParentDirsLimit(selector, pkg.directory) &&
@@ -128,4 +131,4 @@ function getPluginPackagesFilter(selector = {}) {
     matchPluginGroups(selector, pkg);
 }
 
-module.exports = { getPluginSearchPaths, getPluginPackagesFilter };
+export { getPluginSearchPaths, getPluginPackagesFilter };

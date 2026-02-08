@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
-const Path = require('path');
-const Crypto = require('crypto');
+import Fs from 'fs';
+import Path from 'path';
+import Crypto from 'crypto';
 
-const { Package } = require('./package');
-const { getRepoRelsSync } = require('./get_repo_rels');
+import { REPO_ROOT } from '@kbn/repo-info';
+import { Package } from './package';
+import { getRepoRelsSync } from './get_repo_rels';
 
-const PACKAGE_MAP_PATH = Path.resolve(__dirname, '../package-map.json');
+const PACKAGE_MAP_PATH = Path.resolve(
+  REPO_ROOT,
+  'src/platform/packages/private/kbn-repo-packages/package-map.json'
+);
 
 /** @typedef {Map<string, import('./package').Package>} PkgDirMap */
 /** @typedef {Map<string, import('./package').Package>} PkgsById */
@@ -29,7 +33,7 @@ const CACHE = new Map();
  * @param {string=} packageMapPath
  * @returns {Map<string, string>}
  */
-function readPackageMap(packageMapPath) {
+function readPackageMap(packageMapPath?: string): Map<string, string> {
   return new Map(JSON.parse(Fs.readFileSync(packageMapPath || PACKAGE_MAP_PATH, 'utf8')));
 }
 
@@ -38,7 +42,7 @@ function readPackageMap(packageMapPath) {
  * @param {string[]} names
  * @param {string=} packageMapPath
  */
-function removePackagesFromPackageMap(names, packageMapPath) {
+function removePackagesFromPackageMap(names: string[], packageMapPath?: string): void {
   const path = packageMapPath || PACKAGE_MAP_PATH;
   const map = readPackageMap(path);
   names.forEach((name) => map.delete(name));
@@ -50,7 +54,7 @@ function removePackagesFromPackageMap(names, packageMapPath) {
  * Get the hash of the pkgmap, used for populating some cache keys
  * @returns {string}
  */
-function readHashOfPackageMap() {
+function readHashOfPackageMap(): string {
   return Crypto.createHash('sha256').update(Fs.readFileSync(PACKAGE_MAP_PATH)).digest('hex');
 }
 
@@ -58,7 +62,7 @@ function readHashOfPackageMap() {
  * @param {string} repoRoot
  * @param {string[]} manifestPaths
  */
-function updatePackageMap(repoRoot, manifestPaths) {
+function updatePackageMap(repoRoot: string, manifestPaths: string[]): boolean {
   const existingContent = Fs.existsSync(PACKAGE_MAP_PATH)
     ? Fs.readFileSync(PACKAGE_MAP_PATH, 'utf8')
     : '';
@@ -112,7 +116,7 @@ function updatePackageMap(repoRoot, manifestPaths) {
  * @param {string} repoRoot
  * @returns {Package[]}
  */
-function getPackages(repoRoot) {
+function getPackages(repoRoot: string): any[] {
   /** @type {Array<import('./package').Package> | undefined} */
   const cached = CACHE.get(repoRoot);
   if (cached) {
@@ -127,7 +131,7 @@ function getPackages(repoRoot) {
     const packages = paths.map((path) => Package.fromManifest(repoRoot, path)).sort(Package.sorter);
     CACHE.set(repoRoot, packages);
     return packages;
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       // a package manifest was removed, auto-regenerate the package map
       const manifests = Array.from(getRepoRelsSync(repoRoot, ['**/kibana.jsonc']));
@@ -144,7 +148,7 @@ function getPackages(repoRoot) {
  * Get a map of repoRelative directories to packages
  * @param {string} repoRoot
  */
-function getPkgDirMap(repoRoot) {
+function getPkgDirMap(repoRoot: string): any {
   const packages = getPackages(repoRoot);
 
   const cacheKey = `getPkgDirMap-${repoRoot}`;
@@ -164,7 +168,7 @@ function getPkgDirMap(repoRoot) {
  * @param {string} repoRoot
  * @returns {PkgsById}
  */
-function getPkgsById(repoRoot) {
+function getPkgsById(repoRoot: string): any {
   const packages = getPackages(repoRoot);
 
   const cacheKey = `getPkgsById-${repoRoot}`;
@@ -186,7 +190,7 @@ function getPkgsById(repoRoot) {
  * @param {Map<string, T>} map
  * @returns {T | undefined}
  */
-function findClosest(repoRelDir, map) {
+function findClosest<T>(repoRelDir: string, map: Map<string, T>): T | undefined {
   let cur = repoRelDir;
   while (true) {
     if (!cur || cur === '.') {
@@ -207,11 +211,11 @@ function findClosest(repoRelDir, map) {
  * @param {string} repoRoot
  * @param {string} path absolute path to a file
  */
-function findPackageForPath(repoRoot, path) {
+function findPackageForPath(repoRoot: string, path: string): any {
   return findClosest(Path.relative(repoRoot, Path.dirname(path)), getPkgDirMap(repoRoot));
 }
 
-module.exports = {
+export {
   getPackages,
   getPkgDirMap,
   getPkgsById,

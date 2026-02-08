@@ -14,7 +14,7 @@
  * @param {string} importReq
  * @returns {import('./types').KbnImportReq | undefined}
  */
-function parseKbnImportReq(importReq) {
+function parseKbnImportReq(importReq: string): any | undefined {
   if (!importReq.startsWith('@kbn/')) {
     return undefined;
   }
@@ -31,4 +31,4 @@ function parseKbnImportReq(importReq) {
   };
 }
 
-module.exports = { parseKbnImportReq };
+export { parseKbnImportReq };

@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const ChildProcess = require('child_process');
+import Path from 'path';
+import ChildProcess from 'child_process';
 
-const cache = new Map();
+const cache = new Map<string, string | null>();
 
 /**
  * Synchronously get the git repo root for a given repoRoot and cache the result for the execution
  * @param {string} repoRoot
  * @returns {string | null}
  */
-function getGitRepoRootSync(repoRoot) {
+function getGitRepoRootSync(repoRoot: string): string | null {
   if (cache.has(repoRoot)) {
-    return cache.get(repoRoot);
+    return cache.get(repoRoot)!;
   }
 
   try {
@@ -34,11 +34,11 @@ function getGitRepoRootSync(repoRoot) {
     const trimPath = firstLine.trim();
     cache.set(repoRoot, Path.basename(trimPath) !== trimPath ? trimPath : null);
 
-    return cache.get(repoRoot);
+    return cache.get(repoRoot)!;
   } catch {
     cache.set(repoRoot, null);
     return null;
   }
 }
 
-module.exports = { getGitRepoRootSync };
+export { getGitRepoRootSync };

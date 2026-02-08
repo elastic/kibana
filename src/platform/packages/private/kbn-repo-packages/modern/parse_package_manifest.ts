@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const Fs = require('fs');
-const { inspect } = require('util');
+import Path from 'path';
+import Fs from 'fs';
+import { inspect } from 'util';
 
-const {
+import {
   isSomeString,
   isObj,
   isValidPluginId,
@@ -19,37 +19,21 @@ const {
   isArrOfIds,
   isArrOfStrings,
   PACKAGE_TYPES,
-} = require('./parse_helpers');
-const { getGitRepoRootSync } = require('./get_git_repo_root');
-const { parse } = require('../utils/jsonc');
-const { isValidPluginCategoryInfo, PLUGIN_CATEGORY } = require('./plugin_category_info');
+} from './parse_helpers';
+import { getGitRepoRootSync } from './get_git_repo_root';
+import { parse } from '../utils/jsonc';
+import { isValidPluginCategoryInfo, PLUGIN_CATEGORY } from './plugin_category_info';
 
-/**
- * @param {string} key
- * @param {unknown} value
- * @param {string} msg
- * @returns {Error}
- */
-const err = (key, value, msg) => {
+const err = (key: string, value: unknown, msg: string): Error => {
   const dbg = ['string', 'number', 'boolean', 'undefined'].includes(typeof value)
     ? value
     : inspect(value);
   return new Error(`invalid package "${key}" [${dbg}], ${msg}`);
 };
 
-/**
- * @param {unknown} v
- * @returns {v is string}
- */
-const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
+const isValidOwner = (v: unknown): v is string => typeof v === 'string' && v.startsWith('@');
 
-/**
- * @param {unknown} plugin
- * @param {string} repoRoot
- * @param {string} path
- * @returns {import('./types').PluginPackageManifest['plugin']} plugin
- */
-function validatePackageManifestPlugin(plugin, repoRoot, path) {
+function validatePackageManifestPlugin(plugin: unknown, repoRoot: string, path: string): any {
   if (!isObj(plugin)) {
     throw err('plugin', plugin, 'must be an object');
   }
@@ -67,7 +51,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     enabledOnAnonymousPages,
     type,
     __category__,
-  } = plugin;
+  } = plugin as any;
 
   if (!isValidPluginId(id)) {
     throw err(`plugin.id`, id, `must be a string in camel or snake case`);
@@ -171,11 +155,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   };
 }
 
-/**
- * @param {unknown} build
- * @returns {import('./types').PluginPackageManifest['build']}
- */
-function validatePackageManifestBuild(build) {
+function validatePackageManifestBuild(build: unknown): any {
   if (build !== undefined && !isObj(build)) {
     throw err('build', build, 'must be an object or undefined');
   }
@@ -184,7 +164,7 @@ function validatePackageManifestBuild(build) {
     return build;
   }
 
-  const { extraExcludes, noParse, ...extra } = build;
+  const { extraExcludes, noParse, ...extra } = build as any;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
@@ -209,14 +189,7 @@ function validatePackageManifestBuild(build) {
   };
 }
 
-/**
- * Validate the contents of a parsed kibana.jsonc file.
- * @param {unknown} parsed
- * @param {string} repoRoot
- * @param {string} path
- * @returns {import('./types').KibanaPackageManifest}
- */
-function validatePackageManifest(parsed, repoRoot, path) {
+function validatePackageManifest(parsed: unknown, repoRoot: string, path: string): any {
   if (!isObj(parsed)) {
     throw new Error('expected manifest root to be an object');
   }
@@ -232,12 +205,12 @@ function validatePackageManifest(parsed, repoRoot, path) {
     description,
     serviceFolders,
     ...extra
-  } = /** @type {import('./types').PackageManifestBaseFields} */ (/** @type {unknown} */ (parsed));
+  } = parsed as any;
 
-  const { plugin, sharedBrowserBundle } = parsed;
+  const { plugin, sharedBrowserBundle } = parsed as any;
 
   const extraKeys = Object.keys(extra).filter(
-    (key) => !['plugin', 'sharedBrowserBundle'].includes(key)
+    (key: string) => !['plugin', 'sharedBrowserBundle'].includes(key)
   );
   if (extraKeys.length) {
     throw new Error(`unexpected keys in package manifest [${extraKeys.join(', ')}]`);
@@ -337,36 +310,31 @@ function validatePackageManifest(parsed, repoRoot, path) {
   };
 }
 
-/**
- * Parse a kibana.jsonc file from the filesystem
- * @param {string} repoRoot
- * @param {string} path
- */
-function readPackageManifest(repoRoot, path) {
-  let content;
+function readPackageManifest(repoRoot: string, path: string): any {
+  let content: string;
   try {
     content = Fs.readFileSync(path, 'utf8');
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
-      const err = new Error(`Missing kibana.jsonc file at ${path}`);
-      throw Object.assign(err, { code: 'ENOENT' });
+      const e = new Error(`Missing kibana.jsonc file at ${path}`);
+      throw Object.assign(e, { code: 'ENOENT' });
     }
 
     throw error;
   }
 
   try {
-    let parsed;
+    let parsed: any;
     try {
       parsed = parse(content);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Invalid JSONc: ${error.message}`);
     }
 
     return validatePackageManifest(parsed, repoRoot, path);
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`Unable to parse [${path}]: ${error.message}`);
   }
 }
 
-module.exports = { readPackageManifest };
+export { readPackageManifest };

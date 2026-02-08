@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve, parse, dirname } from 'path';
-import { readFileSync, realpathSync } from 'fs';
-
-import type { KibanaPackageJson } from './types.js';
-
-// Use __dirname which is available in CommonJS (esbuild will preserve it)
+const { resolve, parse, dirname } = require('path');
+const { readFileSync, realpathSync } = require('fs');
 
 /**
  * Attempts to read and parse a package.json file as a Kibana package.json
  */
-const readKibanaPkgJson = (path: string): KibanaPackageJson | undefined => {
+const readKibanaPkgJson = (path: string): any | undefined => {
   try {
     const json = JSON.parse(readFileSync(path, 'utf8'));
     if (json && typeof json === 'object' && 'name' in json && json.name === 'kibana') {
-      return json as KibanaPackageJson;
+      return json;
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+    if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'ENOENT') {
       return undefined;
     }
     throw error;
@@ -35,7 +31,7 @@ const readKibanaPkgJson = (path: string): KibanaPackageJson | undefined => {
 /**
  * Walks up the directory tree to find the Kibana root package.json
  */
-const findKibanaPackageJson = (): { kibanaDir: string; kibanaPkgJson: KibanaPackageJson } => {
+const findKibanaPackageJson = (): { kibanaDir: string; kibanaPkgJson: any } => {
   // Search for the kibana directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
@@ -69,32 +65,31 @@ const { kibanaDir, kibanaPkgJson } = findKibanaPackageJson();
 /**
  * The absolute path to the Kibana repository root
  */
-export const REPO_ROOT = kibanaDir;
+const REPO_ROOT: string = kibanaDir;
 
 /**
  * The parsed contents of the Kibana package.json
  */
-export const PKG_JSON = kibanaPkgJson;
+const PKG_JSON = kibanaPkgJson;
 
 /**
  * Alias for PKG_JSON
  */
-export const kibanaPackageJson = PKG_JSON;
+const kibanaPackageJson = PKG_JSON;
 
 /**
  * The upstream branch name from package.json
  */
-export const UPSTREAM_BRANCH = kibanaPkgJson.branch;
+const UPSTREAM_BRANCH: string = kibanaPkgJson.branch;
 
 /**
  * Returns true if this is a distributable build of Kibana
  */
-export const isKibanaDistributable = (): boolean => !!PKG_JSON.build?.distributable;
+const isKibanaDistributable = (): boolean => !!PKG_JSON.build?.distributable;
 
 /**
  * Resolves a path relative to the Kibana repository root
  */
-export const fromRoot = (...paths: string[]): string => resolve(REPO_ROOT, ...paths);
+const fromRoot = (...paths: string[]): string => resolve(REPO_ROOT, ...paths);
 
-// Re-export types
-export type { KibanaPackageJson } from './types.js';
+export { REPO_ROOT, PKG_JSON, kibanaPackageJson, UPSTREAM_BRANCH, isKibanaDistributable, fromRoot };

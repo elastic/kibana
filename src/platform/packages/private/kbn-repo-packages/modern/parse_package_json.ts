@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
-const { isObj } = require('./parse_helpers');
+import Fs from 'fs';
+import { isObj } from './parse_helpers';
 
 /**
  * Asserts that given value looks like a parsed package.json file
  * @param {unknown} v
  * @returns {asserts v is import('./types').ParsedPackageJson}
  */
-function validateParsedPackageJson(v) {
+function validateParsedPackageJson(v: unknown): asserts v is any {
   if (!isObj(v)) {
     throw new Error('Expected package.json to be a JSON object');
   }
@@ -49,12 +49,12 @@ function validateParsedPackageJson(v) {
  * @param {string} path
  * @returns {import('./types').ParsedPackageJson | undefined}
  */
-function readPackageJson(path) {
-  let pkg;
+function readPackageJson(path: string): any | undefined {
+  let pkg: any;
   try {
     pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
     validateParsedPackageJson(pkg);
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw new Error(`unable to parse package.json at [${path}]: ${error.message}`);
     }
@@ -62,4 +62,4 @@ function readPackageJson(path) {
   return pkg;
 }
 
-module.exports = { readPackageJson, validateParsedPackageJson };
+export { readPackageJson, validateParsedPackageJson };

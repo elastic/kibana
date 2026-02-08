@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { stripJsonComments } = require('./strip_json_comments');
+import { isObj } from './parse_helpers';
 
-/**
- * @param {string} jsonWithComments
- * @returns {unknown}
- */
-function parse(jsonWithComments) {
-  return JSON.parse(
-    stripJsonComments(jsonWithComments, {
-      whitespace: false,
-      trailingCommas: true,
-    })
-  );
-}
+const PLUGIN_CATEGORY = Symbol('pluginCategory');
 
-module.exports = { parse };
+const isValidPluginCategoryInfo = (v: unknown): boolean =>
+  isObj(v) &&
+  typeof (v as any).oss === 'boolean' &&
+  typeof (v as any).example === 'boolean' &&
+  typeof (v as any).testPlugin === 'boolean';
+
+export { PLUGIN_CATEGORY, isValidPluginCategoryInfo };

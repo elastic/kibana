@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const Fs = require('fs');
+import Path from 'path';
+import Fs from 'fs';
 
 /**
  * @param {string} path
  */
-function safeIsFile(path) {
+function safeIsFile(path: string): boolean {
   try {
     return Fs.statSync(path).isFile();
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       return false;
     }
@@ -28,12 +28,12 @@ function safeIsFile(path) {
 /**
  * @param {string} path
  */
-function safeReadDir(path) {
+function safeReadDir(path: string): any[] {
   try {
     return Fs.readdirSync(path, {
       withFileTypes: true,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
       return [];
     }
@@ -49,12 +49,12 @@ function safeReadDir(path) {
  * @param {string} name
  * @returns {string[]}
  */
-function findFiles(packageDir, name) {
+function findFiles(packageDir: string, name: string): string[] {
   return (
     // get the directories within the "package dir"
     safeReadDir(packageDir)
       // if this directory has a file with the name, it's a match
-      .flatMap((e) => {
+      .flatMap((e: any) => {
         if (!e.isDirectory()) {
           return [];
         }
@@ -72,9 +72,9 @@ function findFiles(packageDir, name) {
  * @param {string} cwd
  * @param {string[]} patterns
  */
-function expandWildcards(cwd, patterns) {
+function expandWildcards(cwd: string, patterns: string[]): string[] {
   /** @type {Set<string>} */
-  const results = new Set();
+  const results = new Set<string>();
 
   /** @type {Set<string>} */
   const queue = new Set(patterns.map((p) => Path.resolve(cwd, p)));
@@ -112,4 +112,4 @@ function expandWildcards(cwd, patterns) {
   return [...results];
 }
 
-module.exports = { findFiles, expandWildcards };
+export { findFiles, expandWildcards };

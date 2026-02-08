@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
-const Fs = require('fs');
+import Path from 'path';
+import Fs from 'fs';
 
 /**
  * @param {string} path
  */
-function safeReadDir(path) {
+function safeReadDir(path: string): any[] {
   try {
     return Fs.readdirSync(path, {
       withFileTypes: true,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
       return [];
     }
@@ -37,7 +37,7 @@ function safeReadDir(path) {
  * @param {string} name
  * @returns {string[]}
  */
-function findFiles(dir, depth, name) {
+function findFiles(dir: string, depth: number, name: string): string[] {
   // if depth = 0 then we just need to determine if there is a kibana.json file in this directory
   // and return either that path or an empty array
   if (depth === 0) {
@@ -50,7 +50,7 @@ function findFiles(dir, depth, name) {
   const files = safeReadDir(dir);
 
   /** @type {string[]} */
-  const childDirs = [];
+  const childDirs: string[] = [];
   for (const ent of files) {
     if (ent.isFile()) {
       if (ent.name === name) {
@@ -64,4 +64,4 @@ function findFiles(dir, depth, name) {
   return childDirs.flatMap((dir) => findFiles(dir, depth - 1, name));
 }
 
-module.exports = { findFiles };
+export { findFiles };

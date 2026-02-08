@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Path = require('path');
+import Path from 'path';
 
-const { loadJsonFile } = require('./load_json_file');
+import { loadJsonFile } from './load_json_file';
 
 /**
  * @param {unknown} input
  * @param {string} type
  * @returns {string[]}
  */
-function isValidDepsDeclaration(input, type) {
+function isValidDepsDeclaration(input: unknown, type: string): string[] {
   if (typeof input === 'undefined') return [];
   if (Array.isArray(input) && input.every((i) => typeof i === 'string')) {
     return input;
@@ -28,7 +28,7 @@ function isValidDepsDeclaration(input, type) {
  * @param {string} manifestPath
  * @returns {import('./types').LegacyKibanaPlatformPlugin}
  */
-function parseLegacyKibanaPlatformPlugin(manifestPath) {
+function parseLegacyKibanaPlatformPlugin(manifestPath: string): any {
   if (!Path.isAbsolute(manifestPath)) {
     throw new TypeError('expected new platform manifest path to be absolute');
   }
@@ -80,6 +80,4 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
   };
 }
 
-module.exports = {
-  parseLegacyKibanaPlatformPlugin,
-};
+export { parseLegacyKibanaPlatformPlugin };

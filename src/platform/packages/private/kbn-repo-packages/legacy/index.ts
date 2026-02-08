@@ -9,12 +9,5 @@
 
 /** @typedef {import('./types').LegacyKibanaPlatformPlugin} LegacyKibanaPlatformPlugin */
 /** @typedef {import('./types').LegacyKibanaPlatformPluginManifest} LegacyKibanaPlatformPluginManifest */
-const {
-  simpleLegacyKibanaPlatformPluginDiscovery,
-} = require('./simple_kibana_platform_plugin_discovery');
-const { parseLegacyKibanaPlatformPlugin } = require('./parse_kibana_platform_plugin');
-
-module.exports = {
-  simpleLegacyKibanaPlatformPluginDiscovery,
-  parseLegacyKibanaPlatformPlugin,
-};
+export { simpleLegacyKibanaPlatformPluginDiscovery } from './simple_kibana_platform_plugin_discovery';
+export { parseLegacyKibanaPlatformPlugin } from './parse_kibana_platform_plugin';

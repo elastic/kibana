@@ -20,21 +20,24 @@
 const singleComment = Symbol('singleComment');
 const multiComment = Symbol('multiComment');
 
-const stripWithoutWhitespace = () => '';
+const stripWithoutWhitespace = (): string => '';
 
 /**
  * @param {string} string
  * @param {number | undefined} start
  * @param {number | undefined} end
  */
-const stripWithWhitespace = (string, start = undefined, end = undefined) =>
-  string.slice(start, end).replace(/\S/g, ' ');
+const stripWithWhitespace = (
+  string: string,
+  start: number | undefined = undefined,
+  end: number | undefined = undefined
+): string => string.slice(start, end).replace(/\S/g, ' ');
 
 /**
  * @param {string} jsonString
  * @param {number} quotePosition
  */
-const isEscaped = (jsonString, quotePosition) => {
+const isEscaped = (jsonString: string, quotePosition: number): boolean => {
   let index = quotePosition - 1;
   let backslashCount = 0;
 
@@ -50,7 +53,13 @@ const isEscaped = (jsonString, quotePosition) => {
  * @param {string} jsonString
  * @param {{ whitespace?: boolean; trailingCommas?: boolean }} options
  */
-function stripJsonComments(jsonString, { whitespace = true, trailingCommas = false } = {}) {
+function stripJsonComments(
+  jsonString: string,
+  {
+    whitespace = true,
+    trailingCommas = false,
+  }: { whitespace?: boolean; trailingCommas?: boolean } = {}
+): string {
   if (typeof jsonString !== 'string') {
     throw new TypeError(
       `Expected argument \`jsonString\` to be a \`string\`, got \`${typeof jsonString}\``
@@ -61,7 +70,7 @@ function stripJsonComments(jsonString, { whitespace = true, trailingCommas = fal
 
   let isInsideString = false;
   /** @type {boolean | symbol} */
-  let isInsideComment = false;
+  let isInsideComment: boolean | symbol = false;
   let offset = 0;
   let buffer = '';
   let result = '';
@@ -150,4 +159,4 @@ function stripJsonComments(jsonString, { whitespace = true, trailingCommas = fal
   );
 }
 
-module.exports = { stripJsonComments };
+export { stripJsonComments };

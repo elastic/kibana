@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { inspect } = require('util');
-const Path = require('path');
+import { inspect } from 'util';
+import Path from 'path';
 
-const { readPackageJson } = require('./parse_package_json');
-const { PLUGIN_CATEGORY } = require('./plugin_category_info');
-const { readPackageManifest } = require('./parse_package_manifest');
+import { readPackageJson } from './parse_package_json';
+import { PLUGIN_CATEGORY } from './plugin_category_info';
+import { readPackageManifest } from './parse_package_manifest';
 
 /**
  * Normalize a path for operating systems which use backslashes
  * @param {string} path
  */
-const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
+const normalize = (path: string): string => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
  * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
@@ -36,7 +36,7 @@ class Package {
    * @param {string} repoRoot
    * @param {string} path
    */
-  static fromManifest(repoRoot, path) {
+  static fromManifest(repoRoot: string, path: string): Package {
     const manifest = readPackageManifest(repoRoot, path);
     const dir = Path.dirname(path);
 
@@ -48,7 +48,7 @@ class Package {
    * @param {Package} a
    * @param {Package} b
    */
-  static sorter(a, b) {
+  static sorter(a: Package, b: Package): number {
     return a.manifest.id.localeCompare(b.manifest.id, 'en');
   }
 
@@ -60,22 +60,22 @@ class Package {
      * Absolute path to the root of the repository
      * @type {string}
      */
-    repoRoot,
+    repoRoot: string,
     /**
      * Absolute path to the package directory
      * @type {string}
      */
-    dir,
+    dir: string,
     /**
      * Parsed kibana.jsonc manifest from the package
      * @type {import('./types').KibanaPackageManifest}
      */
-    manifest,
+    manifest: any,
     /**
      * Parsed package.json file from the package
      * @type {import('./types').ParsedPackageJson | undefined}
      */
-    pkg
+    pkg: any
   ) {
     /**
      * Absolute path to this package directory
@@ -144,7 +144,7 @@ class Package {
    * be listed in the devDependencies and will never end up in the build
    * @returns {boolean}
    */
-  isDevOnly() {
+  isDevOnly(): boolean {
     return (
       !!this.manifest.devOnly ||
       this.manifest.type === 'functional-tests' ||
@@ -157,7 +157,7 @@ class Package {
    * @readonly
    * @returns {this is import('./types').PluginPackage}
    */
-  isPlugin() {
+  isPlugin(): boolean {
     return this.manifest.type === 'plugin';
   }
 
@@ -166,7 +166,7 @@ class Package {
    * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
-  getGroup() {
+  getGroup(): any {
     return this.group;
   }
 
@@ -175,7 +175,7 @@ class Package {
    * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
-  getVisibility() {
+  getVisibility(): any {
     return this.visibility;
   }
 
@@ -183,7 +183,7 @@ class Package {
    * Returns true if the package represents some type of plugin
    * @returns {import('./types').PluginCategoryInfo}
    */
-  getPluginCategories() {
+  getPluginCategories(): any {
     if (!this.isPlugin()) {
       throw new Error('package is not a plugin, check pkg.isPlugin before calling this method');
     }
@@ -209,13 +209,13 @@ class Package {
     };
   }
 
-  determineGroupAndVisibility() {
+  determineGroupAndVisibility(): { group: any; visibility: any } {
     const dir = this.normalizedRepoRelativeDir;
 
     /** @type {import('@kbn/projects-solutions-groups').ModuleGroup} */
-    let group = 'common';
+    let group: any = 'common';
     /** @type {import('@kbn/projects-solutions-groups').ModuleVisibility} */
-    let visibility = 'shared';
+    let visibility: any = 'shared';
 
     // the following checks will only work in dev mode, as production builds create NPM packages under 'node_modules/@kbn-...'
     if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
@@ -257,11 +257,9 @@ class Package {
   /**
    * Custom inspect handler
    */
-  [inspect.custom]() {
+  [inspect.custom](): string {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
   }
 }
 
-module.exports = {
-  Package,
-};
+export { Package };

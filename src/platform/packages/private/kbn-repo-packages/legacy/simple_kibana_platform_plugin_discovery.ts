@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { parseLegacyKibanaPlatformPlugin } = require('./parse_kibana_platform_plugin');
-const { findFiles } = require('./find_files');
+import { parseLegacyKibanaPlatformPlugin } from './parse_kibana_platform_plugin';
+import { findFiles } from './find_files';
 
 /**
  * Helper to find the new platform plugins.
@@ -16,7 +16,10 @@ const { findFiles } = require('./find_files');
  * @param {string[]} pluginPaths
  * @returns {Array<import('./types').LegacyKibanaPlatformPlugin>}
  */
-function simpleLegacyKibanaPlatformPluginDiscovery(scanDirs, pluginPaths) {
+function simpleLegacyKibanaPlatformPluginDiscovery(
+  scanDirs: string[],
+  pluginPaths: string[]
+): any[] {
   return Array.from(
     new Set([
       // find kibana.json files up to 5 levels within each scan dir
@@ -27,4 +30,4 @@ function simpleLegacyKibanaPlatformPluginDiscovery(scanDirs, pluginPaths) {
   ).map(parseLegacyKibanaPlatformPlugin);
 }
 
-module.exports = { simpleLegacyKibanaPlatformPluginDiscovery };
+export { simpleLegacyKibanaPlatformPluginDiscovery };

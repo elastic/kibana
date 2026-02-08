@@ -15,7 +15,10 @@
  * @param {T} item
  * @returns {Promise<PromiseSettledResult<T2>>}
  */
-const settle = async (fn, item) => {
+const settle = async <T, T2>(
+  fn: (v: T) => Promise<T2>,
+  item: T
+): Promise<PromiseSettledResult<T2>> => {
   const [result] = await Promise.allSettled([(async () => fn(item))()]);
   return result;
 };
@@ -28,7 +31,11 @@ const settle = async (fn, item) => {
  * @param {(v: T) => Promise<T2>} mapFn
  * @returns {Promise<T2[]>}
  */
-function asyncMapWithLimit(source, limit, mapFn) {
+function asyncMapWithLimit<T, T2>(
+  source: T[],
+  limit: number,
+  mapFn: (v: T) => Promise<T2>
+): Promise<T2[]> {
   return new Promise((resolve, reject) => {
     if (limit < 1) {
       reject(new Error('invalid limit, must be greater than 0'));
@@ -40,7 +47,7 @@ function asyncMapWithLimit(source, limit, mapFn) {
     const queue = [...source.entries()];
 
     /** @type {T2[]} */
-    const results = new Array(source.length);
+    const results = new Array<T2>(source.length);
 
     /**
      * this is run for each item, manages the inProgress state,
@@ -52,7 +59,7 @@ function asyncMapWithLimit(source, limit, mapFn) {
      * @param {number} index
      * @param {T} item
      */
-    function run(index, item) {
+    function run(index: number, item: T): void {
       inProgress += 1;
       settle(mapFn, item).then((result) => {
         inProgress -= 1;
@@ -82,7 +89,7 @@ function asyncMapWithLimit(source, limit, mapFn) {
      * then we're done. This function is called every time a mapFn
      * promise resolves and once after initialization
      */
-    function runMore() {
+    function runMore(): void {
       if (!queue.length) {
         if (inProgress === 0) {
           resolve(results);
@@ -105,4 +112,4 @@ function asyncMapWithLimit(source, limit, mapFn) {
   });
 }
 
-module.exports = { asyncMapWithLimit };
+export { asyncMapWithLimit };
