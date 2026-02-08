@@ -8,14 +8,13 @@
  */
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
 import {
   getPromqlFunctionSuggestions,
   getPromqlFunctionSuggestionsForReturnTypes,
-  getPromqlParamTypesForFunction,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../shared/sorting';
@@ -46,8 +45,6 @@ import {
   getIndexAssignmentContext,
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
-  resolveFunctionAtCursor,
-  getParamTypesAtCursor,
 } from './utils';
 
 export async function autocomplete(
@@ -66,7 +63,6 @@ export async function autocomplete(
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
   const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
-  const promqlCommand = command as ESQLAstPromqlCommand;
 
   switch (position.type) {
     case 'after_command': {
@@ -121,15 +117,13 @@ export async function autocomplete(
       return [valuePlaceholderConstant];
 
     case 'after_metric': {
-      const types = getParamTypesAtCursor(promqlCommand, commandText, cursorPosition);
-      return types.includes('range_vector') && !position.selector?.duration
+      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
         ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
         : [promqlLabelSelectorItem];
     }
 
     case 'after_label_selector': {
-      const types = getParamTypesAtCursor(promqlCommand, commandText, cursorPosition);
-      return types.includes('range_vector') && !position.selector?.duration
+      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
         ? [promqlRangeSelectorItem]
         : [];
     }
@@ -142,13 +136,7 @@ export async function autocomplete(
       if (position.canSuggestCommaInFunctionArgs) {
         return [commaCompleteItem];
       }
-      const { functionName, paramIndex } = resolveFunctionAtCursor(
-        promqlCommand,
-        commandText,
-        cursorPosition
-      );
-
-      const signatureTypes = getPromqlParamTypesForFunction(functionName, paramIndex);
+      const signatureTypes = position.signatureTypes ?? [];
       const types = getMetricTypesForSignature(signatureTypes);
 
       const expectsOnlyScalar = isScalarOnlyParam(signatureTypes);
