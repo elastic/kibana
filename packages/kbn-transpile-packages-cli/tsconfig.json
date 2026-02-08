@@ -1,8 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "target/types"
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"]
-}

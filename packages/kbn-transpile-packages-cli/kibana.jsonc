@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/transpile-packages-cli",
-  "owner": "@elastic/kibana-operations",
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}
