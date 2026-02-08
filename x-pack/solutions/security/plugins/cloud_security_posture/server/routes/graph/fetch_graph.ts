@@ -669,7 +669,10 @@ ${enrichmentSection}
 
 /**
  * Builds a DSL filter for relationship queries from entityIds.
- * Creates a terms query on entity.id with all provided entity IDs.
+ * Creates a query that matches:
+ * 1. Entities where entity.id is in the provided IDs (direct match)
+ * 2. Entities where any entity.relationships.* field contains the provided IDs
+ *    (entities that have relationships pointing to these IDs)
  */
 const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
   if (!entityIds || entityIds.length === 0) {
@@ -679,15 +682,26 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
   // Extract just the IDs for the terms query
   const ids = entityIds.map((entity) => entity.id);
 
+  // Build terms queries for each relationship field
+  const relationshipQueries = ENTITY_RELATIONSHIP_FIELDS.map((field) => ({
+    terms: {
+      [`entity.relationships.${field}`]: ids,
+    },
+  }));
+
   return {
     bool: {
-      filter: [
+      should: [
+        // Match entities by their ID
         {
           terms: {
             'entity.id': ids,
           },
         },
+        // Match entities that have relationships pointing to these IDs
+        ...relationshipQueries,
       ],
+      minimum_should_match: 1,
     },
   };
 };

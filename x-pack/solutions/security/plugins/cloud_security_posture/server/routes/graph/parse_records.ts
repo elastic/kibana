@@ -29,6 +29,8 @@ import {
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
+import { inspect } from 'node:util';
+import { createHash } from 'node:crypto';
 
 interface ConnectorEdges {
   source: string;
@@ -41,7 +43,7 @@ interface ConnectorEdges {
  * Each source+relationship combination gets one node that connects to all targets.
  */
 interface RelationshipConnectorEdges {
-  sources: string[]; // Multiple sources can connect to the same relationship node
+  source: string; // Source entity for this relationship (relationshipNodeId = entityId-relationship)
   targets: string[]; // All targets for this source+relationship combination
   edgeType: EdgeDataModel['type'];
 }
@@ -113,7 +115,7 @@ export const parseRecords = (
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
   const edges = sortEdges(ctx.edgesMap, ctx.nodesMap);
-
+  console.log('edges11 ', inspect(edges, false, null, true));
   return {
     nodes,
     edges,
@@ -439,14 +441,10 @@ const processRelationshipNodes = (
   const { nodesMap, relationshipEdges } = context;
   const { sourceId, targetIds, relationshipNode } = nodeData;
 
-  // Check if this relationship node already exists
+  // Check if this relationship node already exists (relationshipNodeId = sourceId-relationship)
   const existingEdges = relationshipEdges[relationshipNode.id];
   if (existingEdges) {
-    // Add this source if not already present
-    if (!existingEdges.sources.includes(sourceId)) {
-      existingEdges.sources.push(sourceId);
-    }
-    // Add any new targets
+    // Add any new targets (source is always the same for a given relationship node ID)
     targetIds.forEach((targetId) => {
       if (!existingEdges.targets.includes(targetId)) {
         existingEdges.targets.push(targetId);
@@ -456,7 +454,7 @@ const processRelationshipNodes = (
     // Create new relationship node
     nodesMap[relationshipNode.id] = relationshipNode;
     relationshipEdges[relationshipNode.id] = {
-      sources: [sourceId],
+      source: sourceId,
       targets: targetIds,
       edgeType: 'solid',
     };
@@ -693,7 +691,11 @@ const sortEdges = (
 
     // Priority: relationship > label > other
     const priority = { relationship: 0, label: 1, other: 2 };
-    return priority[shapeA] - priority[shapeB];
+    const shapeDiff = priority[shapeA] - priority[shapeB];
+
+    // If same priority, sort alphabetically by edge ID for deterministic ordering
+    if (shapeDiff !== 0) return shapeDiff;
+    return a.id.localeCompare(b.id);
   });
 };
 
@@ -780,19 +782,41 @@ const createEdgesAndGroups = (context: ParseContext) => {
     processConnectorGroup(edgeId, edgeLabelsIds, labelEdges, edgesMap, nodesMap, 'label');
   });
 
-  // Process relationship nodes - each relationship node can have multiple sources and targets
-  Object.entries(relationshipEdges).forEach(([relationshipNodeId, edges]) => {
-    // Create edges from all sources to the relationship node
-    edges.sources.forEach((sourceId) => {
-      const edge = connectNodes(nodesMap, sourceId, relationshipNodeId, edges.edgeType);
-      edgesMap[edge.id] = edge;
-    });
+  // Build grouping and connector edges from relationshipEdges
+  // Grouping is computed here (after parsing) because we need all targets accumulated
+  const relationshipGrouping: Record<string, string[]> = {};
+  const relationshipConnectorEdges: Record<string, ConnectorEdges[]> = {};
 
-    // Create edges from the relationship node to all targets
-    edges.targets.forEach((targetId) => {
-      const edge = connectNodes(nodesMap, relationshipNodeId, targetId, edges.edgeType);
-      edgesMap[edge.id] = edge;
-    });
+  Object.entries(relationshipEdges).forEach(([relNodeId, edges]) => {
+    // Compute grouping key from final accumulated targets
+    // Relationship nodes with same source AND same targets get stacked
+    const sortedTargets = [...edges.targets].sort().join(',');
+    const groupingKey = `${edges.source}-${createHash('md5').update(sortedTargets).digest('hex')}`;
+
+    // Build grouping map
+    if (!relationshipGrouping[groupingKey]) {
+      relationshipGrouping[groupingKey] = [];
+    }
+    relationshipGrouping[groupingKey].push(relNodeId);
+
+    // Convert to ConnectorEdges[] format for processConnectorGroup
+    relationshipConnectorEdges[relNodeId] = edges.targets.map((targetId) => ({
+      source: edges.source,
+      target: targetId,
+      edgeType: edges.edgeType,
+    }));
+  });
+
+  // Process relationship nodes using processConnectorGroup (handles stacking)
+  Object.entries(relationshipGrouping).forEach(([groupKey, relationshipNodeIds]) => {
+    processConnectorGroup(
+      groupKey,
+      relationshipNodeIds,
+      relationshipConnectorEdges,
+      edgesMap,
+      nodesMap,
+      'relationship'
+    );
   });
 };
 
