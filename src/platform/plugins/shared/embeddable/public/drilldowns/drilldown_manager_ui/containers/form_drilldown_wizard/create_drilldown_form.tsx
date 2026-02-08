@@ -10,34 +10,34 @@
 import React from 'react';
 import { useDrilldownsManager } from '../context';
 import { DrilldownForm } from '../../components/drilldown_form';
-import type { DrilldownManger } from '../../state';
+import type { DrilldownManager } from '../../state';
 import type { TriggerPickerProps } from '../../components/trigger_picker';
 
 export interface CreateDrilldownFormProps {
   drilldown: DrilldownManager;
 }
 
-export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state }) => {
+export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ drilldown }) => {
   const drilldowns = useDrilldownsManager();
-  const name = state.useName();
-  const triggers = state.useTriggers();
-  const config = state.useConfig();
+  const name = drilldown.useName();
+  const trigger = drilldown.useTrigger();
+  const config = drilldown.useConfig();
   const triggerPickerProps: TriggerPickerProps = React.useMemo(
     () => ({
-      items: state.uiTriggers.map((id) => {
+      items: drilldown.uiTriggers.map((id) => {
         const trigger = drilldowns.deps.getTrigger(id);
         return trigger;
       }),
-      selected: triggers,
-      onChange: state.setTriggers,
+      selected: trigger,
+      onChange: drilldown.setTrigger,
     }),
-    [drilldowns, triggers, state]
+    [drilldowns, trigger, drilldown]
   );
-  const context = state.getFactoryContext();
+  // const context = state.getFactoryContext();
 
   return (
-    <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
-      <state.factory.CollectConfig config={config} onConfig={state.setConfig} context={context} />
+    <DrilldownForm name={name} onNameChange={drilldown.setName} triggers={triggerPickerProps}>
+      <drilldown.factory.Editor state={config} onChange={drilldown.setConfig} />
     </DrilldownForm>
   );
 };

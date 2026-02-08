@@ -38,8 +38,8 @@ export interface TriggerPickerProps {
   /** List of available triggers. */
   items: TriggerPickerItemDescription[];
 
-  /** List of IDs of selected triggers. */
-  selected?: string[];
+  /** selected trigger. */
+  selected?: string;
 
   /** Link to documentation. */
   docs?: string;
@@ -48,7 +48,7 @@ export interface TriggerPickerProps {
   disabled?: boolean;
 
   /** Called on trigger selection change. */
-  onChange: (selected: string[]) => void;
+  onChange: (selected: string) => void;
 }
 
 export const TriggerPicker: React.FC<TriggerPickerProps> = ({
@@ -85,7 +85,7 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
           description={trigger.description}
           checked={trigger.id === selected[0]}
           disabled={disabled}
-          onSelect={(id) => onChange([id])}
+          onSelect={onChange}
         />
       ))}
     </EuiFormFieldset>

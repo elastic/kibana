@@ -12,6 +12,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
 import type { SerializedDrilldowns, DrilldownState } from '../../server';
+import { FC } from 'react';
 
 export type DrilldownActionState = DrilldownState & { actionId: string };
 
@@ -24,6 +25,11 @@ export type DrilldownDefinition<
    * Should be i18n string
    */
   displayName: string;
+
+  /**
+   * Drilldown editor component. Rendered as child of EuiForm component.
+   */
+  readonly Editor: FC<EditorProps<TDrilldownState>>;
 
   /**
    * Implements the "navigation" action of the drilldown. This happens when
@@ -70,6 +76,28 @@ export type DrilldownDefinition<
    */
   supportedTriggers: string[];
 };
+
+/**
+ * Props provided to `Editor` component on every re-render.
+ */
+export interface EditorProps<
+  TDrilldownState extends DrilldownState = DrilldownState,
+> {
+  /**
+   * Current (latest) state.
+   */
+  state: Partial<TDrilldownState>;
+
+  /**
+   * Callback called when user updates the state in UI.
+   */
+  onChange: (state: Partial<TDrilldownState>) => void;
+
+  /**
+   * Context information about where component is being rendered.
+   */
+  // context: Context;
+}
 
 export interface DrilldownsManager {
   api: HasDrilldowns;

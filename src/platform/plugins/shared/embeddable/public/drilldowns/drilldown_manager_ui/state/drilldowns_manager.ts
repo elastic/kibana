@@ -24,6 +24,7 @@ import {
 } from './i18n';
 import { DrilldownManager } from './drilldown_manager';
 import { useTableItems } from '../hooks/use_table_items';
+import { DrilldownState } from '../../../../server/drilldowns/types';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -288,34 +289,30 @@ export class DrilldownsManager {
   /**
    * Clone a list of selected templates.
    */
-  /*public readonly onClone = async (templateIds: string[]) => {
-    const { templates } = this.deps;
+  public readonly onCloneTemplates = async (templateIds: string[]) => {
+    const { drilldowns$, setDrilldowns, templates } = this.deps;
     if (!templates) return;
-    const templatesToClone: DrilldownTemplate[] = templateIds
-      .map((templateId) => templates.find(({ id }) => id === templateId))
-      .filter(Boolean) as DrilldownTemplate[];
 
-    for (const template of templatesToClone) {
-      await this.cloneTemplate(template);
+    const clonedDrilldowns = templateIds
+      .map((templateId) => {
+        const template = templates.find(({ id }) => id === templateId);
+        return template?.drilldownState;
+      })
+      .filter(Boolean) as DrilldownState[];
+
+    if (clonedDrilldowns.length) {
+      setDrilldowns([
+        ...drilldowns$.getValue(),
+        ...clonedDrilldowns
+      ]);
     }
-
+    
     this.lastCloneRecord = {
       time: Date.now(),
       templateIds,
     };
     this.setRoute(['manage']);
-  };*/
-
-  /*private async cloneTemplate(template: DrilldownTemplate) {
-    const { dynamicActionManager } = this.deps;
-    const name = this.pickName(template.name);
-    const action: SerializedAction = {
-      factoryId: template.factoryId,
-      name,
-      config: (template.config || {}) as SerializableRecord,
-    };
-    await dynamicActionManager.createEvent(action, template.triggers);
-  }*/
+  };
 
   /**
    * Checks if drilldown with such a name already exists.

@@ -18,35 +18,34 @@ export interface DrilldownStateFormProps {
   disabled?: boolean;
 }
 
-export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state, disabled }) => {
+export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ drilldown, disabled }) => {
   const drilldowns = useDrilldownsManager();
-  const name = state.useName();
-  const triggers = state.useTriggers();
-  const config = state.useConfig();
+  const name = drilldown.useName();
+  const trigger = drilldown.useTrigger();
+  const config = drilldown.useConfig();
   const triggerPickerProps: TriggerPickerProps = React.useMemo(
     () => ({
-      items: state.uiTriggers.map((id) => {
+      items: drilldown.uiTriggers.map((id) => {
         const trigger = drilldowns.deps.getTrigger(id);
         return trigger;
       }),
-      selected: triggers,
-      onChange: state.setTriggers,
+      selected: trigger,
+      onChange: drilldown.setTrigger,
     }),
-    [drilldowns, triggers, state]
+    [drilldowns, trigger, drilldown]
   );
-  const context = state.getFactoryContext();
+  // const context = drilldown.getFactoryContext();
 
   return (
     <DrilldownForm
       name={name}
-      onNameChange={state.setName}
+      onNameChange={drilldown.setName}
       triggers={triggerPickerProps}
       disabled={disabled}
     >
-      <state.factory.CollectConfig
-        config={config}
-        onConfig={disabled ? () => {} : state.setConfig}
-        context={context}
+      <drilldown.factory.Editor
+        state={config}
+        onChange={disabled ? () => {} : drilldown.setConfig}
       />
     </DrilldownForm>
   );

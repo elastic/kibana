@@ -18,7 +18,7 @@ export const DrilldownManagerContent: React.FC = ({}) => {
   const route = drilldowns.useRoute();
 
   if (route[0] === 'new' && !!route[1]) return <CreateDrilldownForm />;
-  if (route[0] === 'manage' && !!route[1]) return <EditDrilldownForm eventId={route[1]} />;
+  if (route[0] === 'manage' && !!route[1]) return <EditDrilldownForm actionId={route[1]} />;
 
   return <Tabs />;
 };

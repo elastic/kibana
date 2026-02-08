@@ -26,28 +26,28 @@ export interface EditDrilldownFormProps {
   drilldown: DrilldownManager;
 }
 
-export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ state }) => {
+export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ drilldown }) => {
   const drilldowns = useDrilldownsManager();
-  const name = state.useName();
-  const triggers = state.useTriggers();
-  const config = state.useConfig();
+  const name = drilldown.useName();
+  const trigger = drilldown.useTrigger();
+  const config = drilldown.useConfig();
   const triggerPickerProps: TriggerPickerProps = React.useMemo(
     () => ({
-      items: state.uiTriggers.map((id) => {
+      items: drilldown.uiTriggers.map((id) => {
         const trigger = drilldowns.deps.getTrigger(id);
         return trigger;
       }),
-      selected: triggers,
-      onChange: state.setTriggers,
+      selected: trigger,
+      onChange: drilldown.setTrigger,
     }),
-    [drilldowns, triggers, state]
+    [drilldowns, trigger, drilldown]
   );
-  const context = state.getFactoryContext();
+  // const context = state.getFactoryContext();
 
   return (
     <>
-      <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
-        <state.factory.CollectConfig config={config} onConfig={state.setConfig} context={context} />
+      <DrilldownForm name={name} onNameChange={drilldown.setName} triggers={triggerPickerProps}>
+        <drilldown.factory.Editor state={config} onChange={drilldown.setConfig} />
       </DrilldownForm>
       <EuiSpacer size={'xl'} />
       <EuiButton

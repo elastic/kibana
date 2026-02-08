@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import type { DrilldownManagerProviderProps } from '../context';
+import type { DrilldownsManagerProviderProps } from '../context';
 import { DrilldownManagerProvider } from '../context';
 import { DrilldownManager } from './drilldown_manager';
 
-export const DrilldownManagerWithProvider: React.FC<DrilldownManagerProviderProps> = (props) => {
+export const DrilldownManagerWithProvider: React.FC<DrilldownsManagerProviderProps> = (props) => {
   return (
     <DrilldownManagerProvider {...props}>
       <DrilldownManager />
