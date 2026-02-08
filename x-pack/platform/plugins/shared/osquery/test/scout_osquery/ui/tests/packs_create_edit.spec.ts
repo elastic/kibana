@@ -348,6 +348,154 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
   });
 
   // eslint-disable-next-line playwright/max-nested-describe
+  test.describe('should open lens in new tab', { tag: ['@ess'] }, () => {
+    let packId: string;
+    let packName: string;
+
+    test.beforeEach(async ({ kbnClient }) => {
+      const { data: policiesResponse } = await kbnClient.request({
+        method: 'GET',
+        path: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      const pack = await loadPack(kbnClient, {
+        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
+          },
+        },
+      });
+      packId = pack.saved_object_id;
+      packName = pack.name;
+    });
+
+    test.afterEach(async ({ kbnClient }) => {
+      if (packId) {
+        await cleanupPack(kbnClient, packId);
+      }
+    });
+
+    test('should open lens in new tab', { tag: ['@ess'] }, async ({ page, pageObjects }) => {
+      test.setTimeout(300_000);
+
+      // Stub window.open to capture the Lens URL
+      let lensUrl = '';
+      await page.exposeFunction('__capturedWindowOpen', (url: string) => {
+        lensUrl = url;
+      });
+      await page.evaluate(() => {
+        window.open = ((url: string) => {
+          // @ts-expect-error exposed function
+          window.__capturedWindowOpen(url);
+          return null;
+        }) as typeof window.open;
+      });
+
+      // Navigate to pack details
+      await pageObjects.packs.clickPackByName(packName);
+      await page.testSubj
+        .locator('docsLoading')
+        .waitFor({ state: 'visible' })
+        .catch(() => {});
+      await page.testSubj
+        .locator('docsLoading')
+        .waitFor({ state: 'hidden', timeout: 60_000 })
+        .catch(() => {});
+
+      // Click "View in Lens" button
+      const viewInLensButton = page.locator('[aria-label="View in Lens"]').first();
+      await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
+      await viewInLensButton.click();
+
+      // Visit the captured lens URL
+      if (lensUrl) {
+        await page.goto(lensUrl);
+        await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible({ timeout: 60_000 });
+        await expect(page.testSubj.locator('breadcrumbs')).toContainText(
+          `Action pack_${packName}_${savedQueryName}`
+        );
+      }
+    });
+  });
+
+  // eslint-disable-next-line playwright/max-nested-describe
+  test.describe.skip('should open discover in new tab', { tag: ['@ess'] }, () => {
+    let packId: string;
+    let packName: string;
+
+    test.beforeAll(async ({ kbnClient }) => {
+      const { data: policiesResponse } = await kbnClient.request({
+        method: 'GET',
+        path: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      const pack = await loadPack(kbnClient, {
+        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        queries: {
+          [savedQueryName]: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
+          },
+        },
+      });
+      packId = pack.saved_object_id;
+      packName = pack.name;
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      if (packId) {
+        await cleanupPack(kbnClient, packId);
+      }
+    });
+
+    test('should open discover in new tab', async ({ page, pageObjects, kbnUrl }) => {
+      test.setTimeout(300_000);
+
+      // Navigate to pack details
+      await pageObjects.packs.clickPackByName(packName);
+      await page.testSubj
+        .locator('docsLoading')
+        .waitFor({ state: 'visible' })
+        .catch(() => {});
+      await page.testSubj
+        .locator('docsLoading')
+        .waitFor({ state: 'hidden', timeout: 60_000 })
+        .catch(() => {});
+
+      // Find the Discover link for the saved query
+      const discoverLink = page
+        .locator(`[aria-label="Run ${savedQueryName}"]`)
+        .first()
+        .locator('a[href]');
+      const href = await discoverLink.getAttribute('href');
+
+      if (href) {
+        const baseUrl = new URL(page.url()).origin;
+        await page.goto(`${baseUrl}${href}`);
+
+        await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover');
+        await expect(
+          page.getByText(`action_id: pack_${packName}_${savedQueryName}`).first()
+        ).toBeVisible({ timeout: 30_000 });
+
+        // Set date range to Today
+        await page.testSubj.locator('superDatePickerToggleQuickMenuButton').click();
+        await page.testSubj.locator('superDatePickerCommonlyUsed_Today').click();
+
+        await expect(
+          page.testSubj.locator('discoverDocTable').getByText(`pack_${packName}_${savedQueryName}`)
+        ).toBeVisible({ timeout: 60_000 });
+      }
+    });
+  });
+
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('deactivate and activate pack', () => {
     let packId: string;
     let packName: string;

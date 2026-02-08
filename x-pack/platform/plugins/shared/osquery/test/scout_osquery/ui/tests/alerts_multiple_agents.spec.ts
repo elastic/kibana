@@ -68,16 +68,112 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
     await expect(flyoutBody.locator('input[value="host.os.platform"]')).toBeVisible();
   });
 
-  // Skipped tests from Cypress
-  test.skip('should substitute parameters in live query and increase number of ran queries', () => {
-    // This test is skipped in Cypress as well
+  // response-actions-notification doesn't exist in expandable flyout
+  test.skip('should substitute parameters in live query and increase number of ran queries', async ({
+    page,
+    pageObjects,
+  }) => {
+    let initialNotificationCount: number;
+
+    await page.testSubj.locator('expand-event').first().click();
+    const notificationBadge = page.testSubj.locator('response-actions-notification');
+    await expect(notificationBadge).not.toHaveText('0');
+    initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
+
+    // Take osquery action with params
+    await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+    await page.testSubj.locator('osquery-action-item').click();
+
+    const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+    await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
+
+    await pageObjects.liveQuery.selectAllAgents();
+    await pageObjects.liveQuery.inputQuery('select * from uptime;');
+    await pageObjects.liveQuery.submitQuery();
+    await pageObjects.liveQuery.checkResults();
+
+    await page.testSubj.locator('osquery-empty-button').click();
+
+    const updatedNotificationCount = parseInt(
+      (await notificationBadge.textContent()) || '0',
+      10
+    );
+    expect(initialNotificationCount).toBe(updatedNotificationCount - 1);
+
+    // Verify response actions
+    await page.testSubj
+      .locator('securitySolutionDocumentDetailsFlyoutResponseSectionHeader')
+      .click();
+    await page.testSubj
+      .locator('securitySolutionDocumentDetailsFlyoutResponseButton')
+      .click();
+
+    const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
+    await expect(responseWrapper.getByText('tags')).toBeVisible();
+    await expect(
+      responseWrapper.locator('[data-test-subj="osquery-results-comment"]')
+    ).toHaveCount(updatedNotificationCount);
   });
 
-  test.skip('should be able to run take action query against all enrolled agents', () => {
-    // This test is skipped in Cypress as well
+  test.skip('should be able to run take action query against all enrolled agents', async ({
+    page,
+    pageObjects,
+  }) => {
+    test.setTimeout(600_000);
+
+    await page.testSubj.locator('expand-event').first().click();
+    await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+    await page.testSubj.locator('osquery-action-item').click();
+
+    // Clear the pre-filled agent and select All agents
+    const agentSelection = page.testSubj.locator('agentSelection');
+    await agentSelection.locator('[data-test-subj="comboBoxClearButton"]').click();
+    const agentInput = agentSelection.locator('[data-test-subj="comboBoxInput"]');
+    await agentInput.pressSequentially('All');
+    const allAgentsOption = page.getByRole('option', { name: /All agents/ });
+    await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
+    await allAgentsOption.click();
+
+    await expect(agentSelection.getByText('All agents')).toBeVisible();
+
+    await pageObjects.liveQuery.inputQuery(
+      "SELECT * FROM os_version where name='{{host.os.name}}';"
+    );
+    await page.waitForTimeout(1000);
+    await pageObjects.liveQuery.submitQuery();
+
+    // At least 2 agents should respond
+    const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+    await expect(flyoutBody.locator('[data-grid-row-index]')).toHaveCount(
+      expect.any(Number),
+      { timeout: 600_000 }
+    );
+    expect(await flyoutBody.locator('[data-grid-row-index]').count()).toBeGreaterThanOrEqual(2);
   });
 
-  test.skip('should substitute params in osquery ran from timelines alerts', () => {
-    // This test is skipped in Cypress as well
+  test.skip('should substitute params in osquery ran from timelines alerts', async ({
+    page,
+    pageObjects,
+  }) => {
+    test.setTimeout(300_000);
+
+    // Send alert to timeline
+    await page.testSubj.locator('send-alert-to-timeline-button').first().click();
+
+    // Expand first event in the timeline
+    const queryEventsTable = page.testSubj.locator('query-events-table');
+    await queryEventsTable.locator('[data-test-subj="expand-event"]').first().click();
+
+    // Take osquery action with params
+    await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+    await page.testSubj.locator('osquery-action-item').click();
+
+    const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+    await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
+
+    await pageObjects.liveQuery.selectAllAgents();
+    await pageObjects.liveQuery.inputQuery('select * from uptime;');
+    await pageObjects.liveQuery.submitQuery();
+    await pageObjects.liveQuery.checkResults();
   });
 });

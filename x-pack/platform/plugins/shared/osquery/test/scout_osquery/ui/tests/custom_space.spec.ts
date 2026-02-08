@@ -19,7 +19,7 @@ import {
 import { waitForPageReady } from '../common/constants';
 
 const testSpaces = [
-  { name: 'default', tags: ['@ess'] as const },
+  { name: 'default', tags: ['@ess', '@svlSecurity'] as const },
   { name: 'custom-space', tags: ['@ess'] as const },
 ];
 
