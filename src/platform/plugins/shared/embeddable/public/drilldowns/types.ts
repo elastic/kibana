@@ -29,7 +29,7 @@ export type DrilldownDefinition<
   /**
    * Drilldown editor component. Rendered as child of EuiForm component.
    */
-  readonly Editor: FC<EditorProps<TDrilldownState>>;
+  readonly Editor: FC<DrilldownEditorProps<TDrilldownState>>;
 
   /**
    * Implements the "navigation" action of the drilldown. This happens when
@@ -82,7 +82,7 @@ export type DrilldownRegistryEntry = [string, () => Promise<DrilldownDefinition>
 /**
  * Props provided to `Editor` component on every re-render.
  */
-export interface EditorProps<TDrilldownState extends DrilldownState = DrilldownState> {
+export interface DrilldownEditorProps<TDrilldownState extends DrilldownState = DrilldownState> {
   /**
    * Current (latest) state.
    */
