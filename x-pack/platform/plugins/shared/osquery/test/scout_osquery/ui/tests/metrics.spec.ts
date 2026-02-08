@@ -51,7 +51,10 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
     // Note: The first button in waffleMap is "Group by All" which is NOT a host
-    const hostButton = page.testSubj.locator('waffleMap').getByRole('button', { name: /scout-osquery-agent/i }).first();
+    const hostButton = page.testSubj
+      .locator('waffleMap')
+      .getByRole('button', { name: /scout-osquery-agent/i })
+      .first();
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 
@@ -94,7 +97,10 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
     }
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
-    const hostButton = page.testSubj.locator('waffleMap').getByRole('button', { name: /scout-osquery-agent/i }).first();
+    const hostButton = page.testSubj
+      .locator('waffleMap')
+      .getByRole('button', { name: /scout-osquery-agent/i })
+      .first();
     await expect(hostButton).toBeVisible({ timeout: 30_000 });
     await hostButton.click();
 
@@ -108,7 +114,10 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
     await osqueryTab.click();
 
     // Wait for the osquery content to load within the host flyout
-    await page.testSubj.locator('comboBoxInput').first().waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj
+      .locator('comboBoxInput')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 });
 
     // Select saved query
     const comboBox = page.testSubj.locator('comboBoxInput').first();

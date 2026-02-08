@@ -56,6 +56,7 @@ roles.forEach(({ name, role }) => {
       if (savedQueryId) {
         await cleanupSavedQuery(kbnClient, savedQueryId);
       }
+
       if (packId) {
         await cleanupPack(kbnClient, packId);
       }
@@ -111,7 +112,9 @@ roles.forEach(({ name, role }) => {
       await newLiveQueryButton.click();
 
       await pageObjects.liveQuery.selectAllAgents();
-      const savedQueryCombo = page.testSubj.locator('savedQuerySelect').locator('[data-test-subj="comboBoxInput"]');
+      const savedQueryCombo = page.testSubj
+        .locator('savedQuerySelect')
+        .locator('[data-test-subj="comboBoxInput"]');
       await savedQueryCombo.click();
       await savedQueryCombo.pressSequentially(savedQueryName);
       await page
@@ -129,7 +132,7 @@ roles.forEach(({ name, role }) => {
 
       // Ensure the pack is visible - it may be on page 2 due to accumulated packs
       let toggle = page.locator(`[aria-label="${packName}"]`);
-      if (await toggle.isVisible({ timeout: 3_000 }).catch(() => false) === false) {
+      if ((await toggle.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
         const nextPageLink = page.getByRole('link', { name: 'Next page' });
         while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await nextPageLink.click();

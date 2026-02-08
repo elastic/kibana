@@ -129,9 +129,7 @@ test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
     await liveQuery.checkResults();
 
     // Click through to agent details
-    const firstCell = page.locator(
-      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"]'
-    );
+    const firstCell = page.locator('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]');
     await expect(firstCell).toBeVisible();
     await firstCell.locator('[data-euigrid-tab-managed="true"]').click();
     await expect(page).toHaveURL(/app\/fleet\/agents\//);
@@ -179,10 +177,7 @@ test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
     await expect(liveQuery.resultsPanel).toBeVisible({ timeout: 60_000 });
   });
 
-  test('should validate form fully and submit with ECS mapping', async ({
-    page,
-    pageObjects,
-  }) => {
+  test('should validate form fully and submit with ECS mapping', async ({ page, pageObjects }) => {
     test.slow(); // Live queries can take time for agents to respond
     const liveQuery = pageObjects.liveQuery;
 

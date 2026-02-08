@@ -107,8 +107,8 @@ for (const testSpace of testSpaces) {
         // Verify Discover link works
         const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
         await expect(discoverLink).toBeVisible({ timeout: 30_000 });
-        const href = await discoverLink.getAttribute('href');
-        expect(href).toBeTruthy();
+        const href = discoverLink;
+        await expect(href).toHaveAttribute('href');
 
         if (href) {
           // href is relative, need to construct absolute URL
@@ -116,9 +116,7 @@ for (const testSpace of testSpaces) {
           await page.goto(`${baseUrl}${href}`);
           await waitForPageReady(page);
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ timeout: 60_000 });
-          await expect(
-            page.getByText(/action_data.*select \* from uptime;/).first()
-          ).toBeVisible();
+          await expect(page.getByText(/action_data.*select \* from uptime;/).first()).toBeVisible();
         }
       });
 
@@ -142,6 +140,7 @@ for (const testSpace of testSpaces) {
             }
           }
         }
+
         await playButton.click();
         await pageObjects.liveQuery.selectAllAgents();
         await page.getByText('Submit').first().click();

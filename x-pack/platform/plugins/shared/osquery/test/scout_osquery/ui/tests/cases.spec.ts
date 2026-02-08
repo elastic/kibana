@@ -50,7 +50,9 @@ test.describe('Add to Cases', () => {
       // Navigate to live query results page
       await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
       await waitForPageReady(page);
-      await page.testSubj.locator('osqueryResultsTable').waitFor({ state: 'visible', timeout: 60_000 });
+      await page.testSubj
+        .locator('osqueryResultsTable')
+        .waitFor({ state: 'visible', timeout: 60_000 });
 
       // Find and click "Add to Case" button
       const addToCaseButton = page.locator('[aria-label="Add to Case"]').first();
@@ -100,7 +102,9 @@ test.describe('Add to Cases', () => {
       // Navigate to live query results page
       await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
       await waitForPageReady(page);
-      await page.testSubj.locator('osqueryResultsTable').waitFor({ state: 'visible', timeout: 60_000 });
+      await page.testSubj
+        .locator('osqueryResultsTable')
+        .waitFor({ state: 'visible', timeout: 60_000 });
 
       // Find and click "Add to Case" button
       const addToCaseButton = page.locator('[aria-label="Add to Case"]').first();

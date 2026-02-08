@@ -43,12 +43,8 @@ function registerCleanup(log: { info: (msg: string) => void; error: (msg: string
 
 async function isContainerRunning(name: string): Promise<boolean> {
   try {
-    const { stdout } = await execa('docker', [
-      'inspect',
-      '--format',
-      '{{.State.Running}}',
-      name,
-    ]);
+    const { stdout } = await execa('docker', ['inspect', '--format', '{{.State.Running}}', name]);
+
     return stdout.trim() === 'true';
   } catch {
     return false;
@@ -72,18 +68,14 @@ async function getOnlineAgentCount(kbnClient: any): Promise<number> {
 async function getAgentVersion(kbnClient: any): Promise<string> {
   try {
     const status = await kbnClient.status.get();
+
     return `${status.version.number}-SNAPSHOT`;
   } catch {
     return '9.4.0-SNAPSHOT';
   }
 }
 
-async function waitForAgents(
-  kbnClient: any,
-  log: any,
-  expectedCount: number,
-  timeoutMs = 240_000
-) {
+async function waitForAgents(kbnClient: any, log: any, expectedCount: number, timeoutMs = 240_000) {
   const start = Date.now();
   let lastCount = 0;
 
@@ -92,17 +84,22 @@ async function waitForAgents(
 
     if (lastCount >= expectedCount) {
       log.info(`[osquery-setup] ${lastCount} agent(s) online`);
+
       return;
     }
 
     log.info(
-      `[osquery-setup] Waiting for agents... ${lastCount}/${expectedCount} online (${Math.round((Date.now() - start) / 1000)}s)`
+      `[osquery-setup] Waiting for agents... ${lastCount}/${expectedCount} online (${Math.round(
+        (Date.now() - start) / 1000
+      )}s)`
     );
     await new Promise((r) => setTimeout(r, 5_000));
   }
 
   throw new Error(
-    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${timeoutMs / 1000}s`
+    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${
+      timeoutMs / 1000
+    }s`
   );
 }
 
@@ -148,7 +145,10 @@ async function waitForOsqueryReady(kbnClient: any, log: any, timeoutMs = 300_000
             );
 
             if (successful > 0 || docs > 0) {
-              log.info(`[osquery-warmup] Osquery is ready! (successful=${successful}, docs=${docs})`);
+              log.info(
+                `[osquery-warmup] Osquery is ready! (successful=${successful}, docs=${docs})`
+              );
+
               return;
             }
           }
@@ -158,7 +158,9 @@ async function waitForOsqueryReady(kbnClient: any, log: any, timeoutMs = 300_000
       }
 
       log.info(
-        `[osquery-warmup] No successful results yet (${Math.round((Date.now() - start) / 1000)}s elapsed), submitting new query...`
+        `[osquery-warmup] No successful results yet (${Math.round(
+          (Date.now() - start) / 1000
+        )}s elapsed), submitting new query...`
       );
     } catch (e: any) {
       log.info(
@@ -193,7 +195,12 @@ globalSetupHook(
         `online agents=${onlineAgents}/${EXPECTED_AGENT_COUNT}`
     );
 
-    if (fleetServerRunning && agent0Running && agent1Running && onlineAgents >= EXPECTED_AGENT_COUNT) {
+    if (
+      fleetServerRunning &&
+      agent0Running &&
+      agent1Running &&
+      onlineAgents >= EXPECTED_AGENT_COUNT
+    ) {
       log.info(
         '[osquery-setup] Fleet Server and agents are already running and enrolled. Skipping provisioning.'
       );
@@ -202,6 +209,7 @@ globalSetupHook(
       log.info('[osquery-setup] Verifying osquery is responsive on existing agents...');
       await waitForOsqueryReady(kbnClient, log);
       log.info('[osquery-setup] Osquery warm-up complete. Agents are responsive.');
+
       return;
     }
 

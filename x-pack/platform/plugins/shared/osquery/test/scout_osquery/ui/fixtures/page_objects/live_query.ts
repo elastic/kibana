@@ -27,7 +27,10 @@ export class LiveQueryPage {
   async navigate() {
     await this.page.gotoApp('osquery');
     await waitForPageReady(this.page);
-    await this.page.getByText('New live query').first().waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page
+      .getByText('New live query')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async clickNewLiveQuery() {
@@ -99,6 +102,7 @@ export class LiveQueryPage {
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
       try {
         await dataCell.waitFor({ state: 'visible', timeout: 10_000 });
+
         return; // Results found
       } catch {
         // Results not yet available, wait and retry
@@ -107,9 +111,9 @@ export class LiveQueryPage {
     }
 
     // Final check — fail with a clear error if results never appeared
-    await expect(
-      this.page.testSubj.locator('dataGridRowCell').first()
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(this.page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
+      timeout: 15_000,
+    });
   }
 
   async clickAdvanced() {
@@ -117,8 +121,8 @@ export class LiveQueryPage {
   }
 
   async fillInQueryTimeout(timeout: string) {
-    const timeoutInput = this.page
-      .testSubj.locator('advanced-accordion-content')
+    const timeoutInput = this.page.testSubj
+      .locator('advanced-accordion-content')
       .locator('[data-test-subj="timeout-input"]');
     await timeoutInput.clear();
     await timeoutInput.fill(timeout);
@@ -141,6 +145,7 @@ export class LiveQueryPage {
       try {
         await option.waitFor({ state: 'visible', timeout: 10_000 });
         await option.click();
+
         return;
       } catch {
         // Dropdown didn't show options — schema may not be loaded yet
@@ -168,13 +173,16 @@ export class LiveQueryPage {
     await comboBox.pressSequentially(cleanText);
 
     // Wait for an option matching the typed text to appear in the dropdown
-    const matchingOption = this.page.getByRole('option', { name: new RegExp(cleanText, 'i') }).first();
+    const matchingOption = this.page
+      .getByRole('option', { name: new RegExp(cleanText, 'i') })
+      .first();
     await matchingOption.waitFor({ state: 'visible', timeout: 15_000 });
     await matchingOption.click();
   }
 
   async getQueryEditorHeight(): Promise<number> {
     const box = await this.queryEditor.boundingBox();
+
     return box?.height ?? 0;
   }
 }

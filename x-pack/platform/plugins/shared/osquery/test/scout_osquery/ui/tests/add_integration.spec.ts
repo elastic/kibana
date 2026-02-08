@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security';
 import { test } from '../fixtures';
 
 // NOTE: This spec is skipped in the original Cypress tests.
 // It has been migrated with the same skip status. Enable when ready to implement.
 test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test('test case name', async ({ page }) => {
+  test('case name', async ({ page }) => {
     // TODO: Implement when test is unskipped
   });
 });

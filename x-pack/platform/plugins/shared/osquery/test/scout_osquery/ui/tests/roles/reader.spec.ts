@@ -45,6 +45,7 @@ test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
     if (savedQueryId) {
       await cleanupSavedQuery(kbnClient, savedQueryId);
     }
+
     if (packId) {
       await cleanupPack(kbnClient, packId);
     }
@@ -74,10 +75,10 @@ test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
     await expect(page.getByText('Permission denied').first()).toBeVisible();
   });
 
-    test('should not be able to play in live queries history', async ({ page, pageObjects }) => {
-      await pageObjects.liveQuery.navigate();
-      await expect(page.getByText('New live query').first()).toBeDisabled();
-      await expect(page.getByText(liveQueryQuery).first()).toBeVisible();
+  test('should not be able to play in live queries history', async ({ page, pageObjects }) => {
+    await pageObjects.liveQuery.navigate();
+    await expect(page.getByText('New live query').first()).toBeDisabled();
+    await expect(page.getByText(liveQueryQuery).first()).toBeVisible();
     await expect(page.locator(`[aria-label="Run ${savedQueryName}"]`)).not.toBeVisible();
     await expect(page.locator('[aria-label="Details"]').first()).toBeVisible();
   });
@@ -89,7 +90,7 @@ test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
 
     // Ensure the pack is visible - it may be on page 2 due to accumulated packs from previous test runs
     let toggle = page.locator(`[aria-label="${packName}"]`);
-    if (await toggle.isVisible({ timeout: 3_000 }).catch(() => false) === false) {
+    if ((await toggle.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
       // Click through pages to find the pack
       const nextPageLink = page.getByRole('link', { name: 'Next page' });
       while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {

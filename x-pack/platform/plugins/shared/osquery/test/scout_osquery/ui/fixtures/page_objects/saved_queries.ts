@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { waitForPageReady } from '../../../common/constants';
 
 export class SavedQueriesPage {

@@ -8,12 +8,7 @@
 import { expect } from '@kbn/scout-security';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
-import {
-  loadSavedQuery,
-  cleanupSavedQuery,
-  loadPack,
-  cleanupPack,
-} from '../../common/api_helpers';
+import { loadSavedQuery, cleanupSavedQuery, loadPack, cleanupPack } from '../../common/api_helpers';
 
 test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () => {
   let savedQueryId: string;
@@ -214,14 +209,19 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
       }
 
       // Wait for the success toast notification before interacting with pagination
-      await expect(page.getByText(`Successfully created "${packName}" pack`).first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(`Successfully created "${packName}" pack`).first()).toBeVisible({
+        timeout: 30_000,
+      });
 
       const paginationButton = page.testSubj.locator('tablePaginationPopoverButton');
       if (await paginationButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
         await paginationButton.click();
-        await page.testSubj.locator('tablePagination-50-rows').waitFor({ state: 'visible', timeout: 5_000 });
+        await page.testSubj
+          .locator('tablePagination-50-rows')
+          .waitFor({ state: 'visible', timeout: 5_000 });
         await page.testSubj.locator('tablePagination-50-rows').click();
       }
+
       await expect(page.getByText(packName).first()).toBeVisible();
     });
   });
@@ -280,9 +280,13 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
       await page.waitForTimeout(500); // Wait for form validation to settle
       await packs.clickSaveQueryInFlyout();
 
-      await expect(page.locator('tbody > tr').filter({ hasText: newQueryName })).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator('tbody > tr').filter({ hasText: newQueryName })).toBeVisible({
+        timeout: 15_000,
+      });
       await packs.clickUpdatePack();
-      await expect(page.getByText(`Successfully updated "${packName}" pack`).first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(`Successfully updated "${packName}" pack`).first()).toBeVisible({
+        timeout: 30_000,
+      });
     });
   });
 
@@ -419,10 +423,13 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
 
       while (lastResultsDate === '-' && Date.now() < maxWait) {
         await page.testSubj.locator('docsLoading').waitFor({ state: 'hidden' });
-        const resultsCell = page.locator('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent');
+        const resultsCell = page.locator(
+          'tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent'
+        );
         if ((await resultsCell.count()) > 0) {
           lastResultsDate = (await resultsCell.first().textContent()) || '-';
         }
+
         if (lastResultsDate === '-') {
           await page.reload();
           await page.waitForTimeout(5_000);
@@ -470,16 +477,24 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     test('delete all queries in pack', async ({ page, pageObjects }) => {
       const packs = pageObjects.packs;
       await packs.clickPackByName(packName);
-      await page.getByText(/^Edit$/).first().click();
+      await page
+        .getByText(/^Edit$/)
+        .first()
+        .click();
 
       // Wait for the pack edit page to fully load
       await expect(page.getByText(`Edit ${packName}`).first()).toBeVisible({ timeout: 15_000 });
       await page.testSubj.locator('checkboxSelectAll').click();
-      await page.getByText(/^Delete \d+ quer(y|ies)/).first().click();
+      await page
+        .getByText(/^Delete \d+ quer(y|ies)/)
+        .first()
+        .click();
 
       // Click update pack and handle confirmation modal
       await packs.clickUpdatePack();
-      await expect(page.getByText(`Successfully updated "${packName}" pack`).first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(`Successfully updated "${packName}" pack`).first()).toBeVisible({
+        timeout: 30_000,
+      });
 
       // Navigate back to packs list and verify
       await pageObjects.packs.navigate();
@@ -523,7 +538,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     test('enable changing saved queries and ecs_mappings', async ({ page, pageObjects }) => {
       const packs = pageObjects.packs;
       await packs.clickPackByName(packName);
-      await page.getByText(/^Edit$/).first().click();
+      await page
+        .getByText(/^Edit$/)
+        .first()
+        .click();
 
       await packs.clickAddQuery();
       await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });

@@ -15,7 +15,9 @@
 const API_VERSION = '2023-10-31';
 
 function randomString(length = 8): string {
-  return Math.random().toString(36).substring(2, 2 + length);
+  return Math.random()
+    .toString(36)
+    .substring(2, 2 + length);
 }
 
 // ── Saved Queries ─────────────────────────────────────────────────────────────
@@ -73,7 +75,10 @@ export interface PackPayload {
   name?: string;
   description?: string;
   enabled?: boolean;
-  queries?: Record<string, { ecs_mapping?: Record<string, unknown>; interval: number; query: string; platform?: string }>;
+  queries?: Record<
+    string,
+    { ecs_mapping?: Record<string, unknown>; interval: number; query: string; platform?: string }
+  >;
   policy_ids?: string[];
   shards?: Record<string, unknown>;
 }
@@ -153,13 +158,10 @@ export async function getPack(kbnClient: any, packId: string): Promise<any> {
   return data.data;
 }
 
-export async function cleanupPack(
-  kbnClient: any,
-  id: string,
-  space = 'default'
-): Promise<void> {
+export async function cleanupPack(kbnClient: any, id: string, space = 'default'): Promise<void> {
   try {
-    const path = space === 'default' ? `/api/osquery/packs/${id}` : `/s/${space}/api/osquery/packs/${id}`;
+    const path =
+      space === 'default' ? `/api/osquery/packs/${id}` : `/s/${space}/api/osquery/packs/${id}`;
     await kbnClient.request({
       method: 'DELETE',
       path,
@@ -186,10 +188,7 @@ export async function loadLiveQuery(
 
 // ── Detection Rules ───────────────────────────────────────────────────────────
 
-export async function loadRule(
-  kbnClient: any,
-  includeResponseActions = false
-): Promise<any> {
+export async function loadRule(kbnClient: any, includeResponseActions = false): Promise<any> {
   const body: Record<string, unknown> = {
     type: 'query',
     index: [
@@ -468,7 +467,7 @@ export async function addOsqueryToAgentPolicy(
   agentPolicyName: string,
   integrationVersion?: string
 ): Promise<any> {
-  const version = integrationVersion ?? await getInstalledOsqueryIntegrationVersion(kbnClient);
+  const version = integrationVersion ?? (await getInstalledOsqueryIntegrationVersion(kbnClient));
 
   const { data } = await kbnClient.request({
     method: 'POST',

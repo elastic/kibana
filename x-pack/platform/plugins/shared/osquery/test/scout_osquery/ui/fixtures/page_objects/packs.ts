@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { waitForPageReady } from '../../../common/constants';
 
 export class PacksPage {
@@ -75,7 +74,9 @@ export class PacksPage {
   }
 
   async selectPolicy(policyName: string) {
-    const comboBox = this.page.testSubj.locator('policyIdsComboBox').locator('[data-test-subj="comboBoxInput"]');
+    const comboBox = this.page.testSubj
+      .locator('policyIdsComboBox')
+      .locator('[data-test-subj="comboBoxInput"]');
     await comboBox.click();
     await comboBox.pressSequentially(policyName);
     const option = this.page.getByRole('option', { name: new RegExp(policyName, 'i') }).first();
@@ -104,6 +105,7 @@ export class PacksPage {
       if (await fiftyRowsOption.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await fiftyRowsOption.click({ force: true });
       }
+
       // Close the popover if it's still open (press Escape)
       await this.page.keyboard.press('Escape');
       await this.page.waitForTimeout(1000);

@@ -43,7 +43,9 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
 
     await page.testSubj.locator('osqueryAddInvestigationGuideQueries').click();
     // Wait for the investigation guide text to be replaced by response actions
-    await expect(page.testSubj.locator('osquery-investigation-guide-text')).not.toBeVisible({ timeout: 15_000 });
+    await expect(page.testSubj.locator('osquery-investigation-guide-text')).not.toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for response actions to load after converting investigation guide
     const responseAction0 = page.testSubj.locator('response-actions-list-item-0');
@@ -54,7 +56,9 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
       'SELECT * FROM os_version',
       { timeout: 30_000 }
     );
-    await expect(responseAction0.locator('input[value="host.os.platform"]')).toBeVisible({ timeout: 15_000 });
+    await expect(responseAction0.locator('input[value="host.os.platform"]')).toBeVisible({
+      timeout: 15_000,
+    });
 
     const responseAction1 = page.testSubj.locator('response-actions-list-item-1');
     await expect(responseAction1).toBeVisible({ timeout: 15_000 });
@@ -86,7 +90,9 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
     await expect(page.getByText(/\d+ agents? selected\./).first()).toBeVisible({ timeout: 10_000 });
 
     // Input query
-    const queryEditor = page.testSubj.locator('flyout-body-osquery').locator('[data-test-subj="kibanaCodeEditor"]');
+    const queryEditor = page.testSubj
+      .locator('flyout-body-osquery')
+      .locator('[data-test-subj="kibanaCodeEditor"]');
     await queryEditor.click();
     await queryEditor.pressSequentially('select * from uptime;');
 
@@ -100,7 +106,9 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
     const dataCell = page.testSubj.locator('dataGridRowCell').first();
     await expect(dataCell).toBeVisible({ timeout: 120_000 });
 
-    await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
+      timeout: 30_000,
+    });
     await page.testSubj.locator('add-to-timeline').first().click();
     await expect(page.testSubj.locator('globalToastList').getByText(/Added/)).toBeVisible();
 
@@ -113,14 +121,23 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(1000);
     }
+
     // Also close the security solution flyout if it's still open
-    const secFlyoutClose = page.testSubj.locator('securitySolutionFlyoutNavigationCollapseDetailButton');
+    const secFlyoutClose = page.testSubj.locator(
+      'securitySolutionFlyoutNavigationCollapseDetailButton'
+    );
     if (await secFlyoutClose.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await secFlyoutClose.click();
     }
+
     await page.waitForTimeout(1000);
-    await page.testSubj.locator('timeline-bottom-bar').getByText(TIMELINE_NAME).click({ timeout: 15_000 });
-    await expect(page.testSubj.locator('draggableWrapperKeyboardHandler').getByText(/action_id: "/)).toBeVisible();
+    await page.testSubj
+      .locator('timeline-bottom-bar')
+      .getByText(TIMELINE_NAME)
+      .click({ timeout: 15_000 });
+    await expect(
+      page.testSubj.locator('draggableWrapperKeyboardHandler').getByText(/action_id: "/)
+    ).toBeVisible();
 
     // Navigate away to trigger unsaved changes modal if needed
     await page.goto(kbnUrl.get('/app/osquery'));

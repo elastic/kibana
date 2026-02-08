@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security';
 import { test } from '../../fixtures';
 import { socManagerRole } from '../../../common/roles';
 import { loadRule, cleanupRule } from '../../../common/api_helpers';

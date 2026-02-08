@@ -31,8 +31,7 @@ import { defaultConfig } from '../../../default/stateful/base.config';
 // resolve localhost back to the host machine, so we replace them with host.docker.internal.
 const kbnServerArgsWithoutFleetHosts = defaultConfig.kbnTestServer.serverArgs.filter(
   (arg) =>
-    !arg.startsWith('--xpack.fleet.fleetServerHosts=') &&
-    !arg.startsWith('--xpack.fleet.outputs=')
+    !arg.startsWith('--xpack.fleet.fleetServerHosts=') && !arg.startsWith('--xpack.fleet.outputs=')
 );
 
 export const servers: ScoutServerConfig = {

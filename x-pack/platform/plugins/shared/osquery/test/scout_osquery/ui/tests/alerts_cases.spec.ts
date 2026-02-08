@@ -8,7 +8,15 @@
 import { expect } from '@kbn/scout-security';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
-import { loadRule, cleanupRule, loadPack, cleanupPack, packFixture, loadCase, cleanupCase } from '../../common/api_helpers';
+import {
+  loadRule,
+  cleanupRule,
+  loadPack,
+  cleanupPack,
+  packFixture,
+  loadCase,
+  cleanupCase,
+} from '../../common/api_helpers';
 import { waitForPageReady } from '../../common/constants';
 
 test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, () => {
@@ -55,7 +63,9 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
       await page.waitForTimeout(1000);
 
       await page.getByText('Run a set of queries in a pack').first().click();
-      await expect(page.testSubj.locator('flyout-body-osquery').locator('[data-test-subj="kibanaCodeEditor"]')).not.toBeVisible();
+      await expect(
+        page.testSubj.locator('flyout-body-osquery').locator('[data-test-subj="kibanaCodeEditor"]')
+      ).not.toBeVisible();
       await waitForPageReady(page);
 
       const packSelect = page.testSubj.locator('select-live-pack');
@@ -71,7 +81,9 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
 
       // Wait for results
       await expect(page.testSubj.locator('osqueryResultsTable')).toBeVisible({ timeout: 120_000 });
-      await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({ timeout: 120_000 });
+      await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
+        timeout: 120_000,
+      });
 
       // Add to case
       await page.locator('[aria-label="Add to Case"]').first().click();
@@ -83,16 +95,18 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
       await page.locator('textarea[aria-label="caseDescription"]').fill(caseDescription);
 
       // Set up response listener just before submitting
-      const caseCreatePromise = page.waitForResponse(
-        (response) =>
-          response.url().includes('/api/cases') &&
-          response.request().method() === 'POST',
-        { timeout: 30_000 }
-      ).then(async (response) => {
-        const body = await response.json();
-        capturedCaseId = body.id;
-        return response;
-      });
+      const caseCreatePromise = page
+        .waitForResponse(
+          (response) =>
+            response.url().includes('/api/cases') && response.request().method() === 'POST',
+          { timeout: 30_000 }
+        )
+        .then(async (response) => {
+          const body = await response.json();
+          capturedCaseId = body.id;
+
+          return response;
+        });
 
       await page.testSubj.locator('create-case-submit').click();
       await caseCreatePromise;
@@ -144,13 +158,17 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
         if (hasRows === 0) {
           // Try clicking tabs to refresh
           const tabs = comment.locator('div .euiTabs');
-          if (await tabs.count() > 0) {
+          if ((await tabs.count()) > 0) {
             await comment.locator('[data-test-subj="osquery-status-tab"]').click();
             await comment.locator('[data-test-subj="osquery-results-tab"]').click();
-            await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible({ timeout: 120_000 });
+            await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible(
+              { timeout: 120_000 }
+            );
           }
         } else {
-          await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible({ timeout: 120_000 });
+          await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible({
+            timeout: 120_000,
+          });
         }
       }
 
@@ -158,7 +176,9 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
       await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
       await expect(page.getByText('View in Lens').first()).toBeVisible({ timeout: 30_000 });
       await expect(page.getByText('Add to Case').first()).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText('Add to Timeline investigation').first()).toBeVisible({
+        timeout: 30_000,
+      });
 
       // Add to case
       await page.getByText('Add to Case').first().click();
@@ -167,8 +187,12 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
 
       // View case and check results
       await page.getByText('View case').first().click();
-      await expect(page.getByText(/attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/)).toBeVisible();
-      await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({ timeout: 120_000 });
+      await expect(
+        page.getByText(/attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/)
+      ).toBeVisible();
+      await expect(page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
+        timeout: 120_000,
+      });
     });
   });
 });

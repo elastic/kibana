@@ -39,7 +39,7 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
       .locator('securitySolutionFlyoutInvestigationGuideButton')
       .waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
-    
+
     // Wait for investigation guide to load, then click the osquery action button
     const getProcessesButton = page.getByText('Get processes').first();
     await expect(getProcessesButton).toBeVisible({ timeout: 30_000 });
@@ -56,6 +56,7 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
       // Try double-click if single click didn't work
       await getProcessesButton.dblclick({ force: true });
     }
+
     await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
 
     // Click the editor to ensure tokenization
