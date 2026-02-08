@@ -85,8 +85,19 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
   // Pre-loaded cache: maps cache filename → parsed JSON entry.
   // All cache files are read into memory at buildStart (async, parallel)
   // so that transform-time lookups are pure Map.get() — no disk I/O.
-  const memoryCache = new Map<string, { contentHash: string; code: string; map: any }>();
+  const memoryCache = new Map<
+    string,
+    { contentHash: string; code: string; map: any; filePath?: string }
+  >();
   let memoryCacheReady = false;
+
+  // ── Source file pre-read cache ───────────────────────────────────
+  // Pre-loaded source files for all cached modules. Populated during
+  // buildStart alongside cache entries. This allows the `load` hook to
+  // return source from memory instead of Vite reading from disk,
+  // eliminating readFileUtf8 from the hot path (~800ms in parent process).
+  const sourceCache = new Map<string, string>(); // absolute filePath → source code
+  let sourceCacheReady = false;
 
   // ── helpers ──────────────────────────────────────────────────────────
 
@@ -106,6 +117,10 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
    * Pre-load ALL cache entries into memory at startup. This converts
    * thousands of synchronous readFileSync calls (5.3s of readFileUtf8)
    * into a single parallel async batch that runs before any transforms.
+   *
+   * Also pre-reads the original source files for cached modules. This
+   * enables the `load` hook to return source from memory instead of Vite
+   * reading from disk, eliminating ~800ms of readFileUtf8 from startup.
    */
   async function preloadCacheEntries(): Promise<void> {
     ensureCacheDir();
@@ -114,12 +129,14 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
       files = await FsPromises.readdir(cacheDir);
     } catch {
       memoryCacheReady = true;
+      sourceCacheReady = true;
       return;
     }
 
     const jsonFiles = files.filter((f) => f.endsWith('.json') && !f.endsWith('.tmp'));
     if (jsonFiles.length === 0) {
       memoryCacheReady = true;
+      sourceCacheReady = true;
       return;
     }
 
@@ -127,7 +144,7 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
     const BATCH_SIZE = 200;
     for (let i = 0; i < jsonFiles.length; i += BATCH_SIZE) {
       const batch = jsonFiles.slice(i, i + BATCH_SIZE);
-      const results = await Promise.allSettled(
+      await Promise.allSettled(
         batch.map(async (file) => {
           const filePath = Path.join(cacheDir, file);
           const raw = await FsPromises.readFile(filePath, 'utf-8');
@@ -141,6 +158,35 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
     }
 
     memoryCacheReady = true;
+
+    // Pre-read source files for all cached modules (async, parallel).
+    // This allows the load hook to serve source from memory, avoiding
+    // synchronous readFileUtf8 calls during Vite's internal load step.
+    const sourceReads: Array<{ filePath: string; promise: Promise<string> }> = [];
+    for (const [, entry] of memoryCache) {
+      if (entry.filePath && !sourceCache.has(entry.filePath)) {
+        sourceReads.push({
+          filePath: entry.filePath,
+          promise: FsPromises.readFile(entry.filePath, 'utf-8').catch(() => ''),
+        });
+      }
+    }
+
+    if (sourceReads.length > 0) {
+      for (let i = 0; i < sourceReads.length; i += BATCH_SIZE) {
+        const batch = sourceReads.slice(i, i + BATCH_SIZE);
+        await Promise.allSettled(
+          batch.map(async (r) => {
+            const source = await r.promise;
+            if (source) {
+              sourceCache.set(r.filePath, source);
+            }
+          })
+        );
+      }
+    }
+
+    sourceCacheReady = true;
   }
 
   function readCacheEntry(id: string, hash: string): { code: string; map: any } | null {
@@ -169,7 +215,7 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
   }
 
   function writeCacheEntry(id: string, hash: string, code: string, map?: any): void {
-    const entry = { contentHash: hash, code, map: map ?? null };
+    const entry = { filePath: id, contentHash: hash, code, map: map ?? null };
 
     // Update the in-memory cache immediately
     memoryCache.set(pathToKey(id), entry);
@@ -198,7 +244,10 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
     // Skip virtual modules
     if (id.startsWith('\0')) return false;
     // Skip node_modules — these are either externalized or pre-bundled
-    if (id.includes('node_modules')) return false;
+    // Use '/node_modules/' path segment check (not substring match) to avoid
+    // false positives on files whose names contain 'node_modules' as a
+    // substring (e.g. find_used_node_modules.ts).
+    if (id.includes('/node_modules/')) return false;
     // Only cache TS/JS source files
     if (!/\.(ts|tsx|js|jsx)$/.test(id)) return false;
     return true;
@@ -229,6 +278,18 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
       // This replaces thousands of synchronous readFileSync calls during
       // transform with fast Map.get() lookups.
       await preloadCacheEntries();
+    },
+
+    // Load hook — return pre-read source from memory to skip Vite's internal
+    // readFileUtf8 disk I/O. Source files for all cached modules are pre-read
+    // during buildStart (async parallel I/O).
+    load(id: string) {
+      if (!sourceCacheReady || !shouldCache(id)) return null;
+      const source = sourceCache.get(id);
+      if (source !== undefined) {
+        return source;
+      }
+      return null;
     },
 
     transform(code: string, id: string) {

@@ -28,8 +28,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { Log } from './log';
 import { CliLog } from './log';
-import { Optimizer } from './optimizer';
-import { ViteServer } from './vite_server';
+// Lazy-loaded in start() to defer heavy import chains:
+// - Optimizer pulls in @kbn/optimizer → webpack and all loaders
+// - ViteServer pulls in @kbn/vite-optimizer → vite, rolldown, etc.
+// By deferring these imports, the child process spawns sooner.
+import type { Optimizer } from './optimizer';
+import type { ViteServer } from './vite_server';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
@@ -118,11 +122,15 @@ export class CliDevMode {
   private readonly basePathProxy?: BasePathProxyServer;
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
-  private readonly optimizer?: Optimizer;
-  private readonly viteServer?: ViteServer;
+  // Lazy-loaded in start() — not set in constructor
+  private optimizer?: Optimizer;
+  private viteServer?: ViteServer;
   private readonly useViteBrowser: boolean;
   private startTime?: number;
   private subscription?: Rx.Subscription;
+
+  // Options stored from constructor for lazy creation in start()
+  private readonly _bundlerOpts: Record<string, any>;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
@@ -195,18 +203,20 @@ export class CliDevMode {
       },
     });
 
-    // Use either Vite or webpack optimizer based on flag
+    // Store options for lazy creation of ViteServer or Optimizer in start().
+    // The actual classes are imported dynamically so that @kbn/vite-optimizer
+    // (Vite, Rolldown) and @kbn/optimizer (webpack) are NOT loaded at module
+    // import time. This lets the child process spawn sooner.
     if (this.useViteBrowser) {
-
-      this.viteServer = new ViteServer({
+      this._bundlerOpts = {
         enabled: !cliArgs.disableOptimizer,
         repoRoot: REPO_ROOT,
         runExamples: cliArgs.runExamples,
         verbose: !!cliArgs.verbose,
         silent: !!cliArgs.silent,
-      });
+      };
     } else {
-      this.optimizer = new Optimizer({
+      this._bundlerOpts = {
         enabled: !cliArgs.disableOptimizer,
         repoRoot: REPO_ROOT,
         runExamples: cliArgs.runExamples,
@@ -218,7 +228,7 @@ export class CliDevMode {
         watch: cliArgs.watch,
         pluginPaths: config.plugins.additionalPluginPaths,
         pluginScanDirs: config.plugins.pluginSearchPaths,
-      });
+      };
     }
   }
 
@@ -238,7 +248,7 @@ export class CliDevMode {
     };
   }
 
-  public start() {
+  public async start() {
     const { basePathProxy } = this;
 
     if (this.subscription) {
@@ -248,59 +258,51 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
     this.startTime = Date.now();
 
-    const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
-    if (reporter.isEnabled()) {
-      this.subscription.add(this.reportTimings(reporter));
-    }
-
-    // Get the bundler ready observable (either optimizer or vite)
-    const bundlerReady$ =
-      this.useViteBrowser && this.viteServer
-        ? this.viteServer.isReady$()
-        : this.optimizer?.isReady$() ?? Rx.of(true);
-
     const bundlerName = this.useViteBrowser ? '@kbn/vite' : '@kbn/optimizer';
 
+    // Shared readiness subjects — updated by the lazily-loaded bundler below.
+    const serverReady$ = new Rx.BehaviorSubject(false);
+    const optimizerReady$ = new Rx.BehaviorSubject(false);
+
+    // Connect devServer readiness
+    this.subscription.add(
+      this.devServer.isReady$().pipe(tap((v) => serverReady$.next(v))).subscribe()
+    );
+
     if (basePathProxy) {
-      const serverReady$ = new Rx.BehaviorSubject(false);
-      const optimizerReady$ = new Rx.BehaviorSubject(false);
       const userWaiting$ = new Rx.BehaviorSubject(false);
 
       this.subscription.add(
-        Rx.merge(
-          this.devServer.isReady$().pipe(tap(serverReady$)),
-          bundlerReady$.pipe(tap(optimizerReady$)),
-          userWaiting$.pipe(
-            distinctUntilChanged(),
-            switchMap((waiting) =>
-              !waiting
-                ? Rx.EMPTY
-                : Rx.timer(1000).pipe(
-                    tap(() => {
-                      if (!optimizerReady$.getValue()) {
-                        this.log.warn(
-                          'please hold',
-                          this.useViteBrowser
-                            ? 'Vite dev server is starting so requests have been paused'
-                            : 'optimizer is still bundling so requests have been paused'
-                        );
-                        return;
-                      }
-
-                      if (!serverReady$.getValue()) {
-                        this.log.warn(
-                          'please hold',
-                          'Kibana server is not ready so requests have been paused'
-                        );
-                        return;
-                      }
-
-                      throw new Error(
-                        'user is waiting for over 1 second and neither serverReady$ or optimizerReady$ is false'
+        userWaiting$.pipe(
+          distinctUntilChanged(),
+          switchMap((waiting) =>
+            !waiting
+              ? Rx.EMPTY
+              : Rx.timer(1000).pipe(
+                  tap(() => {
+                    if (!optimizerReady$.getValue()) {
+                      this.log.warn(
+                        'please hold',
+                        this.useViteBrowser
+                          ? 'Vite dev server is starting so requests have been paused'
+                          : 'optimizer is still bundling so requests have been paused'
                       );
-                    })
-                  )
-            )
+                      return;
+                    }
+
+                    if (!serverReady$.getValue()) {
+                      this.log.warn(
+                        'please hold',
+                        'Kibana server is not ready so requests have been paused'
+                      );
+                      return;
+                    }
+
+                    throw new Error(
+                      'user is waiting for over 1 second and neither serverReady$ or optimizerReady$ is false'
+                    );
+                  })
+                )
           )
         ).subscribe(this.observer('readiness checks'))
       );
@@ -344,43 +346,12 @@ export class CliDevMode {
       this.log.warn('no-base-path', '='.repeat(100));
     }
 
-    // Start either Vite or webpack optimizer
-    if (this.useViteBrowser && this.viteServer) {
-      this.subscription.add(
-        this.viteServer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
-      );
-
-      // When Vite is ready, send plugin config to Kibana server via IPC
-      this.subscription.add(
-        Rx.combineLatest([this.viteServer.isReady$(), this.devServer.isReady$()])
-          .pipe(
-            filter(([viteReady, serverReady]) => viteReady && serverReady),
-            take(1),
-            takeUntil(exitSignal$)
-          )
-          .subscribe(() => {
-            const viteConfig = this.getViteConfig();
-            if (viteConfig) {
-              this.log.good(
-                'vite',
-                `Sending plugin config to Kibana server (${viteConfig.pluginIds.length} plugins)`
-              );
-              this.devServer.sendMessage('VITE_PLUGINS', viteConfig);
-            }
-          })
-      );
-    } else if (this.optimizer) {
-      this.subscription.add(
-        this.optimizer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
-      );
-    }
-
+    // ── Phase 1: Start watcher + devServer (spawns child process) ──────
+    // These subscriptions are set up BEFORE loading the bundler so the
+    // child Kibana process starts as early as possible.
     this.subscription.add(
       this.watcher.run$
-        .pipe(
-          // stop the watcher as soon as we get an exit signal
-          takeUntil(exitSignal$)
-        )
+        .pipe(takeUntil(exitSignal$))
         .subscribe(this.observer('watcher'))
     );
 
@@ -396,6 +367,63 @@ export class CliDevMode {
         )
         .subscribe(this.observer('dev server'))
     );
+
+    // ── Phase 2: Lazy-load the bundler (child is already starting) ─────
+    // Dynamic import defers loading @kbn/vite-optimizer or @kbn/optimizer
+    // until the child process spawn has been initiated (Phase 1 above).
+    if (this.useViteBrowser) {
+      const { ViteServer: ViteServerClass } = await import('./vite_server');
+      this.viteServer = new ViteServerClass(this._bundlerOpts);
+
+      // Connect bundler readiness
+      this.subscription.add(
+        this.viteServer.isReady$().pipe(tap((v) => optimizerReady$.next(v))).subscribe()
+      );
+
+      this.subscription.add(
+        this.viteServer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
+      );
+
+      // When Vite is ready, send plugin config to Kibana server via IPC
+      this.subscription.add(
+        Rx.combineLatest([this.viteServer.isReady$(), this.devServer.isReady$()])
+          .pipe(
+            filter(([viteReady, devReady]) => viteReady && devReady),
+            take(1),
+            takeUntil(exitSignal$)
+          )
+          .subscribe(() => {
+            const viteConfig = this.getViteConfig();
+            if (viteConfig) {
+              this.log.good(
+                'vite',
+                `Sending plugin config to Kibana server (${viteConfig.pluginIds.length} plugins)`
+              );
+              this.devServer.sendMessage('VITE_PLUGINS', viteConfig);
+            }
+          })
+      );
+    } else {
+      const { Optimizer: OptimizerClass } = await import('./optimizer');
+      this.optimizer = new OptimizerClass(this._bundlerOpts as any);
+
+      // Connect bundler readiness
+      this.subscription.add(
+        this.optimizer.isReady$().pipe(
+          tap((v) => optimizerReady$.next(v))
+        ).subscribe()
+      );
+
+      this.subscription.add(
+        this.optimizer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
+      );
+    }
+
+    // ── Phase 3: CI stats (after bundler is loaded) ────────────────────
+    const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
+    if (reporter.isEnabled()) {
+      this.subscription.add(this.reportTimings(reporter));
+    }
   }
 
   private reportTimings(reporter: CiStatsReporter) {

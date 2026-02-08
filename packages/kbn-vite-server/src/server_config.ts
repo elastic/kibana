@@ -59,6 +59,10 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
     mode: 'development',
 
     // Plugin configuration - order matters!
+    // When HMR is disabled (parent/bootstrap process), we use a minimal plugin
+    // set — the parent only loads @kbn/cli-dev-mode and its dependencies, so
+    // specialized plugins like peggy/dot-text/special-modules are pure no-ops
+    // that just add Rolldown plugin dispatch overhead (~wrappedPlugin.<computed>).
     plugins: [
       // Transform disk cache reader — check for cached transform results FIRST
       // (must be the earliest 'pre' plugin so it can short-circuit all transforms)
@@ -72,11 +76,21 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       cjsInteropPlugin(),
       // Kibana-specific plugins for module resolution (fallback)
       kbnResolverPlugin({ repoRoot }) as PluginOption,
-      kbnSpecialModulesPlugin({ repoRoot }) as PluginOption,
-      kbnPeggyPlugin() as PluginOption,
-      kbnDotTextPlugin() as PluginOption,
-      // Custom plugin for server-specific transformations
-      kbnServerPlugin(options),
+      // The following plugins are only needed for the child process (HMR-enabled):
+      // - kbnSpecialModulesPlugin: rewrites @elastic/eui, zod, etc. — all these
+      //   are externalized by kbnCacheResolverPlugin before this plugin runs, so
+      //   it's a no-op for the parent process.
+      // - kbnPeggyPlugin: handles .peggy files — none in CLI dev mode deps.
+      // - kbnDotTextPlugin: handles .text files — none in CLI dev mode deps.
+      // - kbnServerPlugin: injects HMR accept code — no-op when hmr=false.
+      ...(hmr
+        ? [
+            kbnSpecialModulesPlugin({ repoRoot }) as PluginOption,
+            kbnPeggyPlugin() as PluginOption,
+            kbnDotTextPlugin() as PluginOption,
+            kbnServerPlugin(options),
+          ]
+        : []),
       // TypeScript transform — replaces vite:oxc with a direct Rolldown/OXC
       // call that uses pre-configured options instead of resolving tsconfig.json
       // per-file. This eliminates the tsconfck replaceTokens hotspot (~20% CPU).
@@ -366,7 +380,10 @@ function cjsInteropPlugin(): import('vite').Plugin {
 
     transform(code, id) {
       // Skip node_modules - we only need to transform source code
-      if (id.includes('node_modules')) {
+      // Use '/node_modules/' path segment check (not substring match) to avoid
+      // false positives on files whose names contain 'node_modules' as a
+      // substring (e.g. find_used_node_modules.ts).
+      if (id.includes('/node_modules/')) {
         return null;
       }
 
@@ -766,7 +783,10 @@ function kbnServerPlugin(options: ViteServerOptions): import('vite').Plugin {
     // Transform hook for custom transformations
     transform(code, id) {
       // Skip node_modules
-      if (id.includes('node_modules')) {
+      // Use '/node_modules/' path segment check (not substring match) to avoid
+      // false positives on files whose names contain 'node_modules' as a
+      // substring (e.g. find_used_node_modules.ts).
+      if (id.includes('/node_modules/')) {
         return null;
       }
 

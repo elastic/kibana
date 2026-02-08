@@ -57,7 +57,10 @@ export function kbnTypescriptTransformPlugin(): Plugin {
 
     transform(code: string, id: string) {
       // Skip virtual modules and node_modules
-      if (id.startsWith('\0') || id.includes('node_modules')) {
+      // Use '/node_modules/' path segment check (not substring match) to avoid
+      // false positives on files whose names contain 'node_modules' as a
+      // substring (e.g. find_used_node_modules.ts).
+      if (id.startsWith('\0') || id.includes('/node_modules/')) {
         return null;
       }
 
