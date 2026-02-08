@@ -6,7 +6,10 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityDefinition,
+  EntityType,
+} from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
@@ -24,7 +27,7 @@ const BASE_ENTITY_INDEX_MAPPING = {
   // 'entity.source': { type: 'keyword' },
 } as const satisfies MappingProperties;
 
-export const getComponentTemplateName = (type: string, namespace: string) =>
+export const getComponentTemplateName = (type: EntityType, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (
@@ -48,7 +51,7 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
   },
 });
 
-export const getUpdatesComponentTemplateName = (type: string, namespace: string) =>
+export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
