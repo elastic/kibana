@@ -11,8 +11,7 @@
  * NOTE: babel-register has been removed from the codebase.
  *
  * TypeScript transpilation for test plugins is now handled by:
- * - Vite Module Runner in dev mode
- * - Pre-transpiled packages via `yarn transpile`
+ * - Vite Module Runner in dev mode (with automatic disk-backed transform cache)
  * - Jest's built-in TypeScript support for unit tests
  *
  * This file is kept as a no-op for backwards compatibility with any

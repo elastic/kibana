@@ -16,6 +16,7 @@ import type {
   ScreenshotModeServerStartDependencies,
 } from './types';
 import { isScreenshotMode } from './is_screenshot_mode';
+import { setScreenshotContext, setScreenshotModeEnabled } from '../common';
 
 export class ScreenshotModePlugin
   implements
@@ -35,11 +36,6 @@ export class ScreenshotModePlugin
         };
       }
     );
-
-    // We use "require" here to ensure the import does not have external references due to code bundling that
-    // commonly happens during transpiling. External references would be missing in the environment puppeteer creates.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { setScreenshotContext, setScreenshotModeEnabled } = require('../common');
 
     return {
       setScreenshotContext,

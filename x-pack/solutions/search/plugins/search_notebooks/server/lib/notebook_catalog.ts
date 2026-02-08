@@ -163,7 +163,7 @@ export const getNotebook = async (
   const notebookPath = path.join(__dirname, NOTEBOOKS_DATA_DIR, `${notebookId}.json`);
   try {
     await fs.access(notebookPath, fs.constants.F_OK);
-    const notebook = (await import(notebookPath)).default;
+    const notebook = (await import(/* @vite-ignore */ notebookPath)).default;
     return notebook;
   } catch (err) {
     logger.error(`Error reading search notebook ${notebookId}`, err);

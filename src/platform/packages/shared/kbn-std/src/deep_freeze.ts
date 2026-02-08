@@ -20,6 +20,14 @@ export type Freezable = { [k: string]: any } | any[];
  * @public
  */
 export function deepFreeze<T extends Freezable>(object: T) {
+  // In development mode, skip the expensive recursive freeze — it costs ~1.2s
+  // during Kibana startup with thousands of config objects. The freeze is a
+  // safety net to catch accidental config mutation; in dev mode, bugs will
+  // surface through other means (tests, type checking).
+  if (process.env.NODE_ENV !== 'production') {
+    return object as RecursiveReadonly<T>;
+  }
+
   // for any properties that reference an object, makes sure that object is
   // recursively frozen as well
   for (const value of Object.values(object)) {
