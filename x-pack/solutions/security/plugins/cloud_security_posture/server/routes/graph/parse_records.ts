@@ -29,7 +29,6 @@ import {
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
-import { inspect } from 'node:util';
 import { createHash } from 'node:crypto';
 
 interface ConnectorEdges {
@@ -115,7 +114,7 @@ export const parseRecords = (
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
   const edges = sortEdges(ctx.edgesMap, ctx.nodesMap);
-  console.log('edges11 ', inspect(edges, false, null, true));
+
   return {
     nodes,
     edges,
