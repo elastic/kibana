@@ -279,5 +279,41 @@ describe('EditLifecycleModal', () => {
       expect(saveButton).toBeDisabled();
       expect(cancelButton).toBeDisabled();
     });
+
+    describe('Lifecyle disabled', () => {
+      it('should default to indefinite retention when lifecycle is disabled', async () => {
+        const definition = createMockDefinition({ disabled: {} }, { inherit: {} });
+
+        render(<EditLifecycleModal {...defaultProps} definition={definition} />);
+
+        expect(screen.getByTestId('indefiniteRetentionButton')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(screen.getByTestId('streamsAppModalFooterButton')).toBeDisabled();
+      });
+      it('should call updateLifecycle with dsl when disabling inheritance from disabled lifecycle', async () => {
+        const definition = createMockDefinition({ disabled: {} }, { inherit: {} });
+
+        render(<EditLifecycleModal {...defaultProps} definition={definition} />);
+
+        // Initially save button is disabled
+        const saveButton = screen.getByTestId('streamsAppModalFooterButton');
+        expect(saveButton).toBeDisabled();
+
+        // Disable inheritance
+        const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
+        await userEvent.click(inheritSwitch);
+
+        // Save button should now be enabled
+        expect(saveButton).not.toBeDisabled();
+
+        // Click save
+        await userEvent.click(saveButton);
+
+        // Should save as DSL without data_retention (indefinite)
+        expect(mockUpdateLifecycle).toHaveBeenCalledWith({ dsl: {} });
+      });
+    });
   });
 });

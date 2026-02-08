@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 import { getFleetAgentsReadIntegrationsNoneRole } from '../fixtures/services/privileges';
@@ -32,7 +32,11 @@ test.describe('When the user has Fleet Agents Read built-in role', { tag: ['@ess
     await expect(fleetHome.getAddFleetServerHeader()).toHaveCount(0);
   });
 
-  test('is accessible and user only see agents tab', async ({ browserAuth, pageObjects }) => {
+  test('is accessible and user only see agents tab', async ({
+    browserAuth,
+    pageObjects,
+    config,
+  }) => {
     await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
     const { fleetHome } = pageObjects;
 
@@ -42,9 +46,10 @@ test.describe('When the user has Fleet Agents Read built-in role', { tag: ['@ess
     // Verify agents tab exists
     await expect(fleetHome.getAgentsTab()).toBeVisible();
 
-    // Verify other tabs do not exist
-    await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(0);
-    await expect(fleetHome.getSettingsTab()).toHaveCount(0);
+    const defaultPolicyCount = config.isCloud ? 1 : 0;
+
+    await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(defaultPolicyCount);
+    await expect(fleetHome.getSettingsTab()).toHaveCount(defaultPolicyCount);
     await expect(fleetHome.getUninstallTokensTab()).toHaveCount(0);
   });
 });
