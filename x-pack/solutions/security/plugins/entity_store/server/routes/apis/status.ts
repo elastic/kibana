@@ -12,21 +12,25 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusResult } from '../../domain/types';
-import { LogExtractionState } from '../../domain/definitions/saved_objects';
+import type { LogExtractionState } from '../../domain/definitions/saved_objects';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-type LogExtractionStateForV1 = Omit<LogExtractionState, 'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'>;
+type LogExtractionStateForV1 = Omit<
+  LogExtractionState,
+  'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
+>;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
   timestampField: '@timestamp';
   maxPageSearchSize: 10000;
-};
+}
 
-type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> & LegacyEngineDescriptorV1;
+type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
+  LegacyEngineDescriptorV1;
 
 interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
