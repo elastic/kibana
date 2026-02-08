@@ -11,6 +11,9 @@ import { EntityType } from '../entity_schema';
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 
+export const DELAY_DEFAULT = '1m';
+export const LOOKBACK_PERIOD_DEFAULT = '3h';
+
 export type LogExtractionState = z.infer<typeof LogExtractionState>;
 export const LogExtractionState = z.object({
   filter: z.string().default(''),
@@ -19,11 +22,11 @@ export const LogExtractionState = z.object({
   lookbackPeriod: z
     .string()
     .regex(/[smdh]$/)
-    .default('3h'),
+    .default(LOOKBACK_PERIOD_DEFAULT),
   delay: z
     .string()
     .regex(/[smdh]$/)
-    .default('1m'),
+    .default(DELAY_DEFAULT),
   docsLimit: z.number().int().default(10000),
   timeout: z
     .string()

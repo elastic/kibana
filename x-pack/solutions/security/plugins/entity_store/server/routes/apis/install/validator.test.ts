@@ -5,7 +5,54 @@
  * 2.0.
  */
 
-import { validateKql } from './validator';
+import { BodySchema, validateKql } from './validator';
+
+describe('BodySchema additionalIndexPatterns', () => {
+  it('accepts valid index patterns', () => {
+    const result = BodySchema.safeParse({
+      logExtraction: { additionalIndexPatterns: ['logs-*', 'metrics-*', 'valid_index'] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects index patterns containing illegal characters', () => {
+    const result = BodySchema.safeParse({
+      logExtraction: { additionalIndexPatterns: ['invalid pattern'] },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => i.path[0] === 'logExtraction' && i.path[1] === 'additionalIndexPatterns'
+      );
+      expect(issue).toBeDefined();
+      expect(issue?.message).toContain(' ');
+    }
+  });
+
+  it('rejects index pattern with pipe or quote (validateDataView illegal chars)', () => {
+    const result = BodySchema.safeParse({
+      logExtraction: { additionalIndexPatterns: ['index|pipe', 'index"quote'] },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.length).toBeGreaterThan(0);
+      expect(result.error.issues.some((i) => i.message?.includes('cannot contain'))).toBe(true);
+    }
+  });
+
+  it('reports path with index for invalid entry', () => {
+    const result = BodySchema.safeParse({
+      logExtraction: { additionalIndexPatterns: ['valid', 'bad one', 'also valid'] },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (i) => Array.isArray(i.path) && i.path[2] === 1
+      );
+      expect(issue).toBeDefined();
+    }
+  });
+});
 
 describe('validateKql', () => {
   describe('valid KQL syntax', () => {
