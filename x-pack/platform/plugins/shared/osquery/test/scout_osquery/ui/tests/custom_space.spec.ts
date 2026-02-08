@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import {
@@ -87,7 +88,7 @@ for (const testSpace of testSpaces) {
         pageObjects,
         kbnUrl,
       }) => {
-        test.slow(); // Live queries can take time for agents to respond
+        test.setTimeout(180_000); // Live queries can take time for agents to respond
 
         // Navigate to osquery page in the space
         await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
@@ -115,13 +116,15 @@ for (const testSpace of testSpaces) {
           const baseUrl = new URL(page.url()).origin;
           await page.goto(`${baseUrl}${href}`);
           await waitForPageReady(page);
+          // eslint-disable-next-line playwright/no-conditional-expect
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ timeout: 60_000 });
+          // eslint-disable-next-line playwright/no-conditional-expect
           await expect(page.getByText(/action_data.*select \* from uptime;/).first()).toBeVisible();
         }
       });
 
       test('runs packs normally', async ({ page, pageObjects, kbnUrl }) => {
-        test.slow(); // Live queries can take time for agents to respond
+        test.setTimeout(180_000); // Live queries can take time for agents to respond
 
         await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
         await waitForPageReady(page);

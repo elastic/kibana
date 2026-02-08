@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import {
@@ -47,9 +48,10 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
     await cleanupRule(kbnClient, ruleId);
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Case creation', () => {
     test('runs osquery against alert and creates a new case', async ({ page, kbnClient }) => {
-      test.slow(); // Alert tests can take time
+      test.setTimeout(180_000); // Alert tests can take time
 
       const caseName = `Test case ${Date.now()}`;
       const caseDescription = `Test case description ${Date.now()}`;
@@ -119,6 +121,7 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Case', () => {
     let caseId: string;
 
@@ -134,7 +137,7 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
     });
 
     test('sees osquery results from last action and add to a case', async ({ page }) => {
-      test.slow(); // Alert tests can take time
+      test.setTimeout(180_000); // Alert tests can take time
 
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
@@ -161,11 +164,13 @@ test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, 
           if ((await tabs.count()) > 0) {
             await comment.locator('[data-test-subj="osquery-status-tab"]').click();
             await comment.locator('[data-test-subj="osquery-results-tab"]').click();
+            // eslint-disable-next-line playwright/no-conditional-expect
             await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible(
               { timeout: 120_000 }
             );
           }
         } else {
+          // eslint-disable-next-line playwright/no-conditional-expect
           await expect(comment.locator('[data-test-subj="dataGridRowCell"]').first()).toBeVisible({
             timeout: 120_000,
           });

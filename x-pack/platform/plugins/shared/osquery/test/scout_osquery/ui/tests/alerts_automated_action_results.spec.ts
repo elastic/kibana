@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
@@ -36,7 +37,7 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
   });
 
   test('can visit discover from response action results', { tag: ['@ess'] }, async ({ page }) => {
-    test.slow(); // Alert tests can take time
+    test.setTimeout(180_000); // Alert tests can take time
     const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
 
     await page.testSubj.locator('expand-event').first().click();
@@ -62,14 +63,17 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
       const baseUrl = new URL(page.url()).origin;
       await page.goto(`${baseUrl}${href}`);
       await waitForPageReady(page);
+      // eslint-disable-next-line playwright/no-conditional-expect
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ timeout: 60_000 });
+      // eslint-disable-next-line playwright/no-conditional-expect
       await expect(page.getByText(/action_data\.query\s*.+;/).first()).toBeVisible();
+      // eslint-disable-next-line playwright/no-conditional-expect
       await expect(page.getByText(discoverRegex).first()).toBeVisible();
     }
   });
 
   test('can visit lens from response action results', { tag: ['@ess'] }, async ({ page }) => {
-    test.slow(); // Alert tests can take time
+    test.setTimeout(180_000); // Alert tests can take time
     const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
 
     await page.testSubj.locator('expand-event').first().click();
@@ -105,7 +109,7 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
     'can add to timeline from response action results',
     { tag: ['@ess', '@svlSecurity'] },
     async ({ page }) => {
-      test.slow(); // Alert tests can take time
+      test.setTimeout(180_000); // Alert tests can take time
       const timelineRegex = new RegExp(`Added ${UUID_REGEX} to Timeline`);
       const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
 

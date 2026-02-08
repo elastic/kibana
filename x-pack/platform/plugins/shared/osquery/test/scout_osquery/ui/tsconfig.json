@@ -5,7 +5,6 @@
   },
   "include": ["**/*", "../common/**/*"],
   "kbn_references": [
-    "@kbn/scout-security",
     "@kbn/scout",
     "@kbn/es",
     "@kbn/test",

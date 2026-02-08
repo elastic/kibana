@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadSavedQuery, cleanupSavedQuery } from '../../common/api_helpers';
@@ -21,12 +22,12 @@ test.describe('ALL - Edit saved query', { tag: ['@ess', '@svlSecurity'] }, () =>
     savedQueryName = data.id;
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await cleanupSavedQuery(kbnClient, savedQueryId);
-  });
-
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await cleanupSavedQuery(kbnClient, savedQueryId);
   });
 
   test('by changing ecs mappings and platforms', async ({ page, pageObjects }) => {

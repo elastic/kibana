@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test as baseTest } from '@kbn/scout-security';
+import { test as baseTest } from '@kbn/scout';
 import type { KbnClient } from '@kbn/test';
 import type { OsqueryPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';

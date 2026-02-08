@@ -6,7 +6,7 @@
  */
 
 import execa from 'execa';
-import { globalSetupHook } from '@kbn/scout-security';
+import { globalSetupHook } from '@kbn/scout';
 import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 
 const FLEET_SERVER_CONTAINER = 'scout-fleet-server';

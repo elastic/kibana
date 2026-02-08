@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import {
@@ -56,7 +57,7 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      test.slow(); // Complex form test
+      test.setTimeout(180_000); // Complex form test
       await browserAuth.loginWithCustomRole(socManagerRole);
 
       await page.goto(kbnUrl.get('/app/security/rules'));
@@ -221,8 +222,8 @@ test.describe(
       );
 
       await page.testSubj.locator('ruleEditSubmitButton').click();
-      const response = await savePromise;
-      const requestBody = response.request().postDataJSON();
+      const saveResponse = await savePromise;
+      const requestBody = saveResponse.request().postDataJSON();
 
       const oneQuery = [
         {
@@ -231,7 +232,7 @@ test.describe(
           id: Object.keys(packData.queries!)[0],
         },
       ];
-      expect(requestBody.response_actions[0].params.queries).toEqual(oneQuery);
+      expect(requestBody.response_actions[0].params.queries).toStrictEqual(oneQuery);
 
       await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible();
 
@@ -301,7 +302,7 @@ test.describe(
           id: Object.keys(multiQueryPackData.queries!)[2],
         },
       ];
-      expect(finalRequestBody.response_actions[0].params.queries).toEqual(threeQueries);
+      expect(finalRequestBody.response_actions[0].params.queries).toStrictEqual(threeQueries);
     });
   }
 );

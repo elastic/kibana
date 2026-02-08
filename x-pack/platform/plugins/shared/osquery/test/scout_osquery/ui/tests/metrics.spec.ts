@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadSavedQuery, cleanupSavedQuery } from '../../common/api_helpers';
@@ -15,22 +16,19 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
-  test.beforeEach(async ({ kbnClient }) => {
+  test.beforeEach(async ({ kbnClient, browserAuth }) => {
     const data = await loadSavedQuery(kbnClient);
     savedQueryId = data.saved_object_id;
     savedQueryName = data.id;
+    await browserAuth.loginWithCustomRole(socManagerRole);
   });
 
   test.afterEach(async ({ kbnClient }) => {
     await cleanupSavedQuery(kbnClient, savedQueryId);
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(socManagerRole);
-  });
-
   test('should be able to run the query from Infrastructure', async ({ page, pageObjects }) => {
-    test.slow(); // Infrastructure page + osquery query can be slow
+    test.setTimeout(180_000); // Infrastructure page + osquery query can be slow
 
     // Navigate to Infrastructure Inventory
     await page.gotoApp('metrics/inventory');
@@ -77,7 +75,7 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
   });
 
   test('should be able to run the previously saved query', async ({ page, pageObjects }) => {
-    test.slow(); // Infrastructure page + osquery query can be slow
+    test.setTimeout(180_000); // Infrastructure page + osquery query can be slow
 
     // Navigate to Infrastructure Inventory
     await page.gotoApp('metrics/inventory');

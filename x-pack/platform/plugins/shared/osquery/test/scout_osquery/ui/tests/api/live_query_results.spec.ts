@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { socManagerRole } from '../../../common/roles';
 import { loadLiveQuery } from '../../../common/api_helpers';

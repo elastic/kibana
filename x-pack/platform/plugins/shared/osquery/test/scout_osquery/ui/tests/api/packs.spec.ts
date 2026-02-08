@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { socManagerRole } from '../../../common/roles';
 import {
@@ -30,34 +30,29 @@ test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     await cleanupAgentPolicy(kbnClient, policyId);
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Duplicate policy ids', () => {
     let packId: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      // createPack doesn't fail on status code, so we use try/catch
-      try {
-        const { data } = await kbnClient.request({
-          method: 'POST',
-          path: '/api/osquery/packs',
-          body: {
-            name: `test-pack-${Date.now()}`,
-            policy_ids: Array(1000).fill(policyId),
-            queries: {
-              test: {
-                ecs_mapping: {},
-                interval: 3600,
-                query: 'select * from uptime;',
-              },
+      const { data } = await kbnClient.request({
+        method: 'POST',
+        path: '/api/osquery/packs',
+        body: {
+          name: `test-pack-${Date.now()}`,
+          policy_ids: Array(1000).fill(policyId),
+          queries: {
+            test: {
+              ecs_mapping: {},
+              interval: 3600,
+              query: 'select * from uptime;',
             },
-            enabled: true,
-            shards: {},
           },
-        });
-        packId = data.data.saved_object_id;
-      } catch (error: any) {
-        // If creation fails, packId will be undefined and test will fail appropriately
-        throw error;
-      }
+          enabled: true,
+          shards: {},
+        },
+      });
+      packId = data.data.saved_object_id;
     });
 
     test.afterEach(async ({ kbnClient }) => {
@@ -73,6 +68,7 @@ test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Non existent policy id should return bad request error', () => {
     const nonExistentPolicyId = 'non-existent-policy-id';
 
@@ -100,7 +96,9 @@ test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
       } catch (error: any) {
         const status = error.statusCode || error.status || error.response?.status;
         const message = error.data?.message || error.response?.data?.message || error.message || '';
+        // eslint-disable-next-line playwright/no-conditional-expect
         expect(status).toBe(400);
+        // eslint-disable-next-line playwright/no-conditional-expect
         expect(message).toContain(nonExistentPolicyId);
       }
     });
@@ -129,7 +127,9 @@ test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
       } catch (error: any) {
         const status = error.statusCode || error.status || error.response?.status;
         const message = error.data?.message || error.response?.data?.message || error.message || '';
+        // eslint-disable-next-line playwright/no-conditional-expect
         expect(status).toBe(400);
+        // eslint-disable-next-line playwright/no-conditional-expect
         expect(message).toContain(nonExistentPolicyId);
       }
     });

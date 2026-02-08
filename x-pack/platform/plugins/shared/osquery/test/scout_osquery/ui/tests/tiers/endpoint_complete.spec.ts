@@ -15,16 +15,16 @@ import { loadRule, cleanupRule } from '../../../common/api_helpers';
 test.describe.skip('App Features for Endpoint Complete PLI', { tag: ['@svlSecurity'] }, () => {
   let ruleId: string;
 
-  test.afterEach(async ({ kbnClient }) => {
-    if (ruleId) {
-      await cleanupRule(kbnClient, ruleId);
-    }
-  });
-
   test.beforeEach(async ({ kbnClient, browserAuth }) => {
     const rule = await loadRule(kbnClient);
     ruleId = rule.id;
     await browserAuth.loginWithCustomRole(socManagerRole);
+  });
+
+  test.afterEach(async ({ kbnClient }) => {
+    if (ruleId) {
+      await cleanupRule(kbnClient, ruleId);
+    }
   });
 
   test('response actions should be available', async ({ page }) => {

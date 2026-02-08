@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 
@@ -115,7 +116,7 @@ test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
   });
 
   test('should run a live query and check results', async ({ page, pageObjects }) => {
-    test.slow(); // Live queries can take time for agents to respond
+    test.setTimeout(180_000); // Live queries can take time for agents to respond
     const liveQuery = pageObjects.liveQuery;
 
     await liveQuery.clickNewLiveQuery();
@@ -136,7 +137,7 @@ test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
   });
 
   test('should run multiline query and display results', async ({ page, pageObjects }) => {
-    test.slow(); // Live queries can take time for agents to respond
+    test.setTimeout(180_000); // Live queries can take time for agents to respond
     const liveQuery = pageObjects.liveQuery;
 
     await liveQuery.clickNewLiveQuery();
@@ -178,7 +179,7 @@ test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
   });
 
   test('should validate form fully and submit with ECS mapping', async ({ page, pageObjects }) => {
-    test.slow(); // Live queries can take time for agents to respond
+    test.setTimeout(180_000); // Live queries can take time for agents to respond
     const liveQuery = pageObjects.liveQuery;
 
     await liveQuery.clickNewLiveQuery();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-security';
+import type { KibanaRole } from '@kbn/scout';
 
 // ── SOC Manager ───────────────────────────────────────────────────────────────
 

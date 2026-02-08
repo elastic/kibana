@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadSavedQuery, cleanupSavedQuery } from '../../common/api_helpers';
@@ -25,12 +26,12 @@ test.describe('ALL - Live Query run custom and saved', { tag: ['@ess', '@svlSecu
     savedQueryName = savedQuery.id;
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await cleanupSavedQuery(kbnClient, savedQueryId);
-  });
-
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await cleanupSavedQuery(kbnClient, savedQueryId);
   });
 
   test('should run query and enable ecs mapping', async ({ page, pageObjects }) => {

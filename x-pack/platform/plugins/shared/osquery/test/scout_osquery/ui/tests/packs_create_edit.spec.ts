@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../../common/roles';
 import { loadSavedQuery, cleanupSavedQuery, loadPack, cleanupPack } from '../../common/api_helpers';
@@ -78,6 +79,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     await cleanupSavedQuery(kbnClient, multipleMappingsSavedQueryId);
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Check if result type is correct', () => {
     let resultTypePackId: string;
 
@@ -133,7 +135,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
       // Get pack ID from the response or URL
       await page.waitForTimeout(1000);
       const packUrl = page.url();
-      const packIdMatch = packUrl.match(/\/packs\/([^\/]+)/);
+      const packIdMatch = packUrl.match(/\/packs\/([^/]+)/);
       if (packIdMatch) {
         resultTypePackId = packIdMatch[1];
       }
@@ -170,6 +172,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Check if pack is created', () => {
     let packId: string;
     let packName: string;
@@ -203,7 +206,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
       // Extract pack ID from response
       await page.waitForTimeout(1000);
       const packUrl = page.url();
-      const packIdMatch = packUrl.match(/\/packs\/([^\/]+)/);
+      const packIdMatch = packUrl.match(/\/packs\/([^/]+)/);
       if (packIdMatch) {
         packId = packIdMatch[1];
       }
@@ -226,6 +229,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('to click the edit button and edit pack', () => {
     let packId: string;
     let packName: string;
@@ -290,6 +294,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('should trigger validation when saved query is being chosen', () => {
     let packId: string;
     let packName: string;
@@ -342,6 +347,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('deactivate and activate pack', () => {
     let packId: string;
     let packName: string;
@@ -380,6 +386,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('should verify that packs are triggered', () => {
     let packId: string;
     let packName: string;
@@ -412,7 +419,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
 
     test('should verify that packs are triggered', async ({ page, pageObjects }) => {
-      test.slow(); // Pack execution needs agents
+      test.setTimeout(180_000); // Pack execution needs agents
       const packs = pageObjects.packs;
       await packs.clickPackByName(packName);
       await expect(page.getByText(`${packName} details`).first()).toBeVisible();
@@ -443,6 +450,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('delete all queries in pack', () => {
     let packId: string;
     let packName: string;
@@ -504,6 +512,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('enable changing saved queries and ecs_mappings', () => {
     let packId: string;
     let packName: string;
@@ -582,6 +591,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
   });
 
+  // eslint-disable-next-line playwright/max-nested-describe
   test.describe('to click delete button', () => {
     let packName: string;
     let packId: string;
