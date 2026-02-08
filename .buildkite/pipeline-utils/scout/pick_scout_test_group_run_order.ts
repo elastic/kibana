@@ -73,7 +73,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       {
         group: 'Scout Configs',
         key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
+        depends_on: ['build_scout_tests', 'build'],
         steps: scoutCiRunGroups.map(
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,
