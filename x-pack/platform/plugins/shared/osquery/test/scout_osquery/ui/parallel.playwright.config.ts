@@ -9,6 +9,6 @@ import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
   testDir: './tests',
-  workers: 1,
+  workers: 2,
   runGlobalSetup: true,
 });

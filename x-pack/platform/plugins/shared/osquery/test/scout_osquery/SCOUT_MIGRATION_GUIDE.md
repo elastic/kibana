@@ -63,7 +63,7 @@
 | Aspect | Cypress | Scout/Playwright |
 |--------|---------|-----------------|
 | **Runner** | Cypress CLI | Playwright via `node scripts/scout.js` |
-| **Config** | `cypress.config.ts` | `playwright.config.ts` + `stateful.config.ts` |
+| **Config** | `cypress.config.ts` | `parallel.playwright.config.ts` + `stateful.config.ts` |
 | **Selectors** | `cy.getBySel('name')` | `page.testSubj.locator('name')` |
 | **Assertions** | `should('be.visible')` | `expect(locator).toBeVisible()` |
 | **Async model** | Automatic chaining | Explicit `async/await` |
@@ -85,7 +85,7 @@ plugin/test/scout_osquery/
 │   ├── roles.ts              # Custom role definitions (KibanaRole)
 │   └── constants.ts          # Shared constants (timeouts, etc.)
 ├── ui/
-│   ├── playwright.config.ts  # Playwright configuration
+│   ├── parallel.playwright.config.ts  # Playwright configuration (parallel workers)
 │   ├── tsconfig.json         # TypeScript config with kbn_references
 │   ├── fixtures/
 │   │   ├── index.ts          # Test fixture extending @kbn/scout-security
@@ -123,15 +123,14 @@ plugin/test/scout_osquery/
 - `ui/fixtures/` — Page objects, test fixture
 - `ui/tests/` — Spec files
 
-### 3. Create `playwright.config.ts`
+### 3. Create `parallel.playwright.config.ts`
 ```typescript
-import { createPlaywrightConfig } from '@kbn/scout-security';
+import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
   testDir: './tests',
-  workers: 1,
-  // Custom server config if needed:
-  serversConfigDir: 'src/platform/packages/shared/kbn-scout/src/servers/configs/custom/osquery',
+  workers: 2,
+  runGlobalSetup: true,
 });
 ```
 
@@ -1080,11 +1079,11 @@ await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
 ```bash
 # Headless (default)
 node scripts/scout.js run-tests --stateful \
-  --config x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/playwright.config.ts
+  --config x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts
 
 # Headed (for debugging)
 node scripts/scout.js run-tests --stateful \
-  --config x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/playwright.config.ts \
+  --config x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts \
   --headed
 ```
 
