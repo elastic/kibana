@@ -28,6 +28,7 @@ export function IngestionRatePanel({
       paddingSize="m"
       grow={false}
       css={{ height: '100%', minHeight: '256px' }}
+      data-test-subj="ingestionRatePanel"
     >
       <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>

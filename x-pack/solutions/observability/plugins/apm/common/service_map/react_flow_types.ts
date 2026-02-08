@@ -7,6 +7,7 @@
 
 import type { Node, Edge, MarkerType } from '@xyflow/react';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
+import type { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 
 /**
@@ -101,10 +102,22 @@ export interface EdgeMarker {
 }
 
 /**
+ * Source data for edge popover (matches ConnectionNode structure)
+ */
+export interface EdgeSourceData extends Record<string, unknown> {
+  id: string;
+  [SERVICE_NAME]?: string;
+  [SPAN_DESTINATION_SERVICE_RESOURCE]?: string;
+}
+
+/**
  * Data for edges in the React Flow service map
  */
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
+  sourceData?: EdgeSourceData;
+  targetData?: EdgeSourceData;
+  resources?: string[];
 }
 
 /**
@@ -149,6 +162,22 @@ export function isExternalNode(node: ServiceMapNode): node is Node<DependencyNod
  */
 export function isGroupedNode(node: ServiceMapNode): node is Node<GroupedNodeData> {
   return 'isGrouped' in node.data && node.data.isGrouped === true;
+}
+
+/**
+ * Type guard to check if node data is service node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isServiceNodeData(data: ServiceMapNodeData): data is ServiceNodeData {
+  return data.isService === true;
+}
+
+/**
+ * Type guard to check if node data is grouped node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNodeData {
+  return 'isGrouped' in data && data.isGrouped === true;
 }
 
 /**
