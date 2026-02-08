@@ -8,15 +8,15 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { readerRole } from '../../../common/roles';
+import { readerRole } from '../../common/roles';
 import {
   loadPack,
   cleanupPack,
   loadSavedQuery,
   cleanupSavedQuery,
   loadLiveQuery,
-} from '../../../common/api_helpers';
-import { waitForPageReady } from '../../../common/constants';
+} from '../../common/api_helpers';
+import { waitForPageReady } from '../../common/constants';
 
 test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
   let savedQueryName: string;

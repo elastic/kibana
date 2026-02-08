@@ -8,7 +8,7 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
+import { socManagerRole } from '../common/roles';
 import {
   loadRule,
   cleanupRule,
@@ -16,8 +16,8 @@ import {
   cleanupPack,
   packFixture,
   multiQueryPackFixture,
-} from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 test.describe(
   'Alert Event Details - Response Actions Form',

@@ -6,8 +6,8 @@
  */
 
 import { test } from '../../fixtures';
-import { socManagerRole } from '../../../common/roles';
-import { loadRule, cleanupRule } from '../../../common/api_helpers';
+import { socManagerRole } from '../../common/roles';
+import { loadRule, cleanupRule } from '../../common/api_helpers';
 
 // NOTE: This test requires serverless mode with specific product tier configuration
 // which is not available in the current stateful Scout test setup.

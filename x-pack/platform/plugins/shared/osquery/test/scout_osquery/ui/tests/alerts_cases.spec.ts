@@ -8,7 +8,7 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
+import { socManagerRole } from '../common/roles';
 import {
   loadRule,
   cleanupRule,
@@ -17,8 +17,8 @@ import {
   packFixture,
   loadCase,
   cleanupCase,
-} from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, () => {
   let ruleId: string;

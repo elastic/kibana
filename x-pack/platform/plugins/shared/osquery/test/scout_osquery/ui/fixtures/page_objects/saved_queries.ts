@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { waitForPageReady } from '../../../common/constants';
+import { waitForPageReady } from '../../common/constants';
 
 export class SavedQueriesPage {
   constructor(private readonly page: ScoutPage) {}

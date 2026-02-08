@@ -7,7 +7,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { waitForPageReady } from '../../../common/constants';
+import { waitForPageReady } from '../../common/constants';
 
 export class PacksPage {
   constructor(private readonly page: ScoutPage) {}

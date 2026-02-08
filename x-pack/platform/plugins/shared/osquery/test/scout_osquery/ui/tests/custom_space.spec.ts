@@ -8,15 +8,15 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
+import { socManagerRole } from '../common/roles';
 import {
   loadPack,
   cleanupPack,
   loadSpace,
   cleanupSpace,
   shareOsqueryPackagePoliciesToSpace,
-} from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 const testSpaces = [
   { name: 'default', tags: ['@ess'] as const },

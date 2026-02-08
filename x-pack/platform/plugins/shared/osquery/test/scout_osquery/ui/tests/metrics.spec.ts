@@ -8,9 +8,9 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
-import { loadSavedQuery, cleanupSavedQuery } from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+import { socManagerRole } from '../common/roles';
+import { loadSavedQuery, cleanupSavedQuery } from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
   let savedQueryName: string;

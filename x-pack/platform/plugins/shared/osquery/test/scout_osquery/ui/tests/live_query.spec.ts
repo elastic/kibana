@@ -8,7 +8,7 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
+import { socManagerRole } from '../common/roles';
 
 test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {

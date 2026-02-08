@@ -8,9 +8,9 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { t1AnalystRole } from '../../../common/roles';
-import { loadRule, cleanupRule } from '../../../common/api_helpers';
-import { waitForPageReady } from '../../../common/constants';
+import { t1AnalystRole } from '../../common/roles';
+import { loadRule, cleanupRule } from '../../common/api_helpers';
+import { waitForPageReady } from '../../common/constants';
 
 test.describe('Alert Test', { tag: ['@ess'] }, () => {
   let ruleName: string;

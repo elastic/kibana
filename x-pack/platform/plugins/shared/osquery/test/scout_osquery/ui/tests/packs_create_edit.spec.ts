@@ -8,8 +8,8 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
-import { loadSavedQuery, cleanupSavedQuery, loadPack, cleanupPack } from '../../common/api_helpers';
+import { socManagerRole } from '../common/roles';
+import { loadSavedQuery, cleanupSavedQuery, loadPack, cleanupPack } from '../common/api_helpers';
 
 test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () => {
   let savedQueryId: string;

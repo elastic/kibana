@@ -8,9 +8,9 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
-import { socManagerRole } from '../../common/roles';
-import { loadRule, cleanupRule } from '../../common/api_helpers';
-import { waitForPageReady } from '../../common/constants';
+import { socManagerRole } from '../common/roles';
+import { loadRule, cleanupRule } from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 

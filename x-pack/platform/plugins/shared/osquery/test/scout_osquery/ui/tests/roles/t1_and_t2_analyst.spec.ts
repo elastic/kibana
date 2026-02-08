@@ -8,15 +8,15 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { t1AnalystRole, t2AnalystRole } from '../../../common/roles';
+import { t1AnalystRole, t2AnalystRole } from '../../common/roles';
 import {
   loadPack,
   cleanupPack,
   loadSavedQuery,
   cleanupSavedQuery,
   loadLiveQuery,
-} from '../../../common/api_helpers';
-import { waitForPageReady } from '../../../common/constants';
+} from '../../common/api_helpers';
+import { waitForPageReady } from '../../common/constants';
 
 const roles = [
   { name: 't1_analyst', role: t1AnalystRole },

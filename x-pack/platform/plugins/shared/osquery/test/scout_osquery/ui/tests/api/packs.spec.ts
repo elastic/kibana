@@ -7,14 +7,14 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { socManagerRole } from '../../../common/roles';
+import { socManagerRole } from '../../common/roles';
 import {
   loadAgentPolicy,
   addOsqueryToAgentPolicy,
   cleanupAgentPolicy,
   cleanupPack,
   getPack,
-} from '../../../common/api_helpers';
+} from '../../common/api_helpers';
 
 test.describe('Packs', { tag: ['@ess', '@svlSecurity'] }, () => {
   let policyId: string;

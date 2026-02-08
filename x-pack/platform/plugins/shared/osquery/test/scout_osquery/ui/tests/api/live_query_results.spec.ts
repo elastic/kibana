@@ -7,8 +7,8 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { socManagerRole } from '../../../common/roles';
-import { loadLiveQuery } from '../../../common/api_helpers';
+import { socManagerRole } from '../../common/roles';
+import { loadLiveQuery } from '../../common/api_helpers';
 
 test.describe('Live query', { tag: ['@ess', '@svlSecurity'] }, () => {
   let liveQueryId: string;

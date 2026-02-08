@@ -8,7 +8,7 @@
 
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { expect } from '@kbn/scout';
-import { RESULTS_TIMEOUT, waitForPageReady } from '../../../common/constants';
+import { RESULTS_TIMEOUT, waitForPageReady } from '../../common/constants';
 
 export class LiveQueryPage {
   public readonly queryEditor: Locator;
