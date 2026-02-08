@@ -1,0 +1,180 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout';
+import { RESULTS_TIMEOUT, waitForPageReady } from '../../../common/constants';
+
+export class LiveQueryPage {
+  public readonly queryEditor: Locator;
+  public readonly submitButton: Locator;
+  public readonly resultsTable: Locator;
+  public readonly agentSelection: Locator;
+  public readonly resultsPanel: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.queryEditor = this.page.testSubj.locator('kibanaCodeEditor');
+    this.submitButton = this.page.locator('#submit-button');
+    this.resultsTable = this.page.testSubj.locator('osqueryResultsTable');
+    this.agentSelection = this.page.testSubj.locator('agentSelection');
+    this.resultsPanel = this.page.testSubj.locator('osqueryResultsPanel');
+  }
+
+  async navigate() {
+    await this.page.gotoApp('osquery');
+    await waitForPageReady(this.page);
+    await this.page.getByText('New live query').first().waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  async clickNewLiveQuery() {
+    await this.navigate();
+    await this.page.getByText('New live query').first().click();
+    await waitForPageReady(this.page);
+  }
+
+  async selectAllAgents() {
+    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+
+    const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxInput"]');
+    await expect(agentInput).toBeEnabled();
+    await agentInput.click();
+
+    // Wait for the "All agents" option to appear in the dropdown
+    const allAgentsOption = this.page.getByRole('option', { name: /All agents/ });
+    await expect(allAgentsOption).toBeVisible({ timeout: 15_000 });
+    await allAgentsOption.click();
+
+    // The agent count includes Docker agents; use regex to match any count
+    await expect(this.page.getByText(/\d+ agents? selected\./)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async inputQuery(query: string) {
+    await this.queryEditor.click();
+    await this.queryEditor.pressSequentially(query);
+  }
+
+  async clearAndInputQuery(query: string) {
+    // Click the editor to focus it
+    await this.queryEditor.click();
+    await this.page.waitForTimeout(500);
+    // Select all content and delete it
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.waitForTimeout(200);
+    await this.page.keyboard.press('Backspace');
+    await this.page.waitForTimeout(200);
+    // Verify the editor is empty before typing (retry if needed)
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.keyboard.press('Backspace');
+    await this.page.waitForTimeout(200);
+    await this.queryEditor.pressSequentially(query);
+  }
+
+  async submitQuery() {
+    // Brief pause to let validation trigger — matches Cypress's cy.wait(1000)
+    await this.page.waitForTimeout(1000);
+    await this.page.getByText('Submit').first().click();
+  }
+
+  async checkResults() {
+    const start = Date.now();
+    const maxWaitMs = RESULTS_TIMEOUT;
+
+    while (Date.now() - start < maxWaitMs) {
+      // Try switching tabs to force a results refresh
+      const statusTab = this.page.testSubj.locator('osquery-status-tab');
+      const resultsTab = this.page.testSubj.locator('osquery-results-tab');
+
+      if (await statusTab.isVisible()) {
+        await statusTab.click();
+        await this.page.waitForTimeout(1_000);
+        await resultsTab.click();
+        await this.page.waitForTimeout(1_000);
+      }
+
+      // Check if the results table has data rows
+      const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
+      try {
+        await dataCell.waitFor({ state: 'visible', timeout: 10_000 });
+        return; // Results found
+      } catch {
+        // Results not yet available, wait and retry
+        await this.page.waitForTimeout(5_000);
+      }
+    }
+
+    // Final check — fail with a clear error if results never appeared
+    await expect(
+      this.page.testSubj.locator('dataGridRowCell').first()
+    ).toBeVisible({ timeout: 15_000 });
+  }
+
+  async clickAdvanced() {
+    await this.page.testSubj.locator('advanced-accordion-content').click();
+  }
+
+  async fillInQueryTimeout(timeout: string) {
+    const timeoutInput = this.page
+      .testSubj.locator('advanced-accordion-content')
+      .locator('[data-test-subj="timeout-input"]');
+    await timeoutInput.clear();
+    await timeoutInput.fill(timeout);
+  }
+
+  async typeInOsqueryFieldInput(text: string, index = 0) {
+    const fieldSelect = this.page.testSubj.locator('osqueryColumnValueSelect').nth(index);
+    const comboBox = fieldSelect.locator('[data-test-subj="comboBoxInput"]');
+    const option = this.page.getByRole('option').first();
+
+    // Retry: osquery schema may still be loading from agents
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await comboBox.click();
+      await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+      // Clear any previous text using keyboard (combobox is a div, not input)
+      await this.page.keyboard.press('ControlOrMeta+a');
+      await this.page.keyboard.press('Backspace');
+      await comboBox.pressSequentially(text.replace('{downArrow}{enter}', ''));
+
+      try {
+        await option.waitFor({ state: 'visible', timeout: 10_000 });
+        await option.click();
+        return;
+      } catch {
+        // Dropdown didn't show options — schema may not be loaded yet
+        await comboBox.press('Escape');
+        await this.page.waitForTimeout(5_000);
+      }
+    }
+
+    // Final attempt — fail with a clear error
+    await comboBox.click();
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.keyboard.press('Backspace');
+    await comboBox.pressSequentially(text);
+    await option.waitFor({ state: 'visible', timeout: 15_000 });
+    await option.click();
+  }
+
+  async typeInECSFieldInput(text: string, index = 0) {
+    const ecsWrapper = this.page.testSubj.locator('ECS-field-input').nth(index);
+    const comboBox = ecsWrapper.locator('[data-test-subj="comboBoxInput"]');
+    const cleanText = text.replace('{downArrow}{enter}', '');
+
+    // Click the combobox input to focus it, then type
+    await comboBox.click();
+    await comboBox.pressSequentially(cleanText);
+
+    // Wait for an option matching the typed text to appear in the dropdown
+    const matchingOption = this.page.getByRole('option', { name: new RegExp(cleanText, 'i') }).first();
+    await matchingOption.waitFor({ state: 'visible', timeout: 15_000 });
+    await matchingOption.click();
+  }
+
+  async getQueryEditorHeight(): Promise<number> {
+    const box = await this.queryEditor.boundingBox();
+    return box?.height ?? 0;
+  }
+}
