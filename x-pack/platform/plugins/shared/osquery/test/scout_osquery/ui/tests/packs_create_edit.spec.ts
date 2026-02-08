@@ -391,6 +391,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
         window.open = ((url: string) => {
           // @ts-expect-error exposed function
           window.__capturedWindowOpen(url);
+
           return null;
         }) as typeof window.open;
       });

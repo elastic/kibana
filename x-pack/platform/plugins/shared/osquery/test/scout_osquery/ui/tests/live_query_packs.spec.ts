@@ -53,6 +53,7 @@ test.describe.skip('ALL - Live Query Packs', { tag: ['@ess', '@svlSecurity'] }, 
     if (packId) {
       await cleanupPack(kbnClient, packId);
     }
+
     if (caseId) {
       await cleanupCase(kbnClient, caseId);
     }

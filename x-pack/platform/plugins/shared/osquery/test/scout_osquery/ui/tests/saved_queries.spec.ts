@@ -98,8 +98,13 @@ test.describe.skip('ALL - Saved queries', { tag: ['@ess', '@svlSecurity'] }, () 
     await resultsTableButton.click();
 
     // Sorting
-    await page.testSubj.locator('dataGridHeaderCellActionButton-osquery.egid').click({ force: true });
-    await page.getByText(/Sort A-Z/).first().click();
+    await page.testSubj
+      .locator('dataGridHeaderCellActionButton-osquery.egid')
+      .click({ force: true });
+    await page
+      .getByText(/Sort A-Z/)
+      .first()
+      .click();
 
     // Visit Status results
     await page.testSubj.locator('osquery-status-tab').click();
@@ -179,9 +184,7 @@ test.describe.skip('ALL - Saved queries', { tag: ['@ess', '@svlSecurity'] }, () 
   test('checks default values on new saved query', async ({ page, pageObjects }) => {
     await pageObjects.savedQueries.navigate();
     await page.getByText('Add saved query').first().click();
-    await expect(
-      page.testSubj.locator('resultsTypeField').getByText('Snapshot')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/169787
@@ -224,6 +227,7 @@ test.describe.skip('ALL - Saved queries', { tag: ['@ess', '@svlSecurity'] }, () 
       if (packId) {
         await cleanupPack(kbnClient, packId);
       }
+
       if (savedQueryId) {
         await cleanupSavedQuery(kbnClient, savedQueryId);
       }
@@ -231,9 +235,7 @@ test.describe.skip('ALL - Saved queries', { tag: ['@ess', '@svlSecurity'] }, () 
 
     test('checks result type on prebuilt saved query', async ({ page }) => {
       await page.locator(`[aria-label="Edit users_elastic"]`).click();
-      await expect(
-        page.testSubj.locator('resultsTypeField').getByText('Snapshot')
-      ).toBeVisible();
+      await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
     });
 
     test('user can run prebuilt saved query and add to case', async ({ page, pageObjects }) => {
@@ -276,6 +278,7 @@ test.describe.skip('ALL - Saved queries', { tag: ['@ess', '@svlSecurity'] }, () 
         await paginationButton.click();
         await page.testSubj.locator('tablePagination-50-rows').click();
       }
+
       await pageObjects.packs.clickPackByName(packName);
       await pageObjects.packs.clickEditPack();
 

@@ -36,36 +36,42 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
     }
   });
 
-  test('validate osquery is not available and nav search links to integration', {
-    tag: ['@ess'],
-  }, async ({ page, kbnUrl }) => {
-    // Visit osquery — when not installed, should prompt to add integration
-    await page.goto(kbnUrl.get('/app/osquery'));
-    await waitForPageReady(page);
+  test(
+    'validate osquery is not available and nav search links to integration',
+    {
+      tag: ['@ess'],
+    },
+    async ({ page, kbnUrl }) => {
+      // Visit osquery — when not installed, should prompt to add integration
+      await page.goto(kbnUrl.get('/app/osquery'));
+      await waitForPageReady(page);
 
-    // Intercept the status API to simulate osquery not being installed
-    await page.route('**/internal/osquery/status', async (route) => {
-      const response = await route.fetch();
-      const body = await response.json();
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({ ...body, install_status: undefined }),
+      // Intercept the status API to simulate osquery not being installed
+      await page.route('**/internal/osquery/status', async (route) => {
+        const response = await route.fetch();
+        const body = await response.json();
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ ...body, install_status: undefined }),
+        });
       });
-    });
 
-    await page.reload();
-    await waitForPageReady(page);
+      await page.reload();
+      await waitForPageReady(page);
 
-    await expect(
-      page.getByText('Add this integration to run and schedule queries for Elastic Agent.').first()
-    ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Add Osquery Manager').first()).toBeVisible();
-    await expect(page.testSubj.locator('osquery-add-integration-button')).toBeVisible();
+      await expect(
+        page
+          .getByText('Add this integration to run and schedule queries for Elastic Agent.')
+          .first()
+      ).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText('Add Osquery Manager').first()).toBeVisible();
+      await expect(page.testSubj.locator('osquery-add-integration-button')).toBeVisible();
 
-    // Test nav search
-    await page.testSubj.locator('nav-search-input').fill('Osquery');
-    await expect(page.locator('[url*="osquery"]').first()).toBeVisible({ timeout: 15_000 });
-  });
+      // Test nav search
+      await page.testSubj.locator('nav-search-input').fill('Osquery');
+      await expect(page.locator('[url*="osquery"]').first()).toBeVisible({ timeout: 15_000 });
+    }
+  );
 
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe('Add and upgrade integration', { tag: ['@ess', '@svlSecurity'] }, () => {
@@ -78,59 +84,63 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
       }
     });
 
-    test('should add the old integration and be able to upgrade it', {
-      tag: ['@ess'],
-    }, async ({ page, kbnUrl }) => {
-      test.setTimeout(300_000);
+    test(
+      'should add the old integration and be able to upgrade it',
+      {
+        tag: ['@ess'],
+      },
+      async ({ page, kbnUrl }) => {
+        test.setTimeout(300_000);
 
-      const integrationName = `integration-${Date.now()}`;
-      const policyName = `policy-${Date.now()}`;
+        const integrationName = `integration-${Date.now()}`;
+        const policyName = `policy-${Date.now()}`;
 
-      // Visit the old osquery version page
-      await page.goto(
-        kbnUrl.get(`/app/integrations/detail/osquery_manager-${oldVersion}/overview`)
-      );
-      await waitForPageReady(page);
+        // Visit the old osquery version page
+        await page.goto(
+          kbnUrl.get(`/app/integrations/detail/osquery_manager-${oldVersion}/overview`)
+        );
+        await waitForPageReady(page);
 
-      // Add the integration
-      await page.testSubj.locator('addIntegrationPolicyButton').click();
-      await waitForPageReady(page);
+        // Add the integration
+        await page.testSubj.locator('addIntegrationPolicyButton').click();
+        await waitForPageReady(page);
 
-      // Fill in integration name
-      const nameInput = page.testSubj.locator('packagePolicyNameInput');
-      await nameInput.clear();
-      await nameInput.fill(integrationName);
+        // Fill in integration name
+        const nameInput = page.testSubj.locator('packagePolicyNameInput');
+        await nameInput.clear();
+        await nameInput.fill(integrationName);
 
-      // Create new agent policy
-      await page.testSubj.locator('createAgentPolicyButton').click();
-      await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
-      await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
+        // Create new agent policy
+        await page.testSubj.locator('createAgentPolicyButton').click();
+        await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
+        await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
 
-      // Save the integration policy
-      await page.testSubj.locator('createPackagePolicySaveButton').click();
+        // Save the integration policy
+        await page.testSubj.locator('createPackagePolicySaveButton').click();
 
-      // Handle "Add Elastic Agent later" if shown
-      const addAgentLater = page.getByText('Add Elastic Agent later');
-      if (await addAgentLater.isVisible({ timeout: 10_000 }).catch(() => false)) {
-        await addAgentLater.click();
+        // Handle "Add Elastic Agent later" if shown
+        const addAgentLater = page.getByText('Add Elastic Agent later');
+        if (await addAgentLater.isVisible({ timeout: 10_000 }).catch(() => false)) {
+          await addAgentLater.click();
+        }
+
+        // Verify the integration exists
+        await expect(page.getByText(integrationName).first()).toBeVisible({ timeout: 30_000 });
+        await expect(page.getByText(`version: ${oldVersion}`).first()).toBeVisible();
+
+        // Upgrade the integration
+        await page.testSubj.locator('euiFlyoutCloseButton').click();
+        await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
+        await page.testSubj.locator('saveIntegration').click();
+
+        await expect(
+          page.getByText(`Successfully updated '${integrationName}'`).first()
+        ).toBeVisible({ timeout: 30_000 });
+
+        // Verify old version is gone
+        await expect(page.getByText(`version: ${oldVersion}`).first()).not.toBeVisible();
       }
-
-      // Verify the integration exists
-      await expect(page.getByText(integrationName).first()).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByText(`version: ${oldVersion}`).first()).toBeVisible();
-
-      // Upgrade the integration
-      await page.testSubj.locator('euiFlyoutCloseButton').click();
-      await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
-      await page.testSubj.locator('saveIntegration').click();
-
-      await expect(
-        page.getByText(`Successfully updated '${integrationName}'`).first()
-      ).toBeVisible({ timeout: 30_000 });
-
-      // Verify old version is gone
-      await expect(page.getByText(`version: ${oldVersion}`).first()).not.toBeVisible();
-    });
+    );
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/170593
@@ -156,9 +166,9 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
       await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
       await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
 
-      await expect(
-        page.getByText(`Agent policy '${policyName}' created`).first()
-      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(`Agent policy '${policyName}' created`).first()).toBeVisible({
+        timeout: 15_000,
+      });
 
       // Navigate to the policy and add osquery
       await page.testSubj.locator('agentPolicyNameLink').getByText(policyName).click();
@@ -169,9 +179,7 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
       await waitForPageReady(page);
 
       // Verify the agent policy is pre-selected
-      await expect(
-        page.testSubj.locator('agentPolicySelect').getByText(policyName)
-      ).toBeVisible();
+      await expect(page.testSubj.locator('agentPolicySelect').getByText(policyName)).toBeVisible();
 
       // Set integration name
       const nameInput = page.testSubj.locator('packagePolicyNameInput');
@@ -205,6 +213,7 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
       if (packId) {
         await cleanupPack(kbnClient, packId);
       }
+
       if (policyId) {
         await cleanupAgentPolicy(kbnClient, policyId);
       }
@@ -279,17 +288,23 @@ test.describe.skip('ALL - Add Integration', { tag: ['@ess', '@svlSecurity'] }, (
       await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
 
       // Verify the pack is included in the advanced config
-      await page.getByText(/^Advanced$/).first().click();
+      await page
+        .getByText(/^Advanced$/)
+        .first()
+        .click();
       await expect(page.locator('.kibanaCodeEditor')).toContainText(`"${packName}"`);
 
       await page.testSubj.locator('saveIntegration').click();
-      await expect(
-        page.getByText(`Successfully updated '${integrationName}'`).first()
-      ).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(`Successfully updated '${integrationName}'`).first()).toBeVisible(
+        { timeout: 30_000 }
+      );
 
       // Verify upgrade removed old version label
       await page.locator(`a[title="${integrationName}"]`).click();
-      await page.getByText(/^Advanced$/).first().click();
+      await page
+        .getByText(/^Advanced$/)
+        .first()
+        .click();
       await expect(page.locator('.kibanaCodeEditor')).toContainText(`"${packName}"`);
 
       // Verify prebuilt saved queries exist

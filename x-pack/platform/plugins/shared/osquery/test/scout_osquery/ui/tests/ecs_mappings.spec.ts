@@ -37,10 +37,15 @@ test.describe.skip('EcsMapping', { tag: ['@ess', '@svlSecurity'] }, () => {
     // Select "Static value" from the osquery field type dropdown
     const fieldTypeSelect = page.testSubj.locator('osqueryColumnValueSelect').nth(0);
     await fieldTypeSelect.locator('[data-test-subj="comboBoxInput"]').click();
-    await page.getByRole('option', { name: /Static value/i }).first().click();
+    await page
+      .getByRole('option', { name: /Static value/i })
+      .first()
+      .click();
 
     // Type static values
-    const staticInput = page.testSubj.locator('osqueryColumnValueSelect').nth(0)
+    const staticInput = page.testSubj
+      .locator('osqueryColumnValueSelect')
+      .nth(0)
       .locator('[data-test-subj="comboBoxInput"]');
     await staticInput.click();
     await staticInput.pressSequentially('test1');
@@ -57,9 +62,14 @@ test.describe.skip('EcsMapping', { tag: ['@ess', '@svlSecurity'] }, () => {
 
     const fieldTypeSelect2 = page.testSubj.locator('osqueryColumnValueSelect').nth(1);
     await fieldTypeSelect2.locator('[data-test-subj="comboBoxInput"]').click();
-    await page.getByRole('option', { name: /Static value/i }).first().click();
+    await page
+      .getByRole('option', { name: /Static value/i })
+      .first()
+      .click();
 
-    const staticInput2 = page.testSubj.locator('osqueryColumnValueSelect').nth(1)
+    const staticInput2 = page.testSubj
+      .locator('osqueryColumnValueSelect')
+      .nth(1)
       .locator('[data-test-subj="comboBoxInput"]');
     await staticInput2.click();
     await staticInput2.pressSequentially('test3');

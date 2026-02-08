@@ -94,25 +94,20 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
 
     await page.testSubj.locator('osquery-empty-button').click();
 
-    const updatedNotificationCount = parseInt(
-      (await notificationBadge.textContent()) || '0',
-      10
-    );
+    const updatedNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
     expect(initialNotificationCount).toBe(updatedNotificationCount - 1);
 
     // Verify response actions
     await page.testSubj
       .locator('securitySolutionDocumentDetailsFlyoutResponseSectionHeader')
       .click();
-    await page.testSubj
-      .locator('securitySolutionDocumentDetailsFlyoutResponseButton')
-      .click();
+    await page.testSubj.locator('securitySolutionDocumentDetailsFlyoutResponseButton').click();
 
     const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
     await expect(responseWrapper.getByText('tags')).toBeVisible();
-    await expect(
-      responseWrapper.locator('[data-test-subj="osquery-results-comment"]')
-    ).toHaveCount(updatedNotificationCount);
+    await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]')).toHaveCount(
+      updatedNotificationCount
+    );
   });
 
   test.skip('should be able to run take action query against all enrolled agents', async ({

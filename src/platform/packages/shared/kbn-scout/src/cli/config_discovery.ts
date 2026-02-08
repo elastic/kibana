@@ -180,9 +180,7 @@ const MODULES_TO_SPLIT_BY_SERVER_RUN_FLAGS = ['streams_app', 'osquery'];
 
 // Splits modules by 'serverRunFlags' to have a better control over
 // test execution, e.g.: osquery-stateful, osquery-serverless-security
-const splitModulesByServerRunFlags = (
-  modules: ModuleDiscoveryInfo[]
-): ModuleDiscoveryInfo[] => {
+const splitModulesByServerRunFlags = (modules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] => {
   return modules.flatMap((module) => {
     if (!MODULES_TO_SPLIT_BY_SERVER_RUN_FLAGS.some((name) => module.name.includes(name))) {
       return [module];
