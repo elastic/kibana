@@ -31,6 +31,15 @@ export class EngineDescriptorClient {
     });
   }
 
+  async getAll(): Promise<EngineDescriptor[]> {
+    const { saved_objects } = await this.soClient.find<EngineDescriptor>({
+      type: EngineDescriptorTypeName,
+      namespaces: [this.namespace],
+    });
+
+    return saved_objects.map((engine) => engine.attributes);
+  }
+
   async findOrThrow(entityType: EntityType): Promise<EngineDescriptor> {
     const response = await this.find(entityType);
 
