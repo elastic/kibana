@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var isRoot = require('./is_root');
+// disable moment deprecation warnings
+const moment = require('moment');
+moment.suppressDeprecationWarnings = true;
 
-describe('isRoot', function () {
-  test('0 is root', function () {
-    expect(isRoot(0)).toBeTruthy();
-  });
-
-  test('not 0 is not root', function () {
-    expect(isRoot(5)).toBeFalsy();
-  });
-});
+// disable rison-node parsing errors
+// eslint-disable-next-line @kbn/eslint/module_migration
+const rison = require('rison-node');
+rison.parser.prototype.error = function (message: string) {
+  this.message = message;
+  return undefined;
+};

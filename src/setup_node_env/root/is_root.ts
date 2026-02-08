@@ -7,20 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var forceRoot = require('./force');
-
-describe('forceRoot', function () {
-  it('with flag', function () {
-    expect(forceRoot(['--allow-root'])).toBeTruthy();
-  });
-
-  it('without flag', function () {
-    expect(forceRoot(['--foo'])).toBeFalsy();
-  });
-
-  test('retains argument', function () {
-    var args = ['--allow-root', 'foo'];
-    forceRoot(args);
-    expect(args.includes('--allow-root')).toBeTruthy();
-  });
-});
+module.exports = function (uid: number): boolean {
+  return uid === 0;
+};

@@ -7,7 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var EOL = require('os').EOL;
+const EOL = require('os').EOL;
+
+interface IgnoreWarningRule {
+  name?: string;
+  code?: string;
+  message?: string;
+  messageContains?: string;
+  file?: string;
+  line?: number;
+  col?: number;
+  ftrOnly?: boolean;
+}
+
+interface StackFrame {
+  func?: string;
+  file: string;
+  line: number;
+  col: number;
+}
+
+interface ParsedWarning {
+  name: string;
+  code?: string;
+  message: string;
+  frames: StackFrame[];
+}
 
 // Be very careful of what you add to this list. Idealy this array should be
 // empty, but in certain circumstances, we can allow a warning to be ignored
@@ -20,7 +45,7 @@ var EOL = require('os').EOL;
 // The `file`, `line`, and `col` rules will be checked against the top stack
 // frame only. Also, `file` doesn't have to match the full path, only the end of
 // it.
-var IGNORE_WARNINGS = [
+const IGNORE_WARNINGS: IgnoreWarningRule[] = [
   {
     name: 'MaxListenersExceededWarning',
   },
@@ -102,11 +127,11 @@ var IGNORE_WARNINGS = [
   },
 ];
 
-if (process.noProcessWarnings !== true) {
-  process.on('warning', function (warn) {
+if ((process as any).noProcessWarnings !== true) {
+  process.on('warning', function (warn: Error & { code?: string }) {
     if (shouldIgnore(warn)) return;
 
-    if (process.traceProcessWarnings === true) {
+    if ((process as any).traceProcessWarnings === true) {
       console.error('Node.js process-warning detected - Terminating process...');
     } else {
       console.error('Node.js process-warning detected:');
@@ -121,7 +146,7 @@ if (process.noProcessWarnings !== true) {
   // While the above warning listener would also be called on
   // unhandledRejection warnings, we can give a better error message if we
   // handle them separately:
-  process.on('unhandledRejection', function (reason) {
+  process.on('unhandledRejection', function (reason: unknown) {
     console.error('Unhandled Promise rejection detected:');
     console.error();
     console.error(reason);
@@ -131,8 +156,8 @@ if (process.noProcessWarnings !== true) {
   });
 }
 
-function shouldIgnore(warn) {
-  warn = parseWarn(warn);
+function shouldIgnore(warn: Error & { code?: string }): boolean {
+  const parsed = parseWarn(warn);
 
   return IGNORE_WARNINGS.some(function ({
     name,
@@ -145,19 +170,19 @@ function shouldIgnore(warn) {
     ftrOnly,
   }) {
     if (ftrOnly && !process.env.IS_FTR_RUNNER) return false;
-    if (name && name !== warn.name) return false;
-    if (code && code !== warn.code) return false;
-    if (message && message !== warn.message) return false;
-    if (messageContains && !warn.message.includes(messageContains)) return false;
-    if (file && !warn.frames[0].file.endsWith(file)) return false;
-    if (line && line !== warn.frames[0].line) return false;
-    if (col && col !== warn.frames[0].col) return false;
+    if (name && name !== parsed.name) return false;
+    if (code && code !== parsed.code) return false;
+    if (message && message !== parsed.message) return false;
+    if (messageContains && !parsed.message.includes(messageContains)) return false;
+    if (file && !parsed.frames[0].file.endsWith(file)) return false;
+    if (line && line !== parsed.frames[0].line) return false;
+    if (col && col !== parsed.frames[0].col) return false;
     return true;
   });
 }
 
-function parseWarn(warn) {
-  var lines = warn.stack.split(EOL);
+function parseWarn(warn: Error & { code?: string }): ParsedWarning {
+  const lines = warn.stack!.split(EOL);
   return {
     name: warn.name,
     code: warn.code,
@@ -166,18 +191,18 @@ function parseWarn(warn) {
   };
 }
 
-function parseStack(stack) {
-  return stack.map(parseFrame).filter(function (frame) {
-    return frame;
+function parseStack(stack: string[]): StackFrame[] {
+  return stack.map(parseFrame).filter(function (frame): frame is StackFrame {
+    return frame !== undefined;
   });
 }
 
-function parseFrame(frame) {
+function parseFrame(frame: string): StackFrame | undefined {
   // supports the following frame types:
   // - "    at function-name (file-path:1:2)"
   // - "    at function-name (file-path)"
   // - "    at file-path:1:2"
-  var match = frame.match(/^    at (?:([^(]+) )?\(?([^:)]+)(?::(\d+):(\d+))?\)?$/);
+  const match = frame.match(/^    at (?:([^(]+) )?\(?([^:)]+)(?::(\d+):(\d+))?\)?$/);
   if (match === null) return; // in case the stack trace is modified by another module, e.g. jest
   return {
     func: match[1],

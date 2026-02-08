@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function hardenPrototypes() {
+function hardenPrototypes(): void {
   // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/seal
   // > The Object.seal() static method seals an object.
   // > Sealing an object prevents extensions and makes existing properties non-configurable.

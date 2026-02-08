@@ -7,29 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var isIterateeCall = require('lodash/_isIterateeCall');
+const isIterateeCall = require('lodash/_isIterateeCall');
 
-function createProxy(template) {
+function createProxy(template: Function): Function {
   return new Proxy(template, {
-    apply: function (target, thisArg, args) {
+    apply: function (target: Function, thisArg: any, args: any[]) {
       if (args.length === 1 || isIterateeCall(args)) {
         return target.apply(thisArg, [args[0], { sourceURL: '' }]);
       }
 
-      var options = Object.assign({}, args[1]);
+      const options = Object.assign({}, args[1]);
       options.sourceURL = (options.sourceURL + '').replace(/\s/g, ' ');
-      var newArgs = args.slice(0); // copy
+      const newArgs = args.slice(0); // copy
       newArgs.splice(1, 1, options); // replace options in the copy
       return target.apply(thisArg, newArgs);
     },
   });
 }
 
-function createFpProxy(template) {
+function createFpProxy(template: Function): Function {
   // we have to do the require here, so that we get the patched version
-  var _ = require('lodash');
+  const _ = require('lodash');
   return new Proxy(template, {
-    apply: function (target, thisArg, args) {
+    apply: function (target: Function, thisArg: any, args: any[]) {
       // per https://github.com/lodash/lodash/wiki/FP-Guide
       // > Iteratee arguments are capped to avoid gotchas with variadic iteratees.
       // this means that we can't specify the options in the second argument to fp.template because it's ignored.

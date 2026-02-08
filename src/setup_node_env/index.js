@@ -10,15 +10,22 @@
 /**
  * Node.js environment setup for Kibana.
  *
- * NOTE: babel-register has been removed. TypeScript transpilation is now handled by:
- * - Vite Module Runner for dev mode (`yarn start --use-vite`)
- * - Pre-transpiled cache (`.transpile-cache/`) from `yarn transpile`
- *
- * Scripts that need TypeScript support should either:
- * 1. Use `yarn transpile` to pre-build packages
- * 2. Use the Vite-based dev mode
- * 3. Be converted to JavaScript
+ * TypeScript support is provided by:
+ * - CJS require hook (ts_require_hook.js) using esbuild — replaces babel-register
+ * - ESM resolve hooks (ts_resolve_hooks.mjs) for extensionless .ts imports in ESM context
+ * - Vite Module Runner for dev mode (`yarn start`)
  */
+
+// Register esbuild-based CJS require hook for .ts/.tsx files.
+// This replaces babel-register: compiles TypeScript to CJS on-the-fly,
+// and patches Module._resolveFilename to try .ts extensions.
+require('./ts_require_hook');
+
+// Register ESM resolve hooks for .mts scripts and ESM contexts.
+// These try .ts extensions for extensionless ESM imports.
+const { register } = require('node:module');
+const { pathToFileURL } = require('node:url');
+register(pathToFileURL(require.resolve('./ts_resolve_hooks.mjs')));
 
 // Development environment setup
 require('./setup_env');

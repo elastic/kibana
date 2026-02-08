@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = function (argv) {
-  var rootIndex = argv.indexOf('--allow-root');
+module.exports = function (argv: string[]): boolean {
+  const rootIndex = argv.indexOf('--allow-root');
   return rootIndex >= 0;
 };

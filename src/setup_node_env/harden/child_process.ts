@@ -11,7 +11,7 @@
 // `options.env` object passed to the child process function doesn't inherit
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
 // as described in CVE-2019-7609
-function patchChildProcess(cp) {
+function patchChildProcess(cp: any): any {
   // The `exec` function is currently just a wrapper around `execFile`. So for
   // now there's no need to patch it. If this changes in the future, our tests
   // will fail and we can uncomment the line below.
@@ -28,10 +28,11 @@ function patchChildProcess(cp) {
   return cp;
 }
 
-function patchOptions(hasArgs) {
-  return function apply(target, thisArg, args) {
-    var pos = 1;
-    var newArgs = Object.setPrototypeOf([].concat(args), null);
+function patchOptions(hasArgs?: boolean) {
+  return function apply(target: Function, thisArg: any, args: any[]) {
+    const pos_start = 1;
+    let pos = pos_start;
+    const newArgs: any = Object.setPrototypeOf([].concat(args as any), null);
 
     if (pos === newArgs.length) {
       // fn(arg1)
@@ -62,8 +63,8 @@ function patchOptions(hasArgs) {
   };
 }
 
-function prototypelessSpawnOpts(obj) {
-  var prototypelessObj = Object.assign(Object.create(null), obj);
+function prototypelessSpawnOpts(obj?: any): any {
+  const prototypelessObj: any = Object.assign(Object.create(null), obj);
   prototypelessObj.env = Object.assign(Object.create(null), prototypelessObj.env || process.env);
   return prototypelessObj;
 }

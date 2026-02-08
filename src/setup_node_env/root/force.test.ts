@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// disable moment deprecation warnings
-var moment = require('moment');
-moment.suppressDeprecationWarnings = true;
+const forceRoot = require('./force');
 
-// disable rison-node parsing errors
-// eslint-disable-next-line @kbn/eslint/module_migration
-var rison = require('rison-node');
-rison.parser.prototype.error = function (message) {
-  this.message = message;
-  return undefined;
-};
+describe('forceRoot', function () {
+  it('with flag', function () {
+    expect(forceRoot(['--allow-root'])).toBeTruthy();
+  });
+
+  it('without flag', function () {
+    expect(forceRoot(['--foo'])).toBeFalsy();
+  });
+
+  test('retains argument', function () {
+    const args = ['--allow-root', 'foo'];
+    forceRoot(args);
+    expect(args.includes('--allow-root')).toBeTruthy();
+  });
+});
