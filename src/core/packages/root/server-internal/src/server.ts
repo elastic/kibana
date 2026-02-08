@@ -192,8 +192,15 @@ export class Server {
           specifier: string
         ) => Promise<typeof import('@kbn/vite-server')>;
         const { createViteModuleLoader } = await dynamicImport('@kbn/vite-server');
+
+        // Reuse the Vite Runtime that was already created during bootstrap
+        // (scripts/kibana.mts stores it on globalThis). This avoids creating a
+        // second Vite dev server with duplicate file watchers and module graph.
+        const existingRuntime = (globalThis as any).__kbnViteRuntime ?? undefined;
+
         const loader = createViteModuleLoader({
           repoRoot: this.env.homeDir,
+          existingRuntime,
           onModuleInvalidated: (modulePath: string) => {
             this.log.debug(`[vite-server] Module invalidated: ${modulePath}`);
           },

@@ -83,7 +83,7 @@ export class DynamicImportModuleLoader implements ModuleLoader {
     }
 
     // Use dynamic import for ESM compatibility
-    const module = await import(modulePath);
+    const module = await import(/* @vite-ignore */ modulePath);
 
     // Handle both default and named exports
     const exports = module.default ?? module;
@@ -105,12 +105,12 @@ export function resolvePluginServerPath(pluginPath: string): string {
 }
 
 /**
- * Create the default module loader based on environment
+ * Create the default module loader based on environment.
+ * Uses DynamicImportModuleLoader which works with both Node.js native ESM
+ * and Vite's Module Runner (which intercepts import() calls).
  */
 export function createDefaultModuleLoader(): ModuleLoader {
-  // In the future, this could check for Vite availability
-  // and return a ViteModuleLoader in development mode
-  return new RequireModuleLoader();
+  return new DynamicImportModuleLoader();
 }
 
 /**

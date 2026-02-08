@@ -118,7 +118,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     });
 
     // Check if Vite dev server is configured
-    // Note: Vite config is set via global.__kbnViteConfig when using --use-vite flag
+    // Note: Vite config is set via global.__kbnViteConfig in dev mode (disable with --no-vite)
     let viteConfigData:
       | { serverUrl: string; pluginIds: string[]; pluginDependencies: Record<string, string[]> }
       | undefined;

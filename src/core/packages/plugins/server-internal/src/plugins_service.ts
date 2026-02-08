@@ -272,7 +272,7 @@ export class PluginsService
 
     // Register config descriptors and deprecations
     for (const plugin of plugins) {
-      const configDescriptor = plugin.getConfigDescriptor();
+      const configDescriptor = await plugin.getConfigDescriptor();
       if (configDescriptor) {
         this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
         if (configDescriptor.deprecations) {

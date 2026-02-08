@@ -200,13 +200,12 @@ export class PluginWrapper<
     this.container = undefined;
   }
 
-  public getConfigDescriptor(): PluginConfigDescriptor | null {
+  public async getConfigDescriptor(): Promise<PluginConfigDescriptor | null> {
     if (!this.manifest.server) {
       return null;
     }
-    // Use synchronous loading for config descriptor since it's called
-    // during discovery, before async init() is called
-    const definition = this.getPluginDefinitionSync();
+    // Use async loading via module loader (supports Vite Module Runner)
+    const definition = await this.getPluginDefinition();
     if (!definition.config) {
       this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
