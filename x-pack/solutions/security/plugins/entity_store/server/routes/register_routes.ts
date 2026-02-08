@@ -11,7 +11,7 @@ import {
   registerStatus,
   registerForceLogExtraction,
   registerUninstall,
-  registerStart
+  registerStart,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
