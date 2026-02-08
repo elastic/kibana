@@ -23,7 +23,6 @@ import type {
 import type { Writable } from '@kbn/utility-types';
 import { createHash } from 'node:crypto';
 import {
-  type LabelNodeId,
   type GraphEdge,
   type RelationshipEdge,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
@@ -37,32 +36,15 @@ interface ConnectorEdges {
   edgeType: EdgeDataModel['type'];
 }
 
-/**
- * Relationship connector edges - supports multiple sources and targets for consolidated relationship nodes.
- * Each source+relationship combination gets one node that connects to all targets.
- */
-interface RelationshipConnectorEdges {
-  source: string; // Source entity for this relationship (relationshipNodeId = entityId-relationship)
-  targets: string[]; // All targets for this source+relationship combination
-  edgeType: EdgeDataModel['type'];
-}
-
 interface ParseContext {
   readonly nodesLimit?: number;
   readonly nodesMap: Record<string, NodeDataModel>;
   readonly edgesMap: Record<string, EdgeDataModel>;
-  // Label nodes (events/actions)
-  readonly relationshipEdges: Record<string, RelationshipConnectorEdges>;
   /**
-   * Used to group multiple labels that share the same document set.
+   * Maps connector node ID (label or relationship) to array of edges (source-target pairs).
+   * Used for both event labels and relationship nodes.
    */
-  readonly edgeLabelsNodes: Record<LabelNodeId, LabelNodeId[]>;
-  /**
-   * Maps label node ID to array of edges (source-target pairs).
-   * A single label can connect to multiple actor-target pairs when
-   * MV_EXPAND creates multiple rows from the same document(s).
-   */
-  readonly labelEdges: Record<LabelNodeId, ConnectorEdges[]>;
+  readonly connectorEdges: Record<string, ConnectorEdges[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -84,10 +66,8 @@ export const parseRecords = (
     nodesLimit,
     logger,
     nodesMap: {},
-    edgeLabelsNodes: {},
     edgesMap: {},
-    labelEdges: {},
-    relationshipEdges: {},
+    connectorEdges: {},
     messages: [],
   };
 
@@ -344,36 +324,39 @@ const createLabelNode = (record: GraphEdge): LabelNodeDataModel => {
   };
 };
 
-const processLabelNodes = (
+/**
+ * Unified function to process connector nodes (labels and relationships).
+ * Adds the node to nodesMap if new, and accumulates edges in connectorEdges.
+ */
+const processConnectorNode = (
   context: ParseContext,
   nodeData: {
-    labelNodeId: string;
     sourceId: string;
     targetId: string;
-    labelNode: LabelNodeDataModel;
+    connectorNode: LabelNodeDataModel | RelationshipNodeDataModel;
   }
 ) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
-  const { labelNodeId, sourceId, targetId, labelNode } = nodeData;
+  const { nodesMap, connectorEdges } = context;
+  const { sourceId, targetId, connectorNode } = nodeData;
 
-  // Group labels by labelNodeId (document-based)
-  if (edgeLabelsNodes[labelNodeId] === undefined) {
-    edgeLabelsNodes[labelNodeId] = [];
+  // Add node to nodesMap if new
+  if (!nodesMap[connectorNode.id]) {
+    nodesMap[connectorNode.id] = connectorNode;
+    connectorEdges[connectorNode.id] = [];
   }
 
-  // Only add the label node if it doesn't exist yet
-  if (nodesMap[labelNode.id] === undefined) {
-    nodesMap[labelNode.id] = labelNode;
-    edgeLabelsNodes[labelNodeId].push(labelNode.id);
-    labelEdges[labelNode.id] = [];
+  // Add edge (source-target pair) - dedupe by checking existing edges
+  const existingEdges = connectorEdges[connectorNode.id];
+  const edgeExists = existingEdges.some(
+    (e) => e.source === sourceId && e.target === targetId
+  );
+  if (!edgeExists) {
+    existingEdges.push({
+      source: sourceId,
+      target: targetId,
+      edgeType: 'solid',
+    });
   }
-
-  // Add the edge (source-target pair) for this label node
-  labelEdges[labelNode.id].push({
-    source: sourceId,
-    target: targetId,
-    edgeType: 'solid',
-  });
 };
 
 const isAboveAPINodesLimit = (context: ParseContext) => {
@@ -397,14 +380,12 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
     }
 
     const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-    const { labelNodeId } = record;
     const labelNode = createLabelNode(record);
 
-    processLabelNodes(context, {
-      labelNodeId,
+    processConnectorNode(context, {
       sourceId: actorId,
       targetId,
-      labelNode,
+      connectorNode: labelNode,
     });
   }
 };
@@ -425,40 +406,6 @@ const createRelationshipNode = (
   };
 };
 
-/**
- * Processes relationship nodes with consolidation.
- * Each source+relationship combination gets one node that connects to all targets.
- */
-const processRelationshipNodes = (
-  context: ParseContext,
-  nodeData: {
-    sourceId: string;
-    targetIds: string[]; // All targets for this source+relationship
-    relationshipNode: RelationshipNodeDataModel;
-  }
-) => {
-  const { nodesMap, relationshipEdges } = context;
-  const { sourceId, targetIds, relationshipNode } = nodeData;
-
-  // Check if this relationship node already exists (relationshipNodeId = sourceId-relationship)
-  const existingEdges = relationshipEdges[relationshipNode.id];
-  if (existingEdges) {
-    // Add any new targets (source is always the same for a given relationship node ID)
-    targetIds.forEach((targetId) => {
-      if (!existingEdges.targets.includes(targetId)) {
-        existingEdges.targets.push(targetId);
-      }
-    });
-  } else {
-    // Create new relationship node
-    nodesMap[relationshipNode.id] = relationshipNode;
-    relationshipEdges[relationshipNode.id] = {
-      source: sourceId,
-      targets: targetIds,
-      edgeType: 'solid',
-    };
-  }
-};
 
 /**
  * Parses entity doc data JSON and creates an enriched entity node.
@@ -622,10 +569,10 @@ const createRelationshipNodes = (
     // so each source+relationship combination gets one node that connects to all target groups
     const relationshipNode = createRelationshipNode(record.relationshipNodeId, record.relationship);
 
-    processRelationshipNodes(context, {
+    processConnectorNode(context, {
       sourceId: sourceNodeId,
-      targetIds: [targetNodeId], // Pass the grouped targetNodeId
-      relationshipNode,
+      targetId: targetNodeId,
+      connectorNode: relationshipNode,
     });
   }
 };
@@ -774,48 +721,44 @@ const processConnectorGroup = (
 };
 
 const createEdgesAndGroups = (context: ParseContext) => {
-  const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges, relationshipEdges } = context;
+  const { edgesMap, nodesMap, connectorEdges } = context;
 
-  // Process label nodes (events) - existing logic
-  Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
-    processConnectorGroup(edgeId, edgeLabelsIds, labelEdges, edgesMap, nodesMap, 'label');
-  });
-
-  // Build grouping and connector edges from relationshipEdges
-  // Grouping is computed here (after parsing) because we need all targets accumulated
+  // Build grouping for connector nodes (labels and relationships)
+  // Nodes with same source-target pairs get stacked together
+  const labelGrouping: Record<string, string[]> = {};
   const relationshipGrouping: Record<string, string[]> = {};
-  const relationshipConnectorEdges: Record<string, ConnectorEdges[]> = {};
 
-  Object.entries(relationshipEdges).forEach(([relNodeId, edges]) => {
-    // Compute grouping key from final accumulated targets
-    // Relationship nodes with same source AND same targets get stacked
-    const sortedTargets = [...edges.targets].sort().join(',');
-    const groupingKey = `${edges.source}-${createHash('md5').update(sortedTargets).digest('hex')}`;
+  Object.entries(connectorEdges).forEach(([connectorNodeId, edges]) => {
+    const node = nodesMap[connectorNodeId];
+    if (!node) return;
 
-    // Build grouping map
-    if (!relationshipGrouping[groupingKey]) {
-      relationshipGrouping[groupingKey] = [];
+    // Compute grouping key from all source-target pairs
+    // Sort to ensure consistent key regardless of edge order
+    const edgePairs = edges.map((e) => `${e.source}-${e.target}`).sort();
+    const groupingKey = createHash('sha256').update(edgePairs.join(',')).digest('hex');
+
+    // Build grouping maps by node type
+    if (node.shape === 'label') {
+      if (!labelGrouping[groupingKey]) {
+        labelGrouping[groupingKey] = [];
+      }
+      labelGrouping[groupingKey].push(connectorNodeId);
+    } else if (node.shape === 'relationship') {
+      if (!relationshipGrouping[groupingKey]) {
+        relationshipGrouping[groupingKey] = [];
+      }
+      relationshipGrouping[groupingKey].push(connectorNodeId);
     }
-    relationshipGrouping[groupingKey].push(relNodeId);
-
-    // Convert to ConnectorEdges[] format for processConnectorGroup
-    relationshipConnectorEdges[relNodeId] = edges.targets.map((targetId) => ({
-      source: edges.source,
-      target: targetId,
-      edgeType: edges.edgeType,
-    }));
   });
 
-  // Process relationship nodes using processConnectorGroup (handles stacking)
-  Object.entries(relationshipGrouping).forEach(([groupKey, relationshipNodeIds]) => {
-    processConnectorGroup(
-      groupKey,
-      relationshipNodeIds,
-      relationshipConnectorEdges,
-      edgesMap,
-      nodesMap,
-      'relationship'
-    );
+  // Process label nodes (handles stacking)
+  Object.entries(labelGrouping).forEach(([groupKey, nodeIds]) => {
+    processConnectorGroup(groupKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
+  });
+
+  // Process relationship nodes (handles stacking)
+  Object.entries(relationshipGrouping).forEach(([groupKey, nodeIds]) => {
+    processConnectorGroup(groupKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'relationship');
   });
 };
 

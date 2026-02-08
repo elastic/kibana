@@ -533,9 +533,25 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(4); // 2 entities + 2 labels
-        expect(response.body).to.have.property('edges').length(4); // actor→label1, label1→target, actor→label2, label2→target
+        // 2 entities + 2 labels + 1 group (labels are stacked since they share same actor-target pair)
+        expect(response.body).to.have.property('nodes').length(5);
+        // actor→group, group→target, plus 4 internal group edges (group↔label1, group↔label2)
+        expect(response.body).to.have.property('edges').length(6);
         expect(response.body).not.to.have.property('messages');
+
+        // Find the group node
+        const groupNode = response.body.nodes.find((node: NodeDataModel) => node.shape === 'group');
+        expect(groupNode).to.be.ok();
+
+        // Find label nodes and verify they have parentId pointing to group
+        const labelNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape === 'label'
+        );
+        expect(labelNodes).to.have.length(2);
+        labelNodes.forEach((labelNode: LabelNodeDataModel) => {
+          expect(labelNode).to.have.property('parentId');
+          expect(labelNode.parentId).to.equal(groupNode.id);
+        });
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group' && node.shape !== 'relationship') {
