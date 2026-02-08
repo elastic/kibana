@@ -12,8 +12,6 @@
  * that correspond to the Cypress `tasks/api_fixtures.ts` helpers.
  */
 
-const API_VERSION = '2023-10-31';
-
 function randomString(length = 8): string {
   return Math.random()
     .toString(36)
