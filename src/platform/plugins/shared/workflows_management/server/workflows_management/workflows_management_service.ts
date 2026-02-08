@@ -77,8 +77,8 @@ import {
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
+import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -87,6 +87,7 @@ export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  executedBy?: string[];
   page?: number;
   size?: number;
 }
@@ -244,6 +245,7 @@ export class WorkflowsService {
     await this.workflowStorage.getClient().index({
       id,
       document: workflowData,
+      refresh: true,
     });
 
     // Schedule the workflow if it has triggers
@@ -409,6 +411,7 @@ export class WorkflowsService {
       await this.workflowStorage.getClient().index({
         id,
         document: finalData,
+        refresh: true,
       });
 
       // Update task scheduler if needed
@@ -514,6 +517,7 @@ export class WorkflowsService {
       try {
         const bulkResponse = await client.bulk({
           operations: bulkOperations,
+          refresh: true,
         });
 
         // Process bulk response to track successes and failures
@@ -911,6 +915,13 @@ export class WorkflowsService {
           },
         });
       }
+    }
+    if (params.executedBy && params.executedBy.length > 0) {
+      must.push({
+        terms: {
+          executedBy: params.executedBy,
+        },
+      });
     }
 
     const page = params.page ?? 1;
