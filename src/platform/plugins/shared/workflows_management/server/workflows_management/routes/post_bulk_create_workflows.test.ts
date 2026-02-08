@@ -53,7 +53,7 @@ describe('POST /api/workflows/_bulk_create', () => {
           { id: 'workflow-1', name: 'Workflow 1', enabled: true, valid: true },
           { id: 'workflow-2', name: 'Workflow 2', enabled: true, valid: true },
         ],
-        errors: [],
+        failed: [],
       };
 
       workflowsApi.bulkCreateWorkflows = jest.fn().mockResolvedValue(mockResult);
@@ -84,7 +84,7 @@ describe('POST /api/workflows/_bulk_create', () => {
     it('should handle partial failures', async () => {
       const mockResult = {
         created: [{ id: 'workflow-1', name: 'Workflow 1', enabled: true, valid: true }],
-        errors: [{ index: 1, error: 'Invalid YAML syntax' }],
+        failed: [{ index: 1, error: 'Invalid YAML syntax' }],
       };
 
       workflowsApi.bulkCreateWorkflows = jest.fn().mockResolvedValue(mockResult);
@@ -134,7 +134,7 @@ describe('POST /api/workflows/_bulk_create', () => {
     it('should work with different space contexts', async () => {
       const mockResult = {
         created: [{ id: 'workflow-1', name: 'Workflow 1' }],
-        errors: [],
+        failed: [],
       };
 
       workflowsApi.bulkCreateWorkflows = jest.fn().mockResolvedValue(mockResult);
@@ -166,7 +166,7 @@ describe('POST /api/workflows/_bulk_create', () => {
           { id: 'workflow-custom-1', name: 'Workflow 1' },
           { id: 'workflow-custom-2', name: 'Workflow 2' },
         ],
-        errors: [],
+        failed: [],
       };
 
       workflowsApi.bulkCreateWorkflows = jest.fn().mockResolvedValue(mockResult);

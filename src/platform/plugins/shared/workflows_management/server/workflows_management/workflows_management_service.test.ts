@@ -1062,7 +1062,7 @@ steps:
       const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
 
       expect(result.created).toHaveLength(2);
-      expect(result.errors).toHaveLength(0);
+      expect(result.failed).toHaveLength(0);
       expect(result.created[0].name).toBe('workflow one');
       expect(result.created[1].name).toBe('workflow two');
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
@@ -1119,10 +1119,10 @@ steps:
       const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
 
       expect(result.created).toHaveLength(1);
-      expect(result.errors).toHaveLength(1);
+      expect(result.failed).toHaveLength(1);
       expect(result.created[0].name).toBe('good workflow');
-      expect(result.errors[0].index).toBe(1);
-      expect(result.errors[0].error).toContain('failed to parse');
+      expect(result.failed[0].index).toBe(1);
+      expect(result.failed[0].error).toContain('failed to parse');
     });
 
     it('should handle invalid yaml in bulk create without failing entire batch', async () => {
@@ -1150,14 +1150,14 @@ steps:
       const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
 
       expect(result.created).toHaveLength(1);
-      expect(result.errors).toHaveLength(0);
+      expect(result.failed).toHaveLength(0);
     });
 
     it('should return empty results when given empty array', async () => {
       const result = await service.bulkCreateWorkflows([], 'default', mockRequest);
 
       expect(result.created).toHaveLength(0);
-      expect(result.errors).toHaveLength(0);
+      expect(result.failed).toHaveLength(0);
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
   });

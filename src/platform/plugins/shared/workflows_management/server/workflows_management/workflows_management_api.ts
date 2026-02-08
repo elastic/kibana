@@ -141,7 +141,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<{
     created: WorkflowDetailDto[];
-    errors: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; error: string }>;
   }> {
     return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request);
   }

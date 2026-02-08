@@ -264,7 +264,7 @@ export class WorkflowsService {
     request: KibanaRequest
   ): Promise<{
     created: WorkflowDetailDto[];
-    errors: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; error: string }>;
   }> {
     if (!this.workflowStorage) {
       throw new Error('WorkflowsService not initialized');
@@ -275,7 +275,7 @@ export class WorkflowsService {
     const now = new Date();
 
     const created: WorkflowDetailDto[] = [];
-    const errors: Array<{ index: number; error: string }> = [];
+    const failed: Array<{ index: number; error: string }> = [];
     const bulkOperations: Array<{
       index: { _id: string; document: WorkflowProperties };
     }> = [];
@@ -346,7 +346,7 @@ export class WorkflowsService {
           definition: workflowToCreate.definition,
         });
       } catch (error) {
-        errors.push({
+        failed.push({
           index: i,
           error: error instanceof Error ? error.message : String(error),
         });
@@ -366,7 +366,7 @@ export class WorkflowsService {
         const validWorkflow = validWorkflows[itemIndex];
 
         if (operation?.error) {
-          errors.push({
+          failed.push({
             index: validWorkflow.idx,
             error:
               typeof operation.error === 'object' && 'reason' in operation.error
@@ -406,7 +406,7 @@ export class WorkflowsService {
       }
     }
 
-    return { created, errors };
+    return { created, failed };
   }
 
   public async updateWorkflow(
