@@ -26,3 +26,5 @@ export const ENTITY_STORE_ROUTES = {
 
 // ESS Only until we have LAST/FIRST enabled for serverless
 export const ENTITY_STORE_TAGS = ['@ess' /* '@svlSecurity'*/];
+
+export const UPDATES_INDEX = '.entities.v2.updates.security_default';

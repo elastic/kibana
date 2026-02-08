@@ -178,7 +178,7 @@ export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMa
   return mapping.get(toolCall.toolName) ?? toolCall.toolName;
 };
 
-function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
+export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   const reversed = new Map<V, K>();
   for (const [key, value] of map.entries()) {
     if (reversed.has(value)) {

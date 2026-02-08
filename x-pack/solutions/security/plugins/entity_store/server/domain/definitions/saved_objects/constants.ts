@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { TasksConfig } from '../../../tasks/config';
 import { EntityStoreTaskType } from '../../../tasks/constants';
-import { EntityType } from '../entity_schema';
+import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
