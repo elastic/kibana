@@ -231,6 +231,44 @@ describe('EnterRetryNodeImpl', () => {
         );
       });
     });
+
+    describe('when re-entering after wait period (resumeAt exists in state)', () => {
+      beforeEach(() => {
+        node.configuration = {
+          'max-attempts': 3,
+          delay: '1s',
+          strategy: 'exponential',
+        };
+        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(false);
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+          attempt: 1,
+          resumeAt: '2026-02-08T16:00:26.485Z',
+        });
+      });
+
+      it('should advance attempt without entering new wait', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 2 });
+      });
+
+      it('should enter next attempt scope', async () => {
+        await underTest.run();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledWith('3-attempt');
+      });
+
+      it('should navigate to next node', async () => {
+        await underTest.run();
+        expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
+      });
+
+      it('should log retry message', async () => {
+        await underTest.run();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          `Retrying "retryStep1" step. (attempt 2).`
+        );
+      });
+    });
   });
 
   describe('catchError', () => {
