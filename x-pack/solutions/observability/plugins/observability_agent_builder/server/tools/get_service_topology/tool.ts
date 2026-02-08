@@ -87,7 +87,6 @@ When NOT to use:
             {
               type: ToolResultType.other,
               data: {
-                tracesCount: topology.tracesCount,
                 connections: topology.connections,
               },
             },

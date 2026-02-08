@@ -34,7 +34,7 @@ export async function getToolHandler({
   });
 
   if (!topology) {
-    return { tracesCount: 0, connections: [] };
+    return { connections: [] };
   }
 
   return topology;

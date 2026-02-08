@@ -30,7 +30,6 @@ export interface ServiceTopologyConnection {
 }
 
 export interface ServiceTopologyResponse {
-  tracesCount: number;
   connections: ServiceTopologyConnection[];
 }
 

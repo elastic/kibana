@@ -47,7 +47,7 @@ async function buildTopologyFromTraceIds({
   filterFn: (connections: ConnectionWithKey[], rootService: string) => ConnectionWithKey[];
 }): Promise<ServiceTopologyResponse> {
   if (traceIds.length === 0) {
-    return { tracesCount: 0, connections: [] };
+    return { connections: [] };
   }
 
   const spans = await fetchExitSpanSamplesFromTraceIds({
@@ -67,7 +67,7 @@ async function buildTopologyFromTraceIds({
     serviceNames,
   });
 
-  return { tracesCount: traceIds.length, connections: finalizeConnections(filtered, metricsMap) };
+  return { connections: finalizeConnections(filtered, metricsMap) };
 }
 
 async function getDownstreamTopology({
@@ -257,7 +257,6 @@ async function getBothTopology({
   });
 
   return {
-    tracesCount: traceIds.length,
     connections: [
       ...finalizeConnections(downFiltered, metricsMap),
       ...finalizeConnections(upFiltered, metricsMap),
