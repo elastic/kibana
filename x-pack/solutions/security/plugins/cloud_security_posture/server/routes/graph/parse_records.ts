@@ -347,9 +347,7 @@ const processConnectorNode = (
 
   // Add edge (source-target pair) - dedupe by checking existing edges
   const existingEdges = connectorEdges[connectorNode.id];
-  const edgeExists = existingEdges.some(
-    (e) => e.source === sourceId && e.target === targetId
-  );
+  const edgeExists = existingEdges.some((e) => e.source === sourceId && e.target === targetId);
   if (!edgeExists) {
     existingEdges.push({
       source: sourceId,
@@ -405,7 +403,6 @@ const createRelationshipNode = (
     shape: 'relationship',
   };
 };
-
 
 /**
  * Parses entity doc data JSON and creates an enriched entity node.
