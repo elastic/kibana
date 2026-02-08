@@ -872,7 +872,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined, exclude: unknown[] | undefined, legacyMode: boolean) => unknown[]"
+          "[], accessors: string[], exclude: unknown[] | undefined, legacyMode: boolean) => unknown[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
         "lineNumber": 15,
@@ -907,19 +907,19 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getColorCategories.$2",
-            "type": "string",
+            "type": "Array",
             "tags": [],
-            "label": "accessor",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           },
           {
             "parentPluginId": "@kbn/chart-expressions-common",
@@ -1217,10 +1217,10 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[] | undefined, accessor: string | undefined, exclude: unknown[] | undefined) => string[]"
+          "[] | undefined, accessors: string[] | undefined, exclude: unknown[] | undefined) => string[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
-        "lineNumber": 43,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1243,7 +1243,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
-            "lineNumber": 49,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1252,15 +1252,15 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getLegacyColorCategories.$2",
-            "type": "string",
+            "type": "Array",
             "tags": [],
-            "label": "accessor",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
-            "lineNumber": 50,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1277,7 +1277,7 @@
               "unknown[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
-            "lineNumber": 51,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

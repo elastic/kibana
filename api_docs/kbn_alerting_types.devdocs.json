@@ -3176,7 +3176,7 @@
         "label": "RuleRegistryInspect",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3192,7 +3192,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3208,7 +3208,7 @@
         "label": "RuleRegistrySearchRequestPagination",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3221,7 +3221,7 @@
             "label": "pageIndex",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3234,7 +3234,7 @@
             "label": "pageSize",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3284,7 +3284,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3307,7 +3307,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5492,7 +5492,7 @@
           },
           " | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
+          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; includeDelayedAlerts?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
         "lineNumber": 19,

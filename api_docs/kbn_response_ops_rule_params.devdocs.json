@@ -29,8 +29,8 @@
         "signature": [
           "() => string"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 26,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,8 +52,8 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 29,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -69,8 +69,8 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 29,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -86,8 +86,8 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 30,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -103,8 +103,8 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 30,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -129,8 +129,8 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 13,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -153,8 +153,8 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 13,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -177,8 +177,8 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 17,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -201,8 +201,8 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
-        "lineNumber": 17,
+        "path": "x-pack/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
