@@ -65,7 +65,7 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.triggeredBy).toBe('manual');
     });
 
-    it('should fall back to createdBy when executedBy is undefined', () => {
+    it('should default to unknown when executedBy is undefined', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         createdBy: 'legacy-user',
@@ -75,7 +75,7 @@ describe('buildWorkflowContext', () => {
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
-      expect(context.execution.executedBy).toBe('legacy-user');
+      expect(context.execution.executedBy).toBe('unknown');
       expect(context.execution.triggeredBy).toBe('manual');
     });
 
@@ -89,7 +89,7 @@ describe('buildWorkflowContext', () => {
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
-      expect(context.execution.executedBy).toBe('system');
+      expect(context.execution.executedBy).toBe('unknown');
       expect(context.execution.triggeredBy).toBeUndefined();
     });
 

@@ -20,13 +20,9 @@ import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/c
  */
 export async function getAuthenticatedUser(
   request: KibanaRequest,
-  security?: SecurityServiceStart,
-  clusterClient?: IClusterClient
+  security: SecurityServiceStart,
+  clusterClient: IClusterClient
 ): Promise<string> {
-  if (!security) {
-    return 'system';
-  }
-
   // Try getCurrentUser first (works for regular authenticated requests)
   try {
     const user = security.authc.getCurrentUser(request);
@@ -39,7 +35,7 @@ export async function getAuthenticatedUser(
 
   // For fake requests with API keys (Task Manager contexts), use ES security.authenticate
   // This is a workaround here: https://elastic.slack.com/archives/C6R17GU7R/p1712694768074839
-  if (clusterClient && request.headers.authorization) {
+  if (request.headers.authorization) {
     try {
       const scopedClient = clusterClient.asScoped(request);
       const authResponse = await scopedClient.asCurrentUser.security.authenticate();
@@ -51,6 +47,6 @@ export async function getAuthenticatedUser(
     }
   }
 
-  // For system requests or when authentication fails
-  return 'system';
+  // For the time being, this is WTF - should never happen since we don't have "system" execution
+  return 'unknown';
 }
