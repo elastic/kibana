@@ -9,142 +9,95 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
 import { ML_PAGES } from '../../locator';
 
-export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabled: boolean }> = ({
-  buttonType,
+export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's' | 'xs' }> = ({
   isEsqlEnabled,
+  cardTitleSize,
 }) => (
   <EuiFlexGrid gutterSize="m" columns={2}>
     {isEsqlEnabled ? (
       <MLOverviewCard
         layout="horizontal"
+        iconType="esqlVis"
         path={ML_PAGES.DATA_VISUALIZER_ESQL}
         title={
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-                    defaultMessage="ES|QL"
-                  />
-                </h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label=""
-                aria-label={i18n.translate(
-                  'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
-                  { defaultMessage: 'Technical Preview' }
-                )}
-                iconType="beaker"
-                size="m"
-                color="hollow"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
-                    defaultMessage="ES|QL data visualizer is in technical preview."
-                  />
-                }
-                tooltipPosition={'right'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+            defaultMessage="ES|QL"
+          />
         }
+        titleSize={cardTitleSize}
         description={i18n.translate(
           'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
           {
             defaultMessage:
-              'The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch.',
+              "Use Elastic's piped query language to analyze the shape of data in an Elasticsearch index.",
           }
         )}
-        iconType="esqlVis"
         buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel', {
-          defaultMessage: 'Try it now!',
+          defaultMessage: 'Open ES|QL editor',
         })}
         cardDataTestSubj="mlDataVisualizerSelectESQLCard"
         buttonDataTestSubj="mlDataVisualizerSelectESQLButton"
-        buttonType={buttonType}
       />
     ) : null}
     <MLOverviewCard
       layout="horizontal"
-      path="/filedatavisualizer"
-      title={i18n.translate('xpack.ml.datavisualizer.selector.importDataTitle', {
-        defaultMessage: 'Visualize data from a file',
-      })}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.importDataDescription', {
-        defaultMessage:
-          'Upload your file, analyze its data, and optionally import the data into an index.',
-      })}
-      iconType="addDataApp"
-      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.uploadFileButtonLabel', {
-        defaultMessage: 'Select file',
-      })}
-      cardDataTestSubj="mlDataVisualizerCardImportData"
-      buttonDataTestSubj="mlDataVisualizerUploadFileButton"
-      buttonType={buttonType}
-    />
-    <MLOverviewCard
-      layout="horizontal"
-      path="/datavisualizer_index_select"
-      title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
-        defaultMessage: 'Visualize data from a data view',
-      })}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
-        defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
-      })}
-      iconType="dataVisualizer"
-      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
-        defaultMessage: 'Select data view',
-      })}
-      cardDataTestSubj="mlDataVisualizerCardIndexData"
-      buttonDataTestSubj="mlDataVisualizerSelectIndexButton"
-      buttonType={buttonType}
-    />
-    <MLOverviewCard
-      layout="horizontal"
+      iconType="visTagCloud"
       path="/data_drift_index_select"
       title={
-        <>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
-            defaultMessage="Visualize data using data drift"
-          />{' '}
-          <EuiBetaBadge
-            label=""
-            aria-label={i18n.translate(
-              'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
-              { defaultMessage: 'Technical Preview' }
-            )}
-            iconType="beaker"
-            size="m"
-            color="hollow"
-            tooltipContent={
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.selector.dataDriftTechnicalPreviewBadge.titleMsg"
-                defaultMessage="Data drift visualizer is in technical preview."
-              />
-            }
-            tooltipPosition={'right'}
-          />
-        </>
+        <FormattedMessage
+          id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
+          defaultMessage="Data drift"
+        />
       }
+      titleSize={cardTitleSize}
       description={i18n.translate('xpack.ml.datavisualizer.selector.dataDriftDescription', {
         defaultMessage:
           'Detecting data drifts enables you to identify potential performance issues.',
       })}
-      iconType="visTagCloud"
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
         defaultMessage: 'Compare data distribution',
       })}
       cardDataTestSubj="mlDataVisualizerCardDataDriftData"
       buttonDataTestSubj="mlDataVisualizerSelectDataDriftButton"
-      buttonType={buttonType}
+    />
+    <MLOverviewCard
+      iconType="export"
+      layout="horizontal"
+      path="/filedatavisualizer"
+      title={i18n.translate('xpack.ml.datavisualizer.selector.importDataTitle', {
+        defaultMessage: 'Upload data files',
+      })}
+      titleSize={cardTitleSize}
+      description={i18n.translate('xpack.ml.datavisualizer.selector.importDataDescription', {
+        defaultMessage: 'Import and analyze data from files.',
+      })}
+      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.uploadFileButtonLabel', {
+        defaultMessage: 'Upload data files',
+      })}
+      cardDataTestSubj="mlDataVisualizerCardImportData"
+      buttonDataTestSubj="mlDataVisualizerUploadFileButton"
+    />
+    <MLOverviewCard
+      iconType="tableDensityCompact"
+      layout="horizontal"
+      path="/datavisualizer_index_select"
+      title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
+        defaultMessage: 'Data view',
+      })}
+      titleSize={cardTitleSize}
+      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
+        defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
+      })}
+      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
+        defaultMessage: 'Select data view',
+      })}
+      cardDataTestSubj="mlDataVisualizerCardIndexData"
+      buttonDataTestSubj="mlDataVisualizerSelectIndexButton"
     />
   </EuiFlexGrid>
 );
