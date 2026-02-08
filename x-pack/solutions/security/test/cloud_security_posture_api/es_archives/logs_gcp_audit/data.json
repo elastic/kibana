@@ -1689,3 +1689,133 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "rel-hierarchy-event-2",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:46:00.789Z",
+      "user": {
+        "name": "Hierarchy Identity 1",
+        "entity": {
+          "id": "rel-hierarchy-identity-1"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "rel-hierarchy-supervisor-1"
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account"
+        },
+        "provider": "gcp",
+        "region": "us-east1"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.admin.reports.v1.AuditLog",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "rel-hierarchy-event-id-22222",
+        "ingested": "2024-10-07T17:49:00Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "info"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "rel-hierarchy-identity-1"
+        ]
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "gcloud",
+        "original": "gcloud/450.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "rel-hierarchy-event-3",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:47:00.789Z",
+      "user": {
+        "name": "Hierarchy Identity 1",
+        "entity": {
+          "id": "rel-hierarchy-identity-1"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "rel-hierarchy-supervisor-1"
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account"
+        },
+        "provider": "gcp",
+        "region": "us-east1"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.admin.directory.v1.UserOperation",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "rel-hierarchy-event-id-33333",
+        "ingested": "2024-10-07T17:49:00Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "rel-hierarchy-identity-1"
+        ]
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "gcloud",
+        "original": "gcloud/450.0.0"
+      }
+    }
+  }
+}

@@ -654,14 +654,21 @@ describe('fetchEntityRelationships', () => {
       const esqlCallArgs = esClient.asInternalUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
-      // Verify filter contains terms query for entity.id
-      expect(filterArg.bool.filter).toEqual([
-        {
-          terms: {
-            'entity.id': ['entity-1', 'entity-2', 'entity-3'],
-          },
+      // Verify filter contains bool.should with terms query for entity.id and all relationship fields
+      expect(filterArg.bool.should).toContainEqual({
+        terms: {
+          'entity.id': ['entity-1', 'entity-2', 'entity-3'],
         },
-      ]);
+      });
+      // Verify it queries for entities that have these IDs in their relationships (all fields)
+      ENTITY_RELATIONSHIP_FIELDS.forEach((field) => {
+        expect(filterArg.bool.should).toContainEqual({
+          terms: {
+            [`entity.relationships.${field}`]: ['entity-1', 'entity-2', 'entity-3'],
+          },
+        });
+      });
+      expect(filterArg.bool.minimum_should_match).toEqual(1);
     });
 
     it('should handle empty entityIds array', async () => {
