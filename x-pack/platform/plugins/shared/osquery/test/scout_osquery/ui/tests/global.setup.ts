@@ -180,6 +180,16 @@ globalSetupHook(
   'Set up Fleet Server and Elastic Agents for Osquery tests',
   { tag: ['@ess'] },
   async ({ kbnClient, log, config }) => {
+    // Docker-based Fleet Server and Elastic Agent provisioning is only applicable in
+    // stateful (ESS) mode. In serverless mode, skip this setup entirely.
+    if (config.serverless) {
+      log.info(
+        '[osquery-setup] Serverless mode detected — skipping Docker-based Fleet/Agent provisioning.'
+      );
+
+      return;
+    }
+
     // Register container cleanup handler early
     registerCleanup(log);
 
