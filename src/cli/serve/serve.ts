@@ -17,27 +17,22 @@ import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const MOCK_IDP_PLUGIN_PATH = '@kbn/mock-idp-plugin/common';
-
-async function canImport(modulePath) {
+function canResolve(modulePath: string): boolean {
   try {
-    await import(modulePath);
+    require.resolve(modulePath);
     return true;
-  } catch (error) {
-    if (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'MODULE_NOT_FOUND' || error.message?.includes('Cannot find')) {
-      return false;
-    }
-    throw error;
+  } catch {
+    return false;
   }
 }
 
-const DEV_MODE_SUPPORTED = await canImport(DEV_MODE_PATH);
-const MOCK_IDP_PLUGIN_SUPPORTED = await canImport(MOCK_IDP_PLUGIN_PATH);
+const DEV_MODE_SUPPORTED = canResolve('@kbn/cli-dev-mode');
+const MOCK_IDP_PLUGIN_SUPPORTED = canResolve('@kbn/mock-idp-plugin/common');
 
 const getBootstrapScript = async (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
-    const { bootstrapDevMode } = await import(DEV_MODE_PATH);
+    // Use literal string so Vite can statically analyze the import
+    const { bootstrapDevMode } = await import('@kbn/cli-dev-mode');
     return bootstrapDevMode;
   } else {
     const { bootstrap } = await import('@kbn/core/server');
@@ -45,7 +40,7 @@ const getBootstrapScript = async (isDev) => {
   }
 };
 
-const setServerlessKibanaDevServiceAccountIfPossible = async (get, set, opts) => {
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
   const esHosts = [].concat(
     get('elasticsearch.hosts', []),
     opts.elasticsearch ? opts.elasticsearch.split(',') : []
@@ -72,13 +67,11 @@ const setServerlessKibanaDevServiceAccountIfPossible = async (get, set, opts) =>
     return;
   }
 
-  const DEV_UTILS_PATH = '@kbn/dev-utils';
-
-  if (!(await canImport(DEV_UTILS_PATH))) {
+  if (!canResolve('@kbn/dev-utils')) {
     return;
   }
 
-  const { kibanaDevServiceAccount } = await import(DEV_UTILS_PATH);
+  const { kibanaDevServiceAccount } = require('@kbn/dev-utils');
   set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
 };
 
@@ -93,7 +86,7 @@ function pathCollector() {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-export async function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreConfig) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreConfig) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
@@ -114,8 +107,8 @@ export async function applyConfigOverrides(rawConfig, opts, extraCliOptions, key
   let isServerlessSamlSupported = false;
   if (opts.dev) {
     if (opts.serverless) {
-      await setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
-      isServerlessSamlSupported = await tryConfigureServerlessSamlProvider(
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+      isServerlessSamlSupported = tryConfigureServerlessSamlProvider(
         rawConfig,
         opts,
         extraCliOptions
@@ -139,7 +132,7 @@ export async function applyConfigOverrides(rawConfig, opts, extraCliOptions, key
     // HTTP TLS configuration
     if (opts.ssl || opts.http2) {
       // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = await import('@kbn/dev-utils');
+      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
 
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
@@ -157,7 +150,7 @@ export async function applyConfigOverrides(rawConfig, opts, extraCliOptions, key
   // Kib/ES encryption
   if (opts.ssl || isServerlessSamlSupported) {
     // @kbn/dev-utils is part of devDependencies
-    const { CA_CERT_PATH } = await import('@kbn/dev-utils');
+    const { CA_CERT_PATH } = require('@kbn/dev-utils');
 
     const customElasticsearchHosts = opts.elasticsearch
       ? opts.elasticsearch.split(',')
@@ -273,7 +266,8 @@ export default function (program) {
       .option(
         '--uiam',
         'Configure Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
-      );
+      )
+      .option('--no-vite', 'Disable Vite and fall back to legacy webpack optimizer');
   }
 
   command.action(async function (opts) {
@@ -316,6 +310,9 @@ export default function (program) {
       dist: !!opts.dist,
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && !!opts.uiam,
+      useVite: opts.vite !== false,
+      useViteBrowser: opts.vite !== false,
+      useViteServer: opts.vite !== false,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -355,7 +352,7 @@ function mergeAndReplaceArrays(objValue, srcValue) {
  * @param extraCliOptions Extra CLI options.
  * @returns {boolean} True if SAML provider was successfully configured.
  */
-async function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
+function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
     return false;
   }
@@ -367,7 +364,7 @@ async function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptio
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
     MOCK_IDP_UIAM_PROJECT_ID,
-  } = await import(MOCK_IDP_PLUGIN_PATH);
+  } = require('@kbn/mock-idp-plugin/common');
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
   // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check

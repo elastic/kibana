@@ -6,13 +6,14 @@
   "include": [
     "encryption_keys/**/*",
     "health_gateway/**/*",
+    "kibana/**/*",
     "keystore/**/*",
     "plugin/**/*",
     "profiler/**/*",
     "serve/**/*",
     "setup/**/*",
     "verification_code/**/*",
-    "*.js"
+    "*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -27,9 +28,8 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/projects-solutions-groups",
+    "@kbn/apm-config-loader",
+    "@kbn/telemetry"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/*.test.js"
-  ]
+  "exclude": ["target/**/*", "**/*.test.js", "**/*.test.ts"]
 }
