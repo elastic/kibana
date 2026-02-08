@@ -62,15 +62,15 @@ export type SomeCliArgs = Pick<
   | 'basePath'
 > & {
   /**
-   * Use Vite for both browser and server-side
+   * Use Vite for both browser and server-side (default: true)
    */
   useVite?: boolean;
   /**
-   * Use Vite dev server for browser bundles
+   * Use Vite dev server for browser bundles (default: true)
    */
   useViteBrowser?: boolean;
   /**
-   * Use Vite for server-side plugin loading with HMR
+   * Use Vite for server-side plugin loading with HMR (default: true)
    */
   useViteServer?: boolean;
 };
@@ -126,7 +126,7 @@ export class CliDevMode {
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
-    this.useViteBrowserBrowser = !!cliArgs.useViteBrowser;
+    this.useViteBrowser = !!cliArgs.useViteBrowser;
 
     if (cliArgs.basePath) {
       this.basePathProxy = getBasePathProxyServer({
@@ -144,7 +144,7 @@ export class CliDevMode {
 
     // Build argv for the dev server, adding Vite config if enabled
     // Filter out vite-related flags as they're handled via env vars
-    const viteFlags = ['--no-watch', '--use-vite', '--use-vite-browser', '--use-vite-server'];
+    const viteFlags = ['--no-watch', '--use-vite', '--use-vite-browser', '--use-vite-server', '--no-vite'];
     const devServerArgv = [
       ...process.argv.slice(2).filter((v) => !viteFlags.includes(v)),
       ...(this.basePathProxy
@@ -156,17 +156,17 @@ export class CliDevMode {
         : []),
     ];
 
-    // Pass Vite browser configuration to Kibana server via env var
-    // This will be picked up by the bundle routes registration
-    if (this.useViteBrowserBrowser) {
-      devServerArgv.push('--use-vite-browser');
+    // If Vite browser is disabled (--no-vite), pass that to the child process
+    // so it falls back to legacy webpack bundles. Otherwise Vite is the default.
+    if (!this.useViteBrowser) {
+      devServerArgv.push('--no-vite');
     }
 
     // Environment variables to pass to child process
     // When Vite browser is enabled, pass the Vite server URL (it uses fixed ports)
     // Plugin IDs will be passed after Vite server starts
     const devServerEnv: Record<string, string> = {};
-    if (this.useViteBrowserBrowser) {
+    if (this.useViteBrowser) {
       // Vite runs on fixed ports: 5173 for HTTP, 5174 for HMR
       devServerEnv.KBN_VITE_BROWSER_URL = 'http://localhost:5173';
       // Note: KBN_VITE_PLUGIN_IDS will be set dynamically when Vite starts
@@ -181,7 +181,7 @@ export class CliDevMode {
       watcher: this.watcher,
       gracefulTimeout: GRACEFUL_TIMEOUT,
 
-      script: Path.resolve(REPO_ROOT, 'scripts/kibana'),
+      script: Path.resolve(REPO_ROOT, 'scripts/kibana.mts'),
       argv: devServerArgv,
       env: devServerEnv,
       mapLogLine: (line) => {
@@ -196,14 +196,7 @@ export class CliDevMode {
     });
 
     // Use either Vite or webpack optimizer based on flag
-    if (this.useViteBrowserBrowser) {
-      this.log.write(
-        Rx.of({
-          type: 'info' as const,
-          indent: false,
-          args: ['Using Vite dev server for browser bundles instead of webpack optimizer'],
-        })
-      );
+    if (this.useViteBrowser) {
 
       this.viteServer = new ViteServer({
         enabled: !cliArgs.disableOptimizer,
@@ -320,6 +313,25 @@ export class CliDevMode {
           );
         },
         shouldRedirectFromOldBasePath,
+        // When Vite browser is enabled, route asset requests (bundles, @vite
+        // internals, node_modules) directly to the Vite dev server. This lets
+        // the browser start loading its ~8000 module requests while the Kibana
+        // server is still booting, overlapping asset loading with server startup.
+        //
+        // Additionally, serve a pre-loading shell HTML page for app requests
+        // when the server isn't ready yet. This shell imports all modules from
+        // Vite in the background, warming the browser cache. When the server
+        // becomes ready, the page reloads and serves modules from cache.
+        ...(this.useViteBrowser
+          ? {
+              viteDevServerPort: 5173,
+              delayUntilForAssets: () => {
+                return firstAllTrue(optimizerReady$);
+              },
+              isServerReady: () => serverReady$.getValue(),
+              getVitePluginIds: () => this.viteServer?.getPluginIds(),
+            }
+          : {}),
       });
 
       this.subscription.add(() => basePathProxy.stop());
@@ -349,14 +361,9 @@ export class CliDevMode {
           .subscribe(() => {
             const viteConfig = this.getViteConfig();
             if (viteConfig) {
-              this.log.write(
-                Rx.of({
-                  type: 'info' as const,
-                  indent: false,
-                  args: [
-                    `[vite] Sending plugin config to Kibana server (${viteConfig.pluginIds.length} plugins)`,
-                  ],
-                })
+              this.log.good(
+                'vite',
+                `Sending plugin config to Kibana server (${viteConfig.pluginIds.length} plugins)`
               );
               this.devServer.sendMessage('VITE_PLUGINS', viteConfig);
             }

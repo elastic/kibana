@@ -21,6 +21,8 @@ import type { DevConfig, HttpConfig } from '../config';
 import type { Log } from '../log';
 import { getRandomBasePath } from './utils';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
+import { generateViteShellHtml } from './vite_shell_html';
+import { checkEsStatus, getElasticsearchHosts } from './check_es_status';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
 
@@ -105,10 +107,17 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
   private setupRoutes({
     delayUntil,
     shouldRedirectFromOldBasePath,
+    viteDevServerPort,
+    delayUntilForAssets,
+    isServerReady,
+    getVitePluginIds,
   }: Readonly<BasePathProxyServerOptions>) {
     if (this.server === undefined) {
       throw new Error(`Routes cannot be set up since server is not initialized.`);
     }
+
+    const canServeShell =
+      !!viteDevServerPort && !!delayUntilForAssets && !!isServerReady && !!getVitePluginIds;
 
     // Always redirect from root URL to the URL with basepath.
     this.server.route({
@@ -118,6 +127,101 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
       method: 'GET',
       path: '/',
     });
+
+    // ── Internal endpoints for the shell page ──────────────────────────
+    if (canServeShell) {
+      // Readiness endpoint — the shell page polls this to know when the
+      // Kibana server is ready. Returns 200 when ready, 503 when not.
+      this.server.route({
+        handler: (request, responseToolkit) => {
+          if (isServerReady()) {
+            return responseToolkit.response({ ready: true }).code(200);
+          }
+          return responseToolkit.response({ ready: false }).code(503);
+        },
+        method: 'GET',
+        path: `${this.httpConfig.basePath}/__internal/shell_ready`,
+      });
+
+      // Elasticsearch status endpoint — the shell page calls this to
+      // show whether ES is reachable. Reads configured hosts directly
+      // from kibana.dev.yml / kibana.yml. Uses Node.js http/https modules
+      // to handle self-signed certs (ES 8.x+ default). Also tries
+      // flipping the protocol (http↔https) as a fallback.
+      const esHosts = getElasticsearchHosts();
+      this.server.route({
+        handler: async (request, responseToolkit) => {
+          const result = await checkEsStatus(esHosts);
+          return responseToolkit.response(result).code(200);
+        },
+        method: 'GET',
+        path: `${this.httpConfig.basePath}/__internal/es_status`,
+      });
+    }
+
+    // ── Early asset routing to Vite ────────────────────────────────────
+    // When Vite is enabled, route asset requests directly to the Vite dev
+    // server (port 5173), bypassing the Kibana server entirely. This allows
+    // the browser to start loading its 8000+ module requests while the
+    // Kibana server is still booting — overlapping asset loading with server
+    // startup instead of doing them sequentially.
+    if (viteDevServerPort && delayUntilForAssets) {
+      const assetDelay = delayUntilForAssets;
+      const vitePort = viteDevServerPort;
+
+      // Helper to create a Vite route definition. Vite runs plain HTTP on
+      // localhost, so we always use protocol: 'http' regardless of whether
+      // the proxy itself uses HTTPS.
+      const createViteRoute = (
+        pathPrefix: string,
+        vitePathPrefix: string,
+        method: string | string[] = 'GET'
+      ) => {
+        this.server!.route({
+          handler: {
+            proxy: {
+              passThrough: true,
+              xforward: true,
+              mapUri: async (request: Request) => {
+                const pathAfterBasePath = request.params.kbnPath || '';
+                return {
+                  uri: Url.format({
+                    hostname: 'localhost',
+                    port: vitePort,
+                    protocol: 'http',
+                    pathname: `${vitePathPrefix}${pathAfterBasePath}`,
+                    query: request.query,
+                  }),
+                };
+              },
+            },
+          },
+          method,
+          options: {
+            pre: [
+              // Only wait for Vite to be ready, NOT the Kibana server
+              async (request, responseToolkit) => {
+                apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/[vite-asset]`);
+                await assetDelay().pipe(take(1)).toPromise();
+                return responseToolkit.continue;
+              },
+            ],
+          },
+          path: `${this.httpConfig.basePath}/${pathPrefix}/{kbnPath*}`,
+        });
+      };
+
+      // Plugin bundles served by Vite
+      createViteRoute('bundles', '/bundles/');
+
+      // Vite internal paths (@vite/client, @id/module, @fs/path)
+      createViteRoute('@vite', '/@vite/');
+      createViteRoute('@id', '/@id/');
+      createViteRoute('@fs', '/@fs/');
+
+      // Pre-bundled dependencies
+      createViteRoute('node_modules', '/node_modules/');
+    }
 
     this.server.route({
       handler: {
@@ -145,6 +249,38 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
             apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
+
+            // ── Shell pre-loading for HTML requests ──────────────────
+            // When the browser requests an HTML page (e.g. /app/discover)
+            // and the Kibana server isn't ready yet but Vite IS, serve a
+            // shell HTML that pre-loads all modules from Vite. This
+            // overlaps the heavy module loading with server startup.
+            if (canServeShell) {
+              const accept = request.headers.accept || '';
+              const isHtmlRequest = accept.includes('text/html');
+
+              if (isHtmlRequest && !isServerReady!()) {
+                // Wait for Vite to be ready
+                await delayUntilForAssets!().pipe(take(1)).toPromise();
+
+                // Double-check server isn't ready (it might have become
+                // ready while we waited for Vite)
+                if (!isServerReady!()) {
+                  const pluginIds = getVitePluginIds!();
+                  if (pluginIds && pluginIds.length > 0) {
+                    const html = generateViteShellHtml({
+                      basePath: this.httpConfig.basePath ?? '',
+                      viteUrl: `http://localhost:${viteDevServerPort}`,
+                      pluginIds,
+                    });
+                    return responseToolkit.response(html).type('text/html').takeover();
+                  }
+                }
+                // Server became ready or no plugin IDs — fall through
+                // to normal proxy
+              }
+            }
+
             await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },

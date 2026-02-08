@@ -20,6 +20,8 @@ import type { DevConfig, HttpConfig } from '../config';
 import type { Log } from '../log';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 import { getRandomBasePath } from './utils';
+import { generateViteShellHtml } from './vite_shell_html';
+import { checkEsStatus, getElasticsearchHosts } from './check_es_status';
 
 export class Http2BasePathProxyServer implements BasePathProxyServer {
   private readonly httpConfig: HttpConfig;
@@ -98,7 +100,27 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
     }
   }
 
-  private async setupServer({ delayUntil }: Readonly<BasePathProxyServerOptions>) {
+  /**
+   * Check if a path (after basePath stripping) is an asset request that
+   * can be served directly by Vite, bypassing the Kibana server.
+   */
+  private isViteAssetPath(pathAfterBasePath: string): boolean {
+    return (
+      pathAfterBasePath.startsWith('/bundles/') ||
+      pathAfterBasePath.startsWith('/@vite/') ||
+      pathAfterBasePath.startsWith('/@id/') ||
+      pathAfterBasePath.startsWith('/@fs/') ||
+      pathAfterBasePath.startsWith('/node_modules/')
+    );
+  }
+
+  private async setupServer({
+    delayUntil,
+    viteDevServerPort,
+    delayUntilForAssets,
+    isServerReady,
+    getVitePluginIds,
+  }: Readonly<BasePathProxyServerOptions>) {
     const tlsOptions = getServerTLSOptions(this.httpConfig.ssl);
     this.server = http2.createSecureServer({
       ...tlsOptions,
@@ -115,70 +137,170 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
       throw e;
     });
 
+    const canServeShell =
+      !!viteDevServerPort && !!delayUntilForAssets && !!isServerReady && !!getVitePluginIds;
+
+    // Helper: proxy a request to a target (Kibana server or Vite)
+    const proxyRequest = (
+      inboundRequest: any,
+      inboundResponse: any,
+      opts: {
+        protocol: string;
+        hostname: string;
+        port: number;
+        delay: () => any;
+        rewritePath?: string;
+        useTls: boolean;
+      }
+    ) => {
+      http2Proxy.web(
+        inboundRequest,
+        inboundResponse,
+        {
+          protocol: opts.protocol,
+          hostname: opts.hostname,
+          port: opts.port,
+          onReq: async (request, options) => {
+            await opts.delay().pipe(take(1)).toPromise();
+
+            const proxyOptions = {
+              ...options,
+              ...(opts.useTls ? tlsOptions : {}),
+              rejectUnauthorized: false,
+              path: opts.rewritePath ?? options.path,
+              agent: opts.useTls
+                ? { https: this.httpsAgent ?? false, http2: http2Agent }
+                : undefined,
+            } as AutoRequestOptions;
+
+            const proxyReq = await http2.auto(proxyOptions, (proxyRes) => {
+              for (const name in proxyRes.headers) {
+                if (name.startsWith(':')) {
+                  delete proxyRes.headers[name];
+                }
+              }
+            });
+
+            proxyReq.flushHeaders();
+            return proxyReq;
+          },
+          onRes: async (request, response, _proxyRes) => {
+            const proxyRes = _proxyRes as unknown as http2.IncomingMessage;
+            response.setHeader('x-powered-by', 'kibana-base-path-server');
+            response.writeHead(proxyRes.statusCode!, proxyRes.headers);
+            proxyRes.pipe(response);
+          },
+        },
+        (err, req, res) => {
+          if (err) {
+            this.log.bad('warning', 'base path proxy: error forwarding request', err);
+            res.statusCode = (err as any).statusCode || 500;
+            res.end((err as any).stack ?? err.message);
+          }
+        }
+      );
+    };
+
     server.listen(this.httpConfig.port, this.httpConfig.host, () => {
       server.on('request', (inboundRequest, inboundResponse) => {
         const requestPath = Url.parse(inboundRequest.url).path ?? '/';
 
         if (requestPath === '/') {
-          // Always redirect from root URL to the URL with basepath.
-          inboundResponse.writeHead(302, {
-            location: this.httpConfig.basePath,
-          });
+          inboundResponse.writeHead(302, { location: this.httpConfig.basePath });
           inboundResponse.end();
-        } else if (requestPath.startsWith(this.httpConfig.basePath!)) {
-          // Perform proxy request if requested path is within base path
-          http2Proxy.web(
-            inboundRequest,
-            inboundResponse,
-            {
-              protocol: 'https',
-              hostname: this.httpConfig.host,
-              port: this.devConfig.basePathProxyTargetPort,
-              onReq: async (request, options) => {
-                // Before we proxy request to a target port we may want to wait until some
-                // condition is met (e.g. until target listener is ready).
-                await delayUntil().pipe(take(1)).toPromise();
+          return;
+        }
 
-                const proxyOptions = {
-                  ...options,
-                  ...tlsOptions,
-                  rejectUnauthorized: false,
-                  path: options.path,
-                  agent: {
-                    https: this.httpsAgent ?? false,
-                    http2: http2Agent,
-                  },
-                } as AutoRequestOptions;
+        // ── Internal endpoints for the shell page ────────────────
+        if (
+          canServeShell &&
+          requestPath === `${this.httpConfig.basePath}/__internal/shell_ready`
+        ) {
+          const ready = isServerReady!();
+          inboundResponse.writeHead(ready ? 200 : 503, {
+            'content-type': 'application/json',
+          });
+          inboundResponse.end(JSON.stringify({ ready }));
+          return;
+        }
 
-                const proxyReq = await http2.auto(proxyOptions, (proxyRes) => {
-                  // `http2-proxy` doesn't automatically remove pseudo-headers
-                  for (const name in proxyRes.headers) {
-                    if (name.startsWith(':')) {
-                      delete proxyRes.headers[name];
-                    }
+        if (
+          canServeShell &&
+          requestPath === `${this.httpConfig.basePath}/__internal/es_status`
+        ) {
+          const esHosts = getElasticsearchHosts();
+          checkEsStatus(esHosts).then((result) => {
+            inboundResponse.writeHead(200, { 'content-type': 'application/json' });
+            inboundResponse.end(JSON.stringify(result));
+          });
+          return;
+        }
+
+        if (!requestPath.startsWith(this.httpConfig.basePath!)) {
+          return;
+        }
+
+        const pathAfterBasePath = requestPath.slice(this.httpConfig.basePath!.length);
+
+        // ── Shell pre-loading for HTML requests ──────────────────
+        if (canServeShell) {
+          const accept = (inboundRequest.headers.accept as string) || '';
+          const isHtmlRequest = accept.includes('text/html');
+
+          if (isHtmlRequest && !isServerReady!()) {
+            delayUntilForAssets!()
+              .pipe(take(1))
+              .toPromise()
+              .then(() => {
+                if (!isServerReady!()) {
+                  const pluginIds = getVitePluginIds!();
+                  if (pluginIds && pluginIds.length > 0) {
+                    const html = generateViteShellHtml({
+                      basePath: this.httpConfig.basePath ?? '',
+                      viteUrl: `http://localhost:${viteDevServerPort}`,
+                      pluginIds,
+                    });
+                    inboundResponse.writeHead(200, {
+                      'content-type': 'text/html; charset=utf-8',
+                    });
+                    inboundResponse.end(html);
+                    return;
                   }
+                }
+                // Server became ready — proxy normally
+                proxyRequest(inboundRequest, inboundResponse, {
+                  protocol: 'https',
+                  hostname: this.httpConfig.host,
+                  port: this.devConfig.basePathProxyTargetPort,
+                  delay: delayUntil,
+                  useTls: true,
                 });
+              });
+            return;
+          }
+        }
 
-                // `http2-proxy` waits for the `socket` event before calling `h2request.end()`
-                proxyReq.flushHeaders();
-                return proxyReq;
-              },
-              onRes: async (request, response, _proxyRes) => {
-                // wrong type - proxyRes is declared as Http.ServerResponse but is Http.IncomingMessage
-                const proxyRes = _proxyRes as unknown as http2.IncomingMessage;
-                response.setHeader('x-powered-by', 'kibana-base-path-server');
-                response.writeHead(proxyRes.statusCode!, proxyRes.headers);
-                proxyRes.pipe(response);
-              },
-            },
-            (err, req, res) => {
-              if (err) {
-                this.log.bad('warning', 'base path proxy: error forwarding request', err);
-                res.statusCode = (err as any).statusCode || 500;
-                res.end((err as any).stack ?? err.message);
-              }
-            }
-          );
+        // ── Asset routing to Vite / API routing to Kibana ────────
+        const isAsset =
+          viteDevServerPort && delayUntilForAssets && this.isViteAssetPath(pathAfterBasePath);
+
+        if (isAsset) {
+          proxyRequest(inboundRequest, inboundResponse, {
+            protocol: 'http',
+            hostname: 'localhost',
+            port: viteDevServerPort!,
+            delay: delayUntilForAssets!,
+            rewritePath: pathAfterBasePath,
+            useTls: false,
+          });
+        } else {
+          proxyRequest(inboundRequest, inboundResponse, {
+            protocol: 'https',
+            hostname: this.httpConfig.host,
+            port: this.devConfig.basePathProxyTargetPort,
+            delay: delayUntil,
+            useTls: true,
+          });
         }
       });
     });

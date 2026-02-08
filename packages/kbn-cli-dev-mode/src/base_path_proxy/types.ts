@@ -22,4 +22,26 @@ export interface BasePathProxyServer {
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
   delayUntil: () => Observable<void>;
+  /**
+   * When set, asset requests (bundles, Vite internals, static assets) are
+   * proxied directly to the Vite dev server on this port, bypassing the
+   * Kibana server. This allows the browser to start loading assets while
+   * the Kibana server is still booting.
+   */
+  viteDevServerPort?: number;
+  /**
+   * Like delayUntil, but only waits for the Vite dev server to be ready.
+   * Used for asset requests routed directly to Vite.
+   */
+  delayUntilForAssets?: () => Observable<void>;
+  /**
+   * Returns true when the Kibana server is ready to accept requests.
+   */
+  isServerReady?: () => boolean;
+  /**
+   * Returns the plugin IDs being served by the Vite dev server, or
+   * undefined if the Vite server isn't ready yet. Used to generate the
+   * pre-loading shell HTML.
+   */
+  getVitePluginIds?: () => string[] | undefined;
 }

@@ -14,6 +14,32 @@ import { getActiveInspectFlag } from './get_active_inspect_flag';
 
 const ACTIVE_INSPECT_FLAG = getActiveInspectFlag();
 
+/**
+ * Strip inspect-related flags from a NODE_OPTIONS string to prevent the child
+ * process from inheriting them. The child gets its own inspect flag via
+ * nodeOptions with an incremented port, so keeping the parent's flags would
+ * cause port conflicts or unintended --inspect-wait hangs.
+ */
+function stripInspectFromNodeOptions(nodeOptions: string | undefined): string | undefined {
+  if (!nodeOptions) {
+    return nodeOptions;
+  }
+
+  return nodeOptions
+    .replace(/--inspect(-brk|-wait)?(=\S+)?/g, '')
+    .replace(/\s+/g, ' ')
+    .trim() || undefined;
+}
+
+/**
+ * Filter inspect-related flags from an execArgv-style array. Some Node.js
+ * versions reflect NODE_OPTIONS into process.execArgv, so we need to strip
+ * inspect flags from there too when the child gets its own inspect flag.
+ */
+function stripInspectFromExecArgv(args: string[]): string[] {
+  return args.filter((arg) => !arg.match(/^--inspect(-brk|-wait)?(=|$)/));
+}
+
 interface ProcResource extends Rx.Unsubscribable {
   proc: execa.ExecaChildProcess;
   unsubscribe(): void;
@@ -35,12 +61,16 @@ export function usingServerProcess<T>(
       const proc = execa.node(options.script, options.argv, {
         stdio: 'pipe',
         nodeOptions: [
-          ...process.execArgv,
+          ...(ACTIVE_INSPECT_FLAG
+            ? stripInspectFromExecArgv(process.execArgv)
+            : process.execArgv),
           ...(ACTIVE_INSPECT_FLAG ? [`${ACTIVE_INSPECT_FLAG}=${process.debugPort + 1}`] : []),
         ],
         env: {
           ...process.env,
-          NODE_OPTIONS: process.env.NODE_OPTIONS,
+          NODE_OPTIONS: ACTIVE_INSPECT_FLAG
+            ? stripInspectFromNodeOptions(process.env.NODE_OPTIONS)
+            : process.env.NODE_OPTIONS,
           isDevCliChild: 'true',
           ELASTIC_APM_SERVICE_NAME: 'kibana',
           ...(options.forceColor ? { FORCE_COLOR: 'true' } : {}),

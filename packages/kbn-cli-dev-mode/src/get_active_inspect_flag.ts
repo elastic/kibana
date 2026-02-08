@@ -23,11 +23,19 @@ export function getActiveInspectFlag() {
     return '--inspect-brk';
   }
 
+  if (execOpts['inspect-wait']) {
+    return '--inspect';
+  }
+
   if (envOpts.inspect) {
     return '--inspect';
   }
 
   if (envOpts['inspect-brk']) {
     return '--inspect-brk';
+  }
+
+  if (envOpts['inspect-wait']) {
+    return '--inspect';
   }
 }
