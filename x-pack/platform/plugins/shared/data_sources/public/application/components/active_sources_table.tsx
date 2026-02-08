@@ -336,7 +336,6 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
 
   const deleteSelection = useCallback(() => {
     onBulkDelete?.(selectedItems);
-    setSelectedItems([]);
   }, [onBulkDelete, selectedItems]);
 
   const selection = {

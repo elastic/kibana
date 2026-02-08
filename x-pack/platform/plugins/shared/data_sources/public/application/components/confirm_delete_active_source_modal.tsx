@@ -53,13 +53,13 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
           {isBulk ? (
             <FormattedMessage
               id="xpack.dataSources.deleteActiveSourceModal.bulkTitle"
-              defaultMessage="Delete {count} {count, plural, one {data source} other {data sources}}"
+              defaultMessage="Delete {count} {count, plural, one {data source} other {data sources}}?"
               values={{ count }}
             />
           ) : (
             <FormattedMessage
               id="xpack.dataSources.deleteActiveSourceModal.title"
-              defaultMessage="Delete {name}"
+              defaultMessage="Delete {name}?"
               values={{ name: activeSource!.name }}
             />
           )}
@@ -68,18 +68,10 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
       <EuiModalBody>
         <EuiText>
           <p>
-            {isBulk ? (
-              <FormattedMessage
-                id="xpack.dataSources.deleteActiveSourceModal.bulkDescription"
-                defaultMessage="Are you sure you want to delete {count} {count, plural, one {data source} other {data sources}}? This action cannot be undone."
-                values={{ count }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.dataSources.deleteActiveSourceModal.description"
-                defaultMessage="Are you sure you want to delete this data source? This action cannot be undone."
-              />
-            )}
+            <FormattedMessage
+              id="xpack.dataSources.deleteActiveSourceModal.description"
+              defaultMessage="This action cannot be undone."
+            />
           </p>
         </EuiText>
       </EuiModalBody>
