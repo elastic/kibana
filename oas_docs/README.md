@@ -18,7 +18,11 @@ Append pre-existing bundles not extracted from code using [`kbn-openapi-bundler`
 
 To add more files into the final bundle, edit the appropriate `oas_docs/scripts/merge*.js` files.
 
-### Step 2
+### Step 3
+
+Convert inline schemas to component references that follow a specific naming pattern. See the ["Scripts"](#scripts) section for more details. 
+
+### Step 3
 
 Apply any final overalys to the document that might include examples or final tweaks (see the ["Scripts"](#scripts) section for more details).
 

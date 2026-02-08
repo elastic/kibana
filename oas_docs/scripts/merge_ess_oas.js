@@ -10,8 +10,14 @@
 require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { extractComponents } = require('./extract_components');
 const checkBundle = require('./check_bundles');
 
+/**
+ * Merges all Kibana ESS related OpenAPI spec files into a single file
+ * and outputs the result to oas_docs/output/kibana.yaml
+ * then extracts and converts object schemas to components, mutating the output file.
+ */
 (async () => {
   checkBundle(`${REPO_ROOT}/oas_docs/bundle.json`);
   await merge({
@@ -50,4 +56,5 @@ const checkBundle = require('./check_bundles');
       prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
     },
   });
+  await extractComponents(`${REPO_ROOT}/oas_docs/output/kibana.yaml`);
 })();

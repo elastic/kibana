@@ -25,7 +25,7 @@ space-aware-api-docs: ## Add special space aware description entries
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: merge-api-docs
-merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
+merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler, and convert schemas to component references
 	@node scripts/merge_serverless_oas.js
 	@node scripts/merge_ess_oas.js
 
@@ -36,6 +36,12 @@ merge-api-docs-stateful: ## Merge only kibana.yaml
 .PHONY: merge-api-docs-serverless
 merge-api-docs-serverless: ## Merge only kibana.serverless.yaml
 	@node scripts/merge_serverless_oas.js
+
+.PHONY: componentize-schemas
+componentize-schemas: ## convert inline object schemas to component references in both kibana.yaml and kibana.serverless.yaml
+	@echo "Converting inline schemas to component references...this might take a while"
+	@node scripts/extract_components.js oas_docs/output/kibana.yaml
+	@node scripts/extract_components.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter
@@ -61,6 +67,8 @@ api-docs-overlay: ## Apply all overlays
 	@npx bump-cli overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
 	@npx @redocly/cli bundle output/kibana.serverless.tmp4.yaml --ext yaml -o output/kibana.serverless.yaml
 	@npx @redocly/cli bundle output/kibana.tmp4.yaml --ext yaml -o output/kibana.yaml
+	@node scripts/resolve_external_refs.js oas_docs/output/kibana.serverless.yaml
+	@node scripts/resolve_external_refs.js oas_docs/output/kibana.yaml
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 
