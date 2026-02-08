@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import External from '../../lib/external_packages.js';
+import External from '../../lib/external_packages.ts';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 export async function discovery() {

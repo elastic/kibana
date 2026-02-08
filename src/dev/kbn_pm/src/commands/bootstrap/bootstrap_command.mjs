@@ -8,7 +8,7 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import External from '../../lib/external_packages.js';
+import External from '../../lib/external_packages.ts';
 
 import {
   areNodeModulesPresent,
@@ -17,6 +17,7 @@ import {
   yarnInstallDeps,
   runInstallScripts,
 } from './yarn.mjs';
+import { buildKbnPackages } from './build_kbn_packages.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -112,6 +113,10 @@ export const command = {
 
     await time('run install scripts', async () => {
       await runInstallScripts(log, { quiet });
+    });
+
+    await time('build @kbn packages', async () => {
+      await buildKbnPackages(log, { quiet });
     });
 
     await time('sort package json', async () => {

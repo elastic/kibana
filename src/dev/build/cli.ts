@@ -64,7 +64,6 @@ if (showHelp) {
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}
         --skip-node-download                 {dim Reuse existing downloads of node.js}
         --skip-os-packages                   {dim Don't produce rpm/deb/docker packages}
-        --use-vite                           {dim Use Vite instead of webpack for plugin builds}
         --verbose,-v                         {dim Turn on verbose logging}
         --version-qualifier                  {dim Suffix version with a qualifier}
         --with-example-plugins               {dim Pass to include example plugins in the build output}

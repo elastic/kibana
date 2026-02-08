@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from './paths.mjs';
-import External from './external_packages.js';
+import External from './external_packages.ts';
 
 /**
  * Attempt to load the package map, if bootstrap hasn't run successfully

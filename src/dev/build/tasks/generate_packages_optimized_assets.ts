@@ -19,7 +19,7 @@ import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
 import type { ToolingLog } from '@kbn/tooling-log';
-import terser from 'terser';
+import * as terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';

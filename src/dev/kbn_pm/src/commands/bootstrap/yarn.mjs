@@ -66,10 +66,14 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
  */
 export async function runInstallScripts(log, { quiet }) {
   log.info('running allowlisted install scripts');
-  await run('node', ['scripts/yarn_install_scripts.js', 'run'], {
-    cwd: REPO_ROOT,
-    pipe: !quiet,
-  });
+  await run(
+    'node',
+    ['--experimental-transform-types', '--no-warnings', 'scripts/yarn_install_scripts.ts', 'run'],
+    {
+      cwd: REPO_ROOT,
+      pipe: !quiet,
+    }
+  );
   log.success('install scripts completed');
 }
 

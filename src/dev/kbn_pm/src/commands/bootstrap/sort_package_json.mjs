@@ -11,7 +11,7 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
-import External from '../../lib/external_packages.js';
+import External from '../../lib/external_packages.ts';
 
 /**
  *

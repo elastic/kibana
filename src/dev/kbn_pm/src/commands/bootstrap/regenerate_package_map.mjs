@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import External from '../../lib/external_packages.js';
+import External from '../../lib/external_packages.ts';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /**
