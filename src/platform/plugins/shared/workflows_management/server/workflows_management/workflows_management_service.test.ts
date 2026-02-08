@@ -1013,6 +1013,155 @@ steps:
     });
   });
 
+  describe('bulkCreateWorkflows', () => {
+    const mockRequest = {
+      auth: {
+        credentials: {
+          username: 'test-user',
+        },
+      },
+    } as any;
+
+    it('should bulk create workflows successfully', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          { index: { _id: 'workflow-1', status: 201 } },
+          { index: { _id: 'workflow-2', status: 201 } },
+        ],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: workflow one
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+        {
+          yaml: `
+name: workflow two
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "World"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(2);
+      expect(result.errors).toHaveLength(0);
+      expect(result.created[0].name).toBe('workflow one');
+      expect(result.created[1].name).toBe('workflow two');
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refresh: true,
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should handle partial failures in bulk create', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { index: { _id: 'workflow-1', status: 201 } },
+          {
+            index: {
+              _id: 'workflow-2',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'failed to parse' },
+            },
+          },
+        ],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: good workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+        {
+          yaml: `
+name: bad workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-two
+    with:
+      message: "World"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.created[0].name).toBe('good workflow');
+      expect(result.errors[0].index).toBe(1);
+      expect(result.errors[0].error).toContain('failed to parse');
+    });
+
+    it('should handle invalid yaml in bulk create without failing entire batch', async () => {
+      mockEsClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
+        took: 10,
+      } as any);
+
+      const workflows = [
+        {
+          yaml: `
+name: valid workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`,
+        },
+      ];
+
+      const result = await service.bulkCreateWorkflows(workflows, 'default', mockRequest);
+
+      expect(result.created).toHaveLength(1);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should return empty results when given empty array', async () => {
+      const result = await service.bulkCreateWorkflows([], 'default', mockRequest);
+
+      expect(result.created).toHaveLength(0);
+      expect(result.errors).toHaveLength(0);
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
   describe('updateWorkflow', () => {
     it('should update workflow successfully', async () => {
       const mockRequest = {

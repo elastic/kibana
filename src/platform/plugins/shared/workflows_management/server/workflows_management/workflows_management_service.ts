@@ -258,6 +258,157 @@ export class WorkflowsService {
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
+  public async bulkCreateWorkflows(
+    workflows: CreateWorkflowCommand[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    created: WorkflowDetailDto[];
+    errors: Array<{ index: number; error: string }>;
+  }> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const now = new Date();
+
+    const created: WorkflowDetailDto[] = [];
+    const errors: Array<{ index: number; error: string }> = [];
+    const bulkOperations: Array<{
+      index: { _id: string; document: WorkflowProperties };
+    }> = [];
+    const validWorkflows: Array<{
+      idx: number;
+      id: string;
+      workflowData: WorkflowProperties;
+      definition?: WorkflowYaml;
+    }> = [];
+
+    // Phase 1: Validate all workflows and prepare bulk operations
+    for (let i = 0; i < workflows.length; i++) {
+      try {
+        const workflow = workflows[i];
+        let workflowToCreate: EsWorkflowCreate = {
+          name: 'Untitled workflow',
+          description: undefined,
+          enabled: false,
+          tags: [],
+          definition: undefined,
+          valid: false,
+        };
+
+        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
+        if (parsedYaml.success) {
+          workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
+            parsedYaml.data as unknown as WorkflowYaml
+          );
+
+          const stepValidation = validateStepNameUniqueness(
+            parsedYaml.data as unknown as WorkflowYaml
+          );
+          if (!stepValidation.isValid) {
+            workflowToCreate.valid = false;
+            workflowToCreate.definition = undefined;
+          }
+        }
+
+        const id = workflow.id || this.generateWorkflowId();
+
+        if (workflow.id) {
+          this.validateWorkflowId(workflow.id);
+        }
+
+        const workflowData: WorkflowProperties = {
+          name: workflowToCreate.name,
+          description: workflowToCreate.description,
+          enabled: workflowToCreate.enabled,
+          tags: workflowToCreate.tags || [],
+          yaml: workflow.yaml,
+          definition: workflowToCreate.definition ?? null,
+          createdBy: authenticatedUser,
+          lastUpdatedBy: authenticatedUser,
+          spaceId,
+          valid: workflowToCreate.valid,
+          deleted_at: null,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        };
+
+        bulkOperations.push({
+          index: { _id: id, document: workflowData },
+        });
+        validWorkflows.push({
+          idx: i,
+          id,
+          workflowData,
+          definition: workflowToCreate.definition,
+        });
+      } catch (error) {
+        errors.push({
+          index: i,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Phase 2: Bulk index all valid workflows
+    if (bulkOperations.length > 0) {
+      const bulkResponse = await this.workflowStorage.getClient().bulk({
+        operations: bulkOperations,
+        refresh: true,
+      });
+
+      // Process bulk response
+      bulkResponse.items.forEach((item, itemIndex) => {
+        const operation = item.index;
+        const validWorkflow = validWorkflows[itemIndex];
+
+        if (operation?.error) {
+          errors.push({
+            index: validWorkflow.idx,
+            error:
+              typeof operation.error === 'object' && 'reason' in operation.error
+                ? operation.error.reason ?? JSON.stringify(operation.error)
+                : JSON.stringify(operation.error),
+          });
+        } else {
+          created.push(
+            this.transformStorageDocumentToWorkflowDto(validWorkflow.id, validWorkflow.workflowData)
+          );
+        }
+      });
+    }
+
+    // Phase 3: Schedule triggers for successfully created workflows
+    if (this.taskScheduler) {
+      for (const validWorkflow of validWorkflows) {
+        const isCreated = created.some((w) => w.id === validWorkflow.id);
+        if (isCreated && validWorkflow.definition?.triggers) {
+          for (const trigger of validWorkflow.definition.triggers) {
+            if (trigger.type === 'scheduled') {
+              try {
+                await this.taskScheduler.scheduleWorkflowTask(
+                  validWorkflow.id,
+                  spaceId,
+                  trigger,
+                  request
+                );
+              } catch (error) {
+                this.logger.warn(
+                  `Failed to schedule trigger for workflow ${validWorkflow.id}: ${error}`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return { created, errors };
+  }
+
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
