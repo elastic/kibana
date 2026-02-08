@@ -165,7 +165,8 @@ export class DrilldownManager {
   /**
    * Update the current drilldown configuration.
    */
-  public readonly setConfig = (config: {}): void => {
+  public readonly setConfig = (state: Partial<DrilldownState>): void => {
+    const { label, type, trigger, ...config } = state;
     this.config$.next(config);
   };
 

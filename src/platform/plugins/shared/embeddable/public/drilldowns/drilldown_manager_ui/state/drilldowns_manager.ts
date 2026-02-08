@@ -353,31 +353,31 @@ export class DrilldownsManager {
     if (drilldownManager) {
       drilldownManager.setName(this.pickName(template.name));
       drilldownManager.setTrigger(template.trigger);
-      const { label, type, trigger, ...config } = template.drilldownState;
-      drilldownManager.setConfig(config);
+      drilldownManager.setConfig(template.drilldownState);
     }
   };
 
-  /*public readonly onCreateFromDrilldown = async (eventId: string) => {
-    const { dynamicActionManager } = this.deps;
-    const { events } = dynamicActionManager.state.get();
-    const event = events.find((ev) => ev.eventId === eventId);
-    if (!event) return;
-    const actionFactory = this.deps.actionFactories.find(({ id }) => id === event.action.factoryId);
-    if (!actionFactory) return;
-    this.setActionFactory(actionFactory);
-    const drilldownState = this.getDrilldownState();
-    if (drilldownState) {
-      drilldownState.setName(this.pickName(event.action.name));
-      drilldownState.setTriggers(event.triggers);
-      drilldownState.setConfig(event.action.config);
+  public readonly cloneDrilldown = async (actionId: string) => {
+    const { drilldowns$, factories } = this.deps;
+    const drilldownState = drilldowns$.getValue().find((drilldown) => drilldown.actionId === actionId);
+    if (!drilldownState) return null;
+
+    const factory = factories.find(({ type }) => type === drilldownState.type);
+    if (!factory) return null;
+
+    this.setDrilldownFactory(factory);
+    const drilldownManager = this.getDrilldownManager();
+    if (drilldownManager) {
+      drilldownManager.setName(this.pickName(drilldownState.label));
+      drilldownManager.setTrigger(drilldownState.trigger);
+      drilldownManager.setConfig(drilldownState);
     }
-  };*/
+  };
 
   /**
-   * Returns the state object of an existing drilldown for editing purposes.
+   * Returns the drilldown manager of an existing drilldown for editing purposes.
    *
-   * @param actionId ID of the drilldown action.
+   * @param actionId action ID of the drilldown.
    */
   public createDrilldownManager(actionId: string): null | DrilldownManager {
     const { drilldowns$, factories, triggers } = this.deps;
@@ -386,6 +386,7 @@ export class DrilldownsManager {
 
     const factory = factories.find(({ type }) => type === drilldownState.type);
     if (!factory) return null;
+
     const state = new DrilldownManager({
       factory,
       // placeContext: this.getActionFactoryContext(),
