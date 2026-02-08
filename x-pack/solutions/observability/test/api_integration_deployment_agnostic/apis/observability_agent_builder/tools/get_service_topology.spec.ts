@@ -65,7 +65,6 @@ interface ServiceTopologyConnection {
 
 interface GetServiceTopologyToolResult extends OtherResult {
   data: {
-    tracesCount: number;
     connections: ServiceTopologyConnection[];
   };
 }
@@ -142,10 +141,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(results).to.have.length(1);
         resultData = results[0].data;
-      });
-
-      it('returns tracesCount', () => {
-        expect(resultData.tracesCount).to.be.greaterThan(0);
       });
 
       it('returns connections to multiple downstream services', () => {
