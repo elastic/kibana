@@ -108,8 +108,8 @@ for (const testSpace of testSpaces) {
         // Verify Discover link works
         const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
         await expect(discoverLink).toBeVisible({ timeout: 30_000 });
-        const href = discoverLink;
-        await expect(href).toHaveAttribute('href');
+        await expect(discoverLink).toHaveAttribute('href');
+        const href = await discoverLink.getAttribute('href');
 
         if (href) {
           // href is relative, need to construct absolute URL
