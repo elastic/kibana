@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Page } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 
 export const OSQUERY_APP = 'osquery';
 
@@ -18,9 +18,9 @@ export const RESULTS_TIMEOUT = 240_000;
  * before interacting with it. Uses a .catch() so it doesn't fail when the indicator
  * was never shown (fast navigations).
  */
-export async function waitForPageReady(page: ScoutPage | Page): Promise<void> {
-  const indicator = (page as ScoutPage).testSubj
-    ? (page as ScoutPage).testSubj.locator('globalLoadingIndicator')
-    : page.locator('[data-test-subj="globalLoadingIndicator"]');
-  await indicator.waitFor({ state: 'hidden', timeout: 30_000 }).catch(() => {});
+export async function waitForPageReady(page: ScoutPage): Promise<void> {
+  await page.testSubj
+    .locator('globalLoadingIndicator')
+    .waitFor({ state: 'hidden', timeout: 30_000 })
+    .catch(() => {});
 }
