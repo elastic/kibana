@@ -9,8 +9,6 @@
     "@kbn/scout",
     "@kbn/es",
     "@kbn/test",
-    "@kbn/osquery-plugin",
-    "@kbn/fleet-plugin"
   ],
   "exclude": ["target/**/*"]
 }
