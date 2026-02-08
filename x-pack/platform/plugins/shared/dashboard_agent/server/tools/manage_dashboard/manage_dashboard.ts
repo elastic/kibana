@@ -113,6 +113,7 @@ const resolveExistingVisualizations = async ({
         title: vizConfig.title,
       };
       panels.push(panelEntry);
+      console.log('uuidv4()', panelEntry.panelId);
 
       events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
         dashboardAttachmentId,
@@ -215,6 +216,7 @@ const generateVisualizationsFromQueries = async ({
 
       panels.push(panelEntry);
 
+      console.log('uuidv4()', panelEntry.panelId);
       events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
         dashboardAttachmentId,
         panel: {
@@ -446,6 +448,8 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         const updatedDescription = description ?? previousData.description;
         const updatedMarkdownContent = markdownContent ?? previousData.markdownContent;
 
+        // add a wait here for 1 minut
+        await new Promise((resolve) => setTimeout(resolve, 60000));
         const updatedAttachment = await attachments.update(currentAttachmentId, {
           data: {
             title: updatedTitle,

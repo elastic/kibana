@@ -62,7 +62,8 @@ export const getMarkdownPanelHeight = (content: string): number =>
  */
 const buildLensPanelFromApi = (
   config: LensApiSchemaType,
-  grid: DashboardPanel['grid']
+  grid: DashboardPanel['grid'],
+  uid?: string
 ): DashboardPanel => {
   const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
 
@@ -75,6 +76,7 @@ const buildLensPanelFromApi = (
     type: 'lens',
     grid,
     config: lensConfig,
+    uid,
   };
 };
 
@@ -86,7 +88,8 @@ const buildPanelFromRawConfig = (
   embeddableType: string,
   rawConfig: Record<string, unknown>,
   title: string | undefined,
-  position: { currentX: number; currentY: number }
+  position: { currentX: number; currentY: number },
+  uid?: string
 ): DashboardPanel | null => {
   const { currentX, currentY } = position;
 
@@ -110,6 +113,7 @@ const buildPanelFromRawConfig = (
       type: 'lens',
       grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
       config: lensConfig,
+      uid,
     };
   }
 
@@ -127,6 +131,7 @@ const buildPanelFromRawConfig = (
     type: embeddableType,
     grid: { x, y, w, h: DEFAULT_PANEL_HEIGHT },
     config: rawConfig,
+    uid,
   };
 };
 
@@ -161,19 +166,29 @@ export const normalizePanels = (
         currentY += DEFAULT_PANEL_HEIGHT;
       }
 
-      dashboardPanel = buildLensPanelFromApi(config, {
-        x: currentX,
-        y: currentY,
-        w,
-        h: DEFAULT_PANEL_HEIGHT,
-      });
+      dashboardPanel = buildLensPanelFromApi(
+        config,
+        {
+          x: currentX,
+          y: currentY,
+          w,
+          h: DEFAULT_PANEL_HEIGHT,
+        },
+        panel.panelId
+      );
       currentX += w;
     } else if (isGenericAttachmentPanel(panel)) {
       // Generic panel: build from raw configuration (type is the actual embeddable type)
-      dashboardPanel = buildPanelFromRawConfig(panel.type, panel.rawConfig, panel.title, {
-        currentX,
-        currentY,
-      });
+      dashboardPanel = buildPanelFromRawConfig(
+        panel.type,
+        panel.rawConfig,
+        panel.title,
+        {
+          currentX,
+          currentY,
+        },
+        panel.panelId
+      );
 
       if (dashboardPanel) {
         currentX += dashboardPanel.grid.w;

@@ -70,6 +70,11 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
   // Track current panels to avoid unnecessary re-renders
   const currentPanelsRef = useRef(initialData.panels);
 
+  // Track confirmed panel IDs (panels that exist in the attachment)
+  const [confirmedPanelIds, setConfirmedPanelIds] = useState<Set<string>>(
+    () => new Set(initialData.panels.map((p) => p.panelId))
+  );
+
   // Subscribe to attachment store for final state updates
   useEffect(() => {
     console.log('DashboardFlyout: subscribing to attachmentStore, attachmentId:', attachmentId);
@@ -80,6 +85,11 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
         hasData: !!state?.data,
       });
       if (state?.attachmentId === attachmentId && state.data) {
+        // Only update confirmed panel IDs when we receive a confirmed attachment update
+        if (state.isConfirmed) {
+          setConfirmedPanelIds(new Set(state.data.panels.map((p) => p.panelId)));
+        }
+
         // Only update if panels actually changed
         if (!arePanelsEqual(currentPanelsRef.current, state.data.panels)) {
           console.log('DashboardFlyout: panels changed, refreshing dashboard');
@@ -101,9 +111,15 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
     console.log('DashboardFlyout: subscribing to chat$ for UI events');
     const subscription = chat$.subscribe((event) => {
       // Handle panel added event
-      if (isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(event, DASHBOARD_PANEL_ADDED_EVENT)) {
+      if (
+        isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(
+          event,
+          DASHBOARD_PANEL_ADDED_EVENT
+        )
+      ) {
         const { dashboardAttachmentId, panel } = event.data.data;
         if (dashboardAttachmentId === attachmentId) {
+          console.log('DashboardFlyout: panel added event for panelId:', panel.panelId);
           // Check if panel already exists
           if (currentPanelsRef.current.some((p) => p.panelId === panel.panelId)) {
             console.log('DashboardFlyout: panel already exists, skipping', panel.panelId);
@@ -126,7 +142,12 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
       }
 
       // Handle panel removed event
-      if (isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(event, DASHBOARD_PANEL_REMOVED_EVENT)) {
+      if (
+        isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(
+          event,
+          DASHBOARD_PANEL_REMOVED_EVENT
+        )
+      ) {
         const { dashboardAttachmentId, panelId } = event.data.data;
         if (dashboardAttachmentId === attachmentId) {
           // Check if panel exists before removing
@@ -153,6 +174,19 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
     const normalizedPanels = normalizePanels(panels ?? [], yOffset);
     return [...(markdownPanel ? [markdownPanel] : []), ...normalizedPanels];
   }, [panels, markdownContent]);
+
+  // Generate CSS for unconfirmed panels (panels in current data but not in attachment)
+  const unconfirmedPanelStyles = useMemo(() => {
+    const unconfirmedIds = panels
+      .filter((p) => !confirmedPanelIds.has(p.panelId))
+      .map((p) => p.panelId);
+    console.log('DashboardFlyout: unconfirmed panels:', unconfirmedIds);
+    if (unconfirmedIds.length === 0) return '';
+    const selectors = unconfirmedIds
+      .map((id) => `.dshDashboardGrid__item[id="panel-${id}"]`)
+      .join(', ');
+    return `${selectors} { opacity: 0.5; }`;
+  }, [panels, confirmedPanelIds]);
 
   const handleOpenInDashboard = useCallback(async () => {
     if (!share) return;
@@ -183,6 +217,7 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
         }),
       };
     }
+    console.log('dashboardPanels', dashboardPanels);
 
     return {
       getInitialInput: () => ({
@@ -236,6 +271,9 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
             .embPanel__hoverActions {
               display: none !important;
             }
+
+            /* Style unconfirmed panels */
+            ${unconfirmedPanelStyles}
           `}
         >
           <DashboardRenderer

@@ -15,6 +15,8 @@ import type {
 export interface AttachmentState {
   attachmentId: string;
   data: DashboardAttachmentData;
+  /** True when this state came from a confirmed attachment update (RoundCompleteEvent) */
+  isConfirmed: boolean;
 }
 
 export type OpenFlyoutCallback = (attachmentId: string, data: DashboardAttachmentData) => void;
@@ -64,7 +66,7 @@ export class AttachmentStore {
   setAttachment(attachmentId: string, data: DashboardAttachmentData): void {
     // Cache the data so it's available when flyout is closed
     this.attachmentCache.set(attachmentId, data);
-    this.state$.next({ attachmentId, data });
+    this.state$.next({ attachmentId, data, isConfirmed: true });
   }
 
   /**
@@ -91,7 +93,7 @@ export class AttachmentStore {
     if (current?.attachmentId === attachmentId) {
       // Flyout is open with this attachment - update it
       console.log('AttachmentStore: emitting new state');
-      this.state$.next({ attachmentId, data });
+      this.state$.next({ attachmentId, data, isConfirmed: true });
     } else if (current === null && this.openFlyoutCallback) {
       // Flyout is closed - open it with the new data
       console.log('AttachmentStore: flyout closed, opening with new data');
@@ -130,7 +132,7 @@ export class AttachmentStore {
       // Update cache with new state
       this.attachmentCache.set(attachmentId, updatedData);
       console.log('AttachmentStore: adding panel to existing flyout');
-      this.state$.next({ attachmentId, data: updatedData });
+      this.state$.next({ attachmentId, data: updatedData, isConfirmed: false });
     } else if (current === null && this.openFlyoutCallback) {
       // Flyout is closed - use cached data if available, otherwise create new
       const cachedData = this.attachmentCache.get(attachmentId);
@@ -169,7 +171,7 @@ export class AttachmentStore {
         panels: current.data.panels.filter((p) => p.panelId !== panelId),
       };
       console.log('AttachmentStore: removing panel from flyout');
-      this.state$.next({ attachmentId, data: updatedData });
+      this.state$.next({ attachmentId, data: updatedData, isConfirmed: false });
     }
   }
 
