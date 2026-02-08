@@ -9,7 +9,7 @@
 
 require('@kbn/setup-node-env');
 
-var Path = require('path');
+const Path = require('path');
 
 require('@kbn/optimizer').runKbnOptimizerCli({
   defaultLimitsPath: Path.resolve(

@@ -9,17 +9,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var Fs = require('fs');
-var Path = require('path');
+const Fs = require('fs');
+const Path = require('path');
 
-var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+const METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
 
-function hasFlag(args, flag) {
+function hasFlag(args: string[], flag: string) {
   if (args.includes(flag)) {
     return true;
   }
 
-  for (var i = 0; i < args.length; i++) {
+  for (let i = 0; i < args.length; i++) {
     if (String(args[i]).startsWith(flag + '=')) {
       return true;
     }
@@ -28,26 +28,26 @@ function hasFlag(args, flag) {
   return false;
 }
 
-function readMetadata(repoRoot) {
-  var filePath = Path.join(repoRoot, METADATA_RELATIVE_PATH);
+function readMetadata(repoRoot: string) {
+  const filePath = Path.join(repoRoot, METADATA_RELATIVE_PATH);
   if (!Fs.existsSync(filePath)) {
     return [];
   }
 
   try {
-    var raw = Fs.readFileSync(filePath, 'utf-8');
-    var parsed = JSON.parse(raw);
+    const raw = Fs.readFileSync(filePath, 'utf-8');
+    const parsed = JSON.parse(raw);
     return Array.isArray(parsed.suites) ? parsed.suites : [];
   } catch (error) {
     return [];
   }
 }
 
-function deriveSuiteRoot(configPath) {
-  var relPath = String(configPath).replace(/\\/g, '/');
-  var parts = relPath.split('/');
+function deriveSuiteRoot(configPath: string) {
+  const relPath = String(configPath).replace(/\\/g, '/');
+  const parts = relPath.split('/');
 
-  for (var i = 0; i < parts.length; i++) {
+  for (let i = 0; i < parts.length; i++) {
     if (String(parts[i]).startsWith('kbn-evals-suite-')) {
       return parts.slice(0, i + 1).join('/');
     }
@@ -56,14 +56,14 @@ function deriveSuiteRoot(configPath) {
   return null;
 }
 
-function normalizeSuite(entry, repoRoot) {
-  var id = entry.id;
-  var name = entry.name !== undefined && entry.name !== null ? entry.name : id;
-  var tags = entry.tags !== undefined && entry.tags !== null ? entry.tags : [];
-  var ciLabels =
+function normalizeSuite(entry: any, repoRoot: string) {
+  const id = entry.id;
+  const name = entry.name !== undefined && entry.name !== null ? entry.name : id;
+  const tags = entry.tags !== undefined && entry.tags !== null ? entry.tags : [];
+  const ciLabels =
     entry.ciLabels !== undefined && entry.ciLabels !== null ? entry.ciLabels : ['evals:' + id];
-  var absoluteConfigPath = Path.resolve(repoRoot, entry.configPath);
-  var suiteRoot = deriveSuiteRoot(entry.configPath);
+  const absoluteConfigPath = Path.resolve(repoRoot, entry.configPath);
+  const suiteRoot = deriveSuiteRoot(entry.configPath);
 
   return {
     id: id,
@@ -79,36 +79,36 @@ function normalizeSuite(entry, repoRoot) {
   };
 }
 
-function logInfo(message) {
+function logInfo(message: string) {
   console.log(' info ' + message);
 }
 
-function logWarning(message) {
+function logWarning(message: string) {
   console.log('warning ' + message);
 }
 
-function printSuiteTable(suites) {
+function printSuiteTable(suites: any[]) {
   if (suites.length === 0) {
     return;
   }
 
-  var idWidth = 'Suite ID'.length;
-  var tagsWidth = 'Tags'.length;
+  let idWidth = 'Suite ID'.length;
+  let tagsWidth = 'Tags'.length;
 
-  for (var i = 0; i < suites.length; i++) {
+  for (let i = 0; i < suites.length; i++) {
     if (String(suites[i].id).length > idWidth) {
       idWidth = String(suites[i].id).length;
     }
 
-    var tagString = suites[i].tags && suites[i].tags.length ? suites[i].tags.join(', ') : '-';
+    const tagString = suites[i].tags && suites[i].tags.length ? suites[i].tags.join(', ') : '-';
     if (tagString.length > tagsWidth) {
       tagsWidth = tagString.length;
     }
   }
 
   logInfo('Suite ID'.padEnd(idWidth) + '  ' + 'Tags'.padEnd(tagsWidth) + '  Config');
-  for (var j = 0; j < suites.length; j++) {
-    var tags = suites[j].tags && suites[j].tags.length ? suites[j].tags.join(', ') : '-';
+  for (let j = 0; j < suites.length; j++) {
+    const tags = suites[j].tags && suites[j].tags.length ? suites[j].tags.join(', ') : '-';
     logInfo(
       String(suites[j].id).padEnd(idWidth) +
         '  ' +
@@ -119,18 +119,18 @@ function printSuiteTable(suites) {
   }
 }
 
-function runFastList(repoRoot, args) {
-  var metadata = readMetadata(repoRoot);
+function runFastList(repoRoot: string, args: string[]) {
+  const metadata = readMetadata(repoRoot);
   if (metadata.length === 0) {
     return false;
   }
 
-  var suites = [];
-  for (var i = 0; i < metadata.length; i++) {
+  const suites = [];
+  for (let i = 0; i < metadata.length; i++) {
     suites.push(normalizeSuite(metadata[i], repoRoot));
   }
 
-  var wantsJson = hasFlag(args, '--json');
+  const wantsJson = hasFlag(args, '--json');
   logInfo('Using cached suite metadata (fast). Run with --refresh to rescan configs.');
 
   if (wantsJson) {
@@ -143,18 +143,18 @@ function runFastList(repoRoot, args) {
   return true;
 }
 
-function runFastCiMap(repoRoot, args) {
-  var metadata = readMetadata(repoRoot);
+function runFastCiMap(repoRoot: string, args: string[]) {
+  const metadata = readMetadata(repoRoot);
   if (metadata.length === 0) {
     return false;
   }
 
-  var entries = [];
-  for (var i = 0; i < metadata.length; i++) {
-    var suite = metadata[i];
-    var labels = suite.ciLabels && suite.ciLabels.length ? suite.ciLabels : ['evals:' + suite.id];
+  const entries = [];
+  for (let i = 0; i < metadata.length; i++) {
+    const suite = metadata[i];
+    const labels = suite.ciLabels && suite.ciLabels.length ? suite.ciLabels : ['evals:' + suite.id];
 
-    for (var j = 0; j < labels.length; j++) {
+    for (let j = 0; j < labels.length; j++) {
       entries.push({
         label: labels[j],
         suiteId: suite.id,
@@ -164,7 +164,7 @@ function runFastCiMap(repoRoot, args) {
     }
   }
 
-  var wantsJson = hasFlag(args, '--json');
+  const wantsJson = hasFlag(args, '--json');
   if (wantsJson) {
     process.stdout.write(JSON.stringify(entries, null, 2) + '\n');
     return true;
@@ -176,13 +176,13 @@ function runFastCiMap(repoRoot, args) {
   }
 
   logInfo('CI label mappings:');
-  for (var k = 0; k < entries.length; k++) {
+  for (let k = 0; k < entries.length; k++) {
     logInfo('- ' + entries[k].label + ': ' + entries[k].command);
   }
   return true;
 }
 
-var ENV_DOCS = [
+const ENV_DOCS = [
   {
     name: 'EVALUATION_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
@@ -238,10 +238,10 @@ var ENV_DOCS = [
 function runFastEnv() {
   logInfo('Environment variables:');
 
-  var nameWidth = 'Name'.length;
-  var descWidth = 'Description'.length;
+  let nameWidth = 'Name'.length;
+  let descWidth = 'Description'.length;
 
-  for (var i = 0; i < ENV_DOCS.length; i++) {
+  for (let i = 0; i < ENV_DOCS.length; i++) {
     if (String(ENV_DOCS[i].name).length > nameWidth) {
       nameWidth = String(ENV_DOCS[i].name).length;
     }
@@ -251,7 +251,7 @@ function runFastEnv() {
   }
 
   logInfo('Name'.padEnd(nameWidth) + '  ' + 'Description'.padEnd(descWidth) + '  Example');
-  for (var j = 0; j < ENV_DOCS.length; j++) {
+  for (let j = 0; j < ENV_DOCS.length; j++) {
     logInfo(
       String(ENV_DOCS[j].name).padEnd(nameWidth) +
         '  ' +
@@ -285,11 +285,11 @@ function runFastHelp() {
 }
 
 function main() {
-  var args = process.argv.slice(2);
-  var command = args[0];
-  var repoRoot = process.cwd();
+  const args = process.argv.slice(2);
+  const command = args[0];
+  const repoRoot = process.cwd();
 
-  var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
+  const hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 
   // For subcommand-level help, prefer the full CLI help output.
   if (hasHelpFlag && (command === 'list' || command === 'env')) {
@@ -306,10 +306,10 @@ function main() {
   }
 
   if (command === 'list' && hasFlag(args, '--refresh') && !hasFlag(args, '--json')) {
-    var metadata = readMetadata(repoRoot);
+    const metadata = readMetadata(repoRoot);
     if (metadata.length > 0) {
-      var suites = [];
-      for (var i = 0; i < metadata.length; i++) {
+      const suites = [];
+      for (let i = 0; i < metadata.length; i++) {
         suites.push(normalizeSuite(metadata[i], repoRoot));
       }
       logInfo('Cached suites (' + suites.length + '):');

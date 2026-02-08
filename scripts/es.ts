@@ -8,4 +8,21 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/optimizer').runFindNodeLibsBrowserPolyfillsInEntryBundlesCli();
+
+const resolve = require('path').resolve;
+const pkg = require('../package.json');
+const kbnEs = require('@kbn/es');
+
+kbnEs
+  .run({
+    license: 'basic',
+    password: 'changeme',
+    version: pkg.version,
+    'source-path': resolve(__dirname, '../../elasticsearch'),
+    'base-path': resolve(__dirname, '../.es'),
+    ssl: false,
+  })
+  .catch(function (e: unknown) {
+    console.error(e);
+    process.exitCode = 1;
+  });

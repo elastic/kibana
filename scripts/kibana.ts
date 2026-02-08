@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Register CJS TypeScript hooks (esbuild compilation + .ts resolution)
 require('../src/setup_node_env');
 
-// Use dynamic import for ESM module
-async function main() {
-  const { run } = await import('@kbn/transpile-packages-cli');
-  await run();
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Load the CLI entry point directly (skip dev.ts which uses top-level await for Vite).
+// In the child process (isDevCliChild=true), we don't need the extended stack trace setup.
+require('../src/cli/kibana/cli');

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+require('@kbn/setup-node-env/node_version_validator');
+const process = require('process');
+const backport = require('backport');
+
+backport.backportRun({
+  processArgs: process.argv.slice(2), // forward command line args to backport
 });
-
-var run = require('@kbn/observability-alerting-test-data').run;
-
-run();

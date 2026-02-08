@@ -9,7 +9,7 @@
 
 require('@kbn/setup-node-env');
 
-var command = process.argv[2];
+const command = process.argv[2];
 
 switch (command) {
   case 'snapshot':
@@ -24,7 +24,7 @@ switch (command) {
 }
 
 function printHelp() {
-  var scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
+  const scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
 
   console.log(`
   Usage: node ${scriptName} <command>

@@ -15,12 +15,12 @@
  * Import/Export workflows from Kibana
  *
  * Usage:
- *   Export: node scripts/workflows_import_export.js export --dir=./workflows [--space=default]
- *   Import: node scripts/workflows_import_export.js import --dir=./workflows [--space=default] [--overwrite]
+ *   Export: node scripts/workflows_import_export.ts export --dir=./workflows [--space=default]
+ *   Import: node scripts/workflows_import_export.ts import --dir=./workflows [--space=default] [--overwrite]
  *
  * Examples:
- *   node scripts/workflows_import_export.js export --dir=./my-workflows
- *   node scripts/workflows_import_export.js import --dir=./my-workflows --overwrite
+ *   node scripts/workflows_import_export.ts export --dir=./my-workflows
+ *   node scripts/workflows_import_export.ts import --dir=./my-workflows --overwrite
  */
 
 require('@kbn/setup-node-env');
@@ -38,7 +38,7 @@ const DEFAULT_DIR = './workflows';
 /**
  * Sanitize workflow name to create valid filename
  */
-function sanitizeFilename(name) {
+function sanitizeFilename(name: string) {
   return name
     .replace(/[^a-zA-Z0-9-_]/g, '_')
     .replace(/_+/g, '_')
@@ -49,7 +49,7 @@ function sanitizeFilename(name) {
 /**
  * Get Kibana configuration
  */
-function getKibanaConfig(useSsl = true) {
+function getKibanaConfig(useSsl: boolean = true) {
   const protocol = useSsl ? 'https' : 'http';
   const kibanaUrl = process.env.KIBANA_URL || `${protocol}://localhost:5601`;
   const username = process.env.KIBANA_USERNAME || 'elastic';
@@ -61,7 +61,7 @@ function getKibanaConfig(useSsl = true) {
 /**
  * Make HTTP request to Kibana API
  */
-function makeKibanaRequest(url, options, body) {
+function makeKibanaRequest(url: string, options: any, body: any) {
   return new Promise((resolve, reject) => {
     const httpModule = url.startsWith('https') ? https : http;
 
@@ -76,10 +76,10 @@ function makeKibanaRequest(url, options, body) {
       rejectUnauthorized: false,
     };
 
-    const req = httpModule.request(url, requestOptions, (res) => {
+    const req = httpModule.request(url, requestOptions, (res: any) => {
       let data = '';
 
-      res.on('data', (chunk) => {
+      res.on('data', (chunk: any) => {
         data += chunk;
       });
 
@@ -91,7 +91,7 @@ function makeKibanaRequest(url, options, body) {
             resolve(data);
           }
         } else {
-          const error = new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`);
+          const error: any = new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`);
           error.statusCode = res.statusCode;
           try {
             error.body = JSON.parse(data);
@@ -116,7 +116,7 @@ function makeKibanaRequest(url, options, body) {
 /**
  * Export workflows from Kibana to YAML files
  */
-async function exportWorkflows(options) {
+async function exportWorkflows(options: any) {
   const { dir, space, ssl } = options;
   const { kibanaUrl, username, password } = getKibanaConfig(ssl);
 
@@ -140,7 +140,7 @@ async function exportWorkflows(options) {
     const searchUrl = `${kibanaUrl}${spacePrefix}/api/workflows/search`;
 
     console.log(`Fetching workflows from space: ${space}`);
-    const result = await makeKibanaRequest(
+    const result: any = await makeKibanaRequest(
       searchUrl,
       {
         method: 'POST',
@@ -211,7 +211,7 @@ async function exportWorkflows(options) {
     }
 
     console.log(`\n✅ Successfully exported ${exportCount} workflow(s) to ${dir}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Export failed:', error.message);
     if (error.body) {
       console.error('Details:', JSON.stringify(error.body, null, 2));
@@ -232,7 +232,7 @@ async function exportWorkflows(options) {
 /**
  * Import workflows from YAML files using Kibana API
  */
-async function importWorkflows(options) {
+async function importWorkflows(options: any) {
   const { dir, space, overwrite, ssl } = options;
   const { kibanaUrl, username, password } = getKibanaConfig(ssl);
 
@@ -248,7 +248,7 @@ async function importWorkflows(options) {
     // Read all YAML files from directory
     const files = fs
       .readdirSync(dir)
-      .filter((file) => file.endsWith('.yaml') || file.endsWith('.yml'));
+      .filter((file: string) => file.endsWith('.yaml') || file.endsWith('.yml'));
 
     if (files.length === 0) {
       console.log('No YAML files found in directory.');
@@ -269,7 +269,7 @@ async function importWorkflows(options) {
 
     let existingByName = new Map();
     try {
-      const searchResult = await makeKibanaRequest(
+      const searchResult: any = await makeKibanaRequest(
         searchUrl,
         {
           method: 'POST',
@@ -288,7 +288,7 @@ async function importWorkflows(options) {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('⚠️  Could not fetch existing workflows:', error.message);
     }
 
@@ -302,7 +302,7 @@ async function importWorkflows(options) {
 
       // Strip metadata comments to get clean YAML
       const yamlLines = content.split('\n');
-      const cleanYaml = yamlLines.filter((line) => !line.trim().startsWith('#')).join('\n');
+      const cleanYaml = yamlLines.filter((line: string) => !line.trim().startsWith('#')).join('\n');
 
       // Extract workflow name from metadata
       const nameMatch = content.match(/^# Workflow: (.+)$/m);
@@ -350,7 +350,7 @@ async function importWorkflows(options) {
           console.log(`✓ Imported: ${file} → "${workflowName}"`);
           importCount++;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`❌ Failed to import ${file}:`, error.message);
         if (error.body) {
           console.error('  Details:', JSON.stringify(error.body, null, 2));
@@ -361,7 +361,7 @@ async function importWorkflows(options) {
     console.log(
       `\n✅ Import complete: ${importCount} created, ${updateCount} updated, ${skipCount} skipped`
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Import failed:', error.message);
     if (error.body) {
       console.error('Details:', JSON.stringify(error.body, null, 2));
@@ -388,7 +388,7 @@ function showHelp() {
 Kibana Workflows Import/Export Tool
 
 Usage:
-  node scripts/workflows_import_export.js <command> [options]
+  node scripts/workflows_import_export.ts <command> [options]
 
 Commands:
   export    Export workflows to YAML files
@@ -409,22 +409,22 @@ Environment Variables:
 
 Examples:
   Export all workflows:
-    node scripts/workflows_import_export.js export --dir=./my-workflows
+    node scripts/workflows_import_export.ts export --dir=./my-workflows
 
   Export workflows from specific space:
-    node scripts/workflows_import_export.js export --dir=./my-workflows --space=production
+    node scripts/workflows_import_export.ts export --dir=./my-workflows --space=production
 
   Export using HTTP (no SSL):
-    node scripts/workflows_import_export.js export --no-ssl
+    node scripts/workflows_import_export.ts export --no-ssl
 
   Import workflows (skip existing):
-    node scripts/workflows_import_export.js import --dir=./my-workflows
+    node scripts/workflows_import_export.ts import --dir=./my-workflows
 
   Import workflows (overwrite existing):
-    node scripts/workflows_import_export.js import --dir=./my-workflows --overwrite
+    node scripts/workflows_import_export.ts import --dir=./my-workflows --overwrite
 
   Import workflows to specific space:
-    node scripts/workflows_import_export.js import --dir=./my-workflows --space=staging
+    node scripts/workflows_import_export.ts import --dir=./my-workflows --space=staging
 `);
 }
 
@@ -481,7 +481,7 @@ async function main() {
 
 // Run if executed directly
 if (require.main === module) {
-  main().catch((error) => {
+  main().catch((error: unknown) => {
     console.error('❌ Unexpected error:', error);
     process.exit(1);
   });

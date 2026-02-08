@@ -9,20 +9,20 @@
 
 require('@kbn/setup-node-env');
 
-var yaml = require('js-yaml');
-var fs = require('fs');
-var path = require('path');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const path = require('path');
 
-var manifestsJsonPath = path.resolve(__dirname, '../.buildkite/ftr_configs_manifests.json');
+const manifestsJsonPath = path.resolve(__dirname, '../.buildkite/ftr_configs_manifests.json');
 console.log(manifestsJsonPath);
-var manifestsSource = JSON.parse(fs.readFileSync(manifestsJsonPath, 'utf8'));
-var allManifestPaths = Object.values(manifestsSource).flat();
+const manifestsSource = JSON.parse(fs.readFileSync(manifestsJsonPath, 'utf8'));
+const allManifestPaths = Object.values(manifestsSource).flat();
 
 try {
-  for (var manifestRelPath of allManifestPaths) {
-    var manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
+  for (const manifestRelPath of allManifestPaths) {
+    const manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
     if (manifest.enabled) {
-      manifest.enabled.forEach(function (x) {
+      manifest.enabled.forEach(function (x: unknown) {
         console.log(x);
       });
     } else {
