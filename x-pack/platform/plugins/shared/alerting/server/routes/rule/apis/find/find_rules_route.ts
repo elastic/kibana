@@ -89,7 +89,7 @@ export const findRulesRoute = (
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, false);
+          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, true);
 
         return res.ok({
           body: responseBody,
