@@ -1,6 +1,6 @@
 # SPACE
 
-Returns a string composed of a specified number of spaces.
+The SPACE function returns a string consisting of a specified number of space characters.
 
 ## Syntax
 
@@ -8,14 +8,14 @@ Returns a string composed of a specified number of spaces.
 
 ### Parameters
 
-#### `number`
+#### number
 
-The number of spaces to include in the resulting string.
+Specifies the number of spaces to include in the result string.
 
 ## Examples
+
+Creates a message by concatenating "Hello" and "World!" with a single space in between.
 
 ```esql
 ROW message = CONCAT("Hello", SPACE(1), "World!");
 ```
-
-This example creates a string with the word "Hello," followed by a single space, and then the word "World!".

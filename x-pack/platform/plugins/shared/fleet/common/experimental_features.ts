@@ -23,7 +23,7 @@ const _allowedExperimentalValues = {
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
-  enableSloTemplates: false,
+  enableSloTemplates: true,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
 };
