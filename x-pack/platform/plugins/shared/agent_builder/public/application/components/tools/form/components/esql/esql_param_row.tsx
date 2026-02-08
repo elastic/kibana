@@ -89,250 +89,227 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
   ]);
 
   return (
-    <>
-      <EuiTableRow
-        key={paramField.id}
-        css={css`
-          &:hover {
-            background-color: inherit; /* Disable row hover effect */
-          }
-        `}
-      >
-        <EuiTableRowCell>
-          {!isMobile &&
-            ((errorMessages && (
+    <EuiTableRow
+      key={paramField.id}
+      css={css`
+        &:hover {
+          background-color: inherit; /* Disable row hover effect */
+        }
+      `}
+    >
+      <EuiTableRowCell>
+        {!isMobile &&
+          ((errorMessages && (
+            <EuiIconTip
+              content={errorMessages}
+              type="errorFilled"
+              color={euiTheme.colors.danger}
+              size="m"
+            />
+          )) ||
+            (warning && (
               <EuiIconTip
-                content={errorMessages}
-                type="errorFilled"
-                color={euiTheme.colors.danger}
+                content={warning}
+                type="warningFilled"
+                color={euiTheme.colors.warning}
                 size="m"
               />
             )) ||
-              (warning && (
-                <EuiIconTip
-                  content={warning}
-                  type="warningFilled"
-                  color={euiTheme.colors.warning}
-                  size="m"
-                />
-              )) ||
-              (source === EsqlParamSource.Inferred ? (
-                <EuiIcon type="sparkles" color="subdued" size="m" />
-              ) : (
-                <EuiIcon type="documentEdit" color="subdued" size="m" />
-              )))}
-        </EuiTableRowCell>
-        <EuiTableRowCell
-          textOnly={false}
-          mobileOptions={{
-            header: i18nMessages.paramNameLabel,
-            width: '100%',
-          }}
-        >
-          <Controller
-            control={control}
-            name={`params.${index}.name`}
-            render={({
-              field: { ref, onChange, onBlur, ...field },
-              fieldState: { invalid, error },
-            }) => (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFieldText
-                  compressed
-                  fullWidth
-                  placeholder={i18nMessages.paramNamePlaceholder}
-                  inputRef={ref}
-                  isInvalid={invalid}
-                  onBlur={handleValidation}
-                  onChange={(event) => {
-                    onChange(event);
-                    if (source === EsqlParamSource.Inferred) {
-                      setValue(`params.${index}.source`, EsqlParamSource.Custom);
-                    }
-                    if (isSubmitted) {
-                      handleValidation();
-                    }
-                  }}
-                  {...field}
-                />
-                {isMobile &&
-                  (invalid && error?.message ? (
-                    <EuiText size="xs" color="danger">
-                      {error.message}
-                    </EuiText>
-                  ) : (
-                    warning && (
-                      <EuiText size="xs" color="warning">
-                        {warning}
-                      </EuiText>
-                    )
-                  ))}
-              </EuiFlexGroup>
-            )}
-          />
-        </EuiTableRowCell>
-        <EuiTableRowCell
-          textOnly={false}
-          mobileOptions={{
-            header: i18nMessages.paramDescriptionLabel,
-            width: '100%',
-          }}
-        >
-          <Controller
-            control={control}
-            name={`params.${index}.description`}
-            render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFieldText
-                  compressed
-                  fullWidth
-                  placeholder={i18nMessages.paramDescriptionPlaceholder}
-                  inputRef={ref}
-                  isInvalid={invalid}
-                  {...field}
-                />
-                {isMobile && invalid && error?.message && (
-                  <EuiText size="xs" color="danger">
-                    {error.message}
-                  </EuiText>
-                )}
-              </EuiFlexGroup>
-            )}
-          />
-        </EuiTableRowCell>
-        <EuiTableRowCell
-          textOnly={false}
-          mobileOptions={{
-            header: i18nMessages.paramTypeLabel,
-            width: '100%',
-          }}
-        >
-          <Controller
-            control={control}
-            name={`params.${index}.type`}
-            render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiSuperSelect
-                  compressed
-                  fullWidth
-                  popoverProps={{
-                    panelMinWidth: 150,
-                    zIndex: (euiTheme.levels.header as number) - 1, // ensure the popover doesn't render on top of the bottom bar
-                  }}
-                  options={Object.values(EsqlToolFieldType).map((option) => ({
-                    value: option,
-                    inputDisplay: (
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiToken
-                            iconType={FIELD_TYPE_TOKEN_MAP[option]}
-                            css={css`
-                              width: ${euiTheme.size.m};
-                              height: ${euiTheme.size.m};
-                            `}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>{option}</EuiFlexItem>
-                      </EuiFlexGroup>
-                    ),
-                  }))}
-                  valueOfSelected={field.value}
-                  isInvalid={invalid}
-                  {...field}
-                />
-                {isMobile && invalid && error?.message && (
-                  <EuiText size="xs" color="danger">
-                    {error.message}
-                  </EuiText>
-                )}
-              </EuiFlexGroup>
-            )}
-          />
-        </EuiTableRowCell>
-        <EuiTableRowCell align="center">
-          <Controller
-            control={control}
-            name={`params.${index}.optional`}
-            render={({ field: { ref, onChange, value, ...field } }) => (
-              <EuiCheckbox
-                id={`params.${index}.optional`}
+            (source === EsqlParamSource.Inferred ? (
+              <EuiIcon type="sparkles" color="subdued" size="m" />
+            ) : (
+              <EuiIcon type="documentEdit" color="subdued" size="m" />
+            )))}
+      </EuiTableRowCell>
+      <EuiTableRowCell
+        textOnly={false}
+        mobileOptions={{
+          header: i18nMessages.paramNameLabel,
+          width: '100%',
+        }}
+      >
+        <Controller
+          control={control}
+          name={`params.${index}.name`}
+          render={({
+            field: { ref, onChange, onBlur, ...field },
+            fieldState: { invalid, error },
+          }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFieldText
+                compressed
+                fullWidth
+                placeholder={i18nMessages.paramNamePlaceholder}
                 inputRef={ref}
-                onChange={(e) => {
-                  onChange(e.target.checked);
-                  handleValidation();
+                isInvalid={invalid}
+                onBlur={handleValidation}
+                onChange={(event) => {
+                  onChange(event);
+                  if (source === EsqlParamSource.Inferred) {
+                    setValue(`params.${index}.source`, EsqlParamSource.Custom);
+                  }
+                  if (isSubmitted) {
+                    handleValidation();
+                  }
                 }}
-                checked={value}
                 {...field}
               />
-            )}
-          />
-        </EuiTableRowCell>
-        <EuiTableRowCell hasActions>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={() => {
-              removeParamField(index);
-              triggerEsqlParamFieldsValidation(['name']);
-            }}
-            size="s"
-            aria-label={i18nMessages.removeParamButtonLabel}
-          />
-        </EuiTableRowCell>
-      </EuiTableRow>
-      {isOptional && (
-        <EuiTableRow
-          css={css`
-            &:hover {
-              background-color: inherit; /* Disable row hover effect */
-            }
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            border-top: none;
-          `}
-        >
-          <EuiTableRowCell />
-          <EuiTableRowCell colSpan={4}>
-            <>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    <strong>{i18nMessages.defaultValueLabel}</strong>
+              {isMobile &&
+                (invalid && error?.message ? (
+                  <EuiText size="xs" color="danger">
+                    {error.message}
                   </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <Controller
-                    control={control}
-                    name={`params.${index}.defaultValue`}
-                    render={({
-                      field: { ref, onChange, value, ...field },
-                      fieldState: { invalid, error },
-                    }) => (
-                      <EuiFieldText
-                        compressed
-                        placeholder={i18nMessages.defaultValuePlaceholder}
-                        inputRef={ref}
-                        isInvalid={invalid}
-                        value={value != null ? String(value) : ''}
-                        onChange={(e) => {
-                          const inputValue = e.target.value;
-                          onChange(inputValue);
-                          handleValidation();
-                        }}
-                        {...field}
-                      />
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {paramErrors?.defaultValue && (
-                <EuiText size="xs" color="danger" css={{ marginTop: euiTheme.size.xs }}>
-                  {paramErrors.defaultValue.message}
+                ) : (
+                  warning && (
+                    <EuiText size="xs" color="warning">
+                      {warning}
+                    </EuiText>
+                  )
+                ))}
+            </EuiFlexGroup>
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell
+        textOnly={false}
+        mobileOptions={{
+          header: i18nMessages.paramDescriptionLabel,
+          width: '100%',
+        }}
+      >
+        <Controller
+          control={control}
+          name={`params.${index}.description`}
+          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFieldText
+                compressed
+                fullWidth
+                placeholder={i18nMessages.paramDescriptionPlaceholder}
+                inputRef={ref}
+                isInvalid={invalid}
+                {...field}
+              />
+              {isMobile && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
                 </EuiText>
               )}
-            </>
-          </EuiTableRowCell>
-        </EuiTableRow>
-      )}
-    </>
+            </EuiFlexGroup>
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell
+        textOnly={false}
+        mobileOptions={{
+          header: i18nMessages.paramTypeLabel,
+          width: '100%',
+        }}
+      >
+        <Controller
+          control={control}
+          name={`params.${index}.type`}
+          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiSuperSelect
+                compressed
+                fullWidth
+                popoverProps={{
+                  panelMinWidth: 150,
+                  zIndex: (euiTheme.levels.header as number) - 1, // ensure the popover doesn't render on top of the bottom bar
+                }}
+                options={Object.values(EsqlToolFieldType).map((option) => ({
+                  value: option,
+                  inputDisplay: (
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiToken
+                          iconType={FIELD_TYPE_TOKEN_MAP[option]}
+                          css={css`
+                            width: ${euiTheme.size.m};
+                            height: ${euiTheme.size.m};
+                          `}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{option}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
+                }))}
+                valueOfSelected={field.value}
+                isInvalid={invalid}
+                {...field}
+              />
+              {isMobile && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell align="center">
+        <Controller
+          control={control}
+          name={`params.${index}.optional`}
+          render={({ field: { ref, onChange, value, ...field } }) => (
+            <EuiCheckbox
+              id={`params.${index}.optional`}
+              inputRef={ref}
+              onChange={(e) => {
+                onChange(e.target.checked);
+                handleValidation();
+              }}
+              checked={value}
+              {...field}
+            />
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell textOnly={false}>
+        <Controller
+          control={control}
+          name={`params.${index}.defaultValue`}
+          render={({
+            field: { ref, onChange, value, ...field },
+            fieldState: { invalid, error },
+          }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFieldText
+                compressed
+                fullWidth
+                disabled={!isOptional}
+                placeholder={i18nMessages.defaultValuePlaceholder}
+                inputRef={ref}
+                isInvalid={isOptional && invalid}
+                value={value != null ? String(value) : ''}
+                onChange={(e) => {
+                  onChange(e.target.value);
+                  handleValidation();
+                }}
+                {...field}
+              />
+              {isMobile && isOptional && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell hasActions>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          onClick={() => {
+            removeParamField(index);
+            triggerEsqlParamFieldsValidation(['name']);
+          }}
+          size="s"
+          aria-label={i18nMessages.removeParamButtonLabel}
+        />
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
