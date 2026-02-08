@@ -23,14 +23,6 @@ export class EngineDescriptorClient {
     private readonly logger: Logger
   ) {}
 
-  async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
-    return this.soClient.find<EngineDescriptor>({
-      type: EngineDescriptorTypeName,
-      filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
-      namespaces: [this.namespace],
-    });
-  }
-
   async getAll(): Promise<EngineDescriptor[]> {
     const { saved_objects } = await this.soClient.find<EngineDescriptor>({
       type: EngineDescriptorTypeName,
@@ -110,5 +102,13 @@ export class EngineDescriptorClient {
 
   private getSavedObjectId(entityType: EntityType): string {
     return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
+  }
+
+  private find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
+    return this.soClient.find<EngineDescriptor>({
+      type: EngineDescriptorTypeName,
+      filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
+      namespaces: [this.namespace],
+    });
   }
 }
