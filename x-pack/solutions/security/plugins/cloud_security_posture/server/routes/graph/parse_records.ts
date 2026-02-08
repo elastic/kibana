@@ -21,6 +21,7 @@ import type {
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
+import { createHash } from 'node:crypto';
 import {
   type LabelNodeId,
   type GraphEdge,
@@ -29,7 +30,6 @@ import {
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
-import { createHash } from 'node:crypto';
 
 interface ConnectorEdges {
   source: string;
