@@ -23,10 +23,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { sortBy } from 'lodash';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
@@ -111,6 +112,10 @@ export function QueriesTable() {
       });
     }
   }, [promoteAll, queryClient, toasts]);
+
+  const sortedQueries = useMemo(() => {
+    return sortBy(queriesData?.significant_events ?? [], ['rule_backed', (e) => e.query.title]);
+  }, [queriesData?.significant_events]);
 
   if (queriesLoading || streamsLoading) {
     return <LoadingPanel size="l" />;
@@ -332,7 +337,7 @@ export function QueriesTable() {
           tableCaption={TABLE_CAPTION}
           columns={columns}
           itemId={(item) => item.query.id}
-          items={queriesData.significant_events ?? []}
+          items={sortedQueries}
           loading={queriesLoading}
           noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
         />
