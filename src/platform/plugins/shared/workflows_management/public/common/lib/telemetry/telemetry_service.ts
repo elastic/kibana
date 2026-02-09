@@ -27,7 +27,7 @@ export interface TelemetryServiceStart {
  * to trigger custom events for Workflows plugin features
  */
 export class TelemetryService {
-  constructor(private analytics: AnalyticsServiceSetup | null = null) {}
+  private analytics: AnalyticsServiceSetup | null = null;
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;

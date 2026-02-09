@@ -22,7 +22,7 @@ export enum WorkflowUIEventTypes {
   WorkflowDetailViewed = 'workflows_workflow_detail_viewed',
 }
 
-export type WorkflowDetailTab = 'workflow' | 'executions' | 'logs';
+export type WorkflowDetailTab = 'workflow' | 'executions';
 
 /**
  * Parameters for workflow list view telemetry.
