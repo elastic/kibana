@@ -79,6 +79,13 @@ if (!Object.hasOwn(global, 'Worker')) {
   }
 }
 
+// cheerio 1.2.0+ imports undici which requires ReadableStream at module load time.
+// Must be polyfilled before cheerio/enzyme loads.
+if (!Object.hasOwn(global, 'ReadableStream')) {
+  const { ReadableStream } = require('node:stream/web');
+  global.ReadableStream = ReadableStream;
+}
+
 // @elastic/elasticsearch imports undici that requires on MessagePort (even when unused in the tests)
 if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};

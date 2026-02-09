@@ -20,6 +20,7 @@ const { readPackageMap } = require('@kbn/repo-packages');
 const pkgMap = readPackageMap();
 
 const APM_AGENT_MOCK = Path.resolve(__dirname, 'mocks/apm_agent_mock.ts');
+const CHEERIO_COMPAT = Path.resolve(__dirname, 'mocks/cheerio_compat.js');
 const CSS_MODULE_MOCK = Path.resolve(__dirname, 'mocks/css_module_mock.js');
 const STYLE_MOCK = Path.resolve(__dirname, 'mocks/style_mock.js');
 const FILE_MOCK = Path.resolve(__dirname, 'mocks/file_mock.js');
@@ -93,6 +94,19 @@ module.exports = (request, options) => {
 
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
+  }
+
+  // cheerio 1.2.0 compat shim for enzyme: provides the callable default export
+  // and static .root() method that enzyme expects from cheerio rc.12.
+  if (request === 'cheerio') {
+    return CHEERIO_COMPAT;
+  }
+
+  // cheerio 1.2.0 moved cheerio/lib/utils to cheerio/utils (exported subpath).
+  // Enzyme still imports the old path.
+  if (request === 'cheerio/lib/utils') {
+    const cheerioDir = Path.dirname(resolve.sync('cheerio/package.json', { basedir: REPO_ROOT }));
+    return Path.join(cheerioDir, 'dist', 'commonjs', 'utils.js');
   }
 
   const reqExt = Path.extname(request);
