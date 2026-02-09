@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { load as parseYaml } from 'js-yaml';
+
 /**
  * NOTE: this test uses a mock template definition to try and render the controls
  * as per their definitions stored in the controlRegistry
@@ -23,5 +25,9 @@ fields:
         - high
         - critical
 `;
+
+const testTemplateRenderer = (templateDefinition: string) => {
+  const template = parseYaml(templateDefinition);
+};
 
 describe('controlRegistry', () => {});

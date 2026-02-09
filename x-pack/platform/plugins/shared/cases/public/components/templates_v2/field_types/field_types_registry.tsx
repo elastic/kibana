@@ -21,7 +21,7 @@ export type FieldMap = {
   [K in FieldType]: FC<Extract<z.infer<typeof FieldSchema>, { control: K }>>;
 };
 
-// Register ui controls here
+// NOTE: Register ui controls here (remember to update ./schema as well)
 export const controlRegistry: FieldMap = {
   [FieldType.INPUT_TEXT]: InputText,
   [FieldType.INPUT_NUMBER]: InputNumber,
