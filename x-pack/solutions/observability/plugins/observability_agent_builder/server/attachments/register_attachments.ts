@@ -16,6 +16,8 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { createServiceAttachmentType } from './service';
+import { createSloAttachmentType } from './slo';
 
 export async function registerAttachments({
   core,
@@ -33,6 +35,8 @@ export async function registerAttachments({
     createErrorAttachmentType({ core, logger, dataRegistry }),
     createAlertAttachmentType({ core, logger }),
     createLogAttachmentType({ core, logger, dataRegistry }),
+    createServiceAttachmentType({ core, logger, dataRegistry }),
+    createSloAttachmentType({ core, logger, dataRegistry }),
   ];
 
   for (const attachment of attachmentTypes) {
