@@ -74,22 +74,27 @@ function defaultIconForConnector(connector: GetStepIconBase64Params): string {
  */
 export async function getStepIconBase64(connector: GetStepIconBase64Params): Promise<string> {
   try {
+    console.log('connector', connector);
     // The icon from action registry,
     if (connector.icon) {
       // data URL strings or lazy components supported.
       // built-in EUI icons are not supported (e.g. 'logoSlack', 'inference') use hardcoded icons for them instead.
       if (typeof connector.icon === 'string' && connector.icon.startsWith('data:')) {
+        console.log('connector.icon is a data URL');
         return connector.icon;
       }
       if (isLazyExoticComponent(connector.icon)) {
+        console.log('connector.icon is a lazy component');
         const IconComponent = await resolveLazyComponent(connector.icon);
         return getDataUrlFromReactComponent(IconComponent);
       }
       if (typeof connector.icon === 'function') {
+        console.log('connector.icon is a function');
         return getDataUrlFromReactComponent(
           connector.icon as React.FC<{ width: number; height: number }>
         );
       }
+      console.log('connector.icon is unknown');
     }
 
     if (connector.actionTypeId === 'elasticsearch') {
@@ -119,6 +124,7 @@ function getDataUrlFromReactComponent(
   component: React.ComponentType<{ width: number; height: number }>
 ): string {
   try {
+    console.log('getDataUrlFromReactComponent', component);
     const logoElement = React.createElement(component, { width: 16, height: 16 });
     let htmlString = renderToStaticMarkup(logoElement);
 
@@ -136,6 +142,7 @@ function getDataUrlFromReactComponent(
           return srcValue;
         }
 
+        console.error('srcValue is not a data URL', srcValue);
         // If it's a regular URL/path, we can't easily convert it here
         // Fallback to default
         return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
@@ -155,6 +162,7 @@ function getDataUrlFromReactComponent(
     const base64 = btoa(htmlString);
     return `data:image/svg+xml;base64,${base64}`;
   } catch (error) {
+    console.error('Error converting React component to data URL', error);
     // Fallback to default SVG on any error
     return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
   }
