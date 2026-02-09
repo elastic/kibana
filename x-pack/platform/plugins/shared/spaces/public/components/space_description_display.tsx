@@ -14,10 +14,8 @@
  */
 
 import React from 'react';
-import {
-  buildDataTableRecord,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+
+import { buildDataTableRecord, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 
 // BAD: Direct dangerouslySetInnerHTML from getMessageFieldWithFallbacks
 export const DirectInnerHtml = ({ hit }: { hit: any }) => {
@@ -41,7 +39,7 @@ export const SpreadPatternInnerHtml = ({ hit }: { hit: any }) => {
 // BAD: From buildDataTableRecord
 export const FromBuildRecord = ({ doc, dataView }: { doc: any; dataView: any }) => {
   const record = buildDataTableRecord(doc, dataView);
-  return <div dangerouslySetInnerHTML={{ __html: record.flattened['message'] as string }} />;
+  return <div dangerouslySetInnerHTML={{ __html: record.flattened.message as string }} />;
 };
 
 // GOOD: Safe — using children (React auto-escapes)
