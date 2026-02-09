@@ -79,10 +79,12 @@ export async function checkFileCasing(log, files, options = {}) {
     }
   }
 
-  const violations = Array.from(violationsMap.entries()).map(([path, expected]) => ({
+  let violations = Array.from(violationsMap.entries()).map(([path, expected]) => ({
     path,
     expected,
   }));
+
+  violations = violations.filter((v) => !isExempt(v.path, exceptionPaths));
 
   if (generateExceptions && violations.length > 0) {
     const existing = existsSync(EXCEPTIONS_JSON_PATH)
