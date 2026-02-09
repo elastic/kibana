@@ -5,40 +5,218 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { PluginStart } from '@kbn/core-di';
+import { useService, CoreStart } from '@kbn/core-di-browser';
+import type { HttpStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
+import { dump, load } from 'js-yaml';
+import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { RulesApi } from '../../services/rules_api';
 import { RuleFooter } from './rule_footer';
 
+const DEFAULT_RULE_YAML = `name: Example rule
+tags: []
+schedule:
+  custom: 1m
+enabled: true
+query: FROM logs-* | LIMIT 1
+timeField: "@timestamp"
+lookbackWindow: 5m
+groupingKey: []`;
+
+const DEFAULT_RULE_VALUES: CreateRuleData = {
+  name: 'Example rule',
+  tags: [],
+  schedule: { custom: '1m' },
+  enabled: true,
+  query: 'FROM logs-* | LIMIT 1',
+  timeField: '@timestamp',
+  lookbackWindow: '5m',
+  groupingKey: [],
+};
+
 interface YamlTabProps {
-  yaml: string;
-  onYamlChange: (value: string) => void;
-  onYamlBlur: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-  esqlCallbacks: ESQLCallbacks;
-  isReadOnly: boolean;
-  isSubmitting: boolean;
+  ruleId?: string;
   isEditing: boolean;
-  error: React.ReactNode | null;
-  errorTitle: React.ReactNode | null;
+  onCancel: () => void;
+  onSaveSuccess: () => void;
+  services: {
+    http: HttpStart;
+    rulesApi: RulesApi;
+  };
 }
 
-export const YamlTab = ({
-  yaml,
-  onYamlChange,
-  onYamlBlur,
-  onSave,
-  onCancel,
-  esqlCallbacks,
-  isReadOnly,
-  isSubmitting,
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
+const parseYaml = (value: string): Record<string, unknown> | null => {
+  try {
+    const result = load(value);
+    if (!result || typeof result !== 'object' || Array.isArray(result)) {
+      return null;
+    }
+    return result as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+export const YamlTab: React.FC<YamlTabProps> = ({
+  ruleId,
   isEditing,
-  error,
-  errorTitle,
-}: YamlTabProps) => {
+  onCancel,
+  onSaveSuccess,
+  services,
+}) => {
+  const http = useService(CoreStart('http'));
+  const application = useService(CoreStart('application'));
+  const data = useService(PluginStart('data')) as DataPublicPluginStart;
+
+  const [yaml, setYaml] = useState(DEFAULT_RULE_YAML);
+  const [error, setError] = useState<React.ReactNode | null>(null);
+  const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const esqlCallbacks = useMemo<ESQLCallbacks>(
+    () => ({
+      getSources: async () => getESQLSources({ application, http }, undefined),
+      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
+        getEsqlColumns({ esqlQuery: query, search: data.search.search }),
+    }),
+    [application, http, data.search.search]
+  );
+
+  // Load rule data when in edit mode
+  useEffect(() => {
+    if (!ruleId) {
+      setYaml(DEFAULT_RULE_YAML);
+      return;
+    }
+
+    let cancelled = false;
+    const loadRule = async () => {
+      setIsLoading(true);
+      setError(null);
+      setErrorTitle(null);
+
+      try {
+        const rule = await services.rulesApi.getRule(ruleId);
+        if (cancelled) {
+          return;
+        }
+
+        const nextPayload: CreateRuleData = {
+          ...DEFAULT_RULE_VALUES,
+          name: rule.name,
+          tags: rule.tags ?? DEFAULT_RULE_VALUES.tags,
+          schedule: rule.schedule?.custom
+            ? { custom: rule.schedule.custom }
+            : DEFAULT_RULE_VALUES.schedule,
+          enabled: rule.enabled ?? DEFAULT_RULE_VALUES.enabled,
+          query: rule.query ?? DEFAULT_RULE_VALUES.query,
+          timeField: rule.timeField ?? DEFAULT_RULE_VALUES.timeField,
+          lookbackWindow: rule.lookbackWindow ?? DEFAULT_RULE_VALUES.lookbackWindow,
+          groupingKey: rule.groupingKey ?? DEFAULT_RULE_VALUES.groupingKey,
+        };
+
+        setYaml(dump(nextPayload, { lineWidth: 120, noRefs: true }));
+      } catch (err) {
+        if (!cancelled) {
+          setErrorTitle(
+            <FormattedMessage
+              id="xpack.alertingV2.createRule.loadErrorTitle"
+              defaultMessage="Failed to load rule"
+            />
+          );
+          setError(getErrorMessage(err));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadRule();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ruleId, services.rulesApi]);
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    setErrorTitle(null);
+
+    try {
+      // Parse YAML
+      const parsed = parseYaml(yaml);
+      if (!parsed) {
+        setErrorTitle(
+          <FormattedMessage
+            id="xpack.alertingV2.createRule.yamlParseErrorTitle"
+            defaultMessage="Invalid YAML"
+          />
+        );
+        setError(
+          <FormattedMessage
+            id="xpack.alertingV2.createRule.yamlParseError"
+            defaultMessage="The YAML could not be parsed. Please check your syntax."
+          />
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate rule data
+      const validated = createRuleDataSchema.safeParse(parsed);
+      if (!validated.success) {
+        setErrorTitle(
+          <FormattedMessage
+            id="xpack.alertingV2.createRule.validationTitle"
+            defaultMessage="Rule validation failed"
+          />
+        );
+        setError(validated.error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Save rule
+      if (isEditing && ruleId) {
+        await services.rulesApi.updateRule(ruleId, validated.data);
+      } else {
+        await services.rulesApi.createRule(validated.data);
+      }
+
+      onSaveSuccess();
+    } catch (err) {
+      setErrorTitle(
+        <FormattedMessage
+          id="xpack.alertingV2.createRule.saveErrorTitle"
+          defaultMessage="Failed to save rule"
+        />
+      );
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isReadOnly = isLoading || isSubmitting;
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -77,19 +255,17 @@ export const YamlTab = ({
           />
         }
       >
-        <div onBlur={onYamlBlur}>
-          <YamlRuleEditor
-            value={yaml}
-            onChange={onYamlChange}
-            esqlCallbacks={esqlCallbacks}
-            isReadOnly={isReadOnly}
-            dataTestSubj="alertingV2CreateRuleYaml"
-          />
-        </div>
+        <YamlRuleEditor
+          value={yaml}
+          onChange={setYaml}
+          esqlCallbacks={esqlCallbacks}
+          isReadOnly={isReadOnly}
+          dataTestSubj="alertingV2CreateRuleYaml"
+        />
       </EuiFormRow>
       <EuiSpacer />
       <RuleFooter
-        onSave={onSave}
+        onSave={handleSave}
         onCancel={onCancel}
         isSubmitting={isSubmitting}
         isEditing={isEditing}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useForm } from 'react-hook-form';
@@ -15,74 +15,169 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from '@kbn/alerting-v2-rule-form/form/types';
 import { RuleFields } from '@kbn/alerting-v2-rule-form';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { RulesApi } from '../../services/rules_api';
 import { QueryEditor } from './query_editor';
 import { RuleFooter } from './rule_footer';
 
+const DEFAULT_RULE_VALUES: CreateRuleData = {
+  name: 'Example rule',
+  tags: [],
+  schedule: { custom: '1m' },
+  enabled: true,
+  query: 'FROM logs-* | LIMIT 1',
+  timeField: '@timestamp',
+  lookbackWindow: '5m',
+  groupingKey: [],
+};
+
 interface FormTabProps {
-  stagedRule: Partial<CreateRuleData>;
-  onFormChange: (
-    values: FormValues
-  ) => { success: true; data: CreateRuleData } | { success: false };
-  onFormReady?: (getCurrentValues: () => FormValues) => void;
-  onSave: () => void;
+  ruleId?: string;
+  isEditing: boolean;
   onCancel: () => void;
+  onSaveSuccess: () => void;
   services: {
     http: HttpStart;
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
     notifications: NotificationsStart;
+    rulesApi: RulesApi;
   };
-  isReadOnly: boolean;
-  isSubmitting: boolean;
-  isEditing: boolean;
-  error: React.ReactNode | null;
-  errorTitle: React.ReactNode | null;
 }
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
 export const FormTab: React.FC<FormTabProps> = ({
-  stagedRule,
-  onFormChange,
-  onFormReady,
-  onSave,
-  onCancel,
-  services,
-  isReadOnly,
-  isSubmitting,
+  ruleId,
   isEditing,
-  error,
-  errorTitle,
+  onCancel,
+  onSaveSuccess,
+  services,
 }) => {
+  const [error, setError] = useState<React.ReactNode | null>(null);
+  const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     control,
     setValue,
     watch,
+    handleSubmit,
     formState: { errors },
     reset,
   } = useForm<FormValues>({
     mode: 'onBlur',
-    defaultValues: stagedRule as FormValues,
+    defaultValues: DEFAULT_RULE_VALUES as FormValues,
   });
 
   const query = watch('query');
 
-  // Expose getCurrentValues function to parent
+  // Load rule data when in edit mode
   useEffect(() => {
-    if (onFormReady) {
-      onFormReady(() => watch());
+    if (!ruleId) {
+      reset(DEFAULT_RULE_VALUES as FormValues);
+      return;
     }
-  }, [onFormReady, watch]);
 
-  // Reset form when stagedRule changes (e.g., on tab switch)
-  useEffect(() => {
-    reset(stagedRule as FormValues);
-  }, [stagedRule, reset]);
+    let cancelled = false;
+    const loadRule = async () => {
+      setIsLoading(true);
+      setError(null);
+      setErrorTitle(null);
 
-  // Sync to parent on field blur
-  const handleBlur = () => {
-    const formValues = watch();
-    onFormChange(formValues);
+      try {
+        const rule = await services.rulesApi.getRule(ruleId);
+        if (cancelled) {
+          return;
+        }
+
+        const nextPayload: CreateRuleData = {
+          ...DEFAULT_RULE_VALUES,
+          name: rule.name,
+          tags: rule.tags ?? DEFAULT_RULE_VALUES.tags,
+          schedule: rule.schedule?.custom
+            ? { custom: rule.schedule.custom }
+            : DEFAULT_RULE_VALUES.schedule,
+          enabled: rule.enabled ?? DEFAULT_RULE_VALUES.enabled,
+          query: rule.query ?? DEFAULT_RULE_VALUES.query,
+          timeField: rule.timeField ?? DEFAULT_RULE_VALUES.timeField,
+          lookbackWindow: rule.lookbackWindow ?? DEFAULT_RULE_VALUES.lookbackWindow,
+          groupingKey: rule.groupingKey ?? DEFAULT_RULE_VALUES.groupingKey,
+        };
+
+        reset(nextPayload as FormValues);
+      } catch (err) {
+        if (!cancelled) {
+          setErrorTitle(
+            <FormattedMessage
+              id="xpack.alertingV2.createRule.loadErrorTitle"
+              defaultMessage="Failed to load rule"
+            />
+          );
+          setError(getErrorMessage(err));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadRule();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ruleId, services.rulesApi, reset]);
+
+  const onSubmit = async (formValues: FormValues) => {
+    setIsSubmitting(true);
+    setError(null);
+    setErrorTitle(null);
+
+    try {
+      // Validate rule data
+      const validated = createRuleDataSchema.safeParse(formValues);
+      if (!validated.success) {
+        setErrorTitle(
+          <FormattedMessage
+            id="xpack.alertingV2.createRule.validationTitle"
+            defaultMessage="Rule validation failed"
+          />
+        );
+        setError(validated.error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Save rule
+      if (isEditing && ruleId) {
+        await services.rulesApi.updateRule(ruleId, validated.data);
+      } else {
+        await services.rulesApi.createRule(validated.data);
+      }
+
+      onSaveSuccess();
+    } catch (err) {
+      setErrorTitle(
+        <FormattedMessage
+          id="xpack.alertingV2.createRule.saveErrorTitle"
+          defaultMessage="Failed to save rule"
+        />
+      );
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const isReadOnly = isLoading || isSubmitting;
 
   return (
     <>
@@ -142,10 +237,7 @@ export const FormTab: React.FC<FormTabProps> = ({
             <QueryEditor
               value={field.value}
               onChange={field.onChange}
-              onBlur={() => {
-                field.onBlur();
-                handleBlur();
-              }}
+              onBlur={field.onBlur}
               isReadOnly={isReadOnly}
             />
           )}
@@ -155,7 +247,7 @@ export const FormTab: React.FC<FormTabProps> = ({
       <EuiSpacer />
 
       <RuleFooter
-        onSave={onSave}
+        onSave={handleSubmit(onSubmit)}
         onCancel={onCancel}
         isSubmitting={isSubmitting}
         isEditing={isEditing}
