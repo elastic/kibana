@@ -223,3 +223,10 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
+
+export const AI_RULE_CREATE = i18n.translate(
+  'xpack.securitySolution.navigation.aiRuleCreationTitle',
+  {
+    defaultMessage: 'AI rule creation',
+  }
+);
