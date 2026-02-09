@@ -31,6 +31,7 @@ export const storybookAliases = {
   es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
+  esql_resource_browser: 'src/platform/packages/shared/kbn-esql-resource-browser/.storybook',
   event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
   expression_metric_vis:
@@ -62,7 +63,7 @@ export const storybookAliases = {
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
-  ['response-ops']: 'src/platform/packages/shared/response-ops/.storybook',
+  ['response-ops']: 'x-pack/platform/packages/shared/response-ops/.storybook',
   security: 'x-pack/platform/packages/shared/security/form_components/.storybook',
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',

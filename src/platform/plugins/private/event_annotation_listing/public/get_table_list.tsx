@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { firstValueFrom } from 'rxjs';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -19,6 +20,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {
@@ -30,6 +32,7 @@ export interface EventAnnotationListingPageServices {
   queryInputServices: QueryInputServices;
   LensEmbeddableComponent: LensEmbeddableComponent;
   sessionService: ISessionService;
+  embeddable: EmbeddableStart;
 }
 
 export const getTableList = (
@@ -55,7 +58,16 @@ export const getTableList = (
           dataViews={services.dataViews}
           createDataView={services.createDataView}
           queryInputServices={services.queryInputServices}
-          navigateToLens={() => services.core.application.navigateToApp('lens')}
+          navigateToLens={async () => {
+            const currentApp = await firstValueFrom(services.core.application.currentAppId$);
+            await services.embeddable.getStateTransfer().navigateToEditor('lens', {
+              path: '',
+              state: {
+                originatingApp: currentApp ?? 'dashboards',
+                originatingPath: window.location.hash,
+              },
+            });
+          }}
           LensEmbeddableComponent={services.LensEmbeddableComponent}
           sessionService={services.sessionService}
         />

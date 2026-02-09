@@ -27,6 +27,7 @@ describe('getInternalRuleTemplateRoute', () => {
   const mockedTemplate: RuleTemplate = {
     id: '1',
     name: 'My rule template',
+    description: 'My rule template description',
     ruleTypeId: '1',
     schedule: { interval: '10s' },
     params: {
@@ -36,7 +37,7 @@ describe('getInternalRuleTemplateRoute', () => {
   };
 
   const getResult = {
-    ...pick(mockedTemplate, 'name', 'schedule', 'tags', 'params'),
+    ...pick(mockedTemplate, 'name', 'schedule', 'tags', 'params', 'description'),
     rule_type_id: mockedTemplate.ruleTypeId,
     id: mockedTemplate.id,
   };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,7 +33,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
     await testBed.ingest('esql-set-value', docs);
     const esqlResult = await esql.queryOnIndex('esql-set-value', query);
 
-    expect(ingestResult[0]).toHaveProperty('attributes.status', 'active');
+    expect(ingestResult[0]?.attributes?.status).toBe('active');
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ 'attributes.status': 'active' })
     );
@@ -60,7 +60,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
     await testBed.ingest('esql-set-copy', docs);
     const esqlResult = await esql.queryOnIndex('esql-set-copy', query);
 
-    expect(ingestResult[0]).toHaveProperty('attributes.status', 'should-be-copied');
+    expect(ingestResult[0]?.attributes?.status).toBe('should-be-copied');
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ 'attributes.status': 'should-be-copied' })
     );
@@ -88,7 +88,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
     await testBed.ingest('esql-set-override', docs);
     const esqlResult = await esql.queryOnIndex('esql-set-override', query);
 
-    expect(ingestResult[0]).toHaveProperty('attributes.status', 'inactive');
+    expect(ingestResult[0]?.attributes?.status).toBe('inactive');
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ 'attributes.status': 'inactive' })
     );
@@ -118,7 +118,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
       await testBed.ingest('esql-set-no-override', docs);
       const esqlResult = await esql.queryOnIndex('esql-set-no-override', query);
 
-      expect(ingestResult[0]).toHaveProperty('attributes.status', 'active');
+      expect(ingestResult[0]?.attributes?.status).toBe('active');
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({ 'attributes.status': 'active' })
       );

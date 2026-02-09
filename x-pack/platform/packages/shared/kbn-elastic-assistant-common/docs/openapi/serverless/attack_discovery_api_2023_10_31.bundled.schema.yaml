@@ -2487,6 +2487,11 @@ components:
         summary_markdown:
           description: A markdown summary of attack discovery, using the same syntax
           type: string
+        tags:
+          description: The optional array of tags assigned the attack
+          items:
+            type: string
+          type: array
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The time the attack discovery was generated

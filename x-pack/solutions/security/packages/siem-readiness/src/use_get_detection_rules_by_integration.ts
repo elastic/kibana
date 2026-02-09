@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RelatedIntegrationRuleResponse } from './types';
+import type { RelatedIntegrationRuleResponse, RelatedIntegration } from './types';
 import { useSiemReadinessApi } from './use_siem_readiness_api';
 
 export interface RuleIntegrationCoverage {
@@ -14,7 +14,7 @@ export interface RuleIntegrationCoverage {
   uncoveredRules: RelatedIntegrationRuleResponse[];
   missingIntegrations: string[];
   installedIntegrations: string[];
-  relatedIntegrations: Array<{ package: string; version?: string; integration?: string }>;
+  relatedIntegrations: RelatedIntegration[];
 }
 
 export const getRuleIntegrationCoverage = (
@@ -23,10 +23,7 @@ export const getRuleIntegrationCoverage = (
 ): RuleIntegrationCoverage => {
   const installedSet = new Set(installedIntegrationPackages);
   const referencedIntegrations = new Set<string>();
-  const relatedIntegrationsMap = new Map<
-    string,
-    { package: string; version?: string; integration?: string }
-  >();
+  const relatedIntegrationsMap = new Map<string, RelatedIntegration>();
 
   const coveredRules: RelatedIntegrationRuleResponse[] = [];
   const uncoveredRules: RelatedIntegrationRuleResponse[] = [];

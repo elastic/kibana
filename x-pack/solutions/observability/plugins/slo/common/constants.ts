@@ -77,6 +77,9 @@ export const SUMMARY_DESTINATION_INDEX_NAME = `.slo-observability.summary-v${SLO
 export const SUMMARY_TEMP_INDEX_NAME = `.slo-observability.summary-v${SLO_RESOURCES_VERSION}.temp`; // store the temporary summary document
 export const SUMMARY_DESTINATION_INDEX_PATTERN = `.slo-observability.summary-v${SLO_RESOURCES_VERSION_MAJOR}*`; // include temp and non-temp summary indices
 
+export const HEALTH_DATA_STREAM_NAME = `.slo-observability.health-v${SLO_RESOURCES_VERSION}`;
+export const HEALTH_INDEX_TEMPLATE_NAME = `.slo-observability.health-v${SLO_RESOURCES_VERSION}@template`;
+
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
 

@@ -239,6 +239,17 @@ describe('SummaryColumn', () => {
       );
     });
 
+    it('should render angle brackets as text (not HTML tags)', () => {
+      const message =
+        '2026-02-06 04:41:12,718 INFO some.program.module(128):Search for <John Doe> found <48> items in <0.314> seconds';
+      const record = getBaseRecord({ message });
+
+      renderSummary(record);
+
+      expect(screen.queryByTestId('discoverDataTableMessageValue')).toHaveTextContent(message);
+      expect(document.querySelector('john')).toBeNull();
+    });
+
     it(`should fallback to ${constants.ERROR_MESSAGE_FIELD} and ${constants.EVENT_ORIGINAL_FIELD} fields if message does not exist`, () => {
       const recordWithoutMessage = getBaseRecord({ message: undefined });
       renderSummary(recordWithoutMessage);

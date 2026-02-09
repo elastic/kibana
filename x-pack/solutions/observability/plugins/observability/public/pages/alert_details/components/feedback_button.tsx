@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../utils/kibana_react';
 
 const LOGS_ALERT_DETAILS_FEEDBACK_LINK = 'https://ela.st/log-alert-details-feedback';
 const feedbackButtonLabel = i18n.translate(
@@ -17,6 +18,11 @@ const feedbackButtonLabel = i18n.translate(
   }
 );
 export function FeedbackButton() {
+  const { notifications } = useKibana().services;
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
+
+  if (!isFeedbackEnabled) return null;
+
   return (
     <EuiButtonEmpty
       aria-label={feedbackButtonLabel}

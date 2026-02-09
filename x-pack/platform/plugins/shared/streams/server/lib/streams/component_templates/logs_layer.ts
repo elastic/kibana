@@ -87,7 +87,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/validate_streamlang.ts)
+// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/constants.ts)
 export const NAMESPACE_PRIORITIES: Record<string, number> = {
   'body.structured.': 10,
   'attributes.': 20,

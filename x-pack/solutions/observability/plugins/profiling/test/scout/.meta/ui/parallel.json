@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T10:19:33.520Z",
-  "sha1": "94c8c7b5ebaa78824c2f7c5684d4d6a4bff4842c",
+  "lastModified": "2026-01-30T09:08:43.358Z",
+  "sha1": "6f0b1f9a483f5404fe85a1bc9a0717f80fd673f1",
   "tests": [
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
@@ -37,7 +37,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 69,
+        "line": 66,
         "column": 7
       }
     },
@@ -50,7 +50,33 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 110,
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "1b328b6212635cc-c818742761ad34b",
+      "title": "Flamegraph page opens flamegraph page and shows chart when WebGL is available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "1b328b6212635cc-d965561cd176846",
+      "title": "Flamegraph page displays WebGL warning when WebGL is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 31,
         "column": 7
       }
     },

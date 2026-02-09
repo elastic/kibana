@@ -74,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
             params: {
               serviceName: SERVICE_NAME,
-              serviceEnvironment: ENVIRONMENT,
+              environment: ENVIRONMENT,
               start: START,
               end: END,
             },

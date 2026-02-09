@@ -46,6 +46,8 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
+import { indexDataEnricher, type IndexDataEnricher } from './services';
+import { indexStatsEnricher } from './index_stats_enricher';
 
 export class IndexMgmtUIPlugin
   implements
@@ -80,6 +82,8 @@ export class IndexMgmtUIPlugin
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
+
+  private readonly indexDataEnricher: IndexDataEnricher;
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -119,6 +123,8 @@ export class IndexMgmtUIPlugin
       enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
+
+    this.indexDataEnricher = indexDataEnricher;
   }
 
   public setup(
@@ -167,6 +173,11 @@ export class IndexMgmtUIPlugin
 
     this.apiService = new PublicApiService(coreSetup.http);
 
+    // disabled in serverless
+    if (this.config.enableIndexStats) {
+      this.indexDataEnricher.add(indexStatsEnricher);
+    }
+
     return {
       apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
@@ -186,6 +197,9 @@ export class IndexMgmtUIPlugin
         });
       },
       locator: this.locator,
+      indexDataEnricher: {
+        add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
+      },
     };
   }
 

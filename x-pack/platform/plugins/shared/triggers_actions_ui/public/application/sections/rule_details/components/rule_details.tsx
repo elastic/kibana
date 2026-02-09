@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 import {
   EuiPageHeader,
   EuiText,
@@ -58,6 +57,7 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { runRule } from '../../../lib/run_rule';
 import {
@@ -106,9 +106,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
-  const { capabilities, navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ } = application;
-  const currentAppId = useObservable(currentAppId$, undefined);
-  const isInRulesApp = currentAppId === 'rules';
+  const { capabilities, navigateToApp, getUrlForApp } = application;
+  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -127,7 +126,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(isAppRegistered, getUrlForApp);
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -248,8 +247,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    if (isInRulesApp) {
-      // Navigate within the rules app using history
+    if (useUnifiedRulesPage) {
       const { pathname, search, hash } = history.location;
       const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
       history.push({
@@ -259,7 +257,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         },
       });
     } else {
-      // Navigate to Stack Management for other apps
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
@@ -476,7 +473,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          isInRulesApp ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
+          useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />
       <EuiPageSection>

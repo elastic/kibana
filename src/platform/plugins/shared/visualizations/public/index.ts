@@ -74,3 +74,8 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
+
+export {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from './utils/to_table_list_view_saved_object';

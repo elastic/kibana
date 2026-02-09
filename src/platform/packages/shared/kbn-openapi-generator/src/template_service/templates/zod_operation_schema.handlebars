@@ -27,26 +27,26 @@ import {
   */
 {{/if}}
 {{#if (isCircularSchema @key)}}
-export type {{@key}} = {{> ts_type}};
-export type {{@key}}Input = {{> ts_input_type }};
-export const {{@key}}: z.ZodType<{{@key}}, ZodTypeDef, {{@key}}Input> = {{> zod_schema_item }};
+export type {{transformSchemaName @key}} = {{> ts_type}};
+export type {{transformSchemaName @key}}Input = {{> ts_input_type }};
+export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, ZodTypeDef, {{transformSchemaName @key}}Input> = {{> zod_schema_item }};
 {{else}}
 {{#if (shouldCastExplicitly this)}}
-{{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{@key}} type --}}
+{{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{transformSchemaName @key}} type --}}
 {{!-- error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. --}}
-export const {{@key}}Internal = {{> zod_schema_item}};
+export const {{transformSchemaName @key}}Internal = {{> zod_schema_item}};
 
-export type {{@key}} = z.infer<typeof {{@key}}Internal>;
-export const {{@key}} = {{@key}}Internal as z.ZodType<{{@key}}>;
+export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}Internal>;
+export const {{transformSchemaName @key}} = {{transformSchemaName @key}}Internal as z.ZodType<{{transformSchemaName @key}}>;
 {{else}}
-export type {{@key}} = z.infer<typeof {{@key}}>;
-export const {{@key}} = {{> zod_schema_item}};
+export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}>;
+export const {{transformSchemaName @key}} = {{> zod_schema_item}};
 {{/if }}
 {{/if}}
 {{#if enum}}
 {{#unless (isSingle enum)}}
-export type {{@key}}Enum = typeof {{@key}}.enum;
-export const {{@key}}Enum = {{@key}}.enum;
+export type {{transformSchemaName @key}}Enum = typeof {{transformSchemaName @key}}.enum;
+export const {{transformSchemaName @key}}Enum = {{transformSchemaName @key}}.enum;
 {{/unless}}
 {{/if}}
 

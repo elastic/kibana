@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
@@ -54,7 +54,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices: { inventoryViews } }) => {
-      await inventoryViews.deleteOne(savedViewId);
+      await inventoryViews.deleteById(savedViewId);
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {

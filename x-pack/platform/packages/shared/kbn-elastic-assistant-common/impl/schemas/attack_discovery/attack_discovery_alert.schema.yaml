@@ -100,3 +100,8 @@ components:
           description: The optional array of user-IDs who have been assigned the attack
           items:
             type: string
+        tags:
+          type: array
+          description: The optional array of tags assigned the attack
+          items:
+            type: string

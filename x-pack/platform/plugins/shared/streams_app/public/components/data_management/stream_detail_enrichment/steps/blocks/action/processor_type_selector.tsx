@@ -14,6 +14,7 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
+import { useGrokCollection } from '@kbn/grok-ui';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
@@ -56,7 +57,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
   });
 
-  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   // To make it possible to clear the selection to enter a new value,
   // keep track of local empty state. As soon as field.value is set, switch back to highlighting
@@ -78,7 +79,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     const formState = getDefaultFormStateByType(
       type,
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection }
+      { grokCollection: grokCollection! }
     );
     reset(formState);
   };
@@ -442,6 +443,47 @@ const getAvailableProcessors: (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.concatHelpText"
           defaultMessage="Join field values and text into a single string and write it to a target field."
+        />
+      );
+    },
+  },
+  join: {
+    type: 'join' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.joinInputDisplay',
+      {
+        defaultMessage: 'Join',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.joinHelpText"
+          defaultMessage="{joinLink} into a single field by inserting a delimiter (for example: {example1} or {example2}) between the field values."
+          values={{
+            joinLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsJoinLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.join}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.joinLinkLabel', {
+                  defaultMessage: 'Join multiple fields',
+                })}
+              </EuiLink>
+            ),
+            example1: (
+              <>
+                <EuiCode>,</EuiCode>
+              </>
+            ),
+            example2: (
+              <>
+                <EuiCode>|</EuiCode>
+              </>
+            ),
+          }}
         />
       );
     },

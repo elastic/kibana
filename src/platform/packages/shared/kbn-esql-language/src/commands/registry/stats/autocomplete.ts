@@ -80,7 +80,7 @@ export async function autocomplete(
       let location: Location;
 
       if (isInBy) {
-        location = Location.EVAL;
+        location = Location.STATS_BY;
       } else if (isTimeseriesSource && isAggFunctionUsedAlready(command, command.args.length - 1)) {
         location = Location.STATS_TIMESERIES;
       } else {
@@ -400,9 +400,11 @@ function buildCustomFilteringContext(
   }
 
   const statsSpecificFunctionsToIgnore: string[] = [];
-  statsSpecificFunctionsToIgnore.push(
-    ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-  );
+  if (basicContext.functionDefinition?.type === 'grouping') {
+    statsSpecificFunctionsToIgnore.push(
+      ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+    );
+  }
 
   const finalCommandArgIndex = command.args.length - 1;
   const isInBy = isNodeWithinByClause(foundFunction, command);

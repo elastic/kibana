@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureFlagsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import type {
@@ -33,8 +33,9 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { getESQLForLayer, isEsqlQuerySuccess } from './to_esql';
+import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
 import { convertToAbsoluteDateRange } from '../../utils';
+import { getLensFeatureFlags } from '../../get_feature_flags';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import { dedupeAggs } from './dedupe_aggs';
@@ -75,7 +76,6 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
-  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
@@ -176,12 +176,14 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
-    const esqlLayer =
-      canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
-    const isFormBasedEsqlMode = canUseESQL && isEsqlQuerySuccess(esqlLayer);
+    const lensESQLEnabled = getLensFeatureFlags().enableEsql;
+    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL;
+
+    // Only generate ES|QL query when ES|QL mode is enabled
+    const esqlLayer = canUseESQL
+      ? generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant)
+      : undefined;
+    const isFormBasedEsqlMode = canUseESQL && !!esqlLayer && isEsqlQuerySuccess(esqlLayer);
 
     if (!isFormBasedEsqlMode) {
       esAggEntries.forEach(([colId, col], index) => {
@@ -362,9 +364,8 @@ function getExpressionForLayer(
 
       esAggsIdMap = updatedEsAggsIdMap;
     } else {
-      // The esAggsIdMap from getESQLForLayer uses the common OriginalColumn type,
-      // but the local OriginalColumn type includes more properties. The runtime
-      // objects have all the necessary properties via the spread operator in getESQLForLayer.
+      // generateEsqlQuery returns the full column data but typed with the minimal common OriginalColumn.
+      // The runtime objects have all properties needed by the local OriginalColumn type.
       esAggsIdMap = esqlLayer.esAggsIdMap as unknown as Record<string, OriginalColumn[]>;
     }
 
@@ -562,7 +563,6 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
-  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
@@ -573,7 +573,6 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
-      featureFlags,
       dateRange,
       nowInstant,
       searchSessionId,

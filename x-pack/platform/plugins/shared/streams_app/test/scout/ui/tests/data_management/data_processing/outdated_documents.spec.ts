@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import moment from 'moment';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
@@ -115,22 +115,15 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
       .getByTestId('streamsAppKqlSamplesDataSourceNameField')
       .fill('Kql Samples');
     // Set date range within the KQL data source card
-    await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
-    await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
-    await page.getByRole('tab', { name: 'End date: Absolute' }).click();
-    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-    await endDateInput.clear();
-    await endDateInput.fill(oldDocumentsDateRange.to);
-    await page.getByTestId('parseAbsoluteDateFormat').click();
-    await page.keyboard.press('Escape');
-    await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
-    await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
-    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-    await startDateInput.clear();
-    await startDateInput.fill(oldDocumentsDateRange.from);
-    await page.getByTestId('parseAbsoluteDateFormat').click();
-    await page.keyboard.press('Escape');
-    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
+    await kqlDataSourceCard
+      .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+      .click();
+    await pageObjects.datePicker.typeAbsoluteRange({
+      from: oldDocumentsDateRange.from,
+      to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
+    });
+    await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeVisible();
@@ -157,22 +150,15 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
       .getByTestId('streamsAppKqlSamplesDataSourceNameField')
       .fill('Kql Samples');
     // Set date range within the KQL data source card
-    await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
-    await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
-    await page.getByRole('tab', { name: 'End date: Absolute' }).click();
-    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-    await endDateInput.clear();
-    await endDateInput.fill(oldDocumentsDateRange.to);
-    await page.getByTestId('parseAbsoluteDateFormat').click();
-    await page.keyboard.press('Escape');
-    await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
-    await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
-    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-    await startDateInput.clear();
-    await startDateInput.fill(oldDocumentsDateRange.from);
-    await page.getByTestId('parseAbsoluteDateFormat').click();
-    await page.keyboard.press('Escape');
-    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
+    await kqlDataSourceCard
+      .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+      .click();
+    await pageObjects.datePicker.typeAbsoluteRange({
+      from: oldDocumentsDateRange.from,
+      to: oldDocumentsDateRange.to,
+      containerLocator: kqlDataSourceCard,
+    });
+    await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();

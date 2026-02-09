@@ -35,7 +35,7 @@ export const buildResultsQuery = ({
       ? [
           {
             range: {
-              '@timestamp': {
+              'event.ingested': {
                 gte: startDate,
                 lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
               },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
@@ -31,9 +31,9 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
     });
 
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeTruthy();
-    expect(adminStatus.has_data).toBeFalsy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
+    expect(adminStatus.has_setup).toBe(true);
+    expect(adminStatus.has_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
   apiTest('Viewer user', async ({ apiClient }) => {
@@ -46,9 +46,9 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
     });
 
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeTruthy();
-    expect(readStatus.has_data).toBeFalsy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
+    expect(readStatus.has_setup).toBe(true);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
   });
 });

@@ -9,7 +9,8 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import type { z } from '@kbn/zod/v4';
-import type { JsonModelSchemaType, LegacyWorkflowInput, WorkflowInputSchema } from '../schema';
+import type { LegacyWorkflowInput, WorkflowInputSchema } from '../schema';
+import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 
 /**
  * Converts a legacy workflow input definition to a JSON Schema property

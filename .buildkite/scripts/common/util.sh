@@ -172,3 +172,42 @@ docker_with_retry () {
     fi
   done
 }
+
+force_clean_ports() {
+  set +e
+
+  echo "LSOF: $(which lsof)"
+  for port in "$@"; do
+    echo "Force cleaning port: '$port'"
+
+    PORT_PID=$(lsof -i ":$port" -t)
+    if [[ "$PORT_PID" != "" ]]; then
+      echo "Found process using port '$port': $PORT_PID - sending SIGTERM..."
+      kill -15 "$PORT_PID" || true
+      sleep 5
+
+      PORT_PID=$(lsof -i ":$port" -t)
+      if [[ "$PORT_PID" != "" ]]; then
+        echo "Process $PORT_PID is still using port '$port', force killing..."
+        kill -9 "$PORT_PID" || true
+      fi
+    else
+      echo "No process found using port '$port', checking docker..."
+
+      ENTRY_WITH_PORT=$(docker ps -a | grep -E ":$port->")
+      if [[ -z "$ENTRY_WITH_PORT" ]]; then
+        echo "No docker container found using port $port"
+        continue
+      else
+        CONTAINER_ID=$(echo "$ENTRY_WITH_PORT" | awk '{print $1}')
+        echo "Found docker container using port $port: $CONTAINER_ID"
+        echo "Stopping and removing container $CONTAINER_ID"
+        docker stop "$CONTAINER_ID" || true
+        docker rm "$CONTAINER_ID" || true
+        continue
+      fi
+    fi
+  done
+
+  set -e
+}

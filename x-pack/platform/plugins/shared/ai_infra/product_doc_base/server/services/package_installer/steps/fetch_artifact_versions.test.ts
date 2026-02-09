@@ -6,16 +6,13 @@
  */
 
 import * as fs from 'fs';
-import type { Response } from 'node-fetch';
-import fetch from 'node-fetch';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
 import type { ProductName } from '@kbn/product-doc-common';
 import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
 
-jest.mock('node-fetch');
 jest.mock('fs');
 
-const fetchMock = fetch as jest.MockedFn<typeof fetch>;
+const fetchMock = jest.spyOn(global, 'fetch');
 
 const createResponse = ({
   artifactNames,
@@ -71,7 +68,7 @@ describe('fetchArtifactVersions', () => {
     const response = {
       text: () => Promise.resolve(responseText),
     };
-    fetchMock.mockResolvedValue(response as Response);
+    fetchMock.mockResolvedValue(response as unknown as Response);
   };
 
   const mockFileResponse = (responseText: string) => {
@@ -87,7 +84,7 @@ describe('fetchArtifactVersions', () => {
     await fetchArtifactVersions({ artifactRepositoryUrl });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`);
+    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`, {});
   });
 
   it('parses the local file', async () => {

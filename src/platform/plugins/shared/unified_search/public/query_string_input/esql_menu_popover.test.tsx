@@ -14,11 +14,12 @@ import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/stubs';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ESQLMenuPopover } from './esql_menu_popover';
 
 const startMock = coreMock.createStart();
+const notificationsMock = notificationServiceMock.createStartContract();
 // Mock the necessary services
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 const httpModule = {
@@ -30,6 +31,7 @@ const services = {
   docLinks: startMock.docLinks,
   http: httpModule.http,
   chrome: startMock.chrome,
+  notifications: notificationsMock,
 };
 
 describe('ESQLMenuPopover', () => {
@@ -46,6 +48,7 @@ describe('ESQLMenuPopover', () => {
   beforeEach(() => {
     // Reset mocks before each test
     httpModule.http.get.mockClear();
+    notificationsMock.feedback.isEnabled.mockReturnValue(true);
   });
 
   it('should render a button', async () => {
@@ -67,6 +70,13 @@ describe('ESQLMenuPopover', () => {
     await renderESQLPopover(stubIndexPattern);
     await userEvent.click(screen.getByRole('button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+  });
+
+  it('should not have feedback if feedback is not enabled', async () => {
+    notificationsMock.feedback.isEnabled.mockReturnValue(false);
+    await renderESQLPopover(stubIndexPattern);
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-feedback')).not.toBeInTheDocument();
   });
 
   it('should fetch ESQL extensions when activeSolutionId and queryForRecommendedQueries are present and the popover is open', async () => {

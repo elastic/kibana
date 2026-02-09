@@ -6,7 +6,6 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
 import {
   ENTITY_LATEST,
   ENTITY_BASE_PREFIX,
@@ -16,16 +15,17 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getComponentTemplateName } from './component_templates';
+import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
 
-export const getLatestIndexTemplateId = (definition: EntityDefinition) =>
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
+export const getLatestIndexTemplateId = (namespace: string) =>
+  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_security_${namespace}_index_template` as const;
 
 export const getLatestEntityIndexTemplateConfig = (
-  definition: EntityDefinition
+  namespace: string
 ): IndicesPutIndexTemplateRequest => ({
-  name: getLatestIndexTemplateId(definition),
+  name: getLatestIndexTemplateId(namespace),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
@@ -33,18 +33,24 @@ export const getLatestEntityIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getComponentTemplateName(definition.id)],
+  composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
+    ...ALL_ENTITY_TYPES.map((t) => getComponentTemplateName(t, namespace)),
+  ],
+  ignore_missing_component_templates: [
+    ...ALL_ENTITY_TYPES.map((t) => getComponentTemplateName(t, namespace)),
+  ],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
       dataset: ENTITY_LATEST,
-      definitionId: definition.id,
+      namespace,
     }),
   ],
   priority: 200,
   template: {
     aliases: {
-      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_LATEST })]: {},
+      [getEntitiesAliasPattern({ dataset: ENTITY_LATEST })]: {},
     },
     mappings: {
       _meta: { n: '1.6.0' },

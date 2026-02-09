@@ -52,6 +52,7 @@ import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
+import type { UiamServicePublic } from '../uiam';
 
 export { Actions } from '@kbn/security-authorization-core';
 
@@ -66,6 +67,7 @@ interface AuthorizationServiceSetupParams {
   kibanaIndexName: string;
 
   getSpacesService(): SpacesService | undefined;
+  getUiamService(): UiamServicePublic | undefined;
 
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 
@@ -105,6 +107,7 @@ export class AuthorizationService {
     features,
     kibanaIndexName,
     getSpacesService,
+    getUiamService,
     getCurrentUser,
     customBranding,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
@@ -118,6 +121,7 @@ export class AuthorizationService {
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
+      getUiamService,
       this.applicationName
     );
 

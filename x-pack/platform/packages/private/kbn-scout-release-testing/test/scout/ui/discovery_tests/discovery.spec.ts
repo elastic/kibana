@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
 import Papa from 'papaparse';

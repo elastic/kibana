@@ -20,12 +20,9 @@ import { createCustomizationService } from '../../customizations/customization_s
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
-import { createRuntimeStateManager } from './state_management/redux';
-import { BehaviorSubject } from 'rxjs';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -57,12 +54,6 @@ jest.mock('../../context_awareness', () => {
     useRootProfile: () => mockRootProfileState,
   };
 });
-
-jest.mock('./state_management/redux/runtime_state', () => ({
-  ...jest.requireActual('./state_management/redux/runtime_state'),
-  createRuntimeStateManager: jest.fn(),
-}));
-const mockCreateRuntimeStateManager = jest.mocked(createRuntimeStateManager);
 
 function getServicesMock(
   hasESData = true,
@@ -120,10 +111,6 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
-    mockCreateRuntimeStateManager.mockReturnValue({
-      adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-      tabs: { byId: {} },
-    });
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {

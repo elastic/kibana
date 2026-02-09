@@ -103,7 +103,7 @@
     "@kbn/lens-common",
     "@kbn/crypto-browser",
     "@kbn/cps",
-    "@kbn/kql",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

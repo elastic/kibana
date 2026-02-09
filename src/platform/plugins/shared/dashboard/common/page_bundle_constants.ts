@@ -19,3 +19,6 @@ export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
   use_time_range: true,
   use_filters: true,
 };
+
+// Do not change constant value - part of dashboard REST API
+export const DASHBOARD_DRILLDOWN_TYPE = 'dashboard_drilldown';

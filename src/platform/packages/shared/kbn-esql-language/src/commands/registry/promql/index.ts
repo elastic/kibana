@@ -10,11 +10,15 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
+import { validate } from './validate';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
 
 const promqlCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   columnsAfter,
+  validate,
+  summary,
 };
 
 export const promqlCommand = {

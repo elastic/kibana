@@ -71,7 +71,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await searchSpace.navigateTo(spaceCreated.id);
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
           await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
-          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -112,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have quick stats', async () => {
           await pageObjects.searchIndexDetailsPage.expectQuickStats();
           await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
-          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227.00 B');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
         });
 

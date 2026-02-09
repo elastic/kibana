@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type ScoutPage } from '@kbn/scout';
+import { type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -68,6 +69,9 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
   }) => {
     // Wait for the page content to load - the empty prompt should be visible
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
+
+    // Verify the Technical Preview badge is visible when AI suggestions are available
+    await expect(page.getByText('Technical Preview')).toBeVisible();
 
     // Verify the generate button is visible with connector
     await expect(pageObjects.streams.getSuggestPipelineButton()).toBeVisible();

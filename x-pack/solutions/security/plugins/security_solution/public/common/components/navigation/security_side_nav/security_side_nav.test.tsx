@@ -242,4 +242,26 @@ describe('SecuritySideNav', () => {
       );
     });
   });
+
+  describe('enableAlertsAndAttacksAlignment setting', () => {
+    it('should call getNavCategories with true when setting is enabled', () => {
+      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(true),
+        })
+      );
+    });
+
+    it('should call getNavCategories with false when setting is disabled', () => {
+      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false),
+        })
+      );
+    });
+  });
 });

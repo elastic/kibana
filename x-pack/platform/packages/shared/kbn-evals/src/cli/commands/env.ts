@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Command } from '@kbn/dev-cli-runner';
+
+const ENV_DOCS = [
+  {
+    name: 'EVALUATION_CONNECTOR_ID',
+    description: 'Connector used for LLM-as-a-judge evaluators (required).',
+    example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
+  },
+  {
+    name: 'EVALUATION_REPETITIONS',
+    description: 'Overrides configured repetition count for evals.',
+    example: 'EVALUATION_REPETITIONS=3',
+  },
+  {
+    name: 'KBN_EVALS_EXECUTOR',
+    description: 'Switch to the Phoenix-backed executor.',
+    example: 'KBN_EVALS_EXECUTOR=phoenix',
+  },
+  {
+    name: 'PHOENIX_BASE_URL',
+    description: 'Phoenix base URL used when KBN_EVALS_EXECUTOR=phoenix.',
+    example: 'PHOENIX_BASE_URL=http://localhost:6006',
+  },
+  {
+    name: 'PHOENIX_API_KEY',
+    description: 'Phoenix API key used when KBN_EVALS_EXECUTOR=phoenix.',
+    example: 'PHOENIX_API_KEY=...',
+  },
+  {
+    name: 'TRACING_ES_URL',
+    description: 'Elasticsearch URL for trace-based evaluators.',
+    example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
+  },
+  {
+    name: 'EVALUATIONS_ES_URL',
+    description: 'Elasticsearch URL where evaluation results are exported.',
+    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+  },
+  {
+    name: 'SELECTED_EVALUATORS',
+    description:
+      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',
+    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality"',
+  },
+  {
+    name: 'RAG_EVAL_K',
+    description:
+      'Overrides default k used by RAG evaluators. Supports comma-separated values for multi-K evaluation.',
+    example: 'RAG_EVAL_K=5,10,20',
+  },
+  {
+    name: 'INDEX_FOCUSED_RAG_EVAL',
+    description: 'Restrict RAG evaluators to ground-truth indices.',
+    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+  },
+];
+
+export const envCmd: Command<void> = {
+  name: 'env',
+  description: `
+  List environment variables supported by the eval runner.
+
+  Example:
+    node scripts/evals env
+  `,
+  run: ({ log }) => {
+    log.info('Environment variables:');
+
+    const nameWidth = Math.max('Name'.length, ...ENV_DOCS.map((entry) => entry.name.length));
+    const descWidth = Math.max(
+      'Description'.length,
+      ...ENV_DOCS.map((entry) => entry.description.length)
+    );
+
+    log.info(`${'Name'.padEnd(nameWidth)}  ${'Description'.padEnd(descWidth)}  Example`);
+    ENV_DOCS.forEach((entry) => {
+      log.info(
+        `${entry.name.padEnd(nameWidth)}  ${entry.description.padEnd(descWidth)}  ${entry.example}`
+      );
+    });
+  },
+};

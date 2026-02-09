@@ -55,6 +55,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
             // Parse QRadar XML
             const parser = new QradarRulesXmlParser(xml);
@@ -65,6 +66,16 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
             if (!qradarRules || qradarRules.length === 0) {
               return res.badRequest({
                 body: { message: 'No rules found in the provided XML' },
+              });
+            }
+
+            const isEligibleForTranslation = qradarRules.some(
+              (rule) => rule.rule_type !== 'building_block'
+            );
+
+            if (!isEligibleForTranslation) {
+              return res.badRequest({
+                body: { message: 'No valid rules could be extracted from the XML' },
               });
             }
 
@@ -115,7 +126,9 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
 
             // Identify reference sets from rule data and create resource records without content
             // This allows tracking missing resources that need to be uploaded
-            const resourceIdentifier = new RuleResourceIdentifier('qradar');
+            const resourceIdentifier = new RuleResourceIdentifier('qradar', {
+              experimentalFeatures,
+            });
             const extractedResources = await resourceIdentifier.fromOriginals(
               rulesToBeCreated.map((r) => r.original_rule)
             );

@@ -71,7 +71,7 @@ export class DataViewsPublicPlugin
 
   public start(
     core: CoreStart,
-    { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
+    { fieldFormats, contentManagement, cps }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, application } = core;
 
@@ -106,7 +106,13 @@ export class DataViewsPublicPlugin
       getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
-      getIndices: (props) => getIndices({ ...props, http: core.http }),
+      getIndices: (props) =>
+        getIndices({
+          ...props,
+          http: core.http,
+          projectRouting:
+            'projectRouting' in props ? props.projectRouting : cps?.cpsManager?.getProjectRouting(),
+        }),
       getRollupsEnabled: () => this.rollupsEnabled,
       scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
     });

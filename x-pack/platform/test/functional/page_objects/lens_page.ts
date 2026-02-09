@@ -113,13 +113,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Clicks a visualize list item's title (in the visualize app).
+     * Clicks a visualize list item's title (visualize app or dashboard Visualizations tab).
      *
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
       return retry.try(async () => {
-        await testSubjects.click(`visListingTitleLink-${title}`);
+        const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
+          ? `visualizationListingListingTitleLink-${title}`
+          : (await testSubjects.exists(`visListingTitleLink-${title}`))
+          ? `visListingTitleLink-${title}`
+          : `visualizationListingTitleLink-${title}`;
+        await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
     },
@@ -1886,7 +1891,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
-        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+        await retry.waitFor('dashboard visualizations list to load', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('#/list/visualizations');
+        });
       });
     },
 

@@ -89,11 +89,10 @@ export const StreamDetailGeneralData = ({
         }),
       });
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
           defaultMessage: 'Failed to update lifecycle',
         }),
-        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setUpdateInProgress(false);

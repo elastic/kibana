@@ -52,6 +52,7 @@ describe('Quick search visor', () => {
       isSpaceReduced: false,
       isVisible: true,
       onUpdateAndSubmitQuery: jest.fn(),
+      onToggleVisor: jest.fn(),
     };
   });
 
@@ -82,6 +83,14 @@ describe('Quick search visor', () => {
     await waitFor(() => {
       expect(screen.getAllByText('test_index').length).toBeGreaterThan(0);
       expect(screen.getAllByText('logs').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should default to the first fetched source when query has no source', async () => {
+    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x =1' }));
+
+    await waitFor(() => {
+      expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
     });
   });
 });

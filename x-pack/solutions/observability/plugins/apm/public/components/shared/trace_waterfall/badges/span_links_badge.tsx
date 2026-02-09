@@ -58,7 +58,7 @@ export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Pr
                 defaultMessage: 'Open span links details',
               }),
             }
-          : [])}
+          : { onClick: undefined, onClickAriaLabel: undefined })} // this is needed to un-confuse TypeScript
       >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage: '{total} {total, plural, one {Span link} other {Span links}}',

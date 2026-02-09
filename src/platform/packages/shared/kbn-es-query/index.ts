@@ -143,6 +143,7 @@ export {
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
   isCCSRemoteIndexName,
+  getTimeZoneFromSettings,
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';

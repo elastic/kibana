@@ -49,6 +49,11 @@ export const useMetricFields = (): UseMetricFieldsReturn => {
     const fields: MetricField[] = [];
 
     for (const metricField of metricFields) {
+      // Filter out legacy histogram metric types
+      if (metricField.type === 'histogram') {
+        continue;
+      }
+
       const row = getSampleRow(metricField.name);
       if (row) {
         const enriched = enrichMetricField(metricField, dimensions, row);

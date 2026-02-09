@@ -58,6 +58,41 @@ export default function ({ getService }: FtrProviderContext) {
         createdToolIds.push(mockTool.id);
       });
 
+      it('should create a tool with all supported parameter types', async () => {
+        const toolWithAllParamTypes = {
+          id: 'all-param-types-tool',
+          type: 'esql',
+          description: 'A tool with all parameter types',
+          tags: ['test'],
+          configuration: {
+            query:
+              'FROM my_cases | WHERE case_id == ?case_id AND priority >= ?priority AND score >= ?score AND is_active == ?is_active AND @timestamp >= ?since AND owner == ?owners',
+            params: {
+              case_id: { type: 'string', description: 'Case ID' },
+              priority: { type: 'integer', description: 'Priority' },
+              score: { type: 'float', description: 'Score' },
+              is_active: { type: 'boolean', description: 'Is active' },
+              since: { type: 'date', description: 'Since timestamp' },
+              owners: { type: 'array', description: 'Owners list' },
+            },
+          },
+        };
+
+        const response = await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(toolWithAllParamTypes)
+          .expect(200);
+
+        expect(response.body).to.have.property('id', toolWithAllParamTypes.id);
+        expect(response.body).to.have.property('configuration');
+        expect(response.body.configuration.params).to.eql(
+          toolWithAllParamTypes.configuration.params
+        );
+
+        createdToolIds.push(toolWithAllParamTypes.id);
+      });
+
       it('should validate tool ID format', async () => {
         const invalidTool = {
           ...mockTool,

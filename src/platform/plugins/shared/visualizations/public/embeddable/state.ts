@@ -52,12 +52,13 @@ export const deserializeState = async (state: VisualizeEmbeddableState | undefin
 
 export const deserializeSavedObjectState = async ({
   savedObjectId,
-  enhancements,
+  drilldowns,
   uiState,
   timeRange,
   title: embeddableTitle,
   description: embeddableDescription,
-  hidePanelTitles,
+
+  hide_title,
 }: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
   const {
@@ -101,12 +102,12 @@ export const deserializeSavedObjectState = async ({
     },
     title: panelTitle,
     description: panelDescription,
-    hidePanelTitles,
+    hide_title,
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
     ...(timeRange ? { timeRange } : {}),
-    ...(enhancements ? { enhancements } : {}),
+    ...(drilldowns ? { drilldowns } : {}),
   } as VisualizeRuntimeState;
 };
 

@@ -45,7 +45,7 @@ export const useHighlightedFieldsPrivilege = ({
   rule,
   isExistingRule,
 }: UseHighlightedFieldsPrivilegeParams): UseHighlightedFieldsPrivilegeResult => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const mlCapabilities = useMlCapabilities();
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 

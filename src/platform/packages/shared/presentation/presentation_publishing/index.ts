@@ -177,6 +177,7 @@ export {
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
+export { transformTitlesOut } from './interfaces/titles/bwc/titles_transforms';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
@@ -184,4 +185,5 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
-export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';
+export { SAVED_OBJECT_REF_NAME } from './constants';
+export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';

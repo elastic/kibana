@@ -171,8 +171,8 @@ describe('esql query helpers', () => {
       ).toBe('@timestamp');
     });
 
-    it('should return undefined for PromQL if there is no time param', () => {
-      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBeUndefined();
+    it('should return @timestamp for PromQL if there is no time param', () => {
+      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
     });
   });
 

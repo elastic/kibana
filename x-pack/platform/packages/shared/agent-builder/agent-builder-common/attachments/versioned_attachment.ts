@@ -11,11 +11,13 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 /**
  * Represents a single version of an attachment's content.
  */
-export interface AttachmentVersion<DataType = unknown> {
+export interface AttachmentVersion<DataType = unknown, RawDataType = unknown> {
   /** Version number (starts at 1) */
   version: number;
   /** The attachment data for this version */
   data: DataType;
+  /** The attachment raw data for by reference attachments */
+  raw_data?: RawDataType;
   /** When this version was created */
   created_at: string;
   /** Hash of the content for deduplication */
@@ -46,9 +48,33 @@ export interface VersionedAttachment<
   active?: boolean;
   /** Whether the attachment should be hidden from the user */
   hidden?: boolean;
+  /** Whether the attachment is read-only in this conversation */
+  readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
 }
+
+/**
+ * Operation performed on an attachment during a round.
+ */
+export const ATTACHMENT_REF_OPERATION = {
+  read: 'read',
+  created: 'created',
+  updated: 'updated',
+  deleted: 'deleted',
+  restored: 'restored',
+} as const;
+
+export type AttachmentRefOperation =
+  (typeof ATTACHMENT_REF_OPERATION)[keyof typeof ATTACHMENT_REF_OPERATION];
+
+export const ATTACHMENT_REF_ACTOR = {
+  user: 'user',
+  agent: 'agent',
+  system: 'system',
+} as const;
+
+export type AttachmentRefActor = (typeof ATTACHMENT_REF_ACTOR)[keyof typeof ATTACHMENT_REF_ACTOR];
 
 /**
  * Reference to a specific version of an attachment.
@@ -59,6 +85,10 @@ export interface AttachmentVersionRef {
   attachment_id: string;
   /** Version number being referenced */
   version: number;
+  /** Operation performed on this attachment during the round */
+  operation?: AttachmentRefOperation;
+  /** Actor responsible for the operation during the round */
+  actor?: AttachmentRefActor;
 }
 
 /**
@@ -90,18 +120,37 @@ export interface VersionedAttachmentInput<
   description?: string;
   /** Whether the attachment should be hidden */
   hidden?: boolean;
+  /** Whether the attachment should be read-only */
+  readonly?: boolean;
 }
 
 // Zod schemas for validation
 
+export const attachmentRefOperationSchema = z.enum([
+  ATTACHMENT_REF_OPERATION.read,
+  ATTACHMENT_REF_OPERATION.created,
+  ATTACHMENT_REF_OPERATION.updated,
+  ATTACHMENT_REF_OPERATION.deleted,
+  ATTACHMENT_REF_OPERATION.restored,
+]);
+
+export const attachmentRefActorSchema = z.enum([
+  ATTACHMENT_REF_ACTOR.user,
+  ATTACHMENT_REF_ACTOR.agent,
+  ATTACHMENT_REF_ACTOR.system,
+]);
+
 export const attachmentVersionRefSchema = z.object({
   attachment_id: z.string(),
   version: z.number().int().positive(),
+  operation: attachmentRefOperationSchema.optional(),
+  actor: attachmentRefActorSchema.optional(),
 });
 
 export const attachmentVersionSchema = z.object({
   version: z.number().int().positive(),
   data: z.unknown(),
+  raw_data: z.unknown().optional(),
   created_at: z.string(),
   content_hash: z.string(),
   estimated_tokens: z.number().int().optional(),
@@ -115,6 +164,7 @@ export const versionedAttachmentSchema = z.object({
   description: z.string().optional(),
   active: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  readonly: z.boolean().optional(),
   client_id: z.string().optional(),
 });
 
@@ -124,6 +174,7 @@ export const versionedAttachmentInputSchema = z.object({
   data: z.unknown(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
+  readonly: z.boolean().optional(),
 });
 
 export const attachmentDiffSchema = z.object({

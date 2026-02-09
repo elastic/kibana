@@ -17,6 +17,7 @@ import {
   EmptyViewerState,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
@@ -59,6 +60,10 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
     handleConfirmExceptionFlyout,
   } = useListWithSearchComponent(list, refreshExceptions);
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
+
+  const canAddException =
+    listType === ExceptionListTypeEnum.ENDPOINT ? canWriteEndpointExceptions : canEditExceptions;
 
   return (
     <>
@@ -109,9 +114,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               isSearching={viewerStatus === ViewerStatus.SEARCHING}
               isButtonFilled={false}
               buttonIconType="plusInCircle"
-              canAddException={
-                !(listType === ExceptionListTypeEnum.ENDPOINT && canWriteEndpointExceptions)
-              }
+              canAddException={canAddException}
             />
             <ListExceptionItems
               viewerStatus={exceptionViewerStatus as ViewerStatus}

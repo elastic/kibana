@@ -1,0 +1,40 @@
+version: '1'
+name: 'sources.github.search_repositories'
+description: 'Search for GitHub repositories'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+  - name: minimal_output
+    type: boolean
+    default: true
+  - name: order
+    type: string
+    default: "desc"
+    description: "Sort order. Valid values: asc, desc"
+  - name: page
+    type: number
+    default: 1
+  - name: per_page
+    type: number
+    default: 10
+  - name: sort
+    type: string
+    default: "stars"
+    description: "Sort field. Valid values: stars, forks, help-wanted-issues, updated"
+steps:
+  - name: search-repositories
+    type: mcp.callTool
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "search_repositories"
+      arguments:
+        query: "${{inputs.query}}"
+        minimalOutput: "${{inputs.minimal_output}}"
+        order: "${{inputs.order}}"
+        page: "${{inputs.page}}"
+        perPage: "${{inputs.per_page}}"
+        sort: "${{inputs.sort}}"

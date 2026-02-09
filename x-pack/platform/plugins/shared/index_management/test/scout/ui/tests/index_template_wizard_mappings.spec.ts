@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, EuiFieldTextWrapper } from '@kbn/scout';
+import { EuiFieldTextWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => {

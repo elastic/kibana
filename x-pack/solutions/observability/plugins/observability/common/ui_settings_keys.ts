@@ -12,6 +12,8 @@ export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvi
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
+export const enableInfrastructureAssetCustomDashboards =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
