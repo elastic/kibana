@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout-security';
+import type { SecurityPageObjects, ScoutPage } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
 import { AssistantPage } from './assistant';
 
-export interface AiAssistantPageObjects extends PageObjects {
+export interface AiAssistantPageObjects extends SecurityPageObjects {
   assistant: AssistantPage;
 }
 
 export function extendPageObjects(
-  pageObjects: PageObjects,
+  pageObjects: SecurityPageObjects,
   page: ScoutPage
 ): AiAssistantPageObjects {
   return {

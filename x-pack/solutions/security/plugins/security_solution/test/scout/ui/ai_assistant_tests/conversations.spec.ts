@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, expect } from './fixtures';
+import { test } from './fixtures';
 import {
   azureConnectorPayload,
   bedrockConnectorPayload,

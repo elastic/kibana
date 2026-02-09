@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import type { KbnClient, EsClient } from '@kbn/scout-security';
-import type {
-  ConversationCreateProps,
-  ConversationResponse,
-  Provider,
-  ConversationCategory,
-} from '@kbn/elastic-assistant-common';
-import type {
-  PerformPromptsBulkActionRequestBody,
-  PromptCreateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas';
-
 // ── Connector payloads ──────────────────────────────────────────────────────
 
 export const azureConnectorPayload = {
@@ -40,10 +28,10 @@ export const bedrockConnectorPayload = {
 // ── Connector CRUD ──────────────────────────────────────────────────────────
 
 export async function createConnector(
-  kbnClient: KbnClient,
+  kbnClient: any,
   payload: typeof azureConnectorPayload | typeof bedrockConnectorPayload
 ): Promise<{ id: string }> {
-  const resp = await kbnClient.request<{ id: string }>({
+  const resp = await kbnClient.request({
     method: 'POST',
     path: '/api/actions/connector',
     body: payload,
@@ -51,21 +39,22 @@ export async function createConnector(
   return resp.data;
 }
 
-export async function createAzureConnector(kbnClient: KbnClient): Promise<{ id: string }> {
+export async function createAzureConnector(kbnClient: any): Promise<{ id: string }> {
   return createConnector(kbnClient, azureConnectorPayload);
 }
 
-export async function createBedrockConnector(kbnClient: KbnClient): Promise<{ id: string }> {
+export async function createBedrockConnector(kbnClient: any): Promise<{ id: string }> {
   return createConnector(kbnClient, bedrockConnectorPayload);
 }
 
-export async function deleteConnectors(kbnClient: KbnClient): Promise<void> {
+export async function deleteConnectors(kbnClient: any): Promise<void> {
   try {
-    const resp = await kbnClient.request<{ data: Array<{ id: string }> }>({
+    const resp = await kbnClient.request({
       method: 'GET',
       path: '/api/actions/connectors',
     });
-    for (const connector of resp.data ?? []) {
+    const connectors: Array<{ id: string }> = resp.data ?? [];
+    for (const connector of connectors) {
       await kbnClient.request({
         method: 'DELETE',
         path: `/api/actions/connector/${connector.id}`,
@@ -78,9 +67,7 @@ export async function deleteConnectors(kbnClient: KbnClient): Promise<void> {
 
 // ── Conversation mock factory ───────────────────────────────────────────────
 
-export function getMockConversation(
-  overrides?: Partial<ConversationCreateProps>
-): ConversationCreateProps {
+export function getMockConversation(overrides?: Record<string, unknown>): Record<string, unknown> {
   return {
     title: 'Test Conversation',
     apiConfig: {
@@ -88,13 +75,13 @@ export function getMockConversation(
       connectorId: '',
       defaultSystemPromptId: 'default-system-prompt',
       model: 'test-model',
-      provider: 'OpenAI' as Provider,
+      provider: 'OpenAI',
     },
     excludeFromLastConversationStorage: false,
     isDefault: false,
     messages: [],
     replacements: {},
-    category: 'assistant' as ConversationCategory,
+    category: 'assistant',
     ...overrides,
   };
 }
@@ -102,11 +89,11 @@ export function getMockConversation(
 // ── Conversation CRUD ───────────────────────────────────────────────────────
 
 export async function createConversation(
-  kbnClient: KbnClient,
-  overrides?: Partial<ConversationCreateProps>
-): Promise<ConversationResponse> {
+  kbnClient: any,
+  overrides?: Record<string, unknown>
+): Promise<any> {
   const body = getMockConversation(overrides);
-  const resp = await kbnClient.request<ConversationResponse>({
+  const resp = await kbnClient.request({
     method: 'POST',
     path: '/api/security_ai_assistant/current_user/conversations',
     body,
@@ -114,11 +101,11 @@ export async function createConversation(
   return resp.data;
 }
 
-export async function deleteConversations(esClient: EsClient): Promise<void> {
+export async function deleteConversations(esClient: any): Promise<void> {
   try {
     await esClient.deleteByQuery({
       index: '.kibana-elastic-ai-assistant-conversations-*',
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });
@@ -129,7 +116,9 @@ export async function deleteConversations(esClient: EsClient): Promise<void> {
 
 // ── Prompt mock factory ─────────────────────────────────────────────────────
 
-export function getMockCreatePrompt(overrides?: Partial<PromptCreateProps>): PromptCreateProps {
+export function getMockCreatePrompt(
+  overrides?: Record<string, unknown>
+): Record<string, unknown> {
   return {
     name: 'Mock Prompt Name',
     promptType: 'quick',
@@ -142,10 +131,10 @@ export function getMockCreatePrompt(overrides?: Partial<PromptCreateProps>): Pro
 // ── Prompt CRUD ─────────────────────────────────────────────────────────────
 
 export async function createPromptsBulk(
-  kbnClient: KbnClient,
-  prompts: Array<Partial<PromptCreateProps>>
+  kbnClient: any,
+  prompts: Array<Record<string, unknown>>
 ): Promise<void> {
-  const body: PerformPromptsBulkActionRequestBody = {
+  const body = {
     create: prompts.map((p) => getMockCreatePrompt(p)),
   };
   await kbnClient.request({
@@ -155,11 +144,11 @@ export async function createPromptsBulk(
   });
 }
 
-export async function deletePrompts(esClient: EsClient): Promise<void> {
+export async function deletePrompts(esClient: any): Promise<void> {
   try {
     await esClient.deleteByQuery({
       index: '.kibana-elastic-ai-assistant-prompts-*',
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });
@@ -170,15 +159,15 @@ export async function deletePrompts(esClient: EsClient): Promise<void> {
 
 // ── Alerts & Rules ──────────────────────────────────────────────────────────
 
-export async function deleteAlertsAndRules(kbnClient: KbnClient): Promise<void> {
+export async function deleteAlertsAndRules(kbnClient: any): Promise<void> {
   try {
-    // Delete rules
-    const rulesResp = await kbnClient.request<{ data: Array<{ id: string }> }>({
+    const rulesResp = await kbnClient.request({
       method: 'GET',
       path: '/api/detection_engine/rules/_find',
       query: { per_page: 100 },
     });
-    for (const rule of rulesResp.data?.data ?? []) {
+    const rules: Array<{ id: string }> = rulesResp.data?.data ?? [];
+    for (const rule of rules) {
       await kbnClient.request({
         method: 'DELETE',
         path: '/api/detection_engine/rules',
@@ -191,10 +180,10 @@ export async function deleteAlertsAndRules(kbnClient: KbnClient): Promise<void> 
 }
 
 export async function createRule(
-  kbnClient: KbnClient,
+  kbnClient: any,
   rule: Record<string, unknown>
 ): Promise<{ id: string; name: string }> {
-  const resp = await kbnClient.request<{ id: string; name: string }>({
+  const resp = await kbnClient.request({
     method: 'POST',
     path: '/api/detection_engine/rules',
     body: rule,
@@ -204,7 +193,7 @@ export async function createRule(
 
 // ── License ─────────────────────────────────────────────────────────────────
 
-export async function startBasicLicense(kbnClient: KbnClient): Promise<void> {
+export async function startBasicLicense(kbnClient: any): Promise<void> {
   await kbnClient.request({
     method: 'POST',
     path: '/_license/start_basic?acknowledge=true',

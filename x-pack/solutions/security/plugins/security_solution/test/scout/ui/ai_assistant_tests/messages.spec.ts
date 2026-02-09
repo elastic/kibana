@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { test, expect } from './fixtures';
 import {
   createAzureConnector,
@@ -26,7 +25,7 @@ const mockConvo = {
       timestamp: '2024-08-15T18:30:37.873Z',
       content:
         'You are a helpful, expert assistant who answers questions about Elastic Security.\n\nGive a query I can run in the timeline',
-      role: 'user' as MessageRole,
+      role: 'user',
     },
     {
       timestamp: '2024-08-15T18:31:24.008Z',
@@ -34,7 +33,7 @@ const mockConvo = {
         'To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n```kql\n' +
         mockTimelineQuery +
         '\n```',
-      role: 'assistant' as MessageRole,
+      role: 'assistant',
       traceData: {
         traceId: '74d2fac29753adebd5c479e3d9e45da3',
         transactionId: 'e13d97d138b8a13c',
