@@ -34,16 +34,22 @@ export interface InternalReportParams {
   timezone?: string;
 }
 
-export interface GenerateSystemReportRequestParams {
+const paramsSchema = schema.recordOf(schema.string(), schema.string());
+const querySchema = schema.nullable(
+  schema.recordOf(schema.string(), schema.maybe(schema.string()))
+);
+const bodySchema = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.any())));
+
+export interface GenerateSystemReportRequestParams<
+  P extends typeof paramsSchema,
+  Q extends typeof querySchema,
+  B extends typeof bodySchema
+> {
   reportParams: InternalReportParams;
-  request: KibanaRequest;
+  request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
 }
-
-const Params = schema.recordOf(schema.string(), schema.string());
-const Query = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.string())));
-const Body = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.any())));
 
 interface GenerateSystemReportResult {
   report: SavedReport;
@@ -62,9 +68,9 @@ const SUPPORTED_INDICES = ['.fleet-agents'];
  * to encapsulate creating reports derived from system indices
  */
 export class GenerateSystemReportRequestHandler<
-  P extends typeof Params,
-  Q extends typeof Query,
-  B extends typeof Body
+  P extends typeof paramsSchema,
+  Q extends typeof querySchema,
+  B extends typeof bodySchema
 > extends RequestHandler<P, Q, B, SavedReport> {
   private handleResponse: HandleResponseFunc;
 
@@ -196,11 +202,15 @@ export type HandleGenerateSystemReportRequestFunc = ReturnType<
   typeof handleGenerateSystemReportRequest
 >;
 
-export async function handleGenerateSystemReportRequest(
+export async function handleGenerateSystemReportRequest<
+  P extends typeof paramsSchema = typeof paramsSchema,
+  Q extends typeof querySchema = typeof querySchema,
+  B extends typeof bodySchema = typeof bodySchema
+>(
   reporting: ReportingCore,
   logger: Logger,
   path: string,
-  requestParams: GenerateSystemReportRequestParams,
+  requestParams: GenerateSystemReportRequestParams<P, Q, B>,
   handleResponse: HandleResponseFunc
 ) {
   const { reportParams, request: req, response: res, context } = requestParams;
@@ -236,13 +246,13 @@ export async function handleGenerateSystemReportRequest(
     objectType: 'search',
     columns: searchSource.fields as string[],
   };
-  const requestHandler = new GenerateSystemReportRequestHandler(
+  const requestHandler = new GenerateSystemReportRequestHandler<P, Q, B>(
     {
       reporting,
       user,
       context: reportingContext,
       path,
-      req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
+      req,
       res,
       logger,
     },

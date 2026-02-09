@@ -13,7 +13,7 @@ import type { ReportingCore } from '../../core';
 
 import { getUser } from './get_user';
 
-type ReportingUser = AuthenticatedUser | false;
+export type ReportingUser = AuthenticatedUser | false;
 
 interface GetAuthorizedUserOptions {
   /** If true, throws if security is disabled. Default: false */

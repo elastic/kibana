@@ -269,7 +269,7 @@ describe('handleGenerateSystemReportRequest', () => {
   let mockRequest: KibanaRequest;
   let mockResponseFactory: jest.Mocked<KibanaResponseFactory>;
   let mockHandleResponse: HandleResponseFunc;
-  let requestParams: GenerateSystemReportRequestParams;
+  let requestParams: GenerateSystemReportRequestParams<any, any, any>;
 
   beforeEach(async () => {
     const mockReportingConfig = createMockConfigSchema({});
