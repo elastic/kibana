@@ -380,6 +380,11 @@ enabled:
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
+  - x-pack/performance/journeys_e2e/streams_listing_page.ts
+  - x-pack/performance/journeys_e2e/streams_data_quality.ts
+  - x-pack/performance/journeys_e2e/streams_processing_step.ts
+  - x-pack/performance/journeys_e2e/streams_retention.ts
+  - x-pack/performance/journeys_e2e/streams_field_mapping.ts
   - x-pack/platform/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
