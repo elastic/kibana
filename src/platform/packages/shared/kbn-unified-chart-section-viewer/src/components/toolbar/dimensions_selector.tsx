@@ -8,8 +8,9 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiBadge } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -18,6 +19,12 @@ import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
+import {
+  findAvailableEntities,
+  findEntityByAttribute,
+  CATEGORY_ORDER,
+  CATEGORY_LABELS,
+} from '../../common/entity_definitions';
 
 interface DimensionsSelectorProps {
   fields: Array<{ dimensions: Dimension[] }>;
@@ -74,20 +81,94 @@ export const DimensionsSelector = ({
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    return dimensions.map<SelectableEntry>((dimension) => {
+    const dimensionNames = dimensions.map((d) => d.name);
+    const availableEntities = findAvailableEntities(dimensionNames);
+    const matchedAttributes = new Set(availableEntities.map((e) => e.identifyingAttribute));
+
+    const createOption = (
+      dimension: Dimension,
+      entity?: { displayName: string; iconType: string; identifyingAttribute: string }
+    ): SelectableEntry => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
       const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
 
       return {
         value: dimension.name,
-        label: dimension.name,
+        label: entity ? entity.displayName : dimension.name,
         checked: isSelected ? 'on' : undefined,
-        // In single-selection mode, don't check intersections since we're replacing, not adding
         disabled: singleSelection ? false : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
+        prepend: entity ? <EuiIcon type={entity.iconType} size="s" /> : undefined,
+        append: entity ? (
+          <EuiBadge color="hollow" css={css({ marginLeft: 4 })}>
+            {entity.identifyingAttribute}
+          </EuiBadge>
+        ) : undefined,
       };
-    });
+    };
+
+    // Group entities by category
+    const entityOptions: SelectableEntry[] = [];
+    for (const category of CATEGORY_ORDER) {
+      const entitiesInCategory = availableEntities.filter((e) => e.category === category);
+      if (entitiesInCategory.length === 0) continue;
+
+      // Add category group label
+      entityOptions.push({
+        label: CATEGORY_LABELS[category],
+        isGroupLabel: true,
+        key: `category-${category}`,
+        value: '',
+      });
+
+      // Add entity options for this category
+      for (const entity of entitiesInCategory) {
+        const dimension = dimensions.find((d) => d.name === entity.identifyingAttribute);
+        if (dimension) {
+          entityOptions.push(createOption(dimension, entity));
+        }
+      }
+    }
+
+    // Other dimensions that don't match entities
+    const otherDimensions = dimensions.filter((d) => !matchedAttributes.has(d.name));
+
+    // Build final options array
+    const finalOptions: SelectableEntry[] = [];
+
+    if (entityOptions.length > 0) {
+      finalOptions.push({
+        label: i18n.translate('metricsExperience.dimensionsSelector.entitiesGroupLabel', {
+          defaultMessage: 'Entities',
+        }),
+        isGroupLabel: true,
+        key: 'entities-header',
+        value: '',
+      });
+      finalOptions.push(...entityOptions);
+    }
+
+    if (otherDimensions.length > 0) {
+      finalOptions.push({
+        label: i18n.translate('metricsExperience.dimensionsSelector.otherDimensionsGroupLabel', {
+          defaultMessage: 'Other dimensions',
+        }),
+        isGroupLabel: true,
+        key: 'other-dimensions-header',
+        value: '',
+      });
+      for (const dimension of otherDimensions) {
+        finalOptions.push(createOption(dimension));
+      }
+    }
+
+    // If no entities found, just return flat list
+    if (finalOptions.length === 0) {
+      return dimensions.map((dimension) => createOption(dimension));
+    }
+
+    return finalOptions;
   }, [
     dimensions,
     selectedNamesSet,
@@ -111,7 +192,11 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
-    const dimensionLabel = selectedDimensions[0]?.name;
+    const selectedDimension = selectedDimensions[0];
+
+    // Try to find entity for the selected dimension to display its name
+    const entity = selectedDimension ? findEntityByAttribute(selectedDimension.name) : undefined;
+    const dimensionLabel = entity ? entity.displayName : selectedDimension?.name;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>

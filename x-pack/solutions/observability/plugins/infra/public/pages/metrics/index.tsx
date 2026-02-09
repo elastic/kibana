@@ -58,6 +58,9 @@ const NodeDetail = dynamic(() =>
   import('./metric_detail').then((mod) => ({ default: mod.NodeDetail }))
 );
 const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.HostsPage })));
+const EsqlInventoryPage = dynamic(() =>
+  import('./esql_inventory').then((mod) => ({ default: mod.default }))
+);
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
@@ -137,6 +140,8 @@ export const InfrastructurePage = () => {
                 <Route path="/detail/:type/:node" component={NodeDetail} />
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
+                {/* ES|QL Inventory Prototype */}
+                <Route path="/esql-inventory" component={EsqlInventoryPage} />
 
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
                 <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
