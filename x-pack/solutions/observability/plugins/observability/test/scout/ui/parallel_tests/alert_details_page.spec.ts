@@ -65,9 +65,9 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
   test('should show a tabbed view', async ({ page, pageObjects }) => {
     await expect(async () => {
       await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
-      await expect(page.testSubj.locator('overviewTab')).toBeHidden();
-      await expect(page.testSubj.locator('metadataTab')).toBeHidden();
-      await expect(page.testSubj.locator('investigationGuideTab')).toBeHidden();
+      await expect(page.testSubj.locator('overviewTab')).toBeVisible();
+      await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+      await expect(page.testSubj.locator('investigationGuideTab')).toBeVisible();
       await expect(page.testSubj.locator('relatedAlertsTab')).toBeVisible();
       await expect(page.testSubj.locator('relatedDashboardsTab')).toBeVisible();
     }).toPass({ timeout: 60_000, intervals: [2_000] });
