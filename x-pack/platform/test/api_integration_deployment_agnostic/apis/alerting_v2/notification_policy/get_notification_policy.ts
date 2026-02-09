@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 
-const NOTIFICATION_POLICY_API_PATH = '/internal/alerting/v2/notification_policy';
+const NOTIFICATION_POLICY_API_PATH = '/internal/alerting/v2/notification_policies';
 const NOTIFICATION_POLICY_SO_TYPE = 'alerting_notification_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

@@ -6,15 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { UserServiceContract } from '../services/user_service/user_service';
 import type {
   CreateNotificationPolicyParams,
   NotificationPolicyResponse,
@@ -24,28 +21,23 @@ import type {
 @injectable()
 export class NotificationPolicyClient {
   constructor(
-    @inject(Request) private readonly request: KibanaRequest,
     @inject(NotificationPolicySavedObjectService)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
-    @inject(PluginStart('security')) private readonly security: SecurityPluginStart
+    @inject(UserService) private readonly userService: UserServiceContract
   ) {}
-
-  private async getUserName(): Promise<string | null> {
-    return this.security.authc.getCurrentUser(this.request)?.username ?? null;
-  }
 
   public async createNotificationPolicy(
     params: CreateNotificationPolicyParams
   ): Promise<NotificationPolicyResponse> {
-    const username = await this.getUserName();
+    const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
     const notificationPolicyAttributes: NotificationPolicySavedObjectAttributes = {
       name: params.data.name,
       workflow_id: params.data.workflow_id,
-      createdBy: username,
+      createdBy: userProfileUid,
       createdAt: now,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: now,
     };
 
@@ -86,7 +78,7 @@ export class NotificationPolicyClient {
     id: string;
     data: UpdateNotificationPolicyData;
   }): Promise<NotificationPolicyResponse> {
-    const username = await this.getUserName();
+    const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
     let existingAttrs: NotificationPolicySavedObjectAttributes;
@@ -106,7 +98,7 @@ export class NotificationPolicyClient {
       ...existingAttrs,
       ...(data.name !== undefined && { name: data.name }),
       ...(data.workflow_id !== undefined && { workflow_id: data.workflow_id }),
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: now,
     };
 
@@ -139,5 +131,9 @@ export class NotificationPolicyClient {
     }
 
     await this.notificationPolicySavedObjectService.delete({ id });
+  }
+
+  private async getUserProfileUid(): Promise<string | null> {
+    return this.userService.getCurrentUserProfileUid();
   }
 }
