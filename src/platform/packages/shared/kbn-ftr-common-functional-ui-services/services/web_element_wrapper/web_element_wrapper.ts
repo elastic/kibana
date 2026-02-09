@@ -11,7 +11,7 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { WebElement, WebDriver } from 'selenium-webdriver';
 import { By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
-import { load as cheerioLoad } from 'cheerio';
+import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
@@ -795,7 +795,7 @@ export class WebElementWrapper {
    */
   public async parseDomContent(): Promise<CustomCheerioStatic> {
     const htmlContent: any = await this.getAttribute('innerHTML');
-    const $: any = cheerioLoad(htmlContent, {
+    const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
