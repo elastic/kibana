@@ -64,14 +64,12 @@ export class DashboardAgentPlugin
       // Handle progressive panel additions
       if (isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(event, DASHBOARD_PANEL_ADDED_EVENT)) {
         const { dashboardAttachmentId, panel } = event.data.data;
-        console.log('Panel added event:', { dashboardAttachmentId, panel });
         this.attachmentStore.addPanel(dashboardAttachmentId, panel);
       }
 
       // Handle progressive panel removals
       if (isToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>(event, DASHBOARD_PANEL_REMOVED_EVENT)) {
         const { dashboardAttachmentId, panelId } = event.data.data;
-        console.log('Panel removed event:', { dashboardAttachmentId, panelId });
         this.attachmentStore.removePanel(dashboardAttachmentId, panelId);
       }
 
@@ -79,16 +77,13 @@ export class DashboardAgentPlugin
       if (isRoundCompleteEvent(event) && event.data.attachments) {
         for (const attachment of event.data.attachments) {
           if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
-            console.log('Dashboard attachment updated:', attachment);
             const latestVersion = getLatestVersion(attachment);
-            console.log('Latest version:', latestVersion);
             if (latestVersion?.data) {
               this.attachmentStore.updateAttachment(
                 attachment.id,
                 latestVersion.data as DashboardAttachmentData
               );
             } else {
-              console.log('No latestVersion.data found');
             }
           }
         }

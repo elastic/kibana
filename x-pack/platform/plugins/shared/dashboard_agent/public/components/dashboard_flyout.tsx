@@ -77,13 +77,7 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
 
   // Subscribe to attachment store for final state updates
   useEffect(() => {
-    console.log('DashboardFlyout: subscribing to attachmentStore, attachmentId:', attachmentId);
     const subscription = attachmentStore.state.subscribe((state) => {
-      console.log('DashboardFlyout: attachment store update:', {
-        stateAttachmentId: state?.attachmentId,
-        expectedAttachmentId: attachmentId,
-        hasData: !!state?.data,
-      });
       if (state?.attachmentId === attachmentId && state.data) {
         // Only update confirmed panel IDs when we receive a confirmed attachment update
         if (state.isConfirmed) {
@@ -92,12 +86,10 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
 
         // Only update if panels actually changed
         if (!arePanelsEqual(currentPanelsRef.current, state.data.panels)) {
-          console.log('DashboardFlyout: panels changed, refreshing dashboard');
           currentPanelsRef.current = state.data.panels;
           setData(state.data);
           setVersion((v) => v + 1);
         } else {
-          console.log('DashboardFlyout: panels unchanged, skipping refresh');
           // Still update non-panel data (title, description, etc.) without re-rendering dashboard
           setData(state.data);
         }
@@ -108,7 +100,6 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
 
   // Subscribe to UI events for progressive panel updates
   useEffect(() => {
-    console.log('DashboardFlyout: subscribing to chat$ for UI events');
     const subscription = chat$.subscribe((event) => {
       // Handle panel added event
       if (
@@ -119,13 +110,10 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
       ) {
         const { dashboardAttachmentId, panel } = event.data.data;
         if (dashboardAttachmentId === attachmentId) {
-          console.log('DashboardFlyout: panel added event for panelId:', panel.panelId);
           // Check if panel already exists
           if (currentPanelsRef.current.some((p) => p.panelId === panel.panelId)) {
-            console.log('DashboardFlyout: panel already exists, skipping', panel.panelId);
             return;
           }
-          console.log('DashboardFlyout: panel added, refreshing dashboard', panel);
           const newPanel = {
             type: 'lens' as const,
             panelId: panel.panelId,
@@ -152,10 +140,8 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
         if (dashboardAttachmentId === attachmentId) {
           // Check if panel exists before removing
           if (!currentPanelsRef.current.some((p) => p.panelId === panelId)) {
-            console.log('DashboardFlyout: panel not found, skipping removal', panelId);
             return;
           }
-          console.log('DashboardFlyout: panel removed, refreshing dashboard', panelId);
           setData((prev) => {
             const newPanels = prev.panels.filter((p) => p.panelId !== panelId);
             currentPanelsRef.current = newPanels;
@@ -180,7 +166,6 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
     const unconfirmedIds = panels
       .filter((p) => !confirmedPanelIds.has(p.panelId))
       .map((p) => p.panelId);
-    console.log('DashboardFlyout: unconfirmed panels:', unconfirmedIds);
     if (unconfirmedIds.length === 0) return '';
     const selectors = unconfirmedIds
       .map((id) => `.dshDashboardGrid__item[id="panel-${id}"]`)
@@ -217,7 +202,6 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
         }),
       };
     }
-    console.log('dashboardPanels', dashboardPanels);
 
     return {
       getInitialInput: () => ({

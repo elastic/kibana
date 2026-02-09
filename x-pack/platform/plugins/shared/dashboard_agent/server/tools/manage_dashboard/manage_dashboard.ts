@@ -113,7 +113,6 @@ const resolveExistingVisualizations = async ({
         title: vizConfig.title,
       };
       panels.push(panelEntry);
-      console.log('uuidv4()', panelEntry.panelId);
 
       events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
         dashboardAttachmentId,
@@ -216,7 +215,6 @@ const generateVisualizationsFromQueries = async ({
 
       panels.push(panelEntry);
 
-      console.log('uuidv4()', panelEntry.panelId);
       events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
         dashboardAttachmentId,
         panel: {
@@ -328,20 +326,10 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
       },
       { logger, attachments, esClient, modelProvider, events }
     ) => {
-      console.log('attachments', {
-        dashboardAttachmentId,
-        title,
-        description,
-        markdownContent,
-        visualizationQueries,
-        existingVisualizationIds,
-        removePanelIds,
-      });
       try {
         let currentAttachmentId: string;
         let previousData: DashboardAttachmentData;
         let isNewDashboard = false;
-        console.log('###dashboardAttachmentId', dashboardAttachmentId);
 
         if (dashboardAttachmentId) {
           // Updating existing dashboard

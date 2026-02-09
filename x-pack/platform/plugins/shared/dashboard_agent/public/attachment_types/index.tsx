@@ -92,7 +92,6 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onClick: ({ attachment }) => {
-      console.log('Dashboard attachment clicked:', attachment);
       const data = attachment.data as DashboardAttachmentData | undefined;
       if (!data) return;
 
