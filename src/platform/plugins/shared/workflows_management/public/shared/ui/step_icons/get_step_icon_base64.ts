@@ -136,7 +136,6 @@ function getDataUrlFromReactComponent(
           return srcValue;
         }
 
-        console.error('srcValue is not a data URL', srcValue);
         // If it's a regular URL/path, we can't easily convert it here
         // Fallback to default
         return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
@@ -156,7 +155,6 @@ function getDataUrlFromReactComponent(
     const base64 = btoa(htmlString);
     return `data:image/svg+xml;base64,${base64}`;
   } catch (error) {
-    console.error('Error converting React component to data URL', error);
     // Fallback to default SVG on any error
     return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
   }
