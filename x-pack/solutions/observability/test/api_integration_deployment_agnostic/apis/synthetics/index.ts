@@ -36,5 +36,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./edit_private_location'));
     loadTestFile(require.resolve('./get_private_location_monitors'));
     loadTestFile(require.resolve('./clean_up_extra_package_policies'));
+    loadTestFile(require.resolve('./migrate_legacy_policies'));
   });
 }
