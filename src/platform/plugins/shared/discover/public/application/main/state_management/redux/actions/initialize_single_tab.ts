@@ -232,6 +232,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // then get an updated copy of the saved search with the applied initial state
     const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
+      hasGlobalState: Object.keys(urlGlobalState || {}).length > 0,
       persistedTab,
       dataView,
       services,
