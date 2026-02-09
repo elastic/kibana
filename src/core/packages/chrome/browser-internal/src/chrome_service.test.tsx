@@ -65,7 +65,6 @@ Object.defineProperty(window, 'localStorage', {
 function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const notifications = notificationServiceMock.createStartContract();
   const deps = {
-    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     userProfile: userProfileServiceMock.createStart(),

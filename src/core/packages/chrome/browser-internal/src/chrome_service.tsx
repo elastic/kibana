@@ -11,7 +11,7 @@ import { defer, from, ReplaySubject } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -64,7 +64,6 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
-  analytics: AnalyticsServiceStart;
   featureFlags: FeatureFlagsStart;
 }
 
@@ -107,7 +106,6 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
-    analytics,
     featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
@@ -213,7 +211,6 @@ export class ChromeService {
       customBranding$: customBranding.customBranding$,
       appMenuActions$: application.currentActionMenu$,
       prependBasePath: http.basePath.prepend,
-      reportEvent: analytics.reportEvent,
     });
 
     // 8. Return chrome API

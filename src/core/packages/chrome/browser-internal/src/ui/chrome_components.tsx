@@ -67,7 +67,6 @@ export interface ChromeComponentsDeps {
   customBranding$: CustomBrandingStart['customBranding$'];
   appMenuActions$: InternalApplicationStart['currentActionMenu$'];
   prependBasePath: InternalHttpStart['basePath']['prepend'];
-  reportEvent: (eventType: string, eventData: object) => void;
 }
 
 export const createChromeComponents = ({
@@ -86,7 +85,6 @@ export const createChromeComponents = ({
   appMenuActions$,
   projectNavigation,
   prependBasePath,
-  reportEvent,
 }: ChromeComponentsDeps) => {
   const getClassicHeader = () => (
     <Header
@@ -144,7 +142,6 @@ export const createChromeComponents = ({
     const navProps: NavigationProps = {
       basePath,
       application,
-      reportEvent,
       navigationTree$: projectNavigation.navigationTree$,
       activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
