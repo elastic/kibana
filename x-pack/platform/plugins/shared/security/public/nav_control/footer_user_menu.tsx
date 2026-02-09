@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
 import React, { Fragment, useState } from 'react';
@@ -103,8 +104,18 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
 
   const wrapperStyles = css`
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     width: 100%;
+    gap: ${euiTheme.size.xs};
+  `;
+
+  const dividerStyles = css`
+    width: ${euiTheme.size.xl};
+    height: 1px;
+    background: ${euiTheme.border.color};
+    margin: ${euiTheme.size.xs} 0;
   `;
 
   const buttonStyles = css`
@@ -171,90 +182,98 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
 
   const items: ContextMenuItem[] = [];
   
-  // Add menu item first - "Preferences" for version 1.2, "Navigation preferences" for version 1.1
-  const menuItemLabel = version === '1.2' ? (
-    <FormattedMessage
-      id="xpack.security.navControlComponent.preferencesLinkText"
-      defaultMessage="Preferences"
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.security.navControlComponent.navigationPreferencesLinkText"
-      defaultMessage="Navigation preferences"
-    />
-  );
-
-  items.push({
-    name: menuItemLabel,
-    icon: <EuiIcon type="brush" size="m" />,
-    onClick: () => {
-      setIsPopoverOpen(false);
-      // For version 1.2, provide user profile data for appearance settings
-      if (version === '1.2' && userProfile.value?.data) {
-        const userSettings = (userProfile.value.data as any).userSettings;
-        if (userSettings) {
-          // Store user profile data temporarily for the modal to access
-          (window as any).__kbnUserProfileForPreferences = userSettings;
-          
-          // Set up listener to provide user profile data when requested
-          const handleGetUserProfile = () => {
-            const currentUserSettings = (userProfile.value?.data as any)?.userSettings;
-            if (currentUserSettings) {
-              window.dispatchEvent(new CustomEvent('userProfileForPreferences', {
-                detail: { userSettings: currentUserSettings },
-              }));
+  // Helper function to open navigation preferences modal
+  const openNavigationPreferencesModal = () => {
+    // For version 3, provide user profile data for appearance settings
+    if (version === '3' && userProfile.value?.data) {
+      const userSettings = (userProfile.value.data as any).userSettings;
+      if (userSettings) {
+        // Store user profile data temporarily for the modal to access
+        (window as any).__kbnUserProfileForPreferences = userSettings;
+        
+        // Set up listener to provide user profile data when requested
+        const handleGetUserProfile = () => {
+          const currentUserSettings = (userProfile.value?.data as any)?.userSettings;
+          if (currentUserSettings) {
+            window.dispatchEvent(new CustomEvent('userProfileForPreferences', {
+              detail: { userSettings: currentUserSettings },
+            }));
+          }
+        };
+        
+        // Set up listener to update user profile when appearance changes
+        const handleUpdateUserProfile = (e: Event) => {
+          const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
+          if (customEvent.detail?.userSettings && userProfile.value) {
+            // Update user profile via API (preview)
+            // This will be handled by the user profile API client
+            const userProfileApiClient = (window as any).__kbnUserProfileApiClient;
+            if (userProfileApiClient) {
+              userProfileApiClient.partialUpdate({
+                userSettings: customEvent.detail.userSettings,
+              }).catch(() => {
+                // Ignore errors for preview
+              });
             }
-          };
-          
-          // Set up listener to update user profile when appearance changes
-          const handleUpdateUserProfile = (e: Event) => {
-            const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
-            if (customEvent.detail?.userSettings && userProfile.value) {
-              // Update user profile via API (preview)
-              // This will be handled by the user profile API client
-              const userProfileApiClient = (window as any).__kbnUserProfileApiClient;
-              if (userProfileApiClient) {
-                userProfileApiClient.partialUpdate({
-                  userSettings: customEvent.detail.userSettings,
-                }).catch(() => {
-                  // Ignore errors for preview
-                });
-              }
-            }
-          };
-          
-          window.addEventListener('getUserProfileForPreferences', handleGetUserProfile);
-          window.addEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
-          
-          // Clean up listeners when modal closes (will be cleaned up by modal close handler)
-          (window as any).__cleanupPreferencesListeners = () => {
-            window.removeEventListener('getUserProfileForPreferences', handleGetUserProfile);
-            window.removeEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
-            delete (window as any).__kbnUserProfileForPreferences;
-            delete (window as any).__cleanupPreferencesListeners;
-          };
+          }
+        };
+        
+        window.addEventListener('getUserProfileForPreferences', handleGetUserProfile);
+        window.addEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
+        
+        // Clean up listeners when modal closes (will be cleaned up by modal close handler)
+        (window as any).__cleanupPreferencesListeners = () => {
+          window.removeEventListener('getUserProfileForPreferences', handleGetUserProfile);
+          window.removeEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
+          delete (window as any).__kbnUserProfileForPreferences;
+          delete (window as any).__cleanupPreferencesListeners;
+        };
+      }
+    }
+    
+    // Use requestAnimationFrame to ensure DOM is ready, then try multiple approaches
+    requestAnimationFrame(() => {
+      // First try: call global function directly
+      if (typeof (window as any).__openNavigationPreferencesModal === 'function') {
+        try {
+          (window as any).__openNavigationPreferencesModal();
+          return;
+        } catch (e) {
+          // If direct call fails, try event
         }
       }
-      
-      // Use requestAnimationFrame to ensure DOM is ready, then try multiple approaches
-      requestAnimationFrame(() => {
-        // First try: call global function directly
-        if (typeof (window as any).__openNavigationPreferencesModal === 'function') {
-          try {
-            (window as any).__openNavigationPreferencesModal();
-            return;
-          } catch (e) {
-            // If direct call fails, try event
-          }
-        }
-        // Fallback: dispatch custom event
-        const event = new CustomEvent('openNavigationPreferencesModal', { bubbles: true });
-        window.dispatchEvent(event);
-        document.dispatchEvent(event);
-      });
-    },
-    'data-test-subj': version === '1.2' ? 'footerPreferencesLink' : 'footerNavigationPreferencesLink',
-  });
+      // Fallback: dispatch custom event
+      const event = new CustomEvent('openNavigationPreferencesModal', { bubbles: true });
+      window.dispatchEvent(event);
+      document.dispatchEvent(event);
+    });
+  };
+  
+  // Add menu item first - "Preferences" for version 3, "Navigation preferences" for version 1 only
+  // Version 2 has a separate button below the profile
+  if (version !== '2') {
+    const menuItemLabel = version === '3' ? (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.preferencesLinkText"
+        defaultMessage="Preferences"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.navControlComponent.navigationPreferencesLinkText"
+        defaultMessage="Navigation preferences"
+      />
+    );
+
+    items.push({
+      name: menuItemLabel,
+      icon: <EuiIcon type="brush" size="m" />,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        openNavigationPreferencesModal();
+      },
+      'data-test-subj': version === '3' ? 'footerPreferencesLink' : 'footerNavigationPreferencesLink',
+    });
+  }
 
   const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
@@ -316,12 +335,32 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
     defaultMessage: 'Account menu',
   });
 
+  // Navigation preferences button for version 2 (separate button below profile)
+  const navigationPreferencesButton = version === '2' ? (
+    <EuiToolTip
+      content={i18n.translate('xpack.security.navControlComponent.navigationPreferencesLinkText', {
+        defaultMessage: 'Navigation preferences',
+      })}
+      position="right"
+      repositionOnScroll
+      offset={TOOLTIP_OFFSET}
+    >
+      <EuiButtonIcon
+        iconType="brush"
+        size="m"
+        aria-label={i18n.translate('xpack.security.navControlComponent.navigationPreferencesLinkText', {
+          defaultMessage: 'Navigation preferences',
+        })}
+        onClick={openNavigationPreferencesModal}
+        css={buttonStyles}
+        data-test-subj="footerNavigationPreferencesButton"
+      />
+    </EuiToolTip>
+  ) : null;
+
   // Wrap button in tooltip only when popover is closed
   const buttonWithTooltip = !isPopoverOpen ? (
     <EuiToolTip
-      anchorProps={{
-        css: wrapperStyles,
-      }}
       content={tooltipContent}
       disableScreenReaderOutput
       position="right"
@@ -331,37 +370,42 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
       {button}
     </EuiToolTip>
   ) : (
-    <div css={wrapperStyles}>{button}</div>
+    button
   );
 
   return (
     <>
-      <EuiPopover
-        id="footerUserMenu"
-        ownFocus
-        button={buttonWithTooltip}
-        isOpen={isPopoverOpen}
-        anchorPosition="rightUp"
-        repositionOnScroll
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        offset={5}
-      >
-        <EuiContextMenu
-          className="chrNavControl__userMenu"
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: displayName,
-              content: (
-                <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
-              ),
-            },
-          ]}
-          data-test-subj="footerUserMenu"
-        />
-      </EuiPopover>
+      <div css={wrapperStyles}>
+        {navigationPreferencesButton}
+        {version === '2' && <div css={dividerStyles} data-test-subj="footerUserMenuDivider" />}
+        <EuiPopover
+          id="footerUserMenu"
+          ownFocus
+          button={buttonWithTooltip}
+          isOpen={isPopoverOpen}
+          anchorPosition="rightUp"
+          repositionOnScroll
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="none"
+          offset={5}
+        >
+          <EuiContextMenu
+            className="chrNavControl__userMenu"
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                title: displayName,
+                content: (
+                  <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
+                ),
+              },
+            ]}
+            data-test-subj="footerUserMenu"
+          />
+        </EuiPopover>
+        {version === '2' && navigationPreferencesButton}
+      </div>
       {isProfileModalOpen && currentUser.value && (
         <ProfileModal
           user={currentUser.value}

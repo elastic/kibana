@@ -561,7 +561,7 @@ export const ProfileModal: FunctionComponent<ProfileModalProps> = ({
                 </>
               )}
 
-              {!isCloudUser && formik.values.data && version !== '1.2' && (
+              {!isCloudUser && formik.values.data && version !== '3' && (
                 <>
                   <EuiDescribedFormGroup
                     fullWidth

@@ -55,7 +55,7 @@ interface NavItemConfig {
   isLocked: boolean;
 }
 
-// Appearance settings component for version 1.2
+// Appearance settings component for version 3
 interface AppearanceSettingsSectionProps {
   colorMode: string;
   contrastMode: string;
@@ -276,17 +276,17 @@ export const SideNavCollapseButton: FC<Props> = ({
   const { tooltipRef, handleMouseOut } = useTooltip();
   
   // Get current version from localStorage (for version-specific UI changes)
-  const getCurrentVersion = useCallback((): 'current' | '1.1' | '1.2' => {
+  const getCurrentVersion = useCallback((): 'current' | '1' | '2' | '3' => {
     if (typeof window !== 'undefined' && window.localStorage) {
       const stored = window.localStorage.getItem('kibana_ui_version');
-      if (stored === 'current' || stored === '1.1' || stored === '1.2') {
-        return stored as 'current' | '1.1' | '1.2';
+      if (stored === 'current' || stored === '1' || stored === '2' || stored === '3') {
+        return stored as 'current' | '1' | '2' | '3';
       }
     }
     return 'current';
   }, []);
   
-  const [currentVersion, setCurrentVersion] = useState<'current' | '1.1' | '1.2'>(getCurrentVersion);
+  const [currentVersion, setCurrentVersion] = useState<'current' | '1' | '2' | '3'>(getCurrentVersion);
   const [selectedTabId, setSelectedTabId] = useState<'navigation' | 'appearance'>('appearance');
   
   // Listen for version changes
@@ -329,7 +329,7 @@ export const SideNavCollapseButton: FC<Props> = ({
   // Local state for modal (not saved until Apply is clicked)
   const [localShowLabels, setLocalShowLabels] = useState(showLabels);
   
-  // Appearance settings state (for version 1.2)
+  // Appearance settings state (for version 3)
   const [localColorMode, setLocalColorMode] = useState<string>('system');
   const [localContrastMode, setLocalContrastMode] = useState<string>('system');
 
@@ -417,8 +417,8 @@ export const SideNavCollapseButton: FC<Props> = ({
         }
       }
       
-      // Revert appearance settings if version 1.2
-      if (currentVersion === '1.2' && originalAppearanceSettings) {
+      // Revert appearance settings if version 3
+      if (currentVersion === '3' && originalAppearanceSettings) {
         setLocalColorMode(originalAppearanceSettings.darkMode);
         setLocalContrastMode(originalAppearanceSettings.contrastMode);
         // Revert via custom event
@@ -444,8 +444,8 @@ export const SideNavCollapseButton: FC<Props> = ({
     // Reset local state when closing
     setLocalShowLabels(showLabels);
     setInitialState(null);
-    // Reset appearance settings state for version 1.2
-    if (currentVersion === '1.2') {
+    // Reset appearance settings state for version 3
+    if (currentVersion === '3') {
       setSelectedTabId('appearance');
       // Reset to original values if not applying
       if (!isApplying && originalAppearanceSettings) {
@@ -504,8 +504,8 @@ export const SideNavCollapseButton: FC<Props> = ({
     setNavItemsConfig(initialConfig);
     setLocalShowLabels(showLabels);
     
-    // Load appearance settings for version 1.2
-    if (currentVersion === '1.2') {
+    // Load appearance settings for version 3
+    if (currentVersion === '3') {
       // Request user profile data via custom event
       const requestEvent = new CustomEvent('getUserProfileForPreferences');
       window.dispatchEvent(requestEvent);
@@ -565,7 +565,7 @@ export const SideNavCollapseButton: FC<Props> = ({
         }
       }, 100);
     } else {
-      // Store initial state for change detection (non-1.2 version)
+      // Store initial state for change detection (non-3 version)
       setInitialState({
         showLabels,
         navItemsConfig: initialConfig,
@@ -591,7 +591,7 @@ export const SideNavCollapseButton: FC<Props> = ({
     // Also listen on document as fallback
     document.addEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
     
-    // Listen for user profile data requests (for appearance settings in version 1.2)
+    // Listen for user profile data requests (for appearance settings in version 3)
     const handleGetUserProfile = (e: Event) => {
       const customEvent = e as CustomEvent;
       // User profile data will be provided by footer_user_menu via another event
@@ -704,8 +704,8 @@ export const SideNavCollapseButton: FC<Props> = ({
     
     count += visibilityChanges;
     
-    // Check appearance settings changes (for version 1.2)
-    if (currentVersion === '1.2' && initialState.appearanceSettings) {
+    // Check appearance settings changes (for version 3)
+    if (currentVersion === '3' && initialState.appearanceSettings) {
       if (
         localColorMode !== initialState.appearanceSettings.darkMode ||
         localContrastMode !== initialState.appearanceSettings.contrastMode
@@ -737,7 +737,7 @@ export const SideNavCollapseButton: FC<Props> = ({
     return {
       showLabels: false, // Default is false (collapsed)
       navItemsConfig: defaultNavItemsConfig,
-      appearanceSettings: currentVersion === '1.2' ? {
+      appearanceSettings: currentVersion === '3' ? {
         darkMode: 'system',
         contrastMode: 'system',
       } : undefined,
@@ -766,8 +766,8 @@ export const SideNavCollapseButton: FC<Props> = ({
       return false;
     }
     
-    // Check appearance settings (for version 1.2)
-    if (currentVersion === '1.2' && defaultState.appearanceSettings) {
+    // Check appearance settings (for version 3)
+    if (currentVersion === '3' && defaultState.appearanceSettings) {
       if (
         localColorMode !== defaultState.appearanceSettings.darkMode ||
         localContrastMode !== defaultState.appearanceSettings.contrastMode
@@ -785,8 +785,8 @@ export const SideNavCollapseButton: FC<Props> = ({
     setLocalShowLabels(initialState.showLabels);
     setNavItemsConfig(initialState.navItemsConfig);
     
-    // Revert appearance settings (for version 1.2)
-    if (currentVersion === '1.2' && initialState.appearanceSettings) {
+    // Revert appearance settings (for version 3)
+    if (currentVersion === '3' && initialState.appearanceSettings) {
       setLocalColorMode(initialState.appearanceSettings.darkMode);
       setLocalContrastMode(initialState.appearanceSettings.contrastMode);
       // Revert via custom event
@@ -841,8 +841,8 @@ export const SideNavCollapseButton: FC<Props> = ({
     setNavItemsConfig(defaultState.navItemsConfig);
     setLocalShowLabels(defaultState.showLabels);
     
-    // Reset appearance settings (for version 1.2)
-    if (currentVersion === '1.2' && defaultState.appearanceSettings) {
+    // Reset appearance settings (for version 3)
+    if (currentVersion === '3' && defaultState.appearanceSettings) {
       setLocalColorMode(defaultState.appearanceSettings.darkMode);
       setLocalContrastMode(defaultState.appearanceSettings.contrastMode);
       // Apply preview immediately via custom event
@@ -922,8 +922,8 @@ export const SideNavCollapseButton: FC<Props> = ({
       }
     });
     
-    // Save appearance settings (for version 1.2)
-    if (currentVersion === '1.2' && initialState?.appearanceSettings) {
+    // Save appearance settings (for version 3)
+    if (currentVersion === '3' && initialState?.appearanceSettings) {
       const hasAppearanceChanges =
         localColorMode !== initialState.appearanceSettings.darkMode ||
         localContrastMode !== initialState.appearanceSettings.contrastMode;
@@ -992,11 +992,11 @@ export const SideNavCollapseButton: FC<Props> = ({
         <EuiModal
           onClose={closeModal}
           aria-labelledby="navigation-modal-title"
-          maxWidth={currentVersion === '1.2' ? 800 : 500}
+          maxWidth={currentVersion === '3' ? 800 : 500}
           style={{ 
-            width: currentVersion === '1.2' ? '800px' : '500px', 
-            height: currentVersion === '1.2' ? '640px' : undefined,
-            maxHeight: currentVersion === '1.2' ? '640px' : '90vh', 
+            width: currentVersion === '3' ? '800px' : '500px', 
+            height: currentVersion === '3' ? '640px' : undefined,
+            maxHeight: currentVersion === '3' ? '640px' : '90vh', 
             display: 'flex', 
             flexDirection: 'column' 
           }}
@@ -1004,7 +1004,7 @@ export const SideNavCollapseButton: FC<Props> = ({
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="navigation-modal-title">
-              {currentVersion === '1.2' ? (
+              {currentVersion === '3' ? (
                 <FormattedMessage
                   id="xpack.security.navControlComponent.preferencesModal.title"
                   defaultMessage="Preferences"
@@ -1017,7 +1017,7 @@ export const SideNavCollapseButton: FC<Props> = ({
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
-            {currentVersion === '1.2' ? (
+            {currentVersion === '3' ? (
               <>
                 <div
                   css={css`
@@ -1130,8 +1130,8 @@ export const SideNavCollapseButton: FC<Props> = ({
               </>
             )}
             
-            {/* Navigation content - only show when navigation tab is selected or not version 1.2 */}
-            {((currentVersion === '1.2' && selectedTabId === 'navigation') || currentVersion !== '1.2') && (
+            {/* Navigation content - only show when navigation tab is selected or not version 3 */}
+            {((currentVersion === '3' && selectedTabId === 'navigation') || currentVersion !== '3') && (
               <>
             {/* Locked items section (non-draggable) */}
             {navItemsConfig

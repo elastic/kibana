@@ -131,7 +131,7 @@ export class SecurityNavControlService {
     this.stop$.next();
   }
 
-  private updateNavControlsForVersion(version: 'current' | '1.1' | '1.2') {
+  private updateNavControlsForVersion(version: 'current' | '1' | '2' | '3') {
     if (!this.core || !this.authc || !this.headerNavControlElement) return;
 
     this.renderHeaderNavControl(this.headerNavControlElement, version);
@@ -139,7 +139,7 @@ export class SecurityNavControlService {
     if (version === 'current') {
       this.core.chrome.sideNav.setFooterUserMenu(undefined);
     } else {
-      // Versions 1.1 and 1.2 both use footer menu
+      // Versions 1, 2, and 3 all use footer menu
       const footerMenu = this.core.rendering.addContext(
         <VersionProvider>
           <Providers
@@ -148,6 +148,7 @@ export class SecurityNavControlService {
             securityApiClients={this.securityApiClients}
           >
             <FooterUserMenu
+              key={version}
               editProfileUrl={this.core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
               userMenuLinks$={this.userMenuLinks$}
@@ -162,7 +163,7 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(
     core: CoreStart,
     authc: AuthenticationServiceSetup,
-    version?: 'current' | '1.1' | '1.2'
+    version?: 'current' | '1' | '2' | '3'
   ) {
     const currentVersion = version ?? version$.value;
 
@@ -223,7 +224,7 @@ export class SecurityNavControlService {
     this.navControlRegistered = true;
   }
 
-  private renderHeaderNavControl(element: HTMLElement, version: 'current' | '1.1' | '1.2') {
+  private renderHeaderNavControl(element: HTMLElement, version: 'current' | '1' | '2' | '3') {
     if (!this.core || !this.authc) return;
 
     if (version === 'current') {
@@ -250,7 +251,7 @@ export class SecurityNavControlService {
         ReactDOM.unmountComponentAtNode(element);
       };
     } else {
-      // Render empty div for versions 1.1 and 1.2 (footer menu will be shown instead)
+      // Render empty div for versions 1, 2, and 3 (footer menu will be shown instead)
       ReactDOM.render(<div />, element, () => {});
       this.headerNavControlUnmount = () => {
         ReactDOM.unmountComponentAtNode(element);
