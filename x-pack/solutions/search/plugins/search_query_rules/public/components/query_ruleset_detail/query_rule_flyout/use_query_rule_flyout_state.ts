@@ -42,13 +42,13 @@ export const useQueryRuleFlyoutState = ({
   onSave,
 }: UseQueryRuleFlyoutStateProps) => {
   const usageTracker = useUsageTracker();
-  const { control, getValues, reset, setValue, formState, trigger, setFocus } =
+  const { control, getValues, reset, setValue, formState, trigger } =
     useFormContext<QueryRuleEditorForm>();
   const {
+    fields: criteria,
     remove,
     replace,
     append,
-    fields: criteria,
   } = useFieldArray({
     control,
     name: 'criteria',
@@ -77,7 +77,7 @@ export const useQueryRuleFlyoutState = ({
     name: 'actions.ids',
   });
 
-  const criteriaField = useWatch({
+  const criteriaFields = useWatch({
     control,
     name: 'criteria',
   });
@@ -89,7 +89,7 @@ export const useQueryRuleFlyoutState = ({
   }, [actionFields, trigger]);
   useEffect(() => {
     trigger('criteria');
-  }, [trigger, criteriaField]);
+  }, [trigger, criteriaFields, criteria]);
 
   const { data: indexNames } = useFetchIndexNames('');
 
@@ -186,7 +186,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' } as QueryRuleEditorForm['criteria'][0]]
-          : criteriaField.map((c) => {
+          : criteriaFields.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -203,7 +203,7 @@ export const useQueryRuleFlyoutState = ({
         rule_id: ruleId,
         criteria: isAlways
           ? [{ type: 'always' }]
-          : criteriaField.map((c) => {
+          : criteriaFields.map((c) => {
               const normalizedCriteria = {
                 values: c.values,
                 metadata: c.metadata,
@@ -294,14 +294,14 @@ export const useQueryRuleFlyoutState = ({
 
   const documentCount = actionFields.length || actionIdsFields?.length || 0;
   const shouldShowMetadataEditor = (createMode || !!ruleFromRuleset) && !isAlways;
-  const criteriaCount = criteriaField.length;
+  const criteriaCount = criteriaFields.length;
 
   return {
     actionFields,
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    criteriaField,
+    criteriaFields,
     criteriaCount,
     documentCount,
     dragEndHandle,
@@ -322,7 +322,6 @@ export const useQueryRuleFlyoutState = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    setFocus,
-    criteria
+    criteria,
   };
 };

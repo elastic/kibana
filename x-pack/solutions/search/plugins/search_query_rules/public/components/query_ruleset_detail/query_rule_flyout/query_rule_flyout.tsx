@@ -64,7 +64,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    criteriaField,
+    criteria,
     criteriaCount,
     documentCount,
     dragEndHandle,
@@ -82,7 +82,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    criteria,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -101,7 +100,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   const dndBackgroundColor = css`
     background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
   `;
-  console.log('criteria', criteria);
 
   const pinExcludeText =
     pinType === 'pinned' ? (
@@ -207,7 +205,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiCallOut
                     announceOnMount
                     title={i18n.translate(
-                      'undefined.queryRuleFlyout.euiCallOut.documentActionUsingidsLabel',
+                      'xpack.search.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
                       { defaultMessage: "Document action using 'ids' are unsupported" }
                     )}
                     color="warning"
@@ -324,29 +322,23 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     criteria.map((field, index) => {
                       const error = formState.errors?.criteria?.[index];
                       return (
-                        <React.Fragment key={`${field.type}_${index}`}>
+                        <React.Fragment key={field.id}>
                           <Controller
                             control={control}
                             name={`criteria.${index}`}
-                            render={({ field: { onChange, value, ref }, fieldState }) => {
+                            render={({ field: { onChange, value } }) => {
                               return (
-                                <div ref={ref}>
-                                  <QueryRuleMetadataEditor
-                                    criteria={field}
-                                    key={`${field.type}_${index}`}
-                                    onRemove={() => {
-                                      remove(index);
-                                    }}
-                                    error={isQueryRuleFieldError(error) ? error : undefined}
-                                    onChange={(newCriteria) => {
-                                      onChange(newCriteria);
-                                    }}
-                                    // onChange={(newCriteria) => {
-                                    //   update(index, newCriteria);
-                                    // }}
-                                    criteriaValue={value}
-                                  />
-                                </div>
+                                <QueryRuleMetadataEditor
+                                  criteria={value}
+                                  key={field.id}
+                                  onRemove={() => {
+                                    remove(index);
+                                  }}
+                                  error={isQueryRuleFieldError(error) ? error : undefined}
+                                  onChange={(newCriteria) => {
+                                    onChange(newCriteria);
+                                  }}
+                                />
                               );
                             }}
                           />
