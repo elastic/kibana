@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import equal from 'fast-deep-equal';
 import type { NormalizedSpec } from '../input/normalize_oas';
 
 export type DiffType = 'added' | 'removed' | 'modified';
@@ -40,39 +41,6 @@ export interface OasDiff {
   methodsAdded: MethodDiff[];
   methodsRemoved: MethodDiff[];
   operationsModified: OperationDiff[];
-}
-
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a === null || b === null) return false;
-  if (typeof a !== typeof b) return false;
-  if (typeof a !== 'object') return false;
-
-  const aArray = Array.isArray(a);
-  const bArray = Array.isArray(b);
-  if (aArray !== bArray) return false;
-
-  if (aArray && bArray) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (!deepEqual(a[i], b[i])) return false;
-    }
-    return true;
-  }
-
-  const aObj = a as Record<string, unknown>;
-  const bObj = b as Record<string, unknown>;
-  const aKeys = Object.keys(aObj);
-  const bKeys = Object.keys(bObj);
-
-  if (aKeys.length !== bKeys.length) return false;
-
-  for (const key of aKeys) {
-    if (!bKeys.includes(key)) return false;
-    if (!deepEqual(aObj[key], bObj[key])) return false;
-  }
-
-  return true;
 }
 
 export function diffOas(baseline: NormalizedSpec, current: NormalizedSpec): OasDiff {
@@ -122,21 +90,21 @@ export function diffOas(baseline: NormalizedSpec, current: NormalizedSpec): OasD
 
       const changes: OperationChange[] = [];
 
-      if (!deepEqual(baselineOp.parameters, currentOp.parameters)) {
+      if (!equal(baselineOp.parameters, currentOp.parameters)) {
         const hasBaseline = baselineOp.parameters !== undefined;
         const hasCurrent = currentOp.parameters !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';
         changes.push({ type: 'parameters', change, details: currentOp.parameters });
       }
 
-      if (!deepEqual(baselineOp.requestBody, currentOp.requestBody)) {
+      if (!equal(baselineOp.requestBody, currentOp.requestBody)) {
         const hasBaseline = baselineOp.requestBody !== undefined;
         const hasCurrent = currentOp.requestBody !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';
         changes.push({ type: 'requestBody', change, details: currentOp.requestBody });
       }
 
-      if (!deepEqual(baselineOp.responses, currentOp.responses)) {
+      if (!equal(baselineOp.responses, currentOp.responses)) {
         const hasBaseline = baselineOp.responses !== undefined;
         const hasCurrent = currentOp.responses !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';

@@ -4,6 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+export DISABLE_BOOTSTRAP_VALIDATION=false
+.buildkite/scripts/bootstrap.sh
+
 echo --- Check API Contracts
 
 KIBANA_VERSION="$(jq -r '.version' package.json)"

@@ -39,9 +39,14 @@ export function selectBaseline(
     throw new Error('Version is required for stack baseline selection');
   }
 
+  // semver.parse handles SNAPSHOT suffix and pre-release versions automatically
+  // Examples: "9.2.0-SNAPSHOT" → { major: 9, minor: 2, ... }
+  //           "9.2.0-alpha.1" → { major: 9, minor: 2, ... }
   const parsed = semver.parse(version);
   if (!parsed) {
-    throw new Error(`Invalid semver version: ${version}`);
+    throw new Error(
+      `Invalid semver version: "${version}". Expected format: X.Y.Z (e.g., "9.2.0" or "9.2.0-SNAPSHOT")`
+    );
   }
 
   const minorVersion = `${parsed.major}.${parsed.minor}`;

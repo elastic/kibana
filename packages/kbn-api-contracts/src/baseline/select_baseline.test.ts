@@ -38,6 +38,32 @@ describe('selectBaseline', () => {
     expect(selection.path).toContain('baselines/stack/9.0.yaml');
   });
 
+  it('handles SNAPSHOT suffix', () => {
+    const selection = selectBaseline('stack', '9.2.0-SNAPSHOT');
+
+    expect(selection.path).toContain('baselines/stack/9.2.yaml');
+  });
+
+  it('handles build metadata', () => {
+    const selection = selectBaseline('stack', '9.2.0+build.123');
+
+    expect(selection.path).toContain('baselines/stack/9.2.yaml');
+  });
+
+  it('handles complex pre-release versions', () => {
+    const testCases = [
+      { version: '9.2.0-beta.1', expected: '9.2' },
+      { version: '9.2.0-rc.1', expected: '9.2' },
+      { version: '9.2.0-alpha.1+build.456', expected: '9.2' },
+      { version: '10.0.0-SNAPSHOT', expected: '10.0' },
+    ];
+
+    testCases.forEach(({ version, expected }) => {
+      const selection = selectBaseline('stack', version);
+      expect(selection.path).toContain(`baselines/stack/${expected}.yaml`);
+    });
+  });
+
   it('uses override path when provided', () => {
     const overridePath = '/custom/baseline.yaml';
     const selection = selectBaseline('stack', '8.15.0', overridePath);
@@ -50,6 +76,13 @@ describe('selectBaseline', () => {
   });
 
   it('throws when version is invalid', () => {
-    expect(() => selectBaseline('stack', 'not-a-version')).toThrow('Invalid semver version');
+    expect(() => selectBaseline('stack', 'not-a-version')).toThrow(
+      'Invalid semver version: "not-a-version". Expected format: X.Y.Z'
+    );
+  });
+
+  it('throws on completely non-semver input', () => {
+    expect(() => selectBaseline('stack', 'invalid')).toThrow('Invalid semver version');
+    expect(() => selectBaseline('stack', 'x.y.z')).toThrow('Invalid semver version');
   });
 });
