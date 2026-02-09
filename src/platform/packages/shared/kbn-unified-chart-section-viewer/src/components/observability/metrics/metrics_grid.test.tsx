@@ -20,7 +20,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { createESQLQuery } from '../../../common/utils';
+import { createESQLQuery, getMetricKey } from '../../../common/utils';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 jest.mock('../../chart', () => ({
