@@ -39,33 +39,16 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
     .inSingletonScope();
 
   /**
-   * Rule executor steps
+   * Rule execution steps via multi-injection.
+   * Binding order defines execution order.
    */
-  bind(WaitForResourcesStep).toSelf().inSingletonScope();
-  bind(FetchRuleStep).toSelf().inRequestScope();
-  bind(ValidateRuleStep).toSelf().inSingletonScope();
-  bind(ExecuteRuleQueryStep).toSelf().inRequestScope();
-  bind(CreateAlertEventsStep).toSelf().inSingletonScope();
-  bind(DirectorStep).toSelf().inSingletonScope();
-  bind(StoreAlertEventsStep).toSelf().inSingletonScope();
-
-  /**
-   * Bind steps array (order defines execution order)
-   * Steps can be wrapped with decorators for per-step behavior
-   * For example: new AuditLoggingDecorator(get(ValidateRuleStep), auditService)
-   */
-
-  bind(RuleExecutionStepsToken)
-    .toDynamicValue(({ get }) => [
-      get(WaitForResourcesStep),
-      get(FetchRuleStep),
-      get(ValidateRuleStep),
-      get(ExecuteRuleQueryStep),
-      get(CreateAlertEventsStep),
-      get(DirectorStep),
-      get(StoreAlertEventsStep),
-    ])
-    .inRequestScope();
+  bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
+  bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
+  bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
   bind(RuleExecutionPipeline).toSelf().inRequestScope();
 };
