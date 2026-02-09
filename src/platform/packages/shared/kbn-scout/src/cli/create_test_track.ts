@@ -10,7 +10,7 @@
 import type { Command } from '@kbn/dev-cli-runner';
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
 import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { readFileSync } from 'node:fs';
 import { z } from '@kbn/zod/v4';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -41,7 +41,7 @@ function mergeConfigManifests(manifestPaths: string[]): ScoutConfigManifest {
 
   manifestPaths.forEach((manifestPath) => {
     const manifest = ScoutConfigManifestSchema.parse(
-      yaml.load(readFileSync(manifestPath, 'utf-8'))
+      parse(readFileSync(manifestPath, 'utf-8'))
     );
     mergedManifest.enabled.push(...manifest.enabled);
     mergedManifest.disabled.push(...manifest.disabled);

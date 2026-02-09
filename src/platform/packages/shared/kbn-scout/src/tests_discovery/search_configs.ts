@@ -11,7 +11,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
@@ -30,7 +30,7 @@ interface ScoutCiConfig {
 const readScoutCiConfig = (): ScoutCiConfig => {
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
-  return yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as ScoutCiConfig;
+  return parse(fs.readFileSync(scoutCiConfigPath, 'utf8')) as ScoutCiConfig;
 };
 
 export const getScoutCiExcludedConfigs = (): string[] => {
