@@ -213,7 +213,6 @@ export class ChromeService {
       },
       loadingCount$,
       helpMenuLinks$,
-      forceAppSwitcherNavigation$: navLinks.getForceAppSwitcherNavigation$(),
       navLinks$,
       recentlyAccessed$,
       customBranding$: customBranding.customBranding$,

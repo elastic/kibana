@@ -61,7 +61,6 @@ export interface ChromeComponentsDeps {
   projectNavigation: ProjectNavigationObservables;
   loadingCount$: Observable<number>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
-  forceAppSwitcherNavigation$: Observable<boolean>;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
   customBranding$: CustomBrandingStart['customBranding$'];
@@ -77,7 +76,6 @@ export const createChromeComponents = ({
   state,
   loadingCount$,
   helpMenuLinks$,
-  forceAppSwitcherNavigation$,
   navLinks$,
   recentlyAccessed$,
   navControls,
@@ -98,7 +96,6 @@ export const createChromeComponents = ({
       customNavLink$={state.customNavLink.$}
       kibanaDocLink={config.kibanaDocLink}
       docLinks={docLinks}
-      forceAppSwitcherNavigation$={forceAppSwitcherNavigation$}
       globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
       helpExtension$={state.help.extension.$}
       helpSupportUrl$={state.help.supportUrl.$}

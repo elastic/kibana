@@ -41,8 +41,6 @@ const createStartContractMock = () => {
       has: jest.fn(),
       get: jest.fn(),
       getAll: jest.fn().mockReturnValue([]),
-      enableForcedAppSwitcherNavigation: jest.fn(),
-      getForceAppSwitcherNavigation$: jest.fn(),
     }),
     recentlyAccessed: lazyObject({
       add: jest.fn(),
