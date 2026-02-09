@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { CompositeSkillRegistry } from './composite_skill_registry';
 
 export interface SkillServiceSetup {
   /**
@@ -15,6 +17,18 @@ export interface SkillServiceSetup {
 }
 
 export interface SkillServiceStart {
+  /**
+   * Returns a skill definition by ID from the built-in registry.
+   * @deprecated Use getRegistry() for unified access.
+   */
   getSkillDefinition(skillId: string): SkillDefinition | undefined;
+  /**
+   * Lists all built-in skills.
+   * @deprecated Use getRegistry() for unified access.
+   */
   listSkills(): SkillDefinition[];
+  /**
+   * Create a composite skill registry scoped to the current user and context.
+   */
+  getRegistry(opts: { request: KibanaRequest }): Promise<CompositeSkillRegistry>;
 }

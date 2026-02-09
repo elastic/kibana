@@ -76,7 +76,6 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
-    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -85,6 +84,13 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+    });
+
+    const skillsServiceStart = this.services.skills.start({
+      elasticsearch,
+      spaces,
+      logger: logger.get('skills'),
+      getToolRegistry: tools.getRegistry,
     });
 
     const agents = this.services.agents.start({

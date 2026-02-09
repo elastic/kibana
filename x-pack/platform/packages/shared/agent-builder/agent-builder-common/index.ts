@@ -155,5 +155,22 @@ export {
   isToolProgressEvent,
   isPromptRequestEvent,
 } from './chat';
+export {
+  type SkillSelection,
+  type PublicSkillDefinition,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  type SkillReferencedContent,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+  skillCreateRequestSchema,
+  skillUpdateRequestSchema,
+  validateSkillId,
+  skillIdMaxLength,
+  skillIdRegexp,
+} from './skills';
 export * from './telemetry';
 export type { VersionedAttachment } from './attachments';
