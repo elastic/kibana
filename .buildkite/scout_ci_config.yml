@@ -4,6 +4,7 @@ plugins:
     - apm
     - console
     - cloud_security_posture
+    - data_views
     - discover_enhanced
     - entity_store
     - fleet
