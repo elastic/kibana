@@ -15,6 +15,7 @@ import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -234,12 +235,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
+  const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...addToCaseActionItems,
             ...statusActionItems,
+            ...runWorkflowMenuItem,
             ...alertTagsItems,
             ...alertAssigneesItems,
             ...exceptionActionItems,
@@ -251,6 +259,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ...(agentId ? osqueryActionItems : []),
           ],
     [
+      runWorkflowMenuItem,
       isEvent,
       ruleId,
       addToCaseActionItems,
@@ -274,8 +283,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
+      ...runAlertWorkflowPanel,
     ],
-    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
+    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels, runAlertWorkflowPanel]
   );
 
   const button = useMemo(() => {

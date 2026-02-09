@@ -94,7 +94,8 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "agentBuilder"
+      "agentBuilder",
+      "workflowsManagement"
     ],
     "extraPublicDirs": [
       "common"
