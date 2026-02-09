@@ -32,10 +32,7 @@ import {
 } from './get_correlated_logs/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
-import {
-  createDownstreamDependenciesTool,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from './get_downstream_dependencies/tool';
+import { createDownstreamDependenciesTool } from './get_downstream_dependencies/tool';
 import {
   createGetTraceMetricsTool,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -72,7 +69,6 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
