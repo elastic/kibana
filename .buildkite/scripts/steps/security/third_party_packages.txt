@@ -30,3 +30,4 @@ yaml-language-server
 @opentelemetry/exporter-metrics-otlp-proto
 @opentelemetry/instrumentation-hapi
 simple-statistics
+zodv4
