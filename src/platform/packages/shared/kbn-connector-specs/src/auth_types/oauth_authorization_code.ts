@@ -82,6 +82,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_authorization_code',
   schema: authSchema,
+  authMode: 'per-user',
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
