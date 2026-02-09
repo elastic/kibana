@@ -15,11 +15,30 @@ import type {
   ESQLLocation,
   ESQLMessage,
 } from '../../../types';
+import { Walker } from '../../../ast';
 import { isIdentifier, isList, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
+import {
+  getPromqlFunctionDefinition,
+  isPromqlAcrossSeriesFunction,
+  normalizePromqlReturnType,
+} from '../../definitions/utils/promql';
 import { sourceExists } from '../../definitions/utils/sources';
 import { errors } from '../../definitions/utils/errors';
+import { validateColumnForCommand } from '../../definitions/utils/validation/column';
+import type {
+  PromQLFunctionDefinition,
+  PromQLFunctionParameter,
+  PromQLFunctionParamType,
+  PromQLSignature,
+} from '../../definitions/types';
+import type {
+  PromQLAstExpression,
+  PromQLFunction,
+  PromQLLabelName,
+  PromQLSelector,
+} from '../../../promql/types';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
@@ -51,7 +70,6 @@ export const validate = (
   for (const param of getUsedPromqlParamNames(command.text)) {
     usedParams.add(param);
   }
-  const requiredParams = PROMQL_REQUIRED_PARAMS;
 
   if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has('step')) {
     messages.push(
@@ -63,7 +81,7 @@ export const validate = (
     );
   }
 
-  for (const param of requiredParams) {
+  for (const param of PROMQL_REQUIRED_PARAMS) {
     if (usedParams.has(param)) {
       continue;
     }
@@ -138,7 +156,9 @@ export const validate = (
     }
   }
 
-  if (!hasValidQuery(command)) {
+  const hasQuery = hasValidQuery(command);
+
+  if (!hasQuery) {
     messages.push({
       ...getMessageFromId({
         messageId: 'promqlMissingQuery',
@@ -148,7 +168,8 @@ export const validate = (
     });
   }
 
-  return messages;
+  const shouldValidateColumns = hasQuery && !command.query?.incomplete;
+  return [...messages, ...validatePromqlQuery(command, _context, shouldValidateColumns)];
 };
 
 // ============================================================================
@@ -376,4 +397,273 @@ function extractTrailingParamFromQuery(
   }
 
   return { param, value: match[2] ?? '' };
+}
+
+// ============================================================================
+// PromQL query validation (walker-based)
+// ============================================================================
+
+function validatePromqlQuery(
+  command: ESQLAstPromqlCommand,
+  context?: ICommandContext,
+  shouldValidateColumns: boolean = false
+): ESQLMessage[] {
+  const queryNode = command.query;
+
+  if (!queryNode || queryNode.incomplete) {
+    return [];
+  }
+
+  const messages: ESQLMessage[] = [];
+  const selectors: PromQLSelector[] = [];
+  const groupingArgs: PromQLLabelName[] = [];
+
+  // ES|QL Walker needed: command.query can be ESQLParens/ESQLFunction wrapping PromQL content.
+  Walker.walk(queryNode, {
+    promql: {
+      visitPromqlFunction: (fn) => {
+        const definition = getPromqlFunctionDefinition(fn.name);
+
+        messages.push(
+          ...getUnknownFunctionErrors(fn, definition),
+          ...getFunctionArityErrors(fn, definition),
+          ...getMatchingSignatureErrors(fn, definition),
+          ...getGroupingErrors(fn)
+        );
+        if (fn.grouping) groupingArgs.push(...fn.grouping.args);
+      },
+
+      visitPromqlSelector: (selector) => {
+        selectors.push(selector);
+        messages.push(...getDurationErrors([selector.duration], selector.location));
+      },
+
+      visitPromqlSubquery: ({ range, resolution, location }) => {
+        messages.push(...getDurationErrors([range, resolution], location));
+      },
+    },
+  });
+
+  if (context && shouldValidateColumns) {
+    const completeSelectors = selectors.filter(({ incomplete }) => !incomplete);
+    messages.push(...getColumnErrors(completeSelectors, groupingArgs, command.name, context));
+  }
+
+  return messages;
+}
+
+/* Returns an error when a function name is not present in the PromQL registry. */
+function getUnknownFunctionErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition) {
+    return [
+      getMessageFromId({
+        messageId: 'promqlUnknownFunction',
+        values: { fn: fn.name },
+        locations: fn.location,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+/* Returns an error when function arity doesn't match signature min/max parameter counts. */
+function getFunctionArityErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || fn.incomplete) {
+    return [];
+  }
+
+  const { args, name, location } = fn;
+  const minArgs = Math.min(...definition.signatures.map(getRequiredParamCount));
+  const maxArgs = Math.max(...definition.signatures.map(({ params }) => params.length));
+
+  if (args.length < minArgs || args.length > maxArgs) {
+    const expected = minArgs === maxArgs ? `${minArgs}` : `${minArgs}..${maxArgs}`;
+
+    return [
+      getMessageFromId({
+        messageId: 'promqlWrongNumberArgs',
+        values: { fn: name, expected, actual: args.length },
+        locations: location,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+/* Returns an error when grouping (by/without) is used on a non-aggregation function. */
+function getGroupingErrors(fn: PromQLFunction): ESQLMessage[] {
+  const { grouping, name } = fn;
+
+  if (!grouping || isPromqlAcrossSeriesFunction(name)) {
+    return [];
+  }
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlGroupingNotAllowed',
+      values: { fn: name },
+      locations: grouping.location,
+    }),
+  ];
+}
+
+/* Returns an error when argument types don't match any signature for the given arity. */
+function getMatchingSignatureErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || fn.incomplete) {
+    return [];
+  }
+
+  function format(params: PromQLFunctionParameter[], argCount: number): string {
+    return params
+      .slice(0, argCount)
+      .map(({ name, type }) => `${name}=${type}`)
+      .join(', ');
+  }
+
+  const { args, name, location } = fn;
+  const argTypes = args.map((arg) => getPromqlExpressionType(arg));
+
+  if (argTypes.some((argType) => argType === undefined)) {
+    return [];
+  }
+
+  const matchingAritySignatures = definition.signatures.filter(
+    (sig) => args.length >= getRequiredParamCount(sig) && args.length <= sig.params.length
+  );
+
+  if (matchingAritySignatures.length === 0) {
+    return [];
+  }
+
+  const hasMatch = matchingAritySignatures.some(({ params }) =>
+    args.every((_, idx) => params[idx]?.type === argTypes[idx])
+  );
+
+  if (hasMatch) {
+    return [];
+  }
+
+  // PromQL definitions expose a single arity-compatible signature here, so [0] is deterministic.
+  const { params: refParams } = matchingAritySignatures[0];
+  const required = format(refParams, args.length);
+
+  const mismatchIdx = argTypes.findIndex((argType, idx) => refParams[idx]?.type !== argType);
+  const mismatchLocation = getPromqlNodeLocation(args[mismatchIdx], location);
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlNoMatchingSignature',
+      values: { fn: name, required },
+      locations: mismatchLocation,
+    }),
+  ];
+}
+
+/* Returns errors for PromQL column references (metrics, labels, grouping) not found in ES|QL columns. */
+function getColumnErrors(
+  selectors: PromQLSelector[],
+  groupingArgs: PromQLLabelName[],
+  commandName: string,
+  context: ICommandContext
+): ESQLMessage[] {
+  const metrics = selectors.map(({ metric }) => metric);
+  const labels = selectors.flatMap(
+    ({ labelMap }) => labelMap?.args.map(({ labelName }) => labelName) ?? []
+  );
+
+  const columns = [...metrics, ...labels, ...groupingArgs].filter((node) => isIdentifier(node));
+
+  return columns.flatMap((column) =>
+    validateColumnForCommand(
+      { ...column, text: column.name, incomplete: !!column.incomplete },
+      commandName,
+      context
+    )
+  );
+}
+
+/* Returns errors for invalid duration expressions. */
+function getDurationErrors(
+  durations: Array<{ text?: string; incomplete?: boolean; location?: ESQLLocation } | undefined>,
+  fallbackLocation: ESQLLocation
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  for (const duration of durations) {
+    if (!duration || duration.incomplete) continue;
+
+    const text = duration.text?.trim() ?? '';
+
+    if (!text || !FORMAT_STEP_DURATION_REGEX.test(text)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'promqlInvalidDurationValue',
+          values: { value: text },
+          locations: duration.location ?? fallbackLocation,
+        })
+      );
+    }
+  }
+
+  return messages;
+}
+
+// ----------------------------------------------------------------------------
+// Utilities
+// ----------------------------------------------------------------------------
+
+function getRequiredParamCount({ params, minParams }: PromQLSignature): number {
+  return minParams ?? params.filter(({ optional }) => !optional).length;
+}
+
+/* Extracts a node location for precise error highlighting. */
+function getPromqlNodeLocation(node: unknown, fallback: ESQLLocation): ESQLLocation {
+  if (node && typeof node === 'object' && 'location' in node) {
+    const location = (node as { location?: ESQLLocation }).location;
+
+    if (location?.min !== undefined && location?.max !== undefined) {
+      return location;
+    }
+  }
+
+  return fallback;
+}
+
+function getPromqlExpressionType(
+  expression: PromQLAstExpression
+): PromQLFunctionParamType | undefined {
+  switch (expression.type) {
+    case 'selector':
+      return expression.duration ? 'range_vector' : 'instant_vector';
+    case 'subquery':
+      return 'range_vector';
+    case 'literal':
+      return expression.literalType === 'string' ? 'string' : 'scalar';
+    case 'parens':
+      return getPromqlExpressionType(expression.child);
+    case 'unary-expression':
+      return getPromqlExpressionType(expression.arg);
+    case 'function':
+      return normalizePromqlReturnType(
+        getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType
+      );
+    case 'binary-expression': {
+      const bothScalar =
+        getPromqlExpressionType(expression.left) === 'scalar' &&
+        getPromqlExpressionType(expression.right) === 'scalar';
+
+      return bothScalar ? 'scalar' : 'instant_vector';
+    }
+  }
 }

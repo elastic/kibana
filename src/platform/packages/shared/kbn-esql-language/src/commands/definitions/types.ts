@@ -382,6 +382,26 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  promqlUnknownFunction: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlWrongNumberArgs: {
+    message: string;
+    type: { fn: string; expected: string; actual: number };
+  };
+  promqlGroupingNotAllowed: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlNoMatchingSignature: {
+    message: string;
+    type: { fn: string; required: string };
+  };
+  promqlInvalidDurationValue: {
+    message: string;
+    type: { value: string };
+  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
