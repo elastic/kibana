@@ -59,11 +59,17 @@ export type AttackDetailsProviderProps = {
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
     // data view side: browserFields + field-browser data
-    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading, refetch } =
-      useAttackDetails({
-        attackId,
-        indexName,
-      });
+    const {
+      browserFields,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+      loading,
+      refetch,
+    } = useAttackDetails({
+      attackId,
+      indexName,
+    });
 
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
