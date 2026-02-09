@@ -10,7 +10,10 @@ import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  ConversationAction,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import type {
   Attachment,
   ScreenContextAttachmentData,
@@ -34,7 +37,7 @@ interface UseSendMessageMutationProps {
 
 interface SendMessageParams {
   message?: string;
-  action?: 'regenerate';
+  action?: ConversationAction;
 }
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -151,6 +154,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
     browserToolExecutor,
+    isRegeneratingRef,
   });
 
   const sendMessage = async ({ message, action }: SendMessageParams) => {
