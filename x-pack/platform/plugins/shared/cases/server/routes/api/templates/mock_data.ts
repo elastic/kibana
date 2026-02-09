@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 
 // Mock data store (simulates database)
@@ -14,7 +14,7 @@ export const mockTemplates: Template[] = [
     templateId: 'template-1',
     name: 'Security Incident Template',
     owner: 'securitySolution',
-    definition: yaml.dump({
+    definition: stringify({
       fields: [
         {
           control: 'text',
@@ -40,7 +40,7 @@ export const mockTemplates: Template[] = [
     templateId: 'template-2',
     name: 'Observability Alert Template',
     owner: 'observability',
-    definition: yaml.dump({
+    definition: stringify({
       fields: [
         {
           control: 'text',
@@ -58,7 +58,7 @@ export const mockTemplates: Template[] = [
     templateId: 'template-3',
     name: 'Deleted Template',
     owner: 'securitySolution',
-    definition: yaml.dump({ fields: [] }),
+    definition: stringify({ fields: [] }),
     templateVersion: 1,
     deletedAt: '2024-01-15T10:00:00.000Z',
   },

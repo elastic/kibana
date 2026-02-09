@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
@@ -17,7 +17,7 @@ import { deleteTemplateRoute } from './delete_template_route';
 import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
 
-const validDefinition = yaml.dump({
+const validDefinition = stringify({
   fields: [
     {
       control: 'text',
