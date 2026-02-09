@@ -6,3 +6,13 @@
  */
 
 export { DASHBOARD_NAMESPACE, dashboardTools } from './constants';
+export {
+  buildLensPanelFromApi,
+  buildMarkdownPanel,
+  buildPanelFromRawConfig,
+  calculateMarkdownPanelHeight,
+  getMarkdownPanelHeight,
+  getPanelWidth,
+  normalizePanels,
+} from './panel_utils';
+export type { BuildPanelFromRawConfigOptions, PanelLayoutConfig } from './panel_utils';
