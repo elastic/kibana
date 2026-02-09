@@ -292,7 +292,8 @@ async function getSuggestionsWithinCommandExpression(
   const commandName = astContext.command.name.toLowerCase();
   const isTSorFROMCommand = commandName === 'from' || commandName === 'ts';
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
-  if (isTSorFROMCommand && callbacks?.isResourceBrowserEnabled && !isInsideSubquery) {
+  const isResourceBrowserEnabled = callbacks?.isResourceBrowserEnabled?.() ?? false;
+  if (isTSorFROMCommand && isResourceBrowserEnabled && !isInsideSubquery) {
     const { rangeToReplace, filterText } =
       suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
     const insertText = rangeToReplace

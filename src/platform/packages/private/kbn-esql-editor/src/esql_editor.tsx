@@ -653,7 +653,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
-    isResourceBrowserEnabled: enableResourceBrowser,
+    isResourceBrowserEnabled: () => enableResourceBrowser,
   });
 
   const {
