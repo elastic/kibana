@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 
+import type { CreateRuleParams, UpdateRuleData } from './types';
+import type { UserService } from '../services/user_service/user_service';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
-import type { UserServiceContract } from '../services/user_service/user_service';
-
-import type { CreateRuleParams, UpdateRuleData } from './types';
+import { createUserService } from '../services/user_service/user_service.mock';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -35,9 +35,7 @@ describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
-  const userService: jest.Mocked<UserServiceContract> = {
-    getCurrentUserProfileUid: jest.fn(),
-  };
+  let userService: UserService;
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
 
   const baseCreateData: CreateRuleParams['data'] = {
@@ -61,7 +59,7 @@ describe('RulesClient', () => {
 
     // Default space
     http.basePath.get.mockReturnValue('/s/space-1');
-    userService.getCurrentUserProfileUid.mockResolvedValue('elastic_profile_uid');
+    ({ userService } = createUserService({ request }));
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
       type: RULE_SAVED_OBJECT_TYPE,

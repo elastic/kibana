@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
 export interface UserServiceContract {
@@ -18,16 +18,11 @@ export interface UserServiceContract {
 export class UserService implements UserServiceContract {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @optional()
     @inject(CoreStart('userProfile'))
-    private readonly userProfile?: UserProfileServiceStart
+    private readonly userProfile: UserProfileServiceStart
   ) {}
 
   public async getCurrentUserProfileUid(): Promise<string | null> {
-    if (!this.userProfile) {
-      return null;
-    }
-
     const profile = await this.userProfile.getCurrent({ request: this.request });
     return profile?.uid ?? null;
   }

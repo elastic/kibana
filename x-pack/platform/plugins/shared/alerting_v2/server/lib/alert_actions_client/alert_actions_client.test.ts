@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { UserService } from '../services/user_service/user_service';
 import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import type { UserServiceContract } from '../services/user_service/user_service';
+import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
   getBulkAlertEventsESQLResponse,
@@ -20,13 +22,13 @@ describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
   const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
-  const userService: jest.Mocked<UserServiceContract> = {
-    getCurrentUserProfileUid: jest.fn(),
-  };
+  let userService: UserService;
+  let userProfile: jest.Mocked<UserProfileServiceStart>;
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    userService.getCurrentUserProfileUid.mockResolvedValue('test-uid');
+    ({ userService, userProfile } = createUserService());
+    userProfile.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
     client = new AlertActionsClient(queryService, storageService, userService);
   });
@@ -107,7 +109,7 @@ describe('AlertActionsClient', () => {
     it('should handle null profile uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
-      userService.getCurrentUserProfileUid.mockResolvedValueOnce(null);
+      userProfile.getCurrent.mockResolvedValueOnce(null);
       const clientWithoutSecurity = new AlertActionsClient(
         queryService,
         storageService,
