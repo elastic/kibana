@@ -54,6 +54,7 @@ export const getSections = ({
   dataViewId,
   assetDetailsLocator,
   discoverLocator,
+  metricsIndices,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -69,6 +70,8 @@ export const getSections = ({
   dataViewId?: string;
   assetDetailsLocator?: AssetDetailsLocator;
   discoverLocator?: LocatorPublic<SerializableRecord>;
+  /** Metrics data view title (e.g. from metricsDataAccess.metricsClient.metricsIndices()). */
+  metricsIndices?: string;
 }) => {
   if (!transaction) return [];
 
@@ -128,6 +131,7 @@ export const getSections = ({
     assetDetailsLocator,
     discoverLocator,
     infraLinksAvailable,
+    metricsIndices,
   });
 
   const podActions: Action[] = [

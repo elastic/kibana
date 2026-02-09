@@ -6,6 +6,7 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { useHistory } from 'react-router-dom';
 import {
   ActionMenuDivider,
@@ -43,7 +44,7 @@ interface Props {
 const POPOVER_WIDTH = '305px';
 
 export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClose }: Props) {
-  const { core, share } = useApmPluginContext();
+  const { core, share, metricsDataAccess } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -54,6 +55,11 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
   });
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
+
+  const metricsIndicesAsync = useAsync(() => {
+    return metricsDataAccess?.metricsClient.metricsIndices() ?? Promise.resolve(undefined);
+  }, [metricsDataAccess]);
+  const metricsIndices = metricsIndicesAsync.value?.metricIndices;
 
   const logsLocator = getLogsLocatorFromUrlService(share.url)!;
   const assetDetailsLocator =
@@ -102,6 +108,7 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
     assetDetailsLocator,
     discoverLocator,
     infraLinksAvailable,
+    metricsIndices,
   });
 
   return (

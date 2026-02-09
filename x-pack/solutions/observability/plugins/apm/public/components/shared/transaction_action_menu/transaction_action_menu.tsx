@@ -121,10 +121,16 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, share } = useApmPluginContext();
+  const { core, uiActions, share, metricsDataAccess } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
+
+  const metricsIndicesAsync = useAsync(() => {
+    return metricsDataAccess?.metricsClient.metricsIndices() ?? Promise.resolve(undefined);
+  }, [metricsDataAccess]);
+
+  const metricsIndices = metricsIndicesAsync.value?.metricIndices;
 
   const logsLocator = getLogsLocatorFromUrlService(share.url)!;
 
@@ -161,6 +167,7 @@ function ActionMenuSections({
     dataViewId: dataView?.id,
     assetDetailsLocator,
     discoverLocator,
+    metricsIndices,
   });
 
   const externalMenuItems = useAsync(() => {

@@ -17,6 +17,7 @@ interface PodMetricsLinkParams {
   assetDetailsLocator?: AssetDetailsLocator;
   discoverLocator?: LocatorPublic<SerializableRecord>;
   infraLinksAvailable?: boolean;
+  metricsIndices?: string;
 }
 
 /**
@@ -31,6 +32,7 @@ export function getPodMetricsLink({
   assetDetailsLocator,
   discoverLocator,
   infraLinksAvailable = true,
+  metricsIndices = 'metrics-*',
 }: PodMetricsLinkParams): string | undefined {
   if (!podId) {
     return undefined;
@@ -42,7 +44,7 @@ export function getPodMetricsLink({
   if (isOTelObservedK8sPod && discoverLocator && infraMetricsQuery) {
     return discoverLocator.getRedirectUrl({
       dataViewSpec: {
-        title: 'metrics-*',
+        title: metricsIndices,
       },
       timeRange: {
         from: infraMetricsQuery.from,

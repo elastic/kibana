@@ -46,6 +46,7 @@ export function getMenuSections({
   assetDetailsLocator,
   discoverLocator,
   infraLinksAvailable,
+  metricsIndices,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
@@ -55,6 +56,7 @@ export function getMenuSections({
   assetDetailsLocator?: AssetDetailsLocator;
   discoverLocator?: LocatorPublic<SerializableRecord>;
   infraLinksAvailable: boolean;
+  metricsIndices?: string;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -88,6 +90,7 @@ export function getMenuSections({
     assetDetailsLocator,
     discoverLocator,
     infraLinksAvailable,
+    metricsIndices,
   });
 
   const podActions: Action[] = [
