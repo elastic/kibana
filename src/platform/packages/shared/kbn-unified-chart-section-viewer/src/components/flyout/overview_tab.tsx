@@ -111,13 +111,13 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           {metric.index}
         </EuiText>
       ),
-      createDescriptionListItem('fieldTypeLabel', 'Field type', <EuiBadge>{metric.type}</EuiBadge>),
+      createDescriptionListItem('fieldTypeLabel', 'Field type', <div><EuiBadge>{metric.type}</EuiBadge></div>),
       ...(unitLabel
         ? [
             createDescriptionListItem(
               'metricUnitLabel',
               'Metric unit',
-              <EuiBadge>{unitLabel}</EuiBadge>,
+              <div><EuiBadge>{unitLabel}</EuiBadge></div>,
               'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
             ),
           ]
@@ -127,7 +127,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             createDescriptionListItem(
               'metricTypeLabel',
               'Metric type',
-              <EuiBadge>{metric.instrument}</EuiBadge>,
+              <div><EuiBadge>{metric.instrument}</EuiBadge></div>,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
