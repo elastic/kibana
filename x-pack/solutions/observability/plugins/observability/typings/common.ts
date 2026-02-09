@@ -14,7 +14,8 @@ export type ObservabilityApp =
   // we will remove uptime in future to replace to be replace by synthetics
   | 'uptime'
   | 'synthetics'
-  | 'observability-overview'
+  | 'observability'
+  | 'observability_overview'
   | 'ux'
   | 'fleet'
   | 'universal_profiling';

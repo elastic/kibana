@@ -12,7 +12,7 @@ import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
@@ -73,7 +73,7 @@ export function RulePage() {
           defaultMessage: 'Alerts',
         }),
         href: http.basePath.prepend(paths.observability.alerts),
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       },
       {
         href: http.basePath.prepend(paths.observability.rules),
@@ -126,6 +126,7 @@ export function RulePage() {
       <ObservabilityPageTemplate data-test-subj="rulePage">
         <HeaderMenu />
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.observability.ruleForm.templateError.title', {
             defaultMessage: 'Error loading rule template',
           })}

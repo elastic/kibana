@@ -70,8 +70,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // all other links in navigation menu are hidden
       await testSubjects.missingOrFail('~nav-item-id-dashboards');
-      await testSubjects.missingOrFail('~nav-item-id-observability-overview:alerts');
-      await testSubjects.missingOrFail('~nav-item-id-observability-overview:cases');
+      await testSubjects.missingOrFail('~nav-item-id-observability:alerts');
+      await testSubjects.missingOrFail('~nav-item-id-observability:cases');
       await testSubjects.missingOrFail('~nav-item-id-slo');
       await testSubjects.missingOrFail('~nav-item-id-aiops');
       await testSubjects.missingOrFail('~nav-item-id-inventory');

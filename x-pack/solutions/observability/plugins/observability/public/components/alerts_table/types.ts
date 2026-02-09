@@ -7,11 +7,57 @@
 
 import type { SetOptional } from 'type-fest';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
-import type { ConfigSchema, ObservabilityRuleTypeRegistry, TopAlert } from '../..';
+
+// Using a generic with `any` default allows this interface to accept
+// registries with formatters that expect specific field types (like ParsedTechnicalFields)
+// without requiring type assertions at the call site.
+
+/** Nullable number type matching the observability plugin's Maybe<number> */
+type MaybeNumber = number | null | undefined;
+
+/**
+ * Formatter function that takes a nullable number value and returns a formatted string.
+ * Additional options parameters vary by implementation (e.g., FormatterOptions for asDuration).
+ */
+type ValueFormatter = (value: MaybeNumber, ...options: any[]) => string;
+
+export interface ObservabilityRuleTypeRegistry<TFields = any> {
+  getFormatter: (ruleTypeId: string) =>
+    | ((params: {
+        fields: TFields;
+        formatters: {
+          asDuration: ValueFormatter;
+          asPercent: ValueFormatter;
+        };
+      }) => { link?: string; reason?: string; hasBasePath?: boolean })
+    | undefined;
+}
+
+export interface ConfigSchema {
+  unsafe?: {
+    alertDetails?: {
+      logs?: { enabled: boolean };
+      uptime?: { enabled: boolean };
+      observability?: { enabled: boolean };
+    };
+    thresholdRule?: { enabled: boolean };
+    ruleFormV2?: { enabled: boolean };
+  };
+}
+
+export interface TopAlert {
+  fields: Record<string, unknown>;
+  active: boolean;
+  start: number;
+  lastUpdated: number;
+  link?: string;
+  reason: string;
+  hasBasePath?: boolean;
+}
 
 export interface ObservabilityAlertsTableContext {
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  config: ConfigSchema;
+  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
+  config?: ConfigSchema;
   parentAlert?: TopAlert;
 }
 
@@ -19,6 +65,7 @@ export type ObservabilityAlertsTableProps = SetOptional<
   AlertsTablePropsWithRef<ObservabilityAlertsTableContext>,
   'ruleTypeIds'
 >;
+
 export type GetObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
   NonNullable<ObservabilityAlertsTableProps[PropKey]>;
 

@@ -22,7 +22,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.expectExists();
 
       await svlCommonNavigation.sidenav.expectLinkExists({
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       });
     });
 
@@ -37,7 +37,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('does not show the Cases entry', async () => {
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.sidenav.expectLinkMissing({
-        deepLinkId: 'observability-overview:cases',
+        deepLinkId: 'observability:cases',
       });
     });
 

@@ -16,6 +16,8 @@ export const LAST_USED_LOGS_VIEWER_APP_ID = 'last-used-logs-viewer';
 
 export const OBSERVABILITY_OVERVIEW_APP_ID = 'observability-overview';
 
+export const OBSERVABILITY_APP_ID = 'observability';
+
 export const METRICS_APP_ID = 'metrics';
 
 export const APM_APP_ID = 'apm';

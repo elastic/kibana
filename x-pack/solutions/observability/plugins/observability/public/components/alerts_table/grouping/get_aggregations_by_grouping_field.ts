@@ -27,7 +27,6 @@ export const getAggregationsByGroupingField = (field: string): NamedAggregation[
           },
         },
       ];
-      break;
     case ALERT_INSTANCE_ID:
       return [
         {
@@ -38,7 +37,6 @@ export const getAggregationsByGroupingField = (field: string): NamedAggregation[
           },
         },
       ];
-      break;
     default:
       return [
         {

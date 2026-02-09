@@ -8,17 +8,26 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 
-export const ungrouped = i18n.translate('xpack.observability.alert.grouping.ungrouped.label', {
-  defaultMessage: 'Ungrouped',
-});
+export const ungrouped = i18n.translate(
+  'xpack.observability.alertsTable.alert.grouping.ungrouped.label',
+  {
+    defaultMessage: 'Ungrouped',
+  }
+);
 
-export const ruleName = i18n.translate('xpack.observability.alert.grouping.ruleName.label', {
-  defaultMessage: 'Rule name',
-});
+export const ruleName = i18n.translate(
+  'xpack.observability.alertsTable.alert.grouping.ruleName.label',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
 
-export const source = i18n.translate('xpack.observability.alert.grouping.source.label', {
-  defaultMessage: 'Source',
-});
+export const source = i18n.translate(
+  'xpack.observability.alertsTable.alert.grouping.source.label',
+  {
+    defaultMessage: 'Source',
+  }
+);
 
 export const DEFAULT_GROUPING_OPTIONS = [
   {

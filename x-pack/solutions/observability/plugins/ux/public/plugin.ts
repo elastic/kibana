@@ -14,6 +14,7 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type { ObservabilityOverviewPublicSetup } from '@kbn/observability-overview-plugin/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -56,7 +57,8 @@ export interface ApmPluginSetupDeps {
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  observability: ObservabilityPublicSetup;
+  observability?: ObservabilityPublicSetup;
+  observabilityOverview?: ObservabilityOverviewPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
@@ -87,18 +89,18 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
-    if (plugins.observability) {
-      const getUxDataHelper = async () => {
-        const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
-          './components/app/rum_dashboard/ux_overview_fetchers'
-        );
-        // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core);
+    const getUxDataHelper = async () => {
+      const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
+        './components/app/rum_dashboard/ux_overview_fetchers'
+      );
+      // have to do this here as well in case app isn't mounted yet
+      createCallApmApi(core);
 
-        return { fetchUxOverviewDate, hasRumData };
-      };
+      return { fetchUxOverviewDate, hasRumData };
+    };
 
-      plugins.observability.dashboard.register({
+    if (plugins.observabilityOverview) {
+      plugins.observabilityOverview.dashboard.register({
         appName: OBLT_UX_APP_ID,
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();

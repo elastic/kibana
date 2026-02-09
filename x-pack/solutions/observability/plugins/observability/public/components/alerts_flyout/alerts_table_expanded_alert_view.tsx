@@ -28,6 +28,9 @@ export function AlertsTableExpandedAlertView({
     onExpandedAlertIndexChange(null);
     return null;
   }
+  if (!observabilityRuleTypeRegistry) {
+    return null;
+  }
   const expandedAlertPage = Math.floor(expandedAlertIndex / pageSize);
   // This can be undefined when a new page of alerts is still loading
   const alert = alerts[alertIndexInPage] as Alert | undefined;

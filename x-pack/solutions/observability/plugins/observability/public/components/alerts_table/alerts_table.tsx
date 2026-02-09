@@ -10,19 +10,16 @@ import { ALERT_START } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
-import { AlertsTableExpandedAlertView } from '../alerts_flyout/alerts_table_expanded_alert_view';
-import type { ObservabilityPublicStart } from '../..';
-import AlertActions from '../alert_actions/alert_actions';
-import { useKibana } from '../../utils/kibana_react';
-import { casesFeatureId, observabilityFeatureId } from '../../../common';
 import type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
+  ObservabilityRuleTypeRegistry,
+  ConfigSchema,
 } from './types';
 import { AlertsTableCellValue } from './common/cell_value';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
+import { AlertActions } from './components/alert_actions';
 
 const columns = getColumns({ showRuleName: true });
 const initialSort = [
@@ -34,14 +31,22 @@ const initialSort = [
 ];
 
 const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> = {
-  featureId: casesFeatureId,
-  owner: [observabilityFeatureId],
+  featureId: 'observabilityCases',
+  owner: ['observability'],
 };
 
-export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
-  const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
-  const { observabilityRuleTypeRegistry, config } = usePluginContext();
+export interface ObservabilityAlertsTableComponentProps extends ObservabilityAlertsTableProps {
+  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
+  config?: ConfigSchema;
+  renderExpandedAlertView?: GetObservabilityAlertsTableProp<'renderExpandedAlertView'>;
+}
 
+export function ObservabilityAlertsTable({
+  observabilityRuleTypeRegistry,
+  config,
+  renderExpandedAlertView,
+  ...props
+}: ObservabilityAlertsTableComponentProps) {
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
@@ -49,14 +54,13 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
       sort={initialSort}
       casesConfiguration={caseConfiguration}
       additionalContext={{
-        observabilityRuleTypeRegistry:
-          observabilityRuleTypeRegistry ?? observability?.observabilityRuleTypeRegistry,
+        observabilityRuleTypeRegistry,
         config,
       }}
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
       actionsColumnWidth={120}
-      renderExpandedAlertView={AlertsTableExpandedAlertView}
+      renderExpandedAlertView={renderExpandedAlertView}
       showAlertStatusWithFlapping
       {...props}
     />
@@ -66,4 +70,4 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
 // Lazy loading helpers
 // eslint-disable-next-line import/no-default-export
 export default ObservabilityAlertsTable;
-export type ObservabilityAlertsTable = typeof ObservabilityAlertsTable;
+export type ObservabilityAlertsTableType = typeof ObservabilityAlertsTable;

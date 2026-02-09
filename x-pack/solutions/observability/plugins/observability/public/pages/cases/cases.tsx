@@ -11,7 +11,7 @@ import { observabilityFeatureId } from '../../../common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { Cases } from './components/cases';
 import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 
 export function CasesPage() {

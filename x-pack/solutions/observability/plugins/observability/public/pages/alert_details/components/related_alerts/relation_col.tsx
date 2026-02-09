@@ -17,8 +17,8 @@ import { intersection } from 'lodash';
 import { EuiDescriptionList, EuiLink } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import type { TopAlert } from '../../../..';
-import { getAlertFieldValue } from '../../../../components/alerts_table/common/cell_value';
+import { getAlertFieldValue } from '../../../../components/alerts_table';
+import type { TopAlert } from '../../../../typings/alerts';
 import { paths } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../utils/kibana_react';
 

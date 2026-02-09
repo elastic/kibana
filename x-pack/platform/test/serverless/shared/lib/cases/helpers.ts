@@ -75,6 +75,6 @@ export const navigateToCasesApp = async (
       deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
     });
   } else {
-    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
   }
 };

@@ -7945,6 +7945,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-overview-plugin@link:x-pack/solutions/observability/plugins/observability_overview":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-plugin@link:x-pack/solutions/observability/plugins/observability":
   version "0.0.0"
   uid ""

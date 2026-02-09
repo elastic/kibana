@@ -74,17 +74,17 @@ export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData<T extends ObservabilityFetchDataPlugins> = (
+export type HasData<T extends keyof ObservabilityHasDataResponse> = (
   params?: HasDataParams
 ) => Promise<ObservabilityHasDataResponse[T]>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'fleet' | 'synthetics'
+  'observability-overview' | 'observability' | 'fleet' | 'synthetics'
 >;
 
 export interface DataHandler<
-  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+  T extends keyof ObservabilityFetchDataResponse & keyof ObservabilityHasDataResponse
 > {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData<T>;

@@ -37,6 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               feature: {
                 apm: ['all'],
+                observabilityOverview: ['all'],
               },
               spaces: ['*'],
             },
@@ -92,6 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               feature: {
                 apm: ['read'],
+                observabilityOverview: ['read'],
               },
               spaces: ['*'],
             },

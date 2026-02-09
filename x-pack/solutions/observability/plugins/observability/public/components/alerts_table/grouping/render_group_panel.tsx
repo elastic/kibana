@@ -12,7 +12,7 @@ import type { GroupPanelRenderer } from '@kbn/grouping/src';
 import { firstNonNullValue } from '@kbn/grouping/src';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertsByGroupingAgg } from '../types';
-import { Tags } from '../../tags';
+import { Tags } from '../components/tags';
 import { ungrouped } from './constants';
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
@@ -24,7 +24,7 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
       return isArray(bucket.key) ? (
         <RuleNameGroupContent
           ruleName={bucket.key[0]}
-          tags={bucket.ruleTags?.buckets.map((tag: any) => tag.key)}
+          tags={bucket.ruleTags?.buckets.map((tag: { key: string }) => tag.key)}
         />
       ) : undefined;
     case 'kibana.alert.instance.id':
@@ -35,13 +35,13 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
 const RuleNameGroupContent = React.memo<{
   ruleName: string;
   tags?: string[] | undefined;
-}>(({ ruleName, tags }) => {
+}>(({ ruleName: ruleNameValue, tags }) => {
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
-            <h5 className="eui-textTruncate">{ruleName}</h5>
+            <h5 className="eui-textTruncate">{ruleNameValue}</h5>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -72,7 +72,7 @@ const InstanceIdGroupContent = React.memo<{
                 <EuiIconTip
                   content={
                     <FormattedMessage
-                      id="xpack.observability.alert.grouping.ungrouped.info"
+                      id="xpack.observability.alertsTable.alert.grouping.ungrouped.info"
                       defaultMessage='There is no "group by" field selected in the rule definition.'
                     />
                   }

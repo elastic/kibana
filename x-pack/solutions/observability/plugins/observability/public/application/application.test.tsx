@@ -123,28 +123,6 @@ describe('renderApp', () => {
     }).not.toThrowError();
   });
 
-  it('should clear search sessions when unmounting', () => {
-    const unmount = renderApp({
-      core,
-      config,
-      plugins,
-      appMountParameters: params,
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      ObservabilityPageTemplate: KibanaPageTemplate,
-      usageCollection: {
-        components: {
-          ApplicationUsageTrackingProvider: (props) => null,
-        },
-        reportUiCounter: jest.fn(),
-      },
-      kibanaVersion: '8.8.0',
-      telemetryClient: createTelemetryClientMock(),
-    });
-    unmount();
-
-    expect(mockSearchSessionClear).toBeCalled();
-  });
-
   function AppWrapper({ children }: { children?: ReactNode }) {
     return (
       <KibanaRenderContextProvider {...core}>

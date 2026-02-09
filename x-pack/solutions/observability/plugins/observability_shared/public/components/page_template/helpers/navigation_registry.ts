@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { combineLatest, map, ReplaySubject, scan, shareReplay, switchMap } from 'rxjs';
+import { combineLatest, map, ReplaySubject, scan, shareReplay, startWith, switchMap } from 'rxjs';
 import type { NavigationSection } from '../page_template';
 
 export interface NavigationRegistry {
@@ -26,7 +26,11 @@ export const createNavigationRegistry = (): NavigationRegistry => {
       (accumulatedSections$, newSections) => accumulatedSections$.add(newSections),
       new Set<Observable<NavigationSection[]>>()
     ),
-    switchMap((registeredSections) => combineLatest([...registeredSections])),
+    switchMap((registeredSections) =>
+      // Use startWith to emit an empty array for each registered section immediately,
+      // preventing sidebar flicker while waiting for async navigation data to load
+      combineLatest([...registeredSections].map((section$) => section$.pipe(startWith([]))))
+    ),
     map((registeredSections) =>
       registeredSections.flat().sort((first, second) => first.sortKey - second.sortKey)
     ),

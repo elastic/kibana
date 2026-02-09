@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      observabilityOverview: ['all', 'read', 'minimal_all', 'minimal_read'],
       agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],

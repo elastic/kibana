@@ -82,14 +82,7 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
-import {
-  ALERTS_PATH,
-  CASES_PATH,
-  OBSERVABILITY_BASE_PATH,
-  OVERVIEW_PATH,
-  RULES_PATH,
-} from '../common/locators/paths';
-import { registerDataHandler } from './context/has_data_context/data_handler';
+import { ALERTS_PATH, CASES_PATH, OBSERVABILITY_BASE_PATH } from '../common/locators/paths';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
@@ -213,17 +206,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
+      visibleIn: ['sideNav'],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -311,10 +294,11 @@ export class Plugin
       deepLinks: this.deepLinks,
       euiIconType,
       id: observabilityAppId,
+      defaultPath: '/alerts',
       mount,
       order: 8000,
-      title: i18n.translate('xpack.observability.overviewLinkTitle', {
-        defaultMessage: 'Overview',
+      title: i18n.translate('xpack.observability.alertsLinkTitle', {
+        defaultMessage: 'Alerts',
       }),
       updater$: appUpdater$,
       keywords: [
@@ -368,8 +352,38 @@ export class Plugin
       });
     }
 
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(appUpdater$).pipe(
+    // Register initial navigation sections synchronously to prevent sidebar flicker.
+    // The Overview link doesn't depend on async data, so we can show it immediately.
+    // Other links (Alerts, SLOs, Cases, AI Assistant) will be added once async data loads.
+    const initialOverviewLink = !Boolean(pluginsSetup.serverless)
+      ? [
+          {
+            label: i18n.translate('xpack.observability.overviewLinkTitle', {
+              defaultMessage: 'Overview',
+            }),
+            app: 'observabilityOverview',
+            path: '/',
+            matchPath: (currentPath: string) => currentPath === '/' || currentPath === '',
+          },
+        ]
+      : [];
+
+    // Create a BehaviorSubject so we can update the navigation sections once async data loads
+    const mainNavSections$ = new BehaviorSubject<
+      Array<{ label: string; sortKey: number; entries: NavigationEntry[] }>
+    >([
+      {
+        label: '',
+        sortKey: 100,
+        entries: [...initialOverviewLink],
+      },
+    ]);
+
+    pluginsSetup.observabilityShared.navigation.registerSections(mainNavSections$);
+
+    // Update navigation sections once async data is available
+    from(appUpdater$)
+      .pipe(
         mergeMap((value) =>
           from(coreSetup.getStartServices()).pipe(
             switchMap(([coreStart, pluginsStart]) => {
@@ -381,8 +395,9 @@ export class Plugin
                       label: i18n.translate('xpack.observability.overviewLinkTitle', {
                         defaultMessage: 'Overview',
                       }),
-                      app: observabilityAppId,
-                      path: OVERVIEW_PATH,
+                      app: 'observabilityOverview',
+                      path: '/',
+                      matchPath: (currentPath: string) => currentPath === '/' || currentPath === '',
                     },
                   ]
                 : [];
@@ -471,7 +486,9 @@ export class Plugin
           )
         )
       )
-    );
+      .subscribe((sections) => {
+        mainNavSections$.next(sections);
+      });
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(startServicesPromise).pipe(
@@ -509,7 +526,6 @@ export class Plugin
     const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
     return {
-      dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(unifiedRulesPage),
       rulesLocator,

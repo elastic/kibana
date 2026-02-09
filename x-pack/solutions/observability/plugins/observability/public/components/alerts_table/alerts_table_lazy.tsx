@@ -8,11 +8,11 @@
 import type { ComponentProps } from 'react';
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ObservabilityAlertsTable as ObservabilityAlertsTableType } from './alerts_table';
+import type { ObservabilityAlertsTableType } from './alerts_table';
 
-export const AlertsTable = lazy(() => import('./alerts_table')) as ObservabilityAlertsTableType;
+const AlertsTable = lazy(() => import('./alerts_table')) as ObservabilityAlertsTableType;
 
-export function ObservabilityAlertsTable(
+export function ObservabilityAlertsTableLazy(
   props: ComponentProps<ObservabilityAlertsTableType> & { hideLazyLoader?: boolean }
 ) {
   const { hideLazyLoader, ...tableProps } = props;

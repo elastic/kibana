@@ -27,6 +27,7 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type { ObservabilityOverviewPublicSetup } from '@kbn/observability-overview-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -69,6 +70,7 @@ export interface InfraClientSetupDeps {
   logsShared: LogsSharedClientSetupExports;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityOverview: ObservabilityOverviewPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;

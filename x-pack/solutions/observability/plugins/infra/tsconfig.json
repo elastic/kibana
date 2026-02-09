@@ -130,6 +130,7 @@
     "@kbn/esql-composer",
     "@kbn/fleet-plugin",
     "@kbn/observability-agent-builder-plugin",
+    "@kbn/observability-overview-plugin",
     "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]

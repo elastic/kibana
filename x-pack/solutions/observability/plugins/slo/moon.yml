@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
+  - '@kbn/observability-overview-plugin'
   - '@kbn/observability-get-padded-alert-time-range-util'
 tags:
   - plugin

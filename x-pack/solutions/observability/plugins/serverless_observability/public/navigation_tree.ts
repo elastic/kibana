@@ -85,19 +85,19 @@ export const createNavigationTree = ({
         link: 'workflows',
       },
       {
-        link: 'observability-overview:alerts',
+        link: 'observability:alerts',
         icon: 'warning',
       },
       ...filterForFeatureAvailability(
         {
-          link: 'observability-overview:cases' as const,
+          link: 'observability:cases' as const,
           icon: LazyIconBriefcase,
           children: [
             {
-              link: 'observability-overview:cases_configure' as const,
+              link: 'observability:cases_configure' as const,
             },
             {
-              link: 'observability-overview:cases_create' as const,
+              link: 'observability:cases_create' as const,
             },
           ],
         },

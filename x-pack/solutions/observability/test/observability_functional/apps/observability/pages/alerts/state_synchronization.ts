@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should not sync URL state to shared time range on page load ', async () => {
       await pageObjects.observability.clickSolutionNavigationEntry(
-        'observability-overview',
+        'observabilityOverview',
         'overview'
       );
 
@@ -75,14 +75,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should use shared time range if set', async () => {
       await pageObjects.observability.clickSolutionNavigationEntry(
-        'observability-overview',
+        'observabilityOverview',
         'overview'
       );
       await setTimeRangeToXDaysAgo(10);
-      await pageObjects.observability.clickSolutionNavigationEntry(
-        'observability-overview',
-        'alerts'
-      );
+      await pageObjects.observability.clickSolutionNavigationEntry('observability', 'alerts');
 
       expect(await observability.alerts.common.getTimeRange()).to.be('Last 10 days');
     });
@@ -90,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should set the shared time range', async () => {
       await setTimeRangeToXDaysAgo(100);
       await pageObjects.observability.clickSolutionNavigationEntry(
-        'observability-overview',
+        'observabilityOverview',
         'overview'
       );
 

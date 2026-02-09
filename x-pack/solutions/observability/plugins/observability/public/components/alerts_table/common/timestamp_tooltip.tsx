@@ -7,8 +7,40 @@
 
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import type { TimeUnit } from '../../../../common/utils/formatters/datetime';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters/datetime';
+import moment from 'moment-timezone';
+
+type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
+
+function getTimeFormat(timeUnit: TimeUnit) {
+  switch (timeUnit) {
+    case 'hours':
+      return 'HH';
+    case 'minutes':
+      return 'HH:mm';
+    case 'seconds':
+      return 'HH:mm:ss';
+    case 'milliseconds':
+      return 'HH:mm:ss.SSS';
+    default:
+      return '';
+  }
+}
+
+function formatTimezone(momentTime: moment.Moment) {
+  const DEFAULT_TIMEZONE_FORMAT = 'Z';
+  const utcOffsetHours = momentTime.utcOffset() / 60;
+  const customTimezoneFormat = utcOffsetHours > 0 ? `+${utcOffsetHours}` : utcOffsetHours;
+  const utcOffsetFormatted = Number.isInteger(utcOffsetHours)
+    ? customTimezoneFormat
+    : DEFAULT_TIMEZONE_FORMAT;
+  return momentTime.format(`(UTC${utcOffsetFormatted})`);
+}
+
+export function asAbsoluteDateTime(time: number, timeUnit: TimeUnit = 'milliseconds') {
+  const momentTime = moment(time);
+  const formattedTz = formatTimezone(momentTime);
+  return momentTime.format(`MMM D, YYYY, ${getTimeFormat(timeUnit)} ${formattedTz}`);
+}
 
 interface Props {
   /**

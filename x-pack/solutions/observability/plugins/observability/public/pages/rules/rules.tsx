@@ -17,7 +17,7 @@ import { RULES_LOGS_PATH, RULES_PATH, paths } from '../../../common/locators/pat
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
@@ -51,7 +51,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           defaultMessage: 'Alerts',
         }),
         href: http.basePath.prepend('/app/observability/alerts'),
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       },
       {
         text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {

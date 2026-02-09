@@ -479,7 +479,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [

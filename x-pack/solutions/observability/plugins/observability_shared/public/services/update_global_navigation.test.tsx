@@ -155,6 +155,8 @@ describe('updateGlobalNavigation', () => {
 
         updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
+        // Note: sideNav visibility is now set directly in plugin registration,
+        // updateGlobalNavigation only adds globalSearch
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
             {
@@ -162,7 +164,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['globalSearch'],
             },
           ],
           visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
@@ -192,6 +194,8 @@ describe('updateGlobalNavigation', () => {
 
         updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
+        // Note: sideNav visibility is now set directly in plugin registration,
+        // updateGlobalNavigation only adds globalSearch
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
             {
@@ -199,7 +203,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['globalSearch'],
             },
           ],
           visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
