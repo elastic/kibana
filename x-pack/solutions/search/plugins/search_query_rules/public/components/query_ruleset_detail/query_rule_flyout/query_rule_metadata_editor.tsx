@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import type { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -41,6 +41,9 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   error,
 }) => {
   const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
+  useEffect(() => {
+    setMetadataField(criteria?.metadata ?? '');
+  }, [criteria]);
 
   return (
     <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
