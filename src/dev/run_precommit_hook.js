@@ -12,13 +12,16 @@ import SimpleGit from 'simple-git';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
+import { extname } from 'path';
+
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { extname } from 'path';
+import exceptions from './precommit_hook/exceptions.json';
 
 class CheckResult {
   constructor(checkName) {
@@ -71,7 +74,13 @@ class FileCasingCheck extends PrecommitCheck {
   }
 
   async execute(log, files) {
-    await checkFileCasing(log, files);
+    const packages = getPackages(REPO_ROOT);
+    const packageRootDirs = new Set(
+      packages
+        .filter((pkg) => !pkg.isPlugin())
+        .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
+    );
+    await checkFileCasing(log, files, { packageRootDirs, exceptions });
   }
 }
 
