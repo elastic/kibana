@@ -49,17 +49,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       if (!Streams.ingest.all.Definition.is(stream)) {
         return;
       }
-      let overlay: ReturnType<typeof core.overlays.openFlyout>;
-
-      const handleGoToField = (fieldName: string) => {
-        overlay.close();
-        const targetFieldObj = fields.find((f) => f.name === fieldName);
-        if (targetFieldObj) {
-          openFlyout({}, targetFieldObj);
-        }
-      };
-
-      overlay = core.overlays.openFlyout(
+      const overlay = core.overlays.openFlyout(
         toMountPoint(
           <StreamsAppContextProvider context={context}>
             <SchemaEditorFlyout
@@ -87,6 +77,14 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         ),
         { maxWidth: 500 }
       );
+
+      function handleGoToField(fieldName: string) {
+        overlay.close();
+        const targetFieldObj = fields.find((f) => f.name === fieldName);
+        if (targetFieldObj) {
+          openFlyout({}, targetFieldObj);
+        }
+      }
     };
 
     const viewFieldAction = {
