@@ -301,7 +301,7 @@ export const useQueryRuleFlyoutState = ({
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    criteriaFields,
+    criteria,
     criteriaCount,
     documentCount,
     dragEndHandle,
@@ -322,6 +322,6 @@ export const useQueryRuleFlyoutState = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    criteria,
+    criteriaFields,
   };
 };
