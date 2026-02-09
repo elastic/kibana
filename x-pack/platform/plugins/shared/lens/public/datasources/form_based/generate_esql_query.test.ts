@@ -5,46 +5,22 @@
  * 2.0.
  */
 
-import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-
-const defaultUiSettingsGet = (key: string) => {
-  switch (key) {
-    case 'dateFormat':
-      return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    case 'dateFormat:scaled':
-      return [[]];
-    case 'dateFormat:tz':
-      return 'UTC';
-    case 'histogram:barTarget':
-      return 50;
-    case 'histogram:maxBars':
-      return 100;
-  }
-};
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
+import {
+  mockLayer,
+  mockIndexPattern,
+  mockIndexPatternWithoutTimeField,
+  mockDateRange,
+} from './__mocks__/esql_query_mocks';
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });
-
-  const layer = {
-    indexPatternId: 'myIndexPattern',
-    columns: {},
-    columnOrder: [],
-  };
-
-  const indexPattern = {
-    title: 'myIndexPattern',
-    timeFieldName: 'order_date',
-    getFieldByName: (field: string) => {
-      if (field === 'records') return undefined;
-      return { name: field };
-    },
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
-  } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
     const result = generateEsqlQuery(
@@ -71,13 +47,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -87,8 +60,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -118,13 +90,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -148,13 +117,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -189,13 +155,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -205,8 +168,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -236,20 +198,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      {
-        title: 'myIndexPattern',
-        getFieldByName: (field: string) => {
-          if (field === 'records') return undefined;
-          return { name: field };
-        },
-        getFormatterForField: () => ({ convert: (v: unknown) => v }),
-      } as unknown as IndexPattern,
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -258,8 +210,7 @@ describe('generateEsqlQuery', () => {
         success: true,
         esql: `FROM myIndexPattern
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -294,13 +245,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -341,13 +289,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -357,8 +302,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });
@@ -401,13 +345,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -464,13 +405,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -518,13 +456,10 @@ describe('generateEsqlQuery', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -534,8 +469,7 @@ describe('generateEsqlQuery', () => {
         esql: `FROM myIndexPattern
   | WHERE order_date >= ?_tstart AND order_date <= ?_tend
   | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | SORT order_date ASC`,
+        BY order_date = BUCKET(order_date, 30 minutes)`,
       })
     );
   });

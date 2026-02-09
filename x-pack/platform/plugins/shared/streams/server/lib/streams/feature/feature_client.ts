@@ -54,27 +54,7 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
-    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
-    const validDeleteIds =
-      deleteIds.length > 0
-        ? new Set(
-            (
-              await this.clients.storageClient.search({
-                size: deleteIds.length,
-                track_total_hits: false,
-                query: {
-                  bool: {
-                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
-                  },
-                },
-              })
-            ).hits.hits.flatMap((hit) => hit._id ?? [])
-          )
-        : new Set<string>();
-
-    const filteredOperations = operations.filter(
-      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
-    );
+    const filteredOperations = await this.filterValidOperations(stream, operations);
 
     return await this.clients.storageClient.bulk({
       operations: filteredOperations.map((operation) => {
@@ -164,6 +144,34 @@ export class FeatureClient {
         delete: { _id: feature.uuid },
       })),
     });
+  }
+
+  private async filterValidOperations(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<FeatureBulkOperation[]> {
+    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+
+    const validDeleteIds =
+      deleteIds.length > 0
+        ? new Set(
+            (
+              await this.clients.storageClient.search({
+                size: deleteIds.length,
+                track_total_hits: false,
+                query: {
+                  bool: {
+                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  },
+                },
+              })
+            ).hits.hits.flatMap((hit) => hit._id ?? [])
+          )
+        : new Set<string>();
+
+    return operations.filter(
+      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
   }
 }
 
