@@ -44,7 +44,6 @@ export const createReduxTestSetup = async () => {
         hideChart: false,
       },
     }),
-    timeRestore: false,
     services,
   });
 

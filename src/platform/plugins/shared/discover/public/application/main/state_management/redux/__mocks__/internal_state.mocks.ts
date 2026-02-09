@@ -10,12 +10,25 @@
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { RecentlyClosedTabState, TabState } from '../types';
 
-export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'>): TabState => ({
+export const getTabStateMock = (
+  partial: Partial<Omit<TabState, 'attributes'>> & {
+    id: TabState['id'];
+    attributes?: Partial<TabState['attributes']>;
+  }
+): TabState => ({
   ...DEFAULT_TAB_STATE,
   label: 'Untitled',
   ...partial,
+  attributes: {
+    ...DEFAULT_TAB_STATE.attributes,
+    ...partial.attributes,
+  },
 });
 
 export const getRecentlyClosedTabStateMock = (
-  partial: Partial<RecentlyClosedTabState> & Pick<RecentlyClosedTabState, 'id' | 'closedAt'>
+  partial: Partial<Omit<RecentlyClosedTabState, 'attributes'>> & {
+    id: RecentlyClosedTabState['id'];
+    closedAt: RecentlyClosedTabState['closedAt'];
+    attributes?: Partial<TabState['attributes']>;
+  }
 ): RecentlyClosedTabState => ({ ...getTabStateMock(partial), closedAt: partial.closedAt });

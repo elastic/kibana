@@ -42,7 +42,6 @@ const createPersistedTab = ({
       },
       ...(appState ? { appState } : {}),
     }),
-    timeRestore: false,
     services,
   });
 

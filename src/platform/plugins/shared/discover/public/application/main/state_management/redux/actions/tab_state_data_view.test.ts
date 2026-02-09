@@ -68,7 +68,6 @@ const setup = async () => {
         hideChart: false,
       },
     }),
-    timeRestore: false,
     services,
   });
 

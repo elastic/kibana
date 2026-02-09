@@ -35,7 +35,6 @@ const setup = async () => {
         serializedSearchSource: { index: dataViewWithTimefieldMock.id },
       },
     }),
-    timeRestore: false,
     services,
   });
   const persistedDiscoverSession = createDiscoverSessionMock({

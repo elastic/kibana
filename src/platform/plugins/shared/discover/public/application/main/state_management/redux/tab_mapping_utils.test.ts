@@ -57,7 +57,7 @@ describe('tab mapping utils', () => {
   describe('fromSavedObjectTabToTabState', () => {
     it('should map saved object tab to tab state', () => {
       let tabState = fromSavedObjectTabToTabState({
-        tab: fromTabStateToSavedObjectTab({ tab: tab2, timeRestore: false, services }),
+        tab: fromTabStateToSavedObjectTab({ tab: tab2, services }),
         existingTab: tab1,
       });
       expect(tabState).toMatchInlineSnapshot(`
@@ -87,6 +87,7 @@ describe('tab mapping utils', () => {
           },
           "attributes": Object {
             "controlGroupState": undefined,
+            "timeRestore": false,
             "visContext": Object {
               "bar": "foo",
             },
@@ -143,7 +144,7 @@ describe('tab mapping utils', () => {
         }
       `);
       tabState = fromSavedObjectTabToTabState({
-        tab: fromTabStateToSavedObjectTab({ tab: tab2, timeRestore: true, services }),
+        tab: fromTabStateToSavedObjectTab({ tab: tab2, overridenTimeRestore: true, services }),
         existingTab: tab1,
       });
       expect(tabState).toMatchInlineSnapshot(`
@@ -173,6 +174,7 @@ describe('tab mapping utils', () => {
           },
           "attributes": Object {
             "controlGroupState": undefined,
+            "timeRestore": true,
             "visContext": Object {
               "bar": "foo",
             },
@@ -237,7 +239,6 @@ describe('tab mapping utils', () => {
       const savedSearch = await fromSavedObjectTabToSavedSearch({
         tab: fromTabStateToSavedObjectTab({
           tab: tab1,
-          timeRestore: false,
           services,
         }),
         discoverSession: stateContainer.internalState.getState().persistedDiscoverSession!,
@@ -311,7 +312,6 @@ describe('tab mapping utils', () => {
     it('should map tab state to saved object tab', () => {
       let savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tab1,
-        timeRestore: false,
         services,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
@@ -347,7 +347,11 @@ describe('tab mapping utils', () => {
           },
         }
       `);
-      savedObjectTab = fromTabStateToSavedObjectTab({ tab: tab1, timeRestore: true, services });
+      savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tab1,
+        overridenTimeRestore: true,
+        services,
+      });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
@@ -422,7 +426,7 @@ describe('tab mapping utils', () => {
           },
           "sort": Array [],
           "timeRange": undefined,
-          "timeRestore": undefined,
+          "timeRestore": false,
           "usesAdHocDataView": undefined,
           "viewMode": undefined,
           "visContext": Object {

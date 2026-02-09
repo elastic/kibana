@@ -45,7 +45,6 @@ const setup = async () => {
         hideChart: false,
       },
     }),
-    timeRestore: false,
     services,
   });
 
@@ -251,6 +250,7 @@ describe('tab_state actions', () => {
       expect(tab.attributes).toStrictEqual({
         controlGroupState: mockControlState,
         visContext: undefined,
+        timeRestore: false,
       });
     });
 
