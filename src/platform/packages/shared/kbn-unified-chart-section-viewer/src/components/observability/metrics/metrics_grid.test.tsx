@@ -264,12 +264,14 @@ describe('MetricsGrid', () => {
           dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: ES_FIELD_TYPES.LONG,
+          uniqueKey: getMetricKey('metrics-*', 'system.disk.utilization'),
         },
         {
           name: 'system.network.utilization',
           dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: ES_FIELD_TYPES.LONG,
+          uniqueKey: getMetricKey('metrics-*', 'system.network.utilization'),
         },
       ];
 
