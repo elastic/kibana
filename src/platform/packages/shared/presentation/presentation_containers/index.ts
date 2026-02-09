@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
-export { apiHasSerializedChildState, type HasSerializedChildState } from './interfaces/child_state';
-export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
-export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';
 export {
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  apiHasSerializedChildState,
+  type HasSerializedChildState,
+  childrenUnsavedChanges$,
+  initializeUnsavedChanges,
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   apiCanPinPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
   type CanPinPanels,
-} from './interfaces/panel_management';
-export {
   apiCanBeDuplicated,
   apiCanBeCustomized,
   apiCanBeExpanded,
@@ -29,17 +29,12 @@ export {
   type IsCustomizable,
   type IsPinnable,
   type HasPanelCapabilities,
-} from './interfaces/panel_capabilities';
-export { type CanAddNewSection, apiCanAddNewSection } from './interfaces/can_add_new_section';
-export {
+  type CanAddNewSection,
+  apiCanAddNewSection,
   canTrackContentfulRender,
   type TrackContentfulRender,
-} from './interfaces/performance_trackers';
-export {
   type HasLastSavedChildState,
   apiHasLastSavedChildState,
-} from './interfaces/last_saved_child_state';
-export {
   apiIsPresentationContainer,
   combineCompatibleChildrenApis,
   getContainerParentFromAPI,
@@ -48,10 +43,10 @@ export {
   type PanelPackage,
   type PresentationContainer,
   type HasSections,
-} from './interfaces/presentation_container';
-export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
-export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/can_focus_panel';
-export {
+  apiPublishesSettings,
+  type PublishesSettings,
+  apiCanFocusPanel,
+  type CanFocusPanel,
   apiSupportsPassThroughContext,
   type PassThroughContext,
-} from './interfaces/pass_through_context';
+} from '@kbn/presentation-publishing';

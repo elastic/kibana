@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesSettings {
   settings: Record<string, PublishingSubject<boolean | undefined>>;

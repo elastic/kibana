@@ -47,14 +47,7 @@ import {
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 import { apiPublishesProjectRouting } from './publishes_project_routing';
-
-// TODO Avoid redefining this here, fix circular dependency with presentation-containers
-interface HasSections {
-  panelSection$: (uuid: string) => Observable<string | undefined>;
-}
-const apiHasSections = (api: unknown): api is HasSections => {
-  return typeof (api as HasSections)?.panelSection$ === 'function';
-};
+import { apiHasSections } from '../containers/presentation_container';
 
 function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
   api: unknown,
