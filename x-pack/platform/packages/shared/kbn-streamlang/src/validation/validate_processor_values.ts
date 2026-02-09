@@ -63,6 +63,7 @@ export function validateProcessorValues(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
+    case 'uri_parts':
     case 'join':
     case 'concat':
     case 'manual_ingest_pipeline':

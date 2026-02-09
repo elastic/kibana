@@ -27,6 +27,7 @@ import type {
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
+  UriPartsProcessor,
   JoinProcessor,
   ConcatProcessor,
 } from '../../../types/processors';
@@ -47,6 +48,7 @@ import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
 import { convertConcatProcessorToESQL } from './processors/concat';
+import { convertUriPartsProcessorToESQL } from './processors/uri_parts';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -100,6 +102,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
     case 'trim':
       const convertTrimProcessorToESQL = createTransformStringESQL('TRIM');
       return convertTrimProcessorToESQL(processor as TrimProcessor);
+
+    case 'uri_parts':
+      return convertUriPartsProcessorToESQL(processor as UriPartsProcessor);
 
     case 'join':
       return convertJoinProcessorToESQL(processor as JoinProcessor);
