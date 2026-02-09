@@ -78,7 +78,7 @@ for i in "$@"; do
     elastic_agent_version="${i#*=}"
     ;;
   --metrics-enabled=*)
-    val="${1#*=}"
+    val="${i#*=}"
     case "$val" in
       true) metrics_enabled=true ;;
       *) metrics_enabled=false ;;

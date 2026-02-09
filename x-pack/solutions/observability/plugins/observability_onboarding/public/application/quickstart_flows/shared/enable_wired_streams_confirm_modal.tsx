@@ -101,7 +101,7 @@ export function EnableWiredStreamsConfirmModal({
               <li>
                 {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet2', {
                   defaultMessage:
-                    'Logs from this setup will route to Wired Streams (e.g., logs.system.auth)',
+                    'Logs from this setup will be routed to the root "logs" stream',
                 })}
               </li>
               <li>
