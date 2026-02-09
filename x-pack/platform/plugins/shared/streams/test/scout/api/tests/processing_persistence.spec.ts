@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
