@@ -103,6 +103,7 @@ export class NotificationPolicySavedObjectService
       attrs,
       { version }
     );
+
     return { id: result.id, version: result.version };
   }
 

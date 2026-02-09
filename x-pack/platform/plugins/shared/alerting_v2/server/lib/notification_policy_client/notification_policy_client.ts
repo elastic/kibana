@@ -34,7 +34,7 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const notificationPolicyAttributes: NotificationPolicySavedObjectAttributes = {
+    const attributes: NotificationPolicySavedObjectAttributes = {
       name: params.data.name,
       description: params.data.description,
       workflow_id: params.data.workflow_id,
@@ -46,11 +46,11 @@ export class NotificationPolicyClient {
 
     try {
       const { id, version } = await this.notificationPolicySavedObjectService.create({
-        attrs: notificationPolicyAttributes,
+        attrs: attributes,
         id: params.options?.id,
       });
 
-      return { id, version, ...notificationPolicyAttributes };
+      return { id, version, ...attributes };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';

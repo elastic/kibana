@@ -10,6 +10,7 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import { inject, injectable } from 'inversify';
+import { omit } from 'lodash';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
@@ -58,7 +59,7 @@ export class UpdateNotificationPolicyRoute {
   async handle() {
     try {
       const updated = await this.notificationPolicyClient.updateNotificationPolicy({
-        data: this.request.body,
+        data: omit(this.request.body, ['version']),
         options: { id: this.request.params.id, version: this.request.body.version },
       });
 
