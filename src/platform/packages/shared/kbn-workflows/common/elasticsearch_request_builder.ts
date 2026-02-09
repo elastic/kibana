@@ -111,7 +111,7 @@ export function buildElasticsearchRequest(
     }
 
     if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
-      bulkBody = params.operations as Array<Record<string, unknown>>;
+      bulkBody = buildBulkBody(params.operations as Array<Record<string, unknown>>);
       body = {};
     }
 
@@ -176,4 +176,24 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
   }
 
   return bestPattern;
+}
+
+const OPERATION_TYPES = ['index', 'create', 'update', 'delete'];
+function buildBulkBody(operations: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  // check if all operations are documents, not operation rows like index, create, update, delete
+  const isDocuments = operations.every(
+    (operation) => !Object.keys(operation).every((key) => OPERATION_TYPES.includes(key))
+  );
+  // backward compatibility with the old format
+  if (isDocuments) {
+    return operations.flatMap((doc) => {
+      return [
+        {
+          index: {},
+        },
+        doc,
+      ];
+    });
+  }
+  return operations;
 }

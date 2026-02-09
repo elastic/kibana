@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 

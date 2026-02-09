@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, highContrastModeStyles } from '@elastic/eui';
+import { useEuiTheme, highContrastModeStyles, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useMemo } from 'react';
@@ -64,17 +64,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           flex: 0; // do not grow
           pointer-events: all; // re-enable pointer events for non-breakpoint children
           background-color: ${euiTheme.colors.backgroundBasePlain};
-          border: var(--internalBorderStyle);
-          border-width: ${euiTheme.border.width
-            .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
-          box-shadow: var(
-            --hoverActionsBoxShadowStyle
-          ); /* Simulates a 2px 3-side border without affecting layout by using a box-shadow */
-          border-bottom: 0px;
+          ${euiShadow(euiThemeContext, 'xs')}
           padding: var(--paddingAroundAction);
-          padding-bottom: 0px;
-          border-top-left-radius: ${euiTheme.border.radius.medium};
-          border-top-right-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.medium};
         }
 
         // shrink down to single wrapped element with no breakpoint when panel gets small
@@ -91,11 +83,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         }
       }
     `;
-  }, [euiTheme]);
+  }, [euiTheme, euiThemeContext]);
 
   const containerStyles = useMemo(() => {
     const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`;
-    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`;
 
     return css`
       // the border style can be overwritten by parents who define --hoverActionsBorderStyle; otherwise, default to either
@@ -157,7 +149,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       .embPanel__hoverActions {
         position: absolute;
-        top: -${euiTheme.size.xl};
+        top: -${euiTheme.size.l};
         z-index: -1;
         opacity: 0;
         visibility: hidden;

@@ -11,18 +11,17 @@ import {
   type AdoptionTrackedAPIsByPlugin,
   type ApiDeclaration,
   type ApiStats,
-  type MissingApiItemMap,
+  type IssuesByPlugin,
   type PluginApi,
-  type ReferencedDeprecationsByPlugin,
   TypeKind,
 } from './types';
 
-export function collectApiStatsForPlugin(
-  doc: PluginApi,
-  missingApiItems: MissingApiItemMap,
-  deprecations: ReferencedDeprecationsByPlugin,
-  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin
-): ApiStats {
+/**
+ * Collects API stats for a single plugin.
+ */
+export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin): ApiStats {
+  const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs } = issues;
+
   const stats: ApiStats = {
     missingComments: [],
     isAnyType: [],
@@ -44,7 +43,9 @@ export function collectApiStatsForPlugin(
   Object.values(doc.common).forEach((def) => {
     collectStatsForApi(def, stats, doc);
   });
-  stats.deprecatedAPIsReferencedCount = deprecations[doc.id] ? deprecations[doc.id].length : 0;
+  stats.deprecatedAPIsReferencedCount = referencedDeprecations[doc.id]
+    ? referencedDeprecations[doc.id].length
+    : 0;
 
   collectAdoptionTrackedAPIStats(doc, stats, adoptionTrackedAPIs);
 

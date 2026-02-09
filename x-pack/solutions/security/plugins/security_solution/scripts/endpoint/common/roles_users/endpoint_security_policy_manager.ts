@@ -32,7 +32,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
 
             'workflow_insights_all',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

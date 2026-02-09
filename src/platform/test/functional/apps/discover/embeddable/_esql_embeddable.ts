@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
   const { dashboard, header, timePicker, discover } = getPageObjects([
     'dashboard',
     'header',
@@ -62,6 +64,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing ES|QL Discover Session')),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+      ]);
       await discover.saveSearch('ES|QL Discover Session');
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
@@ -73,6 +88,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing ES|QL Discover Session')),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+      ]);
       await discover.clickSaveSearchButton();
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();

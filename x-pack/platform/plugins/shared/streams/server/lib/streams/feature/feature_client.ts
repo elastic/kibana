@@ -54,27 +54,7 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
-    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
-    const validDeleteIds =
-      deleteIds.length > 0
-        ? new Set(
-            (
-              await this.clients.storageClient.search({
-                size: deleteIds.length,
-                track_total_hits: false,
-                query: {
-                  bool: {
-                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
-                  },
-                },
-              })
-            ).hits.hits.flatMap((hit) => hit._id ?? [])
-          )
-        : new Set<string>();
-
-    const filteredOperations = operations.filter(
-      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
-    );
+    const filteredOperations = await this.filterValidOperations(stream, operations);
 
     return await this.clients.storageClient.bulk({
       operations: filteredOperations.map((operation) => {
@@ -165,6 +145,55 @@ export class FeatureClient {
       })),
     });
   }
+
+  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
+    if (streams.length === 0) {
+      return { hits: [], total: 0 };
+    }
+
+    const featuresResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [{ terms: { [STREAM_NAME]: streams } }],
+        },
+      },
+    });
+
+    return {
+      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
+      total: featuresResponse.hits.total.value,
+    };
+  }
+
+  private async filterValidOperations(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<FeatureBulkOperation[]> {
+    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+
+    const validDeleteIds =
+      deleteIds.length > 0
+        ? new Set(
+            (
+              await this.clients.storageClient.search({
+                size: deleteIds.length,
+                track_total_hits: false,
+                query: {
+                  bool: {
+                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  },
+                },
+              })
+            ).hits.hits.flatMap((hit) => hit._id ?? [])
+          )
+        : new Set<string>();
+
+    return operations.filter(
+      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
+  }
 }
 
 function toStorage(stream: string, feature: Feature): StoredFeature {
@@ -191,6 +220,7 @@ function fromStorage(feature: StoredFeature): Feature {
   return {
     uuid: feature[FEATURE_UUID],
     id: feature[FEATURE_ID],
+    stream_name: feature[STREAM_NAME],
     type: feature[FEATURE_TYPE],
     subtype: feature[FEATURE_SUBTYPE],
     description: feature[FEATURE_DESCRIPTION],

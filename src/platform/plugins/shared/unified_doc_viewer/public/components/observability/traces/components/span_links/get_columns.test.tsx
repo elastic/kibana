@@ -8,105 +8,244 @@
  */
 import React from 'react';
 import { getColumns } from './get_columns';
-import { render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
+
+jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
+  useDiscoverLinkAndEsqlQuery: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
+  useDocViewerExtensionActionsContext: jest.fn(),
+}));
 
 describe('getColumns', () => {
-  const generateDiscoverLink = jest.fn((params) => {
-    if (params[SPAN_ID_FIELD]) return `/discover/span/${params[SPAN_ID_FIELD]}`;
-    if (params[SERVICE_NAME_FIELD]) return `/discover/service/${params[SERVICE_NAME_FIELD]}`;
-    if (params[TRACE_ID_FIELD]) return `/discover/trace/${params[TRACE_ID_FIELD]}`;
-    return undefined;
-  });
-
   const type = 'incoming';
-  const columns = getColumns({ generateDiscoverLink, type }) as Array<
-    EuiTableFieldDataColumnType<SpanLinkDetails>
-  >;
+  const columns = getColumns({ type }) as Array<EuiTableFieldDataColumnType<SpanLinkDetails>>;
 
   const item = {
     spanId: 'span123',
     traceId: 'trace456',
     details: {
       spanName: 'mySpan',
+      transactionId: 'transaction999',
       duration: 1234,
       serviceName: 'myService',
       agentName: 'java',
     },
   } as SpanLinkDetails;
 
-  it('renders span column with link', () => {
-    const SpanRender = columns[0].render;
-    const { getByTestId } = render(<>{SpanRender?.(null, item)}</>);
-    expect(getByTestId('incoming-spanNameLink-span123')).toHaveAttribute(
-      'href',
-      '/discover/span/span123'
-    );
-    expect(getByTestId('incoming-spanName-span123')).toHaveTextContent('mySpan');
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useDataSourcesContext as jest.Mock).mockReturnValue({
+      indexes: { apm: { traces: 'apm-traces-*' } },
+    });
+    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      discoverUrl: undefined,
+      esqlQueryString: undefined,
+    });
   });
 
-  it('renders plain span name when generateDiscoverLink returns undefined', () => {
-    const generateDiscoverLinkNone = jest.fn(() => undefined);
-    const columnsNone = getColumns({
-      generateDiscoverLink: generateDiscoverLinkNone,
-      type,
-    }) as Array<EuiTableFieldDataColumnType<SpanLinkDetails>>;
-    const SpanRender = columnsNone[0].render;
-    const { getByText, queryByTestId } = render(<>{SpanRender?.(null, item)}</>);
-    expect(queryByTestId('incoming-spanNameLink-span123')).not.toBeInTheDocument();
-    expect(getByText('mySpan')).toBeInTheDocument();
+  describe('span name link', () => {
+    it('renders with link', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/transaction/transaction999',
+        esqlQueryString: 'ESQL_TRANSACTION',
+      });
+
+      const SpanRender = columns[0].render;
+      const { getByTestId } = render(<>{SpanRender?.(null, item)}</>);
+      expect(getByTestId('incoming-spanNameLink-span123')).toHaveAttribute(
+        'href',
+        '/discover/transaction/transaction999'
+      );
+      expect(getByTestId('incoming-spanName-span123')).toHaveTextContent('mySpan');
+      expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+      );
+    });
+
+    it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: undefined,
+        esqlQueryString: undefined,
+      });
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+
+      const SpanRender = columns[0].render;
+      const { getByText, queryByTestId } = render(<>{SpanRender?.(null, item)}</>);
+      expect(queryByTestId('incoming-spanNameLink-span123')).not.toBeInTheDocument();
+      expect(getByText('mySpan')).toBeInTheDocument();
+    });
+
+    it('calls openInNewTab on plain left click', () => {
+      const openInNewTab = jest.fn();
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/transaction/transaction999',
+        esqlQueryString: 'ESQL_TRANSACTION',
+      });
+
+      const SpanRender = columns[0].render;
+      const { getByTestId } = render(<>{SpanRender?.(null, item)}</>);
+
+      const link = getByTestId('incoming-spanNameLink-span123');
+      const clickEvent = createEvent.click(link, { button: 0 });
+      fireEvent(link, clickEvent);
+
+      expect(clickEvent.defaultPrevented).toBe(true);
+      expect(openInNewTab).toHaveBeenCalledWith({
+        query: { esql: 'ESQL_TRANSACTION' },
+        tabLabel: 'mySpan',
+      });
+    });
   });
 
-  it('renders serviceName column with link', () => {
-    const ServiceNameRender = columns[2].render;
-    const { getByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
-    expect(getByTestId('incoming-serviceNameLink-myService')).toHaveAttribute(
-      'href',
-      '/discover/service/myService'
-    );
-    expect(getByTestId('incoming-serviceName-myService')).toHaveTextContent('myService');
+  describe('service name link', () => {
+    it('renders with link', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/service/myService',
+        esqlQueryString: 'ESQL_SERVICE',
+      });
+
+      const ServiceNameRender = columns[2].render;
+      const { getByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
+      expect(getByTestId('incoming-serviceNameLink-myService')).toHaveAttribute(
+        'href',
+        '/discover/service/myService'
+      );
+      expect(getByTestId('incoming-serviceName-myService')).toHaveTextContent('myService');
+      expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+      );
+    });
+
+    it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: undefined,
+        esqlQueryString: undefined,
+      });
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+
+      const ServiceNameRender = columns[2].render;
+      const { getByText, queryByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
+      expect(queryByTestId('incoming-serviceNameLink-myService')).not.toBeInTheDocument();
+      expect(getByText('myService')).toBeInTheDocument();
+    });
+
+    it('calls openInNewTab on plain left click', () => {
+      const openInNewTab = jest.fn();
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/service/myService',
+        esqlQueryString: 'ESQL_SERVICE',
+      });
+
+      const ServiceNameRender = columns[2].render;
+      const { getByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
+
+      const link = getByTestId('incoming-serviceNameLink-myService');
+      const clickEvent = createEvent.click(link, { button: 0 });
+      fireEvent(link, clickEvent);
+
+      expect(clickEvent.defaultPrevented).toBe(true);
+      expect(openInNewTab).toHaveBeenCalledWith({
+        query: { esql: 'ESQL_SERVICE' },
+        tabLabel: 'myService',
+      });
+    });
   });
 
-  it('renders plain service name when generateDiscoverLink returns undefined', () => {
-    const generateDiscoverLinkNone = jest.fn(() => undefined);
-    const columnsNone = getColumns({
-      generateDiscoverLink: generateDiscoverLinkNone,
-      type,
-    }) as Array<EuiTableFieldDataColumnType<SpanLinkDetails>>;
-    const ServiceNameRender = columnsNone[2].render;
-    const { getByText, queryByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
-    expect(queryByTestId('incoming-serviceNameLink-myService')).not.toBeInTheDocument();
-    expect(getByText('myService')).toBeInTheDocument();
+  describe('trace id link', () => {
+    it('renders with link', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/trace/trace456',
+        esqlQueryString: 'ESQL_TRACE',
+      });
+
+      const TraceIdRender = columns[3].render;
+      const { getByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
+      expect(getByTestId('incoming-traceIdLink-trace456')).toHaveAttribute(
+        'href',
+        '/discover/trace/trace456'
+      );
+      expect(getByTestId('incoming-traceId-trace456')).toHaveTextContent('trace456');
+      expect(useDiscoverLinkAndEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPattern: 'apm-traces-*', whereClause: expect.any(Function) })
+      );
+    });
+
+    it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: undefined,
+        esqlQueryString: undefined,
+      });
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+
+      const TraceIdRender = columns[3].render;
+      const { getByText, queryByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
+      expect(queryByTestId('incoming-traceIdLink-trace456')).not.toBeInTheDocument();
+      expect(getByText('trace456')).toBeInTheDocument();
+    });
+
+    it('calls openInNewTab on plain left click', () => {
+      const openInNewTab = jest.fn();
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/trace/trace456',
+        esqlQueryString: 'ESQL_TRACE',
+      });
+
+      const TraceIdRender = columns[3].render;
+      const { getByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
+
+      const link = getByTestId('incoming-traceIdLink-trace456');
+      const clickEvent = createEvent.click(link, { button: 0 });
+      fireEvent(link, clickEvent);
+
+      expect(clickEvent.defaultPrevented).toBe(true);
+      expect(openInNewTab).toHaveBeenCalledWith({
+        query: { esql: 'ESQL_TRACE' },
+        tabLabel: 'trace456',
+      });
+    });
+
+    it('does not intercept modifier clicks when href is present', () => {
+      const openInNewTab = jest.fn();
+      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+        discoverUrl: '/discover/trace/trace456',
+        esqlQueryString: 'ESQL_TRACE',
+      });
+
+      const TraceIdRender = columns[3].render;
+      const { getByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
+
+      const link = getByTestId('incoming-traceIdLink-trace456');
+      const ctrlClickEvent = createEvent.click(link, { button: 0, ctrlKey: true });
+      fireEvent(link, ctrlClickEvent);
+
+      expect(openInNewTab).not.toHaveBeenCalled();
+      expect(ctrlClickEvent.defaultPrevented).toBe(false);
+    });
   });
 
-  it('renders traceId column with link', () => {
-    const TraceIdRender = columns[3].render;
-    const { getByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
-    expect(getByTestId('incoming-traceIdLink-trace456')).toHaveAttribute(
-      'href',
-      '/discover/trace/trace456'
-    );
-    expect(getByTestId('incoming-traceId-trace456')).toHaveTextContent('trace456');
-  });
-
-  it('renders plain trace id when generateDiscoverLink returns undefined', () => {
-    const generateDiscoverLinkNone = jest.fn(() => undefined);
-    const columnsNone = getColumns({
-      generateDiscoverLink: generateDiscoverLinkNone,
-      type,
-    }) as Array<EuiTableFieldDataColumnType<SpanLinkDetails>>;
-    const TraceIdRender = columnsNone[3].render;
-    const { getByText, queryByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
-    expect(queryByTestId('incoming-traceIdLink-trace456')).not.toBeInTheDocument();
-    expect(getByText('trace456')).toBeInTheDocument();
-  });
-
-  it('renders N/A when details are missing', () => {
-    const itemMissingDetails = { spanId: 'spanX', traceId: 'traceY', details: undefined };
-    const ServiceNameRender = columns[2].render;
-    const { getByTestId } = render(<>{ServiceNameRender?.(null, itemMissingDetails)}</>);
-    expect(getByTestId('incoming-serviceName-N/A')).toHaveTextContent('N/A');
+  describe('fallback rendering', () => {
+    it('renders N/A when details are missing', () => {
+      const itemMissingDetails = { spanId: 'spanX', traceId: 'traceY', details: undefined };
+      const ServiceNameRender = columns[2].render;
+      const { getByTestId } = render(<>{ServiceNameRender?.(null, itemMissingDetails)}</>);
+      expect(getByTestId('incoming-serviceName-N/A')).toHaveTextContent('N/A');
+    });
   });
 });

@@ -62,6 +62,7 @@ describe('virtualizer', () => {
       expect(result.current).toHaveProperty('scrollToLastVirtualizedRow');
       expect(result.current).toHaveProperty('scrollOffset');
       expect(result.current).toHaveProperty('measureElement');
+      expect(result.current).toHaveProperty('preventRowSizeChangePropagation');
     });
   });
 
@@ -136,6 +137,67 @@ describe('virtualizer', () => {
       );
 
       expect(result.current(range)).toEqual(expect.arrayContaining([parentRowIndex]));
+    });
+
+    describe('preventRowSizeChangePropagation', () => {
+      it('should return a cleanup function when registering a row', () => {
+        const { result } = renderHook(() =>
+          useCascadeVirtualizer({
+            rows: rowsToRender(100),
+            overscan: 5,
+            enableStickyGroupHeader: false,
+            getScrollElement: () => document.body,
+          })
+        );
+
+        const cleanup = result.current.preventRowSizeChangePropagation(5);
+
+        expect(typeof cleanup).toBe('function');
+      });
+
+      it('should return a stable callback reference across renders', () => {
+        const { result, rerender } = renderHook(() =>
+          useCascadeVirtualizer({
+            rows: rowsToRender(100),
+            overscan: 5,
+            enableStickyGroupHeader: false,
+            getScrollElement: () => document.body,
+          })
+        );
+
+        const initialCallback = result.current.preventRowSizeChangePropagation;
+
+        rerender();
+
+        expect(result.current.preventRowSizeChangePropagation).toBe(initialCallback);
+      });
+
+      it('should allow registering multiple rows independently', () => {
+        const { result } = renderHook(() =>
+          useCascadeVirtualizer({
+            rows: rowsToRender(100),
+            overscan: 5,
+            enableStickyGroupHeader: false,
+            getScrollElement: () => document.body,
+          })
+        );
+
+        const cleanup1 = result.current.preventRowSizeChangePropagation(1);
+        const cleanup2 = result.current.preventRowSizeChangePropagation(2);
+        const cleanup3 = result.current.preventRowSizeChangePropagation(3);
+
+        // All cleanups should be functions
+        expect(typeof cleanup1).toBe('function');
+        expect(typeof cleanup2).toBe('function');
+        expect(typeof cleanup3).toBe('function');
+
+        // Cleanup one row should not affect others
+        cleanup2();
+
+        // The remaining rows should still be registered (cleanup functions still valid)
+        expect(typeof cleanup1).toBe('function');
+        expect(typeof cleanup3).toBe('function');
+      });
     });
   });
 

@@ -16,6 +16,7 @@ import type {
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
@@ -231,6 +232,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
+
+    // Validate Streamlang processing
+    if (this._definition.ingest.processing.steps.length > 0) {
+      const validationResult = validateStreamlang(this._definition.ingest.processing, {
+        reservedFields: [],
+        streamType: 'classic',
+      });
+
+      if (!validationResult.isValid) {
+        return {
+          isValid: false,
+          errors: validationResult.errors.map(
+            (error) => new Error(`${error.message} (field: ${error.field})`)
+          ),
+        };
+      }
+    }
 
     const allowlistValidation = validateSettings({
       settings: this._definition.ingest.settings,

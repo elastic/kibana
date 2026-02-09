@@ -212,16 +212,18 @@ Containers use schemas to
 embeddableServerSetup.registerTransforms(
   'myEmbeddableType',
   {
-    transformIn: (state: EmbeddableState) => {
-      return {
-        state: convertToStoredState(state),
-        references: extractReferences(state)
-      };
-    },
-    transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
-      return convertAndInjectReferences(state, references);
-    },
-    schema: schema.object({
+    getTransforms: (drilldownTransfroms) => ({
+      transformIn: (state: EmbeddableState) => {
+        return {
+          state: convertToStoredState(state),
+          references: extractReferences(state)
+        };
+      },
+      transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
+        return convertAndInjectReferences(state, references);
+      },
+    }),
+    getSchema: (getDrilldownsSchema) => schema: schema.object({
       required_field: schema.string(),
       optional_field: schema.maybe(schema.string()),
     })

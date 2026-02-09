@@ -129,6 +129,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 
@@ -137,6 +138,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 

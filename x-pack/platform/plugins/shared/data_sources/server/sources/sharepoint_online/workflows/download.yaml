@@ -1,0 +1,92 @@
+version: '1'
+name: 'sources.sharepoint.download'
+description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id) for markdown/plain-text files; downloadItemFromURL + ingest extract (download_url) for PDFs, .docx, and other files that require preprocessing (extracted text available in simulate response under docs[0].doc._source.attachment.content); getSitePageContents (site_id, page_id) for SharePoint site page content.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: download_action
+    type: choice
+    options:
+      - "downloadDriveItem"
+      - "downloadItemFromURL"
+      - "getSitePageContents"
+  - name: site_id
+    type: string
+    required: false
+  - name: page_id
+    type: string
+    required: false
+  - name: drive_id
+    type: string
+    required: false
+  - name: item_id
+    type: string
+    required: false
+  - name: download_url
+    type: string
+    required: false
+steps:
+  - name: download-drive-item
+    type: sharepoint-online.downloadDriveItem
+    if: "${{ inputs.download_action == 'downloadDriveItem' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      driveId: "${{ inputs.drive_id }}"
+      itemId: "${{ inputs.item_id }}"
+  - name: download-item-from-url-flow
+    type: if
+    condition: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+    steps:
+      - name: download-item-from-url
+        type: sharepoint-online.downloadItemFromURL
+        connector-id: <%= stackConnectorId %>
+        with:
+          downloadUrl: "${{ inputs.download_url }}"
+      - name: extract-content
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_ingest/pipeline/_simulate
+          body:
+            pipeline:
+              processors:
+                - attachment:
+                    field: data
+                    indexed_chars: -1
+                    remove_binary: true
+            docs:
+              - _id: "${{ inputs.download_url }}"
+                _source:
+                  filename: "${{ inputs.download_url }}"
+                  data: "${{ steps.download-item-from-url.output.base64 }}"
+  - name: get-site-page-contents
+    type: sharepoint-online.getSitePageContents
+    if: "${{ inputs.download_action == 'getSitePageContents' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+      pageId: "${{ inputs.page_id }}"
+  - name: set-download-result
+    type: if
+    condition: "${{ inputs.download_action == 'downloadDriveItem' }}"
+    steps:
+      - name: set-download-drive-item-output
+        type: data.set
+        with:
+          result: "${{ steps.download-drive-item.output }}"
+    else:
+      - name: set-download-result-from-url
+        type: if
+        condition: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+        steps:
+          - name: set-download-extract-output
+            type: data.set
+            with:
+              result: "${{ steps.extract-content.output }}"
+        else:
+          - name: set-site-page-contents-output
+            type: data.set
+            with:
+              result: "${{ steps.get-site-page-contents.output }}"

@@ -12,7 +12,7 @@ import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import { PanelFooter } from './footer';
 import { PanelContent } from './content';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
-import { AttackDetailsRightPanelKey } from './constants/panel_keys';
+import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
 import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -27,7 +27,7 @@ export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
  */
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openRightPanel, openLeftPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
@@ -45,9 +45,16 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
     [attackId, indexName, openRightPanel, storage]
   );
 
+  const expandDetails = useCallback(() => {
+    openLeftPanel({
+      id: AttackDetailsLeftPanelKey,
+      params: { attackId, indexName },
+    });
+  }, [attackId, indexName, openLeftPanel]);
+
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

@@ -23,6 +23,7 @@ export const registerDataStreamRoutes = (
 ) => {
   uploadSamplesRoute(router, logger);
   deleteDataStreamRoute(router, logger);
+  getDataStreamResultsRoute(router, logger);
 };
 
 const uploadSamplesRoute = (
@@ -115,6 +116,53 @@ const deleteDataStreamRoute = (
             statusCode: 500,
             body: err,
           });
+        }
+      }
+    );
+
+const getDataStreamResultsRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}/results',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.READ}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DeleteDataStreamRequestParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const result = await automaticImportService.getDataStreamResults(
+            integrationId,
+            dataStreamId
+          );
+          return response.ok({ body: result });
+        } catch (err) {
+          logger.error(`getDataStreamResultsRoute: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          const message = err instanceof Error ? err.message : String(err);
+          const statusCode =
+            message.includes('has not completed yet') ||
+            message.includes('failed and has no results')
+              ? 400
+              : 500;
+          return automaticImportResponse.error({ statusCode, body: err });
         }
       }
     );

@@ -182,19 +182,23 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
     return true;
   }
 
-  // unknown type - check if it's actually a param assignment mistakenly placed here
-  if (query.type === 'unknown') {
-    const text = query.text?.trim() ?? '';
+  const text = query.text?.trim() ?? '';
 
-    // Empty text, starts with "=" (orphaned assignment value), or looks like param assignment
-    if (text === '' || text.startsWith('=') || looksLikePromqlParamAssignment(text)) {
-      return false;
-    }
-
-    return true;
+  if (text === '' || text.startsWith('=')) {
+    return false;
   }
 
-  return false;
+  const expression = query.expression;
+
+  if (
+    query.incomplete &&
+    expression?.type === 'selector' &&
+    isPromqlParamName(expression.name ?? '')
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 /** Validates index sources with precise locations for each source in the list.*/
@@ -248,6 +252,8 @@ function validateIndexSources(
     if (!sourceExists(indexName, sourcesSet)) {
       messages.push(errors.byId('unknownIndex', indexParam.location, { name: indexName }));
     }
+
+    return;
   }
 }
 

@@ -17,7 +17,6 @@ import {
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 

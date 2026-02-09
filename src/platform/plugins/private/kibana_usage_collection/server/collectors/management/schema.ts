@@ -519,6 +519,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

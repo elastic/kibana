@@ -29,7 +29,7 @@ import {
   createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
 } from './retry_unauthorized';
-import { createTransport } from './create_transport';
+import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
@@ -42,6 +42,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
+  private readonly onRequest?: OnRequestHandler;
   private isClosed = false;
 
   public readonly asInternalUser: Client;
@@ -55,6 +56,7 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler = noop,
     agentFactoryProvider,
     kibanaVersion,
+    onRequest,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -64,12 +66,14 @@ export class ClusterClient implements ICustomClusterClient {
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
+    onRequest?: OnRequestHandler;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
+    this.onRequest = onRequest;
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -85,6 +89,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      onRequest,
     });
   }
 
@@ -93,8 +98,10 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
 
       const transportClass = createTransport({
+        scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
+        onRequest: this.onRequest,
       });
 
       return this.rootScopedClient.child({

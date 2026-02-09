@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type EsClient, type ApiServicesFixture } from '@kbn/scout';
+import { type EsClient, type ApiServicesFixture } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { Locator } from '@kbn/scout';
 import { test } from '../../fixtures';
 

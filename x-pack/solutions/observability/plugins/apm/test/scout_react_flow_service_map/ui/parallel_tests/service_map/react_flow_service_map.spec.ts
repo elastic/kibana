@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
   SERVICE_OPBEANS_JAVA,
@@ -129,5 +129,57 @@ test.describe('React Flow Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     const popoverTitle = await reactFlowServiceMapPage.getPopoverTitle();
     expect(popoverTitle).toContain(DEPENDENCY_POSTGRESQL);
     await expect(reactFlowServiceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
+  });
+
+  test('navigates to Service Details from popover', async ({
+    page,
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+    await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+
+    await reactFlowServiceMapPage.serviceMapServiceDetailsButton.click();
+
+    await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`));
+
+    await page.goBack();
+    await reactFlowServiceMapPage.waitForReactFlowServiceMapToLoad();
+    await expect(reactFlowServiceMapPage.reactFlowServiceMap).toBeVisible();
+  });
+
+  test('navigates to Focus Map from popover', async ({
+    page,
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+    await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+
+    await reactFlowServiceMapPage.serviceMapFocusMapButton.click();
+
+    await expect(page).toHaveURL(
+      new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/service-map`)
+    );
+
+    await reactFlowServiceMapPage.waitForReactFlowServiceMapToLoad();
+    await expect(reactFlowServiceMapPage.reactFlowServiceMap).toBeVisible();
+  });
+
+  test('navigates to Dependency Details from popover', async ({
+    page,
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
+    await reactFlowServiceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+
+    await reactFlowServiceMapPage.serviceMapDependencyDetailsButton.click();
+
+    await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));
+
+    await page.goBack();
+    await reactFlowServiceMapPage.waitForReactFlowServiceMapToLoad();
+    await expect(reactFlowServiceMapPage.reactFlowServiceMap).toBeVisible();
   });
 });

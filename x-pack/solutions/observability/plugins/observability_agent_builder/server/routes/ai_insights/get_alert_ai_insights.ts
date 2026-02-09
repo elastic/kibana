@@ -18,7 +18,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -87,7 +87,6 @@ export async function getAlertAiInsight({
 const START_TIME_OFFSETS = {
   serviceSummary: 5,
   downstream: 24 * 60, // 24 hours
-  errors: 15,
   logs: 15,
   changePoints: 6 * 60, // 6 hours
 } as const;
@@ -131,11 +130,6 @@ async function fetchAlertContext({
       params: { serviceName, serviceEnvironment },
     },
     {
-      key: 'apmErrors' as const,
-      startOffset: START_TIME_OFFSETS.errors,
-      params: { serviceName, serviceEnvironment },
-    },
-    {
       key: 'apmServiceChangePoints' as const,
       startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
@@ -150,25 +144,28 @@ async function fetchAlertContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  async function fetchLogCategories() {
+  async function fetchLogGroups() {
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
       const end = alertStart;
-      const result = await getLogCategories({
+      const result = await getLogGroups({
         core,
+        plugins,
+        request,
         logger,
         esClient,
         start,
         end,
         kqlFilter: `service.name: "${serviceName}"`,
-        fields: ['service.name'],
+        fields: [],
+        includeStackTrace: false,
+        includeFirstSeen: false,
+        size: 10,
       });
-      const hasCategories =
-        (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
-        (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-      return hasCategories ? { key: 'logCategories' as const, start, end, data: result } : null;
+
+      return result.length > 0 ? { key: 'logGroups' as const, start, end, data: result } : null;
     } catch (err) {
-      logger.debug(`AI insight: logCategories failed: ${err}`);
+      logger.debug(`AI insight: logGroups failed: ${err}`);
       return null;
     }
   }
@@ -190,7 +187,7 @@ async function fetchAlertContext({
         return null;
       }
     }),
-    fetchLogCategories(),
+    fetchLogGroups(),
   ];
 
   const results = await Promise.all(allFetchers);

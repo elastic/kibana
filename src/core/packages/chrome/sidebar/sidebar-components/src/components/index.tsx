@@ -1,0 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { Sidebar } from './sidebar';
+export type { SidebarProps } from './sidebar';
+export { SidebarAppRenderer } from './sidebar_app_renderer';
+export { SidebarHeader } from './sidebar_panel_header';
+export type { SidebarHeaderProps } from './sidebar_panel_header';
+export { SidebarBody } from './sidebar_panel_body';
+export type { SidebarBodyProps } from './sidebar_panel_body';

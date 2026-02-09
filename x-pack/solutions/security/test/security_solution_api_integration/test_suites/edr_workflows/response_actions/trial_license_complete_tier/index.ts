@@ -12,7 +12,8 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('Endpoint plugin', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/250508
+  describe.skip('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');

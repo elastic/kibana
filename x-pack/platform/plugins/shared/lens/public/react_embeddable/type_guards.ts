@@ -72,3 +72,13 @@ export function apiPublishesInlineEditingCapabilities(
 ): api is { canEditInline: boolean } {
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
 }
+
+/**
+ * Type guard to check if the parent API (e.g., Dashboard) exposes whether
+ * the current user can edit it based on access control settings.
+ */
+export function apiPublishesIsEditableByUser(api: unknown): api is { isEditableByUser: boolean } {
+  return (
+    isObject(api) && typeof (api as { isEditableByUser?: boolean }).isEditableByUser === 'boolean'
+  );
+}

@@ -107,6 +107,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/timerange'
   - '@kbn/inference-common'
+  - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/stack-connectors-plugin'
 tags:
   - plugin
   - prod

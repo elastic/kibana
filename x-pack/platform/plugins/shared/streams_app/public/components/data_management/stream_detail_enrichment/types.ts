@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   DateProcessor,
@@ -30,8 +29,13 @@ import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/confi
  * Processors' types
  */
 
+// GrokFormState uses wrapped patterns for useFieldArray compatibility
+export interface GrokPatternField {
+  value: string;
+}
+
 export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
-  patterns: DraftGrokExpression[];
+  patterns: GrokPatternField[];
 };
 
 export type DissectFormState = DissectProcessor;

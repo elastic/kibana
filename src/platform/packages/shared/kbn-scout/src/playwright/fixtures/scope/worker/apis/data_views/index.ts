@@ -28,36 +28,48 @@ export interface DataViewsApiService {
    * Get all data views
    * @returns Promise with array of data views and status
    */
-  getAll: () => Promise<DataViewApiResponse<DataView[]>>;
+  getAll: (spaceId?: string) => Promise<DataViewApiResponse<DataView[]>>;
 
   /**
    * Get a single data view by ID
    * @param id - The data view ID
+   * @param spaceId - Optional space ID
    * @returns Promise with the data view and status
    */
-  get: (id: string) => Promise<DataViewApiResponse<DataView>>;
+  get: (id: string, spaceId?: string) => Promise<DataViewApiResponse<DataView>>;
 
   /**
    * Delete a data view by ID
    * @param id - The data view ID to delete
+   * @param spaceId - Optional space ID
    * @returns Promise with status code
    */
-  delete: (id: string) => Promise<DataViewStatusResponse>;
+  delete: (id: string, spaceId?: string) => Promise<DataViewStatusResponse>;
 
   /**
    * Find data views that match a predicate function
    * @param predicate - Function to filter data views
+   * @param spaceId - Optional space ID
    * @returns Promise with filtered array of data views and status
    */
-  find: (predicate: (dataView: DataView) => boolean) => Promise<DataViewApiResponse<DataView[]>>;
+  find: (
+    predicate: (dataView: DataView) => boolean,
+    spaceId?: string
+  ) => Promise<DataViewApiResponse<DataView[]>>;
 
   /**
    * Delete a data view by its title (convenience method)
    * Finds the first data view matching the title and deletes it
    * @param title - The data view title to search for
+   * @param spaceId - Optional space ID
    * @returns Promise with status code
    */
-  deleteByTitle: (title: string) => Promise<DataViewStatusResponse>;
+  deleteByTitle: (title: string, spaceId?: string) => Promise<DataViewStatusResponse>;
+
+  /**
+   * Get data view ID by title (optionally within a space)
+   */
+  getIdByTitle: (title: string, spaceId?: string) => Promise<string>;
 }
 
 /**
@@ -70,15 +82,17 @@ export const getDataViewsApiHelper = (
   log: ScoutLogger,
   kbnClient: KbnClient
 ): DataViewsApiService => {
+  const withSpace = (path: string, spaceId?: string) => (spaceId ? `/s/${spaceId}${path}` : path);
+
   return {
-    getAll: async () => {
+    getAll: async (spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
         'dataViewsApi.getAll',
         async (): Promise<DataViewApiResponse<DataView[]>> => {
           const response = await kbnClient.request<GetDataViewsResponse>({
             method: 'GET',
-            path: '/api/data_views',
+            path: withSpace('/api/data_views', spaceId),
             retries: 3,
           });
 
@@ -90,14 +104,14 @@ export const getDataViewsApiHelper = (
       );
     },
 
-    get: async (id: string) => {
+    get: async (id: string, spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
         'dataViewsApi.get',
         async (): Promise<DataViewApiResponse<DataView>> => {
           const response = await kbnClient.request<GetDataViewResponse>({
             method: 'GET',
-            path: `/api/data_views/data_view/${id}`,
+            path: withSpace(`/api/data_views/data_view/${id}`, spaceId),
             retries: 3,
             ignoreErrors: [404],
           });
@@ -110,14 +124,14 @@ export const getDataViewsApiHelper = (
       );
     },
 
-    delete: async (id: string) => {
+    delete: async (id: string, spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
         'dataViewsApi.delete',
         async (): Promise<DataViewStatusResponse> => {
           const response = await kbnClient.request({
             method: 'DELETE',
-            path: `/api/data_views/data_view/${id}`,
+            path: withSpace(`/api/data_views/data_view/${id}`, spaceId),
             retries: 3,
             ignoreErrors: [404],
           });
@@ -129,14 +143,14 @@ export const getDataViewsApiHelper = (
       );
     },
 
-    find: async (predicate: (dataView: DataView) => boolean) => {
+    find: async (predicate: (dataView: DataView) => boolean, spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
         'dataViewsApi.find',
         async (): Promise<DataViewApiResponse<DataView[]>> => {
           const response = await kbnClient.request<GetDataViewsResponse>({
             method: 'GET',
-            path: '/api/data_views',
+            path: withSpace('/api/data_views', spaceId),
             retries: 3,
           });
 
@@ -151,14 +165,14 @@ export const getDataViewsApiHelper = (
       );
     },
 
-    deleteByTitle: async (title: string) => {
+    deleteByTitle: async (title: string, spaceId?: string) => {
       return await measurePerformanceAsync(
         log,
         'dataViewsApi.deleteByTitle',
         async (): Promise<DataViewStatusResponse> => {
           const response = await kbnClient.request<GetDataViewsResponse>({
             method: 'GET',
-            path: '/api/data_views',
+            path: withSpace('/api/data_views', spaceId),
             retries: 3,
           });
 
@@ -172,7 +186,7 @@ export const getDataViewsApiHelper = (
 
           const deleteResponse = await kbnClient.request({
             method: 'DELETE',
-            path: `/api/data_views/data_view/${dataView.id}`,
+            path: withSpace(`/api/data_views/data_view/${dataView.id}`, spaceId),
             retries: 3,
             ignoreErrors: [404],
           });
@@ -182,6 +196,25 @@ export const getDataViewsApiHelper = (
           };
         }
       );
+    },
+
+    getIdByTitle: async (title: string, spaceId?: string) => {
+      return await measurePerformanceAsync(log, 'dataViewsApi.getIdByTitle', async () => {
+        const response = await kbnClient.request<GetDataViewsResponse>({
+          method: 'GET',
+          path: withSpace('/api/data_views', spaceId),
+          retries: 3,
+        });
+        const match = (response.data.data_view || []).find(
+          (dataView) => dataView.title === title || dataView.name === title
+        );
+        if (!match?.id) {
+          throw new Error(
+            `Data view "${title}" not found${spaceId ? ` in space "${spaceId}"` : ''}`
+          );
+        }
+        return match.id;
+      });
     },
   };
 };

@@ -19,7 +19,7 @@ import {
 } from '@kbn/esql-language';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { type Terminal } from '../esql_fields_utils';
+import { getFieldDefinitionFromArg, type Terminal } from '../esql_fields_utils';
 import { getQuerySummaryPerCommandType, getSummaryPerCommand } from '../get_query_summary';
 import { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from '../append_to_query/utils';
 
@@ -195,10 +195,6 @@ export function getStatsGroupFieldType<
   if (!groupByFields) {
     return undefined as R;
   }
-
-  return (
-    groupByFields.definition.type === 'function'
-      ? groupByFields.definition.name
-      : groupByFields.definition.type
-  ) as R;
+  const definition = getFieldDefinitionFromArg(groupByFields.arg);
+  return (definition.type === 'function' ? definition.name : definition.type) as R;
 }

@@ -282,7 +282,7 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
             <>
               {!lastLineSelected && <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />}
               <EuiHorizontalRule margin="none" />
-              <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />
+              <EuiSpacer css={css({ blockSize: euiTheme.size.l })} />
               <EuiFlexGroup alignItems={'center'} direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <FormattedMessage

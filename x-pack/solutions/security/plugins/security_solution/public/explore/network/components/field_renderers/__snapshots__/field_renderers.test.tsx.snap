@@ -262,7 +262,7 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="css-1j75qc1"
+        class="emotion-EuiExternalLinkIcon"
         data-euiicon-type="popout"
         role="presentation"
       />

@@ -23,3 +23,8 @@ export {
   USER_AGENT_HEADER,
   RESERVED_HEADERS,
 } from './src/headers';
+export {
+  createTransport,
+  type OnRequestHandler,
+  type OnRequestContext,
+} from './src/create_transport';

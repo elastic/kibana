@@ -8,6 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 const KIBANA_VERSION_QUERY_PARAM = 'version';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
@@ -101,6 +103,11 @@ export const FeatureFeedbackButton = ({
   nodeType,
   surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,
 }: FeatureFeedbackButtonProps) => {
+  const { services } = useKibana<CoreStart>();
+  const isFeedbackEnabled = services.notifications?.feedback?.isEnabled() ?? true;
+
+  if (!isFeedbackEnabled) return null;
+
   return (
     <EuiButtonEmpty
       aria-label={surveyButtonText ?? FEEDBACK_BUTTON_DEFAULT_TEXT}

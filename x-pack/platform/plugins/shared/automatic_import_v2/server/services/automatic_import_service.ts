@@ -233,13 +233,14 @@ export class AutomaticImportService {
     request: KibanaRequest
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId } = params;
+    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions } = params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
+      ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
       dataStreamTaskParams,
@@ -323,6 +324,41 @@ export class AutomaticImportService {
     params: SamplesToDataStreamParams
   ): Promise<ReturnType<typeof this.samplesIndexService.addSamplesToDataStream>> {
     return this.samplesIndexService.addSamplesToDataStream(params);
+  }
+
+  public async getDataStreamResults(
+    integrationId: string,
+    dataStreamId: string
+  ): Promise<{
+    ingest_pipeline: Record<string, unknown>;
+    results: Array<Record<string, unknown>>;
+  }> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const dataStreamSO = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+    const status = dataStreamSO.attributes.job_info?.status;
+
+    if (status === TASK_STATUSES.failed) {
+      throw new Error(`Data stream ${dataStreamId} failed and has no results`);
+    }
+    if (status !== TASK_STATUSES.completed) {
+      throw new Error(`Data stream ${dataStreamId} has not completed yet`);
+    }
+
+    this.logger.debug(
+      `Data stream ${dataStreamId} results: ${JSON.stringify(dataStreamSO.attributes.result)}`
+    );
+
+    const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline;
+    const results = dataStreamSO.attributes.result?.pipeline_docs ?? [];
+
+    if (!ingestPipelineObj) {
+      throw new Error(`Data stream ${dataStreamId} has no ingest pipeline results`);
+    }
+
+    return {
+      ingest_pipeline: ingestPipelineObj,
+      results,
+    };
   }
 
   public stop() {

@@ -6,30 +6,30 @@
  */
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
-import { useKibana } from '../../hooks/use_kibana';
-import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
-import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
-import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
-import { LoadingPanel } from '../loading_panel';
-import type { Flow } from './add_significant_event_flyout/types';
-import { SignificantEventsTable } from './significant_events_table';
-import { EmptyState } from './empty_state';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_SYSTEMS_URL_PARAM,
 } from '../../constants';
-import { SignificantEventsHistogramChart } from './significant_events_histogram';
-import { formatChangePoint } from './utils/change_point';
 import { useAIFeatures } from '../../hooks/use_ai_features';
+import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
+import { useKibana } from '../../hooks/use_kibana';
+import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
+import { useTimefilter } from '../../hooks/use_timefilter';
+import { LoadingPanel } from '../loading_panel';
+import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
+import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
+import type { Flow } from './add_significant_event_flyout/types';
+import { EmptyState } from './empty_state';
+import { SignificantEventsHistogramChart } from './significant_events_histogram';
+import { SignificantEventsTable } from './significant_events_table';
+import { formatChangePoint } from './utils/change_point';
 
 interface Props {
   definition: Streams.all.GetResponse;

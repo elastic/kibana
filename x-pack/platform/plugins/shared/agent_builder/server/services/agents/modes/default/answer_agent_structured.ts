@@ -66,7 +66,6 @@ export const createAnswerAgentStructured = ({
         });
 
       const prompt = await promptFactory.getStructuredAnswerPrompt({
-        initialMessages: state.initialMessages,
         actions: state.mainActions,
         answerActions: state.answerActions,
       });

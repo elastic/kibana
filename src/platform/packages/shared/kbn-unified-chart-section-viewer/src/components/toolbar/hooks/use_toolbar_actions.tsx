@@ -53,7 +53,7 @@ export const useToolbarActions = ({
           dimensions={dimensions}
           onChange={onDimensionsChange}
           selectedDimensions={selectedDimensions}
-          singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
+          singleSelection={MAX_DIMENSIONS_SELECTIONS <= 1}
           fullWidth={isSmallScreen}
           isLoading={isLoading}
         />

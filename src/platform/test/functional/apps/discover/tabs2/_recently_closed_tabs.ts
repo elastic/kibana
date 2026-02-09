@@ -29,6 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.clearRecentlyClosedTabs();
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     it('should start with no recently closed tabs', async () => {
       const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
       expect(recentlyClosedTabs.length).to.be(0);

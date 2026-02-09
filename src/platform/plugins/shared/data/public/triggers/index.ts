@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apply_filter_trigger';
+export { APPLY_FILTER_TRIGGER } from '../../common';
+export { applyFilterTrigger } from './apply_filter_trigger';
