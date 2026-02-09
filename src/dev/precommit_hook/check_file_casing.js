@@ -19,7 +19,7 @@ const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.
 const CODEOWNERS_PATH = join(REPO_ROOT, '.github/CODEOWNERS');
 const NO_OWNER_KEY = '_no_owner';
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
-const NON_KEBAB_CASE_RE = /[A-Z _]/;
+const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function normalizePath(p) {
   return p.replace(/\\/g, '/');
@@ -87,7 +87,7 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
         break;
       case 'snake_case':
         if (NON_SNAKE_CASE_RE.test(resourceName)) {
-          violations.push({ path, expected: `'${resourceName}' should be kebab-case` });
+          violations.push({ path, expected: `'${resourceName}' should be snake_case` });
         }
         break;
       default:
