@@ -92,7 +92,14 @@ export function SLOInspect({ slo, disabled }: Props) {
   let flyout;
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutTitle" session="start">
+      <EuiFlyout
+        ownFocus
+        onClose={closeFlyout}
+        aria-labelledby="flyoutTitle"
+        session="start"
+        size="s"
+        resizable
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">

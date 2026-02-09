@@ -223,7 +223,7 @@ export default function CreateSLOFormFlyout({
         onClose={onClose}
         aria-labelledby="flyoutTitle"
         size="m"
-        maxWidth={620}
+        resizable
         ownFocus
         session="start"
         flyoutMenuProps={{
