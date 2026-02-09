@@ -8,6 +8,7 @@
  */
 
 import type { LensApiState } from '../../schema';
+import type { PieState } from '../../schema/charts/pie';
 import { mosaicStateSchema } from '../../schema/charts/mosaic';
 import { partitionStateSchema } from '../../schema/charts/partition';
 import { pieStateSchema } from '../../schema/charts/pie';
@@ -15,6 +16,7 @@ import { treemapStateSchema } from '../../schema/charts/treemap';
 import { waffleStateSchema } from '../../schema/charts/waffle';
 import { validateAPIConverter, validateConverter } from '../validate';
 import { esqlCharts } from './lens_api_config.mock';
+import { LensConfigBuilder } from '../../config_builder';
 import {
   mosaicLegacyBasicState,
   pieLegacyBasicState,
@@ -29,6 +31,7 @@ import {
   mosaicLegacyESQLState,
   waffleLegacyESQLState,
 } from './lens_state_config.mock';
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 
 describe('Partition', () => {
   describe('validateConverter', () => {
@@ -92,5 +95,21 @@ describe('Partition', () => {
         validateAPIConverter(config as LensApiState, partitionStateSchema);
       });
     }
+  });
+
+  describe('empty string collapseFns handling', () => {
+    it('should treat empty string collapseFns as undefined and apply color mapping to first group (Lens → API)', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      (pieLegacyESQLState.state
+        .visualization as LensPartitionVisualizationState)!.layers[0].collapseFns!.partition_value_accessor_group_by_0 =
+        '' as unknown as 'min';
+      const apiConfig = builder.toAPIFormat(pieLegacyESQLState) as PieState;
+
+      // The group should have color mapping (since empty string collapseFns means no collapse)
+      expect(apiConfig.group_by?.[0].color).toHaveProperty('mode', 'categorical');
+
+      // The group shouldn't have collapse_by (empty strings should be stripped)
+      expect(apiConfig.group_by?.[0]).not.toHaveProperty('collapse_by');
+    });
   });
 });

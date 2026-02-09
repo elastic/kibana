@@ -43,12 +43,7 @@ export interface SidebarHeaderProps {
 }
 
 /** Header component for sidebar apps */
-export const SidebarHeader: FC<SidebarHeaderProps> = ({
-  title,
-  children,
-  onClose,
-  actions,
-}) => {
+export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose, actions }) => {
   const { setLabel } = useSidebarPanel();
 
   useEffect(() => {
