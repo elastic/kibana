@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuthenticatedUser } from '@kbn/core/server';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
 import { NotificationPolicyClient } from './notification_policy_client';
+import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 
 describe('NotificationPolicyClient', () => {
-  const request: KibanaRequest = httpServerMock.createKibanaRequest();
-  const security = securityMock.createStart();
   const { notificationPolicySavedObjectService, mockSavedObjectsClient } =
     createNotificationPolicySavedObjectService();
 
-  const baseCreateData = {
-    name: 'policy-1',
-    workflow_id: 'workflow-1',
-  };
+  const { userService, userProfile } = createUserService();
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -37,23 +28,21 @@ describe('NotificationPolicyClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    const user: AuthenticatedUser = mockAuthenticatedUser({
-      username: 'elastic',
-      profile_uid: 'elastic_profile_uid',
-    });
-    security.authc.getCurrentUser.mockReturnValue(user);
+    userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',
       type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-      attributes: baseCreateData,
+      attributes: {} as NotificationPolicySavedObjectAttributes,
       references: [],
+      version: 'WzEsMV0=',
     });
     mockSavedObjectsClient.update.mockResolvedValue({
       id: 'policy-id-default',
       type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-      attributes: baseCreateData,
+      attributes: {} as NotificationPolicySavedObjectAttributes,
       references: [],
+      version: 'WzEsMV0=',
     });
     mockSavedObjectsClient.delete.mockResolvedValue({});
   });
@@ -63,7 +52,7 @@ describe('NotificationPolicyClient', () => {
   });
 
   function createClient() {
-    return new NotificationPolicyClient(request, notificationPolicySavedObjectService, security);
+    return new NotificationPolicyClient(notificationPolicySavedObjectService, userService);
   }
 
   describe('createNotificationPolicy', () => {
@@ -72,12 +61,17 @@ describe('NotificationPolicyClient', () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-id-1',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: baseCreateData,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
         references: [],
+        version: 'WzEsMV0=',
       });
 
       const res = await client.createNotificationPolicy({
-        data: { name: 'my-policy', workflow_id: 'my-workflow' },
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          workflow_id: 'my-workflow',
+        },
         options: { id: 'policy-id-1' },
       });
 
@@ -85,9 +79,10 @@ describe('NotificationPolicyClient', () => {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         expect.objectContaining({
           name: 'my-policy',
+          description: 'my-policy description',
           workflow_id: 'my-workflow',
-          createdBy: 'elastic',
-          updatedBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
+          updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         }),
@@ -97,10 +92,12 @@ describe('NotificationPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-1',
+          version: 'WzEsMV0=',
           name: 'my-policy',
+          description: 'my-policy description',
           workflow_id: 'my-workflow',
-          createdBy: 'elastic',
-          updatedBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
+          updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -109,27 +106,40 @@ describe('NotificationPolicyClient', () => {
 
     it('creates a notification policy without custom id', async () => {
       const client = createClient();
-      mockSavedObjectsClient.create.mockResolvedValueOnce({
-        id: 'auto-generated-id',
-        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: baseCreateData,
-        references: [],
+      mockSavedObjectsClient.create.mockImplementationOnce(async (_type, _attrs, options) => {
+        return {
+          id: (options?.id ?? 'auto-generated-id') as string,
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as NotificationPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        };
       });
 
       const res = await client.createNotificationPolicy({
-        data: { name: 'my-policy', workflow_id: 'my-workflow' },
+        data: {
+          name: 'my-policy',
+          description: 'my-policy description',
+          workflow_id: 'my-workflow',
+        },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         expect.objectContaining({
           name: 'my-policy',
+          description: 'my-policy description',
           workflow_id: 'my-workflow',
         }),
-        expect.objectContaining({ overwrite: false })
+        expect.objectContaining({
+          overwrite: false,
+          id: expect.any(String),
+        })
       );
 
+      expect(res.id).toEqual(expect.any(String));
       expect(res.name).toBe('my-policy');
+      expect(res.description).toBe('my-policy description');
       expect(res.workflow_id).toBe('my-workflow');
     });
 
@@ -144,7 +154,11 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.createNotificationPolicy({
-          data: { name: 'my-policy', workflow_id: 'my-workflow' },
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            workflow_id: 'my-workflow',
+          },
           options: { id: 'policy-id-conflict' },
         })
       ).rejects.toMatchObject({
@@ -159,18 +173,19 @@ describe('NotificationPolicyClient', () => {
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
+        description: 'test-policy description',
         workflow_id: 'test-workflow',
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
-        attributes: existingAttributes,
-        version: 'WzEsMV0=',
         id: 'policy-id-get-1',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
         references: [],
+        version: 'WzEsMV0=',
       });
 
       const res = await client.getNotificationPolicy({ id: 'policy-id-get-1' });
@@ -182,6 +197,7 @@ describe('NotificationPolicyClient', () => {
       );
       expect(res).toEqual({
         id: 'policy-id-get-1',
+        version: 'WzEsMV0=',
         ...existingAttributes,
       });
     });
@@ -209,23 +225,31 @@ describe('NotificationPolicyClient', () => {
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
+        description: 'original-policy description',
         workflow_id: 'original-workflow',
-        createdBy: 'elastic',
+        createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'updater_profile_uid',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
-        attributes: existingAttributes,
-        version: 'WzEsMV0=',
         id: 'policy-id-update-1',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
       });
 
       const res = await client.updateNotificationPolicy({
-        id: 'policy-id-update-1',
         data: { name: 'updated-policy', workflow_id: 'updated-workflow' },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -233,11 +257,12 @@ describe('NotificationPolicyClient', () => {
         'policy-id-update-1',
         expect.objectContaining({
           name: 'updated-policy',
+          description: 'original-policy description',
           workflow_id: 'updated-workflow',
-          updatedBy: 'elastic',
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
           // Preserves original createdBy and createdAt
-          createdBy: 'elastic',
+          createdBy: 'creator_profile_uid',
           createdAt: '2024-12-01T00:00:00.000Z',
         }),
         { version: 'WzEsMV0=' }
@@ -246,7 +271,9 @@ describe('NotificationPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-update-1',
+          version: 'WzIsMV0=',
           name: 'updated-policy',
+          description: 'original-policy description',
           workflow_id: 'updated-workflow',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -264,8 +291,8 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          id: 'policy-id-update-404',
           data: { workflow_id: 'some-workflow' },
+          options: { id: 'policy-id-update-404', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
@@ -277,18 +304,19 @@ describe('NotificationPolicyClient', () => {
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
+        description: 'original-policy description',
         workflow_id: 'original-workflow',
-        createdBy: 'elastic',
+        createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'updater_profile_uid',
         updatedAt: '2024-12-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'policy-id-conflict',
-        attributes: existingAttributes,
-        version: 'WzEsMV0=',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
       });
 
       mockSavedObjectsClient.update.mockRejectedValueOnce(
@@ -300,8 +328,8 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          id: 'policy-id-conflict',
           data: { workflow_id: 'new-workflow' },
+          options: { id: 'policy-id-conflict', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -315,18 +343,19 @@ describe('NotificationPolicyClient', () => {
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
+        description: 'policy-to-delete description',
         workflow_id: 'workflow-to-delete',
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
-        attributes: existingAttributes,
-        version: 'WzEsMV0=',
         id: 'policy-id-del-1',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
       });
 
       await client.deleteNotificationPolicy({ id: 'policy-id-del-1' });
@@ -351,6 +380,8 @@ describe('NotificationPolicyClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
+
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
     });
   });
 });
