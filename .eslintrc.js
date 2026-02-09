@@ -2715,22 +2715,21 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
-      // Security Solution Excluded
+      // Security Solution
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-      ],
-      excludedFiles: [
         'x-pack/solutions/security/**/plugins/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/**/plugins/**/security/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          { alternativeFixtures: ['esClient'] },
+        ],
       },
     },
     {
