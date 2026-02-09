@@ -17,11 +17,12 @@ import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count'
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
 
-const discoveryTabs = ['streams', 'queries', 'insights'] as const;
+const discoveryTabs = ['streams', 'features', 'queries', 'insights'] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -73,6 +74,14 @@ export function SignificantEventsDiscoveryPage() {
       }),
       href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
       isSelected: tab === 'streams',
+    },
+    {
+      id: 'features',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTab', {
+        defaultMessage: 'Features',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'features' } }),
+      isSelected: tab === 'features',
     },
     {
       id: 'queries',
@@ -131,6 +140,7 @@ export function SignificantEventsDiscoveryPage() {
       />
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+        {tab === 'features' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'insights' && <InsightsTab />}
       </StreamsAppPageTemplate.Body>
