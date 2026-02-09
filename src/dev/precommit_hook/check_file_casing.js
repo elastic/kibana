@@ -25,22 +25,6 @@ function normalizePath(p) {
   return p.replace(/\\/g, '/');
 }
 
-/**
- * Converts exceptions from file format (compact: team -> { path -> expected }) to a flat array of { path, expected }.
- */
-export function exceptionsToArray(data) {
-  if (!data || typeof data !== 'object') return [];
-  const out = [];
-  for (const value of Object.values(data)) {
-    if (value && typeof value === 'object') {
-      for (const [path, expected] of Object.entries(value)) {
-        out.push({ path: normalizePath(path), expected: expected ?? 'snake_case' });
-      }
-    }
-  }
-  return out;
-}
-
 function parseCodeowners() {
   const rules = [];
   if (!existsSync(CODEOWNERS_PATH)) return rules;

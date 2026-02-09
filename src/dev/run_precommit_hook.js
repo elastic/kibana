@@ -15,13 +15,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
-import { extname } from 'path';
+import { readFileSync } from 'fs';
+import { extname, join } from 'path';
 
-import { getFilesForCommit, checkFileCasing, exceptionsToArray } from './precommit_hook';
+import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import exceptionsData from './precommit_hook/exceptions.json';
+
+const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
 class CheckResult {
   constructor(checkName) {
@@ -80,9 +82,14 @@ class FileCasingCheck extends PrecommitCheck {
         .filter((pkg) => !pkg.isPlugin())
         .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
     );
+
+    const rawExceptions = JSON.parse(readFileSync(EXCEPTIONS_JSON_PATH, 'utf8'));
+    const exceptions = Object.values(rawExceptions).flatMap((teamObject) =>
+      Object.keys(teamObject)
+    );
     await checkFileCasing(log, files, {
       packageRootDirs,
-      exceptions: exceptionsToArray(exceptionsData),
+      exceptions,
     });
   }
 }
