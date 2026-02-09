@@ -129,6 +129,7 @@ steps:
 
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
+    key: check_oas_snapshot
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -137,6 +138,22 @@ steps:
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks/api_contracts.sh
+    label: 'Check API Contracts'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on: check_oas_snapshot
+    timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '-1'

@@ -88,6 +88,21 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/checks/api_contracts.sh
+    label: 'Check API Contracts'
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+    key: check_api_contracts
+    depends_on: check_oas_snapshot
+    timeout_in_minutes: 30
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
