@@ -6,7 +6,8 @@
  */
 
 import { Subject } from 'rxjs';
-import type { EntityOrEventItem } from './components/grouped_item/types';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 
 /**
  * Event bus used to notify external consumers (e.g. Security Solution plugin)
@@ -14,7 +15,7 @@ import type { EntityOrEventItem } from './components/grouped_item/types';
  * to stay decoupled from flyout implementation details while still enabling
  * deep linking to single document/entity previews.
  */
-export const groupedItemClick$ = new Subject<EntityOrEventItem>();
+export const groupedItemClick$ = new Subject<EntityItem | EventOrAlertItem>();
 
 // Simple in-memory state for lightweight duplicate suppression
 let lastEmittedId: string | undefined;
@@ -22,7 +23,7 @@ let lastEmittedTs = 0;
 const DEDUPE_WINDOW_MS = 250; // ignore exact same id within window
 
 /** Convenience publisher with naive duplicate suppression */
-export const emitGroupedItemClick = (item: EntityOrEventItem) => {
+export const emitGroupedItemClick = (item: EntityItem | EventOrAlertItem) => {
   const now = Date.now();
   if (item.id === lastEmittedId && now - lastEmittedTs < DEDUPE_WINDOW_MS) {
     return; // drop duplicate rapid click

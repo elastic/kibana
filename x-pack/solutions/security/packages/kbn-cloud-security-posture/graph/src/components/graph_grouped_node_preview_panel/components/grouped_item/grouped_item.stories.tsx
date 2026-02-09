@@ -6,24 +6,19 @@
  */
 import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  DOCUMENT_TYPE_EVENT,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { GlobalStylesStorybookDecorator } from '../../../../../.storybook/decorators';
-import { GroupedItem as GroupedItemComp } from './grouped_item';
+import type { EntityItem as EntityItemType } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import type {
-  EntityItem as EntityItemType,
   EventItem as EventItemType,
   AlertItem as AlertItemType,
-} from './types';
+} from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { GlobalStylesStorybookDecorator } from '../../../../../.storybook/decorators';
+import { GroupedItem as GroupedItemComp } from './grouped_item';
 
 // Base interface for common props across all stories
 interface BaseStoryProps {
   isLoading?: boolean;
   id: string;
-  timestamp?: string | number | Date;
+  timestamp?: string;
   ips?: string[];
   countryCodes?: string[];
 }
@@ -54,7 +49,6 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
   ...itemArgs
 }: EntityStoryProps) => {
   const item: EntityItemType = {
-    itemType: DOCUMENT_TYPE_ENTITY,
     ...itemArgs,
   };
 
@@ -69,7 +63,7 @@ EntityItem.args = {
   ips: ['10.200.0.202'],
   countryCodes: ['US'],
   icon: 'storage',
-  timestamp: Date.now(),
+  timestamp: new Date().toISOString(),
 };
 
 EntityItem.argTypes = {
@@ -82,7 +76,7 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: EventItemType = {
-    itemType: DOCUMENT_TYPE_EVENT,
+    isAlert: false,
     ...itemArgs,
   };
 
@@ -93,7 +87,7 @@ EventItem.args = {
   isLoading: false,
   id: 'event-id',
   action: 'process_start',
-  timestamp: Date.now(),
+  timestamp: new Date().toISOString(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
   target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
 };
@@ -107,7 +101,7 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: AlertItemType = {
-    itemType: DOCUMENT_TYPE_ALERT,
+    isAlert: true,
     ...itemArgs,
   };
 
@@ -118,7 +112,7 @@ AlertItem.args = {
   isLoading: false,
   id: 'alert-id',
   action: 'suspicious_activity',
-  timestamp: Date.now(),
+  timestamp: new Date().toISOString(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
   target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
 };

@@ -25,6 +25,8 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./benchmarks.ts'));
     loadTestFile(require.resolve('./status.ts'));
     loadTestFile(require.resolve('./graph.ts'));
+    loadTestFile(require.resolve('./graph_entities.ts'));
+    loadTestFile(require.resolve('./graph_events.ts'));
     loadTestFile(require.resolve('./get_detection_engine_alerts_count_by_rule_tags'));
   });
 }

@@ -13,7 +13,6 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  type EntityOrEventItem,
   getNodeDocumentMode,
   getSingleDocumentData,
   GraphGroupedNodePreviewPanelKey,
@@ -22,12 +21,14 @@ import {
   NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import {
-  DOCUMENT_TYPE_ALERT,
-  DOCUMENT_TYPE_ENTITY,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
+  isEntityNodeEnriched,
+  isEntityItem,
+  isEventOrAlertItem,
+} from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -70,7 +71,6 @@ export const GraphVisualization: React.FC = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
@@ -103,7 +103,7 @@ export const GraphVisualization: React.FC = memo(() => {
   );
 
   const onOpenEventPreview = useCallback(
-    (node: NodeViewModel) => {
+    (node: NodeViewModel, timeRange: TimeRange) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
@@ -157,17 +157,12 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            entityItems: (node.documentsData as NodeDocumentDataModel[])
+            type: 'entities' as const,
+            documentIds: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => ({
-                itemType: DOCUMENT_TYPE_ENTITY,
-                id: doc.id,
-                type: doc.entity?.type,
-                subType: doc.entity?.sub_type,
-                icon: node.icon,
-                availableInEntityStore: !!doc.entity?.availableInEntityStore,
-              })),
+              .map((doc) => doc.id),
+            start: timeRange.from,
+            end: timeRange.to,
           },
         });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
@@ -178,11 +173,12 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            dataViewId: dataViewIndexPattern,
+            type: 'events' as const,
             documentIds: (node.documentsData as NodeDocumentDataModel[])
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => doc.event?.id),
+              .map((doc) => doc.id),
+            start: timeRange.from,
+            end: timeRange.to,
           },
         });
       } else {
@@ -196,13 +192,13 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
+    [toasts, openPreviewPanel, scopeId]
   );
 
   // Subscribe to grouped item click events emitted by graph package
   useEffect(() => {
-    const sub = groupedItemClick$.subscribe((item: EntityOrEventItem) => {
-      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+    const sub = groupedItemClick$.subscribe((item: EntityItem | EventOrAlertItem) => {
+      if (isEntityItem(item)) {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
@@ -213,7 +209,7 @@ export const GraphVisualization: React.FC = memo(() => {
             isEngineMetadataExist: !!item.availableInEntityStore,
           },
         });
-      } else {
+      } else if (isEventOrAlertItem(item)) {
         // event or alert
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
@@ -221,8 +217,7 @@ export const GraphVisualization: React.FC = memo(() => {
             id: item.docId,
             indexName: item.index,
             scopeId,
-            banner:
-              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            banner: item.isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });

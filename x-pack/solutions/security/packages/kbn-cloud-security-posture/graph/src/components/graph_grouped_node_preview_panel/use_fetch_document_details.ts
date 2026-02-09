@@ -7,54 +7,51 @@
 
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import { lastValueFrom } from 'rxjs';
-import { number } from 'io-ts';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture/src/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOCUMENT_TYPE_EVENT,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type {
+  EntitiesResponse,
+  EntityItem,
+} from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type {
+  EventsResponse,
+  EventOrAlertItem,
+} from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { showDetailsErrorToast } from '../utils';
-import type { EventItem, AlertItem } from './components/grouped_item/types';
 
-// Minimal shape of an ES hit we care about. (Avoid pulling large shared types until needed.)
-export interface DocumentHit<_Source = unknown> {
-  _id: string;
-  _index?: string;
-  _score?: number | null;
-  _source?: _Source;
-  fields?: Record<string, unknown>;
-  sort?: unknown[];
-}
+const ENTITIES_API = '/internal/cloud_security_posture/graph/entities';
+const EVENTS_API = '/internal/cloud_security_posture/graph/events';
 
 export interface UseFetchDocumentDetailsParams {
-  /** Index (or index pattern) where the documents live */
-  dataViewId: DataView['id'];
-  /** Document ids to retrieve */
-  ids: Array<string | undefined> | undefined;
+  /** Type of documents to fetch */
+  type: 'entities' | 'events';
+  /** Document IDs to retrieve (entity IDs or event IDs) */
+  documentIds: string[];
+  /** Time range start */
+  start: string | number;
+  /** Time range end */
+  end: string | number;
+  /** Pagination parameters */
+  page: {
+    index: number;
+    size: number;
+  };
   /** Optional flags */
-  options: {
-    /** Current page index (0-based) */
-    pageIndex: number;
-    /** Number of elements to fetch per page */
-    pageSize: number;
+  options?: {
+    /** Max number of nodes to return */
+    nodesLimit?: number;
     /** Enable / disable the underlying query (defaults true) */
     enabled?: boolean;
     /** Refetch on window focus (defaults true) */
     refetchOnWindowFocus?: boolean;
-    /** Keep previous data flag (defaults false) */
-    keepPreviousData?: boolean;
   };
 }
 
 export interface UseFetchDocumentDetailsResult {
   data: {
-    page: (EventItem | AlertItem)[];
-    total: number;
+    items: Array<EntityItem | EventOrAlertItem>;
+    totalRecords: number;
   };
   isLoading: boolean;
   isFetching: boolean;
@@ -64,93 +61,42 @@ export interface UseFetchDocumentDetailsResult {
   refresh: () => void;
 }
 
-/** Build a search request for the provided ids */
-export const buildDocumentsRequest = (
-  dataViewId: DataView['id'],
-  ids: string[],
-  pageIndex: number,
-  pageSize: number
-) => ({
-  index: dataViewId,
-  size: pageSize,
-  from: pageIndex * pageSize,
-  ignore_unavailable: true,
-  track_total_hits: true,
-  query: {
-    bool: {
-      filter: [
-        {
-          terms: {
-            'event.id': ids,
-          },
-        },
-      ],
-    },
-  },
-});
-
 /**
- * Normalizes a value to an array of strings.
- * - undefined/null → undefined
- * - string → [string] (single element array)
- * - string[] → string[] (pass through)
+ * Hook to fetch enriched document details from the document details API.
+ * Supports both entities and events/alerts with server-side enrichment via entity store.
+ * Server-side pagination is used to slice IDs before querying ESQL.
  */
-const normalizeToArray = (value?: string | string[]): string[] | undefined => {
-  if (value === undefined || value === null) return undefined;
-  return Array.isArray(value) ? value : [value];
-};
-
-const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
-  // TODO Fix typing issue and replace `any`
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hitSource = hit._source as Record<string, any>;
-  return {
-    itemType: hit._index?.includes('alerts-security.alerts-')
-      ? DOCUMENT_TYPE_ALERT
-      : DOCUMENT_TYPE_EVENT,
-    id: hitSource.event?.id,
-    docId: hit._id,
-    index: hit._index,
-    timestamp: hitSource['@timestamp'],
-    action: hitSource.event?.action,
-    actor: { id: hitSource.actor?.entity?.id },
-    target: { id: hitSource.target?.entity?.id },
-    ips: normalizeToArray(hitSource.source?.ip),
-    countryCodes: normalizeToArray(hitSource.source?.geo?.country_iso_code),
-  };
-};
-
-/**
- * Hook to fetch full document details for a list of document ids using a single
- * Elasticsearch search request (ids query). Returns an array of hits preserving
- * the ES hit structure so consumers can access source/fields as needed.
- */
-export const useFetchDocumentDetails = <_Source = unknown>({
-  dataViewId,
-  ids,
+export const useFetchDocumentDetails = ({
+  type,
+  documentIds,
+  start,
+  end,
+  page,
   options,
 }: UseFetchDocumentDetailsParams): UseFetchDocumentDetailsResult => {
-  const missingDataView = !dataViewId;
   const {
-    data: dataService,
+    http,
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
 
-  // Normalize & sanitize ids (remove undefined / empty, de-duplicate for a stable key)
+  // Normalize & sanitize ids (remove empty, de-duplicate for a stable key)
   const normalizedIds = useMemo(
-    () => (ids ? Array.from(new Set(ids.filter((v): v is string => !!v))) : []),
-    [ids]
+    () => Array.from(new Set(documentIds.filter((v): v is string => !!v))),
+    [documentIds]
   );
 
   const queryKey = useMemo(
     () => [
       'useFetchDocumentDetails',
-      dataViewId,
+      type,
       normalizedIds.join(','),
-      options.pageIndex,
-      options.pageSize,
+      start,
+      end,
+      page.index,
+      page.size,
+      options?.nodesLimit,
     ],
-    [dataViewId, normalizedIds, options.pageIndex, options.pageSize]
+    [type, normalizedIds, start, end, page.index, page.size, options?.nodesLimit]
   );
 
   const queryClient = useQueryClient();
@@ -158,49 +104,59 @@ export const useFetchDocumentDetails = <_Source = unknown>({
   const { isLoading, isFetching, isError, error, data } = useQuery(
     queryKey,
     async () => {
-      if (missingDataView || normalizedIds.length === 0) {
-        return { page: [], total: 0 };
+      if (!http) {
+        throw new Error('Http service is not available');
       }
-      const search$ = dataService.search.search({
-        params: buildDocumentsRequest(
-          dataViewId,
-          normalizedIds,
-          options.pageIndex,
-          options.pageSize
-        ),
-      });
-      const response = await lastValueFrom(search$);
-      const { hits } = response?.rawResponse;
-      return {
-        page: hits.hits.map((hit) => buildItemFromHit(hit as EsHitRecord)),
-        total: number.is(hits.total)
-          ? hits.total
-          : hits.total && number.is(hits.total.value)
-          ? hits.total.value
-          : 0,
-      };
+
+      if (normalizedIds.length === 0) {
+        return { items: [], totalRecords: 0 };
+      }
+
+      if (type === 'entities') {
+        const response = await http.post<EntitiesResponse>(ENTITIES_API, {
+          version: '1',
+          body: JSON.stringify({
+            nodesLimit: options?.nodesLimit,
+            page: {
+              index: page.index,
+              size: page.size,
+            },
+            query: {
+              entityIds: normalizedIds,
+              start,
+              end,
+            },
+          }),
+        });
+        return { items: response.entities, totalRecords: response.totalRecords };
+      } else {
+        const response = await http.post<EventsResponse>(EVENTS_API, {
+          version: '1',
+          body: JSON.stringify({
+            nodesLimit: options?.nodesLimit,
+            page: {
+              index: page.index,
+              size: page.size,
+            },
+            query: {
+              eventIds: normalizedIds,
+              start,
+              end,
+            },
+          }),
+        });
+        return { items: response.events, totalRecords: response.totalRecords };
+      }
     },
     {
-      enabled: !missingDataView && (options.enabled ?? true) && normalizedIds.length > 0,
-      refetchOnWindowFocus: options.refetchOnWindowFocus ?? true,
-      keepPreviousData: options.keepPreviousData ?? false,
+      enabled: (options?.enabled ?? true) && normalizedIds.length > 0,
+      refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
       onError: (e: unknown) => showDetailsErrorToast(toasts, e),
     }
   );
 
-  if (missingDataView) {
-    return {
-      data: { page: [], total: 0 },
-      isLoading: false,
-      isFetching: false,
-      isError: false,
-      error: null,
-      refresh: () => {},
-    };
-  }
-
   return {
-    data: data ?? { page: [], total: 0 },
+    data: data ?? { items: [], totalRecords: 0 },
     isLoading,
     isFetching,
     isError,
@@ -210,5 +166,3 @@ export const useFetchDocumentDetails = <_Source = unknown>({
     },
   };
 };
-
-export type { UseFetchDocumentDetailsParams as UseFetchDocumentDetailsHookParams };

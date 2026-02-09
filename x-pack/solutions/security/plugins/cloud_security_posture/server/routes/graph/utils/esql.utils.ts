@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
+} from '@kbn/cloud-security-posture-common/utils/helpers';
+
 /**
  * Utility functions for building ESQL queries
  */
@@ -94,7 +99,7 @@ export const formatJsonProperty = (propertyName: string, valueVar: string): stri
  */
 export const buildLookupJoinEsql = (lookupIndexName: string): string => {
   return `| DROP entity.id
-| DROP entity.target.id  
+| DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -102,7 +107,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id 
+| RENAME actorLookupEntityId = entity.id
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -130,4 +135,216 @@ export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
   return `// Use ENRICH policy for entity enrichment (deprecated fallback)
 | ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
+};
+
+/**
+ * Generates ESQL EVAL statement for actor entity ID using COALESCE.
+ * Returns the first non-null value from the actor entity fields.
+ *
+ * @param actorFields - Array of actor entity field names
+ * @returns ESQL EVAL statement for actorEntityId
+ *
+ * @example
+ * ```typescript
+ * buildActorEntityIdEval(['user.entity.id', 'service.entity.id'])
+ * // Returns:
+ * // | EVAL actorEntityId = COALESCE(
+ * //     user.entity.id,
+ * //     service.entity.id
+ * //   )
+ * ```
+ */
+export const buildActorEntityIdEval = (actorFields: readonly string[]): string => {
+  const fieldsCoalesce = actorFields.join(',\n    ');
+  return `| EVAL actorEntityId = COALESCE(
+    ${fieldsCoalesce}
+  )`;
+};
+
+/**
+ * Generates ESQL EVAL statements for target entity ID collection using MV_APPEND.
+ * Collects all non-null target entity IDs into a multi-value field, deduplicating them.
+ *
+ * @param targetFields - Array of target entity field names
+ * @returns Multi-line ESQL EVAL statements for targetEntityId
+ *
+ * @example
+ * ```typescript
+ * buildTargetEntityIdEvals(['file.target.entity.id', 'process.target.entity.id'])
+ * // Returns:
+ * // | EVAL targetEntityId = TO_STRING(null)
+ * // | EVAL targetEntityId = CASE(
+ * //     file.target.entity.id IS NULL,
+ * //     targetEntityId,
+ * //     CASE(
+ * //       targetEntityId IS NULL,
+ * //       file.target.entity.id,
+ * //       MV_DEDUPE(MV_APPEND(targetEntityId, file.target.entity.id))
+ * //     )
+ * //   )
+ * // | EVAL targetEntityId = CASE(...)  // repeated for each target field
+ * ```
+ */
+export const buildTargetEntityIdEvals = (targetFields: readonly string[]): string => {
+  return [
+    '| EVAL targetEntityId = TO_STRING(null)',
+    ...targetFields.map((field) => {
+      return `| EVAL targetEntityId = CASE(
+    ${field} IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
+    )
+  )`;
+    }),
+  ].join('\n');
+};
+
+/**
+ * Generates ESQL EVAL statements for entity field hints (ecsParentField).
+ * Creates CASE statements to determine which ECS field an entity ID came from.
+ *
+ * @param actorFields - Array of actor entity field names (empty to skip actor hints)
+ * @param targetFields - Array of target entity field names (empty to skip target hints)
+ * @returns ESQL EVAL statements for actorEcsParentField and/or targetEcsParentField
+ *
+ * @example
+ * ```typescript
+ * buildEntityFieldHints(['user.entity.id'], ['file.target.entity.id'])
+ * // Returns:
+ * // | EVAL actorEcsParentField = CASE(
+ * //     MV_CONTAINS(user.entity.id, actorEntityId), "user",
+ * //     ""
+ * //   )
+ * // | EVAL targetEcsParentField = CASE(
+ * //     MV_CONTAINS(file.target.entity.id, targetEntityId), "file",
+ * //     ""
+ * // )
+ * ```
+ */
+export const buildEntityFieldHints = (
+  actorFields: readonly string[],
+  targetFields: readonly string[]
+): string => {
+  const statements: string[] = [];
+
+  if (actorFields.length > 0) {
+    const actorCases = generateFieldHintCases(actorFields, 'actorEntityId');
+    statements.push(`| EVAL actorEcsParentField = CASE(
+${actorCases},
+    ""
+  )`);
+  }
+
+  if (targetFields.length > 0) {
+    const targetCases = generateFieldHintCases(targetFields, 'targetEntityId');
+    statements.push(`| EVAL targetEcsParentField = CASE(
+${targetCases},
+    ""
+)`);
+  }
+
+  return statements.join('\n');
+};
+
+/**
+ * Generates ESQL EVAL statements for source metadata (IP addresses and geo country codes).
+ *
+ * @returns ESQL EVAL statements for sourceIps and sourceCountryCodes
+ *
+ * @example
+ * ```typescript
+ * buildSourceMetadataEvals()
+ * // Returns:
+ * // | EVAL sourceIps = source.ip
+ * // | EVAL sourceCountryCodes = source.geo.country_iso_code
+ * ```
+ */
+export const buildSourceMetadataEvals = (): string => {
+  return `| EVAL sourceIps = source.ip
+| EVAL sourceCountryCodes = source.geo.country_iso_code`;
+};
+
+/**
+ * Chooses entity enrichment method based on availability.
+ * Prefers LOOKUP JOIN (fastest), falls back to ENRICH policy (deprecated), then null values.
+ *
+ * @param isLookupIndexAvailable - Whether the entities lookup index is available
+ * @param isEnrichPolicyExists - Whether the enrich policy exists
+ * @param spaceId - The Kibana space ID
+ * @returns ESQL statements for the chosen enrichment method
+ *
+ * @example
+ * ```typescript
+ * buildEntityEnrichment(true, false, 'default')
+ * // Returns LOOKUP JOIN ESQL
+ *
+ * buildEntityEnrichment(false, true, 'default')
+ * // Returns ENRICH policy ESQL
+ *
+ * buildEntityEnrichment(false, false, 'default')
+ * // Returns null value EVALs (no enrichment)
+ * ```
+ */
+export const buildEntityEnrichment = (
+  isLookupIndexAvailable: boolean,
+  isEnrichPolicyExists: boolean,
+  spaceId: string
+): string => {
+  if (isLookupIndexAvailable) {
+    const lookupIndexName = getEntitiesLatestIndexName(spaceId);
+    return buildLookupJoinEsql(lookupIndexName);
+  }
+
+  if (isEnrichPolicyExists) {
+    const enrichPolicyName = getEnrichPolicyId(spaceId);
+    return buildEnrichPolicyEsql(enrichPolicyName);
+  }
+
+  return `// No enrichment available - use null values
+| EVAL actorEntityName = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)`;
+};
+
+/**
+ * Generates ESQL LOOKUP JOIN for single entity enrichment (used in graph_entities).
+ * This pattern is for enriching a single entityId field (not actor/target pattern).
+ *
+ * @param lookupIndexName - The name of the entities lookup index
+ * @returns ESQL LOOKUP JOIN statements for single entity enrichment
+ *
+ * @example
+ * ```typescript
+ * buildSingleEntityLookupJoinEsql('.entities.v2.latest.security_generic_default')
+ * // Returns:
+ * // | DROP entity.id
+ * // | EVAL entity.id = entityId
+ * // | LOOKUP JOIN .entities.v2.latest.security_generic_default ON entity.id
+ * // | EVAL availableInEntityStore = CASE(
+ * //     entity.name IS NOT NULL OR entity.type IS NOT NULL,
+ * //     true,
+ * //     false
+ * //   )
+ * // | EVAL entityName = entity.name
+ * // | EVAL entityType = entity.type
+ * // | EVAL entitySubType = entity.sub_type
+ * // | EVAL hostIp = TO_STRING(host.ip)
+ * ```
+ */
+export const buildSingleEntityLookupJoinEsql = (lookupIndexName: string): string => {
+  return `// Drop existing entity.id from source docs before LOOKUP JOIN to avoid conflicts
+| DROP entity.id
+| EVAL entity.id = entityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| EVAL availableInEntityStore = CASE(
+    entity.name IS NOT NULL OR entity.type IS NOT NULL,
+    true,
+    false
+  )
+| EVAL entityName = entity.name
+| EVAL entityType = entity.type
+| EVAL entitySubType = entity.sub_type
+| EVAL hostIp = TO_STRING(host.ip)`;
 };

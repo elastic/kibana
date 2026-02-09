@@ -15,7 +15,6 @@ export {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
 } from './graph_grouped_node_preview_panel/constants';
-export type { EntityOrEventItem } from './graph_grouped_node_preview_panel/components/grouped_item/types';
 export { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from './constants';
 export { GraphPopover } from './popovers/primitives/graph_popover';
 export {

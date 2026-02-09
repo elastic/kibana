@@ -17,17 +17,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  DOCUMENT_TYPE_EVENT,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { isEntityItem, isEventOrAlertItem } from '../../../../utils';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import type { EntityOrEventItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
 
@@ -39,34 +36,30 @@ const entityUnavailableTooltip = i18n.translate(
 );
 
 export interface HeaderRowProps {
-  item: EntityOrEventItem;
+  item: EntityItem | EventOrAlertItem;
 }
 
 export const HeaderRow = ({ item }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
   const title = useMemo(() => {
-    switch (item.itemType) {
-      case DOCUMENT_TYPE_EVENT:
-      case DOCUMENT_TYPE_ALERT:
-        return displayEventName(item);
-      case DOCUMENT_TYPE_ENTITY:
-        return displayEntityName(item);
+    if (isEventOrAlertItem(item)) {
+      return displayEventName(item);
     }
+    return displayEntityName(item);
   }, [item]);
 
-  const isClickable =
-    item.itemType === DOCUMENT_TYPE_EVENT ||
-    item.itemType === DOCUMENT_TYPE_ALERT ||
-    (item.itemType === DOCUMENT_TYPE_ENTITY && item.availableInEntityStore);
+  const isEntity = isEntityItem(item);
+  const isEventOrAlert = isEventOrAlertItem(item);
+  const isClickable = isEventOrAlert || (isEntity && item.availableInEntityStore);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {item.itemType === DOCUMENT_TYPE_ALERT && (
+      {isEventOrAlert && item.isAlert && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="warningFilled" size="m" color="danger" />
         </EuiFlexItem>
       )}
-      {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
+      {isEntity && item.icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={item.icon}

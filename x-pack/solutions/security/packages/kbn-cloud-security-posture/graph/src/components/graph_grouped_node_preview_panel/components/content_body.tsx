@@ -8,13 +8,14 @@
 import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { PanelBody, List } from '../styles';
 import { i18nNamespaceKey } from '../constants';
 import { CONTENT_BODY_TEST_ID } from '../test_ids';
 import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
-import type { EntityOrEventItem } from './grouped_item/types';
 import { PaginationControls } from './pagination_controls';
 import { DEFAULT_PAGE_SIZE, type Pagination } from '../use_pagination';
 
@@ -23,7 +24,7 @@ const maxDocumentsShownLabel = i18n.translate(`${i18nNamespaceKey}.maxDocumentsS
 });
 
 export interface ContentBodyProps {
-  items: EntityOrEventItem[];
+  items: Array<EntityItem | EventOrAlertItem>;
   totalHits: number;
   icon: string;
   groupedItemsType: string;

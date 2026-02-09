@@ -8,13 +8,14 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme, formatDate } from '@elastic/eui';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { GROUPED_ITEM_TIMESTAMP_TEST_ID } from '../../../test_ids';
-import type { EntityOrEventItem } from '../types';
 
 export const LIST_ITEM_DATE_FORMAT = 'MM/DD/YYYY, hh:mm:ss A';
 
 export interface TimestampRowProps {
-  timestamp: EntityOrEventItem['timestamp'];
+  timestamp: EntityItem['timestamp'] | EventOrAlertItem['timestamp'];
 }
 
 export const TimestampRow = ({ timestamp }: TimestampRowProps) => {

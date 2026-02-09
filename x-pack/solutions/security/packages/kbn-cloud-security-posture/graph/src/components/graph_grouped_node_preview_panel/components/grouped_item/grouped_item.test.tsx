@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+import { formatDate } from '@elastic/eui';
 import { render } from '@testing-library/react';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import {
   GROUPED_ITEM_TEST_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -19,18 +21,15 @@ import {
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
 import { GroupedItem } from './grouped_item';
-import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
-import type { EntityOrEventItem } from './types';
 
 describe('<GroupedItem />', () => {
   describe('render items', () => {
     it('renders entity item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { queryByTestId, getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             icon: 'node',
@@ -56,12 +55,12 @@ describe('<GroupedItem />', () => {
     });
 
     it('renders event item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-id',
+            isAlert: false,
             action: 'process_start',
             timestamp,
             actor: { id: 'a1', label: 'user1', icon: 'user' },
@@ -82,12 +81,12 @@ describe('<GroupedItem />', () => {
     });
 
     it('renders alert item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'alert',
             id: 'alert-id',
+            isAlert: true,
             action: 'alert_action',
             timestamp,
             actor: { id: 'host-1', label: 'host', icon: 'storage' },
@@ -112,7 +111,7 @@ describe('<GroupedItem />', () => {
     describe('entity', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ id: entityId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
     });
@@ -120,7 +119,7 @@ describe('<GroupedItem />', () => {
     describe('event', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ id: eventId, isAlert: false }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(eventId);
       });
     });
@@ -128,7 +127,7 @@ describe('<GroupedItem />', () => {
     describe('alert', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ id: alertId, isAlert: true }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(alertId);
       });
     });
@@ -140,7 +139,6 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           item={
             {
-              itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
               actor: { id: 'a1', label: 'actor' },
@@ -158,8 +156,8 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             target: { id: 't1', label: 'target' },
           }}
@@ -174,8 +172,8 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
           }}
@@ -190,8 +188,8 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
             target: { id: 't1', label: 'target' },
           }}
@@ -206,8 +204,8 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
           }}
@@ -222,8 +220,8 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
             target: { id: 't1', label: 'target' },
@@ -239,8 +237,8 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
             target: { id: 't1', label: 'target' },
@@ -256,8 +254,8 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1' }, // No label
             target: { id: 't1', label: 'target' },
@@ -273,8 +271,8 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
             target: { id: 't1' }, // No label
@@ -290,8 +288,8 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1' }, // Only id
             target: { id: 't1' }, // Only id
@@ -307,7 +305,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
+            isAlert: false,
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor', icon: 'user' },
@@ -334,7 +332,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            itemType: 'alert',
+            isAlert: true,
             id: 'alert-1',
             action: 'test_action',
           }}
@@ -350,7 +348,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            itemType: 'event',
+            isAlert: false,
             id: 'event-1',
             action: 'test_action',
           }}
@@ -365,7 +363,6 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'entity-1',
             label: 'test_entity',
           }}
@@ -382,7 +379,6 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['il'],
@@ -397,7 +393,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: undefined,
@@ -412,7 +407,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: [''],
@@ -427,7 +421,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['INVALID'],
@@ -440,8 +433,7 @@ describe('<GroupedItem />', () => {
     });
 
     it('handles uppercase, lowercase or mixed case country codes', () => {
-      const item: EntityOrEventItem = {
-        itemType: 'entity',
+      const item: EntityItem = {
         id: 'e1',
         label: 'entity-1',
       };
@@ -476,7 +468,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: undefined,
@@ -491,7 +482,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: [''],
@@ -507,7 +497,6 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: [ipv4],
@@ -523,7 +512,6 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: ipArray,
@@ -538,7 +526,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: [],
@@ -553,7 +540,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ips: ['', ''],
@@ -571,7 +557,6 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: countryArray,
@@ -588,7 +573,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: [],
@@ -603,7 +587,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['', ''],
@@ -629,7 +612,6 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -646,7 +628,6 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading={false}
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -662,7 +643,6 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}

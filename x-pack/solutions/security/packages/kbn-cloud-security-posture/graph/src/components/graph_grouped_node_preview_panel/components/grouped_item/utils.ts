@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EntityItem, EventItem, AlertItem } from './types';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type {
+  EventItem,
+  AlertItem,
+} from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 
 export const displayEventName = ({ action, id }: Pick<EventItem | AlertItem, 'action' | 'id'>) =>
   action || id || '-';

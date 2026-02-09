@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GraphGroupedNodePreviewPanel } from './graph_grouped_node_preview_panel';
-import type { AlertItem, EntityItem, EventItem } from './components/grouped_item/types';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
 
 import {
@@ -22,7 +23,6 @@ import {
   GROUPED_ITEMS_TYPE_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
-import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
 
 // Mock the hook
@@ -35,7 +35,7 @@ const mockUseFetchDocumentDetails = useFetchDocumentDetails as jest.MockedFuncti
 const createMockHookResult = (
   overrides?: Partial<ReturnType<typeof useFetchDocumentDetails>>
 ): ReturnType<typeof useFetchDocumentDetails> => ({
-  data: { page: [], total: 0 },
+  data: { items: [], totalRecords: 0 },
   isLoading: false,
   isFetching: false,
   isError: false,
@@ -46,10 +46,10 @@ const createMockHookResult = (
 
 describe('GraphGroupedNodePreviewPanel', () => {
   const defaultProps = {
-    docMode: 'grouped-entities' as const,
-    dataViewId: 'test-data-view-id',
+    type: 'entities' as const,
     documentIds: ['doc-1', 'doc-2', 'doc-3'],
-    entityItems: [] as EntityItem[],
+    start: '2024-01-01T00:00:00.000Z',
+    end: '2024-01-02T00:00:00.000Z',
   };
 
   let entityIdCounter = 0;
@@ -57,23 +57,33 @@ describe('GraphGroupedNodePreviewPanel', () => {
   const createEntityItem = (overrides?: Partial<EntityItem>): EntityItem => {
     entityIdCounter += 1;
     return {
+      itemType: 'entity',
       id: `entity-${entityIdCounter}`,
       type: 'host',
       icon: 'storage',
       label: 'Test Host',
+      availableInEntityStore: true,
       ...overrides,
     } as EntityItem;
+  };
+
+  const createEventItem = (overrides?: Partial<EventOrAlertItem>): EventOrAlertItem => {
+    entityIdCounter += 1;
+    return {
+      itemType: 'event',
+      id: `event-${entityIdCounter}`,
+      docId: `docId-${entityIdCounter}`,
+      index: 'test-index',
+      timestamp: '2024-01-01T12:00:00.000Z',
+      ...overrides,
+    } as EventOrAlertItem;
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;
-    mockUseFetchDocumentDetails.mockReturnValue(
-      createMockHookResult({
-        data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
-      })
-    );
+    mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult());
   });
 
   describe('Rendering States', () => {
@@ -81,49 +91,39 @@ describe('GraphGroupedNodePreviewPanel', () => {
       it('should render LoadingBody when isLoading is true', () => {
         mockUseFetchDocumentDetails.mockReturnValue(
           createMockHookResult({
-            data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
             isLoading: true,
           })
         );
 
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
         expect(screen.queryByTestId(CONTENT_BODY_TEST_ID)).not.toBeInTheDocument();
         expect(screen.queryByTestId(EMPTY_BODY_TEST_ID)).not.toBeInTheDocument();
       });
 
-      it('should render LoadingBody only for grouped-events mode during data fetch', () => {
+      it('should render LoadingBody for entities type during data fetch', () => {
         mockUseFetchDocumentDetails.mockReturnValue(
           createMockHookResult({
-            data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
             isLoading: true,
           })
         );
 
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
         expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
       });
 
-      it('should NOT show loading for grouped-entities mode with items', () => {
-        const entityItems = [createEntityItem()];
+      it('should render LoadingBody for events type during data fetch', () => {
         mockUseFetchDocumentDetails.mockReturnValue(
           createMockHookResult({
-            data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
+            isLoading: true,
           })
         );
 
-        render(
-          <GraphGroupedNodePreviewPanel
-            {...defaultProps}
-            docMode="grouped-entities"
-            entityItems={entityItems}
-          />
-        );
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" />);
 
-        expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
-        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
       });
     });
 
@@ -131,7 +131,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       it('should render EmptyBody when items array is empty after loading', () => {
         mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult());
 
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" />);
 
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
         expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
@@ -140,18 +140,37 @@ describe('GraphGroupedNodePreviewPanel', () => {
     });
 
     describe('Content State', () => {
-      it('should render ContentBody with valid data', () => {
-        const entityItems = [createEntityItem()];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+      it('should render ContentBody with valid data for entities', () => {
+        const items = [createEntityItem()];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
         expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
         expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
         expect(screen.queryByTestId(EMPTY_BODY_TEST_ID)).not.toBeInTheDocument();
       });
 
+      it('should render ContentBody with valid data for events', () => {
+        const items = [createEventItem()];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" />);
+
+        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+      });
+
       it('should render icon, title, and grouped type in ContentBody', () => {
-        const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        const items = [createEntityItem({ icon: 'test-icon', type: 'host' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
         expect(screen.getByTestId(ICON_TEST_ID)).toBeInTheDocument();
@@ -162,8 +181,12 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct icon based on entity type', () => {
-        const entityItems = [createEntityItem({ icon: 'custom-icon' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        const items = [createEntityItem({ icon: 'custom-icon' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute(
           'data-euiicon-type',
@@ -172,8 +195,12 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct groupedItemsType label', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        const items = [createEntityItem({ type: 'user' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
       });
@@ -182,39 +209,62 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
   describe('Pagination Behavior', () => {
     describe('Initial Pagination State', () => {
-      it('should start with default pagination pageIndex: 0, pageSize: 10 when items >= MIN_PAGE_SIZE', () => {
-        const entityItems = Array.from({ length: 15 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should start with default pagination pageIndex: 0, pageSize: 10 when totalRecords >= MIN_PAGE_SIZE', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 15 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         // EUI pagination uses 1-based indexing for display
         expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
         expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
+
+        // Verify hook was called with initial page params
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: { index: 0, size: 10 },
+          })
+        );
       });
 
-      it('should hide pagination when items < MIN_PAGE_SIZE', () => {
-        const entityItems = Array.from({ length: 5 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should hide pagination when totalRecords < MIN_PAGE_SIZE', () => {
+        const items = Array.from({ length: 5 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 5 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        // Pagination should not be visible with only 5 items
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
+
+        // Pagination should not be visible with only 5 total records
         expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
         expect(screen.queryByLabelText(/Page 1/)).not.toBeInTheDocument();
       });
     });
 
     describe('Page Size Changes', () => {
-      it('should reset pageIndex to 0 when changing pageSize to 25', async () => {
-        const entityItems = Array.from({ length: 50 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should request new page from server when changing pageSize to 50', async () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 50 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         // Navigate to page 2 first (showing items 11-20)
         await userEvent.click(screen.getByTestId(PAGINATION_BUTTON_NEXT_TEST_ID));
-        expect(screen.getByLabelText(/Page 2/)).toBeInTheDocument();
+
+        await waitFor(() => {
+          expect(screen.getByLabelText(/Page 2/)).toBeInTheDocument();
+        });
+
+        // Verify hook called with page 2
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: { index: 1, size: 10 },
+          })
+        );
 
         // Change page size by opening popover and selecting 50
         await userEvent.click(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID));
@@ -226,34 +276,24 @@ describe('GraphGroupedNodePreviewPanel', () => {
           expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
           expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 50');
         });
-      });
 
-      it('should slice items correctly based on new pageSize', async () => {
-        const entityItems = Array.from({ length: 50 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+        // Verify hook called with new page size and reset pageIndex
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: { index: 0, size: 50 },
+          })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        // Initially shows 10 items
-        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
-
-        // Change to 50
-        await userEvent.click(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID));
-        // Use pointerEventsCheck: 0 to skip pointer-events check for popover items
-        await userEvent.click(screen.getByText('50 rows'), { pointerEventsCheck: 0 });
-
-        await waitFor(() => {
-          expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 50');
-        });
       });
     });
 
     describe('Page Navigation', () => {
-      it('should navigate to page 2 and display correct items', async () => {
-        const entityItems = Array.from({ length: 50 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should request page 2 from server on navigation', async () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 50 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
 
@@ -263,26 +303,21 @@ describe('GraphGroupedNodePreviewPanel', () => {
           expect(screen.getByLabelText(/Page 2/)).toBeInTheDocument();
           expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
         });
-      });
 
-      it('should update pageIndex correctly on navigation', async () => {
-        const entityItems = Array.from({ length: 50 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+        // Verify hook called with page 2 parameters
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: { index: 1, size: 10 },
+          })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        await userEvent.click(screen.getByTestId(PAGINATION_BUTTON_NEXT_TEST_ID));
-
-        await waitFor(() => {
-          expect(screen.getByLabelText(/Page 2/)).toBeInTheDocument();
-        });
       });
     });
 
     describe('Remount Behavior', () => {
-      it('should always reset to page 1 (pageIndex: 0) on mount, even with valid pageIndex in localStorage (grouped-entities)', () => {
-        const entityItems = Array.from({ length: 50 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should always reset to page 1 (pageIndex: 0) on mount, even with valid pageIndex in localStorage', () => {
+        const items = Array.from({ length: 20 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 50 } })
         );
 
         // Simulate localStorage with pageSize=20
@@ -292,75 +327,58 @@ describe('GraphGroupedNodePreviewPanel', () => {
           JSON.stringify({ pageSize: 20 })
         );
 
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
         // Should ALWAYS start at page 1 (pageIndex=0), regardless of localStorage
         expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
         expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
-        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
-          expect.objectContaining({
-            options: expect.objectContaining({ pageIndex: 0 }),
-          })
-        );
         expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 20');
-      });
 
-      it('should always reset to page 1 (pageIndex: 0) on mount with pageSize from localStorage (grouped-events)', () => {
-        // Simulate localStorage with pageSize=10
-        // pageIndex is no longer stored in localStorage
-        localStorage.setItem(
-          GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
-          JSON.stringify({ pageSize: 10 })
-        );
-
-        const mockData = {
-          page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
-          total: 5,
-        };
-        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
-
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        // Should show content and call hook with pageIndex=0 (server-side pagination)
-        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        // Verify hook called with pageIndex: 0
         expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
           expect.objectContaining({
-            options: expect.objectContaining({ pageIndex: 0 }),
+            page: { index: 0, size: 20 },
           })
         );
       });
     });
 
     describe('Pagination Edge Cases', () => {
-      it('should hide pagination when total items less than MIN_PAGE_SIZE (single page)', () => {
-        const entityItems = Array.from({ length: 5 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should hide pagination when totalRecords less than MIN_PAGE_SIZE (single page)', () => {
+        const items = Array.from({ length: 5 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 5 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        // Pagination should be hidden when totalHits < MIN_PAGE_SIZE
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
+
+        // Pagination should be hidden when totalRecords < MIN_PAGE_SIZE
         expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('5');
       });
 
-      it('should hide pagination when total items equal pageSize (boundary case)', () => {
-        const entityItems = Array.from({ length: 10 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should hide pagination when totalRecords equal MIN_PAGE_SIZE (boundary case)', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 10 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        // Pagination should be hidden when totalHits === MIN_PAGE_SIZE (all items fit in one page)
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
+
+        // Pagination should be hidden when totalRecords === MIN_PAGE_SIZE (all items fit in one page)
         expect(screen.queryByTestId(PAGE_SIZE_BTN_TEST_ID)).not.toBeInTheDocument();
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('10');
       });
 
-      it('should show pagination when total items one more than MIN_PAGE_SIZE (2 pages)', () => {
-        const entityItems = Array.from({ length: 11 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should show pagination when totalRecords one more than MIN_PAGE_SIZE (2 pages)', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 11 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
-        // Pagination should be visible with 11 items (more than MIN_PAGE_SIZE)
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
+
+        // Pagination should be visible with 11 total records (more than MIN_PAGE_SIZE)
         expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('11');
       });
@@ -368,375 +386,313 @@ describe('GraphGroupedNodePreviewPanel', () => {
   });
 
   describe('Mode-Specific Behavior', () => {
-    describe('Grouped Entities Mode', () => {
-      it('should use entityItems prop directly without fetch', () => {
-        const entityItems = [createEntityItem()];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+    describe('Entities Type', () => {
+      it('should call hook with type entities', () => {
+        const items = [createEntityItem()];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
         expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
           expect.objectContaining({
-            options: expect.objectContaining({ enabled: false }),
+            type: 'entities',
+            documentIds: defaultProps.documentIds,
+            start: defaultProps.start,
+            end: defaultProps.end,
+            page: { index: 0, size: 10 },
           })
         );
       });
 
       it('should handle empty array', () => {
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={[]} />);
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items: [], totalRecords: 0 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" documentIds={[]} />);
 
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
       });
 
-      it('should use client-side pagination slicing', () => {
-        const entityItems = Array.from({ length: 25 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should use server-side pagination', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        const allDocumentIds = Array.from({ length: 25 }, (_, i) => `doc-${i}`);
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 25 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            type="entities"
+            documentIds={allDocumentIds}
+          />
+        );
+
+        // Server returns only page 1 items (10), but totalRecords is 25
         expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('10');
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('25');
+
+        // Verify hook called with pagination params
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            page: { index: 0, size: 10 },
+          })
+        );
       });
 
-      it('should have total hits equal to entityItems.length', () => {
-        const entityItems = Array.from({ length: 37 }, (_, i) =>
-          createEntityItem({ id: `entity-${i}` })
+      it('should have total hits equal to totalRecords', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+        const allDocumentIds = Array.from({ length: 37 }, (_, i) => `doc-${i}`);
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 37 } })
         );
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            type="entities"
+            documentIds={allDocumentIds}
+          />
+        );
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('37');
       });
 
-      it('should derive icon from first entity icon property', () => {
-        const entityItems = [createEntityItem({ icon: 'first-icon' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+      it('should display "Hosts" for host entity type', () => {
+        const items = [createEntityItem({ type: 'host' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
 
-        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'first-icon');
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
+
+        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
+      });
+
+      it('should display "Users" for user entity type', () => {
+        const items = [createEntityItem({ type: 'user' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
+
+        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
+      });
+
+      it('should display "Entities" for unknown entity type', () => {
+        const items = [createEntityItem({ type: 'unknown' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
+
+        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
       });
 
       it('should default to "index" icon when not possible to derive icon from entities', () => {
-        const entityItems = [createEntityItem({ icon: undefined })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        // Entity with no icon set (API returns icon: undefined)
+        const items = [createEntityItem({ icon: undefined, type: 'unknown' })];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
         expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'index');
       });
 
       it('should derive groupedItemsType from first entity type - this should never happened', () => {
-        const entityItems = [
-          createEntityItem({ type: 'host' }),
-          createEntityItem({ type: 'user' }),
+        // Test case where entities have mixed types - should use first entity's type
+        const items = [
+          createEntityItem({ type: 'host', icon: 'storage' }),
+          createEntityItem({ type: 'user', icon: 'user' }),
         ];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 2 } })
+        );
 
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
+
+        // Should use first entity's type for groupedItemsType
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
-      });
-
-      it('should display "Hosts" label for host type', () => {
-        const entityItems = [createEntityItem({ type: 'host' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
-      });
-
-      it('should display "Users" label for user type', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
-      });
-
-      it('should display "Entities" label for unknown type', () => {
-        const entityItems = [
-          createEntityItem({ type: 'unknown' as unknown as EntityItem['type'] }),
-        ];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
-      });
-
-      it('should display "Entities" label when type is undefined', () => {
-        const entityItems = [createEntityItem({ type: undefined })];
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
-
-        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
+        // Should use first entity's icon
+        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'storage');
       });
     });
 
-    describe('Grouped Events Mode', () => {
-      it('should handle empty array', () => {
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} documentIds={[]} />);
+    describe('Events Type', () => {
+      it('should call hook with type events', () => {
+        const items = [createEventItem()];
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 1 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" />);
+
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'events',
+            documentIds: defaultProps.documentIds,
+            start: defaultProps.start,
+            end: defaultProps.end,
+            page: { index: 0, size: 10 },
+          })
+        );
+      });
+
+      it('should handle empty results', () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items: [], totalRecords: 0 } })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" documentIds={[]} />);
 
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
       });
 
-      it('should pass documentIds to hook', () => {
-        const documentIds = ['doc-1', 'doc-2'];
+      it('should use server-side pagination for events data', () => {
+        const items = Array.from({ length: 10 }, (_, i) => createEventItem({ id: `event-${i}` }));
+        const allDocumentIds = Array.from({ length: 25 }, (_, i) => `doc-${i}`);
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({ data: { items, totalRecords: 25 } })
+        );
+
         render(
           <GraphGroupedNodePreviewPanel
             {...defaultProps}
-            docMode="grouped-events"
-            documentIds={documentIds}
+            type="events"
+            documentIds={allDocumentIds}
           />
         );
 
-        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
-          expect.objectContaining({
-            ids: documentIds,
-          })
-        );
+        // Total hits should be totalRecords from server, not items.length
+        expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('25');
+        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('10');
       });
 
-      it('should pass pagination parameters to hook', async () => {
+      it('should display "Events" for events groupedItemsType', () => {
+        const items = [createEventItem()];
         mockUseFetchDocumentDetails.mockReturnValue(
-          createMockHookResult({
-            data: { page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }], total: 50 },
-          })
+          createMockHookResult({ data: { items, totalRecords: 1 } })
         );
 
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
-          expect.objectContaining({
-            options: expect.objectContaining({
-              pageIndex: 0,
-              pageSize: 10,
-            }),
-          })
-        );
-      });
-
-      it('should enable hook only when docMode is grouped-events', () => {
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
-          expect.objectContaining({
-            options: expect.objectContaining({ enabled: true }),
-          })
-        );
-      });
-
-      it('should use total hits from fetched data', () => {
-        const mockData = {
-          page: [
-            { id: 'event-1', itemType: DOCUMENT_TYPE_EVENT },
-            { id: 'event-2', itemType: DOCUMENT_TYPE_EVENT },
-          ],
-          total: 2,
-        };
-        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
-
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('2');
-      });
-
-      it('should default icon to "index"', () => {
-        const mockData = {
-          page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
-          total: 1,
-        };
-        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
-
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'index');
-      });
-
-      it('should display "Events" label for groupedItemsType', () => {
-        const mockData = {
-          page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
-          total: 1,
-        };
-        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
-
-        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} type="events" />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Events');
       });
-
-      it('should use server-side pagination (fetch only current page)', async () => {
-        mockUseFetchDocumentDetails.mockReturnValue(
-          createMockHookResult({
-            data: { page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }], total: 11 },
-          })
-        );
-
-        const { rerender } = render(
-          <GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />
-        );
-
-        // Simulate page change by forcing re-render with updated hook response
-        mockUseFetchDocumentDetails.mockReturnValue(
-          createMockHookResult({
-            data: { page: [{ id: 'event-11', itemType: DOCUMENT_TYPE_EVENT }], total: 11 },
-          })
-        );
-
-        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-        await userEvent.click(screen.getByTestId(PAGINATION_BUTTON_NEXT_TEST_ID));
-
-        await waitFor(() => {
-          expect(mockUseFetchDocumentDetails).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              options: expect.objectContaining({
-                pageIndex: 1,
-                pageSize: 10,
-              }),
-            })
-          );
-        });
-      });
     });
   });
 
-  describe('useFetchDocumentDetails hook', () => {
-    it('should be called with correct dataViewId', () => {
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} dataViewId="custom-view-id" />);
+  describe('Hook Integration', () => {
+    it('should pass correct parameters to useFetchDocumentDetails hook', () => {
+      const items = [createEntityItem()];
+      mockUseFetchDocumentDetails.mockReturnValue(
+        createMockHookResult({ data: { items, totalRecords: 1 } })
+      );
+
+      const customProps = {
+        ...defaultProps,
+        type: 'entities' as const,
+        documentIds: ['id-1', 'id-2'],
+        start: '2024-06-01T00:00:00.000Z',
+        end: '2024-06-02T00:00:00.000Z',
+      };
+
+      render(<GraphGroupedNodePreviewPanel {...customProps} />);
 
       expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
         expect.objectContaining({
-          dataViewId: 'custom-view-id',
+          type: 'entities',
+          documentIds: ['id-1', 'id-2'],
+          start: '2024-06-01T00:00:00.000Z',
+          end: '2024-06-02T00:00:00.000Z',
+          page: { index: 0, size: 10 },
+          options: expect.objectContaining({
+            nodesLimit: 1000,
+            enabled: true,
+          }),
         })
       );
     });
 
-    it('should receive correct pageIndex', async () => {
+    it('should disable hook when documentIds is empty', () => {
+      render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" documentIds={[]} />);
+
+      expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({ enabled: false }),
+        })
+      );
+    });
+
+    it('should call refresh on refresh button click', async () => {
+      const mockRefresh = jest.fn();
       mockUseFetchDocumentDetails.mockReturnValue(
         createMockHookResult({
-          data: { page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }], total: 50 },
+          data: { items: [], totalRecords: 0 },
+          refresh: mockRefresh,
         })
       );
 
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+      render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
-      await userEvent.click(screen.getByTestId(PAGINATION_BUTTON_NEXT_TEST_ID));
+      // Empty state shows a refresh button
+      const refreshButton = screen.getByRole('button', { name: /refresh/i });
+      await userEvent.click(refreshButton);
 
-      await waitFor(() => {
-        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
-          expect.objectContaining({
-            options: expect.objectContaining({ pageIndex: 1 }),
-          })
-        );
-      });
-    });
-
-    it('should receive correct pageSize', async () => {
-      mockUseFetchDocumentDetails.mockReturnValue(
-        createMockHookResult({
-          data: { page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }], total: 50 },
-        })
-      );
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      // Change page size
-      await userEvent.click(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID));
-      // Use pointerEventsCheck: 0 to skip pointer-events check for popover items
-      await userEvent.click(screen.getByText('50 rows'), { pointerEventsCheck: 0 });
-
-      await waitFor(() => {
-        expect(mockUseFetchDocumentDetails).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            options: expect.objectContaining({ pageSize: 50 }),
-          })
-        );
-      });
-    });
-    it('should return loading state correctly', () => {
-      mockUseFetchDocumentDetails.mockReturnValue(
-        createMockHookResult({
-          data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
-          isLoading: true,
-          error: false,
-        })
-      );
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should return data correctly', () => {
-      const mockData = {
-        page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
-        total: 1,
-      };
-      mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+      expect(mockRefresh).toHaveBeenCalled();
     });
   });
 
-  describe('Async State Management', () => {
-    it('should handle Loading → Empty transition', () => {
+  describe('Error Handling', () => {
+    it('should render empty state when data has empty items and isError is true', () => {
       mockUseFetchDocumentDetails.mockReturnValue(
         createMockHookResult({
-          data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
-          isLoading: true,
+          isError: true,
+          error: new Error('API Error'),
+          data: { items: [], totalRecords: 0 },
         })
       );
 
-      const { unmount } = render(
-        <GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />
-      );
+      render(<GraphGroupedNodePreviewPanel {...defaultProps} />);
 
-      expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
-
-      unmount();
-
-      mockUseFetchDocumentDetails.mockReturnValue(
-        createMockHookResult({
-          data: { page: [], total: 0 },
-        })
-      );
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
+      // Shows empty state, not an error UI (error is handled via toast)
       expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should handle Loading → Content transition', async () => {
-      mockUseFetchDocumentDetails.mockReturnValue(
-        createMockHookResult({
-          data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
-          isLoading: true,
-        })
-      );
-
-      const { unmount } = render(
-        <GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />
-      );
-
-      expect(screen.getByTestId(LOADING_BODY_TEST_ID)).toBeInTheDocument();
-
-      unmount();
-
-      mockUseFetchDocumentDetails.mockReturnValue(
-        createMockHookResult({
-          data: { page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }], total: 1 },
-        })
-      );
-
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
-        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
-      });
     });
   });
 
   describe('Performance Testing', () => {
-    it('should handle 1000+ entities with pagination', () => {
-      const largeEntityItems = Array.from({ length: 1500 }, (_, i) =>
-        createEntityItem({ id: `entity-${i}` })
+    it('should handle 100+ totalRecords with server-side pagination', () => {
+      const items = Array.from({ length: 10 }, (_, i) => createEntityItem({ id: `entity-${i}` }));
+      const allDocumentIds = Array.from({ length: 150 }, (_, i) => `doc-${i}`);
+      mockUseFetchDocumentDetails.mockReturnValue(
+        createMockHookResult({ data: { items, totalRecords: 150 } })
       );
-      render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={largeEntityItems} />);
 
-      expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent(/Rows per page: \d+/);
-      expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('1500');
+      render(
+        <GraphGroupedNodePreviewPanel
+          {...defaultProps}
+          type="entities"
+          documentIds={allDocumentIds}
+        />
+      );
+
+      // Should not crash, should show first page with server-paginated data
+      expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toHaveTextContent('150');
+      expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 10');
+
+      // Verify only 10 items returned from server for page 1
+      expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: { index: 0, size: 10 },
+        })
+      );
     });
   });
 });

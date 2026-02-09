@@ -9,21 +9,22 @@ import React, { useState, useMemo, type PropsWithChildren } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  DOCUMENT_TYPE_EVENT,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type {
+  EventOrAlertItem,
+  EventItem,
+  AlertItem,
+} from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
+import { isEntityItem } from '../utils';
 import type { GraphGroupedNodePreviewPanelProps } from './graph_grouped_node_preview_panel';
-import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/grouped_item/types';
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
 
 // Interface for ContentTemplate args that includes the items property
 interface ContentTemplateArgs extends Partial<GraphGroupedNodePreviewPanelProps> {
-  items?: PanelItems;
+  items?: Array<EntityItem | EventOrAlertItem>;
 }
 
 const meta: Meta<ContentTemplateArgs> = {
@@ -64,23 +65,24 @@ const PanelContainer = ({ children }: PropsWithChildren) => {
 };
 
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
-  itemType: DOCUMENT_TYPE_ENTITY,
   id: 'entity-1',
   type: 'host',
   label: 'host-01.acme.com',
   icon: 'storage',
   risk: 75,
-  timestamp: new Date('2023-12-01T10:30:00Z'),
+  timestamp: '2023-12-01T10:30:00Z',
   ips: ['10.200.0.101'],
   countryCodes: ['US'],
   ...overrides,
 });
 
-const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
-  itemType: DOCUMENT_TYPE_EVENT,
+const createEventItem = (
+  overrides: Partial<Omit<EventItem, 'isAlert'>> & { isAlert?: false } = {}
+): EventItem => ({
   id: 'event-1',
+  isAlert: false,
   action: 'process_start',
-  timestamp: new Date('2023-12-01T11:15:00Z'),
+  timestamp: '2023-12-01T11:15:00Z',
   ips: ['192.168.1.100'],
   countryCodes: ['CA'],
   actor: { id: 'user-123', label: 'admin_user', icon: 'user' },
@@ -88,11 +90,13 @@ const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
   ...overrides,
 });
 
-const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
-  itemType: DOCUMENT_TYPE_ALERT,
+const createAlertItem = (
+  overrides: Partial<Omit<AlertItem, 'isAlert'>> & { isAlert?: true } = {}
+): AlertItem => ({
   id: 'alert-1',
+  isAlert: true,
   action: 'malware_detected',
-  timestamp: new Date('2023-12-01T12:45:00Z'),
+  timestamp: '2023-12-01T12:45:00Z',
   ips: ['172.16.0.50'],
   countryCodes: ['GB'],
   actor: { id: 'system-789', label: 'antivirus_scanner', icon: 'shield' },
@@ -111,7 +115,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   const capitalize = (str: string) =>
     !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
 
-  if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
+  if (firstItem && isEntityItem(firstItem)) {
     icon = firstItem.icon ?? icon;
     groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
   }
@@ -232,7 +236,7 @@ AlertsGroup.args = {
     createAlertItem({
       id: 'alert-2',
       action: 'malware_execution',
-      actor: { id: 'process-malware', label: 'trojan.exe', icon: DOCUMENT_TYPE_ALERT },
+      actor: { id: 'process-malware', label: 'trojan.exe', icon: 'warning' },
       target: { id: 'system-memory', label: 'system_memory', icon: 'memory' },
     }),
     createAlertItem({
@@ -290,14 +294,16 @@ EventsAndAlertsGroup.parameters = {
   },
 };
 
+// Constants for story data generation
+const ITEM_TYPES = ['entity', 'event', 'alert'] as const;
+
 export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   // Generate 100 items
   const allItems = useMemo(
     () =>
       Array.from({ length: 100 }, (_, index) => {
-        const itemTypes = [DOCUMENT_TYPE_ENTITY, DOCUMENT_TYPE_EVENT, DOCUMENT_TYPE_ALERT] as const;
-        const itemType = itemTypes[index % 3];
-        if (itemType === DOCUMENT_TYPE_ENTITY) {
+        const itemType = ITEM_TYPES[index % 3];
+        if (itemType === 'entity') {
           return createEntityItem({
             id: `entity-${index}`,
             label: `host-${String(index).padStart(2, '0')}.domain.com`,
@@ -305,7 +311,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
             ips: [`10.0.1.${100 + index}`],
             countryCodes: [['US', 'CA', 'GB', 'DE', 'FR'][index % 5]],
           });
-        } else if (itemType === DOCUMENT_TYPE_EVENT) {
+        } else if (itemType === 'event') {
           const actions = [
             'file_access',
             'network_connection',
@@ -331,16 +337,15 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
             actor: {
               id: `threat-${index}`,
               label: `threat_actor_${index}`,
-              icon: DOCUMENT_TYPE_ALERT,
+              icon: 'warning',
             },
             target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
           });
         }
-      }) as PanelItems,
+      }) as Array<EntityItem | EventOrAlertItem>,
     []
   );
 
-  // Pagination state (simulate what PaginationControls does)
   const [state, setPaginationState] = useState({ pageIndex: 0, pageSize: 10 });
 
   const goToPage = (pageIndex: number) => {
@@ -357,7 +362,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   let groupedItemsType = 'Events';
   const capitalize = (str: string) =>
     !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
-  if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
+  if (firstItem && isEntityItem(firstItem)) {
     icon = firstItem.icon ?? icon;
     groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
   }

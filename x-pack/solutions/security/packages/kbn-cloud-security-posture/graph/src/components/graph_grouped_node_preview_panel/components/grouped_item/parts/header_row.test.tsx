@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
@@ -15,7 +15,6 @@ import {
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
 import { HeaderRow } from './header_row';
-import type { EntityItem } from '../types';
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
@@ -27,7 +26,6 @@ describe('<HeaderRow />', () => {
   describe('enriched entities', () => {
     it('renders EuiLink (button) for enriched entity', () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
         availableInEntityStore: true,
@@ -40,7 +38,6 @@ describe('<HeaderRow />', () => {
 
     it('emits click event once for a single click on enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
         availableInEntityStore: true,
@@ -60,7 +57,6 @@ describe('<HeaderRow />', () => {
 
     it('suppresses rapid duplicate clicks within dedupe window for enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
         availableInEntityStore: true,
@@ -82,7 +78,6 @@ describe('<HeaderRow />', () => {
   describe('non-enriched entities', () => {
     it('renders EuiText for non-enriched entity and shows tooltip on hover', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
         availableInEntityStore: false,
@@ -105,7 +100,6 @@ describe('<HeaderRow />', () => {
 
     it('does not emit click event for non-enriched entity', async () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
         availableInEntityStore: false,
@@ -124,7 +118,6 @@ describe('<HeaderRow />', () => {
 
     it('renders EuiText when availableInEntityStore is undefined', () => {
       const item: EntityItem = {
-        itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',
         label: 'Entity Three',
       };

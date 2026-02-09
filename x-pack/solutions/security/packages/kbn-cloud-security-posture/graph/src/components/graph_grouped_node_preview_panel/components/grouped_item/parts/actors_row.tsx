@@ -8,13 +8,13 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon } from '@elastic/eui';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { GROUPED_ITEM_ACTOR_TEST_ID, GROUPED_ITEM_TARGET_TEST_ID } from '../../../test_ids';
-import type { AlertItem } from '../types';
 import { displayEntityName } from '../utils';
 
 export interface ActorsRowProps {
-  actor: NonNullable<AlertItem['actor']>;
-  target: NonNullable<AlertItem['target']>;
+  actor: NonNullable<EventOrAlertItem['actor']>;
+  target: NonNullable<EventOrAlertItem['target']>;
 }
 
 const badgeStyles = css`

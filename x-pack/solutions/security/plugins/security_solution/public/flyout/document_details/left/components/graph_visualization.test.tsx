@@ -27,6 +27,11 @@ const mockInvestigateInTimeline = {
   investigateInTimeline: jest.fn(),
 };
 
+const mockTimeRange = {
+  from: '2024-01-01T00:00:00.000Z||-30m',
+  to: '2024-01-01T00:00:00.000Z||+30m',
+};
+
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -154,25 +159,28 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act - Alert nodes contain both the event and alert documents
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id',
-            type: 'event',
-            event: { id: 'event-id' },
-          },
-          {
-            index: 'alert-index',
-            id: 'alert-id',
-            type: 'alert',
-            event: { id: 'alert-id' },
-          },
-        ],
-      } satisfies NodeViewModel);
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'label',
+          color: 'danger',
+          documentsData: [
+            {
+              index: 'event-index',
+              id: 'event-id',
+              type: 'event',
+              event: { id: 'event-id' },
+            },
+            {
+              index: 'alert-index',
+              id: 'alert-id',
+              type: 'alert',
+              event: { id: 'alert-id' },
+            },
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert - should open grouped events preview panel (not single alert preview)
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
@@ -183,9 +191,10 @@ describe('GraphVisualization', () => {
             scopeId: 'test-scope',
             isPreviewMode: true,
             banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-events',
-            dataViewId: 'experimental-data-view-pattern',
+            type: 'events',
             documentIds: ['event-id', 'alert-id'],
+            start: mockTimeRange.from,
+            end: mockTimeRange.to,
           },
         })
       );
@@ -206,18 +215,21 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id',
-            type: 'event',
-          },
-        ],
-      } satisfies NodeViewModel);
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'label',
+          color: 'danger',
+          documentsData: [
+            {
+              index: 'event-index',
+              id: 'event-id',
+              type: 'event',
+            },
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
@@ -249,18 +261,21 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'hexagon',
-        color: 'primary',
-        documentsData: [
-          {
-            index: 'entity-index',
-            id: 'entity-id',
-            type: 'entity',
-          },
-        ],
-      } satisfies NodeViewModel);
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'hexagon',
+          color: 'primary',
+          documentsData: [
+            {
+              index: 'entity-index',
+              id: 'entity-id',
+              type: 'entity',
+            },
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
@@ -281,25 +296,28 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'hexagon',
-        color: 'primary',
-        documentsData: [
-          {
-            index: 'entity-index',
-            id: 'entity-id',
-            type: 'entity',
-            entity: {
-              name: 'Admin',
-              type: 'Identity',
-              sub_type: 'Test User',
-              availableInEntityStore: true,
-              ecsParentField: 'entity',
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'hexagon',
+          color: 'primary',
+          documentsData: [
+            {
+              index: 'entity-index',
+              id: 'entity-id',
+              type: 'entity',
+              entity: {
+                name: 'Admin',
+                type: 'Identity',
+                sub_type: 'Test User',
+                availableInEntityStore: true,
+                ecsParentField: 'entity',
+              },
             },
-          },
-        ],
-      } satisfies NodeViewModel);
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
@@ -331,12 +349,15 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [],
-      } satisfies NodeViewModel);
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'label',
+          color: 'danger',
+          documentsData: [],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
@@ -358,45 +379,48 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act - Grouped entities node with multiple entity documents
-      onOpenEventPreview?.({
-        id: 'grouped-entity-node',
-        shape: 'rectangle',
-        color: 'primary',
-        icon: 'user',
-        count: 3,
-        documentsData: [
-          {
-            id: 'entity-1',
-            type: 'entity',
-            entity: {
-              name: 'User 1',
-              type: 'Identity',
-              sub_type: 'IAM User',
-              ecsParentField: 'user',
-              availableInEntityStore: true,
+      onOpenEventPreview?.(
+        {
+          id: 'grouped-entity-node',
+          shape: 'rectangle',
+          color: 'primary',
+          icon: 'user',
+          count: 3,
+          documentsData: [
+            {
+              id: 'entity-1',
+              type: 'entity',
+              entity: {
+                name: 'User 1',
+                type: 'Identity',
+                sub_type: 'IAM User',
+                ecsParentField: 'user',
+                availableInEntityStore: true,
+              },
             },
-          },
-          {
-            id: 'entity-2',
-            type: 'entity',
-            entity: {
-              name: 'User 2',
-              type: 'Identity',
-              sub_type: 'IAM User',
-              ecsParentField: 'user',
-              availableInEntityStore: true,
+            {
+              id: 'entity-2',
+              type: 'entity',
+              entity: {
+                name: 'User 2',
+                type: 'Identity',
+                sub_type: 'IAM User',
+                ecsParentField: 'user',
+                availableInEntityStore: true,
+              },
             },
-          },
-          {
-            id: 'entity-3',
-            type: 'entity',
-            entity: {
-              ecsParentField: 'user',
-              availableInEntityStore: false,
+            {
+              id: 'entity-3',
+              type: 'entity',
+              entity: {
+                ecsParentField: 'user',
+                availableInEntityStore: false,
+              },
             },
-          },
-        ],
-      } satisfies NodeViewModel);
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert - should open grouped entities preview panel
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
@@ -407,33 +431,10 @@ describe('GraphVisualization', () => {
             scopeId: 'test-scope',
             isPreviewMode: true,
             banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-entities',
-            entityItems: [
-              {
-                itemType: 'entity',
-                id: 'entity-1',
-                type: 'Identity',
-                subType: 'IAM User',
-                icon: 'user',
-                availableInEntityStore: true,
-              },
-              {
-                itemType: 'entity',
-                id: 'entity-2',
-                type: 'Identity',
-                subType: 'IAM User',
-                icon: 'user',
-                availableInEntityStore: true,
-              },
-              {
-                itemType: 'entity',
-                id: 'entity-3',
-                type: undefined,
-                subType: undefined,
-                icon: 'user',
-                availableInEntityStore: false,
-              },
-            ],
+            type: 'entities',
+            documentIds: ['entity-1', 'entity-2', 'entity-3'],
+            start: mockTimeRange.from,
+            end: mockTimeRange.to,
           },
         })
       );
@@ -455,25 +456,28 @@ describe('GraphVisualization', () => {
         jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
 
       // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id-1',
-            type: 'event',
-            event: { id: 'event-id-1' },
-          },
-          {
-            index: 'event-index',
-            id: 'event-id-2',
-            type: 'event',
-            event: { id: 'event-id-2' },
-          },
-        ],
-      } satisfies NodeViewModel);
+      onOpenEventPreview?.(
+        {
+          id: 'node-1',
+          shape: 'label',
+          color: 'danger',
+          documentsData: [
+            {
+              index: 'event-index',
+              id: 'event-id-1',
+              type: 'event',
+              event: { id: 'event-id-1' },
+            },
+            {
+              index: 'event-index',
+              id: 'event-id-2',
+              type: 'event',
+              event: { id: 'event-id-2' },
+            },
+          ],
+        } satisfies NodeViewModel,
+        mockTimeRange
+      );
 
       // Assert - should open grouped events preview panel
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
@@ -484,9 +488,10 @@ describe('GraphVisualization', () => {
             scopeId: 'test-scope',
             isPreviewMode: true,
             banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-events',
-            dataViewId: 'experimental-data-view-pattern',
+            type: 'events',
             documentIds: ['event-id-1', 'event-id-2'],
+            start: mockTimeRange.from,
+            end: mockTimeRange.to,
           },
         })
       );
