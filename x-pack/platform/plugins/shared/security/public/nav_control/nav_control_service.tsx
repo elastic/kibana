@@ -24,6 +24,9 @@ import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { FooterUserMenu } from './footer_user_menu';
+import { SecurityNavControl } from './nav_control_component';
+import { VersionProvider, version$ } from './version_context';
+import { VersionSwitcher } from './version_switcher';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -45,8 +48,14 @@ export class SecurityNavControlService {
   private securityApiClients!: SecurityApiClients;
 
   private navControlRegistered!: boolean;
+  private versionSwitcherRegistered!: boolean;
+  private headerNavControlElement?: HTMLElement;
+  private headerNavControlUnmount?: () => void;
 
   private securityFeaturesSubscription?: Subscription;
+  private versionSubscription?: Subscription;
+  private core?: CoreStart;
+  private authc?: AuthenticationServiceSetup;
 
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
@@ -58,6 +67,9 @@ export class SecurityNavControlService {
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
+    this.core = core;
+    this.authc = authc;
+
     this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
       ({ showLinks }) => {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
@@ -69,6 +81,13 @@ export class SecurityNavControlService {
         }
       }
     );
+
+    // Subscribe to version changes and update nav controls accordingly
+    this.versionSubscription = version$.subscribe((version) => {
+      if (this.navControlRegistered && this.core && this.authc) {
+        this.updateNavControlsForVersion(version);
+      }
+    });
 
     return {
       getUserMenuLinks$: () =>
@@ -103,46 +122,139 @@ export class SecurityNavControlService {
       this.securityFeaturesSubscription.unsubscribe();
       this.securityFeaturesSubscription = undefined;
     }
+    if (this.versionSubscription) {
+      this.versionSubscription.unsubscribe();
+      this.versionSubscription = undefined;
+    }
+    this.unregisterNavControls();
     this.navControlRegistered = false;
     this.stop$.next();
   }
 
-  private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    // Register footer user menu in the navigation
-    core.chrome.sideNav.setFooterUserMenu(
-      core.rendering.addContext(
-        <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-          <FooterUserMenu
-            editProfileUrl={core.http.basePath.prepend('/security/account')}
-            logoutUrl={this.logoutUrl}
-            userMenuLinks$={this.userMenuLinks$}
-          />
-        </Providers>
-      )
-    );
+  private updateNavControlsForVersion(version: 'current' | '1.1') {
+    if (!this.core || !this.authc || !this.headerNavControlElement) return;
 
-    // Header user menu removed - profile no longer displayed in top right corner
-    // core.chrome.navControls.registerRight({
-    //   order: 4000,
-    //   mount: (element: HTMLElement) => {
-    //     ReactDOM.render(
-    //       core.rendering.addContext(
-    //         <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-    //           <SecurityNavControl
-    //             editProfileUrl={core.http.basePath.prepend('/security/account')}
-    //             logoutUrl={this.logoutUrl}
-    //             userMenuLinks$={this.userMenuLinks$}
-    //           />
-    //         </Providers>
-    //       ),
-    //       element
-    //     );
+    this.renderHeaderNavControl(this.headerNavControlElement, version);
 
-    //     return () => ReactDOM.unmountComponentAtNode(element);
-    //   },
-    // });
+    if (version === 'current') {
+      this.core.chrome.sideNav.setFooterUserMenu(undefined);
+    } else {
+      const footerMenu = this.core.rendering.addContext(
+        <VersionProvider>
+          <Providers
+            services={this.core}
+            authc={this.authc}
+            securityApiClients={this.securityApiClients}
+          >
+            <FooterUserMenu
+              editProfileUrl={this.core.http.basePath.prepend('/security/account')}
+              logoutUrl={this.logoutUrl}
+              userMenuLinks$={this.userMenuLinks$}
+            />
+          </Providers>
+        </VersionProvider>
+      );
+      this.core.chrome.sideNav.setFooterUserMenu(footerMenu);
+    }
+  }
+
+  private registerSecurityNavControl(
+    core: CoreStart,
+    authc: AuthenticationServiceSetup,
+    version?: 'current' | '1.1'
+  ) {
+    const currentVersion = version ?? version$.value;
+
+    // Register version switcher (always visible, only once)
+    if (!this.versionSwitcherRegistered) {
+      core.chrome.navControls.registerRight({
+        order: 1,
+        mount: (element: HTMLElement) => {
+          ReactDOM.render(
+            core.rendering.addContext(
+              <VersionProvider>
+                <VersionSwitcher />
+              </VersionProvider>
+            ),
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+      });
+      this.versionSwitcherRegistered = true;
+    }
+
+    // Register header nav control (will be shown/hidden based on version)
+    core.chrome.navControls.registerRight({
+      order: 4000,
+      mount: (element: HTMLElement) => {
+        this.headerNavControlElement = element;
+        this.renderHeaderNavControl(element, currentVersion);
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+    });
+
+    // Set initial footer menu based on version
+    if (currentVersion === 'current') {
+      core.chrome.sideNav.setFooterUserMenu(undefined);
+    } else {
+      const footerMenu = core.rendering.addContext(
+        <VersionProvider>
+          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+            <FooterUserMenu
+              editProfileUrl={core.http.basePath.prepend('/security/account')}
+              logoutUrl={this.logoutUrl}
+              userMenuLinks$={this.userMenuLinks$}
+            />
+          </Providers>
+        </VersionProvider>
+      );
+      core.chrome.sideNav.setFooterUserMenu(footerMenu);
+    }
 
     this.navControlRegistered = true;
+  }
+
+  private renderHeaderNavControl(element: HTMLElement, version: 'current' | '1.1') {
+    if (!this.core || !this.authc) return;
+
+    if (version === 'current') {
+      ReactDOM.render(
+        this.core.rendering.addContext(
+          <VersionProvider>
+            <Providers
+              services={this.core}
+              authc={this.authc}
+              securityApiClients={this.securityApiClients}
+            >
+              <SecurityNavControl
+                editProfileUrl={this.core.http.basePath.prepend('/security/account')}
+                logoutUrl={this.logoutUrl}
+                userMenuLinks$={this.userMenuLinks$}
+              />
+            </Providers>
+          </VersionProvider>
+        ),
+        element,
+        () => {}
+      );
+      this.headerNavControlUnmount = () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
+    } else {
+      // Render empty div for version 1.1 (footer menu will be shown instead)
+      ReactDOM.render(<div />, element, () => {});
+      this.headerNavControlUnmount = () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
+    }
   }
 
   private sortUserMenuLinks(userMenuLinks: UserMenuLink[]) {
