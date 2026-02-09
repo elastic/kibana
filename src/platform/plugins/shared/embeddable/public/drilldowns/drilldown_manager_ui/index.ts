@@ -17,6 +17,11 @@ export { getDrilldownFactories } from './get_drilldown_factories';
 export function DrilldownManager(props: PublicDrilldownsManagerProps) {
   return DrilldownManagerWithProvider({
     ...props,
+    factories: props.factories.filter((factory) => {
+      return factory.supportedTriggers.some((supportedTrigger) =>
+        props.triggers.includes(supportedTrigger)
+      );
+    }),
     getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
     storage: new Storage(window?.localStorage),
     toastService: core.notifications.toasts,
