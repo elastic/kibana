@@ -24,7 +24,6 @@ import { TriggerLineItem } from '../trigger_line_item';
 export interface DrilldownTemplateTableItem {
   id: string;
   name: string;
-  icon?: string;
   description?: string;
   actionName?: string;
   actionIcon?: string;

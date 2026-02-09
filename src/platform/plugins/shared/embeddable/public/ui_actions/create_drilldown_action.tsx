@@ -78,7 +78,7 @@ export const createDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        const { DrilldownManager, getDrilldownFactories } = await import(
+        const { DrilldownManager, getDrilldownFactories, getSiblingDrilldowns } = await import(
           '../drilldowns/drilldown_manager_ui'
         );
         const factories = await getDrilldownFactories(getDrilldownRegistryEntries());
@@ -90,7 +90,7 @@ export const createDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
             drilldowns$={embeddable.drilldowns$}
             setDrilldowns={embeddable.setDrilldowns}
             triggers={getEmbeddableTriggers(embeddable)}
-            templates={[]}
+            templates={getSiblingDrilldowns(embeddable)}
             onClose={closeFlyout}
             factories={factories}
           />

@@ -298,13 +298,13 @@ export class DrilldownsManager {
     if (!templates) return;
     const template = templates.find(({ id }) => id === templateId);
     if (!template) return;
-    const factory = this.deps.factories.find(({ type }) => type === template.type);
+    const factory = this.deps.factories.find(({ type }) => type === template.drilldownState.type);
     if (!factory) return;
     this.setDrilldownFactory(factory);
     const drilldownManager = this.getDrilldownManager();
     if (drilldownManager) {
-      drilldownManager.setName(this.pickName(template.name));
-      drilldownManager.setTrigger(template.trigger);
+      drilldownManager.setName(this.pickName(template.drilldownState.label));
+      drilldownManager.setTrigger(template.drilldownState.trigger);
       drilldownManager.setConfig(template.drilldownState);
     }
   };

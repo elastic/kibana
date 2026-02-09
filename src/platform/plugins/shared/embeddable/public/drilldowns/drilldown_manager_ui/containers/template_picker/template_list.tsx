@@ -28,11 +28,10 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
       const factory = drilldowns.deps.factories.find(
         ({ type }) => type === item.drilldownState.type
       );
-      const trigger = drilldowns.deps.getTrigger(item.trigger);
+      const trigger = drilldowns.deps.getTrigger(item.drilldownState.trigger);
       const tableItem: DrilldownTemplateTableItem = {
         id: item.id,
-        name: item.name,
-        icon: item.icon,
+        name: item.drilldownState.label,
         description: item.description,
         triggerIncompatible: !drilldowns.deps.triggers.find((t) => t === trigger.id),
       };

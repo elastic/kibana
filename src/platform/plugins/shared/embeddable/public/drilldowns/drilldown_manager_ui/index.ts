@@ -13,6 +13,7 @@ import { DrilldownManagerWithProvider } from './containers/drilldown_manager/dri
 import type { PublicDrilldownsManagerProps } from './types';
 
 export { getDrilldownFactories } from './get_drilldown_factories';
+export { getSiblingDrilldowns } from './get_sibling_drilldowns';
 
 export function DrilldownManager(props: PublicDrilldownsManagerProps) {
   return DrilldownManagerWithProvider({

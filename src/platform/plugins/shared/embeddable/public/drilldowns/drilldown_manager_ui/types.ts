@@ -79,30 +79,9 @@ export interface DrilldownTemplate {
   id: string;
 
   /**
-   * EUI icon display next to the description.
-   */
-  icon?: string;
-
-  /**
    * A user facing text that provides information about the source of this template.
    */
   description: string;
-
-  /**
-   * Drilldown type
-   */
-  type: string;
-
-  /**
-   * Suggested new name of the cloned drilldown. If a drilldown with such suggested
-   * name already exists at current place, a suffix like " (copy 1)" will be added.
-   */
-  name: string;
-
-  /**
-   * Selected trigger.
-   */
-  trigger: string;
 
   /**
    * Preliminary configuration of the new drilldown, to be used in the dynamicaction factory.
@@ -113,12 +92,7 @@ export interface DrilldownTemplate {
 export interface DrilldownFactory
   extends Pick<
     DrilldownDefinition,
-    | 'displayName'
-    | 'Editor'
-    | 'euiIcon'
-    | 'getInitialState'
-    | 'isStateValid'
-    | 'supportedTriggers'
+    'displayName' | 'Editor' | 'euiIcon' | 'getInitialState' | 'isStateValid' | 'supportedTriggers'
   > {
   order: number;
   type: string;

@@ -58,7 +58,6 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
   disabled,
   onChange,
 }) => {
-
   return (
     <EuiFormFieldset
       data-test-subj={`triggerPicker`}
