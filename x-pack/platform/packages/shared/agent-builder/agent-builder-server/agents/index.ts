@@ -12,6 +12,7 @@ export type {
   AgentHandlerFn,
   AgentEventEmitter,
   AgentEventEmitterFn,
+  ExperimentalFeatures,
 } from './provider';
 export type {
   RunAgentFn,
