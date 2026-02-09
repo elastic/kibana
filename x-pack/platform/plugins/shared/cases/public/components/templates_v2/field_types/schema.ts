@@ -6,13 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import { InputTextFieldSchema } from './input_text';
-import { SelectBasicFieldSchema } from './select_basic';
+import { InputTextFieldSchema } from './controls/input_text';
+import { InputNumberFieldSchema } from './controls/input_number';
+import { SelectBasicFieldSchema } from './controls/select_basic';
+import { TextareaFieldSchema } from './controls/textarea';
 
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
  */
 export const FieldSchema = z.discriminatedUnion('control', [
   InputTextFieldSchema,
+  InputNumberFieldSchema,
   SelectBasicFieldSchema,
+  TextareaFieldSchema,
 ]);

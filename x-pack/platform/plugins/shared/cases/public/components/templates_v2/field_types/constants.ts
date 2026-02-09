@@ -7,6 +7,7 @@
 
 export const FieldType = {
   INPUT_TEXT: 'INPUT_TEXT',
+  INPUT_NUMBER: 'INPUT_NUMBER',
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
 } as const;

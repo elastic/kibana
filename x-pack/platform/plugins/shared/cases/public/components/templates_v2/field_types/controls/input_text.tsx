@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { FieldType } from './constants';
+import { FieldType } from '../constants';
 
 export const InputTextFieldSchema = z.object({
   control: z.literal(FieldType.INPUT_TEXT),

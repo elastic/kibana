@@ -7,11 +7,14 @@
 
 import type { FC } from 'react';
 import type { z } from '@kbn/zod';
+
 import { FieldType } from './constants';
-import { InputText } from './input_text';
-import { SelectBasic } from './select_basic';
-import { Textarea } from './textarea';
 import type { FieldSchema } from './schema';
+
+import { InputText } from './controls/input_text';
+import { SelectBasic } from './controls/select_basic';
+import { Textarea } from './controls/textarea';
+import { InputNumber } from './controls/input_number';
 
 // NOTE: this guarantees the control will receive props aligned with the schema
 export type FieldMap = {
@@ -21,6 +24,7 @@ export type FieldMap = {
 // Register ui controls here
 export const controlRegistry: FieldMap = {
   [FieldType.INPUT_TEXT]: InputText,
+  [FieldType.INPUT_NUMBER]: InputNumber,
   [FieldType.SELECT_BASIC]: SelectBasic,
   [FieldType.TEXTAREA]: Textarea,
 };
