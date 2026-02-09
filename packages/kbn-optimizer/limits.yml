@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 10605
+  automaticImportVTwo: 12306
   banners: 4087
   canvas: 15142
   cases: 225900
@@ -70,6 +70,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
+  feedback: 7000
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
