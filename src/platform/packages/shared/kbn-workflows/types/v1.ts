@@ -98,7 +98,8 @@ export interface EsWorkflowExecution {
   scopeStack: StackFrame[];
   createdAt: string;
   error: SerializedError | null;
-  createdBy: string;
+  createdBy?: string; // Keep for backwards compatibility with existing documents
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -196,6 +197,7 @@ export interface WorkflowExecutionDto {
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -260,6 +262,7 @@ export const SearchWorkflowCommandSchema = z.object({
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
+  tags: z.array(z.string()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -545,6 +548,7 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
 }
 
 export interface RequestOptions {
