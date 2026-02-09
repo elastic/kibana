@@ -219,6 +219,10 @@ export function useDataSourceBrowser({
       const model = editorModel.current;
       const insertAtOffset = insertionOffsetRef.current;
 
+      if (!editor || !model || insertAtOffset == null) {
+        return;
+      }
+
       // The browser UI emits single-item changes (select/deselect). Reflect that in our local
       // selection ref first
       const previous = selectedSourcesRef.current;
@@ -231,10 +235,6 @@ export function useDataSourceBrowser({
 
       // Keep selection state in sync with the browser UI even if we can't edit the query.
       selectedSourcesRef.current = newSelectedSources;
-
-      if (!editor || !model || insertAtOffset == null) {
-        return;
-      }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
       // list so we preserve user formatting, spacing, and any unknown sources.
