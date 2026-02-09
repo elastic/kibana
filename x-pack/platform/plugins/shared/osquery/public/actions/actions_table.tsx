@@ -97,7 +97,7 @@ const ActionsTableComponent = () => {
 
     if (debouncedSearchValue.trim()) {
       const escaped = debouncedSearchValue.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      parts.push(`(queries.query: "${escaped}" OR pack_name: "${escaped}")`);
+      parts.push(`(queries.query: ${escaped}* OR pack_name: ${escaped}*)`);
     }
 
     if (selectedUserUid) {
