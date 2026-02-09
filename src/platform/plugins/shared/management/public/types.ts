@@ -128,7 +128,7 @@ export interface AppDependencies {
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   hasEnterpriseLicense: boolean;
-  getAutoOpsStatusHook?: () => AutoOpsStatusHook | undefined;
+  getAutoOpsStatusHook: () => AutoOpsStatusHook;
 }
 
 export interface ConfigSchema {

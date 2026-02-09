@@ -25,7 +25,7 @@ export type CloudConnectStatusHook = () => CloudConnectStatusResult;
 
 const defaultCloudConnectStatusHook: CloudConnectStatusHook = () => ({
   isCloudConnected: false,
-  isLoading: false,
+  isLoading: true,
 });
 
 export class AddDataService {

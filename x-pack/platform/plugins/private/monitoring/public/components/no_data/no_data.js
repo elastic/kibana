@@ -56,7 +56,7 @@ export function NoData(props) {
   const { services } = useKibana();
 
   // Check AutoOps connection status
-  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus?.();
+  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
   const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e) => {
@@ -135,8 +135,8 @@ export function NoData(props) {
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           {Legacy.shims.hasEnterpriseLicense &&
-            !cloudConnectStatus?.isLoading &&
-            !cloudConnectStatus?.isCloudConnectAutoopsEnabled && (
+            !cloudConnectStatus.isLoading &&
+            !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
               <>
                 <AutoOpsPromotionCallout
                   learnMoreLink={learnMoreLink}
@@ -192,8 +192,8 @@ export function NoData(props) {
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         {Legacy.shims.hasEnterpriseLicense &&
-          !cloudConnectStatus?.isLoading &&
-          !cloudConnectStatus?.isCloudConnectAutoopsEnabled && (
+          !cloudConnectStatus.isLoading &&
+          !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
             <>
               <AutoOpsPromotionCallout
                 learnMoreLink={learnMoreLink}

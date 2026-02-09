@@ -29,6 +29,7 @@ import type {
   ManagementStart,
   NavigationCardsSubject,
   AutoOpsStatusHook,
+  AutoOpsStatusResult,
 } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -38,6 +39,13 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import type { ManagementSection } from './utils';
+
+const defaultAutoOpsStatusResult: AutoOpsStatusResult = {
+  isCloudConnectAutoopsEnabled: false,
+  isLoading: true,
+};
+
+const defaultAutoOpsStatusHook: AutoOpsStatusHook = () => defaultAutoOpsStatusResult;
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -100,7 +108,7 @@ export class ManagementPlugin
   };
 
   private getAutoOpsStatusHook = () => {
-    return this.autoOpsStatusHook;
+    return this.autoOpsStatusHook ?? defaultAutoOpsStatusHook;
   };
 
   public setup(

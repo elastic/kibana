@@ -49,7 +49,7 @@ export interface ManagementAppDependencies {
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
   chromeStyle$: Observable<ChromeStyle>;
-  getAutoOpsStatusHook?: () => AutoOpsStatusHook | undefined;
+  getAutoOpsStatusHook: () => AutoOpsStatusHook;
 }
 
 export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {

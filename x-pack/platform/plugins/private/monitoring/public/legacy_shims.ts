@@ -28,6 +28,14 @@ import type {
   LegacyMonitoringStartPluginDependencies,
 } from './types';
 
+const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
+  isCloudConnected: false,
+  isCloudConnectEisEnabled: false,
+  isCloudConnectAutoopsEnabled: false,
+  isLoading: true,
+  error: null,
+});
+
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
   href?: string;
@@ -72,7 +80,7 @@ export interface IShims {
   isCloud: boolean;
   cloudBaseUrl?: string;
   hasEnterpriseLicense: boolean;
-  useCloudConnectStatus?: UseCloudConnectStatusHook;
+  useCloudConnectStatus: UseCloudConnectStatusHook;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
@@ -145,7 +153,8 @@ export class Legacy {
       isCloud,
       cloudBaseUrl,
       hasEnterpriseLicense,
-      useCloudConnectStatus: cloudConnect?.hooks.useCloudConnectStatus,
+      useCloudConnectStatus:
+        cloudConnect?.hooks.useCloudConnectStatus ?? defaultCloudConnectStatusHook,
       triggersActionsUi,
       usageCollection,
       kibanaServices: {
