@@ -54,15 +54,20 @@ export function ReviewSuggestionsForm({
   onRegenerate,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
+    snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } })
+      ? snapshot.context.suggestedRuleId
+      : null
   );
   const editingSuggestion = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'editingSuggestedRule' }) ? snapshot.context.editedSuggestion : null
+    snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
+      ? snapshot.context.editedSuggestion
+      : null
   );
 
   const isEditingOrReorderingStreams = useStreamsRoutingSelector(
     (snapshot) =>
-      snapshot.matches({ ready: 'editingRule' }) || snapshot.matches({ ready: 'reorderingRules' })
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   );
 
   // For the confirmation modal, use edited suggestion if available, otherwise find by name
