@@ -1065,7 +1065,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${lookupIndexBadgeStyle}
         `}
       />
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && (formLabel || !hideRunQueryButton) ? (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
@@ -1101,7 +1101,7 @@ const ESQLEditorInternal = function ESQLEditor({
             <ESQLMenu hideHistory={hideQueryHistory} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+      ) : null}
       <EuiFlexGroup
         gutterSize="none"
         css={{

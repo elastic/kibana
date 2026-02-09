@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, fromEvent, map, merge, shareReplay, startWith } from 'rxjs';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
-/**
- * Emits true during printing (window.beforeprint), false otherwise.
- */
-export const isPrinting$ = merge(
-  fromEvent(window, 'beforeprint').pipe(map(() => true)),
-  fromEvent(window, 'afterprint').pipe(map(() => false))
-).pipe(startWith(false), distinctUntilChanged(), shareReplay(1));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+
+  return {
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('.')],
+  };
+}
