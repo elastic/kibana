@@ -458,6 +458,7 @@ export function PreviewTable({
               <EuiFlexItem grow={false}>
                 {viewModeToggle && (
                   <EuiButtonEmpty
+                    data-test-subj="streamsAppPreviewTableViewModeToggle"
                     size="xs"
                     onClick={() => {
                       if (viewModeToggle.currentMode === 'summary') {
