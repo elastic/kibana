@@ -125,7 +125,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (
-          <AnomalyDetectionEmptyState showDocsLink />
+          <AnomalyDetectionEmptyState showDocsLink iconSize="s" />
         ) : (
           <Explorer
             {...{
