@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
+  EuiIconTip,
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -26,6 +27,7 @@ import type { OutputsForAgentPolicy } from '../../../../../../../../server/types
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion } from '../../../../../hooks';
+import { hasVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -162,7 +164,30 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  wrap={false}
+                  css={css({ minWidth: 0 })}
+                >
+                  {hasVersionSuffix(agent.policy_id ?? '') && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="branch"
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.versionSpecificPolicyTooltip"
+                            defaultMessage="This agent uses a version-specific policy derived from the parent policy."
+                          />
+                        }
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={true} css={css({ minWidth: 0 })}>
+                    <AgentPolicySummaryLine policy={agentPolicy} agent={agent} showPolicyId />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiSkeletonText lines={1} />
               ),

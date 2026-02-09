@@ -31,7 +31,9 @@ export const AgentPolicySummaryLine = memo<{
   agent?: Agent;
   direction?: 'column' | 'row';
   withDescription?: boolean;
-}>(({ policy, agent, direction = 'row', withDescription = false }) => {
+  /** When true (e.g. in agent list/details), show policy id in parentheses: "Policy Name (policy_id)" */
+  showPolicyId?: boolean;
+}>(({ policy, agent, direction = 'row', withDescription = false, showPolicyId = false }) => {
   const { getHref } = useLink();
   const { name, id, is_managed: isManaged, description } = policy;
 
@@ -65,7 +67,7 @@ export const AgentPolicySummaryLine = memo<{
                       title={name || id}
                       data-test-subj="agentPolicyNameLink"
                     >
-                      {name || id}
+                      {showPolicyId && name ? `${name} (${id})` : name || id}
                     </EuiLink>
                   </EuiFlexItem>
 
