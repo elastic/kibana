@@ -49,9 +49,12 @@ export function selectBaseline(
     );
   }
 
-  const minorVersion = `${parsed.major}.${parsed.minor}`;
+  // Compare against previous minor version baseline
+  // e.g., 9.4.0 compares against 9.3.yaml
+  const previousMinor = parsed.minor > 0 ? parsed.minor - 1 : 0;
+  const baselineVersion = `${parsed.major}.${previousMinor}`;
   return {
     distribution,
-    path: resolve(baselinesDir, `stack/${minorVersion}.yaml`),
+    path: resolve(baselinesDir, `stack/${baselineVersion}.yaml`),
   };
 }

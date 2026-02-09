@@ -11,12 +11,12 @@ echo --- Check API Contracts
 KIBANA_VERSION="$(jq -r '.version' package.json)"
 
 echo "Checking stack API contracts..."
-node packages/kbn-api-contracts/scripts/check_contracts \
+node scripts/check_api_contracts.js \
   --distribution stack \
   --specPath oas_docs/output/kibana.yaml \
   --version "$KIBANA_VERSION"
 
 echo "Checking serverless API contracts..."
-node packages/kbn-api-contracts/scripts/check_contracts \
+node scripts/check_api_contracts.js \
   --distribution serverless \
   --specPath oas_docs/output/kibana.serverless.yaml

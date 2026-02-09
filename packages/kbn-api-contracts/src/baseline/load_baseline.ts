@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync } from 'fs';
-import { loadOas } from '../input/load_oas';
-import { normalizeOas } from '../input/normalize_oas';
+import { existsSync, readFileSync } from 'fs';
+import { load } from 'js-yaml';
 import type { NormalizedSpec } from '../input/normalize_oas';
 
 export async function loadBaseline(path: string): Promise<NormalizedSpec | null> {
@@ -17,6 +16,6 @@ export async function loadBaseline(path: string): Promise<NormalizedSpec | null>
     return null;
   }
 
-  const spec = await loadOas(path);
-  return normalizeOas(spec);
+  const content = readFileSync(path, 'utf-8');
+  return load(content) as NormalizedSpec;
 }
