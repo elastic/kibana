@@ -1,0 +1,180 @@
+---
+id: kibDevDocsChromeSidebar
+slug: /kibana-dev-docs/chrome/sidebar
+title: Chrome Sidebar
+description: Build sidebar apps with the Chrome sidebar service.
+date: 2026-01-29
+tags: ['kibana', 'dev', 'contributor', 'chrome', 'shared-ux']
+---
+
+## Introduction
+
+Chrome Sidebar lets plugins provide supplemental tools without disrupting the main app content.
+Sidebar apps are global and can stay open across navigation and page reloads.
+
+![Chrome sidebar](./sidebar.png)
+
+## Register a sidebar app
+
+Register apps during the plugin `setup()` phase. Each app provides an async component loader and can optionally define a Zod params schema for persisted state.
+
+Before registering, confirm the `appId` is allowed. Valid app ids are restricted and new ones should be added only after discussing with the UX team.
+
+```tsx
+import { z } from '@kbn/zod/v4';
+
+core.chrome.sidebar.registerApp({
+  appId: 'mySidebarApp',
+  getParamsSchema: () =>
+    z.object({
+      userName: z.string().default(''),
+      count: z.number().default(0),
+    }),
+  loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
+  status: 'accessible',
+});
+```
+
+Required fields:
+- `appId`: Unique identifier for the sidebar app. It must be a valid sidebar app id.
+- `loadComponent`: Async function that resolves the sidebar React component.
+
+Optional fields:
+- `getParamsSchema`: Zod schema for params (persisted state). If omitted, `params` is `{}` and `setParams()` throws.
+- `status`: Accessibility status (defaults to `accessible`).
+- `restoreOnReload`: Whether the app auto-reopens on page reload (defaults to `true`).
+
+## Build a sidebar app component
+
+Sidebar components receive `params`, `setParams`, and `onClose`.
+Use the shared layout components to align with Kibana styling.
+
+```tsx
+import { z } from '@kbn/zod/v4';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
+
+const getMyParamsSchema = () =>
+  z.object({
+    count: z.number().default(0),
+  });
+
+type MyParams = z.infer<ReturnType<typeof getMyParamsSchema>>;
+
+export function MySidebarApp({
+  params,
+  setParams,
+  onClose,
+}: SidebarComponentProps<MyParams>) {
+  return (
+    <>
+      <SidebarHeader title="My App" onClose={onClose} />
+      <SidebarBody>
+        <button onClick={() => setParams({ count: params.count + 1 })}>
+          Count: {params.count}
+        </button>
+      </SidebarBody>
+    </>
+  );
+}
+```
+
+For apps without params, omit `getParamsSchema` and use internal React state instead. If you do that, consider `restoreOnReload: false`.
+
+## Params system (optional)
+
+Params are a persisted, validated state layer:
+- Persisted to `localStorage` and restored on reload.
+- Accessible outside the sidebar component via the app-bound API.
+- Validated and typed through Zod.
+
+```tsx
+const myApp = core.chrome.sidebar.getApp('mySidebarApp');
+
+myApp.open({ userName: 'John' });
+myApp.setParams({ count: 5 });
+
+const params = myApp.getParams();
+myApp.getParams$().subscribe((next) => {
+  console.log('Params changed:', next);
+});
+```
+
+## Open and close the sidebar
+
+Use the app-bound API during the plugin `start()` phase.
+
+```tsx
+const myApp = core.chrome.sidebar.getApp('mySidebarApp');
+
+myApp.open({ userName: 'John' });
+myApp.close();
+
+const isOpen = core.chrome.sidebar.isOpen();
+const currentAppId = core.chrome.sidebar.getCurrentAppId();
+```
+
+From React components, use hooks from `@kbn/core-chrome-sidebar-components`:
+
+```tsx
+import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+
+function MyToolbarButton() {
+  const { close, isOpen } = useSidebar();
+  const myApp = useSidebarApp('mySidebarApp');
+
+  return (
+    <>
+      <button onClick={() => myApp.open({ userName: 'John' })}>
+        Open sidebar
+      </button>
+      {isOpen && <button onClick={close}>Close sidebar</button>}
+    </>
+  );
+}
+```
+
+## Manage accessibility
+
+Use `status: 'inaccessible'` when the app depends on async checks (license, permissions).
+
+```tsx
+const updateMySidebarApp = core.chrome.sidebar.registerApp({
+  appId: 'mySidebarApp',
+  loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
+  status: 'inaccessible',
+});
+
+// Later in start
+updateMySidebarApp({ status: 'accessible' });
+```
+
+## Control sidebar width
+
+```tsx
+core.chrome.sidebar.setWidth(400);
+const width = core.chrome.sidebar.getWidth();
+```
+
+```tsx
+import { useSidebarWidth } from '@kbn/core-chrome-sidebar-components';
+
+const width = useSidebarWidth();
+```
+
+## Testing
+
+Use `@kbn/core-chrome-sidebar-mocks` to mock setup/start contracts in Jest tests.
+
+```tsx
+import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
+
+const setupMock = sidebarServiceMock.createSetupContract();
+const startMock = sidebarServiceMock.createStartContract();
+```
+
+## Best practices
+
+- Wrap sidebar operations in your plugin contract or a custom hook, instead of exposing the raw sidebar API.
+- Use params for state that must survive navigation or reloads; use component state for ephemeral UI.
+- Prefer `SidebarHeader` and `SidebarBody` for consistent layout and spacing.
