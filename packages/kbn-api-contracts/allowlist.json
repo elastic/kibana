@@ -1,0 +1,5 @@
+{
+  "$schema": "./allowlist.schema.json",
+  "description": "Approved API breaking changes that should be ignored by the contract checker",
+  "entries": []
+}

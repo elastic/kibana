@@ -9,6 +9,7 @@
 
 import type { OasDiff, OperationChange } from './diff_oas';
 import type { SchemaChange } from './schema_diff';
+import { isAllowlisted, type Allowlist } from '../allowlist/load_allowlist';
 
 export interface BreakingChange {
   type: 'path_removed' | 'method_removed' | 'operation_breaking';
@@ -17,6 +18,11 @@ export interface BreakingChange {
   reason: string;
   details?: unknown;
   schemaChanges?: SchemaChange[];
+}
+
+export interface FilterResult {
+  breakingChanges: BreakingChange[];
+  allowlistedChanges: BreakingChange[];
 }
 
 const isBreakingOperationChange = (change: OperationChange): boolean => {
@@ -100,4 +106,25 @@ export const filterBreakingChanges = (diff: OasDiff): BreakingChange[] => {
   );
 
   return [...pathsRemoved, ...methodsRemoved, ...operationBreaking];
+};
+
+export const filterBreakingChangesWithAllowlist = (
+  diff: OasDiff,
+  allowlist: Allowlist
+): FilterResult => {
+  const allBreakingChanges = filterBreakingChanges(diff);
+
+  const breakingChanges: BreakingChange[] = [];
+  const allowlistedChanges: BreakingChange[] = [];
+
+  for (const change of allBreakingChanges) {
+    const method = change.method ?? 'ALL';
+    if (isAllowlisted(allowlist, change.path, method)) {
+      allowlistedChanges.push(change);
+    } else {
+      breakingChanges.push(change);
+    }
+  }
+
+  return { breakingChanges, allowlistedChanges };
 };

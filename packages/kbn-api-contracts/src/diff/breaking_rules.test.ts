@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filterBreakingChanges } from './breaking_rules';
+import { filterBreakingChanges, filterBreakingChangesWithAllowlist } from './breaking_rules';
 import type { OasDiff, PathDiff, MethodDiff, OperationDiff } from './diff_oas';
+import type { Allowlist } from '../allowlist/load_allowlist';
 
 const createOasDiff = (overrides: Partial<OasDiff> = {}): OasDiff => ({
   pathsAdded: [],
@@ -148,5 +149,71 @@ describe('filterBreakingChanges', () => {
       'operation_breaking',
       'operation_breaking',
     ]);
+  });
+});
+
+describe('filterBreakingChangesWithAllowlist', () => {
+  const createAllowlist = (entries: Allowlist['entries'] = []): Allowlist => ({ entries });
+
+  it('separates allowlisted changes from breaking changes', () => {
+    const diff = createOasDiff({
+      pathsRemoved: [removedPath('/api/allowed'), removedPath('/api/not-allowed')],
+    });
+
+    const allowlist = createAllowlist([
+      { path: '/api/allowed', method: 'ALL', reason: 'Approved', approvedBy: 'test' },
+    ]);
+
+    const result = filterBreakingChangesWithAllowlist(diff, allowlist);
+
+    expect(result.breakingChanges).toHaveLength(1);
+    expect(result.breakingChanges[0].path).toBe('/api/not-allowed');
+    expect(result.allowlistedChanges).toHaveLength(1);
+    expect(result.allowlistedChanges[0].path).toBe('/api/allowed');
+  });
+
+  it('filters allowlisted method removals by path and method', () => {
+    const diff = createOasDiff({
+      methodsRemoved: [removedMethod('/api/test', 'get'), removedMethod('/api/test', 'post')],
+    });
+
+    const allowlist = createAllowlist([
+      { path: '/api/test', method: 'get', reason: 'Approved', approvedBy: 'test' },
+    ]);
+
+    const result = filterBreakingChangesWithAllowlist(diff, allowlist);
+
+    expect(result.breakingChanges).toHaveLength(1);
+    expect(result.breakingChanges[0].method).toBe('post');
+    expect(result.allowlistedChanges).toHaveLength(1);
+    expect(result.allowlistedChanges[0].method).toBe('get');
+  });
+
+  it('returns all changes as breaking when allowlist is empty', () => {
+    const diff = createOasDiff({
+      pathsRemoved: [removedPath('/api/test')],
+    });
+
+    const result = filterBreakingChangesWithAllowlist(diff, createAllowlist());
+
+    expect(result.breakingChanges).toHaveLength(1);
+    expect(result.allowlistedChanges).toHaveLength(0);
+  });
+
+  it('handles operation changes with method matching', () => {
+    const diff = createOasDiff({
+      operationsModified: [
+        operationDiff('/api/test', 'post', [{ type: 'requestBody', change: 'removed' }]),
+      ],
+    });
+
+    const allowlist = createAllowlist([
+      { path: '/api/test', method: 'post', reason: 'Approved', approvedBy: 'test' },
+    ]);
+
+    const result = filterBreakingChangesWithAllowlist(diff, allowlist);
+
+    expect(result.breakingChanges).toHaveLength(0);
+    expect(result.allowlistedChanges).toHaveLength(1);
   });
 });

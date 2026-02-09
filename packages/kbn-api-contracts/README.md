@@ -82,6 +82,35 @@ This implementation distinguishes between breaking and non-breaking changes at t
 - No support for semantic versioning of individual endpoints yet
 - No deprecation-aware logic yet
 
+## Allowlist
+
+For approved breaking changes that should be ignored, add entries to `packages/kbn-api-contracts/allowlist.json`:
+
+```json
+{
+  "entries": [
+    {
+      "path": "/api/saved_objects/{type}/{id}",
+      "method": "delete",
+      "reason": "Intentional removal as part of saved objects migration",
+      "approvedBy": "elastic/kibana-core",
+      "prUrl": "https://github.com/elastic/kibana/pull/12345",
+      "expiresAt": "2025-12-31"
+    }
+  ]
+}
+```
+
+**Required fields:**
+- `path` - API path (must match exactly)
+- `method` - HTTP method (lowercase) or `ALL` for path-level changes
+- `reason` - Explanation for why this is approved
+- `approvedBy` - GitHub username or team
+
+**Optional fields:**
+- `prUrl` - Link to approval PR
+- `expiresAt` - ISO date after which the entry should be reviewed (auto-filtered when expired)
+
 ## Usage Examples
 
 ### Check Contracts (CI/Local Development)

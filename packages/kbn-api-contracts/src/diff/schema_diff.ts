@@ -276,16 +276,7 @@ export const diffRequestBodySchemas = (baseline: unknown, current: unknown): Sch
           mediaType,
           'schema',
         ]);
-
-        for (const change of schemaDiff.changes) {
-          if (change.type === 'property_added_optional') {
-            changes.push(change);
-          } else if (change.type === 'property_added_required') {
-            changes.push(change);
-          } else {
-            changes.push(change);
-          }
-        }
+        changes.push(...schemaDiff.changes);
       }
     }
   }

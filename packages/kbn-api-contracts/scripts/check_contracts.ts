@@ -14,9 +14,10 @@ import { normalizeOas } from '../src/input/normalize_oas';
 import { selectBaseline, type Distribution } from '../src/baseline/select_baseline';
 import { loadBaseline } from '../src/baseline/load_baseline';
 import { diffOas } from '../src/diff/diff_oas';
-import { filterBreakingChanges } from '../src/diff/breaking_rules';
+import { filterBreakingChangesWithAllowlist } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
 import { checkBaselineGovernance } from '../src/governance/check_baseline_governance';
+import { loadAllowlist } from '../src/allowlist/load_allowlist';
 
 run(
   async ({ flags, log }) => {
@@ -55,8 +56,18 @@ run(
       return;
     }
 
+    const allowlistPath = flags.allowlistPath as string | undefined;
+    const allowlist = loadAllowlist(allowlistPath);
+
     const diff = diffOas(baseline, normalizedCurrent);
-    const breakingChanges = filterBreakingChanges(diff);
+    const { breakingChanges, allowlistedChanges } = filterBreakingChangesWithAllowlist(
+      diff,
+      allowlist
+    );
+
+    if (allowlistedChanges.length > 0) {
+      log.info(`${allowlistedChanges.length} allowlisted change(s) ignored`);
+    }
 
     if (breakingChanges.length === 0) {
       log.success('No breaking changes detected');
@@ -69,12 +80,13 @@ run(
   },
   {
     flags: {
-      string: ['distribution', 'specPath', 'version', 'baselinePath'],
+      string: ['distribution', 'specPath', 'version', 'baselinePath', 'allowlistPath'],
       help: `
         --distribution     Required. Either "stack" or "serverless"
         --specPath         Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
         --version          Semver version for stack baseline selection
         --baselinePath     Override baseline path for testing
+        --allowlistPath    Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
 
         Examples:
           # Check serverless contracts against baseline
