@@ -16,18 +16,19 @@ export {
   EARS_API_PATH,
   EARS_START_OAUTH_ROUTE,
   EARS_FETCH_SECRETS_ROUTE,
+  EARS_EXCHANGE_CODE_ROUTE,
 } from './routes';
 
 export {
   EarsOAuthProvider,
   ALL_EARS_OAUTH_PROVIDERS,
-  startOAuthResponseSchema,
-  fetchSecretsResponseSchema,
 } from './http_api/ears';
 
 export type {
-  StartOAuthRequest,
-  StartOAuthResponse,
-  FetchSecretsResponse,
+  exchangeCodeResponseSchema,
+  ExchangeCodeResponse,
+  refreshTokenResponseSchema,
+  RefreshTokenResponse,
+  ExchangeCodeRequest,
   GoogleUserInfo,
 } from './http_api/ears';

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { registerStartOAuthRoute } from './start_oauth';
 export { registerFetchSecretsRoute } from './fetch_secrets';
+export { registerExchangeCodeRoute } from './exchange_code';

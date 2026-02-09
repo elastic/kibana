@@ -8,8 +8,8 @@
 import { Agent } from 'undici';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { EARS_START_OAUTH_ROUTE } from '../../../common/routes';
-import { EarsOAuthProvider, startOAuthResponseSchema } from '../../../common/http_api/ears';
+import { EARS_EXCHANGE_CODE_ROUTE } from '../../../common/routes';
+import { EarsOAuthProvider, exchangeCodeResponseSchema } from '../../../common/http_api/ears';
 import type { WorkplaceAIAppConfig } from '../../config';
 
 // Create an undici Agent that ignores self-signed certificates (for local dev)
@@ -19,7 +19,7 @@ const insecureAgent = new Agent({
   },
 });
 
-export function registerStartOAuthRoute({
+export function registerExchangeCodeRoute({
   router,
   logger,
   config,
@@ -30,7 +30,7 @@ export function registerStartOAuthRoute({
 }) {
   router.post(
     {
-      path: EARS_START_OAUTH_ROUTE,
+      path: EARS_EXCHANGE_CODE_ROUTE,
       options: {
         access: 'internal',
       },
@@ -49,7 +49,10 @@ export function registerStartOAuthRoute({
           ]),
         }),
         body: schema.object({
-          scope: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          code: schema.maybe(schema.string()),
+          state: schema.maybe(schema.string()),
+          error: schema.maybe(schema.string()),
+          error_description: schema.maybe(schema.string()),
         }),
       },
     },
@@ -66,18 +69,18 @@ export function registerStartOAuthRoute({
         });
       }
 
-      const provider = request.params.provider as EarsOAuthProvider;
+      const { provider } = request.params;
 
-      // Currently only Google is supported
-      if (provider !== EarsOAuthProvider.Google) {
+      const { code, state, error, error_description } = request.body;
+
+      if (!code) {
         return response.customError({
-          statusCode: 400,
+          statusCode: 500,
           body: {
-            message: `Provider '${provider}' is not yet supported. Currently only 'google' is supported.`,
+            message: 'No code provided',
           },
         });
       }
-      const { scope } = request.body;
 
       try {
         const fetchOptions: RequestInit & { dispatcher?: Agent } = {
@@ -85,18 +88,21 @@ export function registerStartOAuthRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ scope }),
+          body: JSON.stringify({code}),
         };
 
         if (allowInsecure) {
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(`${earsUrl}/oauth/start/${provider}`, fetchOptions);
+        const earsResponse = await fetch(
+          `${earsUrl}/${provider}/oauth/token`,
+          fetchOptions
+        );
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();
-          const errorMsg = `EARS OAuth start failed: ${earsResponse.status} - ${errorText}`;
+          const errorMsg = `EARS exchange code failed: ${earsResponse.status} - ${errorText}`;
           logger.error(errorMsg);
           return response.customError({
             statusCode: earsResponse.status,
@@ -107,7 +113,7 @@ export function registerStartOAuthRoute({
         }
 
         const rawData = await earsResponse.json();
-        const parseResult = startOAuthResponseSchema.safeParse(rawData);
+        const parseResult = exchangeCodeResponseSchema.safeParse(rawData);
 
         if (!parseResult.success) {
           const errorMsg = `Invalid response from EARS: ${parseResult.error.message}`;
@@ -124,7 +130,7 @@ export function registerStartOAuthRoute({
           body: parseResult.data,
         });
       } catch (error) {
-        const errorMsg = `Failed to connect to EARS at ${earsUrl}: ${error.message}`;
+        const errorMsg = `EARS exchange code error: ${error}`;
         logger.error(errorMsg);
         return response.customError({
           statusCode: 500,

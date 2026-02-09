@@ -10,54 +10,60 @@ import type { UseQueryResult, UseMutationResult } from '@kbn/react-query';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
   EARS_API_PATH,
+  ExchangeCodeRequest,
   type EarsOAuthProvider,
-  type StartOAuthRequest,
-  type StartOAuthResponse,
-  type FetchSecretsResponse,
+  type ExchangeCodeResponse,
+  type RefreshTokenResponse
 } from '../../../common';
 import { useKibana } from './use_kibana';
+import { RefreshTokenRequest } from '@kbn/workplace-ai-app/common/http_api/ears';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-interface UseStartOAuthInput {
+interface UseExchangeCodeInput {
   provider: EarsOAuthProvider;
-  scope: string[];
+  code: string;
 }
 
-export const useStartOAuth = (): UseMutationResult<
-  StartOAuthResponse,
+
+export const useExchangeCode = (): UseMutationResult<
+  ExchangeCodeResponse,
   ServerError,
-  UseStartOAuthInput
+  UseExchangeCodeInput
 > => {
   const { http } = useKibana().services;
 
-  return useMutation<StartOAuthResponse, ServerError, UseStartOAuthInput>({
-    mutationKey: ['workplace_ai', 'ears', 'start_oauth'],
-    mutationFn: async ({ provider, scope }: UseStartOAuthInput) => {
-      const body: StartOAuthRequest = { scope };
-      return http.post<StartOAuthResponse>(`${EARS_API_PATH}/oauth/start/${provider}`, {
+  return useMutation<ExchangeCodeResponse, ServerError, UseExchangeCodeInput>({
+    mutationKey: ['workplace_ai', 'ears', 'exchange_code'],
+    mutationFn: async ({ provider, code }: UseExchangeCodeInput) => {
+      const body: ExchangeCodeRequest = { code };
+      return http.post<ExchangeCodeResponse>(`${EARS_API_PATH}/${provider}/oauth/token`, {
         body: JSON.stringify(body),
       });
     },
   });
 };
 
-export const useFetchSecrets = (
-  requestId: string | null,
-  enabled: boolean = true
-): UseQueryResult<FetchSecretsResponse> => {
+interface UseRefreshTokenInput {
+  provider: EarsOAuthProvider;
+  refresh_token: string;
+}
+
+
+export const useRefreshToken = (): UseMutationResult<
+  RefreshTokenResponse,
+  ServerError,
+  UseRefreshTokenInput
+> => {
   const { http } = useKibana().services;
 
-  return useQuery({
-    queryKey: ['workplace_ai', 'ears', 'fetch_secrets', requestId],
-    queryFn: async () => {
-      if (!requestId) {
-        throw new Error('Request ID is required');
-      }
-      return http.get<FetchSecretsResponse>(`${EARS_API_PATH}/oauth/fetch_secrets`, {
-        query: { request_id: requestId },
+  return useMutation<RefreshTokenResponse, ServerError, UseRefreshTokenInput>({
+    mutationKey: ['workplace_ai', 'ears', 'refresh_token'],
+    mutationFn: async ({ provider, refresh_token }: UseRefreshTokenInput) => {
+      const body: RefreshTokenRequest = { refresh_token };
+      return http.post<RefreshTokenResponse>(`${EARS_API_PATH}/${provider}/oauth/refresh`, {
+        body: JSON.stringify(body),
       });
     },
-    enabled: enabled && !!requestId,
   });
 };
