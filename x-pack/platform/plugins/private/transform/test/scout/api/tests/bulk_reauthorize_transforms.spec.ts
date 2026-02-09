@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { CookieHeader, RoleApiCredentials } from '@kbn/scout';
 import type { ReauthorizeTransformsRequestSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';

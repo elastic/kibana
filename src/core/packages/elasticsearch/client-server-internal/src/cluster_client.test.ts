@@ -212,8 +212,10 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest: undefined,
       });
     });
 
@@ -237,8 +239,10 @@ describe('ClusterClient', () => {
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
       expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest: undefined,
       });
 
       const { getUnauthorizedErrorHandler: getHandler } = createTransportMock.mock.calls[0][0];
@@ -252,6 +256,33 @@ describe('ClusterClient', () => {
         request,
         getHandler: getUnauthorizedErrorHandler,
         setAuthHeaders: authHeaders.set,
+      });
+    });
+
+    it('passes `onRequest` handler to `createTransport`', () => {
+      const getExecutionContext = jest.fn();
+      const onRequest = jest.fn();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        getExecutionContext,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequest,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(createTransportMock).toHaveBeenCalledTimes(1);
+      expect(createTransportMock).toHaveBeenCalledWith({
+        scoped: true,
+        getExecutionContext,
+        getUnauthorizedErrorHandler: expect.any(Function),
+        onRequest,
       });
     });
 
