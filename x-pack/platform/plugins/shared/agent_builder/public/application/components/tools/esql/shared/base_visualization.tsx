@@ -21,6 +21,8 @@ interface BaseVisualizationProps {
   lensInput: TypedLensByValueInput | undefined;
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
+  timeRange?: { from: string; to: string };
+  searchSessionId?: string;
 }
 
 export function BaseVisualization({
@@ -29,6 +31,8 @@ export function BaseVisualization({
   lensInput,
   setLensInput,
   isLoading,
+  timeRange,
+  searchSessionId,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
@@ -72,7 +76,13 @@ export function BaseVisualization({
           <EuiLoadingSpinner />
         ) : (
           lensInput && (
-            <lens.EmbeddableComponent {...lensInput} style={{ height: '100%' }} onLoad={onLoad} />
+            <lens.EmbeddableComponent
+              {...lensInput}
+              timeRange={timeRange}
+              searchSessionId={searchSessionId}
+              style={{ height: '100%' }}
+              onLoad={onLoad}
+            />
           )
         )}
       </div>

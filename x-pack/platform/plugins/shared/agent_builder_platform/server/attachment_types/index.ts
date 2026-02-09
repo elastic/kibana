@@ -11,6 +11,7 @@ import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationRefAttachmentType } from './visualization_ref';
+import { createVisualizationAttachmentType } from './visualization';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -31,6 +32,7 @@ export const registerAttachmentTypes = ({
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
     createVisualizationRefAttachmentType(),
+    createVisualizationAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

@@ -21,6 +21,8 @@ export function VisualizeESQL({
   esqlColumns,
   esqlQuery,
   preferredChartType,
+  timeRange,
+  searchSessionId,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
@@ -28,6 +30,8 @@ export function VisualizeESQL({
   uiActions: UiActionsStart;
   esqlQuery: string;
   preferredChartType?: ChartType;
+  timeRange?: { from: string; to: string };
+  searchSessionId?: string;
   errorMessages?: string[];
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
@@ -45,6 +49,8 @@ export function VisualizeESQL({
       lensInput={lensInput}
       setLensInput={setLensInput}
       isLoading={isLoading}
+      timeRange={timeRange}
+      searchSessionId={searchSessionId}
     />
   );
 }

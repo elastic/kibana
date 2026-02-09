@@ -11,6 +11,7 @@ import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
+import { renderAttachmentPrompt } from './utils/attachment_rendering';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { attachmentTypeInstructions } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
@@ -44,7 +45,7 @@ export const getAnswerSystemMessage = ({
   capabilities,
   processedConversation: { attachmentTypes },
 }: AnswerAgentPromptParams): string => {
-  const visEnabled = capabilities.visualizations;
+  const renderEnabled = capabilities.visualizations;
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -75,7 +76,11 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ## CUSTOM RENDERING
 
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+${
+  renderEnabled
+    ? `${renderVisualizationPrompt()}\n\n${renderAttachmentPrompt()}`
+    : 'No custom renderers available'
+}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
@@ -105,7 +110,7 @@ export const getStructuredAnswerPrompt = async (
     resultTransformer,
   } = params;
   const { attachmentTypes } = processedConversation;
-  const visEnabled = capabilities.visualizations;
+  const renderEnabled = capabilities.visualizations;
 
   // Generate messages from the conversation's rounds
   const previousRoundsAsMessages = await convertPreviousRounds({
@@ -145,7 +150,11 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ## CUSTOM RENDERING
 
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+${
+  renderEnabled
+    ? `${renderVisualizationPrompt()}\n\n${renderAttachmentPrompt()}`
+    : 'No custom renderers available'
+}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
