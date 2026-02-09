@@ -23,6 +23,30 @@ const recoverableErrorCodes = [
   ErrCodes.emptyResponse,
 ];
 
+/** Matches "Status code: 401" / "Status code: 403" etc. in connector error messages */
+const CONNECTOR_STATUS_CODE_REGEXP = /Status code: ([0-9]{3})/i;
+/** Matches "status [403]" in inference/connector error payloads (e.g. inside data: {...} JSON) */
+const INFERENCE_STATUS_CODE_REGEXP = /status \[([0-9]{3})\]/i;
+
+/**
+ * Parses connector/inference error messages and returns the HTTP status code when present
+ * (401, 403, 4xx, 5xx) so it can be propagated to the client.
+ */
+const parseConnectorStatusCode = (message: string): number | null => {
+  if (!message.includes('Error calling connector:')) {
+    return null;
+  }
+  let match = CONNECTOR_STATUS_CODE_REGEXP.exec(message);
+  if (!match) {
+    match = INFERENCE_STATUS_CODE_REGEXP.exec(message);
+  }
+  if (!match) {
+    return null;
+  }
+  const statusCode = parseInt(match[1], 10);
+  return statusCode >= 400 && statusCode < 600 ? statusCode : null;
+};
+
 /**
  * Converts an error which occurred during the execution of the agent to our error format,
  * leveraging the errors which are already processed by the inference plugin for some of them.
@@ -42,9 +66,14 @@ export const convertError = (error: Error): AgentBuilderAgentExecutionError => {
     });
   } else if (isContextLengthExceededError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.contextLengthExceeded, {});
-  } else {
-    return createAgentExecutionError(error.message, ErrCodes.unknownError, {});
   }
+  const connectorStatusCode = parseConnectorStatusCode(error.message);
+  if (connectorStatusCode !== null) {
+    return createAgentExecutionError(error.message, ErrCodes.connectorError, {
+      statusCode: connectorStatusCode,
+    });
+  }
+  return createAgentExecutionError(error.message, ErrCodes.unknownError, {});
 };
 
 export const isRecoverableError = (error: AgentBuilderAgentExecutionError): boolean => {
