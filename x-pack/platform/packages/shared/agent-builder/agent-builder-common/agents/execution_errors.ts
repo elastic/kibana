@@ -18,7 +18,7 @@ export enum AgentExecutionErrorCode {
   unknownError = 'unknown_error',
   /** invalid workflow state - should never be surfaced */
   invalidState = 'invalid_state',
-  /** connector returned an HTTP error (401, 403, 4xx, 5xx) - status propagated to client */
+  /** connector returned an HTTP error (4xx, 5xx) - status propagated to client */
   connectorError = 'connector_error',
 }
 
