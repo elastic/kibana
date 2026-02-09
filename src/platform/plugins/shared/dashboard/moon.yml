@@ -110,9 +110,12 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/scout'
+  - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
+  - '@kbn/scout'
   - '@kbn/image-embeddable-plugin'
 tags:
   - plugin
@@ -127,6 +130,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
     - '!target/**/*'
 tasks:
   jest:
