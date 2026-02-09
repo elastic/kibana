@@ -9,17 +9,23 @@
 
 import React, { lazy, Suspense, useMemo } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { useObservable } from '@kbn/use-observable';
 import type { SidebarAppId, SidebarComponentType } from '@kbn/core-chrome-sidebar';
+import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
 import { SidebarBody } from './sidebar_panel_body';
-import { useSidebarApp } from '../hooks';
 
 interface SidebarAppRendererProps {
   appId: SidebarAppId;
-  loadComponent: () => Promise<SidebarComponentType<any>>;
+  loadComponent: () => Promise<SidebarComponentType<any, any>>;
 }
 
 export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererProps) {
-  const appApi = useSidebarApp(appId);
+  const sidebar = useSidebarService();
+  const appDefinition = sidebar.getAppDefinition(appId);
+  const appApi = sidebar.getApp(appId);
+  const hasStore = Boolean(appDefinition.store);
+
+  const state = useObservable(appApi.getState$(), appApi.getState());
 
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
@@ -28,7 +34,11 @@ export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererP
 
   return (
     <Suspense fallback={<Fallback />}>
-      <LazyComponent params={appApi.params} setParams={appApi.setParams} onClose={appApi.close} />
+      {hasStore ? (
+        <LazyComponent state={state} actions={appApi.actions} onClose={appApi.close} />
+      ) : (
+        <LazyComponent onClose={appApi.close} />
+      )}
     </Suspense>
   );
 }
