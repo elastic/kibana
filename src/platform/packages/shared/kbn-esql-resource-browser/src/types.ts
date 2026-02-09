@@ -17,4 +17,3 @@ export enum DataSourceSelectionChange {
   Add = 'add',
   Remove = 'remove',
 }
-
