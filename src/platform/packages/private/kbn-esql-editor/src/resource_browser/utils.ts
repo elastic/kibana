@@ -39,10 +39,6 @@ export const getSupportedCommand = (
     if (!cmd) return;
 
     const min = cmd.location?.min;
-    if (typeof min !== 'number') {
-      return { command: cmd.name };
-    }
-
     const safeMin = Math.max(0, Math.min(min, query.length));
     const textBefore = query.slice(0, safeMin);
     const lines = textBefore.split('\n');
