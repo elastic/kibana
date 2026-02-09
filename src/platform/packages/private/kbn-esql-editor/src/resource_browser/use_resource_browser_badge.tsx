@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { getFirstSupportedCommandFromQuery } from './utils';
+import { getSupportedCommand, SUPPORTED_COMMANDS } from './utils';
 import { IndicesBrowserOpenMode } from './open_mode';
 
 interface UseSourcesBadgeParams {
@@ -20,10 +20,6 @@ interface UseSourcesBadgeParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
 }
-
-// Commands that should have a badge
-// We assume that there is only one command in the query that should have a badge (the first FROM or TS command)
-const SUPPORTED_COMMANDS = ['from', 'ts'];
 
 export const useSourcesBadge = ({
   editorRef,
@@ -68,7 +64,7 @@ export const useSourcesBadge = ({
     if (!queryText.trim()) return;
 
     const collections: monaco.editor.IModelDeltaDecoration[] = [];
-    const firstSupportedCommand = getFirstSupportedCommandFromQuery(queryText, SUPPORTED_COMMANDS);
+    const firstSupportedCommand = getSupportedCommand(queryText);
 
     if (!firstSupportedCommand || !firstSupportedCommand.range) return;
     collections.push({
@@ -106,10 +102,7 @@ export const useSourcesBadge = ({
       if (!SUPPORTED_COMMANDS.includes(word)) return;
 
       const queryText = model.getValue() ?? '';
-      const firstSupportedCommand = getFirstSupportedCommandFromQuery(
-        queryText,
-        SUPPORTED_COMMANDS
-      );
+      const firstSupportedCommand = getSupportedCommand(queryText);
       if (!firstSupportedCommand || !firstSupportedCommand.range) return;
 
       if (

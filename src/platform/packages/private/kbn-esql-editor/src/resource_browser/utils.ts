@@ -16,6 +16,10 @@ export interface CommandRange {
   endColumn: number; // 1-based, inclusive
 }
 
+// Commands that should have a badge
+// Only FROM and TS commands support sources
+export const SUPPORTED_COMMANDS = ['from', 'ts'];
+
 /**
  * Returns the first command in the query that matches one of the `supportedCommands`.
  *
@@ -26,13 +30,12 @@ export interface CommandRange {
  *
  * For incomplete/invalid queries, parsing may fail; in that case this returns `undefined`.
  */
-export const getFirstSupportedCommandFromQuery = (
-  query: string,
-  supportedCommands: string[]
+export const getSupportedCommand = (
+  query: string
 ): { command: string; range?: CommandRange } | undefined => {
   try {
     const { root } = Parser.parse(query, { withFormatting: true });
-    const cmd = root.commands.find((c) => supportedCommands.includes(c.name.toLowerCase()));
+    const cmd = root.commands.find((c) => SUPPORTED_COMMANDS.includes(c.name.toLowerCase()));
     if (!cmd) return;
 
     const min = cmd.location?.min;
@@ -99,7 +102,9 @@ export const getSourceCommandContextFromQuery = ({
 }): SourceCommandContext => {
   try {
     const { root } = Parser.parse(queryText, { withFormatting: true });
-    const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
+    const sourceCommand = root.commands.find(({ name }) =>
+      SUPPORTED_COMMANDS.includes(name.toLowerCase())
+    );
 
     const command = sourceCommand?.name as 'from' | 'ts' | undefined;
     const sources = (sourceCommand?.args ?? []).filter(isSource);
@@ -255,7 +260,7 @@ export const computeInsertionText = ({
 }): { at: number; text: string } => {
   const hasItems = items.length > 0;
 
-  if (mode === 'badge') {
+  if (mode === IndicesBrowserOpenMode.Badge) {
     const insertAt = hasItems ? items[0].min : at;
     return { at: insertAt, text: hasItems ? `${sourceName},` : sourceName };
   }

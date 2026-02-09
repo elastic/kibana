@@ -16,8 +16,7 @@ import type {
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { BROWSER_POPOVER_WIDTH } from '@kbn/esql-resource-browser';
-import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   computeInsertionText,
   computeRemovalRange,
@@ -108,11 +107,8 @@ export function useDataSourceBrowser({
   const fetchSources = useCallback(async () => {
     const { getSources, getTimeseriesIndices } = esqlCallbacks;
     if (isTSCommandRef.current) {
-      const result = await getTimeseriesIndices?.();
-      if (!result || typeof result !== 'object' || !('indices' in result)) {
-        return [];
-      }
-      return normalizeTimeseriesIndices(result as IndicesAutocompleteResult);
+      const result = (await getTimeseriesIndices?.()) ?? { indices: [] };
+      return normalizeTimeseriesIndices(result);
     }
 
     return (await getSources?.()) ?? [];
@@ -236,7 +232,7 @@ export function useDataSourceBrowser({
       // Keep selection state in sync with the browser UI even if we can't edit the query.
       selectedSourcesRef.current = newSelectedSources;
 
-      if (!editor || !model || typeof insertAtOffset !== 'number') {
+      if (!editor || !model || insertAtOffset == null) {
         return;
       }
 
