@@ -19,24 +19,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Get Notification Policy API', function () {
     let roleAuthc: RoleCredentials;
-    let createdPolicyId: string;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-
-      // Create a notification policy to test get
-      const createResponse = await supertestWithoutAuth
-        .post(NOTIFICATION_POLICY_API_PATH)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          name: 'test-policy-for-get',
-          description: 'test-policy-for-get description',
-          workflow_id: 'test-workflow-for-get',
-        });
-
-      createdPolicyId = createResponse.body.id;
     });
 
     after(async () => {
@@ -45,6 +31,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should get a notification policy by id', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'policy-name',
+          description: 'policy-description',
+          workflow_id: 'policy-workflow-id',
+        });
+
+      const createdPolicyId = createResponse.body.id;
+
       const response = await supertestWithoutAuth
         .get(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
@@ -53,9 +51,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(createdPolicyId);
       expect(response.body.version).to.be.a('string');
-      expect(response.body.name).to.be('test-policy-for-get');
-      expect(response.body.description).to.be('test-policy-for-get description');
-      expect(response.body.workflow_id).to.be('test-workflow-for-get');
+      expect(response.body.name).to.be('policy-name');
+      expect(response.body.description).to.be('policy-description');
+      expect(response.body.workflow_id).to.be('policy-workflow-id');
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
     });

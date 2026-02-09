@@ -19,12 +19,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Delete Notification Policy API', function () {
     let roleAuthc: RoleCredentials;
-    let createdPolicyId: string;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+    });
 
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
+
+    it('should delete a notification policy by id', async () => {
       const createResponse = await supertestWithoutAuth
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -35,15 +41,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           workflow_id: 'test-workflow-for-delete',
         });
 
-      createdPolicyId = createResponse.body.id;
-    });
+      const createdPolicyId = createResponse.body.id;
 
-    after(async () => {
-      await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
-
-    it('should delete a notification policy by id', async () => {
       const response = await supertestWithoutAuth
         .delete(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
