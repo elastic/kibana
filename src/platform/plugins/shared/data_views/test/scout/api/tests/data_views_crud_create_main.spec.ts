@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect, apiTest, tags } from '@kbn/scout';
-import type { RoleApiCredentials } from '@kbn/scout';
+import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, ES_ARCHIVE_BASIC_INDEX, configArray } from '../fixtures/constants';
 
 configArray.forEach((config) => {
