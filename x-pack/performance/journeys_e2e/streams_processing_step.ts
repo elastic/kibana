@@ -21,28 +21,28 @@ export const journey = new Journey({
     });
   })
   .step('Open add processor form', async ({ page }) => {
+    // Click the "Create Processor" button — Grok is the default processor type
     await page.click(subj('streamsAppStreamDetailEnrichmentCreateProcessorButton'));
-    await page.waitForSelector(subj('streamsAppAvailableProcessorsGrokLink'));
-  })
-  .step('Select grok processor', async ({ page }) => {
-    await page.click(subj('streamsAppAvailableProcessorsGrokLink'));
-    await page.waitForSelector(subj('streamsAppProcessorFieldSelectorComboFieldText'));
+    // Wait for the processor field selector to appear (part of the Grok form)
+    await page.waitForSelector(subj('streamsAppProcessorFieldSelectorComboFieldText'), {
+      timeout: 30000,
+    });
   })
   .step('Configure grok processor', async ({ page, inputDelays }) => {
-    // Fill in the field selector (combo box)
-    await page.click(subj('streamsAppProcessorFieldSelectorComboFieldText'));
-    await page.type(subj('streamsAppProcessorFieldSelectorComboFieldText'), 'body.text', {
-      delay: inputDelays.TYPING,
-    });
-    // Select the option from the dropdown
+    // Fill in the field selector (EuiComboBox)
+    const comboBox = page.locator(subj('streamsAppProcessorFieldSelectorComboFieldText'));
+    await comboBox.locator('input[role="combobox"]').click();
+    await comboBox.locator('input[role="combobox"]').fill('body.text');
+    // Wait for and select the option from the dropdown
     const option = page.locator('[role="option"]').filter({ hasText: 'body.text' });
-    await option.first().click();
+    await option.first().click({ timeout: 15000 });
 
-    // Fill in the grok pattern
-    await page.click(subj('streamsAppPatternExpression'));
-    await page.type(subj('streamsAppPatternExpression'), '%{NUMBER:attributes.numberfield}', {
-      delay: inputDelays.TYPING,
-    });
+    // Fill in the grok pattern using the Expression component's textbox
+    const patternExpression = page.locator(subj('streamsAppPatternExpression'));
+    await patternExpression.click();
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Backspace');
+    await patternExpression.locator('[role="textbox"]').fill('%{NUMBER:attributes.numberfield}');
   })
   .step('Save processor', async ({ page }) => {
     await page.click(subj('streamsAppProcessorConfigurationSaveProcessorButton'));

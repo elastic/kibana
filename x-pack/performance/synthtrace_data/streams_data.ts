@@ -21,17 +21,35 @@ const INTERNAL_API_HEADERS = {
 };
 
 /** Batch size for parallel classic stream creation requests */
-const CLASSIC_STREAM_BATCH_SIZE = 50;
+const CLASSIC_STREAM_BATCH_SIZE = 10;
 
-/** HTTP status codes to treat as "already exists" (idempotent) */
-const CONFLICT_STATUS_CODES = [409];
+/** Max retries for transient errors (lock contention) */
+const MAX_RETRIES = 3;
+
+/** Base delay between retries in ms */
+const RETRY_BASE_DELAY_MS = 2000;
 
 /**
  * Check if an error is an Axios response error with the given status code.
  */
 function isConflictError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
-  return CONFLICT_STATUS_CODES.includes(err?.response?.status ?? 0);
+  return err?.response?.status === 409;
+}
+
+/**
+ * Check if an error is a retryable lock contention error (HTTP 422).
+ */
+function isLockContentionError(error: unknown): boolean {
+  const err = error as { response?: { status?: number } };
+  return err?.response?.status === 422;
+}
+
+/**
+ * Sleep for a given number of milliseconds.
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -60,29 +78,39 @@ export async function enableStreams(kibanaServer: KibanaServer, log: ToolingLog)
 /**
  * Create a single classic stream via the internal API.
  * Idempotent — ignores 409 if the stream already exists.
+ * Retries on 422 (lock contention) with exponential backoff.
  */
 async function createSingleClassicStream(kibanaServer: KibanaServer, name: string): Promise<void> {
-  try {
-    await kibanaServer.request({
-      path: '/internal/streams/_create_classic',
-      method: 'POST',
-      headers: INTERNAL_API_HEADERS,
-      body: {
-        name,
-        description: '',
-        ingest: {
-          processing: { steps: [] },
-          lifecycle: { inherit: {} },
-          settings: {},
-          failure_store: { inherit: {} },
-          classic: {},
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await kibanaServer.request({
+        path: '/internal/streams/_create_classic',
+        method: 'POST',
+        headers: INTERNAL_API_HEADERS,
+        body: {
+          name,
+          description: '',
+          ingest: {
+            processing: { steps: [] },
+            lifecycle: { inherit: {} },
+            settings: {},
+            failure_store: { inherit: {} },
+            classic: {},
+          },
         },
-      },
-    });
-  } catch (error) {
-    if (isConflictError(error)) {
-      // Stream already exists — skip
-    } else {
+      });
+      return;
+    } catch (error) {
+      if (isConflictError(error)) {
+        // Stream already exists — skip
+        return;
+      }
+      if (isLockContentionError(error) && attempt < MAX_RETRIES) {
+        // Lock contention — wait and retry with exponential backoff
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+        await sleep(delay);
+        continue;
+      }
       throw error;
     }
   }
@@ -105,11 +133,16 @@ export async function createClassicStreams(
   let created = 0;
   for (let i = 0; i < names.length; i += CLASSIC_STREAM_BATCH_SIZE) {
     const batch = names.slice(i, i + CLASSIC_STREAM_BATCH_SIZE);
-    await Promise.all(batch.map((name) => createSingleClassicStream(kibanaServer, name)));
+    await Promise.all(batch.map((n) => createSingleClassicStream(kibanaServer, n)));
     created += batch.length;
 
     if (created % 500 === 0 || created === count) {
       log.info(`  Created ${created}/${count} classic streams`);
+    }
+
+    // Small delay between batches to reduce lock contention
+    if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
+      await sleep(500);
     }
   }
 

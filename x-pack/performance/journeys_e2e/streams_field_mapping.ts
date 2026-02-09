@@ -23,24 +23,29 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
   })
   .step('Configure new field mapping', async ({ page, inputDelays }) => {
-    // Type field name in the combo box
-    await page.click(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
-    await page.type(
-      subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'),
-      'attributes.perf_test_field',
-      { delay: inputDelays.TYPING }
-    );
+    // Type field name in the EuiComboBox and press Enter to confirm custom value
+    const comboBox = page.locator(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
+    await comboBox.locator('input[role="combobox"]').click();
+    await comboBox
+      .locator('input[role="combobox"]')
+      .type('attributes.perf_test_field', { delay: inputDelays.TYPING });
+    await page.keyboard.press('Enter');
 
-    // Select field type
+    // Select field type via EuiSuperSelect — click the select, then click the option by test ID
     await page.click(subj('streamsAppFieldFormTypeSelect'));
-    const keywordOption = page.locator('[role="option"]').filter({ hasText: 'Keyword' });
-    await keywordOption.first().click();
+    await page.click(subj('option-type-keyword'));
   })
-  .step('Stage field mapping', async ({ page }) => {
-    await page.click(subj('streamsAppSchemaEditorFieldStageButton'));
-    await page.waitForSelector(subj('streamsAppSchemaEditorReviewStagedChangesButton'));
+  .step('Add field mapping', async ({ page }) => {
+    // Click the "Add field" button in the add field flyout
+    await page.click(subj('streamsAppSchemaEditorAddFieldButton'));
+    // Wait for the flyout to close
+    await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutCloseButton'), {
+      state: 'detached',
+      timeout: 30000,
+    });
   })
   .step('Review and submit field mapping', async ({ page }) => {
+    await page.waitForSelector(subj('streamsAppSchemaEditorReviewStagedChangesButton'));
     await page.click(subj('streamsAppSchemaEditorReviewStagedChangesButton'));
     await page.waitForSelector(subj('streamsAppSchemaChangesReviewModalSubmitButton'));
     await page.click(subj('streamsAppSchemaChangesReviewModalSubmitButton'));

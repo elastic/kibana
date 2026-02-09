@@ -22,21 +22,30 @@ export const journey = new Journey({
   })
   .step('Open edit retention modal', async ({ page }) => {
     await page.click(subj('streamsAppRetentionMetadataEditDataRetentionButton'));
-    await page.waitForSelector(subj('dataRetentionButtonGroup'));
+    // Wait for the modal to appear
+    await page.waitForSelector(subj('editLifecycleModalTitle'));
   })
-  .step('Set custom retention', async ({ page, inputDelays }) => {
-    await page.click(subj('customRetentionButton'));
-    await page.waitForSelector(subj('streamsAppDslModalDaysField'));
+  .step('Set custom retention', async ({ page }) => {
+    // Toggle the inherit switch OFF to enable custom retention options
+    const inheritSwitch = page.locator(subj('inheritDataRetentionSwitch'));
+    const isChecked = await inheritSwitch.isChecked();
+    if (isChecked) {
+      await inheritSwitch.click();
+    }
 
-    // Clear any existing value and type the new retention period
+    // Click "Custom period" button in the button group
+    await page.locator('[role="button"]').filter({ hasText: 'Custom period' }).click();
+
+    // Wait for the days field and fill in the retention value
+    await page.waitForSelector(subj('streamsAppDslModalDaysField'));
     const daysInput = page.locator(subj('streamsAppDslModalDaysField'));
     await daysInput.fill('');
-    await daysInput.type('30', { delay: inputDelays.TYPING });
+    await daysInput.fill('30');
   })
   .step('Save retention settings', async ({ page }) => {
     await page.click(subj('streamsAppModalFooterButton'));
     // Wait for the modal to close
-    await page.waitForSelector(subj('streamsAppModalFooterButton'), {
+    await page.waitForSelector(subj('editLifecycleModalTitle'), {
       state: 'detached',
       timeout: 30000,
     });
