@@ -29,6 +29,12 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+  EuiCallOut,
+  EuiIconTip,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import type { DropResult } from '@hello-pangea/dnd';
 import { css } from '@emotion/react';
@@ -48,6 +54,224 @@ interface NavItemConfig {
   visible: boolean;
   isLocked: boolean;
 }
+
+// Appearance settings component for version 1.2
+const AppearanceSettingsSection: FC = () => {
+  const [colorMode, setColorMode] = useState<string>('system');
+  const [contrastMode, setContrastMode] = useState<string>('system');
+  const [originalColorMode, setOriginalColorMode] = useState<string>('system');
+  const [originalContrastMode, setOriginalContrastMode] = useState<string>('system');
+
+  // Load current user profile settings
+  useEffect(() => {
+    const loadUserProfile = () => {
+      // Request user profile data via custom event
+      const requestEvent = new CustomEvent('getUserProfileForPreferences');
+      window.dispatchEvent(requestEvent);
+      
+      // Listen for response
+      const handleResponse = (e: Event) => {
+        const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
+        if (customEvent.detail?.userSettings) {
+          const darkMode = customEvent.detail.userSettings.darkMode || 'system';
+          const contrast = customEvent.detail.userSettings.contrastMode || 'system';
+          setColorMode(darkMode);
+          setContrastMode(contrast);
+          setOriginalColorMode(darkMode);
+          setOriginalContrastMode(contrast);
+        }
+        window.removeEventListener('userProfileForPreferences', handleResponse);
+      };
+      
+      window.addEventListener('userProfileForPreferences', handleResponse);
+      
+      return () => {
+        window.removeEventListener('userProfileForPreferences', handleResponse);
+      };
+    };
+    
+    const cleanup = loadUserProfile();
+    return cleanup;
+  }, []);
+
+  // Expose revert function via global
+  useEffect(() => {
+    (window as any).__revertAppearanceSettings = () => {
+      setColorMode(originalColorMode);
+      setContrastMode(originalContrastMode);
+      // Revert via custom event
+      const event = new CustomEvent('updateUserProfileForPreferences', {
+        detail: {
+          userSettings: {
+            darkMode: originalColorMode,
+            contrastMode: originalContrastMode,
+          },
+        },
+      });
+      window.dispatchEvent(event);
+    };
+    return () => {
+      delete (window as any).__revertAppearanceSettings;
+    };
+  }, [originalColorMode, originalContrastMode]);
+
+  const handleColorModeChange = useCallback((mode: string) => {
+    setColorMode(mode);
+    // Apply preview immediately via custom event
+    const event = new CustomEvent('updateUserProfileForPreferences', {
+      detail: {
+        userSettings: {
+          darkMode: mode,
+          contrastMode: contrastMode,
+        },
+      },
+    });
+    window.dispatchEvent(event);
+  }, [contrastMode]);
+
+  const handleContrastModeChange = useCallback((mode: string) => {
+    setContrastMode(mode);
+    // Apply preview immediately via custom event
+    const event = new CustomEvent('updateUserProfileForPreferences', {
+      detail: {
+        userSettings: {
+          darkMode: colorMode,
+          contrastMode: mode,
+        },
+      },
+    });
+    window.dispatchEvent(event);
+  }, [colorMode]);
+
+  const colorModeItems = [
+    { id: 'system', label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.systemLabel', { defaultMessage: 'System' }), icon: 'desktop' },
+    { id: 'light', label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.lightLabel', { defaultMessage: 'Light' }), icon: 'sun' },
+    { id: 'dark', label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.darkLabel', { defaultMessage: 'Dark' }), icon: 'moon' },
+    { id: 'space_default', label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.spaceDefaultLabel', { defaultMessage: 'Space default' }), icon: 'grid' },
+  ];
+
+  const contrastModeItems = [
+    { id: 'system', label: i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.systemLabel', { defaultMessage: 'System' }), icon: 'desktop' },
+    { id: 'standard', label: i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.standardLabel', { defaultMessage: 'Normal' }), icon: 'contrast' },
+    { id: 'high', label: i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.highLabel', { defaultMessage: 'High' }), icon: 'contrastHigh' },
+  ];
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.security.formComponents.themeKeyPadMenu.legend"
+            defaultMessage="Color mode"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiKeyPadMenu
+        aria-label={i18n.translate('xpack.security.formComponents.themeKeyPadMenu.ariaLabel', {
+          defaultMessage: 'Elastic theme',
+        })}
+        data-test-subj="themeMenu"
+        checkable={{
+          legend: null,
+        }}
+        css={css`
+          inline-size: 420px;
+        `}
+      >
+        {colorModeItems.map((item) => (
+          <EuiKeyPadMenuItem
+            key={item.id}
+            name={item.id}
+            label={item.label}
+            data-test-subj={`themeKeyPadItem${item.id}`}
+            checkable="single"
+            isSelected={colorMode === item.id}
+            onChange={() => handleColorModeChange(item.id)}
+          >
+            <EuiIcon type={item.icon} size="l" />
+          </EuiKeyPadMenuItem>
+        ))}
+      </EuiKeyPadMenu>
+      
+      {colorMode === 'space_default' && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
+              {
+                defaultMessage: 'Space default settings will be removed in a future version',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+            size="s"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultDescription',
+                {
+                  defaultMessage:
+                    'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+
+      <EuiSpacer size="l" />
+
+      <EuiTitle size="xs">
+        <h3>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={true}>
+              <FormattedMessage
+                id="xpack.security.formComponents.contrastKeyPadMenu.legend"
+                defaultMessage="Interface contrast"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.security.formComponents.contrastKeyPadMenu.betaBadge.tooltip',
+                  { defaultMessage: 'The contrast setting is currently a beta feature.' }
+                )}
+                type="beta"
+                position="bottom"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiKeyPadMenu
+        aria-label={i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.ariaLabel', {
+          defaultMessage: 'Interface contrast',
+        })}
+        data-test-subj="contrastMenu"
+        checkable={{
+          legend: null,
+        }}
+      >
+        {contrastModeItems.map((item) => (
+          <EuiKeyPadMenuItem
+            key={item.id}
+            name={item.id}
+            label={item.label}
+            data-test-subj={`contrastKeyPadItem${item.id}`}
+            checkable="single"
+            isSelected={contrastMode === item.id}
+            onChange={() => handleContrastModeChange(item.id)}
+          >
+            <EuiIcon type={item.icon} size="l" />
+          </EuiKeyPadMenuItem>
+        ))}
+      </EuiKeyPadMenu>
+    </>
+  );
+};
 
 interface Props {
   isCollapsed: boolean;
@@ -96,6 +320,41 @@ export const SideNavCollapseButton: FC<Props> = ({
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { tooltipRef, handleMouseOut } = useTooltip();
+  
+  // Get current version from localStorage (for version-specific UI changes)
+  const getCurrentVersion = useCallback((): 'current' | '1.1' | '1.2' => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = window.localStorage.getItem('kibana_ui_version');
+      if (stored === 'current' || stored === '1.1' || stored === '1.2') {
+        return stored as 'current' | '1.1' | '1.2';
+      }
+    }
+    return 'current';
+  }, []);
+  
+  const [currentVersion, setCurrentVersion] = useState<'current' | '1.1' | '1.2'>(getCurrentVersion);
+  const [selectedTabId, setSelectedTabId] = useState<'navigation' | 'appearance'>('appearance');
+  
+  // Listen for version changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setCurrentVersion(getCurrentVersion());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Also check periodically in case version changes in same window
+    const interval = setInterval(() => {
+      const newVersion = getCurrentVersion();
+      if (newVersion !== currentVersion) {
+        setCurrentVersion(newVersion);
+      }
+    }, 100);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [getCurrentVersion, currentVersion]);
 
   // Determine locked items (first 2: Discover and Dashboards)
   const LOCKED_IDS = ['discover', 'dashboards'];
@@ -155,12 +414,67 @@ export const SideNavCollapseButton: FC<Props> = ({
     return [...lockedItems, ...sortedUnlocked];
   });
 
-  const closeModal = () => {
+  // Store original values for preview/revert
+  const [originalShowLabels, setOriginalShowLabels] = useState(showLabels);
+  const [originalNavItemsOrder, setOriginalNavItemsOrder] = useState<string[]>([]);
+  const [originalNavItemsVisibility, setOriginalNavItemsVisibility] = useState<Record<string, boolean>>({});
+  const [isApplying, setIsApplying] = useState(false);
+
+  const closeModal = useCallback(() => {
+    if (!isApplying && initialState) {
+      // Revert changes if closing without applying
+      // Revert showLabels
+      if (localShowLabels !== originalShowLabels) {
+        onSetShowLabels(originalShowLabels);
+      }
+      
+      // Revert navigation items order
+      if (onSetNavItemsOrder) {
+        try {
+          localStorage.setItem(NAV_ITEMS_ORDER_KEY, JSON.stringify(originalNavItemsOrder));
+          // Dispatch custom event since storage events don't fire in same window
+          window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+            detail: { type: 'order', value: originalNavItemsOrder },
+          }));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+      
+      // Revert navigation items visibility
+      if (onSetNavItemVisibility) {
+        try {
+          localStorage.setItem(NAV_ITEMS_VISIBILITY_KEY, JSON.stringify(originalNavItemsVisibility));
+          // Dispatch custom event since storage events don't fire in same window
+          window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+            detail: { type: 'visibility', value: originalNavItemsVisibility },
+          }));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+      
+      // Revert appearance settings if version 1.2
+      if (currentVersion === '1.2' && typeof (window as any).__revertAppearanceSettings === 'function') {
+        (window as any).__revertAppearanceSettings();
+      }
+    }
+    
+    // Clean up preferences listeners
+    if (typeof (window as any).__cleanupPreferencesListeners === 'function') {
+      (window as any).__cleanupPreferencesListeners();
+    }
+    
     setIsModalOpen(false);
+    setIsApplying(false);
     // Reset local state when closing
     setLocalShowLabels(showLabels);
     setInitialState(null);
-  };
+    // Reset tab selection for version 1.2
+    if (currentVersion === '1.2') {
+      setSelectedTabId('appearance');
+    }
+  }, [isApplying, initialState, localShowLabels, originalShowLabels, originalNavItemsOrder, originalNavItemsVisibility, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, currentVersion]);
 
   const openModal = useCallback(() => {
     // Sync state when opening modal - load current preferences
@@ -182,6 +496,11 @@ export const SideNavCollapseButton: FC<Props> = ({
     } catch {
       // Ignore parsing errors
     }
+
+    // Store original values for revert
+    setOriginalShowLabels(showLabels);
+    setOriginalNavItemsOrder(savedOrder);
+    setOriginalNavItemsVisibility(savedVisibility);
 
     // Update config to match current state
     const updatedConfig = primaryItems.map((item: MenuItem) => ({
@@ -231,10 +550,29 @@ export const SideNavCollapseButton: FC<Props> = ({
     // Also listen on document as fallback
     document.addEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
     
+    // Listen for user profile data requests (for appearance settings in version 1.2)
+    const handleGetUserProfile = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      // User profile data will be provided by footer_user_menu via another event
+    };
+    
+    // Listen for user profile updates (for appearance settings preview)
+    const handleUpdateUserProfile = (e: Event) => {
+      const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
+      if (customEvent.detail?.userSettings) {
+        // Update will be handled by the appearance settings component
+      }
+    };
+    
+    window.addEventListener('getUserProfileForPreferences', handleGetUserProfile);
+    window.addEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
+    
     return () => {
       delete (window as any).__openNavigationPreferencesModal;
       window.removeEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
       document.removeEventListener('openNavigationPreferencesModal', handleOpenModalEvent, true);
+      window.removeEventListener('getUserProfileForPreferences', handleGetUserProfile);
+      window.removeEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
     };
   }, [openModal]);
 
@@ -255,9 +593,22 @@ export const SideNavCollapseButton: FC<Props> = ({
       const newItems = [...lockedItems, ...reorderedUnlocked];
       
       setNavItemsConfig(newItems);
-      // Don't save immediately - wait for Apply button
+      
+      // Apply preview immediately
+      const unlockedOrder = reorderedUnlocked.map((item) => item.id);
+      if (onSetNavItemsOrder) {
+        try {
+          localStorage.setItem(NAV_ITEMS_ORDER_KEY, JSON.stringify(unlockedOrder));
+          // Dispatch custom event since storage events don't fire in same window
+          window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+            detail: { type: 'order', value: unlockedOrder },
+          }));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
     },
-    [navItemsConfig]
+    [navItemsConfig, onSetNavItemsOrder]
   );
 
   const handleToggleVisibility = useCallback(
@@ -265,9 +616,24 @@ export const SideNavCollapseButton: FC<Props> = ({
       setNavItemsConfig((prev) =>
         prev.map((item) => (item.id === itemId ? { ...item, visible } : item))
       );
-      // Don't save immediately - wait for Apply button
+      
+      // Apply preview immediately
+      if (onSetNavItemVisibility) {
+        try {
+          const visibilityStr = localStorage.getItem(NAV_ITEMS_VISIBILITY_KEY);
+          const visibility = visibilityStr ? JSON.parse(visibilityStr) : {};
+          visibility[itemId] = visible;
+          localStorage.setItem(NAV_ITEMS_VISIBILITY_KEY, JSON.stringify(visibility));
+          // Dispatch custom event since storage events don't fire in same window
+          window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+            detail: { type: 'visibility', value: visibility },
+          }));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
     },
-    []
+    [onSetNavItemVisibility]
   );
 
   // Calculate change count
@@ -353,20 +719,91 @@ export const SideNavCollapseButton: FC<Props> = ({
     if (!initialState) return;
     setLocalShowLabels(initialState.showLabels);
     setNavItemsConfig(initialState.navItemsConfig);
-  }, [initialState]);
+    
+    // Apply preview immediately - revert to initial state
+    onSetShowLabels(initialState.showLabels);
+    
+    // Revert navigation items order
+    if (onSetNavItemsOrder && initialState.navItemsConfig) {
+      const unlockedItems = initialState.navItemsConfig.filter((item) => !item.isLocked);
+      const unlockedOrder = unlockedItems.map((item) => item.id);
+      try {
+        localStorage.setItem(NAV_ITEMS_ORDER_KEY, JSON.stringify(unlockedOrder));
+        window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+          detail: { type: 'order', value: unlockedOrder },
+        }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+    
+    // Revert navigation items visibility
+    if (onSetNavItemVisibility && initialState.navItemsConfig) {
+      const visibility: Record<string, boolean> = {};
+      initialState.navItemsConfig.forEach((item) => {
+        visibility[item.id] = item.visible;
+      });
+      try {
+        localStorage.setItem(NAV_ITEMS_VISIBILITY_KEY, JSON.stringify(visibility));
+        window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+          detail: { type: 'visibility', value: visibility },
+        }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+  }, [initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
 
   // Handle reset - reset to default state (as if opening deployment for first time)
   const handleReset = useCallback(() => {
     const defaultState = getDefaultState();
     setNavItemsConfig(defaultState.navItemsConfig);
     setLocalShowLabels(defaultState.showLabels);
-  }, [getDefaultState]);
+    
+    // Apply preview immediately
+    onSetShowLabels(defaultState.showLabels);
+    
+    // Reset navigation items order
+    if (onSetNavItemsOrder) {
+      const unlockedItems = defaultState.navItemsConfig.filter((item) => !item.isLocked);
+      const unlockedOrder = unlockedItems.map((item) => item.id);
+      try {
+        localStorage.setItem(NAV_ITEMS_ORDER_KEY, JSON.stringify(unlockedOrder));
+        // Dispatch custom event since storage events don't fire in same window
+        window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+          detail: { type: 'order', value: unlockedOrder },
+        }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+    
+    // Reset navigation items visibility (all visible)
+    if (onSetNavItemVisibility) {
+      const allVisible: Record<string, boolean> = {};
+      defaultState.navItemsConfig.forEach((item) => {
+        allVisible[item.id] = true;
+      });
+      try {
+        localStorage.setItem(NAV_ITEMS_VISIBILITY_KEY, JSON.stringify(allVisible));
+        // Dispatch custom event since storage events don't fire in same window
+        window.dispatchEvent(new CustomEvent('navigationPreferencesChanged', {
+          detail: { type: 'visibility', value: allVisible },
+        }));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+  }, [getDefaultState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
 
-  // Handle apply - save changes and close modal
+  // Handle apply - changes are already applied, just close modal
   const handleApply = useCallback(() => {
     if (!hasChanges) return;
     
-    // Save showLabels
+    // Mark as applying so closeModal doesn't revert changes
+    setIsApplying(true);
+    
+    // Ensure final state is saved via callbacks (for consistency)
     if (localShowLabels !== showLabels) {
       onSetShowLabels(localShowLabels);
     }
@@ -392,7 +829,7 @@ export const SideNavCollapseButton: FC<Props> = ({
     setTimeout(() => {
       closeModal();
     }, 100);
-  }, [hasChanges, localShowLabels, showLabels, navItemsConfig, initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
+  }, [hasChanges, localShowLabels, showLabels, navItemsConfig, initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, closeModal]);
 
   const button = (
     <EuiButtonIcon
@@ -436,35 +873,126 @@ export const SideNavCollapseButton: FC<Props> = ({
         <EuiModal
           onClose={closeModal}
           aria-labelledby="navigation-modal-title"
-          maxWidth={500}
-          style={{ width: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+          maxWidth={currentVersion === '1.2' ? 800 : 500}
+          style={{ 
+            width: currentVersion === '1.2' ? '800px' : '500px', 
+            height: currentVersion === '1.2' ? '640px' : undefined,
+            maxHeight: currentVersion === '1.2' ? '640px' : '90vh', 
+            display: 'flex', 
+            flexDirection: 'column' 
+          }}
           outsideClickCloses={true}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="navigation-modal-title">
-              {i18n.translate('core.ui.chrome.sideNavigation.modalTitle', {
-                defaultMessage: 'Navigation preferences',
-              })}
+              {currentVersion === '1.2' ? (
+                <FormattedMessage
+                  id="xpack.security.navControlComponent.preferencesModal.title"
+                  defaultMessage="Preferences"
+                />
+              ) : (
+                i18n.translate('core.ui.chrome.sideNavigation.modalTitle', {
+                  defaultMessage: 'Navigation preferences',
+                })
+              )}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
-            <EuiSwitch
-              label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
-                defaultMessage: 'Show labels',
-              })}
-              checked={localShowLabels}
-              onChange={(e) => setLocalShowLabels(e.target.checked)}
-            />
-            <EuiSpacer size="l" />
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('core.ui.chrome.sideNavigation.tabsTitle', {
-                  defaultMessage: 'Tabs',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
+            {currentVersion === '1.2' ? (
+              <>
+                <EuiTabs size="s">
+                  <EuiTab
+                    onClick={() => setSelectedTabId('appearance')}
+                    isSelected={selectedTabId === 'appearance'}
+                    data-test-subj="preferencesAppearanceTab"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.navControlComponent.preferencesModal.appearanceTab"
+                      defaultMessage="Appearance"
+                    />
+                  </EuiTab>
+                  <EuiTab
+                    onClick={() => setSelectedTabId('navigation')}
+                    isSelected={selectedTabId === 'navigation'}
+                    data-test-subj="preferencesNavigationTab"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.navControlComponent.preferencesModal.navigationTab"
+                      defaultMessage="Navigation"
+                    />
+                  </EuiTab>
+                </EuiTabs>
+                <EuiSpacer size="l" />
+                
+                {selectedTabId === 'navigation' && (
+                  <>
+                    <EuiTitle size="xs">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.preferencesModal.primaryNavigationTitle"
+                          defaultMessage="Primary navigation"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
+                    <EuiSwitch
+                      label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
+                        defaultMessage: 'Show labels',
+                      })}
+                      checked={localShowLabels}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        setLocalShowLabels(newValue);
+                        // Apply preview immediately
+                        onSetShowLabels(newValue);
+                      }}
+                    />
+                    <EuiSpacer size="l" />
+                    <EuiTitle size="xs">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.security.navControlComponent.preferencesModal.availableItemsTitle"
+                          defaultMessage="Available items"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+                
+                {selectedTabId === 'appearance' && (
+                  <AppearanceSettingsSection />
+                )}
+              </>
+            ) : (
+              <>
+                <EuiSwitch
+                  label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
+                    defaultMessage: 'Show labels',
+                  })}
+                  checked={localShowLabels}
+                  onChange={(e) => {
+                    const newValue = e.target.checked;
+                    setLocalShowLabels(newValue);
+                    // Apply preview immediately
+                    onSetShowLabels(newValue);
+                  }}
+                />
+                <EuiSpacer size="l" />
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('core.ui.chrome.sideNavigation.tabsTitle', {
+                      defaultMessage: 'Tabs',
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+              </>
+            )}
             
+            {/* Navigation content - only show when navigation tab is selected or not version 1.2 */}
+            {((currentVersion === '1.2' && selectedTabId === 'navigation') || currentVersion !== '1.2') && (
+              <>
             {/* Locked items section (non-draggable) */}
             {navItemsConfig
               .filter((item) => item.isLocked)
@@ -552,6 +1080,8 @@ export const SideNavCollapseButton: FC<Props> = ({
                     ))}
               </EuiDroppable>
             </EuiDragDropContext>
+              </>
+            )}
           </EuiModalBody>
           {/* Fixed footer with save/discard buttons */}
           <div

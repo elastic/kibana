@@ -189,6 +189,53 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
     icon: <EuiIcon type="brush" size="m" />,
     onClick: () => {
       setIsPopoverOpen(false);
+      // For version 1.2, provide user profile data for appearance settings
+      if (version === '1.2' && userProfile.value?.data) {
+        const userSettings = (userProfile.value.data as any).userSettings;
+        if (userSettings) {
+          // Store user profile data temporarily for the modal to access
+          (window as any).__kbnUserProfileForPreferences = userSettings;
+          
+          // Set up listener to provide user profile data when requested
+          const handleGetUserProfile = () => {
+            const currentUserSettings = (userProfile.value?.data as any)?.userSettings;
+            if (currentUserSettings) {
+              window.dispatchEvent(new CustomEvent('userProfileForPreferences', {
+                detail: { userSettings: currentUserSettings },
+              }));
+            }
+          };
+          
+          // Set up listener to update user profile when appearance changes
+          const handleUpdateUserProfile = (e: Event) => {
+            const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
+            if (customEvent.detail?.userSettings && userProfile.value) {
+              // Update user profile via API (preview)
+              // This will be handled by the user profile API client
+              const userProfileApiClient = (window as any).__kbnUserProfileApiClient;
+              if (userProfileApiClient) {
+                userProfileApiClient.partialUpdate({
+                  userSettings: customEvent.detail.userSettings,
+                }).catch(() => {
+                  // Ignore errors for preview
+                });
+              }
+            }
+          };
+          
+          window.addEventListener('getUserProfileForPreferences', handleGetUserProfile);
+          window.addEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
+          
+          // Clean up listeners when modal closes (will be cleaned up by modal close handler)
+          (window as any).__cleanupPreferencesListeners = () => {
+            window.removeEventListener('getUserProfileForPreferences', handleGetUserProfile);
+            window.removeEventListener('updateUserProfileForPreferences', handleUpdateUserProfile);
+            delete (window as any).__kbnUserProfileForPreferences;
+            delete (window as any).__cleanupPreferencesListeners;
+          };
+        }
+      }
+      
       // Use requestAnimationFrame to ensure DOM is ready, then try multiple approaches
       requestAnimationFrame(() => {
         // First try: call global function directly

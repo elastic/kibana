@@ -51,6 +51,8 @@ import { ChangePasswordModal } from '../management/users/edit_user/change_passwo
 import { useUserProfileForm } from '../account_management/user_profile/user_profile';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from '../account_management/user_profile/utils';
 import { isUserReserved } from '../management/users/user_utils';
+import { version$ } from './version_context';
+import { useObservable as useKbnObservable } from '@kbn/use-observable';
 
 interface ProfileModalProps {
   user: AuthenticatedUser;
@@ -76,6 +78,7 @@ export const ProfileModal: FunctionComponent<ProfileModalProps> = ({
   const { euiTheme } = useEuiTheme();
   const previousChangesCount = React.useRef(formChanges.count);
   const previousSubmitCount = React.useRef(formik.submitCount);
+  const version = useKbnObservable(version$, 'current');
 
   // Close modal after successful save
   React.useEffect(() => {
@@ -558,7 +561,7 @@ export const ProfileModal: FunctionComponent<ProfileModalProps> = ({
                 </>
               )}
 
-              {!isCloudUser && formik.values.data && (
+              {!isCloudUser && formik.values.data && version !== '1.2' && (
                 <>
                   <EuiDescribedFormGroup
                     fullWidth

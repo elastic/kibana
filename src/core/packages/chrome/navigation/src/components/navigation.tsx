@@ -144,7 +144,7 @@ export const Navigation = ({
     }
   });
 
-  // Listen for localStorage changes (from other tabs/windows)
+  // Listen for localStorage changes (from other tabs/windows) and custom events (from same window)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === NAV_ITEMS_ORDER_KEY && e.newValue) {
@@ -163,8 +163,21 @@ export const Navigation = ({
       }
     };
 
+    const handleNavigationPreferencesChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ type: 'order' | 'visibility'; value: any }>;
+      if (customEvent.detail?.type === 'order') {
+        setNavItemsOrder(customEvent.detail.value);
+      } else if (customEvent.detail?.type === 'visibility') {
+        setNavItemsVisibility(customEvent.detail.value);
+      }
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('navigationPreferencesChanged', handleNavigationPreferencesChanged);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('navigationPreferencesChanged', handleNavigationPreferencesChanged);
+    };
   }, []);
 
   // Callbacks to update navigation items
