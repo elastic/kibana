@@ -15,7 +15,6 @@ import { useActiveSources } from '../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
 import { useBulkDeleteActiveSources } from '../hooks/use_bulk_delete_active_sources';
 import { useEditActiveSourceFlyout } from '../hooks/use_edit_active_source_flyout';
-import { useCloneActiveSourceFlyout } from '../hooks/use_clone_active_source_flyout';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
@@ -25,7 +24,6 @@ export const ActiveSourcesView: React.FC = () => {
   const [sourceIdsToBulkDelete, setSourceIdsToBulkDelete] = useState<string[]>([]);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
-  const [sourceToClone, setSourceToClone] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
     setSelectedSource(null);
@@ -43,13 +41,6 @@ export const ActiveSourcesView: React.FC = () => {
   const { bulkDelete, isDeleting: isBulkDeleting } =
     useBulkDeleteActiveSources(handleCancelBulkDelete);
 
-  const { openFlyout: openCloneFlyout, flyout: cloneFlyout } = useCloneActiveSourceFlyout({
-    sourceToClone,
-    onConnectorCreated: () => {
-      setSourceToClone(null);
-    },
-  });
-
   const handleCloseEditFlyout = useCallback(() => {
     setSourceToEdit(null);
   }, []);
@@ -65,16 +56,6 @@ export const ActiveSourcesView: React.FC = () => {
       openEditFlyout();
     },
     [openEditFlyout]
-  );
-
-  const handleClone = useCallback(
-    (source: ActiveSource) => {
-      setSourceToClone(source);
-      // Open the add connector flyout with pre-selected type
-      // User will need to select/create credentials (no secrets cloned)
-      openCloneFlyout();
-    },
-    [openCloneFlyout]
   );
 
   const handleDelete = useCallback((source: ActiveSource) => {
@@ -137,7 +118,6 @@ export const ActiveSourcesView: React.FC = () => {
           isLoading={isLoading}
           onReconnect={() => {}}
           onEdit={handleEdit}
-          onClone={handleClone}
           onDelete={handleDelete}
           onBulkDelete={handleBulkDelete}
         />
@@ -159,7 +139,6 @@ export const ActiveSourcesView: React.FC = () => {
         />
       )}
       {editFlyout}
-      {cloneFlyout}
     </>
   );
 };
