@@ -76,7 +76,27 @@ export async function getAnchors({
         ],
       },
     },
-    aggs,
+    aggs: {
+    sample: {
+      sampler: {
+        shard_size: samplerShardSize, // perf optimization to limit aggs to top N entires per shard
+      },
+      aggs: {
+        trace_ids: {
+          terms: {
+            field: TRACE_ID,
+            size: traceIdBucketSize,
+            execution_hint: 'map' as const,
+            // remove bias towards large traces by sorting on trace.id
+            // which will be random-esque
+            order: {
+              _key: 'desc' as const,
+            },
+          },
+        },
+      },
+    },
+  };
   };
 
   const response = await search(searchRequest);
