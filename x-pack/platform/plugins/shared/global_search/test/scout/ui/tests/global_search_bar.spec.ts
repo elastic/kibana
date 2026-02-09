@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
