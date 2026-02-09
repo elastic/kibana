@@ -21,9 +21,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
+import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsRoutingSelector } from '../data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
@@ -36,7 +36,7 @@ interface StreamNameFormRowProps {
   errorMessage?: ReactNode | string | undefined;
   isStreamNameValid?: boolean;
   partitionName: string;
-  prefix: string;
+  prefix?: string;
 }
 
 const MIN_NAME_LENGTH = 1;
@@ -228,8 +228,9 @@ export function StreamNameFormRow({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
-    setLocalStreamName(`${prefix}${newPartitionName}`);
-    onChange(`${prefix}${newPartitionName}`);
+    const newStreamName = prefix ? `${prefix}${newPartitionName}` : newPartitionName;
+    setLocalStreamName(newStreamName);
+    onChange(newStreamName);
   };
 
   return (
@@ -257,25 +258,33 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
-        prepend={[
-          <EuiIcon type="streamsWired" />,
-          <EuiFormLabel
-            css={css`
-              inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-            `}
-            id={descriptionId}
-            data-test-subj="streamsAppRoutingStreamNamePrefix"
-          >
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
-                  defaultMessage: 'Stream prefix:',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <EuiTextTruncate text={prefix} truncation="start" data-test-subj={`streamNamePrefix`} />
-          </EuiFormLabel>,
-        ]}
+        prepend={
+          prefix
+            ? [
+                <EuiIcon type="streamsWired" />,
+                <EuiFormLabel
+                  css={css`
+                    inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                  `}
+                  id={descriptionId}
+                  data-test-subj="streamsAppRoutingStreamNamePrefix"
+                >
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
+                        defaultMessage: 'Stream prefix:',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <EuiTextTruncate
+                    text={prefix}
+                    truncation="start"
+                    data-test-subj={`streamNamePrefix`}
+                  />
+                </EuiFormLabel>,
+              ]
+            : undefined
+        }
       />
     </EuiFormRow>
   );
