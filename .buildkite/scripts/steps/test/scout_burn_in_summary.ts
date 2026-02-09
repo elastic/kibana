@@ -53,7 +53,9 @@ function buildCommentBody(moduleResults: ModuleResult[], repeatEach: number): st
   const lines: string[] = [
     '## Scout Burn-in Test Results',
     '',
-    `**Repeat count:** ${repeatEach} | **Modules tested:** ${totalModules} | ✅ ${passed} | ❌ ${failed}${noTests > 0 ? ` | ⏭️ ${noTests}` : ''}${unknown > 0 ? ` | ❓ ${unknown}` : ''}`,
+    `**Repeat count:** ${repeatEach} | **Modules tested:** ${totalModules} | ✅ ${passed} | ❌ ${failed}${
+      noTests > 0 ? ` | ⏭️ ${noTests}` : ''
+    }${unknown > 0 ? ` | ❓ ${unknown}` : ''}`,
     '',
   ];
 

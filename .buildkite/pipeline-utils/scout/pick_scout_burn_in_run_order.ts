@@ -11,9 +11,9 @@ import Fs from 'fs';
 import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
-import { getRequiredEnv } from '#pipeline-utils';
 import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
 import { getChangedScoutModules } from './get_scout_burn_in_configs';
+import { getRequiredEnv } from '#pipeline-utils';
 
 const DEFAULT_BURN_IN_REPEAT_EACH = 2;
 const BURN_IN_LABEL_PREFIX = 'ci:scout-burn-in-repeat-';
@@ -105,10 +105,7 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
   });
 
   // Store the module names in metadata for the summary step
-  bk.setMetadata(
-    'scout_burn_in_modules',
-    affectedModules.map((m) => m.name).join(',')
-  );
+  bk.setMetadata('scout_burn_in_modules', affectedModules.map((m) => m.name).join(','));
   bk.setMetadata('scout_burn_in_repeat_each', String(repeatEach));
 
   // Upload burn-in test steps + summary step

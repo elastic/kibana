@@ -154,9 +154,7 @@ function getModuleBasePath(configPath: string): string | null {
  * Build a map from module base paths to their modules, extracting base paths
  * from Scout config paths.
  */
-function buildModulePathMap(
-  allModules: ModuleDiscoveryInfo[]
-): Map<string, ModuleDiscoveryInfo> {
+function buildModulePathMap(allModules: ModuleDiscoveryInfo[]): Map<string, ModuleDiscoveryInfo> {
   const modulePathToModule = new Map<string, ModuleDiscoveryInfo>();
   for (const module of allModules) {
     for (const config of module.configs) {
@@ -279,9 +277,7 @@ function findDependentModules(
  * @param allModules - The complete list of discovered Scout modules with configs
  * @returns Filtered list containing only modules affected by PR changes
  */
-export function getChangedScoutModules(
-  allModules: ModuleDiscoveryInfo[]
-): ModuleDiscoveryInfo[] {
+export function getChangedScoutModules(allModules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] {
   const changedFiles = getChangedFiles();
 
   if (changedFiles.length === 0) {
@@ -323,7 +319,9 @@ export function getChangedScoutModules(
 
   if (directlyAffected.size > 0) {
     console.error(
-      `scout burn-in [direct]: ${directlyAffected.size} module(s): ${Array.from(directlyAffected).join(', ')}`
+      `scout burn-in [direct]: ${directlyAffected.size} module(s): ${Array.from(
+        directlyAffected
+      ).join(', ')}`
     );
   }
 
@@ -355,7 +353,9 @@ export function getChangedScoutModules(
 
   if (depGraphAffected.size > 0) {
     console.error(
-      `scout burn-in [dep-graph]: ${depGraphAffected.size} additional module(s): ${Array.from(depGraphAffected).join(', ')}`
+      `scout burn-in [dep-graph]: ${depGraphAffected.size} additional module(s): ${Array.from(
+        depGraphAffected
+      ).join(', ')}`
     );
   }
 
