@@ -59,23 +59,21 @@ export const INDICATOR_SYNTHETICS_AVAILABILITY_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.syntheticsAvailability.description',
   {
     defaultMessage:
-      'A Synthetics availability SLO monitors uptime and availability of your synthetic monitors over time.',
+      'Define an SLO based on the uptime and availability of your synthetic monitors over time.',
   }
 );
 
 export const INDICATOR_CUSTOM_KQL_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.customKql.description',
   {
-    defaultMessage:
-      'A Custom Query SLO uses KQL queries to define good and total events from any Elasticsearch index.',
+    defaultMessage: 'Define an SLO based on any of your Elasticsearch indices or data views.',
   }
 );
 
 export const INDICATOR_CUSTOM_METRIC_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.customMetric.description',
   {
-    defaultMessage:
-      'A Custom Metric SLO uses metric aggregations to calculate SLI values from any Elasticsearch index.',
+    defaultMessage: 'Define an SLO based on custom equations from metric fields in your indices.',
   }
 );
 
@@ -83,7 +81,7 @@ export const INDICATOR_TIMESLICE_METRIC_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.timesliceMetric.description',
   {
     defaultMessage:
-      'A Timeslice Metric SLO evaluates a metric threshold for each time slice to determine compliance.',
+      'Define an SLO based on a custom equation that uses statistical aggregations and a threshold to determine whether a slice is good or bad.',
   }
 );
 
@@ -91,7 +89,7 @@ export const INDICATOR_HISTOGRAM_DESCRIPTION = i18n.translate(
   'xpack.slo.indicators.histogram.description',
   {
     defaultMessage:
-      'A Histogram Metric SLO uses histogram aggregations to calculate SLI values from histogram fields.',
+      'Define an SLO based on histogram metrics using a range aggregation or a value_count aggregation for both the good and total events.',
   }
 );
 
