@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { InputNumberFieldSchema } from '../../../../../common/types/domain/template/fields';
+import type { InputNumberFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const InputNumber = (props: z.infer<typeof InputNumberFieldSchema>) => {
   return null;

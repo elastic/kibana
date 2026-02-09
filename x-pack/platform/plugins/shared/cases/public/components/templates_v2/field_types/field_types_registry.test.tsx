@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import { load as parseYaml } from 'js-yaml';
+
+import { ParsedTemplateSchema } from '../../../../common/types/domain';
+import { controlRegistry } from './field_types_registry';
+import { render, screen } from '@testing-library/react';
+import { FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/form_context';
+import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
 
 /**
  * NOTE: this test uses a mock template definition to try and render the controls
@@ -14,11 +22,10 @@ import { load as parseYaml } from 'js-yaml';
 const exampleCaseTemplate = `
 fields:
   - name: severity
-    control: select
+    control: SELECT_BASIC
     label: Field label
     type: keyword
     metadata:
-      default: low
       options:
         - low
         - moderate
@@ -26,8 +33,59 @@ fields:
         - critical
 `;
 
-const testTemplateRenderer = (templateDefinition: string) => {
-  const template = parseYaml(templateDefinition);
+const TestTemplatedFormRenderer = ({
+  templateDefinition,
+  values,
+}: {
+  templateDefinition: string;
+  values: Record<string, unknown>;
+}) => {
+  const parseResult = ParsedTemplateSchema.safeParse({
+    templateId: 'mock_template',
+    name: 'Mock template',
+    owner: 'security',
+    templateVersion: 1,
+    deletedAt: null,
+    isLatest: true,
+    latestVersion: 1,
+    definition: parseYaml(templateDefinition),
+  });
+
+  const { form } = useForm<{}>({
+    defaultValue: {},
+    options: { stripEmptyFields: false },
+  });
+
+  if (!parseResult.success) {
+    return <>{`Invalid templateDefinition`}</>;
+  }
+
+  const {
+    data: {
+      definition: { fields },
+    },
+  } = parseResult;
+
+  return (
+    <FormProvider form={form}>
+      {fields.map((field) => {
+        const Control = controlRegistry[field.control] as FC<Record<string, unknown>>;
+        const controlProps = { ...field, value: values[field.name] };
+
+        return <Control key={field.name} {...controlProps} />;
+      })}
+    </FormProvider>
+  );
 };
 
-describe('controlRegistry', () => {});
+describe('controlRegistry', () => {
+  it('should render all the controls specified in the template', () => {
+    render(
+      <TestTemplatedFormRenderer
+        templateDefinition={exampleCaseTemplate}
+        values={{ severity: 'low' }}
+      />
+    );
+    expect(screen.getByTestId('select')).toBeInTheDocument();
+  });
+});

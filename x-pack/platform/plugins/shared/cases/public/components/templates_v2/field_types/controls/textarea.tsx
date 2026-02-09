@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';
+import type { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const Textarea = (props: z.infer<typeof TextareaFieldSchema>) => {
   return null;

@@ -6,9 +6,22 @@
  */
 
 import type { z } from '@kbn/zod';
-import { InputTextFieldSchema } from '../../../../../common/types/domain/template/fields';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components';
+import React from 'react';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components/fields/text_field';
+import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { type InputTextFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const InputText = (props: z.infer<typeof InputTextFieldSchema>) => {
-  return null;
+  return (
+    <UseField
+      key={props.name}
+      path={`${CASE_EXTENDED_FIELDS}.${props.name}_as_${props.type}`}
+      component={TextField}
+      componentProps={{
+        label: props.label,
+      }}
+    />
+  );
 };
 InputText.displayName = 'InputText';

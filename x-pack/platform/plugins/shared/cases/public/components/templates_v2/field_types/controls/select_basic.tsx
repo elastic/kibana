@@ -5,10 +5,30 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { z } from '@kbn/zod';
-import { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
+
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components/use_field';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components/fields/select_field';
+import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import type { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const SelectBasic = (props: z.infer<typeof SelectBasicFieldSchema>) => {
-  return null;
+  return (
+    <UseField
+      key={props.name}
+      path={`${CASE_EXTENDED_FIELDS}.${props.name}_as_${props.type}`}
+      component={SelectField}
+      componentProps={{
+        label: props.label,
+        euiFieldProps: {
+          options: props.metadata.options.map((option) => ({
+            value: option,
+            text: option,
+          })),
+        },
+      }}
+    />
+  );
 };
-SelectBasic.displayName = 'SelectBasic ';
+SelectBasic.displayName = 'SelectBasic';
