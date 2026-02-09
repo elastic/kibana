@@ -128,17 +128,26 @@ export function useDataSourceBrowser({
       const editor = editorRef.current;
       if (!model || !editor) return;
 
+      // Remember where the browser was opened from. This affects insertion behavior:
+      // - `Badge`: we always insert at the beginning of the sources list
+      // - `Autocomplete`: we insert at (and then advance) the cursor position
       openModeRef.current = options?.openedFrom ?? IndicesBrowserOpenMode.Autocomplete;
 
+      // Snapshot current selection state at open time.
+      // The browser UI is driven by `selectedSourcesRef.current`.
       const fullText = model.getValue() || '';
       const indexPattern = getIndexPatternFromESQLQuery(fullText);
       const currentSelectedSources = indexPattern ? indexPattern.split(',').filter(Boolean) : [];
       selectedSourcesRef.current = currentSelectedSources;
 
+      // Capture cursor offset at the moment we open the popover.
+      // We keep it in a ref because the actual edits happen later (on selection changes).
       const cursorPosition = editor.getPosition();
       openCursorOffsetRef.current = cursorPosition ? model.getOffsetAt(cursorPosition) : undefined;
 
-      // Get the range of the sources
+      // Compute the "main source command" context (FROM/TS, the existing sources range, and where
+      // we'd like to insert a newly-selected source) from the query text.
+      // This is extracted as a pure helper so it can be unit-tested independently of Monaco.
       const sourceCtx = getSourceCommandContextFromQuery({
         queryText: fullText,
         cursorOffset: openCursorOffsetRef.current,
@@ -150,6 +159,8 @@ export function useDataSourceBrowser({
         typeof sourceCtx.sourcesStartOffset === 'number' &&
         typeof sourceCtx.sourcesEndOffset === 'number'
       ) {
+        // There are existing sources: store the sources range so insert/remove operations can
+        // preserve user formatting by doing minimal edits inside that span.
         sourcesRangeRef.current = getRangeFromOffsets(
           model,
           sourceCtx.sourcesStartOffset,
@@ -164,8 +175,13 @@ export function useDataSourceBrowser({
         );
       }
 
+      // This is the "active" insertion anchor. For badge mode it stays at the beginning, while
+      // in autocomplete mode we advance it after each insert so repeated inserts happen naturally
+      // at the caret.
       insertionOffsetRef.current = sourceCtx.insertionOffset;
 
+      // If callers already have sources (e.g. from autocomplete context) we can reuse them to avoid
+      // an extra async fetch, improving responsiveness.
       const preloadedSources = options?.preloadedSources;
       const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;
       const shouldUsePreloaded = Boolean(
@@ -193,7 +209,7 @@ export function useDataSourceBrowser({
         }
       }
 
-      // Update the popover position
+      // Position the popover near the cursor before opening it.
       updatePopoverPosition();
 
       setIsDataSourceBrowserOpen(true);
@@ -207,6 +223,8 @@ export function useDataSourceBrowser({
       const model = editorModel.current;
       const insertAtOffset = insertionOffsetRef.current;
 
+      // The browser UI emits single-item changes (select/deselect). Reflect that in our local
+      // selection ref first
       const previous = selectedSourcesRef.current;
       const newSelectedSources =
         change === DataSourceSelectionChange.Add
@@ -222,6 +240,8 @@ export function useDataSourceBrowser({
         return;
       }
 
+      // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
+      // list so we preserve user formatting, spacing, and any unknown sources.
       const applyDelete = (start: number, end: number) => {
         editor.executeEdits('dataSourceBrowser', [
           {
@@ -230,6 +250,9 @@ export function useDataSourceBrowser({
           },
         ]);
 
+        // Keep the insertion anchor stable after a deletion:
+        // - if we deleted text before the anchor, shift it left
+        // - if we deleted across the anchor, clamp it to the deletion start
         const deletionLength = end - start;
         if (insertionOffsetRef.current != null) {
           if (insertionOffsetRef.current > end) insertionOffsetRef.current -= deletionLength;
@@ -245,18 +268,25 @@ export function useDataSourceBrowser({
           },
         ]);
 
+        // In autocomplete mode we want the "next insertion" to happen after what we just inserted,
+        // so repeated selections feel natural. In badge mode, we keep inserting at the beginning.
         if (openModeRef.current === IndicesBrowserOpenMode.Autocomplete) {
           insertionOffsetRef.current = at + text.length;
         }
       };
 
       if (change === DataSourceSelectionChange.Remove) {
+        // Removal is location-aware: remove the target source token plus the adjacent comma
+        // according to our "front vs middle/end" rules, while preserving surrounding whitespace.
         const currentText = model.getValue() || '';
         const currentItems = getLocatedSourceItemsFromQuery(currentText);
         const range = computeRemovalRange(currentText, currentItems, sourceName);
         if (!range) return;
         applyDelete(range.start, range.end);
       } else {
+        // Insertion is also location-aware. For badge mode, we insert at the beginning of the
+        // sources list; for autocomplete mode, we insert at the cursor and add leading/trailing
+        // commas only when needed based on surrounding tokens.
         const currentText = model.getValue() || '';
         const at = insertionOffsetRef.current ?? insertAtOffset;
         const currentItems = getLocatedSourceItemsFromQuery(currentText).map(({ min, max }) => ({
