@@ -34,8 +34,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('EIS Models (dynamically configured)', function () {
-      // 12 min timeout (10 min base + 20% buffer). Currently ~7 min for 13 models. Manually increase if models grow.
-      this.timeout(720000);
+      // 10 min per-test timeout. Increase if models grow significantly.
+      this.timeout(600000);
 
       if (eisModels.length === 0) {
         it('should skip - no EIS models discovered', function () {
