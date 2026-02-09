@@ -9,7 +9,6 @@ import type { TCPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
-import { publicTimeoutFormatter } from './timeout';
 import { tlsFormatters } from './tls';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
@@ -27,5 +26,4 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
   [ConfigKey.METADATA]: null,
-  [ConfigKey.TIMEOUT]: publicTimeoutFormatter,
 };

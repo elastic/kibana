@@ -9,7 +9,6 @@ import type { HTTPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
-import { publicTimeoutFormatter } from './timeout';
 import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter } from './formatting_utils';
 
@@ -44,5 +43,4 @@ export const httpFormatters: HTTPFormatMap = {
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.REQUEST_BODY_CHECK]: (fields) => fields[ConfigKey.REQUEST_BODY_CHECK]?.value || null,
   [ConfigKey.PROXY_HEADERS]: objectFormatter,
-  [ConfigKey.TIMEOUT]: publicTimeoutFormatter,
 };

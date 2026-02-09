@@ -51,7 +51,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: stringToObjectFormatter,
-  [ConfigKey.TIMEOUT]: null,
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayFormatter,
   // @ts-expect-error upgrade typescript v5.1.6
