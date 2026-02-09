@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DIMENSIONS_COLUMN = '__DIMENSIONS__';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+
+  return {
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('.')],
+  };
+}
