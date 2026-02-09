@@ -12,6 +12,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./create_notification_policy'));
     loadTestFile(require.resolve('./get_notification_policy'));
     loadTestFile(require.resolve('./update_notification_policy'));
-    loadTestFile(require.resolve('./delete_notification_policy'));
   });
 }

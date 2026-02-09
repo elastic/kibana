@@ -20,6 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Update Notification Policy API', function () {
     let roleAuthc: RoleCredentials;
     let createdPolicyId: string;
+    let currentVersion: string;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
@@ -30,9 +31,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'original-policy', workflow_id: 'original-workflow-id' });
+        .send({
+          name: 'original-policy',
+          description: 'original-policy description',
+          workflow_id: 'original-workflow-id',
+        });
 
       createdPolicyId = createResponse.body.id;
+      currentVersion = createResponse.body.version;
     });
 
     after(async () => {
@@ -45,13 +51,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'updated-policy', workflow_id: 'updated-workflow-id' });
+        .send({
+          name: 'updated-policy',
+          workflow_id: 'updated-workflow-id',
+          version: currentVersion,
+        });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(createdPolicyId);
+      expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('updated-policy');
       expect(response.body.workflow_id).to.be('updated-workflow-id');
       expect(response.body.updatedAt).to.be.a('string');
+
+      currentVersion = response.body.version;
     });
 
     it('should update only name when workflow_id is not provided', async () => {
@@ -59,11 +72,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'only-name-updated' });
+        .send({ name: 'only-name-updated', version: currentVersion });
 
       expect(response.status).to.be(200);
+      expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('only-name-updated');
       expect(response.body.workflow_id).to.be('updated-workflow-id');
+
+      currentVersion = response.body.version;
     });
 
     it('should return 404 when updating a non-existent notification policy', async () => {
@@ -71,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'some-name' });
+        .send({ name: 'some-name', version: 'WzEsMV0=' });
 
       expect(response.status).to.be(404);
     });

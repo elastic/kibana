@@ -35,11 +35,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'my-policy', workflow_id: 'my-workflow-id' });
+        .send({
+          name: 'my-policy',
+          description: 'my-policy description',
+          workflow_id: 'my-workflow-id',
+        });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be.a('string');
+      expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('my-policy');
+      expect(response.body.description).to.be('my-policy description');
       expect(response.body.workflow_id).to.be('my-workflow-id');
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
@@ -52,11 +58,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${customId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'another-policy', workflow_id: 'another-workflow-id' });
+        .send({
+          name: 'another-policy',
+          description: 'another-policy description',
+          workflow_id: 'another-workflow-id',
+        });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(customId);
       expect(response.body.name).to.be('another-policy');
+      expect(response.body.description).to.be('another-policy description');
       expect(response.body.workflow_id).to.be('another-workflow-id');
     });
 
@@ -68,7 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'policy-1', workflow_id: 'workflow-1' });
+        .send({ name: 'policy-1', description: 'policy-1 description', workflow_id: 'workflow-1' });
 
       expect(firstResponse.status).to.be(200);
 
@@ -77,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'policy-2', workflow_id: 'workflow-2' });
+        .send({ name: 'policy-2', description: 'policy-2 description', workflow_id: 'workflow-2' });
 
       expect(secondResponse.status).to.be(409);
     });
@@ -87,7 +98,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'my-workflow-id' });
+        .send({ description: 'my-policy description', workflow_id: 'my-workflow-id' });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('should return 400 when description is missing', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ name: 'my-policy', workflow_id: 'my-workflow-id' });
 
       expect(response.status).to.be(400);
     });
@@ -97,7 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'my-policy' });
+        .send({ name: 'my-policy', description: 'my-policy description' });
 
       expect(response.status).to.be(400);
     });

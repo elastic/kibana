@@ -7,19 +7,24 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import { NotificationPolicyClient } from './notification_policy_client';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
+import type { UserService } from '../services/user_service/user_service';
+import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import { NotificationPolicyClient } from './notification_policy_client';
 
 describe('NotificationPolicyClient', () => {
-  const { notificationPolicySavedObjectService, mockSavedObjectsClient } =
-    createNotificationPolicySavedObjectService();
-
-  const { userService, userProfile } = createUserService();
+  let client: NotificationPolicyClient;
+  let notificationPolicySavedObjectService: NotificationPolicySavedObjectService;
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let userService: UserService;
+  let userProfile: jest.Mocked<UserProfileServiceStart>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -27,6 +32,12 @@ describe('NotificationPolicyClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    ({ notificationPolicySavedObjectService, mockSavedObjectsClient } =
+      createNotificationPolicySavedObjectService());
+    ({ userService, userProfile } = createUserService());
+
+    client = new NotificationPolicyClient(notificationPolicySavedObjectService, userService);
 
     userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
 
@@ -51,13 +62,8 @@ describe('NotificationPolicyClient', () => {
     jest.useRealTimers();
   });
 
-  function createClient() {
-    return new NotificationPolicyClient(notificationPolicySavedObjectService, userService);
-  }
-
   describe('createNotificationPolicy', () => {
     it('creates a notification policy with correct attributes', async () => {
-      const client = createClient();
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-id-1',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
@@ -105,7 +111,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('creates a notification policy without custom id', async () => {
-      const client = createClient();
       mockSavedObjectsClient.create.mockImplementationOnce(async (_type, _attrs, options) => {
         return {
           id: (options?.id ?? 'auto-generated-id') as string,
@@ -144,7 +149,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('throws 409 conflict when id already exists', async () => {
-      const client = createClient();
       mockSavedObjectsClient.create.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createConflictError(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
@@ -169,8 +173,6 @@ describe('NotificationPolicyClient', () => {
 
   describe('getNotificationPolicy', () => {
     it('returns a notification policy by id', async () => {
-      const client = createClient();
-
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
@@ -203,7 +205,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('throws 404 when notification policy is not found', async () => {
-      const client = createClient();
       mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
@@ -221,8 +222,6 @@ describe('NotificationPolicyClient', () => {
 
   describe('updateNotificationPolicy', () => {
     it('updates a notification policy successfully', async () => {
-      const client = createClient();
-
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
@@ -281,7 +280,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('throws 404 when notification policy is not found', async () => {
-      const client = createClient();
       mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
@@ -300,8 +298,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('throws 409 conflict when version is stale', async () => {
-      const client = createClient();
-
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
@@ -339,8 +335,6 @@ describe('NotificationPolicyClient', () => {
 
   describe('deleteNotificationPolicy', () => {
     it('deletes a notification policy successfully', async () => {
-      const client = createClient();
-
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
@@ -367,7 +361,6 @@ describe('NotificationPolicyClient', () => {
     });
 
     it('throws 404 when notification policy is not found', async () => {
-      const client = createClient();
       mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
