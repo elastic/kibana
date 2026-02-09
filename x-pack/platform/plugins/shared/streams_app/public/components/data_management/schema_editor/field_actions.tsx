@@ -46,6 +46,11 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {},
       targetField: SchemaField = field
     ) => {
+      if (!Streams.ingest.all.Definition.is(stream)) {
+        return;
+      }
+      let overlay: ReturnType<typeof core.overlays.openFlyout>;
+
       const handleGoToField = (fieldName: string) => {
         overlay.close();
         const targetFieldObj = fields.find((f) => f.name === fieldName);
@@ -54,7 +59,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
       };
 
-      const overlay = core.overlays.openFlyout(
+      overlay = core.overlays.openFlyout(
         toMountPoint(
           <StreamsAppContextProvider context={context}>
             <SchemaEditorFlyout
