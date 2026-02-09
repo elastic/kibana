@@ -57,7 +57,7 @@ describe('useAttackDetailsAssignees', () => {
     mockUseAttackDetailsContext.mockReturnValue({
       attackId: 'attack-123',
       refetch: mockRefetch,
-    } as ReturnType<typeof useAttackDetailsContext>);
+    } as unknown as ReturnType<typeof useAttackDetailsContext>);
     mockUseHeaderData.mockReturnValue({
       alertIds: ['alert-1', 'alert-2'],
       assignees: ['uid-1'],
