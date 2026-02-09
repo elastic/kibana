@@ -121,7 +121,6 @@ async function fetchAlerts(
 
         const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
         // Format alert using the registered rule type's formatAlert function if available,
-        // otherwise use expandFlattenedAlert to convert flat ECS keys to nested objects
         if (registeredRuleType?.alerts?.formatAlert) {
           alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
         }
