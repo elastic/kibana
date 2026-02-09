@@ -320,12 +320,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
           const results = await Promise.all(
             typedInput.fileIds.map(async (fileId) => {
               try {
-                const response = await ctx.client.get(
-                  `${GOOGLE_DRIVE_API_BASE}/files/${fileId}`,
-                  {
-                    params: { fields: metadataFields },
-                  }
-                );
+                const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
+                  params: { fields: metadataFields },
+                });
                 return response.data;
               } catch (error: unknown) {
                 throwGoogleDriveError(error);

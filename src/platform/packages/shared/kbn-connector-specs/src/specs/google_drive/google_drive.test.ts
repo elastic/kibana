@@ -49,17 +49,14 @@ describe('GoogleDriveConnector', () => {
         pageSize: 250,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://www.googleapis.com/drive/v3/files',
-        {
-          params: {
-            q: "fullText contains 'report'",
-            pageSize: 250,
-            fields:
-              'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
-          },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/files', {
+        params: {
+          q: "fullText contains 'report'",
+          pageSize: 250,
+          fields:
+            'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+        },
+      });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
@@ -81,18 +78,15 @@ describe('GoogleDriveConnector', () => {
         pageToken: 'next-page-token',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://www.googleapis.com/drive/v3/files',
-        {
-          params: {
-            q: "name contains 'test'",
-            pageSize: 10,
-            pageToken: 'next-page-token',
-            fields:
-              'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
-          },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/files', {
+        params: {
+          q: "name contains 'test'",
+          pageSize: 10,
+          pageToken: 'next-page-token',
+          fields:
+            'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+        },
+      });
     });
 
     it('should cap pageSize at 1000', async () => {
@@ -189,17 +183,14 @@ describe('GoogleDriveConnector', () => {
         includeTrashed: false,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://www.googleapis.com/drive/v3/files',
-        {
-          params: {
-            q: "'root' in parents and trashed=false",
-            pageSize: 250,
-            fields:
-              'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
-          },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/files', {
+        params: {
+          q: "'root' in parents and trashed=false",
+          pageSize: 250,
+          fields:
+            'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+        },
+      });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
@@ -437,8 +428,7 @@ describe('GoogleDriveConnector', () => {
         'https://www.googleapis.com/drive/v3/files/sheet-1/export',
         {
           params: {
-            mimeType:
-              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           },
           responseType: 'arraybuffer',
         }
@@ -598,12 +588,9 @@ describe('GoogleDriveConnector', () => {
       }
       const result = await GoogleDriveConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://www.googleapis.com/drive/v3/about',
-        {
-          params: { fields: 'user' },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://www.googleapis.com/drive/v3/about', {
+        params: { fields: 'user' },
+      });
       expect(result).toEqual({
         ok: true,
         message: 'Successfully connected to Google Drive API as user@example.com',
