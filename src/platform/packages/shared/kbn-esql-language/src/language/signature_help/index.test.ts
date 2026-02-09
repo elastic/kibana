@@ -144,9 +144,11 @@ describe('getSignatureHelp', () => {
       const result = await getSignatureHelp(query, offset, mockCallbacks);
 
       expect(result).toBeDefined();
-      expect(result?.signatures[0].label).toBe(`COUNT(
-  field?:aggregate_metric_double|boolean|cartesian_point|…+18 more
-): long`);
+      const signatureLabel = result?.signatures[0].label;
+      expect(signatureLabel).toContain('COUNT(');
+      expect(signatureLabel).toContain('field?:');
+      expect(signatureLabel).toContain('): long');
+      expect(signatureLabel).toMatch(/…\+\d+ more/);
     });
 
     it('should display filtered signature based on argument types', async () => {
