@@ -61,7 +61,7 @@ export const fromSavedObjectTabToTabState = ({
     previousAppState: existingTab?.appState ?? appState,
     globalState: {
       timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-      refreshInterval: tab.timeRange
+      refreshInterval: tab.timeRestore
         ? tab.refreshInterval
         : existingTab?.globalState.refreshInterval,
     },
