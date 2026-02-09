@@ -12,7 +12,7 @@
  * a polyfill until Kibana fully migrates to Zod v4, which has native
  * fromJSONSchema support.
  */
-import { z } from 'zod/v4';
+import { z } from 'zodv4';
 import type { JsonSchema } from './types';
 import { extractMeta } from './meta_utils';
 import { parseString } from './parse_string';

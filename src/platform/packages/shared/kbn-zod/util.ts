@@ -8,7 +8,7 @@
  */
 
 import * as z3 from 'zod/v3';
-import type * as z4 from 'zod/v4';
+import type * as z4 from 'zodv4';
 
 export function isZod(value: unknown): value is z3.ZodTypeAny | z4.ZodType {
   // Check for v3

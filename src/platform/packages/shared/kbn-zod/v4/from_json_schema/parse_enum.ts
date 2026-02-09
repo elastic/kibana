@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from 'zod/v4';
+import { z } from 'zodv4';
 import type { JsonSchema } from './types';
 
 export function parseEnum(schema: JsonSchema): z.ZodType {
