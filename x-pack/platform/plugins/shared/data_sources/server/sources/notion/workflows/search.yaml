@@ -1,0 +1,22 @@
+version: '1'
+name: 'sources.notion.search'
+description: 'Search for pages or data sources that contain a given string in the title'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query_string
+    type: string
+  - name: query_object
+    type: choice
+    options:
+      - "page"
+      - "data_source"
+steps:
+  - name: search-page-by-title
+    type: notion.searchPageOrDSByTitle
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{inputs.query_string}}"
+      queryObjectType: "${{inputs.query_object}}"

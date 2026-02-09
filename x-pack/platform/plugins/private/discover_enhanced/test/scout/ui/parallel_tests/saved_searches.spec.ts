@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
 

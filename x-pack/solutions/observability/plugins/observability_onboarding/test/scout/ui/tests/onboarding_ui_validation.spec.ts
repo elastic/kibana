@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/247685
