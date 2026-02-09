@@ -26,7 +26,7 @@ export function getTransformOut() {
     if (savedObjectRef) {
       return {
         ...state,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       };
     }
 

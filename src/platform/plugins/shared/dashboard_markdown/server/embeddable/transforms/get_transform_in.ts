@@ -20,15 +20,15 @@ export function getTransformIn() {
     references: Reference[];
   } {
     // by ref
-    if ((state as MarkdownByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as MarkdownByReferenceState;
+    if ((state as MarkdownByReferenceState).ref_id) {
+      const { ref_id, ...rest } = state as MarkdownByReferenceState;
       return {
         state: rest as StoredMarkdownEmbeddableState,
         references: [
           {
             name: MARKDOWN_SAVED_OBJECT_REF_NAME,
             type: MARKDOWN_SAVED_OBJECT_TYPE,
-            id: savedObjectId,
+            id: ref_id,
           },
         ],
       };

@@ -11,8 +11,7 @@ import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 import type { MarkdownByReferenceState, MarkdownByValueState } from '..';
 import type { MarkdownSavedObjectAttributes } from '../markdown_saved_object';
 
-type StoredMarkdownByReferenceState = Omit<MarkdownByReferenceState, 'savedObjectId'> &
-  SerializedTitles;
+type StoredMarkdownByReferenceState = Omit<MarkdownByReferenceState, 'ref_id'> & SerializedTitles;
 
 type StoredMarkdownByValueState = Omit<MarkdownByValueState, 'attributes'> & {
   attributes: MarkdownSavedObjectAttributes;

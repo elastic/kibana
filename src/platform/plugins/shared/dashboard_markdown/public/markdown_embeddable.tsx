@@ -61,7 +61,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const savedObjectId = (initialState as MarkdownByReferenceState).savedObjectId;
+    const savedObjectId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = savedObjectId !== undefined;
     const initialStoredState = isByReference
       ? await loadFromLibrary(savedObjectId)
@@ -95,7 +95,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const serializeByReference = (libraryId: string) => {
       return {
         ...titleManager.getLatestState(),
-        savedObjectId: libraryId,
+        ref_id: libraryId,
       };
     };
 
@@ -120,7 +120,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         markdownStateManager.anyStateChange$
       ).pipe(map(() => undefined)),
       getComparators: () => {
-        return { ...titleComparators, ...markdownComparators, savedObjectId: 'skip' };
+        return { ...titleComparators, ...markdownComparators, ref_id: 'skip' };
       },
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
