@@ -10,6 +10,9 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
+/**
+ * IMPORTANT: These tests only work in 'classic' navigation mode. Once https://github.com/elastic/kibana/pull/251436 is merged, we might need to revisit this and make them work in 'solution' navigation as well.
+ */
 test.describe('GlobalSearchBar', { tag: tags.ESS_ONLY }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
