@@ -52,6 +52,7 @@ describe('Quick search visor', () => {
       isSpaceReduced: false,
       isVisible: true,
       onUpdateAndSubmitQuery: jest.fn(),
+      onToggleVisor: jest.fn(),
     };
   });
 

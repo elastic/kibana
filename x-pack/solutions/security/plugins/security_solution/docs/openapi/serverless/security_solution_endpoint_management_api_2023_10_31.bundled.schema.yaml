@@ -397,6 +397,64 @@ paths:
       summary: Terminate a process
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/memory_dump:
+    post:
+      description: Generates memory dumps on the targeted host.
+      operationId: EndpointGenerateMemoryDump
+      requestBody:
+        content:
+          application/json:
+            examples:
+              ProcessMemoryDump:
+                summary: Generate a memory dump from the host machine
+                value:
+                  agent_type: endpoint
+                  comment: Generating memory dump for investigation
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    entity_id: abc123
+                    type: process
+            schema:
+              $ref: '#/components/schemas/MemoryDumpRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                MemoryDumpSuccessResponse:
+                  summary: Memory dump action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: memory-dump
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      parameters:
+                        entity_id: abc123
+                        type: process
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
+      summary: Generate a memory dump from the host machine
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -834,6 +892,7 @@ components:
           get-file: '#/components/schemas/GetFile'
           isolate: '#/components/schemas/Isolate'
           kill-process: '#/components/schemas/KillProcess'
+          memory-dump: '#/components/schemas/MemoryDump'
           running-processes: '#/components/schemas/RunningProcesses'
           runscript: '#/components/schemas/Runscript'
           scan: '#/components/schemas/Scan'
@@ -853,6 +912,7 @@ components:
         - $ref: '#/components/schemas/Unisolate'
         - $ref: '#/components/schemas/SuspendProcess'
         - $ref: '#/components/schemas/RunningProcesses'
+        - $ref: '#/components/schemas/MemoryDump'
     ActionStateSuccessResponse:
       type: object
       properties:
@@ -927,6 +987,7 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+        - fileSize
       example: updatedAt
       type: string
     Cancel:
@@ -1032,6 +1093,7 @@ components:
         - scan
         - runscript
         - cancel
+        - memory-dump
       minLength: 1
       type: string
     Commands:
@@ -1863,6 +1925,153 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    MemoryDump:
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        description: >-
+                          The free space on the host machine in bytes after the
+                          memory dump is written to disk
+                        type: number
+                      file_size:
+                        description: The size of the memory dump compressed file in bytes
+                        type: string
+                      path:
+                        description: >-
+                          The path to the memory dump compressed file on the
+                          host machine
+                        type: string
+                    title: Memory dump output
+                    type: object
+              type: object
+            parameters:
+              oneOf:
+                - properties:
+                    type:
+                      description: Kernel-level memory dump
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                  title: Kernel memory dump
+                  type: object
+                - properties:
+                    pid:
+                      description: The process ID (PID)
+                      type: number
+                    type:
+                      description: Process-level memory dump using a process ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                  title: Process memory dump with PID
+                  type: object
+                - properties:
+                    entity_id:
+                      description: The process entity ID
+                      type: string
+                    type:
+                      description: Process-level memory dump using an entity ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+                  title: Process memory dump with entity ID
+                  type: object
+          required:
+            - parameters
+    MemoryDumpRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - description: Dump the entire kernel memory.
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                - description: Dump the entire memory of a process using the PID.
+                  type: object
+                  properties:
+                    pid:
+                      type: number
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                - description: Dump the entire memory of a process using the entity ID.
+                  type: object
+                  properties:
+                    entity_id:
+                      type: string
+                    type:
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+          required:
+            - parameters
     MetadataListResponse:
       example:
         data:

@@ -113,6 +113,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+    expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
     expect(await screen.findByTestId('maximum-case-to-open-input')).toBeInTheDocument();
   });
 
@@ -195,6 +196,39 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
       expect(screen.queryByText('host.geo.location')).not.toBeInTheDocument();
+    });
+
+    it('renders the auto push case option correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const props = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[3].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...props} />);
+
+      const autoPushCase = await screen.findByTestId('auto-push-case');
+      expect(autoPushCase).not.toBeChecked();
+
+      // click and observe update
+      await user.click(autoPushCase);
+      expect(editAction.mock.calls[0][1].autoPushCase).toEqual(true);
     });
 
     it('updates grouping by field', async () => {

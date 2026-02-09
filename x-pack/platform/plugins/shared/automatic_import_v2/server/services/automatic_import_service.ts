@@ -8,6 +8,7 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  Logger,
   LoggerFactory,
   SavedObject,
   SavedObjectsDeleteOptions,
@@ -31,7 +32,11 @@ import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import type { DataStreamTaskParams } from './task_manager/task_manager_service';
 import { TaskManagerService } from './task_manager/task_manager_service';
-import type { CreateDataStreamParams, CreateUpdateIntegrationParams } from '../routes/types';
+import type {
+  ApproveIntegrationParams,
+  CreateDataStreamParams,
+  CreateUpdateIntegrationParams,
+} from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
@@ -45,6 +50,7 @@ export class AutomaticImportService {
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
+  private logger: Logger;
 
   constructor(
     loggerFactory: LoggerFactory,
@@ -54,6 +60,7 @@ export class AutomaticImportService {
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
+    this.logger = loggerFactory.get('automaticImportService');
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
     this.samplesIndexService = new AutomaticImportSamplesIndexService(loggerFactory);
 
@@ -78,13 +85,16 @@ export class AutomaticImportService {
 
   public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-
     const { authenticatedUser, integrationParams } = params;
 
     try {
       await this.savedObjectService.insertIntegration(integrationParams, authenticatedUser);
+      this.logger.debug(`Integration ${integrationParams.integrationId} created successfully`);
     } catch (error) {
       if (ErrorUtils.isIntegrationAlreadyExistsError(error)) {
+        this.logger.debug(
+          `Integration ${integrationParams.integrationId} already exists, updating it`
+        );
         // Build a full IntegrationAttributes object for the saved objects update API
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
@@ -107,6 +117,7 @@ export class AutomaticImportService {
         };
 
         await this.savedObjectService.updateIntegration(updateData, expectedVersion);
+        this.logger.debug(`Integration ${integrationParams.integrationId} updated successfully`);
       } else {
         throw error;
       }
@@ -184,18 +195,52 @@ export class AutomaticImportService {
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
+  public async approveIntegration(params: ApproveIntegrationParams): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const { integrationId, authenticatedUser, version } = params;
+
+    const existing = await this.savedObjectService.getIntegration(integrationId);
+
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    if (dataStreams.length === 0) {
+      throw new Error(`Cannot approve integration ${integrationId} with no data streams`);
+    }
+    const hasIncompleteDataStreams = dataStreams.some(
+      (dataStream) => dataStream.job_info?.status !== TASK_STATUSES.completed
+    );
+    if (hasIncompleteDataStreams) {
+      throw new Error(
+        `Cannot approve integration ${integrationId} until all data streams are completed`
+      );
+    }
+
+    const updateData: IntegrationAttributes = {
+      ...existing,
+      status: TASK_STATUSES.approved,
+      last_updated_by: authenticatedUser.username,
+      last_updated_at: new Date().toISOString(),
+      metadata: {
+        ...existing.metadata,
+      },
+    };
+
+    // Update integration status and bump semantic version (defaults to patch).
+    await this.savedObjectService.updateIntegration(updateData, version);
+  }
+
   public async createDataStream(
     params: CreateDataStreamParams,
     request: KibanaRequest
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId } = params;
+    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions } = params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
+      ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
       dataStreamTaskParams,

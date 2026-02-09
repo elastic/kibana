@@ -7,7 +7,7 @@
 
 import { getSeverity } from '../../../../common/anomaly_detection';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { getServiceHealthStatus } from '../../../../common/service_health_status';
+import { getServiceAnomaliesHealthStatus } from '../../../../common/service_health_status';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
@@ -45,7 +45,7 @@ export async function getAnomalyHealthStatuses({
 
   return anomalies.serviceAnomalies.map((anomalyStats) => {
     const severity = getSeverity(anomalyStats.anomalyScore);
-    const anomalyHealthStatus = getServiceHealthStatus({ severity });
+    const anomalyHealthStatus = getServiceAnomaliesHealthStatus({ severity });
     return {
       serviceName: anomalyStats.serviceName,
       anomalyHealthStatus,

@@ -446,6 +446,47 @@ const getAvailableProcessors: (
       );
     },
   },
+  join: {
+    type: 'join' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.joinInputDisplay',
+      {
+        defaultMessage: 'Join',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.joinHelpText"
+          defaultMessage="{joinLink} into a single field by inserting a delimiter (for example: {example1} or {example2}) between the field values."
+          values={{
+            joinLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsJoinLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.join}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.joinLinkLabel', {
+                  defaultMessage: 'Join multiple fields',
+                })}
+              </EuiLink>
+            ),
+            example1: (
+              <>
+                <EuiCode>,</EuiCode>
+              </>
+            ),
+            example2: (
+              <>
+                <EuiCode>|</EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}

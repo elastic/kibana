@@ -14,6 +14,7 @@ import { validate } from './validate';
 import type { ICommandContext } from '../types';
 import { columnsAfter } from './columns_after';
 import { summary } from './summary';
+import { Commands } from '../../definitions/keywords';
 
 const rerankCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -23,7 +24,7 @@ const rerankCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const rerankCommand: ICommand = {
-  name: 'rerank',
+  name: Commands.RERANK,
   methods: rerankCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.rerankDoc', {

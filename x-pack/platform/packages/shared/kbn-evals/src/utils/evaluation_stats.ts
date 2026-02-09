@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { keyBy } from 'lodash';
 import { mean, median, deviation, min, max } from 'd3';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import type { RanExperiment } from '../types';
 
 export interface EvaluatorStats {
   mean: number;
@@ -64,15 +62,10 @@ export function calculateEvaluatorStats(scores: number[], totalExamples: number)
  * Process experiments into dataset scores with aggregated evaluator scores
  */
 export async function processExperimentsToDatasetScores(
-  experiments: RanExperiment[],
-  phoenixClient: KibanaPhoenixClient
+  experiments: RanExperiment[]
 ): Promise<DatasetScore[]> {
-  const datasetIds = experiments.map((experiment) => experiment.datasetId);
-  const datasetInfos = await phoenixClient.getDatasets(datasetIds);
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
-
   return experiments.map((experiment) => {
-    const { datasetId, evaluationRuns, runs, id } = experiment;
+    const { datasetId, datasetName, evaluationRuns, runs, id } = experiment;
     const numExamples = runs ? Object.keys(runs).length : 0;
 
     const evaluatorScores = new Map<string, number[]>();
@@ -89,7 +82,7 @@ export async function processExperimentsToDatasetScores(
 
     return {
       id: datasetId,
-      name: datasetInfosById[datasetId]?.name ?? datasetId,
+      name: datasetName ?? datasetId,
       numExamples,
       evaluatorScores,
       experimentId: id ?? '',
@@ -159,14 +152,11 @@ export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string
 /**
  * Complete evaluation results processing - composition function for common workflow
  */
-export async function buildEvaluationResults(
-  experiments: RanExperiment[],
-  phoenixClient: KibanaPhoenixClient
-): Promise<{
+export async function buildEvaluationResults(experiments: RanExperiment[]): Promise<{
   datasetScores: DatasetScore[];
   overallStats: Map<string, EvaluatorStats>;
 }> {
-  const datasetScores = await processExperimentsToDatasetScores(experiments, phoenixClient);
+  const datasetScores = await processExperimentsToDatasetScores(experiments);
   const overallStats = calculateOverallStats(datasetScores);
 
   return { datasetScores, overallStats };

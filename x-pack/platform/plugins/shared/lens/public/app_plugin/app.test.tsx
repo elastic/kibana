@@ -186,9 +186,9 @@ describe('Lens App', () => {
           },
           selectedLayerId: null,
         },
-        activeDatasourceId: 'testDatasource',
+        activeDatasourceId: 'formBased',
         datasourceStates: {
-          testDatasource: {
+          formBased: {
             isLoading: false,
             state: { datasourceState: true },
           },
@@ -225,9 +225,9 @@ describe('Lens App', () => {
           query: preloadedState.query,
           filters: preloadedState.filters,
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: preloadedState.datasourceStates.testDatasource.state,
+              state: preloadedState.datasourceStates.formBased.state,
             },
           },
         })
@@ -352,8 +352,8 @@ describe('Lens App', () => {
       await renderApp({
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isTimeBased: jest.fn((_state, _indexPatterns) => true),
           },
         },
@@ -373,8 +373,8 @@ describe('Lens App', () => {
       await renderApp({
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isTimeBased: jest.fn((_state, _indexPatterns) => false),
           },
         },
@@ -1403,7 +1403,7 @@ describe('Lens App', () => {
           state: {
             ...localDoc.state,
             datasourceStates: {
-              testDatasource: 'datasource',
+              formBased: 'datasource',
             },
             visualization: {},
           },
@@ -1421,8 +1421,8 @@ describe('Lens App', () => {
         preloadedState,
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isEqual: jest.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
           },
         },

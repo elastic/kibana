@@ -120,8 +120,19 @@ export class StreamsApp {
     await this.page.getByTestId('dataQualityTab').click();
   }
 
+  async clickRetentionTab() {
+    await this.page.getByTestId('retentionTab').click();
+  }
+
   async clickRootBreadcrumb() {
     await this.page.getByTestId('breadcrumb first').click();
+  }
+
+  async clickStreamsBreadcrumb() {
+    await this.page
+      .locator('a[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: /^Streams$/ })
+      .click();
   }
 
   // Streams table utility methods
@@ -130,12 +141,13 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    // Use .first() because some pages (like Retention) may have multiple date pickers
     await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
       `Date picker 'start date' is incorrect`
     ).toHaveText(expectedRange.from);
     await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
   }
@@ -158,7 +170,7 @@ export class StreamsApp {
     ).toContainText(expectedIlmPolicy);
   }
 
-  async verifyDiscoverButtonLink(streamName: string) {
+  async verifyDiscoverButtonLink(streamName: string, sourceCommand: 'FROM' | 'TS' = 'FROM') {
     const locator = this.page.locator(
       `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
     );
@@ -170,13 +182,36 @@ export class StreamsApp {
     }
 
     // Expect encoded ESQL snippet to appear (basic validation)
-    // 'FROM <streamName>' should appear URL-encoded
-    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    // '<sourceCommand> <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`${sourceCommand} ${streamName}`);
     if (!href.includes(expectedFragment)) {
       throw new Error(
         `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
       );
     }
+  }
+
+  async getDiscoverButtonLinkSourceCommand(streamName: string): Promise<'FROM' | 'TS' | null> {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      return null;
+    }
+
+    // Check which source command is used in the URL
+    const fromFragment = encodeURIComponent(`FROM ${streamName}`);
+    const tsFragment = encodeURIComponent(`TS ${streamName}`);
+
+    if (href.includes(tsFragment)) {
+      return 'TS';
+    } else if (href.includes(fromFragment)) {
+      return 'FROM';
+    }
+    return null;
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {

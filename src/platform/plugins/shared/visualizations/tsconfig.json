@@ -82,7 +82,7 @@
     "@kbn/visualizations-common",
     "@kbn/lens-common",
     "@kbn/cps",
-    "@kbn/kql",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

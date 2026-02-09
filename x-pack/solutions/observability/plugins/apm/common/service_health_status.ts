@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { NamedColor } from '@elastic/eui/src/components/icon/named_colors';
 import type { ServiceAlertsSeverity, SloStatus } from './service_inventory';
 
 export enum ServiceHealthStatus {
@@ -17,7 +18,7 @@ export enum ServiceHealthStatus {
   unknown = 'unknown',
 }
 
-export function getServiceHealthStatus({ severity }: { severity: ML_ANOMALY_SEVERITY }) {
+export function getServiceAnomaliesHealthStatus({ severity }: { severity: ML_ANOMALY_SEVERITY }) {
   switch (severity) {
     case ML_ANOMALY_SEVERITY.CRITICAL:
     case ML_ANOMALY_SEVERITY.MAJOR:
@@ -63,13 +64,32 @@ export function calculateCombinedHealthStatus({
   if (
     (alertsSeverity?.warning ?? 0) > 0 ||
     sloStatus === 'degrading' ||
-    sloStatus === 'noData' || // SLO can't be evaluated - treat as warning (TODO: revisit this decision)
     anomalyHealthStatus === ServiceHealthStatus.warning
   ) {
     return ServiceHealthStatus.warning;
   }
 
-  // 3. Healthy if ALL available signals are explicitly healthy
+  // 3. Unknown if we can't determine health status
+  // - Anomaly detection explicitly reports unknown status (backward compatibility)
+  // - SLO has no data (can't evaluate)
+  // TODO: Revisit these decisions:
+  //   - Should unknown anomaly status override other healthy signals?
+  //   - Should noData SLO be treated differently (warning/ignored)?
+  if (anomalyHealthStatus === ServiceHealthStatus.unknown || sloStatus === 'noData') {
+    return ServiceHealthStatus.unknown;
+  }
+
+  // 4. Check if ANY monitoring is configured
+  // If nothing is configured, we can't determine health status
+  const hasAnyMonitoring =
+    alertsSeverity !== undefined || sloStatus !== undefined || anomalyHealthStatus !== undefined;
+
+  if (!hasAnyMonitoring) {
+    // No monitoring configured at all - show as unknown
+    return ServiceHealthStatus.unknown;
+  }
+
+  // 5. Healthy if ALL available signals are explicitly healthy
   const hasNoAlerts = (alertsSeverity?.critical ?? 0) === 0 && (alertsSeverity?.warning ?? 0) === 0;
   const sloIsHealthy = !sloStatus || sloStatus === 'healthy';
   const anomalyIsHealthy =
@@ -79,7 +99,7 @@ export function calculateCombinedHealthStatus({
     return ServiceHealthStatus.healthy;
   }
 
-  // 4. Unknown - deferred for now
+  // 6. Unknown - fallback for any other state
   return ServiceHealthStatus.unknown;
 }
 
@@ -99,19 +119,16 @@ export function getServiceHealthStatusColor(
   }
 }
 
-export function getServiceHealthStatusBadgeColor(
-  euiTheme: EuiThemeComputed,
-  status: ServiceHealthStatus
-) {
+export function getServiceHealthStatusBadgeColor(status: ServiceHealthStatus): NamedColor {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return euiTheme.colors.severity.success;
+      return 'success';
     case ServiceHealthStatus.warning:
-      return euiTheme.colors.severity.warning;
+      return 'warning';
     case ServiceHealthStatus.critical:
-      return euiTheme.colors.severity.risk;
+      return 'danger';
     case ServiceHealthStatus.unknown:
-      return euiTheme.colors.mediumShade;
+      return 'default';
   }
 }
 

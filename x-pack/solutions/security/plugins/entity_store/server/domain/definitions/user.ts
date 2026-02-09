@@ -5,28 +5,60 @@
  * 2.0.
  */
 
+import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect } from './field_retention_operations';
 
-export const USER_IDENTITY_FIELD = 'user.name';
-
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
-  identityFields: [
-    {
-      field: USER_IDENTITY_FIELD,
-      mapping: {
-        type: 'keyword',
-        fields: { text: { type: 'match_only_text' } },
-      },
-    },
-  ],
+  identityField: {
+    calculated: true,
+    defaultIdField: 'user.entity.id',
+    defaultIdFieldMapping: { type: 'keyword' },
+    requiresOneOfFields: ['user.id', 'user.name', 'user.email'],
+
+    /*
+      Implements the following rank
+      1. user.entity.id           --> implemented as the default id field
+      2. user.name @ host.entity.id
+      3. user.name @ host.id
+      4. user.name @ host.name
+      5. user.id
+      6. user.email
+      7. user.name @ user.domain
+      8. user.name
+    */
+    esqlEvaluation: `COALESCE(
+                CASE(${esqlIsNotNullOrEmpty('user.name')},
+                  CASE(
+                    ${esqlIsNotNullOrEmpty(
+                      'host.entity.id'
+                    )}, CONCAT(user.name, "@", host.entity.id),
+                    ${esqlIsNotNullOrEmpty('host.id')}, CONCAT(user.name, "@", host.id),
+                    ${esqlIsNotNullOrEmpty('host.name')}, CONCAT(user.name, "@", host.name),
+                    NULL
+                  ),
+                  NULL
+                ),
+                CASE(${esqlIsNotNullOrEmpty('user.id')}, user.id, NULL),
+                CASE(${esqlIsNotNullOrEmpty('user.email')}, user.email, NULL),
+                CASE(
+                  ${esqlIsNotNullOrEmpty('user.name')} AND ${esqlIsNotNullOrEmpty('user.domain')}, 
+                  CONCAT(user.name, ".", user.domain),
+                  NULL
+                ),  
+                CASE(${esqlIsNotNullOrEmpty('user.name')}, user.name, NULL),
+                NULL
+              )`,
+  },
+  entityTypeFallback: 'Identity',
   indexPatterns: [],
   fields: [
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
+    collect({ source: 'user.name' }),
     collect({
       source: 'user.full_name',
       mapping: {
@@ -43,6 +75,11 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'user.roles' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
+
+    // Used to populate the identity field
+    collect({ source: 'host.entity.id' }),
+    collect({ source: 'host.id' }),
+    collect({ source: 'host.name' }),
 
     collect({
       source: `user.entity.relationships.Accesses_frequently`,

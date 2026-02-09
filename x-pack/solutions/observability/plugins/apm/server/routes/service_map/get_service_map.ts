@@ -101,7 +101,10 @@ export function getServiceMap(
 
     const [connectionData, servicesData, anomalies, alertCounts] = await Promise.all([
       getConnectionData(options),
-      getServiceStats(options),
+      getServiceStats(options).catch((error) => {
+        logger.warn(`Unable to retrieve service stats for service map.`, { error });
+        return [];
+      }),
       anomaliesPromise,
       getServicesAlerts({
         apmAlertsClient,

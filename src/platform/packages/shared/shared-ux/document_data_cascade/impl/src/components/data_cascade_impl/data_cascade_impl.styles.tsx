@@ -26,6 +26,9 @@ const slideIn = keyframes({
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   container: css({
     flex: '1 1 auto',
+    // Creates a new stacking context to prevent z-index values
+    // from the virtualized rows from bleeding out to other elements
+    isolation: 'isolate',
   }),
   containerInner: css([relativePosition, { height: '100%' }]),
   cascadeTreeGridBlock: css([
@@ -47,6 +50,18 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     [euiCanAnimate]: {
       animation: `${slideIn} ${euiTheme.animation.slow} ${euiTheme.animation.resistance}`,
     },
+  }),
+  // Hidden variant - keeps the element in DOM so ref is always available,
+  // but visually hidden and non-interactive
+  cascadeTreeGridHeaderStickyRenderSlotHidden: css({
+    position: 'sticky',
+    top: 0,
+    left: 0,
+    right: 0,
+    visibility: 'hidden',
+    pointerEvents: 'none',
+    height: 0,
+    overflow: 'hidden',
   }),
   cascadeTreeGridWrapper: css({
     background: euiTheme.colors.backgroundBaseSubdued,

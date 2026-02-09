@@ -25,17 +25,17 @@ function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
   return serviceAnomalyStats;
 }
 
+function getCombinedHealthStatus(el: cytoscape.NodeSingular): ServiceHealthStatus | undefined {
+  return el.data('combinedHealthStatus');
+}
+
 function getBorderColorFn(
   euiTheme: EuiThemeComputed
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
-    const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
-    const anomalyStats = getServiceAnomalyStats(el);
-    if (hasAnomalyDetectionJob) {
-      return getServiceHealthStatusColor(
-        euiTheme,
-        anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
-      );
+    const combinedHealthStatus = getCombinedHealthStatus(el);
+    if (combinedHealthStatus) {
+      return getServiceHealthStatusColor(euiTheme, combinedHealthStatus);
     }
     if (el.hasClass('primary') || el.selected()) {
       return euiTheme.colors.primary;
@@ -48,7 +48,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.NodeSingular,
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
-  const status = getServiceAnomalyStats(el)?.healthStatus;
+  const status = getCombinedHealthStatus(el);
   if (status === ServiceHealthStatus.critical) {
     return 'double';
   } else {
@@ -57,7 +57,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 };
 
 function getBorderWidth(el: cytoscape.NodeSingular) {
-  const status = getServiceAnomalyStats(el)?.healthStatus;
+  const status = getCombinedHealthStatus(el);
 
   if (status === ServiceHealthStatus.warning) {
     return 4;
@@ -201,6 +201,16 @@ const getStyle = (
       selector: 'node.hover',
       style: {
         'border-width': getBorderWidth,
+      },
+    },
+    {
+      selector: 'edge.hover',
+      style: {
+        width: 4,
+        'z-index': zIndexEdgeHover,
+        'line-color': euiTheme.colors.darkShade,
+        'source-arrow-color': euiTheme.colors.darkShade,
+        'target-arrow-color': euiTheme.colors.darkShade,
       },
     },
     {

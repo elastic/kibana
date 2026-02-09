@@ -12,8 +12,8 @@ import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { calculateCombinedHealthStatus } from '../../../../common/service_health_status';
 import type { SloStatus, ServiceAlertsSeverity } from '../../../../common/service_inventory';
+import { calculateCombinedHealthStatus } from '../../../../common/service_health_status';
 
 export interface MergedServiceStat {
   serviceName: string;
@@ -44,20 +44,16 @@ export function mergeServiceStats({
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // Make sure to exclude anomaly health statuses from services
+  // Make sure to exclude health statuses, alerts, and SLO stats from services
   // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
   const matchedAnomalyHealthStatuses = anomalyHealthStatuses.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
-  // Make sure to exclude alerts from services
-  // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
   const matchedAlertCounts = alertCounts.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
-  // make sure to exclude SLO stats from services
-  // that are not found in APM data
   const matchedSloStats = sloStats.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );

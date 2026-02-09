@@ -20,7 +20,7 @@ import styled from '@emotion/styled';
 import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
-  getServiceHealthStatus,
+  getServiceAnomaliesHealthStatus,
   getServiceHealthStatusColor,
 } from '../../../../../common/service_health_status';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
@@ -67,7 +67,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const transactionType = serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
 
-  const healthStatus = getServiceHealthStatus({ severity });
+  const healthStatus = getServiceAnomaliesHealthStatus({ severity });
 
   return (
     <>

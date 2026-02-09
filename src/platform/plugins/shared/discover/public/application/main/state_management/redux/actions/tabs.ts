@@ -43,6 +43,8 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import { fetchData } from './tab_state';
+import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
+import { initializeAndSync, stopSyncing } from './tab_sync';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -134,7 +136,6 @@ export const updateTabs: InternalStateThunkActionCreator<
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
-    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
@@ -218,7 +219,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
     // If changing tabs, stop syncing the current tab before updating any URL state
     if (selectedTabHasChanged) {
-      currentTabStateContainer?.actions.stopSyncing();
+      dispatch(stopSyncing({ tabId: currentTab.id }));
     }
 
     // Push the selected tab ID to the URL, which creates a new browser history entry.
@@ -275,7 +276,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         }
 
-        nextTabStateContainer.actions.initializeAndSync();
+        dispatch(initializeAndSync({ tabId: nextTab.id }));
 
         if (nextTab.forceFetchOnSelect) {
           nextTabStateContainer.dataState.reset();
@@ -351,12 +352,17 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    const byValueEmbeddableTab = services.embeddableEditor.getByValueInput();
+    const byValueEmbeddableTabState = byValueEmbeddableTab
+      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      : undefined;
+
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
       shouldClearAllTabs,
-      defaultTabState: DEFAULT_TAB_STATE,
+      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
     });
 
     const history = services.getScopedHistory();
@@ -545,11 +551,11 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
   };
 
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
-  function disconnectTabThunkFn(_, __, { runtimeStateManager }) {
+  function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const stateContainer = tabRuntimeState.stateContainer$.getValue();
     stateContainer?.dataState.cancel();
-    stateContainer?.actions.stopSyncing();
+    dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };
 

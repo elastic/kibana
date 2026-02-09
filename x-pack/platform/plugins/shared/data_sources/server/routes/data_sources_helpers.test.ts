@@ -22,6 +22,11 @@ import {
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
 
+const mockLoadWorkflows = jest.fn();
+jest.mock('@kbn/data-catalog-plugin/common/workflow_loader', () => ({
+  loadWorkflows: (...args: unknown[]) => mockLoadWorkflows(...args),
+}));
+
 const mockConnectorSpecs = {
   customConnectorWithBearerType: {
     metadata: {
@@ -132,6 +137,7 @@ describe('createConnectorAndRelatedResources', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSavedObjectsClient.getCurrentNamespace.mockReturnValue('default');
+    mockLoadWorkflows.mockReset();
   });
 
   it('should create connector and all related resources successfully', async () => {
@@ -161,13 +167,15 @@ describe('createConnectorAndRelatedResources', () => {
     };
     const mockDataSource = {
       stackConnector: { type: actionTypeId, config: {} },
-      generateWorkflows: jest.fn().mockReturnValue([
-        {
-          content: 'workflow yaml content',
-          shouldGenerateABTool: true,
-        },
-      ]),
+      workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
+
+    mockLoadWorkflows.mockResolvedValue([
+      {
+        content: 'workflow yaml content',
+        shouldGenerateABTool: true,
+      },
+    ]);
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
@@ -236,13 +244,15 @@ describe('createConnectorAndRelatedResources', () => {
     };
     const mockDataSource = {
       stackConnector: { type: actionTypeId, config: {} },
-      generateWorkflows: jest.fn().mockReturnValue([
-        {
-          content: 'workflow yaml content',
-          shouldGenerateABTool: false,
-        },
-      ]),
+      workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
+
+    mockLoadWorkflows.mockResolvedValue([
+      {
+        content: 'workflow yaml content',
+        shouldGenerateABTool: false,
+      },
+    ]);
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);

@@ -187,7 +187,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   }, [dataView]);
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
-  const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
+  const selectedTemplate = useMemo(
+    () => currentConfiguration.templates.find((t) => t.key === templateId),
+    [currentConfiguration.templates, templateId]
+  );
+  const selectedTemplateHasConnector = !!selectedTemplate?.caseFields?.connector;
   const defaultTemplate = useMemo(() => {
     return {
       key: DEFAULT_EMPTY_TEMPLATE_KEY,
@@ -199,6 +203,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const onTemplateChange = useCallback(
     ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
       editSubActionProperty('templateId', key === DEFAULT_EMPTY_TEMPLATE_KEY ? null : key);
+    },
+    [editSubActionProperty]
+  );
+
+  const onAutoPushChange: React.EventHandler<React.ChangeEvent<HTMLInputElement>> = useCallback(
+    (event) => {
+      editSubActionProperty('autoPushCase', event.target.checked);
     },
     [editSubActionProperty]
   );
@@ -291,7 +302,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         />
       )}
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={true}>
           <TemplateSelector
             key={currentConfiguration.id}
@@ -301,6 +312,18 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             initialTemplate={selectedTemplate}
           />
         </EuiFlexItem>
+        {selectedTemplateHasConnector ? (
+          <EuiFlexItem grow={true}>
+            <EuiCheckbox
+              id={`auto-push-case-${index}`}
+              data-test-subj="auto-push-case"
+              checked={actionParams.subActionParams?.autoPushCase}
+              label={i18n.AUTO_PUSH_CASE_LABEL}
+              disabled={isLoadingCaseConfiguration}
+              onChange={onAutoPushChange}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup>

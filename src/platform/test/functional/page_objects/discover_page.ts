@@ -445,6 +445,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
   }
 
+  public async getAllSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleTextAll('savedSearchTotalDocuments');
+  }
+
   public async getDocHeader() {
     const docHeader = await this.dataGrid.getHeaders();
     return docHeader.join();

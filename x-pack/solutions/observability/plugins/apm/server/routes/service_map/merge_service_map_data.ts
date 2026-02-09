@@ -11,7 +11,7 @@ import type { ServiceAlertsResponse } from '../services/get_services/get_service
 import type { ServiceSloStatsResponse } from '../services/get_services/get_services_slo_stats';
 import { getSeverity } from '../../../common/anomaly_detection';
 import {
-  getServiceHealthStatus,
+  getServiceAnomaliesHealthStatus,
   calculateCombinedHealthStatus,
 } from '../../../common/service_health_status';
 
@@ -26,57 +26,69 @@ export function mergeServiceMapData({
   alertCounts: ServiceAlertsResponse;
   sloStats: ServiceSloStatsResponse;
 }): ServicesResponse[] {
-  // Create lookup maps for efficient merging
-  const anomalyMap = new Map(
-    anomalies.serviceAnomalies.map((anomaly) => {
-      const severity = getSeverity(anomaly.anomalyScore);
-      const anomalyHealthStatus = getServiceHealthStatus({ severity });
-      return [anomaly.serviceName, anomalyHealthStatus];
-    })
-  );
+  try {
+    // Create lookup maps for efficient merging
+    const anomalyMap = new Map(
+      anomalies.serviceAnomalies.map((anomaly) => {
+        const severity = getSeverity(anomaly.anomalyScore);
+        const anomalyHealthStatus = getServiceAnomaliesHealthStatus({ severity });
+        return [anomaly.serviceName, anomalyHealthStatus];
+      })
+    );
 
-  const alertsMap = new Map(
-    alertCounts.map((alert) => [
-      alert.serviceName,
-      {
-        alertsCount: alert.alertsCount,
-        alertsSeverity: alert.severity,
-      },
-    ])
-  );
+    const alertsMap = new Map(
+      alertCounts.map((alert) => [
+        alert.serviceName,
+        {
+          alertsCount: alert.alertsCount,
+          alertsSeverity: alert.alertsSeverity,
+        },
+      ])
+    );
 
-  const sloMap = new Map(
-    sloStats.map((slo) => [
-      slo.serviceName,
-      {
-        sloStatus: slo.sloStatus,
-        sloCount: slo.sloCount,
-      },
-    ])
-  );
+    const sloMap = new Map(
+      sloStats.map((slo) => [
+        slo.serviceName,
+        {
+          sloStatus: slo.sloStatus,
+          sloCount: slo.sloCount,
+        },
+      ])
+    );
 
-  // Merge all data for each service
-  return servicesData.map((service) => {
-    const serviceName = service['service.name'];
-    const anomalyHealthStatus = anomalyMap.get(serviceName);
-    const alertData = alertsMap.get(serviceName);
-    const sloData = sloMap.get(serviceName);
+    // Merge all data for each service
+    return servicesData.map((service) => {
+      try {
+        const serviceName = service['service.name'];
+        const anomalyHealthStatus = anomalyMap.get(serviceName);
+        const alertData = alertsMap.get(serviceName);
+        const sloData = sloMap.get(serviceName);
 
-    // Calculate combined health status from all signals
-    const combinedHealthStatus = calculateCombinedHealthStatus({
-      alertsSeverity: alertData?.alertsSeverity,
-      sloStatus: sloData?.sloStatus,
-      anomalyHealthStatus,
+        // Calculate combined health status from all signals
+        const combinedHealthStatus = calculateCombinedHealthStatus({
+          alertsSeverity: alertData?.alertsSeverity,
+          sloStatus: sloData?.sloStatus,
+          anomalyHealthStatus,
+        });
+
+        return {
+          ...service,
+          anomalyHealthStatus,
+          combinedHealthStatus,
+          alertsCount: alertData?.alertsCount ?? 0,
+          alertsSeverity: alertData?.alertsSeverity, // Leave undefined if no alert data
+          sloStatus: sloData?.sloStatus,
+          sloCount: sloData?.sloCount ?? 0,
+        };
+      } catch (error) {
+        // If merge fails for individual service, return service without health data
+        // This ensures one bad service doesn't break the entire map
+        return service;
+      }
     });
-
-    return {
-      ...service,
-      anomalyHealthStatus,
-      combinedHealthStatus,
-      alertsCount: alertData?.alertsCount ?? 0,
-      alertsSeverity: alertData?.alertsSeverity ?? { critical: 0, warning: 0 },
-      sloStatus: sloData?.sloStatus,
-      sloCount: sloData?.sloCount ?? 0,
-    };
-  });
+  } catch (error) {
+    // If entire merge operation fails, return original servicesData
+    // Map will still render, just without combined health status
+    return servicesData;
+  }
 }

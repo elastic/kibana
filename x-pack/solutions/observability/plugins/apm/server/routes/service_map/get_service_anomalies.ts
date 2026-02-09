@@ -12,7 +12,7 @@ import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getServiceHealthStatus } from '../../../common/service_health_status';
+import { getServiceAnomaliesHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
@@ -161,7 +161,7 @@ export async function getServiceAnomalies({
           : 0;
 
         const severity = getSeverity(anomalyScore);
-        const healthStatus = getServiceHealthStatus({ severity });
+        const healthStatus = getServiceAnomaliesHealthStatus({ severity });
 
         return {
           serviceName: bucket.key.serviceName as string,

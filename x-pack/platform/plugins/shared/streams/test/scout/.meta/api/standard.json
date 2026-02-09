@@ -1,0 +1,1333 @@
+{
+  "lastModified": "2026-01-30T09:08:14.873Z",
+  "sha1": "7e92b18fd6ef0113357d7170377a1129dd34d5fc",
+  "tests": [
+    {
+      "id": "dc6084aa7695e8a-26220f9b20676c1",
+      "title": "Setup environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "fd79392c6460c17-fae630a87fbe60c",
+      "title": "Stream lifecycle - retention API should create stream with inherited lifecycle by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-e5c0c7b6a78910e",
+      "title": "Stream lifecycle - retention API should include effective_lifecycle in stream response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 115,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-a5b83efdc1555f3",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 7 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-3c474ea63f60f99",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 30 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 174,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-3714c804fedc655",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 90 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 210,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-93a66e9579a74ee",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention using hours unit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 242,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-cb860532b1d48e4",
+      "title": "Stream lifecycle - retention API should switch from inherited to DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 277,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-7458a8dce6944da",
+      "title": "Stream lifecycle - retention API should switch from DSL back to inherited lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 316,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-469cb64c2cad280",
+      "title": "Stream lifecycle - retention API should modify existing DSL retention value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 373,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-f775e51d043f41c",
+      "title": "Stream lifecycle - retention API should read ingest settings via GET _ingest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 431,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-c266a3b8b19d574",
+      "title": "Stream lifecycle - retention API should update only lifecycle without affecting other ingest settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 454,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-9989a095dbff3f2",
+      "title": "Stream lifecycle - retention API should return error for non-existent stream lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 498,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-f5b4387854d3e76",
+      "title": "Stream lifecycle - retention API should return error when updating non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 514,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-e6cd46014570785",
+      "title": "Stream lifecycle - retention API should return 400 for invalid lifecycle format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 543,
+        "column": 10
+      }
+    },
+    {
+      "id": "fd79392c6460c17-bb36453a689250b",
+      "title": "Stream lifecycle - retention API should inherit lifecycle from parent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 573,
+        "column": 10
+      }
+    },
+    {
+      "id": "a65f839dacde922-58278be29d16cca",
+      "title": "Stream data processing - simulate processing API should simulate grok pattern with HTTP log format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-8576ae64fc4ff9e",
+      "title": "Stream data processing - simulate processing API should simulate grok with IP address extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 60,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7ea2fee0a5bfd14",
+      "title": "Stream data processing - simulate processing API should simulate grok with multiple patterns (fallback)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 89,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-4408d3e86afb4e1",
+      "title": "Stream data processing - simulate processing API should handle non-matching grok pattern gracefully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-6781e6bb18ae4ae",
+      "title": "Stream data processing - simulate processing API should simulate grok with custom pattern definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-8bc8e55d4500981",
+      "title": "Stream data processing - simulate processing API should simulate grok with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-282be3c54458623",
+      "title": "Stream data processing - simulate processing API should simulate dissect with key-value extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 222,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7be5816e4435595",
+      "title": "Stream data processing - simulate processing API should simulate dissect with delimiter-based extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 254,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-53a4112ee7ce684",
+      "title": "Stream data processing - simulate processing API should simulate dissect with append separator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 286,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-2ccfa25c076f79f",
+      "title": "Stream data processing - simulate processing API should handle dissect with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 310,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-6822e91fa9d3813",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with ISO format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 335,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-824d00b030a5b6a",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with multiple formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 364,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-be9798f81d3d87d",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with timezone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 396,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-84c417a3f6328cc",
+      "title": "Stream data processing - simulate processing API should simulate rename processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 427,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-b438cec73200c88",
+      "title": "Stream data processing - simulate processing API should simulate set processor with literal value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 452,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-3357650c953f018",
+      "title": "Stream data processing - simulate processing API should simulate set processor with copy_from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 475,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7492c0530597ea4",
+      "title": "Stream data processing - simulate processing API should simulate remove processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 498,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-18e1dcb10409ca2",
+      "title": "Stream data processing - simulate processing API should simulate uppercase processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 526,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-5f7952dfe6281bb",
+      "title": "Stream data processing - simulate processing API should simulate lowercase processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 550,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-72d943af64bd882",
+      "title": "Stream data processing - simulate processing API should simulate trim processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 574,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-2604aa4444ba4e2",
+      "title": "Stream data processing - simulate processing API should simulate convert processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 602,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-d198a09dc039591",
+      "title": "Stream data processing - simulate processing API should simulate replace processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 627,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7e75f516d1309a6",
+      "title": "Stream data processing - simulate processing API should simulate multiple processors in sequence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 657,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-de9b653148589f9",
+      "title": "Stream data processing - simulate processing API should simulate conditional processing with where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 700,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-a0aa5c60b9ed28c",
+      "title": "Stream data processing - simulate processing API should return 400 for missing required processor fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 731,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-b79ddc5a8557236",
+      "title": "Stream data processing - simulate processing API should return 400 for invalid action type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 756,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-c52ec84d3acae5c",
+      "title": "Stream data processing - simulate processing API should handle empty documents array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 778,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7bba5284570ddf7",
+      "title": "Stream data processing - simulate processing API should handle empty steps array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 805,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-aa4e8c66c7e61f6",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream via fork API with eq condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 26,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-4c1ef7d9f169ae1",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with neq condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-5f3a2b1888fd3f5",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with contains condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 77,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-f05aa25f01ae018",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with startsWith condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-067c44d5b1cb74e",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with endsWith condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-265d0c4deb60105",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with exists condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 140,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-3e8f9eefdf8e6c7",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with numeric comparisons",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 161,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-2bf913006b328e7",
+      "title": "Stream data routing - fork stream API (CRUD) should create a disabled routing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 183,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-77c5515e2a61adc",
+      "title": "Stream data routing - fork stream API (CRUD) should default to enabled when status is omitted but condition matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 212,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-22955f2a3422817",
+      "title": "Stream data routing - fork stream API (CRUD) should create nested child streams (2 levels)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 245,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-8875b837e4d720f",
+      "title": "Stream data routing - fork stream API (CRUD) should create multiple sibling streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 291,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-06b1f9b4ab36bf9",
+      "title": "Stream data routing - fork stream API (CRUD) should delete a child stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 330,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-2104cc25aa26b97",
+      "title": "Stream data routing - fork stream API (CRUD) should support AND condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 363,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-5a7361e0949447b",
+      "title": "Stream data routing - fork stream API (CRUD) should support OR condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 386,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-dc95eb478c72e7c",
+      "title": "Stream data routing - fork stream API (CRUD) should support NOT condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 409,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-ee546010bd8fc1a",
+      "title": "Stream data routing - fork stream API (CRUD) should support nested AND/OR conditions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 429,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-91e64c47cc51409",
+      "title": "Stream data routing - fork stream API (CRUD) should support always condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 457,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-ea6c832f7c2995f",
+      "title": "Stream data routing - fork stream API (CRUD) should support never condition (auto-disables)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 475,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-15726fab6d00165",
+      "title": "Stream data routing - fork stream API (CRUD) should support range condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 504,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-9d0f58f4dca554b",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork with empty condition object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 526,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-b14724d44f40230",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork to an existing stream name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 542,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-813fe769a12916f",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork from non-existent parent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 572,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-d2b69e87b48cafb",
+      "title": "Stream data routing - fork stream API (CRUD) should fail with missing stream name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 592,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-65846934a0b531c",
+      "title": "Stream data routing - fork stream API (CRUD) should fail with invalid status value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 608,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-2d81909c8010534",
+      "title": "Stream schema - field mapping API should get unmapped fields for a stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-0be104fbd03fbf8",
+      "title": "Stream schema - field mapping API should return error for non-existent stream unmapped fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-83b1ecc4fdfe407",
+      "title": "Stream schema - field mapping API should simulate field mapping with keyword type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-fb6c04b25e0ba43",
+      "title": "Stream schema - field mapping API should simulate single keyword field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-05ac03a7fb45010",
+      "title": "Stream schema - field mapping API should simulate field mapping with match_only_text type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 90,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-184338feb2495d9",
+      "title": "Stream schema - field mapping API should simulate field mapping with long type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-8c2d43ffdfbc4ba",
+      "title": "Stream schema - field mapping API should simulate single long field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 133,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-3c25de221d638fe",
+      "title": "Stream schema - field mapping API should simulate field mapping with double type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-fa8c1f744093729",
+      "title": "Stream schema - field mapping API should simulate single double field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-7d31f8801130a27",
+      "title": "Stream schema - field mapping API should simulate field mapping with boolean type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 192,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-74cacc695f4601f",
+      "title": "Stream schema - field mapping API should simulate multiple boolean fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 210,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-671af81b51cdb3a",
+      "title": "Stream schema - field mapping API should simulate field mapping with date type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 233,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-eb119f8dd624a2d",
+      "title": "Stream schema - field mapping API should simulate multiple date fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 251,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-6728fa1703813b2",
+      "title": "Stream schema - field mapping API should simulate field mapping with ip type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 274,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-cceb01b877ea4be",
+      "title": "Stream schema - field mapping API should simulate single ip field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 295,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-6a4486f044d1ede",
+      "title": "Stream schema - field mapping API should simulate field mapping with geo_point type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 314,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-fad83f4b17b3e65",
+      "title": "Stream schema - field mapping API should simulate multiple geo_point fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 332,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-67c61df9e5b530a",
+      "title": "Stream schema - field mapping API should simulate multiple field definitions of different types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 354,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-f8ce8ce1b03da5f",
+      "title": "Stream schema - field mapping API should handle deeply nested field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 384,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-c841dfc0d7c672c",
+      "title": "Stream schema - field mapping API should handle ECS-style field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 405,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-2cd6d3f29db291e",
+      "title": "Stream schema - field mapping API should return error for invalid field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 430,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-860b828f66428c7",
+      "title": "Stream schema - field mapping API should handle empty field definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 444,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-e9db9fadbe3e671",
+      "title": "Stream schema - field mapping API should return error for non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 463,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-fde1a7bced25313",
+      "title": "Stream schema - field mapping API should handle missing field name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 481,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-e450695e5f203af",
+      "title": "Stream schema - field mapping API should handle missing field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 495,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-15396eb1c1f45d8",
+      "title": "Stream schema - field mapping API should return simulation error for incompatible mapping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 510,
+        "column": 10
+      }
+    },
+    {
+      "id": "f3127db8132e066-9dd7d64d44a032b",
+      "title": "Stream schema - field mapping API should provide simulation details in response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 537,
+        "column": 10
+      }
+    }
+  ]
+}

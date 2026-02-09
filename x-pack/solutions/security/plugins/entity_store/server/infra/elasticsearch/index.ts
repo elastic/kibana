@@ -32,3 +32,9 @@ export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTe
 
 export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
   esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+
+export const createDataStream = (esClient: EsClient, name: IndexName) =>
+  esClient.indices.createDataStream({ name });
+
+export const deleteDataStream = (esClient: EsClient, name: IndexName) =>
+  esClient.indices.deleteDataStream({ name }, { ignore: [404] });

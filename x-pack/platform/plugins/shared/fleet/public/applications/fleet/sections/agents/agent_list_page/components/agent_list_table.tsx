@@ -33,6 +33,8 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
+
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
@@ -198,7 +200,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '220px',
       render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[policyId];
+        const agentPolicy = agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(policyId)];
 
         return (
           agentPolicy && (

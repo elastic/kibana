@@ -69,7 +69,24 @@ function toPluginOrPackage(pkg: Package): PluginOrPackage {
   return result;
 }
 
-export function findPlugins(pluginOrPackageFilter?: string[]): PluginOrPackage[] {
+/**
+ * Options for filtering plugins and packages.
+ */
+export interface FindPluginsOptions {
+  /** Plugin IDs to filter by (plugin.id from kibana.jsonc). */
+  pluginFilter?: string[];
+  /** Package IDs to filter by (id from kibana.jsonc, e.g., @kbn/package-name). */
+  packageFilter?: string[];
+}
+
+/**
+ * Finds all plugins and packages that should have API documentation generated.
+ *
+ * @param options - Optional filter options for plugins and packages.
+ * @returns Array of plugins and packages to document.
+ */
+export function findPlugins(options?: FindPluginsOptions): PluginOrPackage[] {
+  const { pluginFilter, packageFilter } = options ?? {};
   const packages = getPackages(REPO_ROOT);
   const plugins = packages.filter(
     getPluginPackagesFilter({
@@ -83,16 +100,28 @@ export function findPlugins(pluginOrPackageFilter?: string[]): PluginOrPackage[]
     throw new Error('unable to find @kbn/core');
   }
 
-  if (!pluginOrPackageFilter) {
+  const hasPluginFilter = pluginFilter && pluginFilter.length > 0;
+  const hasPackageFilter = packageFilter && packageFilter.length > 0;
+
+  if (!hasPluginFilter && !hasPackageFilter) {
     return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
-  } else {
-    return [
-      ...plugins
-        .filter((p) => pluginOrPackageFilter.includes(p.manifest.plugin.id))
-        .map(toPluginOrPackage),
-      ...findPackages(pluginOrPackageFilter),
-    ];
   }
+
+  const result: PluginOrPackage[] = [];
+
+  // Filter plugins by plugin.id.
+  if (hasPluginFilter) {
+    result.push(
+      ...plugins.filter((p) => pluginFilter.includes(p.manifest.plugin.id)).map(toPluginOrPackage)
+    );
+  }
+
+  // Filter packages by manifest.id.
+  if (hasPackageFilter) {
+    result.push(...findPackages(packageFilter));
+  }
+
+  return result;
 }
 
 export function findTeamPlugins(team: string): PluginOrPackage[] {

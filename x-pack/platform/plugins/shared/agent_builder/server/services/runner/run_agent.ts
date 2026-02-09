@@ -18,6 +18,7 @@ import {
   forkContextForAgentRun,
   createAttachmentsService,
   createToolProvider,
+  createSkillsService,
 } from './utils';
 import type { RunnerManager } from './runner';
 
@@ -33,6 +34,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    savedObjects,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -41,9 +43,13 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     promptManager,
     stateManager,
+    filestore,
+    skillServiceStart,
+    toolManager,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const toolRegistry = await toolsService.getRegistry({ request });
 
   return {
     request,
@@ -51,14 +57,17 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(request),
+    savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
+    toolRegistry,
     toolProvider: createToolProvider({
-      registry: await toolsService.getRegistry({ request }),
+      registry: toolRegistry,
       runner: manager.getRunner(),
       request,
     }),
     resultStore,
     attachmentStateManager,
+    filestore,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
@@ -68,6 +77,14 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
+    skills: createSkillsService({
+      skillServiceStart,
+      toolsServiceStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };
@@ -80,7 +97,6 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, abortSignal } = agentExecutionParams;
-
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 

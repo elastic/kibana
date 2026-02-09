@@ -79,6 +79,10 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -159,6 +163,10 @@ describe('tab mapping utils', () => {
             "sampleSize": undefined,
             "sort": Array [],
             "viewMode": undefined,
+          },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
           },
           "controlGroupState": undefined,
           "dataRequestParams": Object {

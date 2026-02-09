@@ -25,7 +25,7 @@ import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_
 export type ServiceAlertsResponse = Array<{
   serviceName: string;
   alertsCount: number;
-  severity: ServiceAlertsSeverity;
+  alertsSeverity: ServiceAlertsSeverity;
 }>;
 
 export async function getServicesAlerts({
@@ -175,7 +175,7 @@ export async function getServicesAlerts({
   const servicesAlertsCount: ServiceAlertsResponse = filterAggBuckets.map((bucket) => ({
     serviceName: bucket.key as string,
     alertsCount: bucket.alerts_count.value,
-    severity: {
+    alertsSeverity: {
       critical: bucket.critical_alerts.count.value,
       warning: bucket.warning_alerts.count.value,
     },

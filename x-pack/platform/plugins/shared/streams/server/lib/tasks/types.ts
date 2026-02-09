@@ -29,6 +29,10 @@ interface PersistedTaskBase<TParams extends {} = {}> {
   status: Exclude<TaskStatus, TaskStatus.Stale>;
   space: string;
   created_at: string;
+  last_completed_at?: string;
+  last_acknowledged_at?: string;
+  last_canceled_at?: string;
+  last_failed_at?: string;
   task: {
     params: TParams;
   };

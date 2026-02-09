@@ -9,6 +9,7 @@ import type {
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
+  RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -26,6 +27,7 @@ export interface ChatRequestBodyPayload {
   input?: string;
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
 export type ChatResponse = Omit<

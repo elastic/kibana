@@ -43,4 +43,5 @@ export enum ServiceInventoryFieldName {
   Latency = 'latency',
   TransactionErrorRate = 'transactionErrorRate',
   AlertsCount = 'alertsCount',
+  SloStatus = 'sloStatus',
 }
