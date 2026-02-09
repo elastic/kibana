@@ -44,10 +44,14 @@ import {
 import { DEFAULT_EDGE_STYLE } from './constants';
 
 function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
-  // Reuse ServiceAnomalyStats directly from the connection node
+  // Extract all health-related data from the connection node
   const serviceAnomalyStats = 'serviceAnomalyStats' in node ? node.serviceAnomalyStats : undefined;
   const combinedHealthStatus =
     'combinedHealthStatus' in node ? node.combinedHealthStatus : undefined;
+  const alertsCount = 'alertsCount' in node ? node.alertsCount : undefined;
+  const alertsSeverity = 'alertsSeverity' in node ? node.alertsSeverity : undefined;
+  const sloStatus = 'sloStatus' in node ? node.sloStatus : undefined;
+  const sloCount = 'sloCount' in node ? node.sloCount : undefined;
 
   return {
     id: node.id,
@@ -56,6 +60,10 @@ function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
     isService: true,
     serviceAnomalyStats,
     combinedHealthStatus,
+    alertsCount,
+    alertsSeverity,
+    sloStatus,
+    sloCount,
   };
 }
 

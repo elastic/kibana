@@ -21,6 +21,8 @@ import { ServiceContents } from './service_contents';
 import { withDiagnoseButton } from './with_diagnose_button';
 import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { HealthBadge } from '../../service_inventory/service_list/health_badge';
+import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
 
 /**
  * Unified element data format that works with both Cytoscape and React Flow
@@ -99,6 +101,7 @@ export function PopoverContent({
 
   const handleDiagnoseClick = useCallback(() => setIsDiagnosticFlyoutOpen(true), []);
   const handleCloseDiagnosticFlyout = useCallback(() => setIsDiagnosticFlyoutOpen(false), []);
+  const combinedHealthStatus = elementData.combinedHealthStatus as ServiceHealthStatus | undefined;
 
   if (!ContentsComponent) {
     return null;
@@ -112,23 +115,30 @@ export function PopoverContent({
         style={{ minWidth: popoverWidth }}
         data-test-subj="serviceMapPopoverContent"
       >
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-              {elementData.label ?? elementId}
-              {kuery && (
-                <EuiIconTip
-                  position="bottom"
-                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                  })}
-                  type="info"
-                />
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+                {elementData.label ?? elementId}
+                {kuery && (
+                  <EuiIconTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                    type="info"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {combinedHealthStatus && (
+            <EuiFlexItem grow={false}>
+              <HealthBadge healthStatus={combinedHealthStatus} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
         <ContentsComponent
           onFocusClick={onFocusClick}
           elementData={elementData}

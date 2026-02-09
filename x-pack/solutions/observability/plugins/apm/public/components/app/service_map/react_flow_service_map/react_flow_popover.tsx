@@ -130,6 +130,11 @@ function transformNodeDataForPopover(nodeData: ServiceMapNodeData): ElementData 
       [SERVICE_NAME]: nodeData.id,
       serviceAnomalyStats: nodeData.serviceAnomalyStats,
       agentName: nodeData.agentName,
+      combinedHealthStatus: nodeData.combinedHealthStatus,
+      alertsCount: nodeData.alertsCount,
+      alertsSeverity: nodeData.alertsSeverity,
+      sloStatus: nodeData.sloStatus,
+      sloCount: nodeData.sloCount,
     };
   }
 

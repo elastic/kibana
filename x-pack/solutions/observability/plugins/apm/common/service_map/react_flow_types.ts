@@ -10,6 +10,7 @@ import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 import type { ServiceHealthStatus } from '../service_health_status';
+import type { ServiceAlertsSeverity, SloStatus } from '../service_inventory';
 
 /**
  * Node types for React Flow service map (used as React Flow node type)
@@ -32,6 +33,10 @@ export interface ServiceNodeData extends BaseNodeData {
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
   combinedHealthStatus?: ServiceHealthStatus;
+  alertsCount?: number;
+  alertsSeverity?: ServiceAlertsSeverity;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 /**

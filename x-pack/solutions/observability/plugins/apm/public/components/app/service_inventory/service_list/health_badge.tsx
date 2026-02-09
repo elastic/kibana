@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   getServiceHealthStatusBadgeColor,
@@ -15,7 +16,15 @@ import {
 
 export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {
   return (
-    <EuiBadge color={getServiceHealthStatusBadgeColor(healthStatus)}>
+    <EuiBadge
+      color={getServiceHealthStatusBadgeColor(healthStatus)}
+      aria-label={i18n.translate('xpack.apm.serviceHealthStatus.ariaLabel', {
+        defaultMessage: 'Service health: {healthStatus}',
+        values: {
+          healthStatus: getServiceHealthStatusLabel(healthStatus),
+        },
+      })}
+    >
       {getServiceHealthStatusLabel(healthStatus)}
     </EuiBadge>
   );

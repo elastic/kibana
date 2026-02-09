@@ -61,7 +61,7 @@ export interface ServiceMapRawResponse {
   alertCounts: Array<{
     serviceName: string;
     alertsCount: number;
-    severity: ServiceAlertsSeverity;
+    alertsSeverity: ServiceAlertsSeverity;
   }>;
   sloStats: Array<{
     serviceName: string;

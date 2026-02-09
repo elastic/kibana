@@ -7,10 +7,20 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiBadge,
+  EuiToolTip,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { NodeDataDefinition } from 'cytoscape';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ContentsProps } from '.';
@@ -20,6 +30,9 @@ import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { SloStatusBadge } from '../../../shared/slo_status_badge';
+import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import type { SloStatus } from '../../../../../common/service_inventory';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 
@@ -96,9 +109,101 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
 
   const { serviceAnomalyStats } = nodeData;
 
+  const combinedHealthStatus = nodeData.combinedHealthStatus as ServiceHealthStatus | undefined;
+  const alertsCount = nodeData.alertsCount as number | undefined;
+  const sloStatus = nodeData.sloStatus as SloStatus | undefined;
+  const sloCount = nodeData.sloCount as number | undefined;
+
   return (
     <>
       <EuiFlexItem>
+        {/* Alerts Badge */}
+        {alertsCount !== undefined && alertsCount > 0 && (
+          <>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate('xpack.apm.serviceMap.popover.activeAlertsExplanation', {
+                    defaultMessage: 'Active alerts',
+                  })}
+                >
+                  <EuiBadge
+                    data-test-subj="serviceMapPopoverAlertsBadgeLink"
+                    iconType="warning"
+                    color="danger"
+                    href={apmRouter.link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query: {
+                        rangeFrom,
+                        rangeTo,
+                        environment,
+                        kuery,
+                        comparisonEnabled,
+                        serviceGroup,
+                        alertStatus: ALERT_STATUS_ACTIVE,
+                      },
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {i18n.translate('xpack.apm.serviceMap.popover.activeAlerts', {
+                    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}',
+                    values: { count: alertsCount },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
+        {/* SLO Badge */}
+        {sloStatus && sloCount !== undefined && sloCount > 0 && (
+          <>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <SloStatusBadge
+                  sloStatus={sloStatus}
+                  sloCount={sloCount}
+                  serviceName={serviceName}
+                  onClick={() => {
+                    // // Navigate to service details page (SLOs are shown there)
+                    // window.location.href = apmRouter.link('/services/{serviceName}', {
+                    //   path: { serviceName },
+                    //   query: {
+                    //     rangeFrom,
+                    //     rangeTo,
+                    //     environment,
+                    //     kuery,
+                    //     comparisonEnabled,
+                    //     serviceGroup,
+                    //   },
+                    // });
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {i18n.translate('xpack.apm.serviceMap.popover.sloStatus', {
+                    defaultMessage: '{count, plural, one {# SLO} other {# SLOs}}',
+                    values: { count: sloCount },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
+        {(combinedHealthStatus ||
+          (alertsCount && alertsCount > 0) ||
+          (sloCount && sloCount > 0)) && <EuiHorizontalRule margin="xs" />}
+
         {serviceAnomalyStats && (
           <>
             <AnomalyDetection serviceName={serviceName} serviceAnomalyStats={serviceAnomalyStats} />
