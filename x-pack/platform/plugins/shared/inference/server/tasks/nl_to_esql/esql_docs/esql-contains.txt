@@ -1,0 +1,26 @@
+# CONTAINS
+
+The CONTAINS function returns a boolean value indicating whether a specified keyword substring exists within another string. If either parameter is null, the function returns null.
+
+## Syntax
+
+`CONTAINS(string, substring)`
+
+### Parameters
+
+#### string
+
+The input string to check against. If this value is null, the function returns null.
+
+#### substring
+
+The substring to search for within the input string. If this value is null, the function returns null.
+
+## Examples
+
+Checks whether the substring "ll" is present in the string "hello" and stores the result in a new column.
+
+```esql
+ROW a = "hello"
+| EVAL has_ll = CONTAINS(a, "ll")
+```
