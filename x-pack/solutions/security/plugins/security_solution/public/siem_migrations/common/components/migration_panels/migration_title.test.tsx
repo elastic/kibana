@@ -121,7 +121,7 @@ describe('MigrationPanelTitle', () => {
   });
 
   describe('Rename functionality', () => {
-    it('should enter edit mode when rename is clicked', () => {
+    it('should enter edit mode when rename is clicked', async () => {
       renderMigrationPanelTitle(mockMigrationStatsReady);
 
       const optionsButton = screen.getByTestId('openMigrationOptionsButton');
@@ -130,7 +130,9 @@ describe('MigrationPanelTitle', () => {
       const renameButton = screen.getByTestId('renameMigrationItem');
       fireEvent.click(renameButton);
 
-      expect(screen.getByLabelText('Migration name')).toBeInTheDocument();
+      const input = screen.getByLabelText('Migration name');
+      expect(input).toBeInTheDocument();
+      await waitFor(() => expect(input).toHaveFocus());
     });
 
     it('should save new name when edit is confirmed', async () => {

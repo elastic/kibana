@@ -24,6 +24,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useUiSetting: () => true,
+}));
+
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {

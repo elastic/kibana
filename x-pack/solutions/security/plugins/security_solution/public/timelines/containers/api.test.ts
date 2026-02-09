@@ -6,7 +6,7 @@
  */
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
@@ -439,7 +439,7 @@ describe('copyTimeline', () => {
 
   const dataViewMock = buildDataViewMock({
     name: 'first-data-view',
-    fields: shallowMockedFields,
+    fields: deepMockedFields,
   });
 
   const mockSavedSearch = {

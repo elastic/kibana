@@ -16,6 +16,7 @@ import {
 } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
 import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
+import type { SortableScriptLibraryFields } from '../types';
 
 describe('Scripts library schemas', () => {
   const createFileStream = (): HapiReadableStream => {
@@ -244,12 +245,17 @@ describe('Scripts library schemas', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ pageSize: 1001 })).toThrow();
     });
 
-    it.each(['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])(
-      'should accept a `sortField` param with value %s',
-      (sortField) => {
-        expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
-      }
-    );
+    const sortFields: Array<SortableScriptLibraryFields> = [
+      'name',
+      'createdAt',
+      'createdBy',
+      'updatedAt',
+      'updatedBy',
+      'fileSize',
+    ];
+    it.each(sortFields)('should accept a `sortField` param with value %s', (sortField) => {
+      expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
+    });
 
     it('should error `sortField` has an invalid field name', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ sortField: 'foo' })).toThrow();

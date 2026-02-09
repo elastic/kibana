@@ -6,10 +6,7 @@
  */
 
 import { PREFIX } from '../../shared/test_ids';
-import {
-  CONTENT_TEST_ID,
-  HEADER_TEST_ID,
-} from '../../document_details/right/components/expandable_section';
+import { CONTENT_TEST_ID, HEADER_TEST_ID } from '../../shared/components/expandable_section';
 
 const RULE_PANEL_TEST_ID = `${PREFIX}RulePanel` as const;
 export const RULE_TITLE_TEST_ID = `${RULE_PANEL_TEST_ID}Title` as const;

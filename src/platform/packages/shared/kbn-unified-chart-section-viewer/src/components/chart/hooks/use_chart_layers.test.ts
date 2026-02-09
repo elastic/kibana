@@ -22,7 +22,7 @@ jest.mock('../../../common/utils', () => ({
 describe('useChartLayers', () => {
   const mockMetric: MetricField = {
     name: 'system.cpu.total.norm.pct',
-    type: 'gauge',
+    type: ES_FIELD_TYPES.DOUBLE,
     instrument: 'gauge',
     unit: 'percent',
     index: 'metrics-*',

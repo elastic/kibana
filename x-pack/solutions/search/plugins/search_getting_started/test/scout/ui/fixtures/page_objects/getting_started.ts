@@ -94,6 +94,18 @@ export class GettingStarted {
     await button.click();
   }
 
+  async clickTutorialExpandButton() {
+    const button = this.page.testSubj.locator(
+      'searchGettingStartedConsoleTutorialsGroupExpandButton'
+    );
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+  }
+
+  async getTutorialExpandButton() {
+    return this.page.testSubj.locator('searchGettingStartedConsoleTutorialsGroupExpandButton');
+  }
+
   async getLanguageSelector() {
     return this.page.testSubj.locator('codeExampleLanguageSelect');
   }
