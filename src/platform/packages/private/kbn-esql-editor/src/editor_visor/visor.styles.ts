@@ -11,8 +11,8 @@ import { css } from '@emotion/react';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
-export const visorGradientPadding = '1px';
-export const visorGradient =
+const visorGradientPadding = '1px';
+const visorGradient =
   'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
 
 export const visorStyles = (

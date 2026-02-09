@@ -135,7 +135,7 @@ export const HelpPopover: React.FC = () => {
         );
 
         if (cancelled) return;
-
+        // Only update state if the new data is actually different from the *last successfully set* data
         if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
           lastFetchedQueries.current = extensions.recommendedQueries;
@@ -170,6 +170,7 @@ export const HelpPopover: React.FC = () => {
       recommendedQueries.push(
         ...solutionsRecommendedQueries.map((recommendedQuery) => {
           const template = prettifyQueryTemplate(recommendedQuery.query);
+          // Check if query starts with FROM or TS
           const startsWithTs = recommendedQuery.query.startsWith('TS');
           const queryString = startsWithTs
             ? `TS ${adHocDataview?.name} ${template}`
@@ -182,7 +183,7 @@ export const HelpPopover: React.FC = () => {
         })
       );
     }
-
+    // Handle the static recommended queries, no solutions specific
     if (queryForRecommendedQueries && timeFieldName) {
       const recommendedQueriesFromStaticTemplates = getRecommendedQueriesTemplates({
         fromCommand: queryForRecommendedQueries,

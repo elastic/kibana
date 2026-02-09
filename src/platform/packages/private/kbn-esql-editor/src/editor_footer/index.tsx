@@ -49,7 +49,7 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
-  starredQueriesService?: EsqlStarredQueriesService | null;
+  starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
 }
 
