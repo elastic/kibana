@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
 import { EuiInMemoryTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   InferenceInferenceEndpointInfo,
@@ -43,10 +42,6 @@ import { docLinks } from '../../../common/doc_links';
 import { EndpointStats } from './endpoint_stats';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  width: ${euiTheme.base * 25}px;
-`;
-
-const searchFieldStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
@@ -260,7 +255,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EndpointStats endpoints={filteredTableData} />
+        <EndpointStats endpoints={tableData} />
         <EuiFlexItem>
           <EuiInMemoryTable
             columns={tableColumns}
