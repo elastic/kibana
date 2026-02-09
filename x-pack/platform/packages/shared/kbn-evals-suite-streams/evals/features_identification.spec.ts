@@ -46,7 +46,7 @@ const typeValidationEvaluator = {
   evaluate: async ({ output }: CodeEvaluatorParams) => {
     const features = output?.features ?? [];
     if (features.length === 0) {
-      return { score: 1, reasoning: 'No features to validate (vacuously valid)' };
+      return { score: 1, explanation: 'No features to validate (vacuously valid)' };
     }
 
     const invalidFeatures = features.filter(
@@ -57,7 +57,7 @@ const typeValidationEvaluator = {
 
     return {
       score,
-      reasoning:
+      explanation:
         invalidFeatures.length > 0
           ? `Invalid types: ${invalidFeatures.map((f) => `"${f.id}" has type "${f.type}"`).join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
           : 'All features have a valid type',
@@ -133,7 +133,6 @@ function isEvidenceGrounded(
   documents: Array<Record<string, unknown>>
 ): boolean {
   const kvPairs = parseKeyValuePairs(evidence);
-
   if (kvPairs.length > 0) {
     // field=value mode: at least one pair must match a document field
     return documents.some((doc) =>
@@ -174,7 +173,7 @@ const evidenceGroundingEvaluator = {
         if (isEvidenceGrounded(evidence, documents)) {
           groundedEvidence++;
         } else {
-          ungroundedItems.push(`Feature "${feature.id}": "${evidence.slice(0, 80)}..."`);
+          ungroundedItems.push(`Feature "${feature.id}": "${evidence}"`);
         }
       }
     }
@@ -182,7 +181,7 @@ const evidenceGroundingEvaluator = {
     if (totalEvidence === 0) {
       return {
         score: features.length === 0 ? 1 : 0,
-        reasoning:
+        explanation:
           features.length === 0
             ? 'No features, no evidence to check'
             : 'Features present but none have evidence arrays',
@@ -192,7 +191,7 @@ const evidenceGroundingEvaluator = {
     const score = groundedEvidence / totalEvidence;
     return {
       score,
-      reasoning:
+      explanation:
         ungroundedItems.length > 0
           ? `${ungroundedItems.length}/${totalEvidence} evidence strings not grounded: ${ungroundedItems.slice(0, 3).join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded in input documents`,
@@ -210,7 +209,7 @@ const deduplicationEvaluator = {
   evaluate: async ({ output }: CodeEvaluatorParams) => {
     const features = output?.features ?? [];
     if (features.length <= 1) {
-      return { score: 1, reasoning: 'No duplicates possible with 0-1 features' };
+      return { score: 1, explanation: 'No duplicates possible with 0-1 features' };
     }
 
     const ids = features.map((f) => f.id);
@@ -219,7 +218,7 @@ const deduplicationEvaluator = {
 
     return {
       score: uniqueIds.size === ids.length ? 1 : 0,
-      reasoning:
+      explanation:
         duplicates.length > 0
           ? `Duplicate feature IDs found: ${[...new Set(duplicates)].join(', ')}`
           : 'All feature IDs are unique',
@@ -249,7 +248,7 @@ const featureCountEvaluator = {
 
     return {
       score: issues.length === 0 ? 1 : 0,
-      reasoning:
+      explanation:
         issues.length > 0
           ? issues.join('; ')
           : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${max_features ?? '∞'}]`,
@@ -269,14 +268,14 @@ const confidenceBoundsEvaluator = {
 
     const features = output?.features ?? [];
     if (features.length === 0) {
-      return { score: 1, reasoning: 'No features emitted — confidence bounds satisfied trivially' };
+      return { score: 1, explanation: 'No features emitted — confidence bounds satisfied trivially' };
     }
 
     const violations = features.filter((f) => f.confidence > max_confidence);
 
     return {
       score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
-      reasoning:
+      explanation:
         violations.length > 0
           ? `${violations.length}/${features.length} features exceed max confidence ${max_confidence}: ${violations.map((f) => `"${f.id}" (${f.confidence})`).join(', ')}`
           : `All features have confidence ≤ ${max_confidence}`,
@@ -295,7 +294,7 @@ const typeAssertionsEvaluator = {
     const { required_types, forbidden_types } = expected;
 
     if (!required_types?.length && !forbidden_types?.length) {
-      return { score: 1, reasoning: 'No type assertions specified — skipping' };
+      return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
     const features = output?.features ?? [];
@@ -329,7 +328,7 @@ const typeAssertionsEvaluator = {
 
     return {
       score: totalAssertions > 0 ? passedAssertions / totalAssertions : 1,
-      reasoning:
+      explanation:
         issues.length > 0
           ? `Type assertion failures: ${issues.join('; ')}`
           : 'All type assertions passed',
