@@ -44,7 +44,7 @@ export const getTransformIn = (
       } satisfies LensByRefTransformInResult;
     }
 
-    if (legacyMode) {
+    if (legacyMode && !builder.isEnabled) {
       const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
       return {
         state,

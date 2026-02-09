@@ -56,7 +56,7 @@ export const getTransformOut = (
       panelReferences
     );
 
-    if (legacyMode) {
+    if (legacyMode && !builder.isEnabled) {
       return injectedState as LensByValueTransformOutResult;
     }
 
