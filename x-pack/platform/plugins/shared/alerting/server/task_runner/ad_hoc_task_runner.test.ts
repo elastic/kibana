@@ -30,6 +30,7 @@ import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -189,6 +190,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   usageCounter: mockUsageCounter,
   isServerless: false,
   getEventLogClient: jest.fn(),
+  apiKeyType: ApiKeyType.ES,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {

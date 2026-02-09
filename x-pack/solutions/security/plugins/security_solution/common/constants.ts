@@ -525,9 +525,10 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
- * Cases external attachment IDs
+ * Cases attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps
