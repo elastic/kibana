@@ -63,42 +63,30 @@ describe('skillCreateRequestSchema', () => {
   });
 
   it('should reject when id is empty', () => {
-    expect(() =>
-      skillCreateRequestSchema.parse({ ...validRequest, id: '' })
-    ).toThrow();
+    expect(() => skillCreateRequestSchema.parse({ ...validRequest, id: '' })).toThrow();
   });
 
   it('should reject when name is empty', () => {
-    expect(() =>
-      skillCreateRequestSchema.parse({ ...validRequest, name: '' })
-    ).toThrow();
+    expect(() => skillCreateRequestSchema.parse({ ...validRequest, name: '' })).toThrow();
   });
 
   it('should reject when description is empty', () => {
-    expect(() =>
-      skillCreateRequestSchema.parse({ ...validRequest, description: '' })
-    ).toThrow();
+    expect(() => skillCreateRequestSchema.parse({ ...validRequest, description: '' })).toThrow();
   });
 
   it('should reject when content is empty', () => {
-    expect(() =>
-      skillCreateRequestSchema.parse({ ...validRequest, content: '' })
-    ).toThrow();
+    expect(() => skillCreateRequestSchema.parse({ ...validRequest, content: '' })).toThrow();
   });
 
   it('should accept empty tool_ids array', () => {
-    expect(() =>
-      skillCreateRequestSchema.parse({ ...validRequest, tool_ids: [] })
-    ).not.toThrow();
+    expect(() => skillCreateRequestSchema.parse({ ...validRequest, tool_ids: [] })).not.toThrow();
   });
 
   it('should accept optional referenced_content', () => {
     expect(() =>
       skillCreateRequestSchema.parse({
         ...validRequest,
-        referenced_content: [
-          { name: 'ref-1', relativePath: '.', content: 'Some content' },
-        ],
+        referenced_content: [{ name: 'ref-1', relativePath: '.', content: 'Some content' }],
       })
     ).not.toThrow();
   });
@@ -106,9 +94,7 @@ describe('skillCreateRequestSchema', () => {
 
 describe('skillUpdateRequestSchema', () => {
   it('should accept a partial update', () => {
-    expect(() =>
-      skillUpdateRequestSchema.parse({ name: 'updated-name' })
-    ).not.toThrow();
+    expect(() => skillUpdateRequestSchema.parse({ name: 'updated-name' })).not.toThrow();
   });
 
   it('should accept an empty object', () => {
@@ -116,14 +102,10 @@ describe('skillUpdateRequestSchema', () => {
   });
 
   it('should reject when name is empty', () => {
-    expect(() =>
-      skillUpdateRequestSchema.parse({ name: '' })
-    ).toThrow();
+    expect(() => skillUpdateRequestSchema.parse({ name: '' })).toThrow();
   });
 
   it('should accept updating only tool_ids', () => {
-    expect(() =>
-      skillUpdateRequestSchema.parse({ tool_ids: ['tool-a', 'tool-b'] })
-    ).not.toThrow();
+    expect(() => skillUpdateRequestSchema.parse({ tool_ids: ['tool-a', 'tool-b'] })).not.toThrow();
   });
 });

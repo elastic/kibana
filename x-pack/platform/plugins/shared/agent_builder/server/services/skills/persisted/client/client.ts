@@ -8,7 +8,10 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { PersistedSkillCreateRequest, PersistedSkillUpdateRequest } from '@kbn/agent-builder-common';
+import type {
+  PersistedSkillCreateRequest,
+  PersistedSkillUpdateRequest,
+} from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
 import { createStorage } from './storage';
@@ -88,10 +91,7 @@ class SkillClientImpl implements SkillClient {
     return this.get(id);
   }
 
-  async update(
-    id: string,
-    update: PersistedSkillUpdateRequest
-  ): Promise<SkillPersistedDefinition> {
+  async update(id: string, update: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition> {
     const document = await this._get(id);
     if (!document) {
       throw createBadRequestError(`Skill with id '${id}' not found`);

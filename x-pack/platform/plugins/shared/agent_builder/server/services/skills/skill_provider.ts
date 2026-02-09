@@ -22,15 +22,13 @@ export interface ReadonlySkillProvider {
   list(): MaybePromise<SkillDefinition[]>;
 }
 
-export interface WritableSkillProvider extends Omit<ReadonlySkillProvider, 'readonly' | 'get' | 'list'> {
+export interface WritableSkillProvider
+  extends Omit<ReadonlySkillProvider, 'readonly' | 'get' | 'list'> {
   readonly: false;
   get(skillId: string): MaybePromise<PublicSkillDefinition | undefined>;
   list(): MaybePromise<PublicSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): MaybePromise<PublicSkillDefinition>;
-  update(
-    skillId: string,
-    update: PersistedSkillUpdateRequest
-  ): MaybePromise<PublicSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): MaybePromise<PublicSkillDefinition>;
   delete(skillId: string): MaybePromise<boolean>;
 }
 

@@ -32,18 +32,14 @@ const createMockPublicSkillDefinition = (
   ...overrides,
 });
 
-const createMockBuiltinProvider = (
-  skills: SkillDefinition[]
-): ReadonlySkillProvider => ({
+const createMockBuiltinProvider = (skills: SkillDefinition[]): ReadonlySkillProvider => ({
   readonly: true,
   has: jest.fn(async (id: string) => skills.some((s) => s.id === id)),
   get: jest.fn(async (id: string) => skills.find((s) => s.id === id)),
   list: jest.fn(async () => skills),
 });
 
-const createMockPersistedProvider = (
-  skills: PublicSkillDefinition[]
-): WritableSkillProvider => ({
+const createMockPersistedProvider = (skills: PublicSkillDefinition[]): WritableSkillProvider => ({
   readonly: false,
   has: jest.fn(async (id: string) => skills.some((s) => s.id === id)),
   get: jest.fn(async (id: string) => skills.find((s) => s.id === id)),
@@ -246,9 +242,9 @@ describe('CompositeSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(
-        registry.update('builtin-skill-1', { name: 'Updated' })
-      ).rejects.toThrow("Skill 'builtin-skill-1' is read-only");
+      await expect(registry.update('builtin-skill-1', { name: 'Updated' })).rejects.toThrow(
+        "Skill 'builtin-skill-1' is read-only"
+      );
     });
   });
 
@@ -310,9 +306,7 @@ describe('CompositeSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      const result = await registry.resolveSkillSelection([
-        { skill_ids: ['builtin-skill-1'] },
-      ]);
+      const result = await registry.resolveSkillSelection([{ skill_ids: ['builtin-skill-1'] }]);
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('builtin-skill-1');
     });
@@ -324,9 +318,7 @@ describe('CompositeSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      const result = await registry.resolveSkillSelection([
-        { skill_ids: ['custom-skill-1'] },
-      ]);
+      const result = await registry.resolveSkillSelection([{ skill_ids: ['custom-skill-1'] }]);
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('custom-skill-1');
     });

@@ -37,19 +37,24 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     createdSkillIds.length = 0;
   });
 
-  apiTest('should list skills including the built-in data-exploration skill', async ({ kbnClient }) => {
-    const response = await kbnClient.request(skillRequest('GET', SKILLS_API_BASE));
+  apiTest(
+    'should list skills including the built-in data-exploration skill',
+    async ({ kbnClient }) => {
+      const response = await kbnClient.request(skillRequest('GET', SKILLS_API_BASE));
 
-    const body = response.data as { results: Array<{ id: string; readonly: boolean; description: string }> };
-    expect(body).toHaveProperty('results');
-    expect(Array.isArray(body.results)).toBe(true);
-    expect(body.results.length).toBeGreaterThanOrEqual(1);
+      const body = response.data as {
+        results: Array<{ id: string; readonly: boolean; description: string }>;
+      };
+      expect(body).toHaveProperty('results');
+      expect(Array.isArray(body.results)).toBe(true);
+      expect(body.results.length).toBeGreaterThanOrEqual(1);
 
-    // The built-in data-exploration skill should always be present
-    const builtinSkill = body.results.find((skill) => skill.id === BUILTIN_SKILL_ID);
-    expect(builtinSkill).toBeDefined();
-    expect(builtinSkill!.readonly).toBe(true);
-  });
+      // The built-in data-exploration skill should always be present
+      const builtinSkill = body.results.find((skill) => skill.id === BUILTIN_SKILL_ID);
+      expect(builtinSkill).toBeDefined();
+      expect(builtinSkill!.readonly).toBe(true);
+    }
+  );
 
   apiTest('should create a new user-created skill', async ({ kbnClient }) => {
     const skillId = `test-skill-create-${Date.now()}`;
@@ -92,9 +97,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       })
     );
 
-    const response = await kbnClient.request(
-      skillRequest('GET', `${SKILLS_API_BASE}/${skillId}`)
-    );
+    const response = await kbnClient.request(skillRequest('GET', `${SKILLS_API_BASE}/${skillId}`));
 
     const body = response.data as { id: string; name: string; readonly: boolean };
     expect(body).toHaveProperty('id', skillId);
@@ -215,7 +218,12 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       skillRequest('GET', `${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`)
     );
 
-    const body = response.data as { id: string; name: string; description: string; content: string };
+    const body = response.data as {
+      id: string;
+      name: string;
+      description: string;
+      content: string;
+    };
     expect(body).toHaveProperty('id', BUILTIN_SKILL_ID);
     expect(body).toHaveProperty('name', 'data-exploration');
     expect(body.description).toBeTruthy();

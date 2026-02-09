@@ -228,10 +228,7 @@ test.describe('Skills CRUD - UI flows', { tag: ['@ess'] }, () => {
     await skillsPage.expectSkillRowNotVisible(uniqueSkillId);
   });
 
-  test('should cancel skill creation and return to list', async ({
-    pageObjects,
-    browserAuth,
-  }) => {
+  test('should cancel skill creation and return to list', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     const { skillsPage, skillFormPage } = pageObjects;
 

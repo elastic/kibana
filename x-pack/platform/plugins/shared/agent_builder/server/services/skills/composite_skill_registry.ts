@@ -50,7 +50,11 @@ class CompositeSkillRegistryImpl implements CompositeSkillRegistry {
   private readonly persistedProvider: WritableSkillProvider;
   private readonly toolRegistry: ToolRegistry;
 
-  constructor({ builtinProvider, persistedProvider, toolRegistry }: CreateCompositeSkillRegistryParams) {
+  constructor({
+    builtinProvider,
+    persistedProvider,
+    toolRegistry,
+  }: CreateCompositeSkillRegistryParams) {
     this.builtinProvider = builtinProvider;
     this.persistedProvider = persistedProvider;
     this.toolRegistry = toolRegistry;

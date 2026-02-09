@@ -41,10 +41,7 @@ export interface SkillSelection {
 /**
  * Returns true if the given skill ID matches the provided skill selection.
  */
-export const skillMatchSelection = (
-  skillId: string,
-  skillSelection: SkillSelection[]
-): boolean => {
+export const skillMatchSelection = (skillId: string, skillSelection: SkillSelection[]): boolean => {
   return skillSelection.some(
     (selection) =>
       selection.skill_ids.includes(allSkillsSelectionWildcard) ||

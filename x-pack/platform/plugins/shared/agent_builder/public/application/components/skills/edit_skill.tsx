@@ -15,12 +15,7 @@ export const EditSkill: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const { skill } = useSkill({ skillId });
 
-  const {
-    skill: editingSkill,
-    isSubmitting,
-    isLoading,
-    editSkill,
-  } = useEditSkill({ skillId });
+  const { skill: editingSkill, isSubmitting, isLoading, editSkill } = useEditSkill({ skillId });
 
   // If the skill is readonly (built-in), show view mode
   if (skill?.readonly) {

@@ -41,10 +41,7 @@ describe('SkillSelection utilities', () => {
     });
 
     it('should match across multiple selection entries', () => {
-      const selection = [
-        { skill_ids: ['skill-a'] },
-        { skill_ids: ['skill-b'] },
-      ];
+      const selection = [{ skill_ids: ['skill-a'] }, { skill_ids: ['skill-b'] }];
       expect(skillMatchSelection('skill-a', selection)).toBe(true);
       expect(skillMatchSelection('skill-b', selection)).toBe(true);
       expect(skillMatchSelection('skill-c', selection)).toBe(false);
@@ -66,10 +63,7 @@ describe('SkillSelection utilities', () => {
 
     it('should detect wildcard in mixed selection', () => {
       expect(
-        hasSkillSelectionWildcard([
-          { skill_ids: ['skill-a'] },
-          { skill_ids: ['*', 'skill-b'] },
-        ])
+        hasSkillSelectionWildcard([{ skill_ids: ['skill-a'] }, { skill_ids: ['*', 'skill-b'] }])
       ).toBe(true);
     });
   });
@@ -95,10 +89,7 @@ describe('SkillSelection utilities', () => {
     });
 
     it('should flatten multiple selection entries', () => {
-      const selection = [
-        { skill_ids: ['skill-a', 'skill-b'] },
-        { skill_ids: ['skill-c'] },
-      ];
+      const selection = [{ skill_ids: ['skill-a', 'skill-b'] }, { skill_ids: ['skill-c'] }];
       expect(getExplicitSkillIds(selection)).toEqual(['skill-a', 'skill-b', 'skill-c']);
     });
   });

@@ -34,11 +34,7 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   })
 );
 
-export function registerSkillsRoutes({
-  router,
-  getInternalServices,
-  logger,
-}: RouteDependencies) {
+export function registerSkillsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // list skills API

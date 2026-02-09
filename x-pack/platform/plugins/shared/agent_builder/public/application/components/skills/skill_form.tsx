@@ -26,10 +26,7 @@ import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import { validateSkillId } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  CreateSkillPayload,
-  UpdateSkillPayload,
-} from '../../../../common/http_api/skills';
+import type { CreateSkillPayload, UpdateSkillPayload } from '../../../../common/http_api/skills';
 import { useTools } from '../../hooks/tools/use_tools';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -183,7 +180,17 @@ export const SkillForm: React.FC<SkillFormProps> = ({
       }
       navigateToAgentBuilderUrl(appPaths.skills.list);
     },
-    [onSave, validate, mode, id, name, description, content, selectedToolIds, navigateToAgentBuilderUrl]
+    [
+      onSave,
+      validate,
+      mode,
+      id,
+      name,
+      description,
+      content,
+      selectedToolIds,
+      navigateToAgentBuilderUrl,
+    ]
   );
 
   const handleCancel = useCallback(() => {
@@ -335,7 +342,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({
               <EuiComboBox
                 options={toolOptions}
                 selectedOptions={selectedToolOptions}
-                onChange={(selected) => setSelectedToolIds(selected.map((opt) => opt.value as string))}
+                onChange={(selected) =>
+                  setSelectedToolIds(selected.map((opt) => opt.value as string))
+                }
                 isDisabled={isViewMode}
                 fullWidth
                 data-test-subj="agentBuilderSkillFormToolIdsInput"
