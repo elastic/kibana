@@ -19,7 +19,6 @@ project:
     sourceRoot: src/platform/packages/shared/presentation/presentation_containers
 dependsOn:
   - '@kbn/presentation-publishing'
-  - '@kbn/utility-types'
 tags:
   - shared-browser
   - package
