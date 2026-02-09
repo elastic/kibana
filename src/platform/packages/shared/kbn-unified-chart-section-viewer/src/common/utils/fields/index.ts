@@ -16,3 +16,19 @@ export const hasValue = (value: unknown): boolean => {
   }
   return true;
 };
+
+/**
+ * Generates a unique key for a MetricField.
+ * Format: index::metricName
+ *
+ * This combination is unique because:
+ * - Field names are unique within a data view (Elasticsearch guarantees this)
+ * - The index differentiates metrics with the same name from different data views
+ *
+ * @param index - The data view index pattern (e.g., "metrics-*")
+ * @param metricName - The field name (e.g., "system.cpu.user.pct")
+ * @returns A unique string key in the format "index::metricName"
+ */
+export const getMetricKey = (index: string, metricName: string): string => {
+  return `${index}::${metricName}`;
+};
