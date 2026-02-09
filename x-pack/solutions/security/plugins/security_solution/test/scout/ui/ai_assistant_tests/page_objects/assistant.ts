@@ -146,11 +146,7 @@ export class AssistantPage {
     await this.assertSystemPromptSelected(systemPromptName);
   }
 
-  async createSystemPrompt(
-    title: string,
-    prompt: string,
-    defaultConversations?: string[]
-  ) {
+  async createSystemPrompt(title: string, prompt: string, defaultConversations?: string[]) {
     await this.systemPrompt.click();
     await this.page.testSubj.locator('addSystemPrompt').click();
 
@@ -175,11 +171,7 @@ export class AssistantPage {
     await this.page.testSubj.locator('save-button').click();
   }
 
-  async createQuickPrompt(
-    title: string,
-    prompt: string,
-    defaultConversations?: string[]
-  ) {
+  async createQuickPrompt(title: string, prompt: string, defaultConversations?: string[]) {
     await this.page.testSubj.locator('addQuickPrompt').click();
 
     const titleInput = this.page.testSubj
