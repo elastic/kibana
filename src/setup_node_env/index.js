@@ -13,9 +13,6 @@ require('./setup_env');
 // restore < Node 16 default DNS lookup behavior
 require('./dns_ipv4_first');
 
-// cheerio 1.2.0 compat: redirect cheerio/lib/utils → cheerio/utils for enzyme
-require('./cheerio_compat');
-
 require('@kbn/babel-register').install();
 
 require('@kbn/security-hardening');
