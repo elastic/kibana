@@ -29,7 +29,7 @@ interface Dependencies {
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
+  ({ core, plugins, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
     streamsRepositoryClient,
