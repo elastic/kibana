@@ -94,6 +94,14 @@ export function runCheckSavedObjectsCli() {
             enabled: !server && !test,
             skip: test,
           },
+          {
+            title: 'Fallback to test mode (no updated types detected)',
+            task: (ctx) => {
+              ctx.test = true;
+            },
+            enabled: !server && !test,
+            skip: (ctx) => ctx.updatedTypes.length > 0,
+          },
           /**
            * ==================================================================
            * Validate test flow (runs in test mode or after fallback).

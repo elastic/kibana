@@ -516,7 +516,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml'));
     }
 
-    // Always run Saved Objects checks as a smoke test for migration logic
+    // Always run Saved Objects checks.
+    // If there aren't any SO types modified, the check will run with test data as a smoke test for migration logic
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
 
     if (

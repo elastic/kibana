@@ -27,13 +27,6 @@ export const validateSOChanges: Task = (ctx, task) => {
       title: 'Validate existing SO types',
       task: validateUpdatedTypes,
     },
-    {
-      title: 'Fallback to test mode (no updated types detected)',
-      task: () => {
-        ctx.test = true;
-      },
-      skip: () => ctx.updatedTypes.length > 0,
-    },
   ];
 
   return task.newListr<TaskContext>(subtasks);
