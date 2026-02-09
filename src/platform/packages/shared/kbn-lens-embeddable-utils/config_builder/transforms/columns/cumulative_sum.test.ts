@@ -31,7 +31,7 @@ describe('Cumulative Sum Transforms', () => {
 
       const expected: CumulativeSumIndexPatternColumn = {
         operationType: 'cumulative_sum',
-        references: ['col1'],
+        references: [],
         label: '',
         customLabel: false,
         isBucketed: false,
