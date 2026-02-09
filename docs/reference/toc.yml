@@ -75,6 +75,7 @@ toc:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/notion-action-type.md

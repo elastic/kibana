@@ -69,10 +69,13 @@ export const GoogleDriveConnector: ConnectorSpec = {
           .string()
           .min(1)
           .describe(
-            "Google Drive query. Use fullText contains 'term' for content search, " +
-              "name contains 'term' for filename search, mimeType='application/pdf' for type filtering, " +
-              "modifiedTime > '2024-01-01' for date filtering. Combine with 'and'/'or'. " +
-              "Note: Google Drive includes trashed files by default. Add 'and trashed=false' to exclude them."
+            'Google Drive search query. ' +
+              "Examples: name contains 'budget' and trashed=false | " +
+              "fullText contains 'quarterly report' and mimeType='application/pdf' | " +
+              "'me' in owners and modifiedTime > '2024-01-01' | " +
+              "mimeType='application/vnd.google-apps.folder' and trashed=false. " +
+              "Operators: contains, =, !=, <, >, <=, >=. Combine with 'and'/'or'. " +
+              "String values use single quotes. Add 'and trashed=false' to exclude trashed files."
           ),
         pageSize: z
           .number()
@@ -80,27 +83,44 @@ export const GoogleDriveConnector: ConnectorSpec = {
           .default(DEFAULT_PAGE_SIZE)
           .describe('Maximum number of files to return (1-1000)'),
         pageToken: z.string().optional().describe('Token for pagination'),
+        orderBy: z
+          .preprocess(
+            (val) => (val === '' ? undefined : val),
+            z
+              .enum([
+                'createdTime',
+                'createdTime desc',
+                'modifiedTime',
+                'modifiedTime desc',
+                'name',
+                'name desc',
+              ])
+              .optional()
+          )
+          .describe('Field and direction to order results by'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;
           pageSize: number;
           pageToken?: string;
+          orderBy?: string;
         };
-
-        ctx.log.debug(`[google_drive.searchFiles] input: ${JSON.stringify(input)}`);
 
         const params: Record<string, string | number> = {
           q: typedInput.query,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-          fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, webViewLink)',
+          fields:
+            'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
         };
 
         if (typedInput.pageToken) {
           params.pageToken = typedInput.pageToken;
         }
 
-        ctx.log.debug(`[google_drive.searchFiles] API params: ${JSON.stringify(params)}`);
+        if (typedInput.orderBy) {
+          params.orderBy = typedInput.orderBy;
+        }
 
         try {
           const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
@@ -152,14 +172,13 @@ export const GoogleDriveConnector: ConnectorSpec = {
           includeTrashed: boolean;
         };
 
-        ctx.log.debug(`[google_drive.listFiles] input: ${JSON.stringify(input)}`);
-
         const folderId = typedInput.folderId || DEFAULT_FOLDER_ID;
         const trashedFilter = typedInput.includeTrashed ? '' : ' and trashed=false';
         const params: Record<string, string | number> = {
           q: `'${escapeQueryValue(folderId)}' in parents${trashedFilter}`,
           pageSize: Math.min(typedInput.pageSize || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-          fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, webViewLink)',
+          fields:
+            'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
         };
 
         if (typedInput.pageToken) {
@@ -169,8 +188,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
         if (typedInput.orderBy) {
           params.orderBy = typedInput.orderBy;
         }
-
-        ctx.log.debug(`[google_drive.listFiles] API params: ${JSON.stringify(params)}`);
 
         try {
           const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
@@ -192,15 +209,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         fileId: z.string().min(1).describe('The ID of the file to download'),
-        mimeType: z.string().optional().describe('Export MIME type for Google Workspace documents'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           fileId: string;
-          mimeType?: string;
         };
-
-        ctx.log.debug(`[google_drive.downloadFile] input: ${JSON.stringify(input)}`);
 
         try {
           // First, get file metadata to determine if it's a Google Workspace document
@@ -217,6 +230,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
           let contentResponse;
+          let resolvedMimeType: string = fileMetadata.mimeType;
+
           if (isGoogleDoc) {
             // Export Google Workspace documents
             // Use XLSX for Sheets (preserves tabular structure), PDF for everything else
@@ -224,12 +239,12 @@ export const GoogleDriveConnector: ConnectorSpec = {
               fileMetadata.mimeType === 'application/vnd.google-apps.spreadsheet'
                 ? SHEETS_EXPORT_MIME_TYPE
                 : DEFAULT_EXPORT_MIME_TYPE;
-            const exportMimeType = typedInput.mimeType || defaultExport;
+            resolvedMimeType = defaultExport;
             contentResponse = await ctx.client.get(
               `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}/export`,
               {
                 params: {
-                  mimeType: exportMimeType,
+                  mimeType: resolvedMimeType,
                 },
                 responseType: 'arraybuffer',
               }
@@ -253,13 +268,73 @@ export const GoogleDriveConnector: ConnectorSpec = {
           return {
             id: fileMetadata.id,
             name: fileMetadata.name,
-            mimeType: isGoogleDoc
-              ? typedInput.mimeType || DEFAULT_EXPORT_MIME_TYPE
-              : fileMetadata.mimeType,
+            mimeType: resolvedMimeType,
             size: fileMetadata.size,
             content: base64Content,
             encoding: 'base64',
           };
+        } catch (error: unknown) {
+          throwGoogleDriveError(error);
+          throw error;
+        }
+      },
+    },
+
+    getFileMetadata: {
+      isTool: true,
+      input: z.object({
+        fileIds: z
+          .array(z.string().min(1))
+          .min(1)
+          .describe(
+            'Array of file IDs to fetch metadata for. Use after search/list to get ownership, ' +
+              'sharing, permissions, and other details for specific files.'
+          ),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          fileIds: string[];
+        };
+
+        const metadataFields = [
+          'id',
+          'name',
+          'mimeType',
+          'size',
+          'createdTime',
+          'modifiedTime',
+          'owners',
+          'lastModifyingUser',
+          'sharingUser',
+          'shared',
+          'starred',
+          'trashed',
+          'permissions',
+          'description',
+          'parents',
+          'labelInfo',
+          'webViewLink',
+        ].join(',');
+
+        try {
+          const results = await Promise.all(
+            typedInput.fileIds.map(async (fileId) => {
+              try {
+                const response = await ctx.client.get(
+                  `${GOOGLE_DRIVE_API_BASE}/files/${fileId}`,
+                  {
+                    params: { fields: metadataFields },
+                  }
+                );
+                return response.data;
+              } catch (error: unknown) {
+                throwGoogleDriveError(error);
+                throw error;
+              }
+            })
+          );
+
+          return { files: results };
         } catch (error: unknown) {
           throwGoogleDriveError(error);
           throw error;
