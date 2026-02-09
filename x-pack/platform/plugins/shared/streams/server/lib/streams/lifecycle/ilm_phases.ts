@@ -6,13 +6,30 @@
  */
 
 import { compact, pick } from 'lodash';
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyPhase, IlmPolicyHotPhase, IlmPolicyDeletePhase } from '@kbn/streams-schema';
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IlmPolicy,
   IlmPhase,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
+
+interface IlmPolicyPhaseWithStats extends IlmPolicyPhase {
+  size_in_bytes: number;
+}
+
+interface IlmPolicyHotPhaseWithStats extends IlmPolicyPhaseWithStats {
+  name: 'hot';
+  rollover: IlmPolicyHotPhase['rollover'];
+}
+
+interface IlmPolicyPhasesWithStats {
+  hot?: IlmPolicyHotPhaseWithStats;
+  warm?: IlmPolicyPhaseWithStats;
+  cold?: IlmPolicyPhaseWithStats;
+  frozen?: IlmPolicyPhaseWithStats;
+  delete?: IlmPolicyDeletePhase;
+}
 
 export function ilmPhases({
   policy,
@@ -22,8 +39,8 @@ export function ilmPhases({
   policy: IlmPolicy;
   indicesIlmDetails: Record<string, IlmExplainLifecycleLifecycleExplain>;
   indicesStats: Record<string, IndicesStatsIndicesStats>;
-}) {
-  const phaseWithName = (name: keyof IlmPolicyPhases, phase?: IlmPhase) => {
+}): IlmPolicyPhasesWithStats {
+  const phaseWithName = (name: keyof IlmPolicyPhasesWithStats, phase?: IlmPhase) => {
     if (!phase) return undefined;
     return { ...pick(phase, ['min_age'], ['actions']), name };
   };
@@ -84,5 +101,5 @@ export function ilmPhases({
     }
 
     return phases;
-  }, {} as IlmPolicyPhases);
+  }, {} as IlmPolicyPhasesWithStats);
 }

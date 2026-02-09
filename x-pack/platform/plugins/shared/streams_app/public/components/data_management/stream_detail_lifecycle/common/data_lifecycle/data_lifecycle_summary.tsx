@@ -8,12 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { DataLifecycleTimeline } from './data_lifecycle_timeline';
@@ -27,12 +29,23 @@ import {
 import { LifecycleBar } from './lifecycle_bar';
 import { DownsamplingBar } from './downsampling_bar';
 import { type LifecyclePhase } from './lifecycle_types';
+import type { IlmPhaseSelectOption } from '../../downsampling/ilm_phase_select/ilm_phase_select';
+import { IlmPhaseSelect } from '../../downsampling/ilm_phase_select/ilm_phase_select';
 
 interface DataLifecycleSummaryProps {
   phases: LifecyclePhase[];
   loading?: boolean;
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   downsampleSteps?: DownsampleStep[];
+  isIlm?: boolean;
+  onRemovePhase?: (phaseName: string) => void;
+  onRemoveDownsampleStep?: (stepNumber: number) => void;
+  onEditPhase?: (phaseName: string) => void;
+  onEditDownsampleStep?: (stepNumber: number, phaseName?: string) => void;
+  editedPhaseName?: string;
+  ilmSelectedPhases?: IlmPhaseSelectOption[];
+  onAddIlmPhase?: (phase: IlmPhaseSelectOption) => void;
+  canManageLifecycle: boolean;
 }
 
 export const DataLifecycleSummary = ({
@@ -40,6 +53,15 @@ export const DataLifecycleSummary = ({
   loading = false,
   onPhaseClick,
   downsampleSteps,
+  isIlm,
+  onRemovePhase,
+  onRemoveDownsampleStep,
+  onEditPhase,
+  onEditDownsampleStep,
+  editedPhaseName,
+  ilmSelectedPhases,
+  onAddIlmPhase,
+  canManageLifecycle,
 }: DataLifecycleSummaryProps) => {
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
@@ -49,7 +71,6 @@ export const DataLifecycleSummary = ({
     hasDslDownsampling && downsampleSteps ? buildDslSegments(phases, downsampleSteps) : null;
   const timelineSegments = dslSegments?.timelineSegments ?? buildPhaseTimelineSegments(phases);
   const downsamplingSegments = buildDownsamplingSegments(phases, dslSegments);
-
   const gridTemplateColumns = getGridTemplateColumns(timelineSegments);
   const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 
@@ -62,13 +83,56 @@ export const DataLifecycleSummary = ({
         css={{ height: '100%' }}
       >
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
-          <EuiText>
-            <h5 data-test-subj="dataLifecycleSummary-title">
-              {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
-                defaultMessage: 'Data lifecycle',
-              })}
-            </h5>
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h5 data-test-subj="dataLifecycleSummary-title">
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
+                    defaultMessage: 'Data lifecycle',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isIlm && canManageLifecycle && ilmSelectedPhases && onAddIlmPhase && (
+                <IlmPhaseSelect
+                  selectedPhases={ilmSelectedPhases}
+                  onSelect={onAddIlmPhase}
+                  data-test-subj="dataLifecycleSummaryAddPhase"
+                  anchorPosition="downRight"
+                  renderButton={(buttonProps) => {
+                    const button = (
+                      <EuiButton
+                        {...buttonProps}
+                        color="text"
+                        size="s"
+                        iconType="arrowDown"
+                        iconSide="right"
+                      >
+                        {i18n.translate('xpack.streams.dataLifecycleSummary.addPhaseButtonLabel', {
+                          defaultMessage: 'Add data phase and downsampling',
+                        })}
+                      </EuiButton>
+                    );
+
+                    if (!buttonProps.disabled) return button;
+
+                    return (
+                      <EuiToolTip
+                        position="top"
+                        content={i18n.translate(
+                          'xpack.streams.dataLifecycleSummary.allPhasesInUseTooltip',
+                          { defaultMessage: 'All data phases are in use' }
+                        )}
+                      >
+                        <span tabIndex={0}>{button}</span>
+                      </EuiToolTip>
+                    );
+                  }}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
 
         <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
@@ -88,10 +152,19 @@ export const DataLifecycleSummary = ({
                   gridTemplateColumns={gridTemplateColumns}
                   phaseColumnSpans={phaseColumnSpans}
                   onPhaseClick={onPhaseClick}
+                  isIlm={isIlm}
+                  onRemovePhase={onRemovePhase}
+                  onEditPhase={onEditPhase}
+                  editedPhaseName={editedPhaseName}
+                  canManageLifecycle={canManageLifecycle}
                 />
                 <DownsamplingBar
                   segments={downsamplingSegments}
                   gridTemplateColumns={gridTemplateColumns}
+                  onRemoveStep={onRemoveDownsampleStep}
+                  onEditStep={onEditDownsampleStep}
+                  editedPhaseName={editedPhaseName}
+                  canManageLifecycle={canManageLifecycle}
                 />
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline

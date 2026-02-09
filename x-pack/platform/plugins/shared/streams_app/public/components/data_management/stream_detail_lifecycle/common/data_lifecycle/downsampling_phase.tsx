@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -26,6 +27,10 @@ interface DownsamplingPhaseProps {
   stepNumber: number;
   phaseName?: string;
   color?: string;
+  onRemoveStep?: (stepNumber: number) => void;
+  onEditStep?: (stepNumber: number, phaseName?: string) => void;
+  isBeingEdited?: boolean;
+  canManageLifecycle: boolean;
 }
 
 export const DownsamplingPhase = ({
@@ -33,10 +38,24 @@ export const DownsamplingPhase = ({
   stepNumber,
   phaseName,
   color,
+  onRemoveStep,
+  onEditStep,
+  isBeingEdited = false,
+  canManageLifecycle,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const intervalLabel = downsample.fixed_interval;
+
+  const handleEditStep = () => {
+    onEditStep?.(stepNumber, phaseName);
+    setIsPopoverOpen(false);
+  };
+
+  const handleRemoveStep = () => {
+    onRemoveStep?.(stepNumber);
+    setIsPopoverOpen(false);
+  };
 
   const button = (
     <EuiPanel
@@ -54,7 +73,7 @@ export const DownsamplingPhase = ({
       css={getInteractivePanelStyles({
         euiTheme,
         backgroundColor: color ?? euiTheme.colors.backgroundBasePlain,
-        isPopoverOpen,
+        isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '30px',
         fullSize: true,
         extraStyles: {
@@ -100,10 +119,58 @@ export const DownsamplingPhase = ({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle data-test-subj={`downsamplingPopover-step${stepNumber}-title`}>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
-          defaultMessage: 'Downsample step {stepNumber}',
-          values: { stepNumber },
-        })}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
+              defaultMessage: 'Downsample step {stepNumber}',
+              values: { stepNumber },
+            })}
+          </EuiFlexItem>
+          {canManageLifecycle && (onEditStep || onRemoveStep) && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                {onEditStep && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="pencil"
+                      size="s"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.editDownsampleStep.ariaLabel',
+                        {
+                          defaultMessage: 'Edit downsample step {stepNumber}',
+                          values: { stepNumber },
+                        }
+                      )}
+                      data-test-subj={`downsamplingPopover-step${stepNumber}-editButton`}
+                      onClick={handleEditStep}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {onRemoveStep && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="trash"
+                      size="s"
+                      color="danger"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
+                        {
+                          defaultMessage: 'Remove downsample step {stepNumber}',
+                          values: { stepNumber },
+                        }
+                      )}
+                      data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
+                      onClick={handleRemoveStep}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
         style={{ width: '300px' }}
