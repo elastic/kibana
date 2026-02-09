@@ -27,6 +27,7 @@ describe('MetricFlyoutBody', () => {
     name: 'system.cpu.user.pct',
     index: 'metrics-*',
     type: ES_FIELD_TYPES.FLOAT,
+    uniqueKey: 'metrics-*::system.cpu.user.pct',
     dimensions: [],
     ...overrides,
   });
