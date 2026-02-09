@@ -5,23 +5,38 @@
   },
   {
     "path": "packages/kbn-generate/templates/package/README.md.ejs",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "packages/kbn-mock-idp-plugin",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "packages/kbn-plugin-generator/template/README.md.ejs",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "packages/kbn-plugin-generator/template/translations/ja-JP.json.ejs",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "packages/kbn-ts-projects/config-paths.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "packages/kbn-tsconfig",
@@ -29,83 +44,143 @@
   },
   {
     "path": "src/core/packages/chrome/app-menu",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/core/packages/custom-branding",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/data-streams",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/doc-links",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/execution-context",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/fatal-errors",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/feature-flags",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/injected-metadata",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/mount-utils",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/saved-objects",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/test-helpers",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/ui-settings",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/usage-data",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/user-profile",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/packages/user-settings",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/core/test-helpers",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/CODEOWNERS",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined/bulk-data.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/analytics/utils/analytics_collection_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/platform/packages/private/default-nav",
@@ -113,19 +188,31 @@
   },
   {
     "path": "src/platform/packages/private/kbn-mock-idp-utils/src/jwt-codecs",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-mock-idp-utils/src/jwt-codecs/encoder-checksum.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-mock-idp-utils/src/jwt-codecs/encoder-prefix.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-repo-packages/package-map.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-reporting",
@@ -133,51 +220,87 @@
   },
   {
     "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-reporting/export_types/pdf_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-reporting/export_types/png_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-reporting/mocks_server",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/generate-scout-page-objects.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/generate-scout-skeleton-from-ftr-test.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/scout-best-practices.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/scout-browser-auth.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/scout-page-objects.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/private/shared-ux",
@@ -189,187 +312,325 @@
   },
   {
     "path": "src/platform/packages/shared/content-management/access_control/access_control_public",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/access_control/access_control_server",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/content_editor",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/favorites/favorites_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/favorites/favorites_public",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/favorites/favorites_server",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/tabbed_table_list_view",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/table_list_view",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/table_list_view_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/table_list_view_table",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/content-management/user_profiles",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/deeplinks/agent_builder",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "src/platform/packages/shared/deeplinks/data_sources",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "src/platform/packages/shared/deeplinks/workplace_ai",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "src/platform/packages/shared/home/sample_data_card",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/home/sample_data_tab",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/home/sample_data_types",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/ChangePoint.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Enrich.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Explain.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Expression.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Fork.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/From.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Fuse.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Inline.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Join.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Lookup.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/MMR.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/MvExpand.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Project.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Promql.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Rename.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Set.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/Show.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/lexer/UnknownCommand.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/parser/Expression.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/parser/Join.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-language/src/parser/antlr/parser/Promql.g4",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-esql"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/schema/serializedValue.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-visualizations"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-visualizations"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/esqlXY.mock.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-visualizations"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/referenceLines.mock.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-visualizations"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management",
@@ -377,151 +638,272 @@
   },
   {
     "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/cards_navigation",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/components/field_category",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/components/field_input",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/components/field_row",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/field_definition",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/section_registry",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux",
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-management/settings/setting_ids",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux",
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/resolved-semconv.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-core"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/fp/assocPath.d.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/fp/assocPath.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/fp/setWith.d.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/fp/setWith.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/lodash/_baseSet.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/lodash/setWith.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/scripts/patches/_baseSet.js.patch",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/setWith.d.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/setWith.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/test/fp_assocPath.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/test/fp_setWith.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-safer-lodash-set/test/setWith.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-test/jest_integration_node/jest-preset.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations",
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-test/jest_integration/jest-preset.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations",
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-test/jest_node/jest-preset.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations",
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/shared/kbn-test/jest-preset.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations",
+      "@elastic/appex-qa"
+    ]
   },
   {
     "path": "src/platform/packages/shared/presentation/presentation_containers",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "src/platform/packages/shared/presentation/presentation_publishing",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "src/platform/packages/shared/presentation/presentation_util",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "src/platform/packages/shared/react/kibana_mount",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/react/use_observable",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/serverless/settings/observability_project",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux",
+      "@elastic/kibana-management",
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "src/platform/packages/shared/serverless/settings/search_project",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/search-kibana",
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/serverless/settings/security_project",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/security-solution",
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "src/platform/packages/shared/serverless/settings/workplace_ai_project",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux",
@@ -529,75 +911,129 @@
   },
   {
     "path": "src/platform/packages/shared/shared-ux/button_toolbar",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/error_boundary",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/feedback_snippet",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/label_formatter",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/page/solution_nav",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/prompt/not_found",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/table_persist",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/packages/shared/shared-ux/toolbar_selector",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/obs-exploration-team"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/kibana_react/public/markdown/markdownStyles.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/appex-sharedux"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/step-level",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.test.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/plugins/shared/workflows_execution_engine/server/utils/parse-duration/parse-duration.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/workflows-eng"
+    ]
   },
   {
     "path": "src/platform/test/package/Vagrantfile",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "src/setup_node_env",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "typings/@a2a-js-sdk",
@@ -629,7 +1065,10 @@
   },
   {
     "path": "x-pack/dev-tools",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-operations"
+    ]
   },
   {
     "path": "x-pack/packages/ai-infra",
@@ -637,131 +1076,227 @@
   },
   {
     "path": "x-pack/platform/packages/private/maps/vector_tile_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/agg_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/aiops_change_point_detection",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/aiops_components",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/aiops_test_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/cancellable_search",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/category_validator",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/creation_wizard_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/data_grid",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/data_view_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/date_picker",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/date_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/field_stats_flyout",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/in_memory_table",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/is_defined",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/is_populated_object",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/json_schemas",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/local_storage",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/nested_property",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/number_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/parse_interval",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/query_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/route_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/string_hash",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/time_buckets",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/ui_actions",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/ml/url_state",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/security/authorization_core",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/security/authorization_core_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/security/role_management_model",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/security/ui_components",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/private/upgrade-assistant",
@@ -785,7 +1320,10 @@
   },
   {
     "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/index-management",
@@ -793,199 +1331,362 @@
   },
   {
     "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_hosts/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_hosts/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_hosts/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_logs/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_logs/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_logs/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/ecs/fields/mapping-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/ecs/fields/template-settings-legacy.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/ecs/fields/template-settings.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/actionable-obs-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/env/http-client.env.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Android",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Apache",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/BGL",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Hadoop",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/HDFS",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/HealthApp",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/HPC",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Linux",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Mac",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/OpenSSH",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/OpenStack",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Proxifier",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Spark",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Thunderbird",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Windows",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Zookeeper",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team",
+      "@elastic/obs-sig-events-team"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/aiops_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/anomaly_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/error_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/random_sampler_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/response_stream",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/runtime_field_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/ml/trained_models_utils",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/ml-ui"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/response-ops",
@@ -993,291 +1694,508 @@
   },
   {
     "path": "x-pack/platform/packages/shared/response-ops/rule_form",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/response-ops/rule_params",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/security/api_key_management",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/security/form_components",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/security/plugin_types_common",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/security/plugin_types_public",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/packages/shared/security/plugin_types_server",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/kibana-security"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/alterColumn.test.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/alterColumn.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/axisConfig.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/containerStyle.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/dropdownControl.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/getCell.test.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/getCell.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/rowCount.test.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/rowCount.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/seriesStyle.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/staticColumn.test.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/staticColumn.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/common/timefilterControl.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/uis/views/dropdownControl.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/uis/views/getCell.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/uis/views/repeatImage.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/uis/views/revealImage.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/uis/views/timefilterControl.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/customElementService.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/downloadWorkpad.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/esService.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/uiAbsoluteToParsedUrl.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/uiChrome.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/uiMetric.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/uiNotify.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/canvas/tasks/mocks/uiNotifyFormatMsg.js",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/monitoring/public/icons/health-gray.svg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/stack-monitoring"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/monitoring/public/icons/health-green.svg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/stack-monitoring"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/monitoring/public/icons/health-red.svg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/stack-monitoring"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/monitoring/public/icons/health-yellow.svg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/stack-monitoring"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/translations/translations/de-DE.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-localization"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/translations/translations/fr-FR.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-localization"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/translations/translations/ja-JP.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-localization"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/translations/translations/zh-CN.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-localization"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/data_streams/flyout/steps/checklist/callouts/fetchFailed.tsx",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/data_streams/flyout/steps/checklist/callouts/noRequiredPrivileges.tsx",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-cloudwatch.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/aws-s3.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-blob-storage.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/azure-eventhub.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/gcp-pubsub.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/automatic_import/server/templates/readme/setup/ssl-tls.md.njk",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/integration-experience"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/defaultSearchOperator.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/includeComments.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFields.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFieldsType.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFieldsTypeArray.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/sortField.yaml",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-cases"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/dataset_quality_details/quality_issue_flyout/degraded_field/possible_mitigations/field_character_limit/Increase_field_character_limit.tsx",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-onboarding-team"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/fleet/cypress/packages/input_package-1.0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/fleet"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/fleet/cypress/packages/logs_int_no_dataset-1.0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/fleet"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/fleet/cypress/packages/logs_integration-1.0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/fleet"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/fleet/cypress/packages/otel_input_package-1.0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/fleet"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture/__tests__/mockData.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/fleet",
+      "@elastic/contextual-security-apps"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/components/document_fields/common/listItemStyle.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-management"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/0-255.pbf",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/1024-1279.pbf",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/256-511.pbf",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/768-1023.pbf",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/maps/server/fonts/open_sans/8192-8447.pbf",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/kibana-presentation"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/stack_connectors/common/jira-service-management",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/stack_connectors/public/connector_types/jira-service-management",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira-service-management",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/response-ops"
+    ]
   },
   {
     "path": "x-pack/platform/test/saved_object_api_integration/low-level",
@@ -1289,287 +2207,500 @@
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/ftr_e2e",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/diagnostics/apm-diagnostics-8.8.0-1687436214804.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-java.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-nodejs.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-python.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-go.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-java.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-nodejs.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-otel_other-python.json",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/plugins/profiling/Makefile",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-presentation-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/kb-product-doc-elasticsearch-0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/kb-product-doc-kibana-0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/kb-product-doc-observability-0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs/kb-product-doc-security-0.0.zip",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/index-0",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/indices/oYscBShISaWpDm7n1KXkCA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/indices/oYscBShISaWpDm7n1KXkCA/0/index-KxGoXW9rQlmlCfPaW8lMYA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/indices/oYscBShISaWpDm7n1KXkCA/0/snap-9Wej6Q4gRZWSblPzNrtLOQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/indices/oYscBShISaWpDm7n1KXkCA/meta-3cLp9JQBDFLNeO2pjufJ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/meta-9Wej6Q4gRZWSblPzNrtLOQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.10/snap-9Wej6Q4gRZWSblPzNrtLOQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/index-2",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/___mIOvmULQBWV2zkBoDVveA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__06CPqevQQOmvowG1MpCD-g",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__4vijD3jIRDKIsqLVeCyiRg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__67_8A2HNTvS9VX_pNYgoGw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__aG94RvZxT8Ksa-xz2fgEvg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__aRTsRTBPQpSlnI2YORTeYA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__BLiiHnFWQhW5EoLYh86Csg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__BWt56U-gTom2lEcvFItpdg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__D_1rlwiZSf26cF3O5bxszQ",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__D420iyS_RrOpKLE5V4CKYA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__FxtJJJycSD2Seyxdr6QVGw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__GwPjXn70RheLT-KpbFv81w",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__H34FA1J7SoWVKoGOWJlSiw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__kRTD6xS5Qxin-dxmKsTBMw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__l7M6Slx7T5CDnEKFqR8-gg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__LAUFvO8FTlaqxCpF7pLXRw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__Lw5ZKbaITR64_ormwZVmog",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__m0R_-B8CSsG44znmiNNN2Q",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__MiOlmmuaQLus8qTMapK-HA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__oodLbOo3TDKZc57aEYPLCw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__PCbIJy9NR66eWvkmj0W2yA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__PSVIIb94R6WGZknZiAJvGg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__REtuRhUpTfSBtRs_dN0fZg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__rgBY_HmwRe2Yl7mgBTfiEw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__Rl_c6BJPTGW7E5uuo5eDIw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__SfcedHiHRXaOxmmxYtbFlw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__SPQW2ou3T02QJxsmOrrvMg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__tNe8csu0QoO6dTqllqk_dA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__TpwosEuPRm-uCXdsyY4hFw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__ucs8kEFbS3SLJlPbej4NLw",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__VTFzLU52RuiM9HxDBWOPhA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/__YBl88oxKQiSI1qHr2GLwxQ",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/index-FWDT04_LTIaFE_BxwPeJfA",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/0/snap-y1zcTBUTQFuKFwMMbi7VvQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/indices/2MSR7bXrSyyoo2ZmErlBkg/meta-ZOmqhpYBNSJu_urmZ8Mp.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/meta-y1zcTBUTQFuKFwMMbi7VvQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.16/snap-y1zcTBUTQFuKFwMMbi7VvQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/index-0",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w/0/__fd1J8ir-QFu4E0UfWCe62A",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w/0/__oE6vUpmtRsOKre8fj4wmPQ",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w/0/index-E0OyraKORESn_utIfSkkyg",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w/0/snap-oHvKVUVfQ4W501XyBty3_Q.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/indices/xqR66eHHSniUBARvrCJl_w/meta-qUpWgZYBfn3I2UYp5TrQ.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/meta-oHvKVUVfQ4W501XyBty3_Q.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/snapshot_kb_8.18/snap-oHvKVUVfQ4W501XyBty3_Q.dat",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/obs-ai-team"
+    ]
   },
   {
     "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/getting-started-tutorials",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/search-kibana"
+    ]
   },
   {
     "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture",
@@ -1577,78 +2708,135 @@
   },
   {
     "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/integration-vendors.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/contextual-security-apps"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/updateAlertsWithAttackIds.test.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/updateAlertsWithAttackIds.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.test.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-defend-workflows"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-defend-workflows"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.test.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-defend-workflows"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-defend-workflows"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/index_requests/metrics-apm-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/index_requests/traces-apm-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/employees-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/logs-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/metricbeat-[environment].evaluations-[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/nyc_taxis-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/packetbeat-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/indices_create_requests/postgres-logs-[environment].evaluations.[date].ts",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-generative-ai"
+    ]
   },
   {
     "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile",
-    "expected": "snake_case"
+    "expected": "snake_case",
+    "owners": [
+      "@elastic/security-solution"
+    ]
   },
   {
     "path": "x-pack/solutions/security/test/security_solution_api_integration",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/security-detection-engine"
+    ]
   },
   {
     "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/security-detection-engine"
+    ]
   },
   {
     "path": "x-pack/solutions/security/test/security_solution_endpoint",
-    "expected": "kebab-case"
+    "expected": "kebab-case",
+    "owners": [
+      "@elastic/security-defend-workflows"
+    ]
   }
 ]
