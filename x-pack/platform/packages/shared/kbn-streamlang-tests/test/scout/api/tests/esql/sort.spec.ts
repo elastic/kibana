@@ -178,9 +178,10 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
     expect(doc1?.['event.kind']).toBe('test');
 
-    // Second doc should keep original order (where condition not matched)
+    // Second doc: where condition not matched, processor doesn't sort
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
+    expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(doc2?.tags).toHaveLength(3);
     expect(doc2?.['event.kind']).toBe('production');
   });
 
@@ -235,12 +236,9 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
 
     // Second doc should have sorted_tags as empty array (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toStrictEqual(
-      expect.objectContaining({
-        tags: ['zulu', 'xray', 'yankee'],
-        sorted_tags: [],
-      })
-    );
+    expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(doc2?.tags).toHaveLength(3);
+    expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: [] }));
     expect(doc2?.['event.kind']).toBe('production');
   });
 

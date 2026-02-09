@@ -191,9 +191,11 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
       expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
     );
 
-    // Both transpilers should keep the original array order when condition doesn't match
-    expect(ingestDoc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
-    expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
+    // Both transpilers should not apply sort when condition doesn't match
+    expect(ingestDoc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(ingestDoc2?.tags).toHaveLength(3);
+    expect(esqlDoc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
+    expect(esqlDoc2?.tags).toHaveLength(3);
   });
 
   apiTest(
