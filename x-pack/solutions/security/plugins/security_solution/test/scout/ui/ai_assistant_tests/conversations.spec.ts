@@ -30,40 +30,36 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
     await createConversation(kbnClient, mockConvo2);
   });
 
-  test.describe(
-    'No connectors or conversations exist',
-    { tag: ['@ess', '@svlSecurity'] },
-    () => {
-      test('Shows welcome setup when no connectors or conversations exist', async ({
-        browserAuth,
-        page,
-        pageObjects,
-        kbnUrl,
-      }) => {
-        // Delete the conversations we just created for this specific test
-        // (this test checks the empty state)
-        await browserAuth.loginAsAdmin();
-        await page.goto(kbnUrl.get('/app/security/get_started'));
-        await waitForPageReady(page);
-        await pageObjects.assistant.openAssistant();
-        await pageObjects.assistant.assertNewConversation(true, 'New chat');
-      });
+  test.describe('No connectors or conversations exist', { tag: ['@ess', '@svlSecurity'] }, () => {
+    test('Shows welcome setup when no connectors or conversations exist', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      // Delete the conversations we just created for this specific test
+      // (this test checks the empty state)
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
+      await pageObjects.assistant.assertNewConversation(true, 'New chat');
+    });
 
-      test('Creating a new connector from welcome setup automatically sets the connector', async ({
-        browserAuth,
-        page,
-        pageObjects,
-        kbnUrl,
-      }) => {
-        await browserAuth.loginAsAdmin();
-        await page.goto(kbnUrl.get('/app/security/get_started'));
-        await waitForPageReady(page);
-        await pageObjects.assistant.openAssistant();
-        await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
-        await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
-      });
-    }
-  );
+    test('Creating a new connector from welcome setup automatically sets the connector', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
+      await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
+      await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
+    });
+  });
 
   test.describe('Changing conversations', () => {
     test.beforeEach(async ({ kbnClient, browserAuth }) => {

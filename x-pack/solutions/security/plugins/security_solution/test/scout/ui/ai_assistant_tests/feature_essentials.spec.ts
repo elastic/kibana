@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from './fixtures';
+import { expect } from '@kbn/scout-security/ui';
+import { test } from './fixtures';
 import { waitForPageReady } from './common/constants';
 
 // NOTE: This test requires serverless mode with Security Essentials product tier.

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from './fixtures';
+import { expect } from '@kbn/scout-security/ui';
+import { test } from './fixtures';
 import {
   createAzureConnector,
   createConversation,
@@ -29,10 +30,7 @@ const mockConvo = {
     },
     {
       timestamp: '2024-08-15T18:31:24.008Z',
-      content:
-        'To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n```kql\n' +
-        mockTimelineQuery +
-        '\n```',
+      content: `To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n\`\`\`kql\n${mockTimelineQuery}\n\`\`\``,
       role: 'assistant',
       traceData: {
         traceId: '74d2fac29753adebd5c479e3d9e45da3',
@@ -73,8 +71,6 @@ test.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => 
     await pageObjects.assistant.sendQueryToTimeline();
 
     // Verify query appears in timeline
-    await expect(
-      page.testSubj.locator('timelineQueryInput')
-    ).toHaveText(mockTimelineQuery);
+    await expect(page.testSubj.locator('timelineQueryInput')).toHaveText(mockTimelineQuery);
   });
 });

@@ -116,9 +116,7 @@ export async function deleteConversations(esClient: any): Promise<void> {
 
 // ── Prompt mock factory ─────────────────────────────────────────────────────
 
-export function getMockCreatePrompt(
-  overrides?: Record<string, unknown>
-): Record<string, unknown> {
+export function getMockCreatePrompt(overrides?: Record<string, unknown>): Record<string, unknown> {
   return {
     name: 'Mock Prompt Name',
     promptType: 'quick',
