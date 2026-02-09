@@ -10,7 +10,9 @@ import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
 } from '../../../common/model/api/integrations/integration.gen';
-import type { DataStream } from '../../../common/model/common_attributes.gen';
+
+import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
+import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
 import { getLangSmithOptions } from './lang_smith';
 import type { LangSmithOptions } from './lang_smith';
 
@@ -78,5 +80,50 @@ export const getIntegrationById = async ({
     {
       version: '1',
       signal: abortSignal,
+    }
+  );
+
+export interface UploadSamplesRequest {
+  integrationId: string;
+  dataStreamId: string;
+  samples: string[];
+  originalSource: OriginalSource;
+}
+
+export const uploadSamplesToDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  samples,
+  originalSource,
+}: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
+  http.post<UploadSamplesToDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
+    {
+      version: '1',
+      body: JSON.stringify({ samples, originalSource }),
+      signal: abortSignal,
+    }
+  );
+
+export interface DeleteDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export const deleteDataStream = async ({
+  http,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & DeleteDataStreamRequest): Promise<void> =>
+  http.delete<void>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
     }
   );
