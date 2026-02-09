@@ -21,6 +21,7 @@ import {
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
+import type { LangSmithOptions } from '../../routes/types';
 
 export class AgentService {
   private logger: Logger;
@@ -49,7 +50,8 @@ export class AgentService {
     integrationId: string,
     dataStreamId: string,
     esClient: ElasticsearchClient,
-    model: InferenceChatModel
+    model: InferenceChatModel,
+    langSmithOptions?: LangSmithOptions
   ) {
     this.logger.debug(
       `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
@@ -100,16 +102,14 @@ export class AgentService {
       subagents: [logsAnalyzerSubAgent, pipelineGeneratorSubAgent, textToEcsSubAgent],
     });
 
-    const traceOptions = {
-      tracers: [
-        ...getLangSmithTracer({
-          // TODO: Get apiKey from config
-          apiKey: 'apiKey',
-          projectName: 'projectName',
-          logger: this.logger,
-        }),
-      ],
-    };
+    const langSmithTracers =
+      langSmithOptions?.apiKey && langSmithOptions?.projectName
+        ? getLangSmithTracer({
+            apiKey: langSmithOptions.apiKey,
+            projectName: langSmithOptions.projectName,
+            logger: this.logger,
+          })
+        : [];
 
     const result = await automaticImportAgent.invoke(
       {
@@ -121,7 +121,7 @@ export class AgentService {
         ],
       },
       {
-        callbacks: [...(traceOptions.tracers ?? [])],
+        callbacks: [...langSmithTracers],
         runName: 'automatic_import_agent',
         tags: ['automatic_import_agent'],
       }
