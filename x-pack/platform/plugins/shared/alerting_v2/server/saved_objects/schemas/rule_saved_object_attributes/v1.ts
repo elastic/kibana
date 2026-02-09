@@ -19,12 +19,10 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     custom: schema.string(),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-
   query: schema.string(),
   timeField: schema.string(),
   lookbackWindow: schema.string(),
   groupingKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
-
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   updatedAt: schema.string(),
