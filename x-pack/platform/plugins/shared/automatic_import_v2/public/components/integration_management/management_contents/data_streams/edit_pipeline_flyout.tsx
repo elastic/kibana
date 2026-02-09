@@ -102,6 +102,15 @@ export const EditPipelineFlyout = ({
       sortable: true,
       searchable: true,
       truncateText: true,
+      render: (value: string) => {
+        return (
+          <EuiToolTip content={value} anchorProps={{ css: { display: 'flex' } }}>
+            <EuiText size="s" tabIndex={0}>
+              {value}
+            </EuiText>
+          </EuiToolTip>
+        );
+      },
     },
   ];
 

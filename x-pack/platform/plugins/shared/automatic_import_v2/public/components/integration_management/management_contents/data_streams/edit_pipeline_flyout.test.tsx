@@ -331,5 +331,31 @@ describe('EditPipelineFlyout', () => {
 
       expect(tokenIcons.length).toBeGreaterThan(0);
     });
+
+    it('should show tooltip with field type on hover', async () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const table = screen.getByRole('table');
+      const dateIcon = table.querySelector('[data-euiicon-type="tokenDate"]');
+      expect(dateIcon).toBeInTheDocument();
+
+      if (dateIcon) {
+        await userEvent.hover(dateIcon);
+
+        const tooltip = await screen.findByText('date');
+        expect(tooltip).toBeInTheDocument();
+      }
+    });
+  });
+
+  describe('value tooltips', () => {
+    it('should render values that will show tooltips on hover', () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.getByText('Test log message')).toBeInTheDocument();
+      expect(screen.getByText('test_value')).toBeInTheDocument();
+      expect(screen.getByText('42')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
+    });
   });
 });
