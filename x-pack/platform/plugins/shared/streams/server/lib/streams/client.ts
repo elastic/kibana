@@ -342,6 +342,7 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -352,6 +353,32 @@ export class StreamsClient {
               },
               failure_store: { inherit: {} },
             },
+          },
+        },
+      ],
+      { ...this.dependencies, streamsClient: this }
+    );
+
+    return { acknowledged: true, result: 'created' };
+  }
+
+  async createQueryStream({
+    name,
+    query,
+  }: {
+    name: string;
+    query: Streams.QueryStream.UpsertRequest['stream']['query'];
+  }): Promise<UpsertStreamResponse> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: {
+            name,
+            description: '',
+            updated_at: new Date().toISOString(),
+            query_streams: [],
+            query,
           },
         },
       ],
@@ -698,11 +725,16 @@ export class StreamsClient {
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
     const privileges = await checkAccessBulk({
-      names: streams.map((stream) => stream.name),
+      names: streams
+        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
+        .map((stream) => stream.name),
       scopedClusterClient,
     });
 
-    return streams.filter((stream) => privileges[stream.name]?.read);
+    return streams.filter((stream) => {
+      if (Streams.QueryStream.Definition.is(stream)) return true;
+      return privileges[stream.name]?.read === true;
+    });
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {

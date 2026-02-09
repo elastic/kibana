@@ -31,9 +31,11 @@ export class EntityStorePlugin
     >
 {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: EntityStoreCoreSetup, plugins: EntityStoreSetupPlugins) {
@@ -43,7 +45,13 @@ export class EntityStorePlugin
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) =>
-        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger, request })
+        createRequestHandlerContext({
+          context,
+          coreSetup: core,
+          logger: this.logger,
+          request,
+          isServerless: this.isServerless,
+        })
     );
 
     registerTasks(plugins.taskManager, this.logger, core);

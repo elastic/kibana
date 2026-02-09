@@ -39,6 +39,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
     name: 'test-stream',
     description: 'Test stream',
     updated_at: new Date().toISOString(),
+    query_streams: [],
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [], updated_at: new Date().toISOString() },
@@ -59,6 +60,7 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
     name: 'test-classic-stream',
     description: 'Test classic stream',
     updated_at: new Date().toISOString(),
+    query_streams: [],
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [], updated_at: new Date().toISOString() },
@@ -220,6 +222,27 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
       expect(result.description).toBe('');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
+  describe('query_streams migration', () => {
+    it('should add query_streams if missing', () => {
+      const definition = {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          wired: {
+            fields: {},
+            routing: [createRoutingRule()],
+          },
+          failure_store: { inherit: {} },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+      expect(result.query_streams).toEqual([]);
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });

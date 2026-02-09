@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import type {
-  EntityDefinition,
-  EntityField,
-  EntityIdentity,
-  EntityType,
-} from '../definitions/entity_schema';
-import { esqlIsNotNullOrEmpty } from './esql_strings';
+import { esqlIsNullOrEmpty } from '../../../common/esql/strings';
+import {
+  type EntityDefinition,
+  type EntityField,
+  type EntityType,
+} from '../../../common/domain/definitions/entity_schema';
+import {
+  getEuidEsqlEvaluation,
+  getEuidEsqlDocumentsContainsIdFilter,
+} from '../../../common/domain/euid/esql';
 
-export const HASHED_ID = 'entity.hashedId';
+export const HASHED_ID_FIELD = 'entity.hashedId';
 const HASH_ALG = 'MD5';
 
-const MAIN_ENTITY_ID = 'entity.id';
+const MAIN_ENTITY_ID_FIELD = 'entity.id';
+const ENTITY_NAME_FIELD = 'entity.name';
+const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const TIMESTAMP_FIELD = '@timestamp';
 
 const METADATA_FIELDS = ['_index'];
 const DEFAULT_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
-  MAIN_ENTITY_ID,
-  HASHED_ID,
+  MAIN_ENTITY_ID_FIELD,
+  ENTITY_NAME_FIELD,
+  ENGINE_METADATA_UNTYPED_ID_FIELD,
+  HASHED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
 ];
 
@@ -49,48 +56,41 @@ interface LogsExtractionQueryParams {
 
 export const buildLogsExtractionEsqlQuery = ({
   indexPatterns,
-  entityDefinition: { fields, identityField, type, entityTypeFallback },
+  entityDefinition: { fields, type, entityTypeFallback },
   fromDateISO,
   toDateISO,
   docsLimit,
   latestIndex,
 }: LogsExtractionQueryParams): string => {
-  const idFieldName = getIdFieldName(identityField);
-
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE (${entityIdFilter(identityField, type)})
+  | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
       AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
   | SORT ${TIMESTAMP_FIELD} ASC
   | LIMIT ${docsLimit}
-  ${entityFieldEvaluation(identityField, type)}
+  | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+    withTypeId: false,
+  })}
   | STATS
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${recentFieldStats(fields)}
-    BY ${recentData(idFieldName)}
+    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
+  | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = CONCAT("${type}:", ${recentData(
+    ENGINE_METADATA_UNTYPED_ID_FIELD
+  )})
   | LOOKUP JOIN ${latestIndex}
-      ON ${recentData(idFieldName)} == ${idFieldName}
+      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}
   | RENAME
-    ${recentData(idFieldName)} AS ${idFieldName}
+    ${recentData(MAIN_ENTITY_ID_FIELD)} AS ${MAIN_ENTITY_ID_FIELD},
+    ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}
   | EVAL
-    ${mergedFieldStats(idFieldName, fields)},
+    ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
     ${customFieldEvalLogic(type, entityTypeFallback)},
-    ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
-  | KEEP ${fieldsToKeep(idFieldName, fields)}
+    ${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID_FIELD})
+  | KEEP ${fieldsToKeep(fields)}
   | SORT ${TIMESTAMP_FIELD} ASC`;
 };
-
-function entityIdFilter(identityField: EntityIdentity, type: EntityType) {
-  const idFieldName = getIdFieldName(identityField);
-  if (identityField.calculated) {
-    return [idFieldName, ...identityField.requiresOneOfFields]
-      .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
-      .join(' OR ');
-  }
-
-  return esqlIsNotNullOrEmpty(idFieldName);
-}
 
 function recentFieldStats(fields: EntityField[]) {
   return fields
@@ -133,21 +133,22 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
       }
     })
     .filter(Boolean)
-    .concat([`${MAIN_ENTITY_ID} = ${idFieldName}`])
     .join(',\n ');
 }
 
-function fieldsToKeep(idFieldName: string, fields: EntityField[]) {
+function fieldsToKeep(fields: EntityField[]) {
   return fields
     .map(({ destination }) => destination)
-    .concat([...DEFAULT_FIELDS_TO_KEEP, idFieldName])
+    .concat(DEFAULT_FIELDS_TO_KEEP)
     .join(',\n ');
 }
 
 function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
   const evals = [
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
-    `entity.name = COALESCE(entity.name, entity.id)`,
+    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNullOrEmpty(
+      ENTITY_NAME_FIELD
+    )}, ${ENGINE_METADATA_UNTYPED_ID_FIELD}, ${ENTITY_NAME_FIELD})`,
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
   ];
 
@@ -193,26 +194,4 @@ function castDestType(fieldName: string, field: EntityField) {
     default:
       return fieldName;
   }
-}
-
-function getIdFieldName(identityField: EntityIdentity): string {
-  if (identityField.calculated) {
-    return identityField.defaultIdField;
-  }
-
-  return identityField.field;
-}
-
-function entityFieldEvaluation(identityField: EntityIdentity, type: EntityType) {
-  const idFieldName = getIdFieldName(identityField);
-  if (identityField.calculated) {
-    return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", 
-      CASE(
-        ${esqlIsNotNullOrEmpty(idFieldName)}, ${idFieldName},
-        ${identityField.esqlEvaluation}
-      )
-    )`;
-  }
-
-  return `| EVAL ${recentData(idFieldName)} = CONCAT("${type}:", ${idFieldName})`;
 }
