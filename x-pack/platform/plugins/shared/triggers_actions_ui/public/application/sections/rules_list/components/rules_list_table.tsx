@@ -1015,7 +1015,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
       <EuiFlexItem
         grow={true}
         css={css`
-          min-width: 0;
           overflow-x: auto;
         `}
       >
