@@ -13,7 +13,7 @@ import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-service
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.5.0';
+export const INSTALLED_VERSION = '1.4.2';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
