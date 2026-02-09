@@ -27,6 +27,14 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await logsSynthtraceEsClient.clean();
   });
 
+  test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
+    page,
+  }) => {
+    // In the empty state without AI connectors, the Technical Preview badge should be hidden
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
+    await expect(page.getByText('Technical Preview')).toBeHidden();
+  });
+
   test('should create a new processor successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
 
