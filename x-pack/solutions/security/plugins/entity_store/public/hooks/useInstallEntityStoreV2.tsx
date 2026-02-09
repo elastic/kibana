@@ -10,6 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { ENTITY_STORE_ROUTES, EntityStoreStatus, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import type { StatusRequestQuery } from '../../server/routes/apis/status';
 
 export interface Services {
   http: HttpSetup;
@@ -18,11 +19,15 @@ export interface Services {
   spaces: SpacesPluginStart;
 }
 
+const statusRequestQuery = {
+  include_components: false,
+} as const satisfies StatusRequestQuery;
+
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.STATUS,
-  body: JSON.stringify({}),
-  query: { apiVersion: '2' },
+  query: { apiVersion: '2', ...statusRequestQuery },
 };
+
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.INSTALL,
   body: JSON.stringify({}),
@@ -43,7 +48,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const space = await services.spaces.getActiveSpace();
         if (space.id !== 'default') return;
 
-        const statusResponse = await services.http.post<{ status: EntityStoreStatus }>(
+        const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
         if (isEntityStoreInstalled(statusResponse.status)) return;

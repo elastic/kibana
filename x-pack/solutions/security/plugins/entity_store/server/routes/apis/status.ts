@@ -41,6 +41,7 @@ interface EntityStoreStatusResponseBody {
 const querySchema = z.object({
   include_components: BooleanFromString.optional().default(false),
 });
+export type StatusRequestQuery = z.infer<typeof querySchema>;
 
 function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngine {
   const { versionState, ...rest } = engine;
