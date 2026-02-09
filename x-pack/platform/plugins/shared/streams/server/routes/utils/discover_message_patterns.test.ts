@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stripPlaceholderTokensWithCount, isPatternExcludable } from './discover_message_patterns';
+import { stripPlaceholderTokensWithCount, isMeaningfulPattern } from './discover_message_patterns';
 
 describe('stripPlaceholderTokensWithCount', () => {
   it('returns the original pattern and zero count when no placeholders are present', () => {
@@ -79,42 +79,42 @@ describe('stripPlaceholderTokensWithCount', () => {
   });
 });
 
-describe('isPatternExcludable', () => {
+describe('isMeaningfulPattern', () => {
   it('returns true for patterns with 3 or more meaningful tokens', () => {
-    expect(isPatternExcludable('connection closed for user')).toBe(true);
+    expect(isMeaningfulPattern('connection closed for user')).toBe(true);
   });
 
   it('returns false for patterns with fewer than 3 meaningful tokens', () => {
-    expect(isPatternExcludable('request sent')).toBe(false);
+    expect(isMeaningfulPattern('request sent')).toBe(false);
   });
 
   it('returns false for single-token patterns', () => {
-    expect(isPatternExcludable('error')).toBe(false);
+    expect(isMeaningfulPattern('error')).toBe(false);
   });
 
   it('returns false for empty patterns', () => {
-    expect(isPatternExcludable('')).toBe(false);
+    expect(isMeaningfulPattern('')).toBe(false);
   });
 
   it('returns false for patterns that are only placeholders', () => {
-    expect(isPatternExcludable('__URL__ __NUM__ __IP__')).toBe(false);
+    expect(isMeaningfulPattern('__URL__ __NUM__ __IP__')).toBe(false);
   });
 
   it('counts tokens after placeholder removal', () => {
     // "GET __URL__ HTTP __NUM__ OK" → cleaned: "GET HTTP OK" → 3 tokens → true
-    expect(isPatternExcludable('GET __URL__ HTTP __NUM__ OK')).toBe(true);
+    expect(isMeaningfulPattern('GET __URL__ HTTP __NUM__ OK')).toBe(true);
   });
 
   it('returns false when placeholders reduce tokens below minimum', () => {
     // "sent __URL__ to" → cleaned: "sent to" → 2 tokens → false
-    expect(isPatternExcludable('sent __URL__ to')).toBe(false);
+    expect(isMeaningfulPattern('sent __URL__ to')).toBe(false);
   });
 
   it('returns true at exactly the minimum threshold', () => {
-    expect(isPatternExcludable('one two three')).toBe(true);
+    expect(isMeaningfulPattern('one two three')).toBe(true);
   });
 
   it('returns false just below the minimum threshold', () => {
-    expect(isPatternExcludable('one two')).toBe(false);
+    expect(isMeaningfulPattern('one two')).toBe(false);
   });
 });

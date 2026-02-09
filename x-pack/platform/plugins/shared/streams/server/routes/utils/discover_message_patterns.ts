@@ -124,7 +124,7 @@ const SAMPLE_DOCS_PER_CATEGORY = 2;
  * Returns true if a pattern has enough meaningful tokens (after placeholder and
  * short-token removal) to be reliably used for exclusion in subsequent iterations.
  */
-export const isPatternExcludable = (pattern: string): boolean => {
+export const isMeaningfulPattern = (pattern: string): boolean => {
   const { cleaned } = stripPlaceholderTokensWithCount(pattern);
   return cleaned.split(/\s+/).length >= MIN_EXCLUSION_TOKENS;
 };
@@ -229,5 +229,5 @@ export const discoverMessagePatterns = async ({
         sampleDocuments: sampleAgg.hits.hits.map((hit) => hit._source),
       };
     })
-    .filter((category) => isPatternExcludable(category.pattern));
+    .filter((category) => isMeaningfulPattern(category.pattern));
 };
