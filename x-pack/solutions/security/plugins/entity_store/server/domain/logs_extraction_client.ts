@@ -10,11 +10,14 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
-import { getEntityDefinition } from './definitions/registry';
+import type {
+  EntityType,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
-  HASHED_ID,
+  HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
@@ -38,6 +41,7 @@ interface LogsExtractionOptions {
     toDateISO: string;
   };
   abortController?: AbortController;
+  countOnly?: boolean;
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -95,8 +99,7 @@ export class LogsExtractionClient {
         scannedIndices: indexPatterns,
       };
 
-      // With specific window, we don't need to update the pagination timestamp
-      if (opts?.specificWindow) {
+      if (opts?.specificWindow || opts?.countOnly) {
         return operationResult;
       }
 
@@ -159,15 +162,17 @@ export class LogsExtractionClient {
       abortController: opts?.abortController,
     });
 
-    this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-    await ingestEntities({
-      esClient: this.esClient,
-      esqlResponse,
-      esIdField: HASHED_ID,
-      targetIndex: latestIndex,
-      logger: this.logger,
-      abortController: opts?.abortController,
-    });
+    if (!opts?.countOnly) {
+      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      await ingestEntities({
+        esClient: this.esClient,
+        esqlResponse,
+        esIdField: HASHED_ID_FIELD,
+        targetIndex: latestIndex,
+        logger: this.logger,
+        abortController: opts?.abortController,
+      });
+    }
 
     return { esqlResponse, indexPatterns };
   }

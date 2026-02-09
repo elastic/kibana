@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -47,11 +47,11 @@ apiTest.describe(
       expect(ingestResult[0].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200, 201, 204], has_status_200: 'success' })
       );
-      expect(ingestResult[1].attributes).not.toHaveProperty('has_status_200');
+      expect(ingestResult[1].attributes?.has_status_200).toBeUndefined();
       expect(ingestResult[2].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200], has_status_200: 'success' })
       );
-      expect(ingestResult[3].attributes).not.toHaveProperty('has_status_200');
+      expect(ingestResult[3].attributes?.has_status_200).toBeUndefined();
     });
   }
 );
