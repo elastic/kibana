@@ -35,15 +35,15 @@ export const clearInputQuery = () =>
   cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
   options?: { parseSpecialCharSequences: boolean }
-) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click().type(query, options);
 
 export const submitQuery = () => {
-  cy.contains('Submit').should('not.be.disabled').click();
+  cy.get('#submit-button').should('not.be.disabled').click();
 };
 
 export const fillInQueryTimeout = (timeout: string) => {

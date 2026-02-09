@@ -28,6 +28,7 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
+  closeFleetTourIfVisible,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
@@ -117,10 +118,12 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
 
     it('add integration', () => {
       cy.visit(FLEET_AGENT_POLICIES);
+      closeFleetTourIfVisible();
       cy.getBySel('createAgentPolicyButton').click();
       cy.getBySel('createAgentPolicyNameField').type(policyName);
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
+      closeFleetTourIfVisible();
       cy.getBySel('addPackagePolicyButton').click();
       cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -190,7 +193,9 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(/^Save pack$/).click();
       cy.contains(`Successfully created "${packName}" pack`).click();
       cy.visit('app/fleet/policies');
+      closeFleetTourIfVisible();
       cy.get(`[title="${policyName}"]`).click();
+      closeFleetTourIfVisible();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.contains(/^Advanced$/).click();
       cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);

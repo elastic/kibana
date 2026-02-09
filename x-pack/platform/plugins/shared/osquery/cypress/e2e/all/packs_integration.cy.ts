@@ -28,6 +28,7 @@ import {
 import { changePackActiveStatus, cleanupAllPrebuiltPacks } from '../../tasks/packs';
 import {
   addIntegration,
+  closeFleetTourIfVisible,
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
@@ -59,12 +60,15 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       it('add integration', () => {
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains('Create agent policy').click();
         cy.get('input[placeholder*="Choose a name"]').type(AGENT_POLICY_NAME);
         cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
         cy.contains(`Agent policy '${AGENT_POLICY_NAME}' created`);
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains(AGENT_POLICY_NAME).click();
+        closeFleetTourIfVisible();
         cy.contains('Add integration').click();
         cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
@@ -85,7 +89,9 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('comboBoxInput').contains(AGENT_POLICY_NAME).should('exist');
 
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains(AGENT_POLICY_NAME).click();
+        closeFleetTourIfVisible();
         cy.get('.euiTableCellContent')
           .get('.euiPopover')
           .get(`[aria-label="Open"]`)
@@ -224,12 +230,14 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         closeToastIfVisible();
 
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains('Create agent policy').click();
         cy.getBySel('createAgentPolicyNameField').type(agentPolicy);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
         closeToastIfVisible();
         cy.contains(agentPolicy).click();
+        closeFleetTourIfVisible();
         cy.contains('Add integration').click();
         cy.getBySel('epmList.searchBar').type('osquery');
         cy.contains(integration).click();
@@ -250,6 +258,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           });
         });
         cy.visit('/app/fleet/policies');
+        closeFleetTourIfVisible();
         cy.contains('td', agentPolicy)
           .parent()
           .within(() => {

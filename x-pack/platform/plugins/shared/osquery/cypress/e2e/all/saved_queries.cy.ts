@@ -103,9 +103,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // change pagination
-      cy.getBySel('pagination-button-next').click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.getBySel('pagination-button-next').click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click();
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // exit fullscreen
@@ -205,7 +205,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('shows ID must be unique error', () => {
       cy.contains('Saved queries').click();
+      cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
       cy.contains('Add saved query').click();
+      cy.wait('@savedQueriesLoaded');
       cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
 
       cy.contains('ID must be unique').should('not.exist');
@@ -302,7 +304,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT)
         .click()
-        .type('users_elastic{downArrow}{downArrow} {enter}');
+        .type('users_elastic{downArrow}{downArrow}{enter}');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
