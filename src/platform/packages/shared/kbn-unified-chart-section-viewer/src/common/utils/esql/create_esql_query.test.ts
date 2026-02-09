@@ -14,6 +14,7 @@ const mockMetric: MetricField = {
   name: 'cpu.usage',
   type: ES_FIELD_TYPES.DOUBLE,
   index: 'metrics-*',
+  uniqueKey: 'metrics-*::cpu.usage',
   dimensions: [
     { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
     { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
@@ -280,6 +281,7 @@ TS metrics-*
       name: 'cpu.usage',
       type: ES_FIELD_TYPES.LONG,
       index: 'metrics-*',
+      uniqueKey: 'metrics-*::cpu.usage',
       dimensions: [
         { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'container-id', type: ES_FIELD_TYPES.KEYWORD },
@@ -331,6 +333,7 @@ TS metrics-*
         name: 'cpu.usage',
         type: ES_FIELD_TYPES.DOUBLE,
         index: 'metrics-*',
+        uniqueKey: 'metrics-*::cpu.usage',
         dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
       };
 
