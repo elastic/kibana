@@ -29,5 +29,3 @@ export const test = baseTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixture
     await use(extendedPageObjects);
   },
 });
-
-export { expect } from '@kbn/scout';
