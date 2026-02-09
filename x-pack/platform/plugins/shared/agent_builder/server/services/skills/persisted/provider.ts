@@ -28,10 +28,7 @@ const toPublicDefinition = (skill: SkillPersistedDefinition): PublicSkillDefinit
 };
 
 export const createPersistedSkillProviderFn =
-  (opts: {
-    logger: Logger;
-    esClient: ElasticsearchClient;
-  }): SkillProviderFn<false> =>
+  (opts: { logger: Logger; esClient: ElasticsearchClient }): SkillProviderFn<false> =>
   ({ space }) => {
     return createPersistedSkillProvider({
       ...opts,

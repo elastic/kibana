@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';

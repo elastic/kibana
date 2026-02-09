@@ -197,8 +197,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     <div>
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.agentBuilder.agents.form.skills.activeCount', {
-          defaultMessage:
-            '{count} of {total} {total, plural, one {skill} other {skills}} active',
+          defaultMessage: '{count} of {total} {total, plural, one {skill} other {skills}} active',
           values: { count: activeSkillsCount, total: skills.length },
         })}
       </EuiText>
@@ -240,9 +239,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
           },
         }}
         noItemsMessage={
-          skills.length > 0
-            ? labels.skills.noSkillsMatchMessage
-            : labels.skills.noSkillsMessage
+          skills.length > 0 ? labels.skills.noSkillsMatchMessage : labels.skills.noSkillsMessage
         }
       />
     </div>

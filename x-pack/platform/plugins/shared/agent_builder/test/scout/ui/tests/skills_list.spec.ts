@@ -64,10 +64,7 @@ test.describe('Skills list page', { tag: ['@ess'] }, () => {
     await expect(skillsPage.getNewSkillButton()).toBeVisible();
   });
 
-  test('should have a search input for filtering skills', async ({
-    pageObjects,
-    browserAuth,
-  }) => {
+  test('should have a search input for filtering skills', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     const { skillsPage } = pageObjects;
 

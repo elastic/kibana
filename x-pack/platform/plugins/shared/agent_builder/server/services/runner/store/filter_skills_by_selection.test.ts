@@ -39,16 +39,12 @@ describe('filterSkillsBySelection', () => {
   });
 
   it('should return only explicitly selected skills', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['skill-a', 'skill-c'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['skill-a', 'skill-c'] }]);
     expect(result).toEqual([skillA, skillC]);
   });
 
   it('should handle mixed wildcard and explicit IDs (wildcard wins)', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['*', 'skill-a'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['*', 'skill-a'] }]);
     expect(result).toEqual(allSkills);
   });
 
@@ -61,9 +57,7 @@ describe('filterSkillsBySelection', () => {
   });
 
   it('should ignore non-existent skill IDs', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['skill-a', 'non-existent'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['skill-a', 'non-existent'] }]);
     expect(result).toEqual([skillA]);
   });
 

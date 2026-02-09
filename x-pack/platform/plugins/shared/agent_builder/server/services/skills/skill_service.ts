@@ -45,7 +45,12 @@ export class SkillServiceImpl implements SkillService {
     };
   }
 
-  start({ elasticsearch, spaces, logger, getToolRegistry }: SkillServiceStartDeps): SkillServiceStart {
+  start({
+    elasticsearch,
+    spaces,
+    logger,
+    getToolRegistry,
+  }: SkillServiceStartDeps): SkillServiceStart {
     const builtinProvider = createBuiltinSkillProvider({
       registry: this.skillTypeRegistry,
     });

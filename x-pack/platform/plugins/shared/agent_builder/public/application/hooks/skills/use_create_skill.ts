@@ -9,10 +9,7 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import type {
-  CreateSkillPayload,
-  CreateSkillResponse,
-} from '../../../../common/http_api/skills';
+import type { CreateSkillPayload, CreateSkillResponse } from '../../../../common/http_api/skills';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -32,10 +29,7 @@ export interface UseCreateSkillServiceProps {
   onError?: CreateSkillErrorCallback;
 }
 
-export const useCreateSkillService = ({
-  onSuccess,
-  onError,
-}: UseCreateSkillServiceProps = {}) => {
+export const useCreateSkillService = ({ onSuccess, onError }: UseCreateSkillServiceProps = {}) => {
   const queryClient = useQueryClient();
   const { skillsService } = useAgentBuilderServices();
 
