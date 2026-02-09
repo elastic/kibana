@@ -12,7 +12,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { RunRuleParams, TaskRunnerContext } from './types';
+import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
 import { RuleExecutionStatusErrorReasons } from '../types';
@@ -68,7 +68,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey, 'es');
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
   const rule = getAlertFromRaw({
     id: ruleId,
     includeLegacyId: false,
@@ -153,12 +153,11 @@ export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
   apiKey: RawRule['apiKey'],
-  uiamApiKey?: RawRule['uiamApiKey'],
-  apiKeyTypeConfig?: 'es' | 'uiam'
+  uiamApiKey?: RawRule['uiamApiKey']
 ) {
   const requestHeaders: Headers = {};
 
-  if (context.isUiamEnabled && uiamApiKey && apiKeyTypeConfig === 'uiam') {
+  if (context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM && uiamApiKey) {
     const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
   } else if (apiKey) {
