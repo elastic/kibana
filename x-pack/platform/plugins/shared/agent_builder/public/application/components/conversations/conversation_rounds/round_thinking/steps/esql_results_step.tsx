@@ -8,16 +8,14 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
-interface TabularDataResultStepProps {
-  result: TabularDataResult;
+interface EsqlResultsStepProps {
+  result: EsqlResults;
 }
 
-export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
-  result: { data },
-}) => {
+export const EsqlResultsStep: React.FC<EsqlResultsStepProps> = ({ result: { data } }) => {
   const {
     startDependencies: { share },
   } = useAgentBuilderServices();
@@ -41,7 +39,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.agentBuilder.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+          id="xpack.agentBuilder.conversation.thinking.esqlResultsStep.foundRecordsMessage"
           defaultMessage="Found {results}"
           values={{
             results: (
@@ -49,7 +47,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
                 href={discoverUrl}
                 data-test-subj="agent-builder-esql-data-result-see-in-discover"
                 aria-label={i18n.translate(
-                  'xpack.agentBuilder.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+                  'xpack.agentBuilder.conversation.thinking.esqlResultsStep.seeInDiscoverAriaLabel',
                   {
                     defaultMessage: 'Explore results in Discover',
                   }
@@ -57,7 +55,7 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.agentBuilder.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+                  id="xpack.agentBuilder.conversation.thinking.esqlResultsStep.resultsCount"
                   defaultMessage="{totalResults, plural, one {{totalResults, number} result} other {{totalResults, number} results}}"
                   values={{
                     totalResults: data.values.length,
