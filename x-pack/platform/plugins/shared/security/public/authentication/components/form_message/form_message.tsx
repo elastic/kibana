@@ -19,7 +19,7 @@ export enum MessageType {
 }
 
 export interface FormMessage {
-  type: MessageType.Info | MessageType.Danger | MessageType.None;
+  type: MessageType;
   content?: string;
 }
 
@@ -58,7 +58,7 @@ export const formMessages: Record<LogoutReason, FormMessage> = {
 };
 
 export function renderMessage(message: FormMessage) {
-  if (message.type === MessageType.None || !message.content || message.content.length === 0) {
+  if (message.type === MessageType.None || !message.content) {
     return null;
   }
 

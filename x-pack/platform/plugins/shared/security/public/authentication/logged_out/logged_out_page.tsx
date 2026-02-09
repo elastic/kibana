@@ -41,7 +41,7 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
       }
       logo={customBrandingValue?.logo}
     >
-      {renderMessage(message ?? { type: MessageType.None, content: '' })}
+      {message && renderMessage(message)}
       <EuiSpacer size="l" />
       <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
