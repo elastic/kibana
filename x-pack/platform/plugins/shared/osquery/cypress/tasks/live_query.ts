@@ -43,6 +43,7 @@ export const inputQueryInFlyout = (
 ) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click().type(query, options);
 
 export const submitQuery = () => {
+  cy.wait(1000);
   cy.get('#submit-button').should('not.be.disabled').click();
 };
 

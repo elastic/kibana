@@ -32,8 +32,6 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field');
     selectAllAgents();
     inputQuery('select * from uptime;');
-    // wait for the 500ms debounce in OsqueryEditor to sync the value to react-hook-form
-    cy.wait(500);
     submitQuery();
     cy.contains('Agents is a required field').should('not.exist');
     cy.contains('Query is a required field').should('not.exist');
@@ -91,8 +89,6 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     inputQuery(multilineQuery);
     cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
-    // wait for the 500ms debounce in OsqueryEditor to sync the value to react-hook-form
-    cy.wait(500);
     submitQuery();
     cy.getBySel('osqueryResultsPanel');
 

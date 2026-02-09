@@ -76,7 +76,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       inputQuery(BIG_QUERY);
       getAdvancedButton().click();
       fillInQueryTimeout(timeout);
-      cy.wait(500);
       submitQuery();
       checkResults();
       // enter fullscreen
@@ -141,7 +140,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
       selectAllAgents();
       verifyQueryTimeout(timeout);
-      cy.wait(500);
       submitQuery();
 
       // edit saved query
@@ -276,7 +274,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
 
       selectAllAgents();
-      cy.wait(500);
       submitQuery();
       checkResults();
       addToCase(caseId);

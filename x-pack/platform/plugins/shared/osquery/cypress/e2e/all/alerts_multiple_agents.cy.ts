@@ -65,8 +65,6 @@ describe(
       inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
         parseSpecialCharSequences: false,
       });
-      cy.wait(1000);
-
       submitQuery();
       cy.getBySel('flyout-body-osquery').within(() => {
         // at least 2 agents should have responded, sometimes it takes a while for the agents to respond

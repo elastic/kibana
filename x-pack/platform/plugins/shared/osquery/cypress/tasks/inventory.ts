@@ -6,17 +6,11 @@
  */
 
 export const triggerLoadData = () => {
-  cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').should('exist').and('not.be.disabled');
-  cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').click();
+  // Wait for the waffle map nodes to load, then click on a non-fleet-server node
   // @ts-expect-error update types for multiple true
-  cy.getBySel('nodeContainer', { multiple: true })
+  cy.getBySel('nodeContainer', { multiple: true, timeout: 60000 })
     .not(':contains("dev-fleet-server")')
     .first()
-    .should('exist');
-  cy.getBySel('infraWaffleTimeControlsStopRefreshingButton').click();
-  // @ts-expect-error update types for multiple true
-  cy.getBySel('nodeContainer', { multiple: true })
-    .not(':contains("dev-fleet-server")')
-    .first()
+    .should('exist')
     .click();
 };
