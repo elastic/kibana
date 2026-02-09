@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 // includes "observabilityGroup" panel group
