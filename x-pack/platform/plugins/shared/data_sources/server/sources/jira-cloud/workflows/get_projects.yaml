@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.jira.get_projects'
-description: 'Search for Jira projects'
+description: 'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Inputs: query (string), maxResults (number), startAt (number); all optional.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

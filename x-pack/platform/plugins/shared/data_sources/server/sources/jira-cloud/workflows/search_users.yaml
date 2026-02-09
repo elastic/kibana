@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.jira.search_users'
-description: 'Search for Jira users by query string (e.g., name or email). Returns accountId for use in JQL.'
+description: 'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user details. Inputs: query (string), username (string), accountId (string), startAt (number), maxResults (number), property (string); all optional.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

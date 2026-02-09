@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.jira.search_issues_with_jql'
-description: 'Search Jira issues using a JQL (Jira Query Language) query'
+description: 'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, or other criteria. Inputs: jql (string), maxResults (number), nextPageToken (string, for next page); maxResults and nextPageToken optional.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

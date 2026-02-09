@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.jira.get_resource'
-description: 'Get a Jira issue or project by ID/key'
+description: 'Fetch full details of a single Jira issue or project by ID or key. Use when you already have the issue key (e.g. PROJ-123) or project ID and need the complete record. Inputs: resourceType (choice: issue|project), id (string).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
