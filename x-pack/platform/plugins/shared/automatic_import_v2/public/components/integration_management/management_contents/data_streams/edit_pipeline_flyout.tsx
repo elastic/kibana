@@ -165,7 +165,7 @@ export const EditPipelineFlyout = ({
   const pageCount = data?.results?.length ?? 0;
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby="editPipelineFlyoutTitle">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="editPipelineFlyoutTitle">{dataStream.title}</h2>
