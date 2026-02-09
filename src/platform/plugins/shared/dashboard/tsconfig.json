@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_oas_schema/**/*", "test/scout_oas_schema/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -97,10 +97,13 @@
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
+    "@kbn/scout",
+    "@kbn/test",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
-    "@kbn/image-embeddable-plugin",
+    "@kbn/scout",
+    "@kbn/image-embeddable-plugin"
   ],
   "exclude": ["target/**/*"]
 }
