@@ -9,6 +9,7 @@
 
 export type {
   // commands
+  BulkCreateWorkflowsCommand,
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
@@ -64,6 +65,7 @@ export type {
 // exported full to use enum as values
 export {
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,

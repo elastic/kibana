@@ -98,7 +98,8 @@ export interface EsWorkflowExecution {
   scopeStack: StackFrame[];
   createdAt: string;
   error: SerializedError | null;
-  createdBy: string;
+  createdBy?: string; // Keep for backwards compatibility with existing documents
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -196,6 +197,7 @@ export interface WorkflowExecutionDto {
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -244,6 +246,12 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
   id: z.string().optional(),
 });
+
+export const BulkCreateWorkflowsCommandSchema = z.object({
+  workflows: z.array(CreateWorkflowCommandSchema),
+});
+
+export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
 
 export const UpdateWorkflowCommandSchema = z.object({
   name: z.string(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { ConcatProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -53,12 +53,12 @@ apiTest.describe('Cross-compatibility - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
 
       expect(ingestResult).toHaveLength(2);
-      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestResult[1]).toHaveProperty('full_email', 'jane.smith@example.com');
+      expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestResult[1]?.full_email).toBe('jane.smith@example.com');
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', 'jane.smith@example.com');
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@example.com');
     }
   );
 
@@ -100,12 +100,12 @@ apiTest.describe('Cross-compatibility - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-with-where', query);
 
       expect(ingestResult).toHaveLength(2);
-      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestResult[1]).not.toHaveProperty('full_email');
+      expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestResult[1]?.full_email).toBeUndefined();
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBeNull();
     }
   );
 
@@ -151,12 +151,12 @@ apiTest.describe('Cross-compatibility - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
 
       expect(ingestResult).toHaveLength(2);
-      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestResult[1]).toHaveProperty('full_email', 'jane.smith@');
+      expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestResult[1]?.full_email).toBe('jane.smith@');
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', 'jane.smith@');
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@');
     }
   );
 
@@ -201,12 +201,12 @@ apiTest.describe('Cross-compatibility - Concat Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
 
       expect(ingestResult).toHaveLength(2);
-      expect(ingestResult[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestResult[1]).not.toHaveProperty('full_email');
+      expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestResult[1]?.full_email).toBeUndefined();
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(esqlResult.documents[1]).toHaveProperty('full_email', null);
+      expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
+      expect(esqlResult.documents[1]?.full_email).toBeNull();
     }
   );
 });
