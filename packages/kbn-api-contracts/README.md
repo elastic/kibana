@@ -54,9 +54,11 @@ The following changes are considered **breaking** and will fail CI:
 |-------------|--------------|---------|
 | **Path removed** | Endpoint no longer exists | `DELETE /api/saved_objects/{type}/{id}` |
 | **Method removed** | HTTP verb no longer supported | Removing `POST` from `/api/fleet/agents` |
-| **`responses` modified** | Changed response structure breaks consumers | Adding required field to 200 response |
-| **`requestBody` modified** | Changed request requirements break callers | New required field in POST body |
-| **`parameters` modified** | Changed query/path params break existing calls | Making optional param required |
+| **Response property removed** | Consumers may depend on the field | Removing `name` from response |
+| **Required request property added** | Existing callers won't send new required field | Adding required `email` to POST body |
+| **Required parameter added** | Existing calls won't include new required param | Adding required `version` query param |
+| **Optional parameter made required** | Existing calls may not include the param | Making `filter` query param required |
+| **Type changed** | Consumers expect the original type | Changing `id` from string to number |
 
 **Non-breaking changes** (allowed):
 - Adding new paths or methods
@@ -66,18 +68,19 @@ The following changes are considered **breaking** and will fail CI:
 
 ## Current Limitations
 
-This is an **MVP implementation** with known limitations:
+This implementation distinguishes between breaking and non-breaking changes at the schema level:
 
-⚠️ **Does not distinguish required vs optional fields yet**  
-The current rules treat ANY modification to requests/responses/parameters as breaking. This is overly conservative but safe.
+**What's detected correctly:**
+- Adding optional properties to responses (non-breaking)
+- Adding required properties to requests (breaking)
+- Removing properties (breaking)
+- Making optional parameters required (breaking)
 
-**Planned improvements:**
-- Field-level diffing with required/optional awareness
-- Support for semantic versioning of individual endpoints
-- Allowlist for non-breaking schema additions
-- Integration with API deprecation tracking
-
-See [API Contracts Roadmap](https://github.com/elastic/kibana/issues/...) for tracking.
+**Known limitations:**
+- `$ref` changes are treated as breaking even if semantically equivalent
+- `allOf`/`oneOf`/`anyOf` compositions are compared structurally, not semantically
+- No support for semantic versioning of individual endpoints yet
+- No deprecation-aware logic yet
 
 ## Usage Examples
 
@@ -278,7 +281,7 @@ node packages/kbn-api-contracts/scripts/check_contracts \
    - **Intentional break:** Follow API versioning process (requires label approval)
 
 3. **For intentional breaking changes:**
-   - Add `Team:Core` label to PR (baseline governance - see Phase 4)
+   - Add `breaking-change-approved` label to PR
    - Document the breaking change in PR description
    - Update consumer documentation
    - Consider deprecation period if possible
@@ -336,8 +339,6 @@ yarn test:type_check --project packages/kbn-api-contracts/tsconfig.json
 ## Documentation & Support
 
 - **Package Documentation:** This README
-- **API Design Guidelines:** TODO: Update after docs published
-- **Breaking Change Policy:** TODO: Update after docs published
 - **Report Issues:** [GitHub Issues](https://github.com/elastic/kibana/issues/new)
 
 ## Testing
