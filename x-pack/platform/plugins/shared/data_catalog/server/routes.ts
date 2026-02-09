@@ -7,21 +7,13 @@
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { parse } from 'yaml';
-import { trimStart } from 'lodash';
 import type { DataCatalog } from './data_catalog';
 import { API_BASE_PATH, loadWorkflows, type DataSource } from '../common';
 
 async function enhanceWithWorkflowContent(types: DataSource[]) {
   return Promise.all(
     types.map(async (type) => {
-      // creates placeholder stack connector ids when checking workflows using separate type workflow directory paths
-      const stackConnectorIds: Record<string, string> = {};
-      for (const stackConnector of type.stackConnectors) {
-        const connectorType = trimStart(stackConnector.type, '.');
-        stackConnectorIds[stackConnector.type] = `placeholder-${connectorType}`;
-      }
-
-      const workflowInfos = await loadWorkflows(stackConnectorIds, type.workflows);
+      const workflowInfos = await loadWorkflows(type.workflows);
       const content: Record<string, string> = {};
       for (const info of workflowInfos) {
         let parsed;

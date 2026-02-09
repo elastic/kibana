@@ -118,7 +118,7 @@ export const createStackConnector = async (
 
   const stackConnector: ActionResult = await actionsClient.create({
     action: {
-      name: `${connectorType}'`,
+      name: connectorType,
       actionTypeId: connectorType,
       config: connectorConfig,
       secrets,

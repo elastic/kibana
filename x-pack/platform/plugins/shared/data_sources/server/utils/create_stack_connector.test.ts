@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createStackConnector } from './create_stack_connector';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { StackConnectorConfig } from '@kbn/data-catalog-plugin';
 
 describe('createStackConnector', () => {
-  const mockLogger = loggerMock.create();
   const mockRequest = httpServerMock.createKibanaRequest();
   const mockActionsClient = {
     create: jest.fn(),
@@ -42,7 +40,7 @@ describe('createStackConnector', () => {
     it('should create MCP connector with correct configuration', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-1',
-        name: ".mcp stack connector for data connector 'test-connector'",
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -52,16 +50,14 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         mockStackConnectorConfig,
-        'test-connector',
-        'test-token-123',
-        mockLogger
+        'test-token-123'
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActions.getActionsClientWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: ".mcp stack connector for data connector 'test-connector'",
+          name: '.mcp',
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -78,7 +74,7 @@ describe('createStackConnector', () => {
     it('should create MCP connector with apiKey auth type', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-apiKey',
-        name: ".mcp stack connector for data connector 'test-connector'",
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -99,15 +95,13 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithApiKey,
-        'test-connector',
-        'api-key-123',
-        mockLogger
+        'api-key-123'
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: ".mcp stack connector for data connector 'test-connector'",
+          name: '.mcp',
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -128,7 +122,7 @@ describe('createStackConnector', () => {
     it('should create MCP connector with basic auth type', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-basic',
-        name: ".mcp stack connector for data connector 'test-connector'",
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -148,15 +142,13 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithBasic,
-        'test-connector',
-        'username:password',
-        mockLogger
+        'username:password'
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: ".mcp stack connector for data connector 'test-connector'",
+          name: '.mcp',
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -174,7 +166,7 @@ describe('createStackConnector', () => {
     it('should create MCP connector with no auth', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-no-auth',
-        name: ".mcp stack connector for data connector 'test-connector'",
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -194,15 +186,13 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigNoAuth,
-        'test-connector',
-        '',
-        mockLogger
+        ''
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: ".mcp stack connector for data connector 'test-connector'",
+          name: '.mcp',
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -217,7 +207,7 @@ describe('createStackConnector', () => {
     it('should create MCP tools when importedTools are provided', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-3',
-        name: '.mcp stack connector',
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -236,19 +226,16 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
+        'test-token'
       );
 
       expect(result).toEqual(mockStackConnector);
-      // Note: MCP tools creation is handled separately, not in createStackConnector
     });
 
     it('should not create MCP tools when importedTools is not provided', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-4',
-        name: '.mcp stack connector',
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -263,18 +250,14 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithoutTools,
-        'test-connector',
-        'test-token',
-        mockLogger
+        'test-token'
       );
-
-      // Note: MCP tools creation is handled separately, not in createStackConnector
     });
 
     it('should not create MCP tools when importedTools is empty array', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-5',
-        name: '.mcp stack connector',
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -289,9 +272,7 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithEmptyTools,
-        'test-connector',
-        'test-token',
-        mockLogger
+        'test-token'
       );
 
       // Note: MCP tools creation is handled separately, not in createStackConnector
@@ -300,7 +281,7 @@ describe('createStackConnector', () => {
     it('should handle errors when creating MCP tools and rethrow', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-6',
-        name: '.mcp stack connector',
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -311,15 +292,11 @@ describe('createStackConnector', () => {
 
       mockActionsClient.create.mockResolvedValue(mockStackConnector);
 
-      // Note: MCP tools creation is handled separately, not in createStackConnector
-      // This test should be moved to the MCP tools import function tests
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
         connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
+        'test-token'
       );
       expect(result).toEqual(mockStackConnector);
     });
@@ -327,91 +304,7 @@ describe('createStackConnector', () => {
     it('should handle errors when bulk creating MCP tools and rethrow', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-7',
-        name: '.mcp stack connector',
-        actionTypeId: '.mcp',
-      };
-
-      const connectorConfigWithTools: StackConnectorConfig = {
-        ...mockStackConnectorConfig,
-        importedTools: [{ name: 'get_file_contents', description: 'Get file contents' }],
-      };
-
-      mockActionsClient.create.mockResolvedValue(mockStackConnector);
-
-      // Note: MCP tools creation is handled separately, not in createStackConnector
-      // This test should be moved to the MCP tools import function tests
-      const result = await createStackConnector(
-        mockActions as any,
-        mockRequest,
-        connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
-      );
-      expect(result).toEqual(mockStackConnector);
-    });
-
-    it('should handle partial tool creation failures gracefully', async () => {
-      const mockStackConnector = {
-        id: 'mcp-connector-8',
-        name: '.mcp stack connector',
-        actionTypeId: '.mcp',
-      };
-
-      const connectorConfigWithTools: StackConnectorConfig = {
-        ...mockStackConnectorConfig,
-        importedTools: [
-          { name: 'get_file_contents', description: 'Get file contents' },
-          { name: 'list_issues', description: 'List issues' },
-        ],
-      };
-
-      mockActionsClient.create.mockResolvedValue(mockStackConnector);
-
-      const result = await createStackConnector(
-        mockActions as any,
-        mockRequest,
-        connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
-      );
-
-      expect(result).toEqual(mockStackConnector);
-      // Note: MCP tools creation is handled separately, not in createStackConnector
-    });
-
-    it('should handle empty tool list from getMcpTools', async () => {
-      const mockStackConnector = {
-        id: 'mcp-connector-9',
-        name: '.mcp stack connector',
-        actionTypeId: '.mcp',
-      };
-
-      const connectorConfigWithTools: StackConnectorConfig = {
-        ...mockStackConnectorConfig,
-        importedTools: [{ name: 'nonexistent_tool', description: 'Nonexistent tool' }],
-      };
-
-      mockActionsClient.create.mockResolvedValue(mockStackConnector);
-
-      const result = await createStackConnector(
-        mockActions as any,
-        mockRequest,
-        connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
-      );
-
-      expect(result).toEqual(mockStackConnector);
-      // Note: MCP tools creation is handled separately, not in createStackConnector
-    });
-
-    it('should handle empty array return from getNamedMcpTools', async () => {
-      const mockStackConnector = {
-        id: 'mcp-connector-10',
-        name: '.mcp stack connector',
+        name: '.mcp',
         actionTypeId: '.mcp',
       };
 
@@ -426,13 +319,9 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         connectorConfigWithTools,
-        'test-connector',
-        'test-token',
-        mockLogger
+        'test-token'
       );
-
       expect(result).toEqual(mockStackConnector);
-      // Note: MCP tools creation is handled separately, not in createStackConnector
     });
   });
 
@@ -440,7 +329,7 @@ describe('createStackConnector', () => {
     it('should create stack connector with connector v2 spec and bearer auth', async () => {
       const mockStackConnector = {
         id: 'notion-connector-1',
-        name: ".notion stack connector for data connector 'test-connector'",
+        name: '.notion',
         actionTypeId: '.notion',
       };
 
@@ -450,7 +339,6 @@ describe('createStackConnector', () => {
         importedTools: undefined,
       };
 
-      // Mock the connector spec lookup
       const notionSpec = Object.values(connectorsSpecs).find(
         (spec) => spec.metadata.id === '.notion'
       );
@@ -464,15 +352,13 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         notionConnectorConfig,
-        'test-connector',
-        'notion-token-123',
-        mockLogger
+        'notion-token-123'
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: ".notion stack connector for data connector 'test-connector'",
+          name: '.notion',
           actionTypeId: '.notion',
           config: {},
           secrets: expect.objectContaining({
@@ -486,7 +372,7 @@ describe('createStackConnector', () => {
     it('should create stack connector with api_key_header auth', async () => {
       const mockStackConnector = {
         id: 'api-key-connector-1',
-        name: ".test stack connector for data connector 'test-connector'",
+        name: '.test',
         actionTypeId: '.test',
       };
 
@@ -515,15 +401,13 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         apiKeyConnectorConfig,
-        'test-connector',
-        'api-key-123',
-        mockLogger
+        'api-key-123'
       );
 
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: `${apiKeySpec.metadata.id} stack connector for data connector 'test-connector'`,
+          name: apiKeySpec.metadata.id,
           actionTypeId: apiKeySpec.metadata.id,
           config: {},
           secrets: expect.objectContaining({
@@ -542,21 +426,14 @@ describe('createStackConnector', () => {
       };
 
       await expect(
-        createStackConnector(
-          mockActions as any,
-          mockRequest,
-          invalidConnectorConfig,
-          'test-connector',
-          'token',
-          mockLogger
-        )
+        createStackConnector(mockActions as any, mockRequest, invalidConnectorConfig, 'token')
       ).rejects.toThrow('Stack connector spec not found for type ".nonexistent"');
     });
 
     it('should not create MCP tools for stack connectors with connector v2 spec', async () => {
       const mockStackConnector = {
         id: 'notion-connector-2',
-        name: ".notion stack connector for data connector 'test-connector'",
+        name: '.notion',
         actionTypeId: '.notion',
       };
 
@@ -572,13 +449,10 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         notionConnectorConfig,
-        'test-connector',
-        'notion-token-123',
-        mockLogger
+        'notion-token-123'
       );
 
       expect(result).toEqual(mockStackConnector);
-      // Note: MCP tools creation is handled separately, not in createStackConnector
     });
   });
 });

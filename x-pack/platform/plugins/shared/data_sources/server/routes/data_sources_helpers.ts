@@ -184,7 +184,7 @@ export async function createDataSourceAndRelatedResources(
 
   logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
 
-  const workflowInfos = await loadWorkflows(stackConnectorIds, dataSource.workflows);
+  const workflowInfos = await loadWorkflows(dataSource.workflows, stackConnectorIds);
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 

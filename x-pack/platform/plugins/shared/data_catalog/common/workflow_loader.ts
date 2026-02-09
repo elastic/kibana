@@ -28,18 +28,20 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
  * @throws Error if the directory doesn't exist or can't be read
  */
 export async function loadWorkflows(
-  stackConnectorIds: Record<string, string>,
-  config: WorkflowsConfig
+  config: WorkflowsConfig,
+  stackConnectorIds?: Record<string, string>
 ): Promise<WorkflowInfo[]> {
   const { directory, templateInputs } = config;
 
   const workflowInfos: WorkflowInfo[] = [];
   try {
+    let typedTemplateInputs = templateInputs;
     // Build template inputs with all stack connector IDs
-    const typedTemplateInputs = {
-      ...templateInputs,
-      ...stackConnectorIds,
-    };
+    if (stackConnectorIds) {
+      typedTemplateInputs = {
+        ...stackConnectorIds,
+      };
+    }
 
     const files = await fs.readdir(join(directory));
 
@@ -53,7 +55,7 @@ export async function loadWorkflows(
       throw new Error(`No YAML workflow files found in directory: ${directory}`);
     }
 
-    // Load and process each YAML file once
+    // Load and process each YAML file
     const workflowInfo = await Promise.all(
       yamlFiles.map(async (fileName) => {
         const filePath = join(directory, fileName);
