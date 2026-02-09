@@ -62,6 +62,16 @@ run(
         --specPath          Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
         --version           Semver version for stack baseline target
         --allowServerless   Allow serverless baseline updates (post-promotion pipeline only)
+
+        Examples:
+          # Update serverless baseline (post-promotion pipeline only)
+          node scripts/update_baseline.ts --distribution serverless --allowServerless
+
+          # Update stack baseline for version 9.2.0
+          node scripts/update_baseline.ts --distribution stack --version 9.2.0
+
+          # Update stack baseline with custom spec path
+          node scripts/update_baseline.ts --distribution stack --version 8.19.0 --specPath path/to/spec.yaml
       `,
     },
   }

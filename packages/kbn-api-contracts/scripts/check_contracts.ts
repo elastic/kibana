@@ -68,6 +68,17 @@ run(
         --specPath         Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
         --version          Semver version for stack baseline selection
         --baselinePath     Override baseline path for testing
+
+        Examples:
+          # Check serverless contracts against baseline
+          node scripts/check_contracts.ts --distribution serverless
+
+          # Check stack contracts for version 9.2.0
+          node scripts/check_contracts.ts --distribution stack --version 9.2.0
+
+          # Check with custom spec and baseline paths
+          node scripts/check_contracts.ts --distribution stack --version 9.2.0 \\
+            --specPath path/to/spec.yaml --baselinePath path/to/baseline.yaml
       `,
     },
   }
