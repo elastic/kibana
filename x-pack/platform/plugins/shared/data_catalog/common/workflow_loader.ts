@@ -35,13 +35,10 @@ export async function loadWorkflows(
 
   const workflowInfos: WorkflowInfo[] = [];
   try {
-    let typedTemplateInputs = templateInputs;
-    // Build template inputs with all stack connector IDs
-    if (stackConnectorIds) {
-      typedTemplateInputs = {
-        ...stackConnectorIds,
-      };
-    }
+    const typedTemplateInputs = {
+      ...templateInputs,
+      ...stackConnectorIds,
+    };
 
     const files = await fs.readdir(join(directory));
 
