@@ -11,18 +11,20 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Parser } from '../../parser';
 import { within, Walker } from '../../ast';
 import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
-import type { PromQLFunction } from '../../promql/types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
 } from '../../commands/definitions/utils';
-import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
-import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
-import { buildSignatureHelpItem, getArgumentToHighlightIndex, getParameterList } from './helpers';
+import {
+  buildSignatureHelpItem,
+  getArgumentToHighlightIndex,
+  getParameterList,
+  getPromqlSignatureHelp,
+} from './helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
@@ -113,41 +115,6 @@ export async function getSignatureHelp(
     MAX_PARAM_TYPES_TO_SHOW
   );
   const parameters: string[] = getParameterList(formattedSignature);
-
-  return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
-}
-
-function getPromqlSignatureHelp(
-  root: Parameters<typeof Walker.walk>[0],
-  fullText: string,
-  offset: number
-): SignatureHelpItem | undefined {
-  let functionNode: PromQLFunction | undefined;
-
-  Walker.walk(root, {
-    promql: {
-      visitPromqlFunction: (fn) => {
-        const leftParen = fullText.indexOf('(', fn.location.min);
-        if (leftParen < offset && (within(offset - 1, fn) || fn.incomplete)) {
-          functionNode = fn;
-        }
-      },
-    },
-  });
-
-  if (!functionNode) {
-    return undefined;
-  }
-
-  const fnDefinition = getPromqlFunctionDefinition(functionNode.name);
-  if (!fnDefinition) {
-    return undefined;
-  }
-
-  const innerText = fullText.substring(0, offset);
-  const currentArgIndex = getArgumentToHighlightIndex(innerText, functionNode, offset);
-  const formattedSignature = getFormattedPromqlFunctionSignature(fnDefinition);
-  const parameters = getParameterList(formattedSignature);
 
   return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
 }

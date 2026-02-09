@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../ast';
+import { within, Walker } from '../../ast';
 import type { ESQLAstBaseItem, ESQLFunction } from '../../types';
+import type { PromQLFunction } from '../../promql/types';
+import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
+import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
 
 /**
  * Extracts the parameter list from a formatted function signature.
@@ -89,6 +92,41 @@ export function getArgumentToHighlightIndex(
 
   // Default: highlight last argument position
   return Math.max(fnNode.args.length - 1, 0);
+}
+
+export function getPromqlSignatureHelp(
+  root: Parameters<typeof Walker.walk>[0],
+  fullText: string,
+  offset: number
+) {
+  let functionNode: PromQLFunction | undefined;
+
+  Walker.walk(root, {
+    promql: {
+      visitPromqlFunction: (fn) => {
+        const leftParen = fullText.indexOf('(', fn.location.min);
+        if (leftParen < offset && (within(offset - 1, fn) || fn.incomplete)) {
+          functionNode = fn;
+        }
+      },
+    },
+  });
+
+  if (!functionNode) {
+    return undefined;
+  }
+
+  const fnDefinition = getPromqlFunctionDefinition(functionNode.name);
+  if (!fnDefinition) {
+    return undefined;
+  }
+
+  const innerText = fullText.substring(0, offset);
+  const currentArgIndex = getArgumentToHighlightIndex(innerText, functionNode, offset);
+  const formattedSignature = getFormattedPromqlFunctionSignature(fnDefinition);
+  const parameters = getParameterList(formattedSignature);
+
+  return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
 }
 
 export function buildSignatureHelpItem(
