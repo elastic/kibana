@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
-import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
+import { getSegments, MAX_NESTING_LEVEL, type SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
@@ -35,10 +35,12 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
+import { useQueryStreamCreation } from './query_stream_creation_context';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
+  const queryStreamCreation = useQueryStreamCreation();
   const { definition } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
@@ -49,17 +51,28 @@ export function PreviewPanel() {
 
   let content;
 
-  if (routingSnapshot.matches({ ready: 'idle' })) {
+  if (routingSnapshot.matches({ ready: { queryMode: 'creating' } })) {
+    content = (
+      <QueryStreamPreviewPanel
+        streamName={definition.stream.name}
+        documents={queryStreamCreation.documents ?? []}
+        documentsError={queryStreamCreation.error}
+        isLoading={queryStreamCreation.isLoading}
+      />
+    );
+  } else if (routingSnapshot.matches({ ready: { queryMode: 'idle' } })) {
+    content = <QueryModeIdlePanel />;
+  } else if (routingSnapshot.matches({ ready: { ingestMode: 'idle' } })) {
     content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (
-    routingSnapshot.matches({ ready: 'editingRule' }) ||
-    routingSnapshot.matches({ ready: 'reorderingRules' })
+    routingSnapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   ) {
     content = <EditingPanel />;
   } else if (
-    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
-    routingSnapshot.matches({ ready: 'reviewSuggestedRule' }) ||
-    routingSnapshot.matches({ ready: 'editingSuggestedRule' })
+    routingSnapshot.matches({ ready: { ingestMode: 'creatingNewRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } }) ||
+    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } })
   ) {
     content = <SamplePreviewPanel enableActions />;
   }
@@ -279,6 +292,166 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
         ) : (
           <EuiFlexItem grow={false} />
         )}
+        {content}
+      </EuiFlexGroup>
+    </>
+  );
+};
+
+/**
+ * Panel shown when in query mode idle state (no query stream being created)
+ */
+const QueryModeIdlePanel = () => (
+  <EuiEmptyPrompt
+    data-test-subj="streamsAppQueryModeIdlePanel"
+    icon={<AssetImage />}
+    titleSize="xxs"
+    title={
+      <h2>
+        {i18n.translate('xpack.streams.streamDetail.preview.queryModeIdleTitle', {
+          defaultMessage: 'Query stream preview',
+        })}
+      </h2>
+    }
+    body={
+      <EuiText size="s">
+        {i18n.translate('xpack.streams.streamDetail.preview.queryModeIdleBody', {
+          defaultMessage:
+            'Select an existing query stream to view its data, or create a new query stream to see the preview.',
+        })}
+      </EuiText>
+    }
+  />
+);
+
+/**
+ * Panel for previewing query stream ES|QL results during creation
+ */
+const QueryStreamPreviewPanel = ({
+  streamName,
+  documents,
+  documentsError,
+  isLoading,
+}: {
+  streamName: string;
+  documents: SampleDocument[];
+  documentsError: Error | undefined;
+  isLoading: boolean;
+}) => {
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
+  const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
+  const hasDocuments = !isEmpty(documents);
+
+  const [sorting, setSorting] = useState<{
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  }>();
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  const handleSetVisibleColumns = useCallback((newVisibleColumns: string[]) => {
+    setVisibleColumns(newVisibleColumns.length > 0 ? newVisibleColumns : undefined);
+  }, []);
+
+  const docViewsRegistry = useDocViewerSetup();
+
+  const hits = useMemo(() => {
+    return toDataTableRecordWithIndex(documents);
+  }, [documents]);
+
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
+
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
+  let content: React.ReactNode | null = null;
+
+  if (isLoading && !hasDocuments) {
+    content = (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingElastic size="xl" />
+      </EuiFlexGroup>
+    );
+  } else if (documentsError) {
+    content = (
+      <EuiEmptyPrompt
+        icon={<AssetImage type="noResults" />}
+        color="danger"
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.queryStreamError', {
+              defaultMessage: 'Error loading preview',
+            })}
+          </h2>
+        }
+        body={documentsError.message}
+      />
+    );
+  } else if (!hasDocuments) {
+    content = (
+      <EuiEmptyPrompt
+        data-test-subj="streamsAppQueryStreamPreviewEmptyPrompt"
+        icon={<AssetImage size="small" type="noDocuments" />}
+        titleSize="xxs"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.queryStreamEmpty', {
+              defaultMessage: 'No documents found',
+            })}
+          </h2>
+        }
+        body={
+          <EuiText size="s">
+            {i18n.translate('xpack.streams.streamDetail.preview.queryStreamEmptyBody', {
+              defaultMessage: 'Try adjusting your ES|QL query or selecting a different time range.',
+            })}
+          </EuiText>
+        }
+      />
+    );
+  } else if (hasDocuments) {
+    content = (
+      <EuiFlexItem grow data-test-subj="streamsAppQueryStreamPreviewPanelWithResults">
+        <RowSelectionContext.Provider value={rowSelectionContextValue}>
+          <MemoPreviewTable
+            documents={documents}
+            sorting={sorting}
+            setSorting={setSorting}
+            toolbarVisibility={true}
+            displayColumns={visibleColumns}
+            setVisibleColumns={handleSetVisibleColumns}
+            cellActions={[]}
+            mode={viewMode}
+            streamName={streamName}
+            viewModeToggle={{
+              currentMode: viewMode,
+              setViewMode,
+              isDisabled: false,
+            }}
+            dataViewFieldTypes={fieldTypes}
+          />
+        </RowSelectionContext.Provider>
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
+          streamDataView={streamDataView}
+        />
+      </EuiFlexItem>
+    );
+  }
+
+  return (
+    <>
+      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem grow={false} />
         {content}
       </EuiFlexGroup>
     </>
