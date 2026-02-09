@@ -107,10 +107,19 @@ export const useBulkDeleteActiveSources = (onComplete?: () => void) => {
     },
     {
       onMutate: (ids) => {
-        // Optimistic: save IDs to sessionStorage immediately
+        // Persist IDs to sessionStorage so they stay hidden across navigation/refresh
         savePendingBulkDelete({ ids });
-        // Invalidate the list cache so useActiveSources re-reads sessionStorage and filters
-        queryClient.invalidateQueries(queryKeys.dataSources.list());
+
+        // Immediately remove items from the cached list
+        const idsToDelete = new Set(ids);
+        queryClient.setQueryData<{ dataSources: Array<{ id: string }>; total: number }>(
+          queryKeys.dataSources.list(),
+          (old) => {
+            if (!old) return old;
+            const filtered = old.dataSources.filter((s) => !idsToDelete.has(s.id));
+            return { ...old, dataSources: filtered, total: filtered.length };
+          }
+        );
       },
       onSuccess: (data) => {
         // Store the taskId and start polling

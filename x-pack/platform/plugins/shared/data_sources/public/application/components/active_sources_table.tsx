@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { capitalize } from 'lodash';
 import {
   EuiBasicTable,
@@ -203,6 +203,12 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     services: { chrome },
   } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
+
+  // Sync selection with sources — remove selected items that no longer exist
+  useEffect(() => {
+    const sourceIds = new Set(sources.map((s) => s.id));
+    setSelectedItems((prev) => prev.filter((item) => sourceIds.has(item.id)));
+  }, [sources]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
