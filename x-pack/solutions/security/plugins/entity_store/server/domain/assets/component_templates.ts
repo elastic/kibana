@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EntityDefinition,
+  EntityType,
+} from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
@@ -24,7 +27,7 @@ const BASE_ENTITY_INDEX_MAPPING = {
   // 'entity.source': { type: 'keyword' },
 } as const satisfies MappingProperties;
 
-export const getComponentTemplateName = (type: string, namespace: string) =>
+export const getComponentTemplateName = (type: EntityType, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (
@@ -40,7 +43,6 @@ export const getEntityDefinitionComponentTemplate = (
 const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
-    ...getIdentityFieldMapping(definition),
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
@@ -49,7 +51,7 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
   },
 });
 
-export const getUpdatesComponentTemplateName = (type: string, namespace: string) =>
+export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
@@ -65,7 +67,6 @@ export const getUpdatesEntityDefinitionComponentTemplate = (
 const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
-    ...getIdentityFieldMapping(definition),
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
@@ -74,11 +75,3 @@ const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMappi
     ),
   },
 });
-function getIdentityFieldMapping({
-  identityField,
-}: EntityDefinition): Record<string, MappingProperty> {
-  if (!identityField.calculated) {
-    return { [identityField.field]: identityField.mapping };
-  }
-  return { [identityField.defaultIdField]: identityField.defaultIdFieldMapping };
-}
