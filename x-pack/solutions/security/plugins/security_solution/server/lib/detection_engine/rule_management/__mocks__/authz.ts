@@ -13,6 +13,7 @@ export const getMockRulesAuthz = (): DetectionRulesAuthz => ({
   canReadExceptions: true,
   canEditExceptions: true,
   canEnableDisableRules: true,
+  canManualRunRules: true,
   canEditCustomHighlightedFields: true,
   canEditInvestigationGuides: true,
 });

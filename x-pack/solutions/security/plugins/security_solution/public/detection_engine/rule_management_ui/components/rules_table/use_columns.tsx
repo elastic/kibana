@@ -335,7 +335,6 @@ export const useRulesColumns = ({
     confirmDeletion,
   });
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
     isLoadingJobs,
@@ -399,14 +398,13 @@ export const useRulesColumns = ({
       },
       snoozeColumn,
       enabledColumn,
-      ...(canEditRules ? [actionsColumn] : []),
+      actionsColumn,
     ],
     [
       showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
       enabledColumn,
-      canEditRules,
       actionsColumn,
     ]
   );
@@ -609,7 +607,6 @@ export const useMonitoringColumns = ({
     confirmDeletion,
   });
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
     isLoadingJobs,
@@ -642,14 +639,13 @@ export const useMonitoringColumns = ({
       executionStatusColumn,
       LAST_EXECUTION_COLUMN,
       enabledColumn,
-      ...(canEditRules ? [actionsColumn] : []),
+      actionsColumn,
     ],
     [
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
       gapDurationColumn,
-      canEditRules,
       showRelatedIntegrations,
       gapStatusColumn,
     ]

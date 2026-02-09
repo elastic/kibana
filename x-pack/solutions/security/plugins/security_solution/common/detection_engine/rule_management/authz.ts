@@ -28,6 +28,9 @@ export interface DetectionRulesAuthz {
   /** Whether the user can enable or disable detection rules */
   canEnableDisableRules: boolean;
 
+  /** Whether the user can trigger manual runs (schedule backfill / fill gaps) for detection rules */
+  canManualRunRules: boolean;
+
   /** Whether the user can modify investigation_fields on rules */
   canEditCustomHighlightedFields: boolean;
 

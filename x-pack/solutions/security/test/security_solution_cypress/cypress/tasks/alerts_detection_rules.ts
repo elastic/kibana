@@ -17,6 +17,7 @@ import {
   COLLAPSED_ACTION_BTN,
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_BULK_MANUAL_RULE_RUN_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DISABLED_RULES_BTN,
@@ -62,12 +63,14 @@ import {
   TOASTER_BODY,
   TOASTER_CLOSE_ICON,
   TOASTER_ERROR_BTN,
+  CONFIRM_BULK_GAP_FILL_BTN,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
   MODIFIED_PREBUILT_RULE_BADGE,
   MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   POPOVER_ACTIONS_TRIGGER_BUTTON,
+  RULE_FILL_ALL_GAPS_BUTTON,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
@@ -78,6 +81,8 @@ import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
+import { BULK_FILL_RULE_GAPS_BTN, BULK_MANUAL_RULE_RUN_BTN } from '../screens/rules_bulk_actions';
+import { assertSuccessToast, assertToast } from '../screens/common/toast';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -153,6 +158,30 @@ export const manualRuleRunFromDetailsPage = () => {
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const bulkGapFillFromDetailsPage = () => {
+  cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(MODAL_CONFIRMATION_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
+};
+
+export const bulkManualRuleRunFromRulesTablePage = (ruleCount: number) => {
+  cy.get(BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).should('not.exist');
+  assertSuccessToast(
+    'Rules scheduled',
+    `Successfully scheduled manual rule run for ${ruleCount} rule`
+  );
+};
+
+export const bulkGapFillFromRulesTablePage = () => {
+  cy.get(BULK_FILL_RULE_GAPS_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
 };
 
 export const revertRuleFromDetailsPage = () => {

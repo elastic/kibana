@@ -84,6 +84,7 @@ const RuleActionsOverflowComponent = ({
   const {
     rules: { edit: canEditRules, read: canReadRules },
     exceptions: { edit: canEditExceptions },
+    manualRun: { edit: canManualRunRules },
   } = useUserPrivileges().rulesPrivileges;
 
   const onRuleDeletedCallback = useCallback(() => {
@@ -167,9 +168,13 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.MANUAL_RULE_RUN}
               icon="play"
-              disabled={!canEditRules || !rule.enabled}
+              disabled={!canManualRunRules || !rule.enabled}
               toolTipContent={
-                !canEditRules || !rule.enabled ? i18nActions.MANUAL_RULE_RUN_TOOLTIP : ''
+                !canManualRunRules
+                  ? i18nActions.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
+                  : !rule.enabled
+                  ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
+                  : ''
               }
               data-test-subj="rules-details-manual-rule-run"
               onClick={async () => {
@@ -246,6 +251,7 @@ const RuleActionsOverflowComponent = ({
       canDuplicateRuleWithActions,
       canEditRules,
       canReadRules,
+      canManualRunRules,
       doesBaseVersionExist,
       startTransaction,
       closePopover,

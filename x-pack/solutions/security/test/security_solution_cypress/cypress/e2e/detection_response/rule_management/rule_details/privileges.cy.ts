@@ -22,6 +22,8 @@ import {
   rulesReadUser,
   secAll as rulesNone,
   secAllUser as rulesNoneUser,
+  rulesReadWithManualRun,
+  rulesReadWithManualRunUser,
 } from '../../../../tasks/privileges';
 
 import { RULES_URL } from '../../../../urls/navigation';
@@ -34,6 +36,7 @@ import {
   fillScheduleRuleAndContinue,
 } from '../../../../tasks/create_new_rule';
 import {
+  bulkGapFillFromDetailsPage,
   goToRuleDetailsOf,
   manualRuleRunFromDetailsPage,
 } from '../../../../tasks/alerts_detection_rules';
@@ -57,15 +60,15 @@ import {
   unsnoozeRule,
 } from '../../../../tasks/rule_snoozing';
 import { UNSNOOZED_BADGE } from '../../../../screens/rule_snoozing';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone];
+const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadWithManualRunUser];
+const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadWithManualRun];
 
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {
-  const ruleName = 'My rule';
-  const createRule = () => {
+  const testRuleName = 'My rule';
+  const createRule = (ruleName: string) => {
     const rule = getCustomQueryRuleParams({ name: ruleName });
     loginWithUser(rulesAllUser);
     visit(RULES_URL);
@@ -81,14 +84,14 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    createRule();
+    createRule(testRuleName);
   });
 
   describe('securitySolutionRulesV1.all', () => {
     beforeEach(() => {
       loginWithUser(rulesAllUser);
       visit(RULES_URL);
-      goToRuleDetailsOf(ruleName);
+      goToRuleDetailsOf(testRuleName);
     });
 
     it(`should be able to edit rules`, () => {
@@ -140,7 +143,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       loginWithUser(rulesReadUser);
       visit(RULES_URL);
-      goToRuleDetailsOf(ruleName);
+      goToRuleDetailsOf(testRuleName);
     });
 
     it(`should not be able to edit rules`, () => {
@@ -174,6 +177,29 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
     it('should not be able to adjust snooze settings', () => {
       cy.get(UNSNOOZED_BADGE).should('be.disabled');
+    });
+  });
+
+  describe('securitySolutionRulesV4.read with manual run', () => {
+    const ruleNameForManualRunPrivilegesTest = 'ruleNameForManualRunPrivilegesTest';
+    before(() => {
+      loginWithUser(rulesAllUser);
+      createRule(ruleNameForManualRunPrivilegesTest);
+    });
+
+    beforeEach(() => {
+      loginWithUser(rulesReadWithManualRunUser);
+      visit(RULES_URL);
+      goToRuleDetailsOf(ruleNameForManualRunPrivilegesTest);
+    });
+
+    it('should be able to trigger gap fills', () => {
+      goToExecutionLogTab();
+      bulkGapFillFromDetailsPage();
+    });
+
+    it('should be able to trigger manual runs', () => {
+      manualRuleRunFromDetailsPage();
     });
   });
 });
