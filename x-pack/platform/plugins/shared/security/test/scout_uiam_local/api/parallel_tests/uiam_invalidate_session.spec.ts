@@ -15,7 +15,8 @@ import {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 import { COMMON_HEADERS } from '../fixtures/constants';
@@ -71,7 +72,7 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] },
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
       // Check only access token here, refresh token will be checked after logout.
       expect((await checkUiamAccessToken(accessToken)).status).toBe(200);
@@ -81,7 +82,7 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] },
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(302);
+      expect(response).toHaveStatusCode(302);
 
       log.info('Waiting for the UIAM refresh 3s grace period to lapse (+5s)…');
       await setTimeoutAsync(5000);
@@ -92,7 +93,7 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] },
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
       });
-      expect(response.statusCode).toBe(401);
+      expect(response).toHaveStatusCode(401);
       expect((await checkUiamAccessToken(accessToken)).status).toBe(401);
       expect((await checkUiamRefreshToken(refreshToken)).status).toBe(401);
     }
