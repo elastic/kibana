@@ -22,7 +22,8 @@ import {
 } from '../components/tools/form/types/tool_form_types';
 
 /**
- * Converts a defaultValue to the appropriate type based on the parameter type
+ * Converts a defaultValue to the appropriate type based on the parameter type.
+ * The enum values are: integer, string, float, boolean, date, array.
  */
 export const convertDefaultValueToType = (
   value: EsqlToolParamValue,
@@ -32,10 +33,8 @@ export const convertDefaultValueToType = (
     return value;
   }
 
-  // If value is already the correct type, return it as-is
   switch (type) {
     case 'integer':
-    case 'long':
       if (typeof value === 'number' && Number.isInteger(value)) {
         return value;
       }
@@ -48,7 +47,6 @@ export const convertDefaultValueToType = (
       }
       throw new Error(`Invalid integer value: ${value}`);
 
-    case 'double':
     case 'float':
       if (typeof value === 'number') {
         return value;
@@ -78,14 +76,18 @@ export const convertDefaultValueToType = (
       }
       throw new Error(`Invalid boolean value: ${value}`);
 
-    case 'text':
-    case 'keyword':
+    case 'string':
     case 'date':
       if (typeof value === 'string') {
         return value;
       }
-      // Convert other types to string
       return String(value);
+
+    case 'array':
+      if (Array.isArray(value)) {
+        return value;
+      }
+      return value;
 
     default:
       return value;

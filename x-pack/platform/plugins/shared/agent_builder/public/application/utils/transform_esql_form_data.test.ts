@@ -202,22 +202,21 @@ describe('transformEsqlFormData', () => {
   });
 
   describe('convertDefaultValueToType', () => {
-    describe('integer and long types', () => {
+    describe('integer type', () => {
       it('should return number as-is when already an integer', () => {
         expect(convertDefaultValueToType(42, 'integer')).toBe(42);
-        expect(convertDefaultValueToType(42, 'long')).toBe(42);
       });
 
       it('should convert valid string to integer', () => {
         expect(convertDefaultValueToType('42', 'integer')).toBe(42);
-        expect(convertDefaultValueToType(' 42 ', 'long')).toBe(42);
+        expect(convertDefaultValueToType(' 42 ', 'integer')).toBe(42);
       });
 
       it('should throw error for invalid string', () => {
         expect(() => convertDefaultValueToType('abc', 'integer')).toThrow(
           'Invalid integer value: abc'
         );
-        expect(() => convertDefaultValueToType('not-a-number', 'long')).toThrow(
+        expect(() => convertDefaultValueToType('not-a-number', 'integer')).toThrow(
           'Invalid integer value: not-a-number'
         );
       });
@@ -229,19 +228,18 @@ describe('transformEsqlFormData', () => {
       });
     });
 
-    describe('double and float types', () => {
+    describe('float type', () => {
       it('should return number as-is when already a number', () => {
-        expect(convertDefaultValueToType(42.5, 'double')).toBe(42.5);
         expect(convertDefaultValueToType(42.5, 'float')).toBe(42.5);
       });
 
       it('should convert valid string to number', () => {
-        expect(convertDefaultValueToType('42.5', 'double')).toBe(42.5);
+        expect(convertDefaultValueToType('42.5', 'float')).toBe(42.5);
         expect(convertDefaultValueToType(' 42.5 ', 'float')).toBe(42.5);
       });
 
       it('should throw error for invalid string', () => {
-        expect(() => convertDefaultValueToType('abc', 'double')).toThrow(
+        expect(() => convertDefaultValueToType('abc', 'float')).toThrow(
           'Invalid number value: abc'
         );
       });
@@ -279,16 +277,15 @@ describe('transformEsqlFormData', () => {
       });
     });
 
-    describe('text, keyword, and date types', () => {
+    describe('string and date types', () => {
       it('should return string as-is when already a string', () => {
-        expect(convertDefaultValueToType('hello', 'text')).toBe('hello');
-        expect(convertDefaultValueToType('world', 'keyword')).toBe('world');
+        expect(convertDefaultValueToType('hello', 'string')).toBe('hello');
         expect(convertDefaultValueToType('2023-01-01', 'date')).toBe('2023-01-01');
       });
 
       it('should convert other types to string', () => {
-        expect(convertDefaultValueToType(42, 'text')).toBe('42');
-        expect(convertDefaultValueToType(true, 'keyword')).toBe('true');
+        expect(convertDefaultValueToType(42, 'string')).toBe('42');
+        expect(convertDefaultValueToType(true, 'string')).toBe('true');
       });
     });
   });

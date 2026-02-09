@@ -73,7 +73,6 @@ const validateDefaultValueType = (value: EsqlToolParamValue, type: EsqlToolField
 
   switch (type) {
     case EsqlToolFieldType.INTEGER:
-    case EsqlToolFieldType.LONG:
       if (typeof value === 'number') {
         return Number.isInteger(value);
       }
@@ -81,7 +80,6 @@ const validateDefaultValueType = (value: EsqlToolParamValue, type: EsqlToolField
         return /^-?\d+$/.test(value.trim());
       }
       return false;
-    case EsqlToolFieldType.DOUBLE:
     case EsqlToolFieldType.FLOAT:
       if (typeof value === 'number') {
         return isFinite(value);
@@ -103,15 +101,10 @@ const validateDefaultValueType = (value: EsqlToolParamValue, type: EsqlToolField
         return !isNaN(Date.parse(value.trim()));
       }
       return false;
-    case EsqlToolFieldType.TEXT:
-    case EsqlToolFieldType.KEYWORD:
-      return true; // String types accept any value
-    case EsqlToolFieldType.OBJECT:
-      return typeof value === 'object' && !Array.isArray(value);
-    case EsqlToolFieldType.NESTED:
-      return (
-        Array.isArray(value) && value.every((item) => typeof item === 'object' && item !== null)
-      );
+    case EsqlToolFieldType.STRING:
+      return true; // String type accepts any value
+    case EsqlToolFieldType.ARRAY:
+      return Array.isArray(value);
     default:
       return true;
   }
@@ -153,13 +146,7 @@ export const esqlFormValidationSchema = z
           source: z.nativeEnum(EsqlParamSource),
           optional: z.boolean(),
           defaultValue: z
-            .union([
-              z.string(),
-              z.number(),
-              z.boolean(),
-              z.record(z.unknown()),
-              z.array(z.record(z.unknown())),
-            ])
+            .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])
             .optional(),
         })
       )
