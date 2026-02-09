@@ -63,6 +63,8 @@ export interface GenericMatchers {
   rejects: {
     /** Ensures that a rejected promise throws an error that optionally matches `expected` */
     toThrow(expected?: unknown): Promise<void>;
+    /** An alias for `toThrow` */
+    toThrowError(expected?: unknown): Promise<void>;
   };
 
   not: Omit<GenericMatchers, 'not' | 'toBeDefined' | 'toBeNull' | 'rejects'>;

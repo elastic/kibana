@@ -41,6 +41,7 @@ export function createGenericMatchers(actual: unknown, options?: ExpectOptions):
     toThrowError: wrapMatcher((expected?: unknown) => base.toThrowError(expected)),
     rejects: {
       toThrow: wrapMatcher((expected?: unknown) => base.rejects.toThrow(expected)),
+      toThrowError: wrapMatcher((expected?: unknown) => base.rejects.toThrow(expected)),
     },
     not: {
       toBe: wrapMatcher((expected: unknown) => base.not.toBe(expected)),
