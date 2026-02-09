@@ -97,12 +97,29 @@ export interface UserDetailsProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Boolean that indicates whether to show the title or not.
+   * This is used in the Attack Details flyout, where we don't want to show the title.
+   * In other places, like the User Details flyout, we want to show the title.
+   */
+  showTitle?: boolean;
+  /**
+   * Whether the panel is expanded on first render. Defaults to true (document details).
+   * Set to false for attack flyout so multiple entity panels start collapsed.
+   */
+  expandedOnFirstRender?: boolean;
 }
 
 /**
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
+export const UserDetails: React.FC<UserDetailsProps> = ({
+  userName,
+  timestamp,
+  scopeId,
+  expandedOnFirstRender = true,
+  showTitle = true,
+}) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -333,15 +350,19 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
-            defaultMessage="User"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {showTitle && (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+                defaultMessage="User"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <ExpandablePanel
         header={{
           title: userName,
@@ -351,7 +372,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         }}
         expand={{
           expandable: true,
-          expandedOnFirstRender: true,
+          expandedOnFirstRender,
         }}
         data-test-subj={USER_DETAILS_TEST_ID}
       >

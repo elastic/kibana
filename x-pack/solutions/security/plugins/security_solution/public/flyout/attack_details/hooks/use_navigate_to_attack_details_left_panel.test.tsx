@@ -43,7 +43,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
     } as ReturnType<typeof useAttackDetailsContext>);
   });
 
-  it('returns a callback that opens the left panel with correct params and default tab', () => {
+  it('returns a callback that opens the left panel with correct params and default tab and subTab', () => {
     const { result } = renderHook(() => useNavigateToAttackDetailsLeftPanel());
 
     result.current();
@@ -56,6 +56,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       },
       path: {
         tab: 'insights',
+        subTab: 'entity',
       },
     });
   });
@@ -73,6 +74,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       },
       path: {
         tab: 'notes',
+        subTab: 'entity',
       },
     });
   });
