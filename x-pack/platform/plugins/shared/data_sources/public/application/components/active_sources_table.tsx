@@ -40,7 +40,6 @@ import { useKibana } from '../hooks/use_kibana';
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
   isLoading?: boolean;
-  onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
   onBulkDelete?: (sources: ActiveSource[]) => void;
@@ -56,11 +55,10 @@ const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
 
 const ActionsCell: React.FC<{
   source: ActiveSource;
-  onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
-}> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
+}> = ({ source, onEdit, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Menu items (ALL actions)
@@ -77,21 +75,6 @@ const ActionsCell: React.FC<{
       >
         {i18n.translate('xpack.dataSources.activeSources.editAction', {
           defaultMessage: 'Edit',
-        })}
-      </EuiContextMenuItem>
-    ),
-    onReconnect && (
-      <EuiContextMenuItem
-        key="reconnect"
-        icon="link"
-        disabled
-        onClick={() => {
-          setIsPopoverOpen(false);
-          onReconnect(source);
-        }}
-      >
-        {i18n.translate('xpack.dataSources.activeSources.reconnectAction', {
-          defaultMessage: 'Reconnect',
         })}
       </EuiContextMenuItem>
     ),
@@ -176,7 +159,6 @@ const ActionsCell: React.FC<{
 export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   sources,
   isLoading = false,
-  onReconnect,
   onEdit,
   onDelete,
   onBulkDelete,
@@ -303,12 +285,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       width: '120px',
       align: 'center',
       render: (source: ActiveSource) => (
-        <ActionsCell
-          source={source}
-          onReconnect={onReconnect}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <ActionsCell source={source} onEdit={onEdit} onDelete={onDelete} />
       ),
     },
   ];

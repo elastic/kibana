@@ -116,7 +116,6 @@ export const ActiveSourcesView: React.FC = () => {
         <ActiveSourcesTable
           sources={activeSources}
           isLoading={isLoading}
-          onReconnect={() => {}}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onBulkDelete={handleBulkDelete}
