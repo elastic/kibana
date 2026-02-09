@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkFileCasing } from './check_file_casing';
+export { checkFileCasing, exceptionsToArray } from './check_file_casing';
 export { getFilesForCommit } from './get_files_for_commit';

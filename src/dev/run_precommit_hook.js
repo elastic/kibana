@@ -17,11 +17,11 @@ import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { extname } from 'path';
 
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import { getFilesForCommit, checkFileCasing, exceptionsToArray } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import exceptions from './precommit_hook/exceptions.json';
+import exceptionsData from './precommit_hook/exceptions.json';
 
 class CheckResult {
   constructor(checkName) {
@@ -80,7 +80,10 @@ class FileCasingCheck extends PrecommitCheck {
         .filter((pkg) => !pkg.isPlugin())
         .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
     );
-    await checkFileCasing(log, files, { packageRootDirs, exceptions });
+    await checkFileCasing(log, files, {
+      packageRootDirs,
+      exceptions: exceptionsToArray(exceptionsData),
+    });
   }
 }
 

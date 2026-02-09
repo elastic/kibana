@@ -14,12 +14,54 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
+const CODEOWNERS_PATH = join(REPO_ROOT, '.github/CODEOWNERS');
+
+const NO_OWNER_KEY = '_no_owner';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z _]/;
 
 function normalizePath(p) {
   return p.replace(/\\/g, '/');
+}
+
+/**
+ * Converts exceptions from file format (compact: team -> { path -> expected }) to a flat array of { path, expected }.
+ */
+export function exceptionsToArray(data) {
+  if (!data || typeof data !== 'object') return [];
+  const out = [];
+  for (const value of Object.values(data)) {
+    if (value && typeof value === 'object') {
+      for (const [path, expected] of Object.entries(value)) {
+        out.push({ path: normalizePath(path), expected: expected ?? 'snake_case' });
+      }
+    }
+  }
+  return out;
+}
+
+function parseCodeowners() {
+  const rules = [];
+  if (!existsSync(CODEOWNERS_PATH)) return rules;
+  const content = readFileSync(CODEOWNERS_PATH, 'utf8');
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const parts = trimmed.split(/\s+/);
+    if (parts.length < 2) continue;
+    const pathPattern = parts[0].replace(/^\/+/, '');
+    const owners = parts.slice(1).filter((p) => p.startsWith('@'));
+    if (owners.length) rules.push({ path: pathPattern, owners });
+  }
+  rules.sort((a, b) => b.path.length - a.path.length);
+  return rules;
+}
+
+function findOwnersForPath(filePath, rules) {
+  const norm = normalizePath(filePath);
+  const match = rules.find((r) => norm === r.path || norm.startsWith(r.path + '/'));
+  return match ? match.owners : [];
 }
 
 function listPaths(paths) {
@@ -49,9 +91,8 @@ export async function checkFileCasing(log, files, options = {}) {
   } = options;
 
   const packageRootDirsSet = packageRootDirs instanceof Set ? packageRootDirs : new Set();
-  const exceptionPaths = Array.isArray(rawExceptions)
-    ? rawExceptions.map((e) => (typeof e === 'string' ? e : normalizePath(e.path ?? e)))
-    : [];
+  const exceptionsList = exceptionsToArray(rawExceptions);
+  const exceptionPaths = exceptionsList.map((e) => e.path);
 
   const violationsMap = new Map();
 
@@ -86,21 +127,26 @@ export async function checkFileCasing(log, files, options = {}) {
 
   violations = violations.filter((v) => !isExempt(v.path, exceptionPaths));
 
-  if (generateExceptions && violations.length > 0) {
-    const existing = existsSync(EXCEPTIONS_JSON_PATH)
-      ? JSON.parse(readFileSync(EXCEPTIONS_JSON_PATH, 'utf8'))
-      : [];
-    const existingPaths = new Set((Array.isArray(existing) ? existing : []).map((e) => e.path));
-    const merged = [...(Array.isArray(existing) ? existing : [])];
+  if (generateExceptions) {
+    const codeownersRules = parseCodeowners();
+    const byOwner = {};
     for (const v of violations) {
-      if (!existingPaths.has(v.path)) {
-        merged.push(v);
-        existingPaths.add(v.path);
-      }
+      const owners = findOwnersForPath(v.path, codeownersRules);
+      const key = owners.length ? owners[0] : NO_OWNER_KEY;
+      if (!byOwner[key]) byOwner[key] = {};
+      byOwner[key][v.path] = v.expected;
     }
-    merged.sort((a, b) => a.path.localeCompare(b.path));
-    writeFileSync(EXCEPTIONS_JSON_PATH, JSON.stringify(merged, null, 2) + '\n', 'utf8');
-    log.info(`Wrote ${violations.length} new exception(s) to ${EXCEPTIONS_JSON_PATH}`);
+
+    const sortedOwnerKeys = Object.keys(byOwner).sort((a, b) => a.localeCompare(b));
+    const output = {};
+    for (const k of sortedOwnerKeys) {
+      const pathMap = byOwner[k];
+      const sortedPaths = Object.keys(pathMap).sort((a, b) => a.localeCompare(b));
+      output[k] = {};
+      for (const p of sortedPaths) output[k][p] = pathMap[p];
+    }
+    writeFileSync(EXCEPTIONS_JSON_PATH, JSON.stringify(output, null, 2) + '\n', 'utf8');
+    log.info(`Wrote ${violations.length} exception(s) to ${EXCEPTIONS_JSON_PATH}`);
     return;
   }
 
