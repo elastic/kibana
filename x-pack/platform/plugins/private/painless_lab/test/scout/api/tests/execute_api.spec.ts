@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RoleApiCredentials, apiTest, expect } from '@kbn/scout';
+import { RoleApiCredentials, apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
@@ -28,7 +29,7 @@ apiTest.describe(
           responseType: 'json',
           body: TEST_INPUT.script,
         });
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({
           result: 'true',
         });
@@ -45,7 +46,7 @@ apiTest.describe(
         body: TEST_INPUT.invalid_script,
       });
 
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.error.reason).toBe('compile error');
     });
   }
