@@ -20,4 +20,4 @@ export const test = baseTest.extend<AiAssistantTestFixtures>({
   },
 });
 
-export { expect } from '@kbn/scout-security';
+export { expect } from '@kbn/scout-security/ui';

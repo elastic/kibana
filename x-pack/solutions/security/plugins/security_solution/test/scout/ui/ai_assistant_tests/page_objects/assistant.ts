@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 /**
  * Page object for the AI Assistant flyout and its interactions.

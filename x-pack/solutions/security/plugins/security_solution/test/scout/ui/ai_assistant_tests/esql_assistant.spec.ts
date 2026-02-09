@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, expect } from './fixtures';
+import { test } from './fixtures';
 
 // Failing in Cypress: See https://github.com/elastic/kibana/issues/180756
 // This test requires a preconfigured OpenAI connector and auditbeat data.

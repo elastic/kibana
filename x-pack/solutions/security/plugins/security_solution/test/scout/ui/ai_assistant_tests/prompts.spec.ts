@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
-import { test, expect } from './fixtures';
+import { test } from './fixtures';
 import {
   azureConnectorPayload,
   createAzureConnector,
@@ -18,7 +17,7 @@ import {
 } from './common/api_helpers';
 import { waitForPageReady } from './common/constants';
 
-const promptType: PromptCreateProps['promptType'] = 'system';
+const promptType = 'system';
 const testPrompt = {
   name: 'Cool prompt',
   content: 'This is a super cool prompt.',
