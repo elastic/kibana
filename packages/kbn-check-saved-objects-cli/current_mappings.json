@@ -332,6 +332,28 @@
           }
         }
       },
+      "stateTransition": {
+        "properties": {
+          "pendingCount": {
+            "type": "unsigned_long"
+          },
+          "pendingOperator": {
+            "type": "keyword"
+          },
+          "pendingTimeframe": {
+            "type": "keyword"
+          },
+          "recoveringCount": {
+            "type": "unsigned_long"
+          },
+          "recoveringOperator": {
+            "type": "keyword"
+          },
+          "recoveringTimeframe": {
+            "type": "keyword"
+          }
+        }
+      },
       "tags": {
         "type": "keyword"
       },

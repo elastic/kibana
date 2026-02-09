@@ -26,7 +26,6 @@ import {
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DirectorService } from '../lib/director/director';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
