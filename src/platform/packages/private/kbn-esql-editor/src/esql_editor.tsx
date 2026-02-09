@@ -54,6 +54,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { firstValueFrom, of } from 'rxjs';
 import { QuerySource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
@@ -634,6 +635,11 @@ const ESQLEditorInternal = function ESQLEditor({
     [telemetryService, setIsHistoryOpen]
   );
 
+  const isResourceBrowserEnabled = useCallback(async () => {
+    const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+    return Boolean(enableResourceBrowser && currentApp === 'discover');
+  }, [application?.currentAppId$, enableResourceBrowser]);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -653,7 +659,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
-    isResourceBrowserEnabled: () => enableResourceBrowser,
+    isResourceBrowserEnabled,
   });
 
   const {
