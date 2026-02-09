@@ -8,7 +8,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-export type UIVersion = 'current' | '1.1';
+export type UIVersion = 'current' | '1.1' | '1.2';
 
 interface VersionContextValue {
   version: UIVersion;
@@ -24,7 +24,7 @@ const VERSION_STORAGE_KEY = 'kibana_ui_version';
 const getInitialVersion = (): UIVersion => {
   if (typeof window !== 'undefined' && window.localStorage) {
     const stored = window.localStorage.getItem(VERSION_STORAGE_KEY);
-    if (stored === 'current' || stored === '1.1') {
+    if (stored === 'current' || stored === '1.1' || stored === '1.2') {
       return stored as UIVersion;
     }
   }

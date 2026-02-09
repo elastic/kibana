@@ -12,16 +12,13 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
 import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useObservable as useKbnObservable } from '@kbn/use-observable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -30,13 +27,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
 import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 
-import { getUserDisplayName, isUserAnonymous, canUserHaveProfile } from '../../common/model';
+import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
-import type { UserProfileData } from '../../common';
 import { ProfileModal } from './profile_modal';
+import { version$ } from './version_context';
 
 // Import tooltip hook - we'll need to create a simple version or use inline logic
 const TOOLTIP_OFFSET = 4;
@@ -68,7 +63,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
               icon={item.icon}
               size="s"
               href={item.href}
-              onClick={item.onClick}
+              onClick={item.onClick as ((event: React.MouseEvent<Element, MouseEvent>) => void) | undefined}
               data-test-subj={item['data-test-subj']}
             >
               {item.name}
@@ -102,6 +97,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const version = useKbnObservable(version$, 'current');
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
@@ -175,14 +171,21 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
 
   const items: ContextMenuItem[] = [];
   
-  // Add Navigation preferences menu item first
+  // Add menu item first - "Preferences" for version 1.2, "Navigation preferences" for version 1.1
+  const menuItemLabel = version === '1.2' ? (
+    <FormattedMessage
+      id="xpack.security.navControlComponent.preferencesLinkText"
+      defaultMessage="Preferences"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.security.navControlComponent.navigationPreferencesLinkText"
+      defaultMessage="Navigation preferences"
+    />
+  );
+
   items.push({
-    name: (
-      <FormattedMessage
-        id="xpack.security.navControlComponent.navigationPreferencesLinkText"
-        defaultMessage="Navigation preferences"
-      />
-    ),
+    name: menuItemLabel,
     icon: <EuiIcon type="brush" size="m" />,
     onClick: () => {
       setIsPopoverOpen(false);
@@ -203,7 +206,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
         document.dispatchEvent(event);
       });
     },
-    'data-test-subj': 'footerNavigationPreferencesLink',
+    'data-test-subj': version === '1.2' ? 'footerPreferencesLink' : 'footerNavigationPreferencesLink',
   });
 
   const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;

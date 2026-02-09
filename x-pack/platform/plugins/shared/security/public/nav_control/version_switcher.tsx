@@ -39,6 +39,7 @@ export const VersionSwitcher: React.FC = () => {
   const options = [
     { value: 'current', text: 'Current' },
     { value: '1.1', text: '1.1' },
+    { value: '1.2', text: '1.2' },
   ];
 
   return (
@@ -49,7 +50,7 @@ export const VersionSwitcher: React.FC = () => {
             id="ui-version-switcher"
             options={options}
             value={version}
-            onChange={(e) => setVersion(e.target.value as 'current' | '1.1')}
+            onChange={(e) => setVersion(e.target.value as 'current' | '1.1' | '1.2')}
             aria-label="Switch UI version"
             data-test-subj="uiVersionSwitcher"
             style={{ borderRadius: '9999px' }}
