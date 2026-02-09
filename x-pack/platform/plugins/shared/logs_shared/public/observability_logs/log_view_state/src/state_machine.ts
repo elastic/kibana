@@ -29,282 +29,282 @@ import type {
 } from './url_state_storage_service';
 
 export const logViewStateMachine = setup({
-    types: {
-      input: {} as LogViewContextWithReference,
-      context: {} as LogViewContext,
-      events: {} as LogViewEvent,
-    },
-    actions: {
-      notifyLoadingStarted: () => undefined,
-      notifyLoadingSucceeded: () => undefined,
-      notifyLoadingFailed: () => undefined,
-      notifyPersistingInlineLogViewFailed: () => undefined,
-      updateContextInUrl: () => undefined,
-      storeLogViewReference: assign(({ context, event }) =>
-        'logViewReference' in event && event.logViewReference !== null
-          ? ({
-              logViewReference: event.logViewReference,
-            } as LogViewContextWithReference)
-          : {}
-      ),
-      storeLogView: assign(({ event }) => {
-        if ('output' in event && event.output) {
-          return { logView: event.output } as LogViewContextWithLogView;
-        }
-        return {};
-      }),
-      storeResolvedLogView: assign(({ event }) => {
-        if ('output' in event && event.output) {
-          return { resolvedLogView: event.output } as LogViewContextWithResolvedLogView;
-        }
-        return {};
-      }),
-      storeStatus: assign(({ event }) => {
-        if ('output' in event && event.output) {
-          return { status: event.output } as LogViewContextWithStatus;
-        }
-        return {};
-      }),
-      storeError: assign(({ event }) => {
-        // XState v5: onError events have the error in event.error
-        if ('error' in event && event.error) {
-          return { error: event.error as Error } as LogViewContextWithError;
-        }
-        return {};
-      }),
-      convertInlineLogViewReferenceToPersistedLogViewReference: assign(({ context, event }) =>
-        'logView' in event && context.logViewReference.type === 'log-view-inline'
-          ? ({
-              logViewReference: {
-                type: 'log-view-reference',
-                logViewId: context.logViewReference.id,
-              },
-            } as LogViewContextWithReference)
-          : {}
-      ),
-      updateLogViewReference: assign(({ context, event }) =>
-        'attributes' in event && context.logViewReference.type === 'log-view-inline'
-          ? ({
-              logViewReference: {
-                ...context.logViewReference,
-                attributes: {
-                  ...context.logViewReference.attributes,
-                  ...event.attributes,
-                },
-              },
-            } as LogViewContextWithReference)
-          : {}
-      ),
-    },
-    actors: {
-      initializeFromUrl: fromCallback<LogViewEvent, LogViewContext>(({ sendBack }) => {
-        sendBack({ type: 'INITIALIZED_FROM_URL', logViewReference: null });
-      }),
-      listenForUrlChanges: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      loadLogView: fromPromise<LogView, LogViewContext>(async () => {
-        throw new Error('loadLogView not implemented');
-      }),
-      updateLogView: fromPromise<LogView, { context: LogViewContext; event: LogViewEvent }>(
-        async () => {
-          throw new Error('updateLogView not implemented');
-        }
-      ),
-      persistInlineLogView: fromPromise<LogView, LogViewContext>(async () => {
-        throw new Error('persistInlineLogView not implemented');
-      }),
-      resolveLogView: fromPromise<ResolvedLogView<DataView>, LogViewContext>(async () => {
-        throw new Error('resolveLogView not implemented');
-      }),
-      loadLogViewStatus: fromPromise<LogViewStatus, LogViewContext>(async () => {
-        throw new Error('loadLogViewStatus not implemented');
-      }),
-    },
-    guards: {
-      isPersistedLogView: ({ context }) => context.logViewReference.type === 'log-view-reference',
-    },
-  }).createMachine({
-    context: ({ input }) => input,
-    id: 'LogView',
-    initial: 'uninitialized',
-    states: {
-      uninitialized: {
-        always: {
-          target: 'initializingFromUrl',
-        },
-      },
-      initializingFromUrl: {
-        on: {
-          INITIALIZED_FROM_URL: {
-            target: 'loading',
-            actions: ['storeLogViewReference'],
-          },
-        },
-        invoke: {
-          src: 'initializeFromUrl',
-          input: ({ context }) => context,
-        },
-      },
-      loading: {
-        entry: ['notifyLoadingStarted', 'updateContextInUrl'],
-        invoke: {
-          src: 'loadLogView',
-          input: ({ context }) => context,
-          onDone: {
-            target: 'resolving',
-            actions: 'storeLogView',
-          },
-          onError: {
-            target: 'loadingFailed',
-            actions: 'storeError',
-          },
-        },
-      },
-      resolving: {
-        invoke: {
-          src: 'resolveLogView',
-          input: ({ context }) => context,
-          onDone: {
-            target: 'checkingStatus',
-            actions: 'storeResolvedLogView',
-          },
-          onError: {
-            target: 'resolutionFailed',
-            actions: 'storeError',
-          },
-        },
-      },
-      checkingStatus: {
-        invoke: {
-          src: 'loadLogViewStatus',
-          input: ({ context }) => context,
-          onDone: [
-            {
-              target: 'resolvedPersistedLogView',
-              actions: 'storeStatus',
-              guard: 'isPersistedLogView',
+  types: {
+    input: {} as LogViewContextWithReference,
+    context: {} as LogViewContext,
+    events: {} as LogViewEvent,
+  },
+  actions: {
+    notifyLoadingStarted: () => undefined,
+    notifyLoadingSucceeded: () => undefined,
+    notifyLoadingFailed: () => undefined,
+    notifyPersistingInlineLogViewFailed: () => undefined,
+    updateContextInUrl: () => undefined,
+    storeLogViewReference: assign(({ context, event }) =>
+      'logViewReference' in event && event.logViewReference !== null
+        ? ({
+            logViewReference: event.logViewReference,
+          } as LogViewContextWithReference)
+        : {}
+    ),
+    storeLogView: assign(({ event }) => {
+      if ('output' in event && event.output) {
+        return { logView: event.output } as LogViewContextWithLogView;
+      }
+      return {};
+    }),
+    storeResolvedLogView: assign(({ event }) => {
+      if ('output' in event && event.output) {
+        return { resolvedLogView: event.output } as LogViewContextWithResolvedLogView;
+      }
+      return {};
+    }),
+    storeStatus: assign(({ event }) => {
+      if ('output' in event && event.output) {
+        return { status: event.output } as LogViewContextWithStatus;
+      }
+      return {};
+    }),
+    storeError: assign(({ event }) => {
+      // XState v5: onError events have the error in event.error
+      if ('error' in event && event.error) {
+        return { error: event.error as Error } as LogViewContextWithError;
+      }
+      return {};
+    }),
+    convertInlineLogViewReferenceToPersistedLogViewReference: assign(({ context, event }) =>
+      'logView' in event && context.logViewReference.type === 'log-view-inline'
+        ? ({
+            logViewReference: {
+              type: 'log-view-reference',
+              logViewId: context.logViewReference.id,
             },
-            {
-              target: 'resolvedInlineLogView',
-              actions: 'storeStatus',
+          } as LogViewContextWithReference)
+        : {}
+    ),
+    updateLogViewReference: assign(({ context, event }) =>
+      'attributes' in event && context.logViewReference.type === 'log-view-inline'
+        ? ({
+            logViewReference: {
+              ...context.logViewReference,
+              attributes: {
+                ...context.logViewReference.attributes,
+                ...event.attributes,
+              },
             },
-          ],
-          onError: {
-            target: 'checkingStatusFailed',
-            actions: 'storeError',
-          },
+          } as LogViewContextWithReference)
+        : {}
+    ),
+  },
+  actors: {
+    initializeFromUrl: fromCallback<LogViewEvent, LogViewContext>(({ sendBack }) => {
+      sendBack({ type: 'INITIALIZED_FROM_URL', logViewReference: null });
+    }),
+    listenForUrlChanges: fromObservable<LogViewEvent, LogViewContext>(() => of()),
+    loadLogView: fromPromise<LogView, LogViewContext>(async () => {
+      throw new Error('loadLogView not implemented');
+    }),
+    updateLogView: fromPromise<LogView, { context: LogViewContext; event: LogViewEvent }>(
+      async () => {
+        throw new Error('updateLogView not implemented');
+      }
+    ),
+    persistInlineLogView: fromPromise<LogView, LogViewContext>(async () => {
+      throw new Error('persistInlineLogView not implemented');
+    }),
+    resolveLogView: fromPromise<ResolvedLogView<DataView>, LogViewContext>(async () => {
+      throw new Error('resolveLogView not implemented');
+    }),
+    loadLogViewStatus: fromPromise<LogViewStatus, LogViewContext>(async () => {
+      throw new Error('loadLogViewStatus not implemented');
+    }),
+  },
+  guards: {
+    isPersistedLogView: ({ context }) => context.logViewReference.type === 'log-view-reference',
+  },
+}).createMachine({
+  context: ({ input }) => input,
+  id: 'LogView',
+  initial: 'uninitialized',
+  states: {
+    uninitialized: {
+      always: {
+        target: 'initializingFromUrl',
+      },
+    },
+    initializingFromUrl: {
+      on: {
+        INITIALIZED_FROM_URL: {
+          target: 'loading',
+          actions: ['storeLogViewReference'],
         },
       },
-      resolvedPersistedLogView: {
-        invoke: {
-          src: 'listenForUrlChanges',
-          input: ({ context }) => context,
-        },
-        entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
-        on: {
-          PERSIST_INLINE_LOG_VIEW: undefined,
-          RELOAD_LOG_VIEW: {
-            target: 'loading',
-          },
-          LOG_VIEW_URL_KEY_REMOVED: {
-            actions: 'updateContextInUrl',
-          },
-        },
+      invoke: {
+        src: 'initializeFromUrl',
+        input: ({ context }) => context,
       },
-      resolvedInlineLogView: {
-        invoke: {
-          src: 'listenForUrlChanges',
-          input: ({ context }) => context,
+    },
+    loading: {
+      entry: ['notifyLoadingStarted', 'updateContextInUrl'],
+      invoke: {
+        src: 'loadLogView',
+        input: ({ context }) => context,
+        onDone: {
+          target: 'resolving',
+          actions: 'storeLogView',
         },
-        entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
-        on: {
-          PERSIST_INLINE_LOG_VIEW: {
-            target: 'persistingInlineLogView',
-          },
-          LOG_VIEW_URL_KEY_REMOVED: {
-            actions: 'updateContextInUrl',
-          },
-        },
-      },
-      persistingInlineLogView: {
-        invoke: {
-          src: 'persistInlineLogView',
-          input: ({ context }) => context,
-          onDone: {
-            target: 'resolving',
-            actions: ['convertInlineLogViewReferenceToPersistedLogViewReference', 'storeLogView'],
-          },
-          onError: {
-            target: 'persistingInlineLogViewFailed',
-            actions: 'storeError',
-          },
-        },
-      },
-      persistingInlineLogViewFailed: {
-        entry: 'notifyPersistingInlineLogViewFailed',
-        on: {
-          RETRY_PERSISTING_INLINE_LOG_VIEW: {
-            target: 'persistingInlineLogView',
-          },
-        },
-      },
-      loadingFailed: {
-        entry: 'notifyLoadingFailed',
-        on: {
-          RETRY: {
-            target: 'loading',
-          },
-        },
-      },
-      resolutionFailed: {
-        entry: 'notifyLoadingFailed',
-        on: {
-          RETRY: {
-            target: 'resolving',
-          },
-        },
-      },
-      checkingStatusFailed: {
-        entry: 'notifyLoadingFailed',
-        on: {
-          RETRY: {
-            target: 'checkingStatus',
-          },
-        },
-      },
-      updating: {
-        entry: 'notifyLoadingStarted',
-        invoke: {
-          src: 'updateLogView',
-          input: ({ context, event }) => ({ context, event }),
-          onDone: {
-            target: 'resolving',
-            actions: ['updateLogViewReference', 'storeLogView'],
-          },
-          onError: {
-            target: 'updatingFailed',
-            actions: 'storeError',
-          },
-        },
-      },
-      updatingFailed: {
-        entry: 'notifyLoadingFailed',
-        on: {
-          RELOAD_LOG_VIEW: {
-            target: 'loading',
-          },
+        onError: {
+          target: 'loadingFailed',
+          actions: 'storeError',
         },
       },
     },
-    on: {
-      LOG_VIEW_REFERENCE_CHANGED: {
-        target: '.loading',
-        actions: 'storeLogViewReference',
-      },
-      UPDATE: {
-        target: '.updating',
+    resolving: {
+      invoke: {
+        src: 'resolveLogView',
+        input: ({ context }) => context,
+        onDone: {
+          target: 'checkingStatus',
+          actions: 'storeResolvedLogView',
+        },
+        onError: {
+          target: 'resolutionFailed',
+          actions: 'storeError',
+        },
       },
     },
-  });
+    checkingStatus: {
+      invoke: {
+        src: 'loadLogViewStatus',
+        input: ({ context }) => context,
+        onDone: [
+          {
+            target: 'resolvedPersistedLogView',
+            actions: 'storeStatus',
+            guard: 'isPersistedLogView',
+          },
+          {
+            target: 'resolvedInlineLogView',
+            actions: 'storeStatus',
+          },
+        ],
+        onError: {
+          target: 'checkingStatusFailed',
+          actions: 'storeError',
+        },
+      },
+    },
+    resolvedPersistedLogView: {
+      invoke: {
+        src: 'listenForUrlChanges',
+        input: ({ context }) => context,
+      },
+      entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
+      on: {
+        PERSIST_INLINE_LOG_VIEW: undefined,
+        RELOAD_LOG_VIEW: {
+          target: 'loading',
+        },
+        LOG_VIEW_URL_KEY_REMOVED: {
+          actions: 'updateContextInUrl',
+        },
+      },
+    },
+    resolvedInlineLogView: {
+      invoke: {
+        src: 'listenForUrlChanges',
+        input: ({ context }) => context,
+      },
+      entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
+      on: {
+        PERSIST_INLINE_LOG_VIEW: {
+          target: 'persistingInlineLogView',
+        },
+        LOG_VIEW_URL_KEY_REMOVED: {
+          actions: 'updateContextInUrl',
+        },
+      },
+    },
+    persistingInlineLogView: {
+      invoke: {
+        src: 'persistInlineLogView',
+        input: ({ context }) => context,
+        onDone: {
+          target: 'resolving',
+          actions: ['convertInlineLogViewReferenceToPersistedLogViewReference', 'storeLogView'],
+        },
+        onError: {
+          target: 'persistingInlineLogViewFailed',
+          actions: 'storeError',
+        },
+      },
+    },
+    persistingInlineLogViewFailed: {
+      entry: 'notifyPersistingInlineLogViewFailed',
+      on: {
+        RETRY_PERSISTING_INLINE_LOG_VIEW: {
+          target: 'persistingInlineLogView',
+        },
+      },
+    },
+    loadingFailed: {
+      entry: 'notifyLoadingFailed',
+      on: {
+        RETRY: {
+          target: 'loading',
+        },
+      },
+    },
+    resolutionFailed: {
+      entry: 'notifyLoadingFailed',
+      on: {
+        RETRY: {
+          target: 'resolving',
+        },
+      },
+    },
+    checkingStatusFailed: {
+      entry: 'notifyLoadingFailed',
+      on: {
+        RETRY: {
+          target: 'checkingStatus',
+        },
+      },
+    },
+    updating: {
+      entry: 'notifyLoadingStarted',
+      invoke: {
+        src: 'updateLogView',
+        input: ({ context, event }) => ({ context, event }),
+        onDone: {
+          target: 'resolving',
+          actions: ['updateLogViewReference', 'storeLogView'],
+        },
+        onError: {
+          target: 'updatingFailed',
+          actions: 'storeError',
+        },
+      },
+    },
+    updatingFailed: {
+      entry: 'notifyLoadingFailed',
+      on: {
+        RELOAD_LOG_VIEW: {
+          target: 'loading',
+        },
+      },
+    },
+  },
+  on: {
+    LOG_VIEW_REFERENCE_CHANGED: {
+      target: '.loading',
+      actions: 'storeLogViewReference',
+    },
+    UPDATE: {
+      target: '.updating',
+    },
+  },
+});
 
 export interface LogViewStateMachineImplementationDependencies {
   logViews: ILogViewsClient;
