@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-analytics-browser'
-  - '@kbn/shared-ux-router'
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
@@ -68,6 +67,10 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-label-formatter'
+  - '@kbn/core-chrome-sidebar-internal'
+  - '@kbn/core-chrome-sidebar-context'
+  - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
   - package

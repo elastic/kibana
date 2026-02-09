@@ -23,6 +23,8 @@
           "UserProfileRequestHandlerContext"
         ],
         "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "any"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,6 +55,8 @@
                   "InternalUserProfileServiceStart"
                 ],
                 "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -67,6 +73,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -91,6 +99,8 @@
               "<D, L> | null>"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,6 +112,8 @@
                 "label": "{\n    dataPath,\n  }",
                 "description": [],
                 "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 27,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -116,6 +128,8 @@
                       "string | undefined"
                     ],
                     "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -145,6 +159,8 @@
           ">"
         ],
         "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +175,8 @@
               "any"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -173,6 +191,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,6 +212,8 @@
               "UserProfileServiceSetup"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -209,6 +231,8 @@
               "InternalUserProfileServiceStart"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -225,6 +249,8 @@
               "() => void"
             ],
             "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -249,6 +275,8 @@
           "UserProfileServiceSetup"
         ],
         "path": "src/core/packages/user-profile/server-internal/src/internal_contracts.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -267,6 +295,8 @@
           ", \"update\">"
         ],
         "path": "src/core/packages/user-profile/server-internal/src/internal_contracts.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -65,7 +65,7 @@ export const DashboardGrid = () => {
       const updatedLayout: DashboardLayout = {
         sections: {},
         panels: {},
-        controls: currLayout.controls,
+        pinnedPanels: currLayout.pinnedPanels,
       };
       Object.values(newLayout).forEach((widget) => {
         if (widget.type === 'section') {
@@ -264,7 +264,7 @@ const dashboardGridStyles = {
         },
       },
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
-      '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
+      '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred':
         {
           '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',

@@ -14,6 +14,8 @@
           "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
         ],
         "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "Promise<void>"
             ],
             "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46,6 +50,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -71,6 +77,8 @@
           "UnmountCallback"
         ],
         "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -90,6 +98,8 @@
               "T"
             ],
             "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+            "lineNumber": 19,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -109,6 +119,8 @@
           "() => void"
         ],
         "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],

@@ -13,6 +13,7 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationInternalState,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,

@@ -12,11 +12,10 @@ exports[`SampleDataCard installed renders with app links 1`] = `
       class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiCard__image emotion-euiCard__image"
+        class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
-        <img
-          alt=""
-          src="test-file-stub"
+        <span
+          data-euiicon-type="test-file-stub"
         />
       </div>
     </div>
@@ -131,11 +130,10 @@ exports[`SampleDataCard installed renders without app links 1`] = `
       class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiCard__image emotion-euiCard__image"
+        class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
-        <img
-          alt=""
-          src="test-file-stub"
+        <span
+          data-euiicon-type="test-file-stub"
         />
       </div>
     </div>
@@ -241,11 +239,10 @@ exports[`SampleDataCard not installed renders 1`] = `
       class="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        class="euiCard__image emotion-euiCard__image"
+        class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
-        <img
-          alt=""
-          src="test-file-stub"
+        <span
+          data-euiicon-type="test-file-stub"
         />
       </div>
     </div>
@@ -279,14 +276,14 @@ exports[`SampleDataCard not installed renders 1`] = `
         style="display:contents"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              aria-label="Add Sample Data Set"
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+              aria-label="Install Sample Data Set"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
               data-test-subj="addSampleDataSetsample-data-set"
               type="button"
             >
@@ -294,9 +291,13 @@ exports[`SampleDataCard not installed renders 1`] = `
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
+                  color="inherit"
+                  data-euiicon-type="download"
+                />
+                <span
                   class="eui-textTruncate"
                 >
-                  Add data
+                  Install data
                 </span>
               </span>
             </button>

@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/avatar.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/avatar.tsx",
+            "lineNumber": 30,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +99,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+            "lineNumber": 39,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,6 +130,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +152,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+            "lineNumber": 23,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -171,6 +183,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,6 +205,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+            "lineNumber": 30,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -210,6 +226,8 @@
           "(iconSize?: \"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined) => { rootSize: number; ringSize: number; maskPoint: number; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.styles.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -224,6 +242,8 @@
               "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.styles.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -244,6 +264,8 @@
           "\nParameters for the styles for the AI Assistant beacon."
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -280,6 +302,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -296,6 +320,8 @@
               "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,6 +338,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -338,6 +366,8 @@
           ">; title?: string | undefined; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; accessKey?: string | undefined; autoFocus?: boolean | undefined; contentEditable?: \"inherit\" | Booleanish | \"plaintext-only\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; hidden?: boolean | undefined; nonce?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; translate?: \"no\" | \"yes\" | undefined; radioGroup?: string | undefined; about?: string | undefined; content?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; rel?: string | undefined; resource?: string | undefined; rev?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"off\" | \"on\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\" | undefined; is?: string | undefined; iconColor?: string | null | undefined; isDisabled?: boolean | undefined; iconSize?: \"m\" | \"original\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined; casing?: \"none\" | \"lowercase\" | \"capitalize\" | \"uppercase\" | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/avatar.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -359,6 +389,8 @@
           ">; title?: string | undefined; titleId?: string | undefined; onIconLoad?: (() => void) | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/icon/icon.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

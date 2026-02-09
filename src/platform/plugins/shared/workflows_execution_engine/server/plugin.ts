@@ -16,12 +16,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -30,6 +30,8 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { checkLicense } from './lib/check_license';
+import { getAuthenticatedUser } from './lib/get_user';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -107,7 +109,31 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -152,7 +178,36 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const resumeDelayMs = runAt ? now - runAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (resumeDelayMs !== null) {
+                  currentTransaction.setLabel('resume_delay_ms', resumeDelayMs);
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -200,7 +255,43 @@ export class WorkflowsExecutionEnginePlugin
                 spaceId: string;
                 triggerType: string;
               };
+
+              // Add queue delay metrics to APM trace for observability
+              // This shows how long the task waited in the queue before execution
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const scheduleDelayMs = runAt ? now - runAt : null;
+
+              // Add labels to current APM transaction for queue visibility
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (scheduleDelayMs !== null) {
+                  currentTransaction.setLabel('schedule_delay_ms', scheduleDelayMs);
+                }
+                currentTransaction.setLabel('workflow_id', workflowId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
+              logger.debug(
+                `Workflow ${workflowId} queue metrics: queueDelayMs=${queueDelayMs}, scheduleDelayMs=${scheduleDelayMs}`
+              );
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -221,15 +312,19 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Guard check: Check if there's already a scheduled workflow execution in non-terminal state
-              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                workflow,
-                spaceId,
-                workflowExecutionRepository,
-                logger
-              );
-              if (wasSkipped) {
-                return;
+              // Guard check: Check&Skip only when workflow has no concurrency strategy. When strategy is
+              // set, the concurrency check (later) governs the limit and strategy.
+              if (!workflow.definition?.settings?.concurrency?.strategy) {
+                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                  workflow,
+                  spaceId,
+                  workflowExecutionRepository,
+                  taskInstance,
+                  logger
+                );
+                if (wasSkipped) {
+                  return;
+                }
               }
 
               // Check for RRule triggers and log details
@@ -254,6 +349,19 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
+              // Extract user from fake request (contains API key of user who scheduled the workflow)
+              const span = apm.startSpan(
+                'workflow get authenticated user',
+                'workflow',
+                'execution'
+              );
+              const executedBy = await getAuthenticatedUser(
+                fakeRequest,
+                coreStart.security,
+                coreStart.elasticsearch.client
+              );
+              span?.end();
+
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
                 spaceId,
@@ -263,9 +371,25 @@ export class WorkflowsExecutionEnginePlugin
                 yaml: workflow.yaml,
                 context: executionContext,
                 status: ExecutionStatus.PENDING,
+                // Store task's runAt to link execution to specific scheduled run
+                // runAt is stable across retries (retries use the same runAt but get a new startedAt)
+                // This allows us to detect stale executions from previous scheduled runs
+                taskRunAt: taskInstance.runAt?.toISOString() || null,
                 createdAt: workflowCreatedAt.toISOString(),
-                createdBy: '',
+                executedBy,
                 triggeredBy: 'scheduled',
+                // Store queue delay metrics for observability (only if enabled in config)
+                ...(this.config.collectQueueMetrics
+                  ? {
+                      queueMetrics: {
+                        scheduledAt: taskInstance.scheduledAt?.toString(),
+                        runAt: taskInstance.runAt?.toString(),
+                        startedAt: new Date(now).toISOString(),
+                        queueDelayMs,
+                        scheduleDelayMs,
+                      },
+                    }
+                  : {}),
               };
 
               const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -278,7 +402,11 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
+              // for deduplication checks by subsequent scheduled tasks
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                refresh: 'wait_for',
+              });
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -346,7 +474,8 @@ export class WorkflowsExecutionEnginePlugin
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
-      defaultTriggeredBy: string
+      defaultTriggeredBy: string,
+      request: KibanaRequest
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
       repository: WorkflowExecutionRepository;
@@ -354,7 +483,11 @@ export class WorkflowsExecutionEnginePlugin
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-      const createdBy = (context.createdBy as string | undefined) || 'system';
+      const executedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
@@ -366,7 +499,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy,
+        executedBy,
         triggeredBy,
       };
 
@@ -408,6 +541,8 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       // We can determine this from context and request before creating the execution
       const isRunningInTaskManager =
@@ -422,7 +557,8 @@ export class WorkflowsExecutionEnginePlugin
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
-        'manual'
+        'manual',
+        request
       );
 
       // Check concurrency limits and apply collision strategy if needed
@@ -463,10 +599,13 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
-        'alert'
+        'alert',
+        request
       );
 
       // Check concurrency limits and apply collision strategy if needed
@@ -500,11 +639,8 @@ export class WorkflowsExecutionEnginePlugin
       contextOverride,
       request
     ) => {
-      // Check if request is required before creating execution
-      // Workflow steps require user context to run with proper permissions
-      if (!request) {
-        throw new Error('Workflow steps cannot be executed without the user context');
-      }
+      await checkLicense(plugins.licensing);
+
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
@@ -512,6 +648,11 @@ export class WorkflowsExecutionEnginePlugin
       };
 
       const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
+      const executedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
       const workflowExecution = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
@@ -523,8 +664,8 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: context.createdBy as string | undefined, // TODO: set if available
-        triggeredBy, // <-- new field for scheduled workflows
+        executedBy,
+        triggeredBy,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -562,6 +703,8 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecutionId,
       spaceId
     ) => {
+      await checkLicense(plugins.licensing);
+
       await this.initialize(coreStart);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,

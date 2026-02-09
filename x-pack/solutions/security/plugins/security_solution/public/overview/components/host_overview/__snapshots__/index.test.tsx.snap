@@ -39,7 +39,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-OverviewWrapper"
     data-test-subj="host-overview"
   >
     <button
@@ -747,7 +747,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-m-flexStart-stretch-column-OverviewWrapper"
     data-test-subj="host-overview"
   >
     <div

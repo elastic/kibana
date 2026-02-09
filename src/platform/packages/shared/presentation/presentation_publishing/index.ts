@@ -49,6 +49,8 @@ export {
   type AppliesFilters,
   apiAppliesTimeslice,
   type AppliesTimeslice,
+  apiHasUseGlobalFiltersSetting,
+  type HasUseGlobalFiltersSetting,
 } from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
@@ -102,7 +104,6 @@ export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api'
 export {
   apiHasSerializableState,
   type HasSerializableState,
-  type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,
@@ -176,6 +177,7 @@ export {
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
+export { transformTitlesOut } from './interfaces/titles/bwc/titles_transforms';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
@@ -183,4 +185,5 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
-export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';
+export { SAVED_OBJECT_REF_NAME } from './constants';
+export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';

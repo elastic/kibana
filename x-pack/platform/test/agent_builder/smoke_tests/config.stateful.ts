@@ -22,10 +22,7 @@ export default async function (ftrContext: FtrConfigProviderContext) {
     },
     // @ts-expect-error
     kbnTestServer: {
-      serverArgs: [
-        '--uiSettings.overrides.agentBuilder:enabled=true',
-        `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
-      ],
+      serverArgs: [`--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`],
     },
   })(ftrContext);
 }

@@ -32,7 +32,7 @@ export const dataDriftRouteIndexOrSearchFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_drift',
+  id: 'dataDrift',
   path: createPath(ML_PAGES.DATA_DRIFT_INDEX_SELECT),
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',

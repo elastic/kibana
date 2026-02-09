@@ -32,14 +32,14 @@ describe('AppMenuOverflowButton', () => {
   it('should render the overflow button', () => {
     render(<AppMenuOverflowButton {...defaultProps} />);
 
-    expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
+    expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
   });
 
   it('should call onPopoverToggle when clicked', async () => {
     const user = userEvent.setup();
     render(<AppMenuOverflowButton {...defaultProps} />);
 
-    await user.click(screen.getByTestId('top-nav-menu-overflow-button'));
+    await user.click(screen.getByTestId('app-menu-overflow-button'));
 
     expect(defaultProps.onPopoverToggle).toHaveBeenCalledTimes(1);
   });

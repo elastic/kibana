@@ -30,6 +30,9 @@ const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
+  dynamicConfig: {
+    experimentalFeatures: true, // To allow to be changed for tests
+  },
   exposeToBrowser: {
     epm: true,
     agents: {
@@ -241,6 +244,19 @@ export const config: PluginConfigDescriptor = {
           uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
+      /**
+       * Startup optimization settings to reduce memory usage during Fleet initialization.
+       */
+      startupOptimization: schema.maybe(
+        schema.object({
+          /** Defer package install version bump operations to background tasks */
+          deferPackageBumpInstallVersion: schema.boolean({ defaultValue: false }),
+          /** Maximum packages to process concurrently during startup */
+          maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
+          /** Batch size for package upgrade operations */
+          packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
+        })
+      ),
       developer: schema.object({
         maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
@@ -398,6 +414,11 @@ export const config: PluginConfigDescriptor = {
           maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
           interval: schema.string({ defaultValue: '1h' }),
           maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
+        })
+      ),
+      versionSpecificPolicyAssignment: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),

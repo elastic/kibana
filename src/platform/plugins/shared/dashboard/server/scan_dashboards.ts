@@ -14,14 +14,21 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { transformDashboardOut } from './api/transforms';
 import type { DashboardState } from './api';
 
+/**
+ * The result of scanning dashboards.
+ * Contains a paginated list of dashboard summaries.
+ */
 export interface ScanDashboardsResult {
+  /** Array of dashboard summaries with their metadata. */
   dashboards: Array<
     Pick<DashboardState, 'description' | 'panels' | 'tags' | 'title'> & {
       id: string;
       references: Reference[];
     }
   >;
+  /** The current page number. */
   page: number;
+  /** The total number of dashboards. */
   total: number;
 }
 

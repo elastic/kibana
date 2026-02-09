@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsTagcloud_tagDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
 
       await lens.configureDimension({
         dimension: 'lnsTagcloud_valueDimensionPanel > lns-empty-dimension',

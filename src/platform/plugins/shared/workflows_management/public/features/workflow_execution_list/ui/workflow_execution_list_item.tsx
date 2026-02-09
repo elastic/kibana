@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,10 +23,11 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
@@ -43,11 +45,13 @@ interface WorkflowExecutionListItemProps {
   isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
+  executedBy?: string;
+  triggeredBy?: string;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
+  ({ status, isTestRun, startedAt, duration, executedBy, triggeredBy, selected, onClick }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -91,7 +95,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
                     <EuiText size="xs" tabIndex={0} color="subdued">
-                      <FormattedRelative value={startedAt} />
+                      <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
                 ) : (
@@ -105,34 +109,59 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {formattedDuration && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-                {isTestRun && (
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      type="flask"
-                      color={euiTheme.colors.backgroundFilledText}
-                      title={i18n.translate(
-                        'workflows.workflowExecutionListItem.testRunIconTitle',
-                        {
-                          defaultMessage: 'Test Run',
-                        }
-                      )}
-                    />
-                  </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.metadataContainer}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {isTestRun && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="flask"
+                    color={euiTheme.colors.backgroundFilledText}
+                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
+                      defaultMessage: 'Test Run',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={styles.executedByContainer}>
+                {executedBy && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiAvatar name={executedBy} size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {executedBy}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" color="subdued" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {formattedDuration}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
+                {formattedDuration && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="clock" color="subdued" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {formattedDuration}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -154,4 +183,15 @@ const componentStyles = {
         transform: 'none',
       },
     }),
+  metadataContainer: css({
+    minWidth: '200px',
+  }),
+  executedByContainer: css({
+    minWidth: '80px',
+    justifyContent: 'flex-end',
+  }),
+  durationContainer: css({
+    minWidth: '70px',
+    justifyContent: 'flex-end',
+  }),
 };

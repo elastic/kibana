@@ -48,15 +48,17 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize is set to 50 to cover all available fields with room for future additions
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 
   /**
    *  The fields to perform the parsed query against.
    * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
+  // maxSize is set to 2 as there are only 2 valid search fields
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
-    { defaultValue: ['metadata.name.text'] }
+    { defaultValue: ['metadata.name.text'], maxSize: 2 }
   ),
 
   /**
@@ -107,11 +109,13 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * rule section
    */
+  // maxSize is set to 100 as there are limited sections per benchmark
   section: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
   ),
+  // maxSize is set to 100 as there are limited rules per benchmark
   ruleNumber: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
   ),
 });
 

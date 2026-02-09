@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/cloud'
   - '@kbn/deeplinks-search'
+  - '@kbn/scout-search'
 tags:
   - plugin
   - prod
@@ -53,5 +54,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

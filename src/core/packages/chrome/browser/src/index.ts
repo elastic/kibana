@@ -31,7 +31,7 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
@@ -53,3 +53,5 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export type { SidebarApp, SidebarAppDefinition, SidebarSetup, SidebarStart } from './sidebar';

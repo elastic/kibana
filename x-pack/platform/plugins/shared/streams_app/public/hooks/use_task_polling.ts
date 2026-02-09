@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { TaskStatus } from '@kbn/streams-schema';
 import { useEffect } from 'react';
 
 interface TaskWithStatus {
-  status: string;
+  status: TaskStatus;
 }
 
 export function useTaskPolling(
@@ -17,27 +18,23 @@ export function useTaskPolling(
   refresh: () => void
 ) {
   useEffect(() => {
-    if (task?.status !== 'in_progress' && task?.status !== 'being_canceled') {
+    if (task?.status !== TaskStatus.InProgress && task?.status !== TaskStatus.BeingCanceled) {
       return;
     }
 
-    const startTime = Date.now();
-    const maxDuration = 5 * 60 * 1000;
-    const pollInterval = 2000;
-
     const intervalId = setInterval(async () => {
-      if (Date.now() - startTime > maxDuration) {
-        clearInterval(intervalId);
-        return;
-      }
-
       const polledTask = await poll();
 
-      if (polledTask.status !== 'in_progress' && polledTask.status !== 'being_canceled') {
+      // We expect the polling endpoint to report if a task becomes stale so the UI can poll until that happens
+      // leaving the server to control the time thresholds for staleness
+      if (
+        polledTask.status !== TaskStatus.InProgress &&
+        polledTask.status !== TaskStatus.BeingCanceled
+      ) {
         clearInterval(intervalId);
         refresh();
       }
-    }, pollInterval);
+    }, 2000);
 
     return () => {
       clearInterval(intervalId);

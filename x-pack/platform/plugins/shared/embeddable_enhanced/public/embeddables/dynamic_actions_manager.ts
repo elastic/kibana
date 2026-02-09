@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EmbeddableApiContext,
-  SerializedPanelState,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, StateComparators } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
@@ -19,30 +14,22 @@ import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_ac
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 import type { DynamicActionsSerializedState, EmbeddableDynamicActionsManager } from './types';
 import type { StartDependencies } from '../plugin';
+import { extractEnhancements, serializeEnhancements } from './bwc';
 
 export function initializeDynamicActionsManager(
   uuid: string,
   getTitle: () => string | undefined,
-  state: SerializedPanelState<DynamicActionsSerializedState>,
+  state: DynamicActionsSerializedState,
   services: StartDependencies
 ): EmbeddableDynamicActionsManager {
-  const enhancement = services.embeddable.getEnhancement('dynamicActions');
-  const initialEnhancementsState =
-    enhancement && state.rawState.enhancements?.dynamicActions
-      ? {
-          dynamicActions: enhancement.inject(
-            state.rawState.enhancements.dynamicActions,
-            state.references ?? []
-          ),
-        }
-      : state.rawState.enhancements;
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-    getDynamicActionsState(initialEnhancementsState)
+    getDynamicActionsState(extractEnhancements(state))
   );
   const api: DynamicActionStorageApi = {
     dynamicActionsState$,
     setDynamicActions: (enhancements) => {
       dynamicActionsState$.next(getDynamicActionsState(enhancements));
+      storage.reload$.next();
     },
   };
   const storage = new DynamicActionStorage(uuid, getTitle, api);
@@ -56,39 +43,20 @@ export function initializeDynamicActionsManager(
   });
 
   function getLatestState() {
-    return { enhancements: dynamicActionsState$.getValue() };
+    return serializeEnhancements(dynamicActionsState$.getValue());
   }
 
   return {
     api: { ...api, enhancements: { dynamicActions } },
     comparators: {
-      enhancements: (a, b) => {
-        return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
-      },
+      enhancements: 'skip',
+      drilldowns: (a, b) => deepEqual(a, b),
     } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
-    serializeState: () => {
-      const latestState = getLatestState();
-      if (!enhancement || !latestState.enhancements?.dynamicActions) {
-        return {
-          rawState: latestState,
-          references: [],
-        };
-      }
-
-      const extractResults = enhancement.extract(latestState.enhancements.dynamicActions);
-      return {
-        rawState: {
-          enhancements: {
-            dynamicActions: extractResults.state as DynamicActionsState,
-          },
-        },
-        references: extractResults.references,
-      };
-    },
+    serializeState: () => getLatestState(),
     reinitializeState: (lastState: DynamicActionsSerializedState) => {
-      api.setDynamicActions(lastState.enhancements);
+      api.setDynamicActions(getDynamicActionsState(extractEnhancements(lastState)));
     },
     startDynamicActions: () => {
       dynamicActions.start().catch((error) => {

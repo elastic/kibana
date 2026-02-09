@@ -52,6 +52,13 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java',
+            sloStatus: 'violated',
+            sloCount: 1,
+          },
+        ],
       })
     ).toEqual([
       {
@@ -73,11 +80,15 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 1,
+        sloStatus: 'violated',
+        sloCount: 1,
       },
     ]);
   });
 
-  it('shows services that only have trace data', () => {
+  it('excludes alerts from services not found in APM data', () => {
+    // Services with only alert data (no APM service stats) should NOT appear
+    // This prevents phantom services (e.g., wildcard "*" from SLO alerts) from showing
     expect(
       mergeServiceStats({
         serviceStats: [
@@ -89,13 +100,25 @@ describe('mergeServiceStats', () => {
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
           },
         ],
         alertCounts: [
           {
             alertsCount: 2,
-            serviceName: 'opbeans-java',
+            serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
+          },
+        ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'degrading',
+            sloCount: 1,
+          },
+          {
+            serviceName: 'unknown-service',
+            sloStatus: 'violated',
+            sloCount: 5,
           },
         ],
       })
@@ -108,10 +131,8 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
-      },
-      {
-        alertsCount: 2,
-        serviceName: 'opbeans-java',
+        sloStatus: 'degrading',
+        sloCount: 1,
       },
     ]);
   });
@@ -137,6 +158,13 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java-2',
           },
         ],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'violated',
+            sloCount: 2,
+          },
+        ],
       })
     ).toEqual([
       {
@@ -148,6 +176,8 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
+        sloStatus: 'violated',
+        sloCount: 2,
       },
     ]);
   });

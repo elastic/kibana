@@ -21,14 +21,14 @@ import { ConnectionDetails } from './connection_details';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { Tabs } from './tabs';
 
-export const ConnectionDetailsFlyoutContent: React.FC = () => {
+export const ConnectionDetailsFlyoutContent: React.FC<{ headerId?: string }> = ({ headerId }) => {
   const ctx = useConnectionDetailsOpts();
   const service = useConnectionDetailsService();
 
   const header = (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m" data-test-subj="connectionDetailsModalTitle">
-        <h2>
+        <h2 id={headerId}>
           {i18n.translate('cloud.connectionDetails.flyout.title', {
             defaultMessage: 'Connection details',
           })}

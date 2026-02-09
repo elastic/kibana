@@ -17,6 +17,8 @@ import type {
   IntegrationResponse,
 } from '../../common';
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
@@ -31,6 +33,7 @@ export const registerIntegrationRoutes = (
   getAllIntegrationsRoute(router, logger);
   getIntegrationByIdRoute(router, logger);
   createIntegrationRoute(router, logger);
+  approveIntegrationRoute(router, logger);
 };
 
 const getAllIntegrationsRoute = (
@@ -148,45 +151,110 @@ const createIntegrationRoute = (
         },
       },
       async (context, request, response) => {
+        const { automaticImportService, getCurrentUser, esClient } =
+          await context.automaticImportv2;
+        const {
+          integrationId,
+          title,
+          logo,
+          description,
+          connectorId,
+          dataStreams,
+          langSmithOptions,
+        } = request.body;
         try {
-          const automaticImportv2 = await context.automaticImportv2;
-          const automaticImportService = automaticImportv2.automaticImportService;
-          const integrationRequestBody = request.body;
-          const authenticatedUser = await automaticImportv2.getCurrentUser();
-          const integrationId = integrationRequestBody.integrationId;
+          const authenticatedUser = await getCurrentUser();
 
           const integrationParams: IntegrationParams = {
             integrationId,
-            title: integrationRequestBody.title,
-            logo: integrationRequestBody.logo,
-            description: integrationRequestBody.description,
+            title,
+            logo,
+            description,
           };
 
-          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+          await automaticImportService.createUpdateIntegration({
+            authenticatedUser,
+            integrationParams,
+          });
 
-          if (integrationRequestBody.dataStreams) {
-            const dataStreamsParams: DataStreamParams[] = integrationRequestBody.dataStreams.map(
-              (dataStream) => ({
-                ...dataStream,
-                integrationId,
-                metadata: { createdAt: new Date().toISOString() },
-              })
-            );
+          if (dataStreams) {
+            const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
+              ...dataStream,
+              integrationId,
+              metadata: { createdAt: new Date().toISOString() },
+            }));
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
-                automaticImportService.createDataStream({
-                  authenticatedUser,
-                  dataStreamParams,
-                })
+                automaticImportService.createDataStream(
+                  {
+                    authenticatedUser,
+                    dataStreamParams,
+                    esClient,
+                    connectorId,
+                    langSmithOptions,
+                  },
+                  request
+                )
               )
             );
           }
+
           const body: CreateAutoImportIntegrationResponse = {
             integration_id: integrationId,
           };
           return response.ok({ body });
         } catch (err) {
-          logger.error(`createIntegrationRoute: Caught error:`, err);
+          logger.error(`createIntegrationRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const approveIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/approve',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestParams),
+            body: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const authenticatedUser = await getCurrentUser();
+
+          const { integration_id: integrationId } = request.params;
+          const { version } = request.body;
+
+          await automaticImportService.approveIntegration({
+            integrationId,
+            authenticatedUser,
+            version,
+          });
+
+          return response.ok({ body: { message: 'Integration approved successfully' } });
+        } catch (err) {
+          logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,

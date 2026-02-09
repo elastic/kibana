@@ -13,5 +13,4 @@ export { stringifyStackFrames } from './stringify_stack_frames';
 export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
 export { generateExecutionTaskScope } from './generate_execution_task_scope';
 export { TimeoutAbortedError, abortableTimeout } from './abortable_timeout/abortable_timeout';
-export { ExecutionError } from './execution_error/execution_error';
 export { evaluateKql } from './eval_kql/eval_kql';

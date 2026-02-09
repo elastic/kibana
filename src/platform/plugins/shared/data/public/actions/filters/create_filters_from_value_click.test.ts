@@ -443,5 +443,54 @@ AND \`columnB\` == "2048"`);
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\` != "2048"`);
     });
+
+    describe('null value handling', () => {
+      beforeEach(() => {
+        dataPoints = [
+          {
+            table: {
+              columns: [
+                {
+                  name: 'columnA',
+                  id: 'columnA',
+                  meta: {
+                    type: 'string',
+                  },
+                },
+              ],
+              rows: [
+                {
+                  columnA: null,
+                },
+              ],
+            },
+            column: 0,
+            row: 0,
+            value: 'test',
+          },
+        ];
+      });
+
+      test('should filter for null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is null`);
+      });
+
+      test('should filter out null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+          negate: true,
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is not null`);
+      });
+    });
   });
 });

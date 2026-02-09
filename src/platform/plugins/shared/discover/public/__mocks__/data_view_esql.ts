@@ -8,30 +8,29 @@
  */
 
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { fieldList, type FieldSpec } from '@kbn/data-views-plugin/common';
 
-const fields = [
+const fields: FieldSpec[] = [
   {
     name: '@timestamp',
-    displayName: 'timestamp',
+    customLabel: 'timestamp',
     type: 'date',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
-    sortable: true,
   },
   {
     name: 'message',
-    displayName: 'message',
     type: 'string',
     scripted: false,
-    filterable: false,
+    searchable: false,
+    aggregatable: false,
   },
-] as DataView['fields'];
+];
 
 export const dataViewEsql = buildDataViewMock({
   name: 'index-pattern-esql',
   title: 'index-pattern-esql',
-  fields,
+  fields: fieldList(fields),
   isPersisted: false,
 });

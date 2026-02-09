@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
@@ -30,6 +31,8 @@ export async function runWorkflow({
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
 }): Promise<void> {
+  // Span for setup/initialization phase
+  const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -41,21 +44,35 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
   } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  setupSpan?.end();
 
+  // Span for runtime initialization
+  const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
   await workflowRuntime.start();
+  startSpan?.end();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient,
-    fakeRequest,
-    coreStart: dependencies.coreStart,
-    taskAbortController,
-    workflowTaskManager,
-  });
+  // Span for the main execution loop
+  const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+    loopSpan?.setOutcome('success');
+  } catch (error) {
+    loopSpan?.setOutcome('failure');
+    throw error;
+  } finally {
+    loopSpan?.end();
+  }
 }

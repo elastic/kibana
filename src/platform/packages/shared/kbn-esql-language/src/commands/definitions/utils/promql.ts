@@ -1,0 +1,182 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import type { ISuggestionItem } from '../../registry/types';
+import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
+import { EDITOR_MARKER } from '../constants';
+import {
+  PromQLFunctionDefinitionTypes,
+  type PromQLFunctionDefinition,
+  type PromQLFunctionParamType,
+} from '../types';
+import { promqlFunctionDefinitions } from '../generated/promql_functions';
+import { buildFunctionDocumentation } from './documentation';
+import { withAutoSuggest } from './autocomplete/helpers';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
+import { SuggestionCategory } from '../../../shared/sorting';
+import { techPreviewLabel } from './shared';
+
+const INDEX_PARAM_REGEX = /\bindex\s*=\s*(\S+)/i;
+
+/* Builds readable signatures for PROMQL functions. */
+const getPromqlFunctionDeclaration = (fn: PromQLFunctionDefinition) => {
+  const { name, signatures } = fn;
+
+  return signatures.map(({ params, returnType }) => ({
+    declaration: `${name}(${params.map((param) => param.name).join(', ')})${
+      returnType ? `: ${returnType}` : ''
+    }`,
+  }));
+};
+
+/* Converts a PROMQL function definition into an autocomplete suggestion. */
+const getPromqlFunctionSuggestion = (fn: PromQLFunctionDefinition): ISuggestionItem => {
+  const { description, examples, name, preview, signatures } = fn;
+  const detail = description;
+  const docDetail = preview ? `**[${techPreviewLabel}]** ${detail}` : detail;
+
+  const hasNoArguments = signatures.every((signature) => signature.params.length === 0);
+  const text = hasNoArguments ? `${name}() ` : `${name}($0) `;
+
+  return {
+    label: name,
+    text,
+    asSnippet: true,
+    kind: 'Function',
+    detail,
+    category: SuggestionCategory.FUNCTION_AGG,
+    documentation: {
+      value: buildFunctionDocumentation(docDetail, getPromqlFunctionDeclaration(fn), examples),
+    },
+    command: {
+      id: 'editor.action.triggerParameterHints',
+      title: '',
+    },
+  };
+};
+
+/* Returns all PROMQL function suggestions suitable for autocomplete. */
+export const getPromqlFunctionSuggestions = (): ISuggestionItem[] => {
+  return promqlFunctionDefinitions
+    .filter((fn) => !fn.ignoreAsSuggestion)
+    .map((fn) => withAutoSuggest(getPromqlFunctionSuggestion(fn)));
+};
+
+export const getPromqlFunctionSuggestionsForReturnTypes = (
+  returnTypes: PromQLFunctionParamType[]
+): ISuggestionItem[] => {
+  if (!returnTypes.length) {
+    return getPromqlFunctionSuggestions();
+  }
+
+  const allowed = new Set(returnTypes);
+
+  return getPromqlFunctionSuggestions().filter((suggestion) => {
+    const definition = getPromqlFunctionDefinition(suggestion.label);
+    if (!definition?.signatures.length) {
+      return false;
+    }
+
+    return definition.signatures.some((signature) => {
+      const normalized = normalizePromqlReturnType(signature.returnType);
+      return normalized ? allowed.has(normalized) : false;
+    });
+  });
+};
+
+/* Returns the PromQL function definition matching the provided name. */
+export const getPromqlFunctionDefinition = (
+  name: string | undefined
+): PromQLFunctionDefinition | undefined => {
+  if (!name) {
+    return undefined;
+  }
+
+  const normalized = name.toLowerCase();
+  return promqlFunctionDefinitions.find((fn) => fn.name.toLowerCase() === normalized);
+};
+
+/* Extracts param types for a specific PromQL function parameter index. */
+export function getPromqlParamTypesForFunction(
+  name: string | undefined,
+  paramIndex: number
+): PromQLFunctionParamType[] {
+  const definition = getPromqlFunctionDefinition(name);
+  if (!definition?.signatures.length) {
+    return [];
+  }
+
+  return definition.signatures
+    .map((signature) => signature.params[paramIndex]?.type)
+    .filter((paramType) => !!paramType);
+}
+
+/* Reports whether a PromQL function is an across-series aggregation. */
+export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
+  const normalized = name.toLowerCase();
+
+  return promqlFunctionDefinitions.some(
+    ({ name: fnName, type }) =>
+      fnName.toLowerCase() === normalized &&
+      type === PromQLFunctionDefinitionTypes.PROMQL_ACROSS_SERIES
+  );
+};
+
+// TODO: Remove when ES solve the discrepancy with signatures
+const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
+  'instant vector': 'instant_vector',
+  'range vector': 'range_vector',
+  scalar: 'scalar',
+  string: 'string',
+};
+
+export function normalizePromqlReturnType(
+  returnType: string | undefined
+): PromQLFunctionParamType | undefined {
+  return returnType ? PROMQL_RETURN_TYPE_MAP[returnType] : undefined;
+}
+
+export function getIndexFromPromQLParams({
+  params,
+  query,
+}: ESQLAstPromqlCommand): string | undefined {
+  if (params?.entries) {
+    const indexEntry = params.entries.find(
+      (entry): entry is ESQLMapEntry =>
+        isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
+    );
+
+    const { value } = indexEntry ?? {};
+
+    if (isList(value) && value.values.length > 0) {
+      const listText = value.text?.trim();
+      if (listText) {
+        return listText;
+      }
+
+      const names = value.values
+        .map((item) => (isIdentifier(item) || isSource(item) ? item.name : ''))
+        .filter(Boolean);
+
+      if (names.length > 0) {
+        return names.join(',');
+      }
+    }
+
+    if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
+      return value.name;
+    }
+  }
+
+  // Fallback: when "index=value" is last token, parser puts it in query.text
+  // Needed by autocomplete and external consumers (e.g. getIndexPatternFromESQLQuery).
+  const indexMatch = query?.text?.match(INDEX_PARAM_REGEX);
+
+  // same stuffs of getSourcesFromCommands for the other sources
+  return indexMatch?.[1]?.includes(EDITOR_MARKER) ? undefined : indexMatch?.[1];
+}

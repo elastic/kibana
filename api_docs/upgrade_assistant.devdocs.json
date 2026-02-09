@@ -24,6 +24,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+            "lineNumber": 44,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,6 +63,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/upgrade_assistant/public/application/components/es_deprecations/deprecation_types/indices/index_settings.ts",
+            "lineNumber": 44,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

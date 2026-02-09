@@ -11,6 +11,7 @@ export type {
   AppDeepLinkId,
   AppId,
   ChromeBadge,
+  ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
@@ -51,4 +52,8 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  SidebarApp,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
 } from './src';

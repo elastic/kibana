@@ -114,6 +114,8 @@ type IngestBaseStreamDefaults = {
 } & ModelOfSchema<IIngestBaseStreamSchema>;
 
 /* eslint-disable @typescript-eslint/no-namespace */
+export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
+
 export namespace IngestBaseStream {
   export interface Definition extends BaseStream.Definition {
     ingest: IngestBase;
@@ -127,6 +129,7 @@ export namespace IngestBaseStream {
     TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
+    index_mode?: IngestStreamIndexMode;
   }
 
   export type UpsertRequest<
@@ -141,6 +144,13 @@ export namespace IngestBaseStream {
   }
 }
 
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
+  'standard',
+  'time_series',
+  'logsdb',
+  'lookup',
+]);
+
 const IngestBaseStreamSchema = {
   Source: z.object({}),
   Definition: z.object({
@@ -148,6 +158,7 @@ const IngestBaseStreamSchema = {
   }),
   GetResponse: z.object({
     privileges: ingestStreamPrivilegesSchema,
+    index_mode: z.optional(ingestStreamIndexModeSchema),
   }),
   UpsertRequest: z.object({}),
 };

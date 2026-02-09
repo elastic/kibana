@@ -71,15 +71,9 @@ export class NavigationPublicPlugin
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
-    /*
-     *
-     *  This helps clients of navigation to create
-     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
-     *
-     *  Useful in creating multiple stateful SearchBar in the same app without affecting
-     *  global filters
-     *
-     * */
+    /**
+     * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+     */
     const createCustomTopNav = (
       /*
        * Custom instance of unified search if it needs to be overridden
@@ -124,8 +118,17 @@ export class NavigationPublicPlugin
 
     return {
       ui: {
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         TopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {

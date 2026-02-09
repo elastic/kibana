@@ -13,7 +13,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -190,7 +190,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -409,7 +409,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"

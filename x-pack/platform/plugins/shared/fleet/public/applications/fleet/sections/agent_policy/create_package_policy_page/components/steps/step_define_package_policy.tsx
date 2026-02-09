@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,10 +32,10 @@ import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../
 import { Loading } from '../../../../../components';
 import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 
-import { isAdvancedVar } from '../../services';
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { PackagePolicyInputVarField } from './components';
+import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
 
 // on smaller screens, fields should be displayed in one column
@@ -56,6 +56,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
+  isAgentlessSelected?: boolean;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -66,25 +67,48 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     submitAttempted,
     noAdvancedToggle = false,
     isEditPage = false,
+    isAgentlessSelected = false,
   }) => {
     const { docLinks } = useStartServices();
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Package-level vars
-    const requiredVars: RegistryVarsEntry[] = [];
-    const advancedVars: RegistryVarsEntry[] = [];
-
-    if (packageInfo.vars) {
-      packageInfo.vars.forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
-        } else {
-          requiredVars.push(varDef);
-        }
+    // Var group selections - derives from policy, initializes defaults, handles changes
+    const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
+      useVarGroupSelections({
+        varGroups: packageInfo.var_groups,
+        savedSelections: packagePolicy.var_group_selections,
+        isAgentlessEnabled: isAgentlessSelected,
+        onSelectionsChange: updatePackagePolicy,
       });
-    }
+
+    // Package-level vars, filtered by var_group visibility
+    const { requiredVars, advancedVars } = useMemo(() => {
+      const _requiredVars: RegistryVarsEntry[] = [];
+      const _advancedVars: RegistryVarsEntry[] = [];
+
+      if (packageInfo.vars) {
+        packageInfo.vars.forEach((varDef) => {
+          // Check if var should be shown based on var_group selections
+          if (
+            packageInfo.var_groups &&
+            packageInfo.var_groups.length > 0 &&
+            !shouldShowVar(varDef.name, packageInfo.var_groups, varGroupSelections)
+          ) {
+            return; // Skip this var, it's hidden by var_group selection
+          }
+
+          if (isAdvancedVar(varDef, packageInfo.var_groups, varGroupSelections)) {
+            _advancedVars.push(varDef);
+          } else {
+            _requiredVars.push(varDef);
+          }
+        });
+      }
+
+      return { requiredVars: _requiredVars, advancedVars: _advancedVars };
+    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections]);
 
     // Outputs
     const {
@@ -235,11 +259,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               </EuiFormRow>
             </EuiFlexItem>
 
+            {/* Var Group Selectors */}
+            {packageInfo.var_groups?.map((varGroup) => (
+              <EuiFlexItem key={varGroup.name}>
+                <VarGroupSelector
+                  varGroup={varGroup}
+                  selectedOptionName={varGroupSelections[varGroup.name]}
+                  onSelectionChange={handleVarGroupSelectionChange}
+                  isAgentlessEnabled={isAgentlessSelected}
+                />
+              </EuiFlexItem>
+            ))}
+
             {/* Required vars */}
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
               if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
               const value = packagePolicy.vars[varName].value;
+              const requiredByVarGroup = isVarRequiredByVarGroup(
+                varName,
+                packageInfo.var_groups,
+                varGroupSelections
+              );
 
               return (
                 <EuiFlexItem key={varName}>
@@ -260,6 +301,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    isRequiredByVarGroup={requiredByVarGroup}
                   />
                 </EuiFlexItem>
               );
@@ -452,6 +494,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const { name: varName, type: varType } = varDef;
                     if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
                     const value = packagePolicy.vars![varName].value;
+                    const requiredByVarGroup = isVarRequiredByVarGroup(
+                      varName,
+                      packageInfo.var_groups,
+                      varGroupSelections
+                    );
                     return (
                       <EuiFlexItem key={varName}>
                         <PackagePolicyInputVarField
@@ -471,6 +518,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
                           isEditPage={isEditPage}
+                          isRequiredByVarGroup={requiredByVarGroup}
                         />
                       </EuiFlexItem>
                     );

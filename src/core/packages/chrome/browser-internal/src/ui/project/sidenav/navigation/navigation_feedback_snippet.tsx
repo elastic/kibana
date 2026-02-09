@@ -13,10 +13,10 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 export interface NavigationFeedbackSnippetProps {
   solutionId: SolutionId;
   feedbackUrlParams: URLSearchParams | undefined;
+  isEnabled: boolean;
 }
 
 const feedbackSnippetId = 'sideNavigationFeedback';
@@ -58,22 +58,25 @@ const getSurveyFeedbackURL = (
 export const NavigationFeedbackSnippet = ({
   solutionId,
   feedbackUrlParams,
+  isEnabled,
 }: NavigationFeedbackSnippetProps) => {
   const feedbackSurveyUrl = getSurveyFeedbackURL(solutionId, feedbackUrlParams);
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
-      css={css`
-        border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-      `}
-    >
-      <FeedbackSnippet
-        feedbackButtonMessage={feedbackButtonMessage}
-        feedbackSnippetId={feedbackSnippetId}
-        promptViewMessage={promptViewMessage}
-        surveyUrl={feedbackSurveyUrl}
-      />
-    </div>
+    isEnabled && (
+      <div
+        css={css`
+          border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        `}
+      >
+        <FeedbackSnippet
+          feedbackButtonMessage={feedbackButtonMessage}
+          feedbackSnippetId={feedbackSnippetId}
+          promptViewMessage={promptViewMessage}
+          surveyUrl={feedbackSurveyUrl}
+        />
+      </div>
+    )
   );
 };

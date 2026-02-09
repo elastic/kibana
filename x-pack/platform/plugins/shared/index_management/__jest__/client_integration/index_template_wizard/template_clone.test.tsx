@@ -65,9 +65,12 @@ describe('<TemplateClone />', () => {
       await completeStep.four();
       // Aliases
       await completeStep.five();
-    });
+    }, 20000);
 
     it('should send the correct payload', async () => {
+      await waitFor(() => {
+        expect(screen.getByTestId('nextButton')).toBeEnabled();
+      });
       fireEvent.click(screen.getByTestId('nextButton'));
 
       const { template, indexMode, priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
@@ -88,6 +91,6 @@ describe('<TemplateClone />', () => {
           })
         );
       });
-    });
+    }, 20000);
   });
 });

@@ -9,6 +9,7 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { AutocompleteStart, KqlPluginStart } from '@kbn/kql/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -22,8 +23,7 @@ import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
-import type { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
+import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import type { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 
@@ -39,9 +39,8 @@ export interface UnifiedSearchSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface UnifiedSearchPluginSetup {
-  autocomplete: AutocompleteSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UnifiedSearchPluginSetup {}
 
 export interface UnifiedSearchStartDependencies {
   dataViews: DataViewsPublicPluginStart;
@@ -50,6 +49,7 @@ export interface UnifiedSearchStartDependencies {
   uiActions: UiActionsStart;
   screenshotMode?: ScreenshotModePluginStart;
   cps: CPSPluginStart;
+  kql: KqlPluginStart;
 }
 
 type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
@@ -65,18 +65,12 @@ export interface UnifiedSearchPublicPluginStartUi {
   SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
   AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
-  QueryStringInput: React.ComponentType<Omit<QueryStringInputProps, 'deps'>>;
 }
 
 /**
  * Unified search plugin public Start contract
  */
 export interface UnifiedSearchPublicPluginStart {
-  /**
-   * autocomplete service
-   * {@link AutocompleteStart}
-   */
-  autocomplete: AutocompleteStart;
   /**
    * prewired UI components
    * {@link UnifiedSearchPublicPluginStartUi}
@@ -95,7 +89,7 @@ export type FilterPanelOption =
   | 'deleteFilter';
 
 export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
-  unifiedSearch: {
+  kql: {
     autocomplete: AutocompleteStart;
   };
   appName: string;

@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
   RULE_TYPE_MODAL_TEST_SUBJECTS,
@@ -23,11 +23,13 @@ export class RulesPage {
   /**
    * Navigates to the rules list page (Observability)
    */
-  async goto() {
-    await this.page.gotoApp('observability/alerts/rules');
-    await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
-      timeout: BIGGER_TIMEOUT,
-    });
+  async goto(ruleId: string = '') {
+    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    if (!ruleId) {
+      await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
+        timeout: BIGGER_TIMEOUT,
+      });
+    }
   }
 
   /**
@@ -437,10 +439,23 @@ export class RulesPage {
   }
 
   /**
+   * Waits for the form to be ready after data view changes
+   */
+  async waitForFormReady() {
+    // Ensure save button is enabled (form is valid)
+    await expect(this.ruleSaveButton).toBeEnabled({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
+    // Scroll the save button into view to ensure it's accessible
+    await this.ruleSaveButton.scrollIntoViewIfNeeded();
+
+    // Click the save button
     await this.ruleSaveButton.click();
+
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();
     // Wait for navigation to rule details page
@@ -449,5 +464,159 @@ export class RulesPage {
 
   public get observabilityCategory() {
     return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
+  }
+
+  // KQL Filter / Metric Row methods
+
+  /**
+   * Gets the aggregation expression for metric A
+   */
+  public get aggregationExpressionA() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_NAME_A);
+  }
+
+  /**
+   * Gets the aggregation type select dropdown
+   */
+  public get aggregationTypeSelect() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_TYPE_SELECT);
+  }
+
+  /**
+   * Gets the KQL search field
+   */
+  public get kqlSearchField() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.KQL_SEARCH_FIELD);
+  }
+
+  /**
+   * Gets the KQL suggestions panel
+   */
+  public get kqlSuggestionsPanel() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.KQL_SUGGESTIONS_PANEL);
+  }
+
+  /**
+   * Opens the metric row popover by clicking on the aggregation expression
+   */
+  async openMetricRowPopover() {
+    await expect(this.aggregationExpressionA).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionA.click();
+    await expect(this.aggregationTypeSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Selects COUNT aggregation type to show the KQL filter
+   */
+  async selectCountAggregation() {
+    await this.aggregationTypeSelect.selectOption('count');
+    await expect(this.kqlSearchField).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Types in the KQL search field
+   */
+  async typeInKqlFilter(text: string) {
+    await this.kqlSearchField.click();
+    await this.kqlSearchField.fill(text);
+  }
+
+  // Rule Status Dropdown methods
+
+  /**
+   * Gets the rule status dropdown button for a specific rule row
+   */
+  public getRuleStatusDropdown(ruleRow: Locator) {
+    return ruleRow.locator(`[data-test-subj="${RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN}"]`);
+  }
+
+  /**
+   * Gets the disable option in the status dropdown menu
+   */
+  public get disableDropdownItem() {
+    return this.page.testSubj.locator(RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN_DISABLED_ITEM);
+  }
+
+  /**
+   * Gets the enable option in the status dropdown menu
+   */
+  public get enableDropdownItem() {
+    return this.page.testSubj.locator(RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN_ENABLED_ITEM);
+  }
+
+  /**
+   * Clicks the rule status dropdown menu for a rule by name
+   */
+  async clickRuleStatusDropDownMenu(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await statusDropdown.click();
+  }
+
+  /**
+   * Clicks the disable option from the dropdown menu
+   */
+  async clickDisableFromDropDownMenu() {
+    await expect(this.disableDropdownItem).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.disableDropdownItem.click();
+  }
+
+  /**
+   * Clicks the enable option from the dropdown menu
+   */
+  async clickEnableFromDropDownMenu() {
+    await expect(this.enableDropdownItem).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.enableDropdownItem.click();
+  }
+
+  /**
+   * Gets a rule row by name
+   */
+  public getRuleRowByName(ruleName: string) {
+    return this.getEditableRules().filter({ hasText: ruleName });
+  }
+
+  /**
+   * Gets the status button for a specific rule by name
+   */
+  public getRuleStatusButton(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    return ruleRow.locator(`[data-test-subj="${RULE_LIST_TEST_SUBJECTS.RULES_TABLE_CELL_STATUS}"]`);
+  }
+
+  /**
+   * Disables a rule by its name
+   */
+  async disableRule(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    await expect(ruleRow).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await statusDropdown.click();
+    await this.clickDisableFromDropDownMenu();
+
+    await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.confirmModalButton.click();
+
+    await expect(statusDropdown).toHaveAttribute('title', 'Disabled', { timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Verifies that a rule's status is "Disabled"
+   */
+  async expectRuleToBeDisabled(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toHaveAttribute('title', 'Disabled', { timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Verifies that a rule's status is "Enabled"
+   */
+  async expectRuleToBeEnabled(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toHaveAttribute('title', 'Enabled', { timeout: BIGGER_TIMEOUT });
   }
 }

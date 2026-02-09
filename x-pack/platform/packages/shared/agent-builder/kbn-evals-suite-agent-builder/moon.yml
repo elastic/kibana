@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/scout'
+  - '@kbn/inference-common'
 tags:
   - functional-tests
   - package

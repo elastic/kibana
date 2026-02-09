@@ -39,6 +39,20 @@ export function getSourceForNode(node: Node): string {
   return path;
 }
 
+export function getSourceLocationForNode(node: Node): {
+  path: string;
+  lineNumber: number;
+  columnNumber: number;
+} {
+  const path = getRelativePath(node.getSourceFile().getFilePath());
+  const { line, column } = node.getSourceFile().getLineAndColumnAtPos(node.getNonWhitespaceStart());
+  return {
+    path,
+    lineNumber: line,
+    columnNumber: column,
+  };
+}
+
 export function buildApiId(id: string, parentId?: string): string {
   const clean = id.replace(/[^A-Za-z_.$0-9]+/g, '');
   return parentId ? `${parentId}.${clean}` : clean;

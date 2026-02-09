@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -20,6 +21,7 @@ import {
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import type { UiamServicePublic } from '../../uiam';
+import { isUiamCredential } from '../../uiam/utils';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -412,6 +414,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       refresh_token: string;
       realm: string;
       authentication: AuthenticationInfo;
+      in_response_to?: string;
     };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -428,10 +431,24 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
+      let inResponseToRequestId;
+      if (err instanceof errors.ResponseError) {
+        const body = (err as errors.ResponseError).meta.body as
+          | { error: Record<string, string> }
+          | undefined;
+        inResponseToRequestId =
+          body?.error?.['security.saml.unsolicited_in_response_to'] ?? undefined;
+      }
+
       this.logger.error(
-        `Failed to log in with SAML response, ${
-          !isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''
-        } error: ${getDetailedErrorMessage(err)}`
+        [
+          'Failed to log in with SAML response',
+          inResponseToRequestId
+            ? `SP-initiated, unsolicited InResponseTo: ${inResponseToRequestId}`
+            : 'IDP-initiated',
+          state ? `current requestIds: [${stateRequestIds}]` : 'no state',
+          getDetailedErrorMessage(err),
+        ].join(', ')
       );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
@@ -469,7 +486,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let remainingRequestIdMap = stateRequestIdMap;
 
     if (!isIdPInitiatedLogin) {
-      const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+      const inResponseToRequestId = result.in_response_to;
       this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
 
       if (stateRequestIds.length && inResponseToRequestId) {
@@ -495,7 +512,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
         userProfileGrant: this.isUiamToken(result.access_token)
-          ? this.options.uiam.getUserProfileGrant(result.access_token)
+          ? {
+              type: 'uiamAccessToken',
+              accessToken: result.access_token,
+              clientAuthentication: this.options.uiam.getClientAuthentication(),
+            }
           : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
@@ -507,16 +528,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     );
   }
 
-  private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
-    const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
-    const samlResponseString = samlResponseBuffer.toString('utf-8');
-    const inResponseToRequestIdMatch = samlResponseString.match(/InResponseTo="([a-z0-9_]*)"/);
-
-    return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
-  }
-
   private updateRemainingRequestIds(
-    requestIdToRemove: string | null,
+    requestIdToRemove: string | undefined,
     remainingRequestIds: Record<RequestId, { redirectURL: string }>
   ): [boolean, Record<RequestId, { redirectURL: string }>] {
     if (requestIdToRemove) {
@@ -700,7 +713,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
         ...(this.isUiamToken(accessToken) && {
-          userProfileGrant: this.options.uiam.getUserProfileGrant(accessToken),
+          userProfileGrant: {
+            type: 'uiamAccessToken',
+            accessToken,
+            clientAuthentication: this.options.uiam.getClientAuthentication(),
+          },
         }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
@@ -748,6 +765,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
           realm,
         },
+        stateCookieOptions: { sameSite: 'None', isSecure: true },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
@@ -889,7 +907,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param token ES native or UIAM access or refresh token.
    */
   private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
-    const isUiamToken = !!token?.startsWith('essu_');
+    const isUiamToken = !!token && isUiamCredential(token);
     if (isUiamToken && !this.useUiam) {
       this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
     } else if (!isUiamToken && this.useUiam) {

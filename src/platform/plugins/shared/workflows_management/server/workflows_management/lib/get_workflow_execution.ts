@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
@@ -17,6 +15,33 @@ import type {
 } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
+
+/**
+ * Fetches step executions by their IDs using mget (O(1) operation).
+ * This is real-time (reads from translog) and doesn't require index refresh.
+ */
+async function getStepExecutionsByIds(
+  esClient: ElasticsearchClient,
+  stepsExecutionIndex: string,
+  stepExecutionIds: string[]
+): Promise<EsWorkflowStepExecution[]> {
+  if (stepExecutionIds.length === 0) {
+    return [];
+  }
+
+  const mgetResponse = await esClient.mget<EsWorkflowStepExecution>({
+    index: stepsExecutionIndex,
+    ids: stepExecutionIds,
+  });
+
+  const steps: EsWorkflowStepExecution[] = [];
+  for (const doc of mgetResponse.docs) {
+    if ('found' in doc && doc.found && doc._source) {
+      steps.push(doc._source);
+    }
+  }
+  return steps;
+}
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -36,37 +61,55 @@ export const getWorkflowExecution = async ({
   spaceId,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    const response = await esClient.search<EsWorkflowExecution>({
-      index: workflowExecutionIndex,
-      query: {
-        bool: {
-          must: [
-            {
-              ids: {
-                values: [workflowExecutionId],
-              },
-            },
-            { term: { spaceId } },
-          ],
-        },
-      },
-    });
+    // Use direct GET by _id for O(1) lookup performance instead of search
+    // This is critical for reducing ES CPU load from frequent UI polling
+    let response;
+    try {
+      response = await esClient.get<EsWorkflowExecution>({
+        index: workflowExecutionIndex,
+        id: workflowExecutionId,
+      });
+    } catch (error: unknown) {
+      // Handle 404 - document not found
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
 
-    const hit = response.hits.hits[0] ?? null;
+    const doc = response._source;
 
-    if (!hit || !hit._source) {
+    // Verify spaceId matches for security/multi-tenancy
+    if (!doc || doc.spaceId !== spaceId) {
       return null;
     }
 
-    const stepExecutions = await searchStepExecutions({
-      esClient,
-      logger,
-      stepsExecutionIndex,
-      workflowExecutionId,
-      spaceId,
-    });
+    let stepExecutions: EsWorkflowStepExecution[];
 
-    return transformToWorkflowExecutionDetailDto(hit._id!, hit._source, stepExecutions, logger);
+    // Use mget if we have step execution IDs - this is O(1) and real-time
+    // (reads from translog, no refresh needed)
+    if (doc.stepExecutionIds && doc.stepExecutionIds.length > 0) {
+      stepExecutions = await getStepExecutionsByIds(
+        esClient,
+        stepsExecutionIndex,
+        doc.stepExecutionIds
+      );
+    } else {
+      // Fallback to search for backward compatibility (old workflows without stepExecutionIds)
+      stepExecutions = await searchStepExecutions({
+        esClient,
+        logger,
+        stepsExecutionIndex,
+        workflowExecutionId,
+        spaceId,
+      });
+    }
+
+    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
@@ -95,7 +138,10 @@ function transformToWorkflowExecutionDetailDto(
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
-    triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
+    executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
+    triggeredBy: workflowExecution.triggeredBy,
     yaml,
+    traceId: workflowExecution.traceId,
+    entryTransactionId: workflowExecution.entryTransactionId,
   };
 }

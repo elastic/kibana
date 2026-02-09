@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -35,7 +34,7 @@ import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/work
 
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
-  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
+  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
   const { euiTheme } = useEuiTheme();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
@@ -71,33 +70,7 @@ export function WorkflowsPage() {
           <EuiFlexItem>
             <EuiPageHeader
               pageTitle={
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="flexStart"
-                  gutterSize="m"
-                  responsive={false}
-                  wrap={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="workflows.pageTitle"
-                      defaultMessage="Workflows"
-                      ignoreTag
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={
-                        <FormattedMessage
-                          id="workflows.technicalPreviewBadge"
-                          defaultMessage="Technical Preview"
-                        />
-                      }
-                      title="Technical Preview"
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage id="workflows.pageTitle" defaultMessage="Workflows" ignoreTag />
               }
             />
           </EuiFlexItem>
@@ -161,6 +134,21 @@ export function WorkflowsPage() {
                     onSelectedValuesChanged={(newValues) => {
                       setSearch((prevState) => {
                         return { ...prevState, createdBy: newValues };
+                      });
+                    }}
+                  />
+                </EuiFilterGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <WorkflowsFilterPopover
+                    filter="tags"
+                    title="Tags"
+                    values={filtersData?.tags || []}
+                    selectedValues={search.tags || []}
+                    onSelectedValuesChanged={(newValues) => {
+                      setSearch((prevState) => {
+                        return { ...prevState, tags: newValues };
                       });
                     }}
                   />
