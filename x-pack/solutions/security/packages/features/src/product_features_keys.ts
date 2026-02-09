@@ -271,4 +271,5 @@ export enum RulesSubFeatureId {
   investigationGuide = 'investigationGuideSubFeature',
   customHighlightedFields = 'customHighlightedFieldsSubFeature',
   enableDisableRules = 'enableDisableRulesSubFeature',
+  manualRunRules = 'manualRunRulesSubFeature',
 }
