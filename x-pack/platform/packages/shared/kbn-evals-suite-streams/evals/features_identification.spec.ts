@@ -36,7 +36,7 @@ evaluate.describe('Streams features identification', { tag: '@svlOblt' }, () => 
         concurrency: 1,
         task: async ({ input }: { input: FeatureIdentificationEvaluationExample['input'] }) => {
           const { features } = await identifyFeatures({
-            streamName: 'logs.test',
+            streamName: 'test',
             sampleDocuments: input.sample_documents,
             systemPrompt: featuresPrompt,
             inferenceClient,

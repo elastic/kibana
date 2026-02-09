@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { EvaluationCriterion } from '@kbn/evals';
+
 export interface FeatureIdentificationEvaluationExample {
   input: {
     sample_documents: Array<Record<string, any>>;
   };
   output: {
-    criteria: string[];
+    criteria: EvaluationCriterion[];
     weight?: number;
   };
   metadata: {
@@ -101,10 +103,61 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Evidence must be actual text snippets from the provided log messages',
-        'Must correctly identify: Go runtime, PostgreSQL database, Redis cache, AWS provider, Kubernetes orchestrator, Ubuntu OS, and both service dependencies',
-        'Version numbers must match exactly what appears in logs',
-        'Pod names, node identifiers belong in meta; technology names/versions belong in value',
+        {
+          id: 'entity-checkout-api',
+          text: 'Must identify checkout-api as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify the PostgreSQL database as a feature with type "entity" and subtype "database"',
+          score: 2,
+        },
+        {
+          id: 'entity-redis-cache',
+          text: 'Must identify the Redis cache as a feature with type "entity" and subtype "cache"',
+          score: 2,
+        },
+        {
+          id: 'tech-go',
+          text: 'Must identify Go as a technology feature with version matching "go1.22.1" or "1.22.1"',
+          score: 1,
+        },
+        {
+          id: 'infra-aws',
+          text: 'Must identify AWS as an infrastructure feature with subtype "cloud_deployment"',
+          score: 1,
+        },
+        {
+          id: 'infra-k8s',
+          text: 'Must identify Kubernetes as an infrastructure feature with subtype "container_orchestration"',
+          score: 1,
+        },
+        {
+          id: 'infra-ubuntu',
+          text: 'Must identify Ubuntu as an infrastructure feature with version "22.04.3"',
+          score: 1,
+        },
+        {
+          id: 'dep-fraud-service',
+          text: 'Must identify the dependency from checkout-api to fraud-service',
+          score: 1,
+        },
+        {
+          id: 'dep-stripe',
+          text: 'Must identify the dependency from checkout-api to stripe',
+          score: 1,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'All evidence fields must contain actual text snippets from the provided log messages, not fabricated quotes',
+          score: 1,
+        },
+        {
+          id: 'meta-separation',
+          text: 'Pod names and node identifiers must appear in meta, not in properties; technology names and versions must appear in properties',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -188,10 +241,56 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Evidence contains direct quotes from log messages',
-        'Extracts all major stack components: Java, Spring Boot, MySQL, Kafka, GCP, CentOS, and inventory-service dependency',
-        'Version strings accurately reflect what logs contain',
-        'Distinguishes stable identifiers in properties from variable data in meta',
+        {
+          id: 'entity-order-service',
+          text: 'Must identify order-service as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-mysql-db',
+          text: 'Must identify MySQL as a feature with type "entity" and subtype "database" with version "8.0.35"',
+          score: 2,
+        },
+        {
+          id: 'entity-kafka',
+          text: 'Must identify Kafka as a feature with type "entity" and subtype "message_queue"',
+          score: 2,
+        },
+        {
+          id: 'tech-java',
+          text: 'Must identify Java as a technology feature with version "21.0.2"',
+          score: 1,
+        },
+        {
+          id: 'tech-spring-boot',
+          text: 'Must identify Spring Boot as a technology feature with version "3.2.1"',
+          score: 1,
+        },
+        {
+          id: 'infra-gcp',
+          text: 'Must identify GCP as an infrastructure feature with subtype "cloud_deployment"',
+          score: 1,
+        },
+        {
+          id: 'infra-centos',
+          text: 'Must identify CentOS Stream 9 as an infrastructure feature with subtype "operating_system"',
+          score: 1,
+        },
+        {
+          id: 'dep-inventory-service',
+          text: 'Must identify the dependency from order-service to inventory-service',
+          score: 1,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'All evidence fields must contain actual text snippets from the provided log messages',
+          score: 1,
+        },
+        {
+          id: 'meta-separation',
+          text: 'Stable identifiers (service names, technology names) must be in properties; variable data (VM instance names, IPs) in meta',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -271,10 +370,51 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Evidence must be actual log message content',
-        'Should detect all technologies: Rust, MongoDB, NATS, Azure, Debian, plus gRPC dependency',
-        'Versions must match the strings found in logs',
-        'Subscription IDs and VM identifiers should not appear in properties field',
+        {
+          id: 'entity-telemetry-collector',
+          text: 'Must identify telemetry-collector as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-mongodb',
+          text: 'Must identify MongoDB as a feature with type "entity" and subtype "database" with version "7.0.4"',
+          score: 2,
+        },
+        {
+          id: 'entity-nats',
+          text: 'Must identify NATS as a feature with type "entity" and subtype "message_queue"',
+          score: 2,
+        },
+        {
+          id: 'tech-rust',
+          text: 'Must identify Rust as a technology feature with version "1.75.0"',
+          score: 1,
+        },
+        {
+          id: 'infra-azure',
+          text: 'Must identify Azure as an infrastructure feature with subtype "cloud_deployment"',
+          score: 1,
+        },
+        {
+          id: 'infra-debian',
+          text: 'Must identify Debian GNU/Linux 12 as an infrastructure feature with subtype "operating_system"',
+          score: 1,
+        },
+        {
+          id: 'dep-metrics-aggregator',
+          text: 'Must identify the gRPC dependency from telemetry-collector to metrics-aggregator',
+          score: 1,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'All evidence fields must contain actual text snippets from the provided log messages',
+          score: 1,
+        },
+        {
+          id: 'meta-separation',
+          text: 'Subscription IDs and VM identifiers must appear in meta, not in properties',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -353,10 +493,51 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Evidence must be extracted from actual log content',
-        'Should identify Node.js, Express, Elasticsearch, Redis, RHEL, and recommendation-engine dependency',
-        'Version information must be accurate',
-        'Should NOT identify any cloud provider (on-prem deployment)',
+        {
+          id: 'entity-search-api',
+          text: 'Must identify search-api as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-elasticsearch',
+          text: 'Must identify Elasticsearch as a feature with type "entity" and subtype "database" or similar, with version "8.12.0"',
+          score: 2,
+        },
+        {
+          id: 'entity-redis',
+          text: 'Must identify Redis as a feature with type "entity" and subtype "cache" with version "7.0.12"',
+          score: 2,
+        },
+        {
+          id: 'tech-nodejs',
+          text: 'Must identify Node.js as a technology feature with version "20.11.0"',
+          score: 1,
+        },
+        {
+          id: 'tech-express',
+          text: 'Must identify Express as a technology feature with version "4.18.2"',
+          score: 1,
+        },
+        {
+          id: 'infra-rhel',
+          text: 'Must identify Red Hat Enterprise Linux as an infrastructure feature with version "8.9"',
+          score: 1,
+        },
+        {
+          id: 'dep-recommendation-engine',
+          text: 'Must identify the dependency from search-api to recommendation-engine',
+          score: 1,
+        },
+        {
+          id: 'no-cloud-provider',
+          text: 'Must NOT identify any cloud provider since the logs explicitly say "cloud detection failed, deployment appears to be on-premises"',
+          score: 2,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'All evidence fields must contain actual text snippets from the provided log messages',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -433,11 +614,36 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Must extract real features despite 70% noise logs (metrics, stats, monitoring)',
-        'Should identify Python, PostgreSQL, and AWS from the 3 signal logs among 10 total',
-        'Should not extract features from operational metrics and statistics',
-        'Version numbers must be accurate',
-        'Evidence must come from actual infrastructure logs, not metrics',
+        {
+          id: 'entity-data-processor',
+          text: 'Must identify data-processor as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify PostgreSQL as a feature with type "entity" and subtype "database" with version "14.7"',
+          score: 2,
+        },
+        {
+          id: 'tech-python',
+          text: 'Must identify Python as a technology feature with version "3.10.8"',
+          score: 1,
+        },
+        {
+          id: 'infra-aws',
+          text: 'Must identify AWS as an infrastructure feature with subtype "cloud_deployment"',
+          score: 1,
+        },
+        {
+          id: 'no-metrics-features',
+          text: 'Must NOT extract features from operational metrics lines (heap stats, latency percentiles, cache ratios, thread pool stats, network stats, queue depth)',
+          score: 2,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'Evidence must reference actual infrastructure log lines, not metrics/statistics lines',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -489,10 +695,31 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify most recent version of Node.js (20.11.0, not 18.16.0)',
-        'Should handle version upgrade scenario correctly',
-        'Could optionally note version change in meta.observed_versions or meta.notes',
-        'Express and MongoDB versions remain stable across upgrade',
+        {
+          id: 'entity-api-gateway',
+          text: 'Must identify api-gateway as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-mongodb',
+          text: 'Must identify MongoDB as a feature with type "entity" and subtype "database" with version "6.0.4"',
+          score: 2,
+        },
+        {
+          id: 'tech-nodejs-latest',
+          text: 'Must identify Node.js with the most recent version "20.11.0", not the older "18.16.0"',
+          score: 2,
+        },
+        {
+          id: 'tech-express',
+          text: 'Must identify Express as a technology feature with version "4.18.2" (stable across upgrade)',
+          score: 1,
+        },
+        {
+          id: 'version-upgrade-handling',
+          text: 'Should handle the version upgrade correctly — the older version may optionally be noted in meta.observed_versions or meta.notes',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -582,10 +809,51 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Features identified from indirect signals must be tagged as inferred with meta.notes explaining the reasoning',
-        'Moderate confidence levels appropriate for indirect evidence (not highly confident)',
-        'No version information should be invented when not present in logs',
-        'Should detect Python, PostgreSQL, Redis, GCP, and Kubernetes from client library errors and platform-specific patterns',
+        {
+          id: 'entity-etl-worker',
+          text: 'Must identify etl-worker as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-python',
+          text: 'Must identify Python as a technology feature, inferred from the traceback pattern and .py file references',
+          score: 1,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify a PostgreSQL database as a feature (inferred from psycopg2 driver and port 5432)',
+          score: 2,
+        },
+        {
+          id: 'entity-redis-cache',
+          text: 'Must identify a Redis cache as a feature (inferred from Jedis client library)',
+          score: 2,
+        },
+        {
+          id: 'infra-gcp',
+          text: 'Must identify GCP as an infrastructure feature, inferred from metadata.google.internal URL and zone format',
+          score: 1,
+        },
+        {
+          id: 'infra-k8s',
+          text: 'Must identify Kubernetes as an infrastructure feature, inferred from kube-probe and serviceaccount token path',
+          score: 1,
+        },
+        {
+          id: 'inferred-tagging',
+          text: 'Features identified from indirect signals must be tagged as "inferred" with meta.notes explaining the reasoning',
+          score: 1,
+        },
+        {
+          id: 'confidence-calibration',
+          text: 'Inferred features must have moderate confidence levels (not above 80) since evidence is indirect',
+          score: 1,
+        },
+        {
+          id: 'no-invented-versions',
+          text: 'Must NOT invent version numbers not present in the logs — PostgreSQL, Redis, and GCP versions should be absent or marked unknown',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -665,10 +933,51 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Inferred features must have "inferred" tag and meta.notes with explanation',
-        'Confidence should reflect uncertainty from indirect signals',
-        'Should identify Ruby, Rails, PostgreSQL, Redis, AWS, and ECS from ecosystem patterns',
-        'Rails framework components (ActiveRecord, ActionMailer, Rack) should be recognized',
+        {
+          id: 'entity-user-api',
+          text: 'Must identify user-api as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-ruby',
+          text: 'Must identify Ruby as a technology feature, inferred from .rb file extensions and NoMethodError pattern',
+          score: 1,
+        },
+        {
+          id: 'tech-rails',
+          text: 'Must identify Rails as a technology feature, inferred from ActiveRecord, ActionMailer, ActionDispatch, and Rack middleware',
+          score: 1,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify a PostgreSQL database as a feature, inferred from ActiveRecord connection to pg.internal on port 5432',
+          score: 2,
+        },
+        {
+          id: 'entity-redis',
+          text: 'Must identify Redis as a feature, inferred from Sidekiq pushing jobs to redis:// URL',
+          score: 2,
+        },
+        {
+          id: 'infra-aws',
+          text: 'Must identify AWS as an infrastructure feature, inferred from aws-sdk-core IMDS resolution',
+          score: 1,
+        },
+        {
+          id: 'infra-ecs',
+          text: 'Must identify ECS as an infrastructure feature, inferred from the ECS task metadata endpoint (169.254.170.2)',
+          score: 1,
+        },
+        {
+          id: 'inferred-tagging',
+          text: 'Inferred features must have "inferred" tag and meta.notes explaining the reasoning',
+          score: 1,
+        },
+        {
+          id: 'confidence-calibration',
+          text: 'Confidence levels should reflect indirect evidence — not above 80 for inferred features',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -747,10 +1056,51 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Inferred features must be tagged and include meta.notes explanation',
-        'Moderate confidence for features identified through indirect evidence',
-        'Should detect PHP, Laravel, MariaDB, Redis, Nginx, and DigitalOcean',
-        'Nginx has explicit version so confidence can be higher',
+        {
+          id: 'entity-catalog-api',
+          text: 'Must identify catalog-api as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-php',
+          text: 'Must identify PHP as a technology feature, inferred from PHP Fatal error and php-fpm',
+          score: 1,
+        },
+        {
+          id: 'tech-laravel',
+          text: 'Must identify Laravel as a technology feature, inferred from composer.lock, artisan, and laravel/framework reference',
+          score: 1,
+        },
+        {
+          id: 'entity-mariadb',
+          text: 'Must identify MariaDB as a feature with type "entity" and subtype "database", inferred from PDOException connecting to mariadb.internal',
+          score: 2,
+        },
+        {
+          id: 'entity-redis',
+          text: 'Must identify Redis as a feature, inferred from Predis client library connection',
+          score: 2,
+        },
+        {
+          id: 'tech-nginx',
+          text: 'Must identify Nginx as a technology feature with version "1.24.0" — this has explicit version evidence so confidence can be higher',
+          score: 1,
+        },
+        {
+          id: 'infra-digitalocean',
+          text: 'Must identify DigitalOcean as an infrastructure feature, inferred from Droplet metadata and Spaces SDK',
+          score: 1,
+        },
+        {
+          id: 'inferred-tagging',
+          text: 'Features inferred from indirect evidence must be tagged as "inferred" with meta.notes explanation',
+          score: 1,
+        },
+        {
+          id: 'confidence-calibration',
+          text: 'Inferred features should have moderate confidence; Nginx with explicit version can have higher confidence',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -829,10 +1179,46 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Scala, PostgreSQL, and IBM Cloud need "inferred" tag with meta.notes',
-        'Cassandra has explicit version so higher confidence is appropriate',
-        'Should extract Scala, PostgreSQL, Cassandra, IBM Cloud, and reporting-service dependency',
-        'Scala should be identified distinctly from Java',
+        {
+          id: 'entity-analytics-engine',
+          text: 'Must identify analytics-engine as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-scala',
+          text: 'Must identify Scala as a technology feature (from .scala file extension and sbt build tool), distinct from Java',
+          score: 2,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify a PostgreSQL database as a feature, inferred from slick JDBC connecting to jdbc:postgresql://...',
+          score: 2,
+        },
+        {
+          id: 'entity-cassandra',
+          text: 'Must identify Cassandra as a feature with type "entity" and subtype "database" with explicit version "4.1.3"',
+          score: 2,
+        },
+        {
+          id: 'infra-ibm-cloud',
+          text: 'Must identify IBM Cloud as an infrastructure feature, inferred from IBM Cloud metadata',
+          score: 1,
+        },
+        {
+          id: 'dep-reporting-service',
+          text: 'Must identify the dependency from analytics-engine to reporting-service',
+          score: 1,
+        },
+        {
+          id: 'inferred-tagging',
+          text: 'Scala, PostgreSQL, and IBM Cloud must be tagged as "inferred" with meta.notes explaining the reasoning',
+          score: 1,
+        },
+        {
+          id: 'confidence-calibration',
+          text: 'Cassandra has explicit version evidence and should have higher confidence than inferred features like PostgreSQL or IBM Cloud',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -884,10 +1270,36 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify both Go (main) and Python (subprocess) as separate features',
-        'Go has explicit version, Python inferred from subprocess and imports',
-        'Should handle polyglot architecture correctly',
-        'Python confidence should be moderate due to subprocess context',
+        {
+          id: 'entity-hybrid-processor',
+          text: 'Must identify hybrid-processor as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-go',
+          text: 'Must identify Go as a technology feature with explicit version "1.21.4"',
+          score: 1,
+        },
+        {
+          id: 'tech-python',
+          text: 'Must identify Python as a separate technology feature, inferred from subprocess spawn and python library imports',
+          score: 1,
+        },
+        {
+          id: 'polyglot-separation',
+          text: 'Go and Python must be identified as separate technology features — not merged into one',
+          score: 2,
+        },
+        {
+          id: 'confidence-calibration',
+          text: 'Go should have higher confidence (explicit version) than Python (inferred from subprocess context)',
+          score: 1,
+        },
+        {
+          id: 'no-tensorflow',
+          text: 'Must NOT identify TensorFlow as a technology since the ImportError shows it is not available',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -965,11 +1377,31 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should extract zero features or very few with low confidence',
-        'Port numbers (9042, 5432) alone cannot determine specific database technology',
-        'Generic "cache" and "ttl" keywords are insufficient for vendor identification',
-        'Mixed language error tokens (Java, JavaScript) without dominant pattern',
-        'Any features extracted must have evidence field containing direct quotes from log messages',
+        {
+          id: 'restraint-max-features',
+          text: 'Must extract at most 2 features given the highly ambiguous and contradictory signals',
+          score: 3,
+        },
+        {
+          id: 'no-entity-from-ports',
+          text: 'Must NOT create entity features (database, cache) based solely on port numbers (9042, 5432) without corroborating technology-specific evidence',
+          score: 2,
+        },
+        {
+          id: 'no-cache-from-ttl',
+          text: 'Must NOT identify a specific cache vendor from generic "cache", "ttl", or "eviction" keywords',
+          score: 2,
+        },
+        {
+          id: 'no-language-from-mixed-errors',
+          text: 'Must NOT confidently identify a programming language when both Java and JavaScript error patterns appear without a dominant signal',
+          score: 2,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'Any features extracted must have evidence containing direct quotes from the log messages',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -1046,10 +1478,31 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should extract zero or very few features',
-        'Technology names in URL paths (/api/redis/status) do not indicate actual infrastructure usage',
-        'Service names (postgres-primary) and customer names (mongodb-inc) are not infrastructure indicators',
-        'Any features extracted must have evidence field containing direct quotes from log messages',
+        {
+          id: 'restraint-max-features',
+          text: 'Must extract at most 1 feature — these logs contain no real infrastructure signals',
+          score: 3,
+        },
+        {
+          id: 'no-redis-from-path',
+          text: 'Must NOT identify Redis from the URL path "/api/redis/status" — this is an API route, not infrastructure evidence',
+          score: 2,
+        },
+        {
+          id: 'no-postgres-from-label',
+          text: 'Must NOT identify PostgreSQL from the upstream label "postgres-primary" — this is a health check target name, not a database connection',
+          score: 2,
+        },
+        {
+          id: 'no-mongodb-from-customer',
+          text: 'Must NOT identify MongoDB from the customer_id "mongodb-inc" — this is a customer identifier, not infrastructure',
+          score: 2,
+        },
+        {
+          id: 'no-entity-features',
+          text: 'Must NOT create any entity features (service, database, cache) from these logs since no real system components are evidenced',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1125,11 +1578,31 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should extract minimal or no features given ambiguity',
-        'S3-compatible URLs might be MinIO, Ceph, or other on-premises object storage',
-        'Metadata endpoint timeout prevents cloud provider confirmation',
-        'Port 3306 alone cannot distinguish between MySQL, MariaDB, or database proxies',
-        'Any features extracted must have evidence field containing direct quotes from log messages',
+        {
+          id: 'restraint-max-features',
+          text: 'Must extract at most 2 features given pervasive ambiguity across all signals',
+          score: 3,
+        },
+        {
+          id: 'no-aws-from-s3-url',
+          text: 'Must NOT confidently identify AWS from s3:// URL alone — S3-compatible storage (MinIO, Ceph) is common on-premises',
+          score: 2,
+        },
+        {
+          id: 'no-cloud-from-failed-metadata',
+          text: 'Must NOT identify a cloud provider since the metadata endpoint request timed out',
+          score: 2,
+        },
+        {
+          id: 'no-db-from-port-only',
+          text: 'Must NOT identify a specific database technology from port 3306 alone — could be MySQL, MariaDB, or a database proxy',
+          score: 2,
+        },
+        {
+          id: 'evidence-grounding',
+          text: 'Any features extracted must have evidence containing direct quotes from the log messages',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -1204,11 +1677,31 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should output zero or minimal features from generic logs',
-        '"database-cluster" is a routing pool label, not database identification',
-        'Generic load balancing behavior without nginx, haproxy, or envoy signatures',
-        'No Kubernetes, Docker, or ECS-specific patterns present',
-        'Any features extracted must have evidence field containing direct quotes from log messages',
+        {
+          id: 'restraint-max-features',
+          text: 'Must extract at most 1 feature — these logs are entirely generic proxy/LB behavior',
+          score: 3,
+        },
+        {
+          id: 'no-db-from-pool-label',
+          text: 'Must NOT identify a database from "database-cluster" — this is a routing pool label, not a database technology indicator',
+          score: 2,
+        },
+        {
+          id: 'no-proxy-tech',
+          text: 'Must NOT identify Nginx, HAProxy, or Envoy — no technology-specific signatures are present in these generic load balancer logs',
+          score: 2,
+        },
+        {
+          id: 'no-container-orchestration',
+          text: 'Must NOT identify Kubernetes, Docker, or ECS — no container orchestration patterns are present',
+          score: 2,
+        },
+        {
+          id: 'no-entity-features',
+          text: 'Must NOT create entity features (database, service) from generic routing and circuit breaker patterns',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1248,11 +1741,26 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should recognize conflicting evidence and exercise restraint',
-        'Port 5432 suggests PostgreSQL but ERROR 1045 is MySQL-specific',
-        "SQLSTATE is generic and doesn't resolve the conflict",
-        'Without clear resolution, should not emit database feature or use very low confidence',
-        'If database feature is emitted despite conflict, must include meta.notes explaining the conflicting signals',
+        {
+          id: 'restraint-conflicting-db',
+          text: 'Must recognize the conflicting evidence: port 5432 suggests PostgreSQL but ERROR 1045 is a MySQL-specific error code',
+          score: 2,
+        },
+        {
+          id: 'no-confident-db-entity',
+          text: 'Must NOT create a database entity feature with high confidence — the conflicting PostgreSQL/MySQL signals prevent reliable identification',
+          score: 3,
+        },
+        {
+          id: 'conflict-noted-in-meta',
+          text: 'If any database feature is emitted despite the conflict, it must include meta.notes explaining the contradictory PostgreSQL vs MySQL signals',
+          score: 2,
+        },
+        {
+          id: 'low-confidence-if-emitted',
+          text: 'Any database feature emitted must have confidence below 50 given the contradictory evidence',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1293,11 +1801,26 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should output zero features from adversarial log',
-        'Technology names mentioned only in error/failure contexts must not be extracted as features',
-        'No actual connections or usage evidence present in logs',
-        'Must not identify technologies that are listed as missing or unavailable',
-        'Must distinguish between "needs X" and "has X"',
+        {
+          id: 'zero-features',
+          text: 'Must extract exactly zero features — all technology names appear only in the context of missing/unavailable dependencies',
+          score: 3,
+        },
+        {
+          id: 'no-entity-from-missing',
+          text: 'Must NOT create entity features (database, cache, queue) for technologies listed as missing dependencies',
+          score: 2,
+        },
+        {
+          id: 'no-tech-from-error',
+          text: 'Must NOT extract technology features from the error listing "need postgresql mongodb redis..." — these are required but absent',
+          score: 2,
+        },
+        {
+          id: 'needs-vs-has',
+          text: 'Must distinguish between "needs X" (dependency requirement) and "has X" (actual running infrastructure)',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1377,11 +1900,51 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Must identify actual infrastructure: .NET/C#, ASP.NET Core, SQL Server, Azure, auth-service dependency',
-        'Should not extract technologies from user search queries or application content',
-        'User-generated content (queries, help pages, payloads) is not infrastructure evidence',
-        'Configuration flag names are not deployment indicators',
-        'Evidence must come from system logs, not user input',
+        {
+          id: 'entity-web-api',
+          text: 'Must identify web-api as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-sql-server',
+          text: 'Must identify SQL Server as a feature with type "entity" and subtype "database"',
+          score: 2,
+        },
+        {
+          id: 'tech-dotnet',
+          text: 'Must identify .NET/C# and ASP.NET Core as technology features',
+          score: 1,
+        },
+        {
+          id: 'infra-azure',
+          text: 'Must identify Azure as an infrastructure feature',
+          score: 1,
+        },
+        {
+          id: 'dep-auth-service',
+          text: 'Must identify the dependency from web-api to auth-service',
+          score: 1,
+        },
+        {
+          id: 'no-tech-from-search-query',
+          text: 'Must NOT identify Kubernetes, Redis, or MongoDB from the user search query "kubernetes redis mongodb tutorial"',
+          score: 2,
+        },
+        {
+          id: 'no-tech-from-docs-page',
+          text: 'Must NOT identify PostgreSQL from the docs page title "How to deploy PostgreSQL on Kubernetes"',
+          score: 2,
+        },
+        {
+          id: 'no-tech-from-request-body',
+          text: 'Must NOT identify Redis or MongoDB from the JSON request body containing user preferences',
+          score: 2,
+        },
+        {
+          id: 'no-k8s-from-feature-flag',
+          text: 'Must NOT identify Kubernetes from the feature flag name "EnableKubernetesMode" evaluated to false',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1459,11 +2022,56 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify active stack: Python, TensorFlow, PostgreSQL, AWS, prediction-service dependency',
-        'Should ignore competitor references and benchmarking mentions',
-        'Azure ML baseline and GCP-Solutions-Inc are comparison references, not infrastructure',
-        'Benchmark comparisons between frameworks are not actual technology usage',
-        'Infrastructure evidence must come from actual system operations',
+        {
+          id: 'entity-ml-inference',
+          text: 'Must identify ml-inference as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-postgres-db',
+          text: 'Must identify PostgreSQL as a feature with type "entity" and subtype "database" with version "15.5"',
+          score: 2,
+        },
+        {
+          id: 'tech-python',
+          text: 'Must identify Python as a technology feature with version "3.11.7"',
+          score: 1,
+        },
+        {
+          id: 'tech-tensorflow',
+          text: 'Must identify TensorFlow as a technology feature with version "2.15.0" (explicitly loaded at startup)',
+          score: 1,
+        },
+        {
+          id: 'infra-aws',
+          text: 'Must identify AWS as an infrastructure feature (SageMaker endpoint)',
+          score: 1,
+        },
+        {
+          id: 'dep-prediction-service',
+          text: 'Must identify the dependency from ml-inference to prediction-service',
+          score: 1,
+        },
+        {
+          id: 'no-azure-from-benchmark',
+          text: 'Must NOT identify Azure from "azure_ml_baseline" — this is a comparison metric, not actual infrastructure',
+          score: 2,
+        },
+        {
+          id: 'no-gcp-from-customer',
+          text: 'Must NOT identify GCP from customer name "GCP-Solutions-Inc" — this is a client company name',
+          score: 2,
+        },
+        {
+          id: 'no-pytorch-jax-from-benchmark',
+          text: 'Must NOT identify PyTorch or JAX from benchmark comparison results — only TensorFlow is actually loaded',
+          score: 2,
+        },
+        {
+          id: 'no-mysql-from-latency-analysis',
+          text: 'Must NOT identify MySQL from "MySQL_avg=50.2ms" — this is a latency comparison metric, not an actual connection',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1539,11 +2147,51 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should extract actual stack: Go, Memcached, Oracle Cloud (OCI), user-service dependency',
-        'Should not extract technologies from validation errors or documentation references',
-        'Error message about invalid config value is not infrastructure indication',
-        'Documentation URLs and HTTP headers mentioning tech are not evidence',
-        'Deprecation warnings about future removal are not current infrastructure',
+        {
+          id: 'entity-api-gateway',
+          text: 'Must identify api-gateway as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-memcached',
+          text: 'Must identify Memcached as a feature with type "entity" and subtype "cache" with version "1.6.22"',
+          score: 2,
+        },
+        {
+          id: 'tech-go',
+          text: 'Must identify Go as a technology feature with version "1.21.6"',
+          score: 1,
+        },
+        {
+          id: 'infra-oci',
+          text: 'Must identify Oracle Cloud (OCI) as an infrastructure feature',
+          score: 1,
+        },
+        {
+          id: 'dep-user-service',
+          text: 'Must identify the dependency from api-gateway to user-service',
+          score: 1,
+        },
+        {
+          id: 'no-redis-from-config-error',
+          text: 'Must NOT identify Redis from the config validation error — "redis" is an invalid user-provided config value',
+          score: 2,
+        },
+        {
+          id: 'no-mongodb-from-header',
+          text: 'Must NOT identify MongoDB from the rejected HTTP header "X-Database-Type: mongodb"',
+          score: 2,
+        },
+        {
+          id: 'no-postgres-from-docs-url',
+          text: 'Must NOT identify PostgreSQL from the documentation URL about "postgresql-migration"',
+          score: 2,
+        },
+        {
+          id: 'no-cassandra-from-deprecation',
+          text: 'Must NOT identify Cassandra from the deprecation warning — "cassandra backend will be removed" is not current infrastructure',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1619,11 +2267,56 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify active technologies: Java, Quarkus, CockroachDB, Alibaba Cloud, notification-hub dependency',
-        'Should ignore performance comparisons and report content',
-        'Benchmark comparisons between frameworks are not infrastructure indicators',
-        'Report document titles and content are not system evidence',
-        'Customer/client company names are not technology identifiers',
+        {
+          id: 'entity-report-generator',
+          text: 'Must identify report-generator as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-cockroachdb',
+          text: 'Must identify CockroachDB as a feature with type "entity" and subtype "database" with version "23.2.0"',
+          score: 2,
+        },
+        {
+          id: 'tech-java',
+          text: 'Must identify Java as a technology feature with version "17.0.9"',
+          score: 1,
+        },
+        {
+          id: 'tech-quarkus',
+          text: 'Must identify Quarkus as a technology feature with version "3.6.0"',
+          score: 1,
+        },
+        {
+          id: 'infra-alibabacloud',
+          text: 'Must identify Alibaba Cloud as an infrastructure feature',
+          score: 1,
+        },
+        {
+          id: 'dep-notification-hub',
+          text: 'Must identify the dependency from report-generator to notification-hub',
+          score: 1,
+        },
+        {
+          id: 'no-postgres-mysql-from-report',
+          text: 'Must NOT identify PostgreSQL or MySQL from the report template title "PostgreSQL to MySQL Migration Guide"',
+          score: 2,
+        },
+        {
+          id: 'no-spring-boot-from-benchmark',
+          text: 'Must NOT identify Spring Boot from the competitor benchmark comparison',
+          score: 2,
+        },
+        {
+          id: 'no-redis-from-customer',
+          text: 'Must NOT identify Redis from customer company name "Redis-Labs"',
+          score: 2,
+        },
+        {
+          id: 'no-mongodb-from-evaluation',
+          text: 'Must NOT identify MongoDB from the evaluation comparison "MongoDB Atlas vs current CockroachDB"',
+          score: 2,
+        },
       ],
     },
     metadata: {
@@ -1675,11 +2368,41 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify both source and target databases as separate features',
-        'Both MySQL (old) and PostgreSQL (new) are actual infrastructure',
-        'Could optionally use meta.role or meta.notes to indicate source vs target',
-        'Python and Django are the migration tool stack',
-        'Must not confuse migration context with single-database deployment',
+        {
+          id: 'entity-migration-runner',
+          text: 'Must identify migration-runner as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'entity-mysql-source',
+          text: 'Must identify MySQL as a feature with type "entity" and subtype "database" with version "5.7.38" (source database)',
+          score: 2,
+        },
+        {
+          id: 'entity-postgres-target',
+          text: 'Must identify PostgreSQL as a separate feature with type "entity" and subtype "database" with version "15.2" (target database)',
+          score: 2,
+        },
+        {
+          id: 'two-separate-databases',
+          text: 'MySQL and PostgreSQL must be identified as two separate database entity features — not merged into one',
+          score: 2,
+        },
+        {
+          id: 'tech-python',
+          text: 'Must identify Python as a technology feature with version "3.11.2"',
+          score: 1,
+        },
+        {
+          id: 'tech-django',
+          text: 'Must identify Django as a technology feature with version "4.2.0"',
+          score: 1,
+        },
+        {
+          id: 'source-target-context',
+          text: 'Should optionally note source vs target role in meta.role or meta.notes to provide migration context',
+          score: 1,
+        },
       ],
     },
     metadata: {
@@ -1731,11 +2454,36 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'Should identify only Go (the test runner), not the technologies being tested',
-        'Test names mentioning redis, postgres, mongodb are not infrastructure evidence',
-        'Config validation tests are about validating configuration formats, not actual connections',
-        'Must distinguish between testing infrastructure vs using infrastructure',
-        'Evidence must come from actual system usage',
+        {
+          id: 'entity-config-validator',
+          text: 'Must identify config-validator as a feature with type "entity" and subtype "service"',
+          score: 2,
+        },
+        {
+          id: 'tech-go',
+          text: 'Must identify Go as a technology feature with version "1.20.5" — this is the actual runtime',
+          score: 1,
+        },
+        {
+          id: 'no-redis-from-test',
+          text: 'Must NOT identify Redis from the test name "validate_redis_config" — this is testing config format, not actual Redis usage',
+          score: 2,
+        },
+        {
+          id: 'no-postgres-from-test',
+          text: 'Must NOT identify PostgreSQL from the test name "validate_postgres_config" — config format validation, not a connection',
+          score: 2,
+        },
+        {
+          id: 'no-mongodb-from-test',
+          text: 'Must NOT identify MongoDB from the test name "validate_mongodb_config" — this is config validation, not infrastructure',
+          score: 2,
+        },
+        {
+          id: 'testing-vs-using',
+          text: 'Must distinguish between testing configuration formats for infrastructure vs actually using that infrastructure',
+          score: 2,
+        },
       ],
     },
     metadata: {
