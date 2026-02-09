@@ -637,6 +637,37 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  uri_parts: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.uriParts.name', {
+      defaultMessage: 'URI parts',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.description', {
+      defaultMessage: 'Parse a URI string into structured parts (scheme, domain, path, query, etc.)',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.uriParts.usage', {
+      defaultMessage:
+        'Set `from` to the field containing a URI string. Optionally set `to` to choose the target prefix (defaults to `url`). Use `keep_original` to copy the original URI into `{target}.original`.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.uriParts.examples.simple', {
+          defaultMessage: 'Parse a URI and store parts under a target prefix',
+        }),
+        yaml: `- action: uri_parts
+  from: uri
+  to: parts`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.keepOriginal', {
+        defaultMessage: 'keep_original defaults to true to preserve the original URI string',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.uriParts.tips.targetField', {
+        defaultMessage: 'Use `to` to avoid overwriting existing `url.*` fields',
+      }),
+    ],
+  },
+
   join: {
     name: i18n.translate('xpack.streamlang.actionMetadata.join.name', {
       defaultMessage: 'Join',

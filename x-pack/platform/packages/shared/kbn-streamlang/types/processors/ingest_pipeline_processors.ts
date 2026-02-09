@@ -10,6 +10,7 @@ import type {
   GrokProcessor,
   DissectProcessor,
   DateProcessor,
+  UriPartsProcessor,
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
@@ -132,6 +133,12 @@ export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Uri Parts
+export type IngestPipelineUriPartsProcessor = RenameFieldsAndRemoveAction<
+  UriPartsProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Join
 export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
   JoinProcessor,
@@ -185,6 +192,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineUppercaseProcessor
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
+  | IngestPipelineUriPartsProcessor
   | IngestPipelineJoinProcessor
   | IngestPipelineSplitProcessor
   | IngestPipelineSortProcessor
