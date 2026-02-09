@@ -30,12 +30,12 @@ const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
  */
 export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
-    // TODO: check v1 opt-out status before sinitializing
-    const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
-    if (!isEntityStoreV2Enabled) return;
-
     async function install() {
       try {
+        // TODO: check v1 opt-out status before sinitializing
+        const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
+        if (!isEntityStoreV2Enabled) return;
+
         const space = await services.spaces.getActiveSpace();
         if (space.id !== 'default') return;
 
