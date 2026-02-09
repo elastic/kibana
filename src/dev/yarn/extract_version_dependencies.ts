@@ -45,7 +45,7 @@ async function collectDependenciesAndWriteFile(dependencies: string[], outputFil
   const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
 
   const pkgJson = await fs.readFile(rootPackageJson, 'utf-8').then((data) => JSON.parse(data));
-  const yarnLockContent = parseYarnLockFile(yarnLockPath);
+  const yarnLockContent = parseYarnLockFile(yarnLockPath, dependencies);
   const yarnLockEntries = Object.values(yarnLockContent);
 
   const allRequestedDependencies = {

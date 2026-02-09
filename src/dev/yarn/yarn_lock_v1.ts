@@ -23,9 +23,10 @@ interface PackageInfo {
 const makeKey = (name: string, version: string) => `${name}@${version}`;
 const trimQuotes = (str: string) => str.replace(/(^"|"$)/g, '');
 
-export const parseYarnLock = (content: string): Record<string, PackageInfo> => {
+export const parseYarnLock = (content: string, focus?: string[]): Record<string, PackageInfo> => {
   const packages: Record<string, PackageInfo> = {};
   const contentWithoutComments = content.replace(/#.*$/gm, '').trim();
+  const focusSet = focus?.length ? new Set<string>(focus) : null;
 
   const blocks = contentWithoutComments.split('\n\n');
   for (const block of blocks) {
@@ -35,6 +36,11 @@ export const parseYarnLock = (content: string): Record<string, PackageInfo> => {
     const header = lines[0].replace(/:$/, '').trim();
     const headerEntries = header.split(', ').map(trimQuotes);
     const name = headerEntries[0].split(/(?!^)@/)[0];
+
+    if (focusSet !== null && !focusSet.has(name)) {
+      continue;
+    }
+
     const requestedVersions = headerEntries.map((entry) => entry.substring(name.length + 1));
 
     const packageInfo: PackageInfo = {
@@ -52,14 +58,23 @@ export const parseYarnLock = (content: string): Record<string, PackageInfo> => {
       } else if (key === 'integrity') {
         packageInfo.integrity = value;
       } else if (key === 'dependencies:') {
-        packageInfo.dependencies = {};
-        for (let j = i + 1; j < lines.length; j++) {
-          const depLine = lines[j];
-          if (depLine.trim() === '') break;
-          const [depKey, depVersion] = depLine.trim().split(/\s+/).map(trimQuotes);
-          packageInfo.dependencies[depKey] = depVersion;
+        let depCount = 0;
+        if (focusSet === null) {
+          packageInfo.dependencies = {};
+          for (let j = i + 1; j < lines.length; j++) {
+            const depLine = lines[j];
+            if (depLine.trim() === '') break;
+            const [depKey, depVersion] = depLine.trim().split(/\s+/).map(trimQuotes);
+            packageInfo.dependencies![depKey] = depVersion;
+            depCount++;
+          }
+        } else {
+          for (let j = i + 1; j < lines.length; j++) {
+            if (lines[j].trim() === '') break;
+            depCount++;
+          }
         }
-        i += Object.keys(packageInfo.dependencies).length;
+        i += depCount;
       }
     }
 
@@ -77,9 +92,9 @@ export const parseYarnLock = (content: string): Record<string, PackageInfo> => {
   return packages;
 };
 
-export const parseYarnLockFile = (yarnLockPath: string) => {
+export const parseYarnLockFile = (yarnLockPath: string, focus?: string[]) => {
   const yarnLockContent = fs.readFileSync(yarnLockPath, 'utf8');
-  return parseYarnLock(yarnLockContent);
+  return parseYarnLock(yarnLockContent, focus);
 };
 
 if (require.main === module) {
