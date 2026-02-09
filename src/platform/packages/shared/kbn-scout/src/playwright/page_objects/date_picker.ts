@@ -75,7 +75,13 @@ export class DatePicker {
     if (await showBtn.isVisible()) {
       // Click to show start/end time pickers
       await showBtn.click();
-      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
+      try {
+        await this.page.testSubj
+          .locator('superDatePickerAbsoluteTab')
+          .waitFor({ state: 'visible', timeout: 2000 });
+      } catch {
+        await getTestSubjLocator('superDatePickerToggleQuickMenuButton').click();
+      }
       await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
     } else {
       await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
