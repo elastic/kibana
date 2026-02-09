@@ -12,8 +12,8 @@ import { run } from '../lib/spawn.mjs';
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: 'build-shared',
-  intro: 'Builds shared packages with webpack',
-  description: 'Builds shared packages with webpack',
+  intro: 'Builds shared packages with Vite/Rolldown',
+  description: 'Builds shared packages with Vite/Rolldown (with webpack fallback)',
   reportTimings: {
     group: 'scripts/kbn build-shared',
     id: 'total',
@@ -29,7 +29,7 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const cache = args.getBooleanValue('cache') ?? true;
 
-    log.info('building shared packages with webpack');
+    log.info('building shared packages with Vite/Rolldown');
     await run(
       'moon',
       [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),

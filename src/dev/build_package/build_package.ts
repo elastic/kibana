@@ -16,7 +16,7 @@ import globby from 'globby';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
+const PATH_TO_VITE = 'node_modules/.bin/vite';
 
 const getTargetDirForPackage = (packageFolder: string) => {
   return path.resolve(REPO_ROOT, 'target', 'build', packageFolder);
@@ -59,7 +59,7 @@ run(
       boolean: ['watch', 'dist'],
       string: ['task-name'],
       help: `
-      --task-name A task name, used as a sub-directory for the webpack output
+      --task-name A task name, used as a sub-directory for the output
       --watch  Watch for changes and rebuild
       --dist   Build for production
     `,
@@ -90,12 +90,6 @@ async function buildPackage(
   const srcs = packageConfig.buildSourcePaths;
 
   const outPath = getFullOutputPath(packageRelPath, taskName);
-  const webpackArgs = [
-    '--config',
-    path.resolve(packageRoot, 'webpack.config.js'),
-    '--output-path',
-    outPath,
-  ];
 
   const isDist =
     dist ||
@@ -103,11 +97,8 @@ async function buildPackage(
     process.env?.DIST?.toLowerCase() === 'true';
   const env = isDist ? envOptions.dist : envOptions.default;
 
-  if (watch) {
-    webpackArgs.push('--watch', '--stats=minimal');
-  } else {
-    webpackArgs.push('--stats=errors-only');
-  }
+  // Check if package has a vite.config.ts (Rolldown build) or falls back to webpack
+  const hasViteConfig = fs.existsSync(path.resolve(packageRoot, 'vite.config.ts'));
 
   await copySources({
     log,
@@ -122,13 +113,152 @@ async function buildPackage(
     log.info(`building ${packageName}`);
   }
 
+  if (hasViteConfig) {
+    // Use Vite/Rolldown for the build
+    await buildWithVite({ packageRoot, packageName, outPath, watch, quiet, env }, log);
+  } else {
+    // Fallback to webpack for packages that haven't been migrated yet
+    await buildWithWebpack({ packageRoot, packageName, outPath, watch, quiet, env }, log);
+  }
+}
+
+/**
+ * Monaco worker languages — each worker is built as a separate IIFE bundle
+ * because Kibana loads workers via classic `new Worker(url)`.
+ */
+const MONACO_WORKER_LANGUAGES = ['default', 'json', 'xjson', 'painless', 'yaml', 'console'];
+
+async function buildWithVite(
+  {
+    packageRoot,
+    packageName,
+    outPath,
+    watch,
+    quiet,
+    env,
+  }: {
+    packageRoot: string;
+    packageName: string;
+    outPath: string;
+    watch?: boolean;
+    quiet?: boolean;
+    env: Record<string, string>;
+  },
+  log: ToolingLog
+) {
+  const mode = env.NODE_ENV === 'production' ? 'production' : 'development';
+  const viteConfigPath = path.resolve(packageRoot, 'vite.config.ts');
+
+  // For @kbn/monaco, build each worker language separately
+  // (workers must be self-contained IIFEs, no code splitting)
+  if (packageName === '@kbn/monaco') {
+    for (const lang of MONACO_WORKER_LANGUAGES) {
+      log.info(`  building ${lang} worker...`);
+      await runViteBuild({
+        viteConfigPath,
+        outPath,
+        mode,
+        watch,
+        quiet,
+        env,
+        extraEnv: { WORKER_LANG: lang },
+      });
+    }
+    log.success(`Vite/Rolldown build successful for ${packageName} (${MONACO_WORKER_LANGUAGES.length} workers).`);
+    return;
+  }
+
+  // Standard single build
+  await runViteBuild({ viteConfigPath, outPath, mode, watch, quiet, env });
+  log.success(`Vite/Rolldown build successful for ${packageName}.`);
+}
+
+async function runViteBuild({
+  viteConfigPath,
+  outPath,
+  mode,
+  watch,
+  quiet,
+  env,
+  extraEnv = {},
+}: {
+  viteConfigPath: string;
+  outPath: string;
+  mode: string;
+  watch?: boolean;
+  quiet?: boolean;
+  env: Record<string, string>;
+  extraEnv?: Record<string, string>;
+}) {
+  const viteArgs = ['build', '--config', viteConfigPath, '--mode', mode];
+
+  if (watch) {
+    viteArgs.push('--watch');
+  }
+
+  // Register Kibana's TypeScript resolve hooks in the Vite subprocess so that
+  // .js → .ts resolution works for packages like @kbn/vite-config that point
+  // their exports at raw .ts source files.
+  const hooksRegister = path.resolve(REPO_ROOT, 'src/setup_node_env/ts_hooks_register.mjs');
+  const existingNodeOptions = process.env.NODE_OPTIONS || '';
+  const nodeOptions = `--import ${hooksRegister} ${existingNodeOptions}`.trim();
+
+  try {
+    await execa(PATH_TO_VITE, viteArgs, {
+      stdio: quiet ? 'pipe' : 'inherit',
+      env: {
+        ...process.env,
+        ...env,
+        OUTPUT_PATH: outPath,
+        NODE_OPTIONS: nodeOptions,
+        ...extraEnv,
+      },
+      cwd: REPO_ROOT,
+    });
+  } catch (e) {
+    throw new Error(`Vite/Rolldown build failed: ${e}`);
+  }
+}
+
+async function buildWithWebpack(
+  {
+    packageRoot,
+    packageName,
+    outPath,
+    watch,
+    quiet,
+    env,
+  }: {
+    packageRoot: string;
+    packageName: string;
+    outPath: string;
+    watch?: boolean;
+    quiet?: boolean;
+    env: Record<string, string>;
+  },
+  log: ToolingLog
+) {
+  const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
+  const webpackArgs = [
+    '--config',
+    path.resolve(packageRoot, 'webpack.config.js'),
+    '--output-path',
+    outPath,
+  ];
+
+  if (watch) {
+    webpackArgs.push('--watch', '--stats=minimal');
+  } else {
+    webpackArgs.push('--stats=errors-only');
+  }
+
   try {
     await execa(PATH_TO_WEBPACK_CLI, webpackArgs, {
       stdio: quiet ? 'pipe' : 'inherit',
       env: { ...process.env, ...env },
       cwd: REPO_ROOT,
     });
-    log.success(`build successful for ${packageName}.`);
+    log.success(`webpack build successful for ${packageName}.`);
   } catch (e) {
     log.error(`webpack build failed for ${packageName}: ${e}`);
     throw e;
