@@ -162,7 +162,6 @@ export class WorkflowEditorPage {
     return this.page.locator(selector);
   }
 
-
   /**
    * Expands all collapsed steps in the workflow execution panel tree view.
    * Iterates through collapsed nodes and clicks their expansion arrows until all steps are expanded.
