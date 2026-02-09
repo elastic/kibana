@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -25,7 +24,12 @@ import type { ReportingRequestHandlerContext, ReportingUser } from '../../../typ
 import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import type { RequestParams } from './request_handler';
-import { RequestHandler } from './request_handler';
+import {
+  RequestHandler,
+  type ParamsValidation,
+  type QueryValidation,
+  type BodyValidation,
+} from './request_handler';
 import { getAuthorizedUser } from '../get_authorized_user';
 
 export interface InternalReportParams {
@@ -34,16 +38,10 @@ export interface InternalReportParams {
   timezone?: string;
 }
 
-const paramsSchema = schema.recordOf(schema.string(), schema.string());
-const querySchema = schema.nullable(
-  schema.recordOf(schema.string(), schema.maybe(schema.string()))
-);
-const bodySchema = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.any())));
-
 export interface GenerateSystemReportRequestParams<
-  P extends typeof paramsSchema,
-  Q extends typeof querySchema,
-  B extends typeof bodySchema
+  P extends typeof ParamsValidation,
+  Q extends typeof QueryValidation,
+  B extends typeof BodyValidation
 > {
   reportParams: InternalReportParams;
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
@@ -68,9 +66,9 @@ const SUPPORTED_INDICES = ['.fleet-agents'];
  * to encapsulate creating reports derived from system indices
  */
 export class GenerateSystemReportRequestHandler<
-  P extends typeof paramsSchema,
-  Q extends typeof querySchema,
-  B extends typeof bodySchema
+  P extends typeof ParamsValidation,
+  Q extends typeof QueryValidation,
+  B extends typeof BodyValidation
 > extends RequestHandler<P, Q, B, SavedReport> {
   private handleResponse: HandleResponseFunc;
 
@@ -203,9 +201,9 @@ export type HandleGenerateSystemReportRequestFunc = ReturnType<
 >;
 
 export async function handleGenerateSystemReportRequest<
-  P extends typeof paramsSchema = typeof paramsSchema,
-  Q extends typeof querySchema = typeof querySchema,
-  B extends typeof bodySchema = typeof bodySchema
+  P extends typeof ParamsValidation = typeof ParamsValidation,
+  Q extends typeof QueryValidation = typeof QueryValidation,
+  B extends typeof BodyValidation = typeof BodyValidation
 >(
   reporting: ReportingCore,
   logger: Logger,
