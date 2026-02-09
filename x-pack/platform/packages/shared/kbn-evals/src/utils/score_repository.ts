@@ -178,214 +178,38 @@ interface RunStatsAggregations {
 }
 
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
-const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
-const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
-  private async ensureIndexTemplate(): Promise<void> {
-    const templateBody = {
-      index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
-      data_stream: {
-        hidden: true,
-      },
-      template: {
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-          refresh_interval: '5s',
-          'index.hidden': true,
-        },
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            run_id: { type: 'keyword' },
-            experiment_id: { type: 'keyword' },
-            suite: {
-              type: 'object',
-              properties: {
-                id: { type: 'keyword' },
-              },
-            },
-            ci: {
-              type: 'object',
-              properties: {
-                buildkite: {
-                  type: 'object',
-                  properties: {
-                    build_id: { type: 'keyword' },
-                    job_id: { type: 'keyword' },
-                    build_url: { type: 'keyword' },
-                    pipeline_slug: { type: 'keyword' },
-                    pull_request: { type: 'keyword' },
-                    branch: { type: 'keyword' },
-                    commit: { type: 'keyword' },
-                  },
-                },
-              },
-            },
-            example: {
-              type: 'object',
-              properties: {
-                id: { type: 'keyword' },
-                index: { type: 'integer' },
-                dataset: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'keyword' },
-                    name: { type: 'keyword' },
-                  },
-                },
-              },
-            },
-            task: {
-              type: 'object',
-              properties: {
-                trace_id: { type: 'keyword' },
-                repetition_index: { type: 'integer' },
-                model: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'keyword' },
-                    family: { type: 'keyword' },
-                    provider: { type: 'keyword' },
-                  },
-                },
-              },
-            },
-            evaluator: {
-              type: 'object',
-              properties: {
-                name: { type: 'keyword' },
-                score: { type: 'float' },
-                label: { type: 'keyword' },
-                explanation: { type: 'text', index: false },
-                metadata: { type: 'flattened' },
-                trace_id: { type: 'keyword' },
-                model: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'keyword' },
-                    family: { type: 'keyword' },
-                    provider: { type: 'keyword' },
-                  },
-                },
-              },
-            },
-            run_metadata: {
-              type: 'object',
-              properties: {
-                git_branch: { type: 'keyword' },
-                git_commit_sha: { type: 'keyword' },
-                total_repetitions: { type: 'integer' },
-              },
-            },
-            environment: {
-              type: 'object',
-              properties: {
-                hostname: { type: 'keyword' },
-              },
-            },
-          },
-        },
-      },
-    };
-
+  /**
+   * Fail-fast check that we can connect to Elasticsearch before running expensive evals.
+   *
+   * This intentionally does NOT write any documents (or upsert templates) so that running evals
+   * against a shared/"golden" cluster doesn't require delete/create privileges for canary docs.
+   */
+  async preflightConnection(): Promise<void> {
     try {
-      // Upsert template to keep mappings in sync as the schema evolves.
-      await this.esClient.indices.putIndexTemplate({
-        name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-        index_patterns: templateBody.index_patterns,
-        data_stream: templateBody.data_stream,
-        template: templateBody.template as any,
-      });
-
-      this.log.debug('Upserted Elasticsearch index template for evaluation scores');
+      await this.esClient.info();
     } catch (error) {
-      const cause = error instanceof Error ? error : new Error(String(error));
-      this.log.error('Failed to upsert Elasticsearch index template for evaluation scores', cause);
-      throw cause;
+      throw new Error('Evals preflight failed: cannot connect to Elasticsearch', { cause: error });
     }
-  }
 
-  private async ensureDatastream(): Promise<void> {
+    // Best-effort check: warn if the evaluations data stream doesn't exist. We don't create it here
+    // to avoid mutating shared clusters during development.
     try {
-      // Check if datastream exists by trying to get it
-      await this.esClient.indices.getDataStream({
-        name: EVALUATIONS_DATA_STREAM_ALIAS,
-      });
+      await this.esClient.indices.getDataStream({ name: EVALUATIONS_DATA_STREAM_ALIAS });
     } catch (error: any) {
       if (error?.statusCode === 404) {
-        // Datastream doesn't exist, create it
-        await this.esClient.indices.createDataStream({
-          name: EVALUATIONS_DATA_STREAM_ALIAS,
-        });
-        this.log.debug(`Created datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`);
-      } else {
-        throw error;
+        this.log.warning(
+          `Evaluations data stream "${EVALUATIONS_DATA_STREAM_ALIAS}" does not exist. ` +
+            `Score export will fail until it is created.`
+        );
+        return;
       }
-    }
-  }
 
-  /**
-   * Fail-fast check that the evaluations export destination is writable and compatible.
-   * This runs before expensive eval execution so we don't burn tokens only to fail at export time.
-   */
-  async preflightWriteTarget({
-    taskModel,
-    evaluatorModel,
-    runId,
-  }: {
-    taskModel: Model;
-    evaluatorModel: Model;
-    runId?: string;
-  }): Promise<void> {
-    const preflightRunId = `__preflight__-${runId ?? String(Date.now())}`;
-
-    const canaryDocument: EvaluationScoreDocument = {
-      '@timestamp': new Date().toISOString(),
-      run_id: preflightRunId,
-      experiment_id: '__preflight__',
-      // Keep preflight docs out of suite-level dashboards/queries by giving them a dedicated suite id.
-      suite: { id: '__preflight__' },
-      example: {
-        id: '__preflight__',
-        index: 0,
-        dataset: {
-          id: '__preflight__',
-          name: '__preflight__',
-        },
-      },
-      task: {
-        trace_id: null,
-        repetition_index: 0,
-        model: taskModel,
-      },
-      evaluator: {
-        name: '__preflight__',
-        score: null,
-        label: null,
-        explanation: null,
-        metadata: null,
-        trace_id: null,
-        model: evaluatorModel,
-      },
-      run_metadata: {
-        git_branch: null,
-        git_commit_sha: null,
-        total_repetitions: 0,
-      },
-      environment: {
-        hostname: '__preflight__',
-      },
-    };
-
-    try {
-      await this.exportScores([canaryDocument]);
-    } catch (error) {
-      throw new Error('Evals preflight failed: cannot write evaluation results to Elasticsearch', {
-        cause: error,
-      });
+      // Permission errors / unsupported API versions shouldn't block running evals; export will
+      // surface the real error if/when it happens.
+      this.log.debug(`Preflight could not verify datastream existence: ${String(error)}`);
     }
   }
 
@@ -394,9 +218,6 @@ export class EvaluationScoreRepository {
     options: ExportScoresOptions = {}
   ): Promise<void> {
     try {
-      await this.ensureIndexTemplate();
-      await this.ensureDatastream();
-
       if (documents.length === 0) {
         this.log.warning('No evaluation scores to export');
         return;

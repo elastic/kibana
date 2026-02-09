@@ -150,8 +150,6 @@ describe('EvaluationScoreRepository', () => {
     ];
 
     it('should successfully export scores when index template and datastream exist', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -160,8 +158,6 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
-      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
-      expect(mockEsClient.indices.getDataStream).toHaveBeenCalled();
       expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           datasource: mockDocuments,
@@ -173,50 +169,7 @@ describe('EvaluationScoreRepository', () => {
       );
     });
 
-    it('should upsert index template', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
-      mockEsClient.helpers.bulk.mockResolvedValue({
-        total: 2,
-        failed: 0,
-        successful: 2,
-      } as any);
-
-      await repository.exportScores(mockDocuments);
-
-      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'kibana-evaluations-template',
-          index_patterns: ['.kibana-evaluations*'],
-        })
-      );
-      expect(mockLog.debug).toHaveBeenCalledWith(
-        'Upserted Elasticsearch index template for evaluation scores'
-      );
-    });
-
-    it('should create datastream if it does not exist', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
-      mockEsClient.indices.createDataStream.mockResolvedValue({} as any);
-      mockEsClient.helpers.bulk.mockResolvedValue({
-        total: 2,
-        failed: 0,
-        successful: 2,
-      } as any);
-
-      await repository.exportScores(mockDocuments);
-
-      expect(mockEsClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: '.kibana-evaluations',
-      });
-      expect(mockLog.debug).toHaveBeenCalledWith(expect.stringContaining('Created datastream'));
-    });
-
     it('should handle empty dataset scores', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
-
       await repository.exportScores([]);
 
       expect(mockLog.warning).toHaveBeenCalledWith('No evaluation scores to export');
@@ -224,8 +177,6 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should throw error if bulk indexing fails', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 2,
@@ -242,9 +193,6 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should ignore 409 conflicts to keep export idempotent', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
-
       mockEsClient.helpers.bulk.mockImplementation(async (options: any) => {
         // Simulate re-exporting the same deterministic IDs -> ES returns 409 conflict.
         options.onDrop?.({
@@ -268,39 +216,7 @@ describe('EvaluationScoreRepository', () => {
       expect(debugMessages.join('\n')).toContain('already existed');
     });
 
-    it('should handle index template creation errors', async () => {
-      const error = new Error('Template creation failed');
-      mockEsClient.indices.putIndexTemplate.mockRejectedValue(error);
-
-      await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Template creation failed'
-      );
-
-      expect(mockLog.error).toHaveBeenCalled();
-      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
-      expect(errorMessages.join('\n')).toContain(
-        'Failed to upsert Elasticsearch index template for evaluation scores'
-      );
-    });
-
-    it('should handle datastream creation errors', async () => {
-      const error = new Error('Datastream creation failed');
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
-      mockEsClient.indices.createDataStream.mockRejectedValue(error);
-
-      await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Datastream creation failed'
-      );
-
-      expect(mockLog.error).toHaveBeenCalled();
-      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
-      expect(errorMessages.join('\n')).toContain('Failed to export scores to Elasticsearch');
-    });
-
     it('should export multiple documents for multiple evaluators', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -360,6 +276,26 @@ describe('EvaluationScoreRepository', () => {
           _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
+    });
+  });
+
+  describe('preflightConnection', () => {
+    it('should throw when unable to connect to Elasticsearch', async () => {
+      mockEsClient.info.mockRejectedValue(new Error('boom'));
+
+      await expect(repository.preflightConnection()).rejects.toThrow(
+        'Evals preflight failed: cannot connect to Elasticsearch'
+      );
+    });
+
+    it('should warn when evaluations datastream is missing', async () => {
+      mockEsClient.info.mockResolvedValue({} as any);
+      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
+
+      await expect(repository.preflightConnection()).resolves.toBeUndefined();
+      expect(mockLog.warning).toHaveBeenCalledWith(
+        expect.stringContaining('Evaluations data stream ".kibana-evaluations" does not exist')
+      );
     });
   });
 
