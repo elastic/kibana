@@ -2738,6 +2738,7 @@ module.exports = {
       files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
       rules: {
         '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
