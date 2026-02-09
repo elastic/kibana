@@ -15,3 +15,19 @@ export enum TaskStatus {
   Completed = 'completed',
   Acknowledged = 'acknowledged',
 }
+
+/**
+ * Generic result type for task status/actions endpoints.
+ * Uses discriminated union based on status to properly type the payload.
+ */
+export type TaskResult<TPayload> =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | { status: TaskStatus.Failed; error: string }
+  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);
