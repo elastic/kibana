@@ -439,7 +439,7 @@ yarn test:jest           # Run all tests (very slow)
 ### Critical Rules - NON-NEGOTIABLE
 
 - ⚠️ **REQUIRED:** Use TypeScript for all new code (no JavaScript for new files)
-- ⚠️ **REQUIRED:** Follow casing conventions - mostly snake_case (exceptions in `src/dev/precommit_hook/exceptions.json`; skip patterns in `src/dev/run_check_file_casing.ts` ignore list)
+- ⚠️ **REQUIRED:** Follow casing conventions - mostly snake_case (exceptions in `src/dev/precommit_hook/casing_check_config.js`)
 - ⚠️ **REQUIRED:** Run ESLint auto-fix before committing (see MANDATORY VERIFICATION section)
 - ⚠️ **REQUIRED:** Unit tests for all new code (see MANDATORY VERIFICATION section)
 - ⛔ **DO NOT** reduce test coverage - maintain or improve it

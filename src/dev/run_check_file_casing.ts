@@ -17,7 +17,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { getPackages } from '@kbn/repo-packages';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
-import { IGNORE_PATTERNS, KEBAB_CASE_PATTERNS } from './precommit_hook/config';
+import { IGNORE_PATTERNS, KEBAB_CASE_PATTERNS } from './precommit_hook/casing_check_config';
 
 const RELATIVE_EXCEPTIONS_PATH = 'src/dev/precommit_hook/exceptions.json';
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, RELATIVE_EXCEPTIONS_PATH);
