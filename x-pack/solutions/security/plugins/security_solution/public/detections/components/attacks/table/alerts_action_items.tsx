@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memo } from 'react';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
@@ -15,7 +16,7 @@ interface AlertActionItemsProps extends GroupTakeActionItemsProps {
   statusFilter: Status[];
 }
 
-export const AlertActionItems = ({ statusFilter, ...props }: AlertActionItemsProps) => {
+export const AlertActionItems = memo(({ statusFilter, ...props }: AlertActionItemsProps) => {
   const [{ hasIndexWrite, hasIndexMaintenance }] = useUserData();
   const getActionItems = useGroupTakeActionsItems({
     currentStatus: statusFilter,
@@ -23,6 +24,6 @@ export const AlertActionItems = ({ statusFilter, ...props }: AlertActionItemsPro
   });
 
   return getActionItems(props);
-};
+});
 
 AlertActionItems.displayName = 'AlertActionItems';
