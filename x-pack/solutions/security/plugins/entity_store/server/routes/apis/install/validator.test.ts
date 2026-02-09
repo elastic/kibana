@@ -46,9 +46,7 @@ describe('BodySchema additionalIndexPatterns', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      const issue = result.error.issues.find(
-        (i) => Array.isArray(i.path) && i.path[2] === 1
-      );
+      const issue = result.error.issues.find((i) => Array.isArray(i.path) && i.path[2] === 1);
       expect(issue).toBeDefined();
     }
   });
@@ -75,7 +73,6 @@ describe('validateKql', () => {
       expect(validateKql('foo:(bar or baz)')).toBe(true);
       expect(validateKql('nestedField:{ childOfNested: value }')).toBe(true);
     });
-
   });
 
   describe('invalid KQL syntax', () => {

@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { validateDataView } from '@kbn/data-view-validation';
+import { fromKueryExpression } from '@kbn/es-query';
 import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 import { LogExtractionBodyParams } from '../../constants';
-import { fromKueryExpression } from '@kbn/es-query';
 import { parseDurationToMs } from '../../../infra/time';
-import { DELAY_DEFAULT, LOOKBACK_PERIOD_DEFAULT } from '@kbn/entity-store/server/domain/definitions/saved_objects';
+import { DELAY_DEFAULT, LOOKBACK_PERIOD_DEFAULT } from '../../../domain/definitions/saved_objects';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 

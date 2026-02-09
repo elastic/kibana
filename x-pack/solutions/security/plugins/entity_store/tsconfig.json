@@ -35,5 +35,6 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/scout-security",
     "@kbn/core-saved-objects-server",
+    "@kbn/es-query",
   ]
 }
