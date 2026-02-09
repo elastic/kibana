@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import type { KbnZodType } from './kbn_zod_type';
 import { KbnZodTypes } from './kbn_zod_type';
 
@@ -17,12 +17,12 @@ import { KbnZodTypes } from './kbn_zod_type';
  *
  * Accepts "true" or "false" as strings, or a boolean.
  */
-class KbnZodBooleanFromString extends z.ZodUnion<any> implements KbnZodType {
+class KbnZodBooleanFromString extends z.ZodUnion implements KbnZodType {
   readonly kbnTypeName = KbnZodTypes.BooleanFromString;
 
   static create() {
     return new KbnZodBooleanFromString({
-      typeName: z.ZodFirstPartyTypeKind.ZodUnion,
+      type: 'union',
       options: [z.enum(['true', 'false']), z.boolean()],
     }).describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
   }
