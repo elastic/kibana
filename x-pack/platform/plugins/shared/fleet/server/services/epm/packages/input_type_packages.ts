@@ -14,8 +14,8 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
-  RegistryPolicyInputOnlyTemplate,
   RegistryDataStream,
+  RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
   DATASET_VAR_NAME,
@@ -35,6 +35,8 @@ import { getNormalizedDataStreams } from '../../../../common/services';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
 import type { PackageInstallContext } from '../../../../common/types';
+
+import { extractSignalTypesFromPipelines } from '../../agent_policies/otel_collector';
 
 import { getInstallation, getInstalledPackageWithAssets } from './get';
 
@@ -112,22 +114,37 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   const datasetName = getDatasetName(packagePolicy.inputs);
 
-  // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
+  // For OTel packages with dynamic_signal_types, we need to create index templates for signal types defined in the pipelines
   const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-  const signalTypes: string[] = isDynamicSignalTypes
-    ? ['logs', 'metrics', 'traces']
-    : [
-        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-          packagePolicy.inputs[0].streams[0].data_stream?.type ||
-          'logs',
-      ];
+  let signalTypes: string[];
 
-  // Collect all data streams that were successfully installed
+  if (isDynamicSignalTypes) {
+    // Extract pipelines from the package policy streams
+    const firstStream = packagePolicy.inputs[0]?.streams?.[0] as any;
+    const pipelines = firstStream?.service?.pipelines;
+    if (pipelines) {
+      signalTypes = extractSignalTypesFromPipelines(pipelines);
+    } else {
+      // Edge case: if no pipelines configured, don't create any index templates
+      signalTypes = [];
+      logger.warn(
+        `No pipelines found for OTel package ${pkgInfo.name}, skipping index template installation`
+      );
+    }
+  } else {
+    signalTypes = [
+      packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+        packagePolicy.inputs[0].streams[0].data_stream?.type ||
+        'logs',
+    ];
+  }
+
+  // Collect all installed data streams to update ES asset references once at the end
   const installedDataStreams: RegistryDataStream[] = [];
 
   // Check each signal type and install templates as needed
   for (const dataStreamType of signalTypes) {
-    const dataStream = await installAssetsForDataStreamType({
+    const installedDataStream = await installAssetsForDataStreamType({
       pkgInfo,
       logger,
       datasetName,
@@ -137,8 +154,8 @@ export async function installAssetsForInputPackagePolicy(opts: {
       force,
     });
 
-    if (dataStream) {
-      installedDataStreams.push(dataStream);
+    if (installedDataStream) {
+      installedDataStreams.push(installedDataStream);
     }
   }
 
@@ -267,10 +284,10 @@ async function installAssetsForDataStreamType(opts: {
       onlyForDataStreams: [dataStream],
     });
 
-    // Return the data stream for later aggregation
+    // Return the installed data stream so caller can update ES index patterns
     return dataStream;
   } catch (error) {
-    logger.warn(`installAssetsForDataStreamType error: ${error}`);
+    logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
     return null;
   }
 }

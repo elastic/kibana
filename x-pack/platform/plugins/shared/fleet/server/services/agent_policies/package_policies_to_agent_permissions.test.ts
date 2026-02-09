@@ -306,7 +306,35 @@ packageInfoCache.set('input_otel-1.0.0', {
       vars: [],
     },
   ],
-  data_streams: [],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'otel.logs',
+      title: 'OTel Logs',
+      release: 'ga',
+      package: 'input_otel',
+      path: 'logs',
+      streams: [],
+    },
+    {
+      type: 'metrics',
+      dataset: 'otel.metrics',
+      title: 'OTel Metrics',
+      release: 'ga',
+      package: 'input_otel',
+      path: 'metrics',
+      streams: [],
+    },
+    {
+      type: 'traces',
+      dataset: 'otel.traces',
+      title: 'OTel Traces',
+      release: 'ga',
+      package: 'input_otel',
+      path: 'traces',
+      streams: [],
+    },
+  ],
   latestVersion: '1.0.0',
   status: 'not_installed',
   assets: { kibana: {}, elasticsearch: {} },
@@ -802,6 +830,19 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
                 enabled: true,
                 data_stream: { type: 'logs', dataset: 'otel.dataset' },
                 vars: {},
+                service: {
+                  pipelines: {
+                    'logs/otlp': {
+                      receivers: ['otlp'],
+                    },
+                    'metrics/otlp': {
+                      receivers: ['otlp'],
+                    },
+                    'traces/otlp': {
+                      receivers: ['otlp'],
+                    },
+                  },
+                },
               },
             ],
           },
@@ -831,6 +872,128 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         ],
       },
     });
+  });
+
+  it('grants permissions only for signal types defined in pipelines', async () => {
+    // Create a mock package with dynamic_signal_types enabled
+    packageInfoCache.set('input_otel_partial-1.0.0', {
+      format_version: '2.7.0',
+      name: 'input_otel_partial',
+      title: 'Input OTel Partial',
+      version: '1.0.0',
+      type: 'input',
+      release: 'ga',
+      policy_templates: [
+        {
+          name: 'otel',
+          title: 'OTel',
+          description: 'OpenTelemetry input',
+          type: 'logs',
+          input: 'otelcol',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+          vars: [],
+        },
+      ],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'otel.logs',
+          title: 'OTel Logs',
+          release: 'ga',
+          package: 'input_otel_partial',
+          path: 'logs',
+          streams: [],
+        },
+        {
+          type: 'metrics',
+          dataset: 'otel.metrics',
+          title: 'OTel Metrics',
+          release: 'ga',
+          package: 'input_otel_partial',
+          path: 'metrics',
+          streams: [],
+        },
+        {
+          type: 'traces',
+          dataset: 'otel.traces',
+          title: 'OTel Traces',
+          release: 'ga',
+          package: 'input_otel_partial',
+          path: 'traces',
+          streams: [],
+        },
+      ],
+      latestVersion: '1.0.0',
+      status: 'not_installed',
+      assets: { kibana: {}, elasticsearch: {} },
+    } as any);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-partial-signals',
+        name: 'otel-partial-policy',
+        namespace: 'default',
+        enabled: true,
+        package: { name: 'input_otel_partial', version: '1.0.0', title: 'Input OTel Partial' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-1',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                vars: {},
+                service: {
+                  pipelines: {
+                    'logs/otlp': {
+                      receivers: ['otlp'],
+                    },
+                    'metrics/otlp': {
+                      receivers: ['otlp'],
+                    },
+                    // No traces pipeline - should only grant logs and metrics permissions
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'default',
+      packagePolicies
+    );
+
+    expect(permissions).toMatchObject({
+      'package-policy-partial-signals': {
+        indices: [
+          { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          // Should NOT include traces-*-* since it's not in data_streams
+        ],
+      },
+    });
+
+    // Verify traces is NOT present
+    expect(permissions?.['package-policy-partial-signals']?.indices).toHaveLength(2);
+    expect(
+      permissions?.['package-policy-partial-signals']?.indices?.some((idx: any) =>
+        idx.names.includes('traces-*-*')
+      )
+    ).toBe(false);
   });
 });
 

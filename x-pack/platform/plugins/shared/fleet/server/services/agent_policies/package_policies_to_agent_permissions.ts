@@ -31,6 +31,8 @@ import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
+import { extractSignalTypesFromPipelines } from './otel_collector';
+
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export const UNIVERSAL_PROFILING_PERMISSIONS = [
@@ -135,22 +137,33 @@ export function storedPackagePoliciesToAgentPermissions(
         break;
 
       default:
-        // - Input packages with dynamic_signal_types produce logs, metrics, and traces;
-        //   grant index permissions for all three patterns (logs-*-*, metrics-*-*, traces-*-*).
+        // - Input packages with dynamic_signal_types produce data for signal types defined in the pipelines;
+        //   grant index permissions for each signal type pattern (e.g., logs-*-*, metrics-*-*).
         if (
           (pkg as PackageInfo & { type?: string }).type === 'input' &&
           hasDynamicSignalTypes(pkg)
         ) {
-          const dynamicStreamMeta: DataStreamMeta = {
-            type: 'logs',
-            dataset: '',
-            elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
-          };
-          dataStreamsForPermissions = [
-            dynamicStreamMeta,
-            { ...dynamicStreamMeta, type: 'metrics' },
-            { ...dynamicStreamMeta, type: 'traces' },
-          ];
+          // Extract pipelines from the first enabled stream
+          const firstEnabledStream = packagePolicy.inputs
+            .find((i) => i.enabled)
+            ?.streams?.find((s) => s.enabled) as any;
+          const pipelines = firstEnabledStream?.service?.pipelines;
+
+          if (pipelines) {
+            const signalTypes = extractSignalTypesFromPipelines(pipelines);
+            const baseMeta: DataStreamMeta = {
+              type: 'logs',
+              dataset: '',
+              elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+            };
+            dataStreamsForPermissions = signalTypes.map((type) => ({
+              ...baseMeta,
+              type,
+            }));
+          } else {
+            // Fallback: if no pipelines found, don't grant any permissions
+            dataStreamsForPermissions = [];
+          }
         } else {
           // - Normal packages store some of the `data_stream` metadata in
           //   `packagePolicy.inputs[].streams[].data_stream`
