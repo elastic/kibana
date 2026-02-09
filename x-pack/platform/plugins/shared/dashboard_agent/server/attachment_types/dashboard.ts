@@ -54,8 +54,8 @@ const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachme
   const sectionInfo =
     sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
 
-  // Include dashboardAttachmentId prominently so the LLM can reference it in subsequent calls
-  return `Dashboard "${data.title}" (dashboardAttachmentId: "${attachmentId}")
+  // Include attachment id prominently so the LLM can reference it in subsequent calls
+  return `Dashboard "${data.title}" (dashboardAttachment.id: "${attachmentId}")
 Description: ${data.description}
 Panels: ${panelCount}${sectionInfo}`;
 };

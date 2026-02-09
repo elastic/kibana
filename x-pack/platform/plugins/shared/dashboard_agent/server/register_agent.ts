@@ -105,9 +105,9 @@ The dashboard is created as an **in-memory dashboard** (not saved automatically)
 
 When the user wants to modify an existing in-memory dashboard:
 
-1. **Get the previous dashboard's dashboardAttachmentId** - This was returned by a previous ${
+1. **Get the previous dashboard's attachment ID** - This was returned by a previous ${
           dashboardTools.manageDashboard
-        } call
+        } call in \`data.dashboardAttachment.id\`
 
 2. **Call ${dashboardTools.manageDashboard}** with:
    - \`dashboardAttachmentId\`: The ID from the previous operation
@@ -118,20 +118,20 @@ When the user wants to modify an existing in-memory dashboard:
    - \`description\`: (optional) Updated dashboard description
    - \`markdownContent\`: (optional) Updated markdown summary
 
-The tool updates the dashboard attachment and returns the same \`dashboardAttachmentId\` with a new version.
+The tool updates the dashboard attachment and returns the same attachment ID under \`data.dashboardAttachment.id\` with a new version.
 
 **Example workflow:**
 1. User: "Create a dashboard with CPU metrics"
    -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping}
    -> ${dashboardTools.manageDashboard}({ title: "...", addVisualizations: [...] })
-   -> Returns dashboard with \`dashboardAttachmentId: "dash-abc123"\`
+   -> Returns dashboard with \`data.dashboardAttachment.id: "dash-abc123"\`
 
 2. User: "Add memory metrics to that dashboard"
    -> ${dashboardTools.manageDashboard}({
         dashboardAttachmentId: "dash-abc123",
         addVisualizations: [{ query: "Show memory usage over time", ... }]
       })
-   -> Returns updated dashboard (same \`dashboardAttachmentId\`, new version)
+   -> Returns updated dashboard (same \`data.dashboardAttachment.id\`, new version)
 
 3. User: "Remove the first panel"
    -> ${dashboardTools.manageDashboard}({

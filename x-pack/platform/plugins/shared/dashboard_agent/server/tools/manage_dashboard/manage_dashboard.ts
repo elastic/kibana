@@ -110,7 +110,7 @@ const resolveExistingVisualizations = async ({
 /**
  * Generates new visualizations from natural language queries using LLM - requires AI inference.
  */
-const generateVisualizationsFromQueries = async ({
+const buildVisualizationsFromQueriesWithLLM = async ({
   queries,
   modelProvider,
   esClient,
@@ -282,6 +282,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         const latestVersion = retrieveLatestVersion(attachments, dashboardAttachmentId);
         const currentAttachmentId = dashboardAttachmentId ?? uuidv4();
 
+
         let panels: AttachmentPanel[] = [...(latestVersion?.data.panels ?? [])];
 
         // Track failures to report to the user
@@ -315,6 +316,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           failures.push(...result.failures);
 
           // todo: come up with a listening mechanism for the dashboard app to update its state in real-time.
+          // todo: use the same normalization logic as we use when manipulating attachments.
           for (const panel of result.panels) {
             events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
               dashboardAttachmentId: currentAttachmentId,
@@ -333,7 +335,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
         // Generate new visualizations from queries (slow - requires LLM)
         if (visualizationQueries && visualizationQueries.length > 0) {
-          const result = await generateVisualizationsFromQueries({
+          const result = await buildVisualizationsFromQueriesWithLLM({
             queries: visualizationQueries,
             modelProvider,
             esClient,
@@ -368,7 +370,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             title: title ?? latestVersion?.data.title,
             description: description ?? latestVersion?.data.description,
             markdownContent: markdownContent ?? latestVersion?.data.markdownContent,
-            panels,
+            panels, // I think we should normalize the panels here and not have to do it on the client.
           },
         };
 
@@ -387,19 +389,22 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             {
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
+              failures: failures.length > 0 ? failures : undefined,
               data: {
-                // todo: normalize the output to be more close to attachment type.
-                dashboardAttachmentId: attachment?.id,
                 version: attachment?.current_version ?? 1,
-                title: input.data.title,
-                description: input.data.description,
-                markdownContent: input.data.markdownContent ?? '',
-                panels: input.data.panels.map(({ type, panelId, title: panelTitle }) => ({
-                  type,
-                  panelId,
-                  title: panelTitle,
-                })),
-                failures: failures.length > 0 ? failures : undefined,
+                dashboardAttachment: {
+                  id: attachment?.id,
+                  data: {
+                    title: input.data.title,
+                    description: input.data.description,
+                    markdownContent: input.data.markdownContent ?? '',
+                    panels: input.data.panels.map(({ type, panelId, title: panelTitle }) => ({
+                      type,
+                      panelId,
+                      title: panelTitle,
+                    })),
+                  },
+                },
               },
             },
           ],
