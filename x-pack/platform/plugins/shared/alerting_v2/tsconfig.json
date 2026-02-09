@@ -50,7 +50,8 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-user-profile-common",
     "@kbn/core-user-profile-server-mocks",
-    "@kbn/core-user-profile-server"
+    "@kbn/core-user-profile-server",
+    "@kbn/core-security-common"
   ],
   "exclude": ["target/**/*"]
 }
