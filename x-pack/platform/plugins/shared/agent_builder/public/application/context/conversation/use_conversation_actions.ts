@@ -40,6 +40,11 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
+  /**
+   * Optimistically clears the last round's response when resending.
+   * Called when resending - the backend has already persisted an empty round.
+   */
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -149,6 +154,18 @@ const createConversationActions = ({
           draft?.rounds?.pop();
         })
       );
+    },
+    /**
+     * Optimistically clears the last round's response when resending.
+     * We trust that the backend has persisted the cleared state before emitting the event.
+     * Streaming will then update this state with the new response chunks.
+     */
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation

@@ -32,6 +32,11 @@ interface UseSendMessageMutationProps {
   connectorId?: string;
 }
 
+interface SendMessageParams {
+  message?: string;
+  resend?: boolean;
+}
+
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
 const buildScreenContextData = async ({
@@ -108,6 +113,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const isMutatingNewConversationRef = useRef(false);
+  const isResendingRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
 
@@ -147,10 +153,31 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message }: { message: string }) => {
+  const sendMessage = async ({ message, resend = false }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
+    }
+
+    if (resend) {
+      if (!conversationId) {
+        return Promise.reject(new Error('Conversation ID is required to resend'));
+      }
+
+      const events$ = chatService.resend({
+        signal,
+        conversationId,
+        agentId,
+        connectorId,
+        browserApiTools: browserApiToolsMetadata,
+      });
+
+      return subscribeToChatEvents(events$);
+    }
+
+    // Normal send: requires a message
+    if (!message) {
+      return Promise.reject(new Error('Message is required'));
     }
 
     const contextAttachments = await withScreenContextAttachment({
@@ -174,21 +201,31 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message }) => {
-      const isNewConversation = !conversationId;
-      isMutatingNewConversationRef.current = isNewConversation;
-      setPendingMessage(message);
+    onMutate: ({ message, resend = false }) => {
       removeError();
       messageControllerRef.current = new AbortController();
-      conversationActions.addOptimisticRound({
-        userMessage: message,
-        attachments: attachments ?? [],
-      });
-      if (isNewConversation) {
-        if (!agentId) {
-          throw new Error('Agent id must be defined for a new conversation');
+      isResendingRef.current = resend;
+
+      if (resend) {
+        // Clear the existing response immediately so UI shows empty state
+        // This must happen before setIsResponseLoading triggers the streaming UI
+        conversationActions.clearLastRoundResponse();
+      } else if (message) {
+        const isNewConversation = !conversationId;
+        isMutatingNewConversationRef.current = isNewConversation;
+        setPendingMessage(message);
+        conversationActions.addOptimisticRound({
+          userMessage: message,
+          attachments: attachments ?? [],
+        });
+        if (isNewConversation) {
+          if (!agentId) {
+            throw new Error('Agent id must be defined for a new conversation');
+          }
+          conversationActions.setAgentId(agentId);
         }
-        conversationActions.setAgentId(agentId);
+      } else {
+        throw new Error('Message is required');
       }
       setIsResponseLoading(true);
     },
@@ -199,8 +236,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (isResponseLoading) {
         setIsResponseLoading(false);
       }
+      isResendingRef.current = false;
     },
     onSuccess: () => {
+      if (isResendingRef.current) return;
       removePendingMessage();
       resetAttachments?.();
       if (isMutatingNewConversationRef.current) {
@@ -213,6 +252,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (steps) {
         setErrorSteps(steps);
       }
+      if (isResendingRef.current) return;
       // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
       // Otherwise, the error round and the optimistic round will be visible together.
       conversationActions.removeOptimisticRound();
@@ -265,5 +305,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         removePendingMessage();
       }
     },
+    /**
+     * Resend the last conversation round.
+     * Uses the same mutation flow but with resend=true.
+     */
+    resend: () => mutate({ resend: true }),
+    isResending: isLoading && isResendingRef.current,
   };
 };
