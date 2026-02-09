@@ -66,10 +66,12 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
   });
 
   it('should always return the policy id count, even if agent counts are not found for it', async () => {
-    aggrBuckets = [
-      { key: 'agent-policy-id-a', doc_count: 100 },
-    ];
+    aggrBuckets = [{ key: 'agent-policy-id-a', doc_count: 100 }];
     esClientMock.search.mockImplementation(async () => ({
+      took: 3,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+      hits: { total: 100, max_score: 0, hits: [] },
       aggregations: {
         agent_counts: {
           buckets: {
@@ -87,10 +89,14 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
 
   it('should count agents on version-specific policies (e.g. policy#9.3) under the parent policy', async () => {
     esClientMock.search.mockImplementation(async () => ({
+      took: 3,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+      hits: { total: 150, max_score: 0, hits: [] },
       aggregations: {
         agent_counts: {
           buckets: {
-            'policy1': { doc_count: 150 },
+            policy1: { doc_count: 150 },
           },
         },
       },
