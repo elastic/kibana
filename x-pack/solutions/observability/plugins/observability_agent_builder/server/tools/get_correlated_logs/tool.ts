@@ -93,7 +93,7 @@ How it works:
 3. Returns chronologically sorted sequences showing context before and after each anchor
 
 Do NOT use for:
-- High-level overview of log patterns (use get_log_categories)
+- High-level overview of log patterns (use get_log_groups)
 - Analyzing log volume changes (use run_log_rate_analysis)`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],

@@ -13,6 +13,7 @@ const configSchema = schema.object({
   artifactRepositoryUrl: schema.string({
     defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
   }),
+  artifactRepositoryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
   elserInferenceId: schema.string({
     defaultValue: internalElserInferenceId,
   }),

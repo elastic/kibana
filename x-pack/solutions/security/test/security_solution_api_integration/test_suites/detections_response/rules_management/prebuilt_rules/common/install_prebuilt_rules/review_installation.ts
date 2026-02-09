@@ -142,19 +142,26 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
+        const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
         });
-        expect(response.rules.length).toEqual(2);
+        expect(page1Response.rules.length).toEqual(2);
+
+        const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
+          page: 2,
+          per_page: 2,
+        });
+
+        expect(page2Response.rules.length).toEqual(1);
       });
 
       it('returns correct rules for a page specified in the request', async () => {
         const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-4' }),
+          createRuleAssetSavedObject({ name: 'Rule 1', rule_id: 'rule-1' }),
+          createRuleAssetSavedObject({ name: 'Rule 2', rule_id: 'rule-2' }),
+          createRuleAssetSavedObject({ name: 'Rule 3', rule_id: 'rule-3' }),
+          createRuleAssetSavedObject({ name: 'Rule 4', rule_id: 'rule-4' }),
         ];
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
@@ -162,15 +169,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
+          sort: [{ field: 'name', order: 'asc' }],
         });
 
         expect(page1Response.rules).toHaveLength(2);
-        expect(page1Response.rules).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ rule_id: 'rule-1' }),
-            expect.objectContaining({ rule_id: 'rule-2' }),
-          ])
-        );
+        expect(page1Response.rules).toEqual([
+          expect.objectContaining({ name: 'Rule 1' }),
+          expect.objectContaining({ name: 'Rule 2' }),
+        ]);
 
         const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 2,
@@ -178,12 +184,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(page2Response.rules).toHaveLength(2);
-        expect(page2Response.rules).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ rule_id: 'rule-3' }),
-            expect.objectContaining({ rule_id: 'rule-4' }),
-          ])
-        );
+        expect(page2Response.rules).toEqual([
+          expect.objectContaining({ name: 'Rule 3' }),
+          expect.objectContaining({ name: 'Rule 4' }),
+        ]);
       });
 
       it('returns correct number of rules for the last page', async () => {
