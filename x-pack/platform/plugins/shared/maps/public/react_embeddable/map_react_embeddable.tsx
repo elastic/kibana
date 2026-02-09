@@ -20,7 +20,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
