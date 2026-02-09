@@ -119,6 +119,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   isSelected={tab.id === selectedTabId}
                   key={tab.id}
                   css={{ lineHeight: 'normal' }}
+                  data-test-subj={tab.id}
                 >
                   {tab.name}
                 </EuiTab>

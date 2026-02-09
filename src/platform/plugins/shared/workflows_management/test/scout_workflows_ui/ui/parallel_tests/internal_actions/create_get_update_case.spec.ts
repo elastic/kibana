@@ -60,13 +60,13 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     const createCaseStep = await pageObjects.workflowEditor.getStep('create_case');
     await createCaseStep.click();
 
-    const createCaseOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+    const createCaseOutput = await pageObjects.workflowEditor.getStepResultJson<{
       id: string;
       version: string;
       title: string;
       description: string;
       severity: string;
-    }>();
+    }>('output');
     expect(createCaseOutput.title).toBe(workflowInput.title);
     expect(createCaseOutput.description).toBe(workflowInput.description);
     expect(createCaseOutput.severity).toBe(workflowInput.severity);
@@ -84,13 +84,13 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
       );
       await createCaseCommentStep.click();
 
-      const createCaseCommentOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+      const createCaseCommentOutput = await pageObjects.workflowEditor.getStepResultJson<{
         comments: {
           owner: string;
           type: string;
           comment: string;
         }[];
-      }>();
+      }>('output');
       expect(createCaseCommentOutput.comments).toHaveLength(i + 1);
       expect(createCaseCommentOutput.comments[i].owner).toBe(comment.owner);
       expect(createCaseCommentOutput.comments[i].type).toBe(comment.type);
@@ -101,13 +101,13 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     const updateCaseStep = await pageObjects.workflowEditor.getStep('update_case');
     await updateCaseStep.click();
 
-    const updateCaseOutput = await pageObjects.workflowEditor.getStepOutputJson<
+    const updateCaseOutput = await pageObjects.workflowEditor.getStepResultJson<
       Array<{
         id: string;
         version: string;
         title: string;
       }>
-    >();
+    >('output');
     expect(updateCaseOutput).toBeDefined();
     expect(updateCaseOutput.length).toBeGreaterThan(0);
     expect(updateCaseOutput[0].id).toBe(caseId);
@@ -119,12 +119,12 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     const getCaseStep = await pageObjects.workflowEditor.getStep('get_case');
     await getCaseStep.click();
 
-    const getCaseOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+    const getCaseOutput = await pageObjects.workflowEditor.getStepResultJson<{
       id: string;
       version: string;
       title: string;
       description: string;
-    }>();
+    }>('output');
     expect(getCaseOutput.id).toBe(caseId);
     expect(getCaseOutput.title).toBe(`Updated: ${workflowInput.title}`);
     expect(getCaseOutput.description).toBe(`Updated: ${workflowInput.description}`);

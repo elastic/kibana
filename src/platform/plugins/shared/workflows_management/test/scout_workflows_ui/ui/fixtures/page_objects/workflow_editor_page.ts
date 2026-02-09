@@ -242,8 +242,18 @@ export class WorkflowEditorPage {
     throw new Error(`Failed to navigate step path: ${path}`);
   }
 
-  async getStepOutputJson<TOutput = unknown>(): Promise<TOutput> {
+  /**
+   * Retrieves and parses the step result JSON from the workflow step execution details panel.
+   *
+   * @template TOutput - The expected type of the parsed JSON output
+   * @param type - The type of result to retrieve: 'input', 'output', or 'error'
+   * @returns A promise that resolves to the parsed JSON result
+   */
+  async getStepResultJson<TOutput = unknown>(type: 'input' | 'output' | 'error'): Promise<TOutput> {
     const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+
+    await workflowStepExecutionDetails.locator(`button[data-test-subj="${type}"]`).click();
+
     await workflowStepExecutionDetails.locator('button[data-test-subj="json"]').click();
     const jsonEditorNthIndex = 1; // step output json editor index is 1, magic number, but this is the only way
     const stringValue = await new KibanaCodeEditorWrapper(this.page).getCodeEditorValue(

@@ -39,7 +39,7 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
       .getStep('create_parks_index')
       .then((locator) => locator.click());
     expect(
-      await pageObjects.workflowEditor.getStepOutputJson<Record<string, unknown>>()
+      await pageObjects.workflowEditor.getStepResultJson<Record<string, unknown>>('output')
     ).toStrictEqual({
       acknowledged: true,
       shards_acknowledged: true,
@@ -50,20 +50,20 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     await pageObjects.workflowEditor
       .getStep('bulk_index_park_data')
       .then((locator) => locator.click());
-    const bulkIndexOutput = await pageObjects.workflowEditor.getStepOutputJson<
+    const bulkIndexOutput = await pageObjects.workflowEditor.getStepResultJson<
       Record<string, unknown>
-    >();
+    >('output');
     expect(bulkIndexOutput.errors).toBe(false);
     expect(bulkIndexOutput.items).toHaveLength(5);
 
     // verify output of search_park_data
     await pageObjects.workflowEditor.getStep('search_park_data').then((locator) => locator.click());
-    const searchParkOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+    const searchParkOutput = await pageObjects.workflowEditor.getStepResultJson<{
       hits: {
         total: { value: number };
         hits: unknown[];
       };
-    }>();
+    }>('output');
     expect(searchParkOutput.hits).toBeDefined();
     expect(searchParkOutput.hits.total.value).toBe(2);
     expect(searchParkOutput.hits.hits).toHaveLength(2);
@@ -76,7 +76,7 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
         .getStep(`loop_over_results > ${i} > process-item`)
         .then((locator) => locator.click());
 
-      const stepOutput = await pageObjects.workflowEditor.getStepOutputJson<string>();
+      const stepOutput = await pageObjects.workflowEditor.getStepResultJson<string>('output');
       expect(stepOutput).toBe(requiredOutputs[i]);
     }
   });
