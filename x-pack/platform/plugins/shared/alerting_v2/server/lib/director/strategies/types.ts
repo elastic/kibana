@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import type { AlertEventStatus, AlertEpisodeStatus } from '../../../resources/alert_events';
+import type { AlertEpisodeStatus, AlertEvent } from '../../../resources/alert_events';
+import type { RuleResponse } from '../../rules_client/types';
+import type { LatestAlertEventState } from '../queries';
 
-export interface TransitionContext {
-  currentAlertEpisodeStatus?: AlertEpisodeStatus | null;
-  alertEventStatus: AlertEventStatus;
+export interface StateTransitionContext {
+  rule: RuleResponse;
+  alertEvent: AlertEvent;
+  previousEpisode?: LatestAlertEventState;
+}
+
+export interface StateTransitionResult {
+  status: AlertEpisodeStatus;
+  statusCount?: number;
 }
 
 export interface ITransitionStrategy {
   name: string;
-  getNextState(ctx: TransitionContext): AlertEpisodeStatus;
+  canHandle(rule: RuleResponse): boolean;
+  getNextState(ctx: StateTransitionContext): StateTransitionResult;
 }
+
+export const TransitionStrategyToken = Symbol.for('TransitionStrategy');

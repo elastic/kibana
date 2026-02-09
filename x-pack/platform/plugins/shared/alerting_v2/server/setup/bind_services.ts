@@ -11,6 +11,8 @@ import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
@@ -103,5 +105,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
-  bind(BasicTransitionStrategy).toSelf().inSingletonScope();
+  // Strategies are registered via TransitionStrategyToken for multi-injection.
+  // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
+  bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 }

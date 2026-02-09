@@ -8,13 +8,14 @@
 import { injectable } from 'inversify';
 import type { AlertEventStatus } from '../../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEpisodeStatus } from '../../../resources/alert_events';
-import type { ITransitionStrategy, TransitionContext } from './types';
+import type { RuleResponse } from '../../rules_client/types';
+import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult } from './types';
 
 @injectable()
 export class BasicTransitionStrategy implements ITransitionStrategy {
-  readonly name = 'basic';
+  readonly name: string = 'basic';
 
-  private readonly stateMachine: Record<
+  protected readonly stateMachine: Record<
     AlertEpisodeStatus,
     Record<AlertEventStatus, AlertEpisodeStatus>
   > = {
@@ -40,22 +41,25 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     },
   };
 
-  getNextState({
-    currentAlertEpisodeStatus,
-    alertEventStatus,
-  }: TransitionContext): AlertEpisodeStatus {
+  canHandle(_rule: RuleResponse): boolean {
+    return true;
+  }
+
+  getNextState({ alertEvent, previousEpisode }: StateTransitionContext): StateTransitionResult {
+    const currentAlertEpisodeStatus = previousEpisode?.last_episode_status;
+
     if (!currentAlertEpisodeStatus) {
-      return alertEpisodeStatus.pending;
+      return { status: alertEpisodeStatus.pending };
     }
 
     const stateRules = this.stateMachine[currentAlertEpisodeStatus];
 
     if (!stateRules) {
-      return alertEpisodeStatus.pending;
+      return { status: alertEpisodeStatus.pending };
     }
 
-    const nextState = stateRules[alertEventStatus];
+    const nextState = stateRules[alertEvent.status];
 
-    return nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending;
+    return { status: nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending };
   }
 }
