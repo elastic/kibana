@@ -11,7 +11,6 @@ import React from 'react';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
 import { useTransactionBreakdown } from './use_transaction_breakdown';
 import { BreakdownChart } from '../breakdown_chart';
-import { OpenChartInDiscoverLink } from '../../links/discover_links/open_chart_in_discover_link';
 
 export function TransactionBreakdownChart({
   height,
@@ -31,33 +30,25 @@ export function TransactionBreakdownChart({
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-                      defaultMessage: 'Time spent by span type',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate('xpack.apm.transactionBreakdown.chartHelp', {
-                    defaultMessage:
-                      'The average duration of each span type. "app" indicates something was happening within the service. This could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
-                  })}
-                  position="right"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
+                  defaultMessage: 'Time spent by span type',
+                })}
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <OpenChartInDiscoverLink dataTestSubj="apmTransactionBreakdownChartOpenInDiscover" />
+            <EuiIconTip
+              content={i18n.translate('xpack.apm.transactionBreakdown.chartHelp', {
+                defaultMessage:
+                  'The average duration of each span type. "app" indicates something was happening within the service. This could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
+              })}
+              position="right"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
