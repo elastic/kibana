@@ -249,9 +249,9 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
     });
   };
   
-  // Add menu item first - "Preferences" for version 3, "Navigation preferences" for version 1 only
-  // Version 2 has a separate button below the profile
-  if (version !== '2') {
+  // Add menu item first - "Preferences" for version 3, "Navigation preferences" for version 2 only
+  // Version 1 has a separate button below the profile
+  if (version !== '1') {
     const menuItemLabel = version === '3' ? (
       <FormattedMessage
         id="xpack.security.navControlComponent.preferencesLinkText"
@@ -335,8 +335,8 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
     defaultMessage: 'Account menu',
   });
 
-  // Navigation preferences button for version 2 (separate button below profile)
-  const navigationPreferencesButton = version === '2' ? (
+  // Navigation preferences button for version 1 (separate button below profile)
+  const navigationPreferencesButton = version === '1' ? (
     <EuiToolTip
       content={i18n.translate('xpack.security.navControlComponent.navigationPreferencesLinkText', {
         defaultMessage: 'Navigation preferences',
@@ -377,7 +377,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
     <>
       <div css={wrapperStyles}>
         {navigationPreferencesButton}
-        {version === '2' && <div css={dividerStyles} data-test-subj="footerUserMenuDivider" />}
+        {version === '1' && <div css={dividerStyles} data-test-subj="footerUserMenuDivider" />}
         <EuiPopover
           id="footerUserMenu"
           ownFocus
@@ -404,7 +404,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
             data-test-subj="footerUserMenu"
           />
         </EuiPopover>
-        {version === '2' && navigationPreferencesButton}
+        {version === '1' && navigationPreferencesButton}
       </div>
       {isProfileModalOpen && currentUser.value && (
         <ProfileModal
