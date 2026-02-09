@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
+      await discover.resetQueryMode();
       await browser.closeCurrentWindow();
       await browser.switchTab(0);
     });
