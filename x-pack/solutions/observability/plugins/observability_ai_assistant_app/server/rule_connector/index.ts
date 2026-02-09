@@ -34,6 +34,7 @@ import {
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
+import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import type { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
@@ -47,7 +48,7 @@ import { ALERT_STATUSES } from '../../common/constants';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
-const connectorParamsSchemas: Record<string, z.core.ZodStandardJSONSchemaPayload<unknown>> = {
+const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
   '.slack': {
     type: 'object',
     properties: {
