@@ -17,9 +17,23 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   });
 
   test('should run create_get_update_case workflow successfully', async ({ page, pageObjects }) => {
-    const testTitle = `Test Case ${Math.floor(Math.random() * 10000)}`;
-    const testDescription = 'This is a test case description';
-    const testSeverity = 'low';
+    const workflowInput = {
+      title: `Test Case ${Math.floor(Math.random() * 10000)}`,
+      description: 'This is a test case description',
+      severity: 'low',
+      comments: [
+        {
+          type: 'user',
+          owner: 'securitySolution',
+          comment: 'This is the case comment 1',
+        },
+        {
+          type: 'user',
+          owner: 'securitySolution',
+          comment: 'This is the case comment 2',
+        },
+      ],
+    };
 
     // Navigate to new workflow and set YAML
     await pageObjects.workflowEditor.gotoNewWorkflow();
@@ -32,16 +46,12 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
 
     // Set workflow inputs in the execute modal
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
-    await pageObjects.workflowEditor.setExecuteModalInputs({
-      title: testTitle,
-      description: testDescription,
-      severity: testSeverity,
-    });
+    await pageObjects.workflowEditor.setExecuteModalInputs(workflowInput);
 
     // Execute the workflow
     await page.testSubj.click('executeWorkflowButton');
 
-    await pageObjects.workflowEditor.waitForExecutionStatus('completed', 15000);
+    await pageObjects.workflowEditor.waitForExecutionStatus('completed', 20000);
 
     // Expand all steps in the tree
     await pageObjects.workflowEditor.expandStepsTree();
@@ -57,29 +67,35 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
       description: string;
       severity: string;
     }>();
-    expect(createCaseOutput.title).toBe(testTitle);
-    expect(createCaseOutput.description).toBe(testDescription);
-    expect(createCaseOutput.severity).toBe(testSeverity);
+    expect(createCaseOutput.title).toBe(workflowInput.title);
+    expect(createCaseOutput.description).toBe(workflowInput.description);
+    expect(createCaseOutput.severity).toBe(workflowInput.severity);
     expect(createCaseOutput.id).toBeDefined();
     expect(createCaseOutput.version).toBeDefined();
 
     const caseId = createCaseOutput.id;
     const initialVersion = createCaseOutput.version;
 
-    // Verify get_case step output
-    const getCaseStep = await pageObjects.workflowEditor.getStep('get_case');
-    await getCaseStep.click();
+    // Verify add_case_comment step outputs
+    for (let i = 0; i < workflowInput.comments.length; i++) {
+      const comment = workflowInput.comments[i];
+      const createCaseCommentStep = await pageObjects.workflowEditor.getStep(
+        `loop_through_comments > ${i} > create_case_comment`
+      );
+      await createCaseCommentStep.click();
 
-    const getCaseOutput = await pageObjects.workflowEditor.getStepOutputJson<{
-      id: string;
-      version: string;
-      title: string;
-      description: string;
-    }>();
-    expect(getCaseOutput.id).toBe(caseId);
-    expect(getCaseOutput.title).toBe(testTitle);
-    expect(getCaseOutput.description).toBe(testDescription);
-    expect(getCaseOutput.version).toBe(initialVersion);
+      const createCaseCommentOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+        comments: {
+          owner: string;
+          type: string;
+          comment: string;
+        }[];
+      }>();
+      expect(createCaseCommentOutput.comments).toHaveLength(i + 1);
+      expect(createCaseCommentOutput.comments[i].owner).toBe(comment.owner);
+      expect(createCaseCommentOutput.comments[i].type).toBe(comment.type);
+      expect(createCaseCommentOutput.comments[i].comment).toBe(comment.comment);
+    }
 
     // Verify update_case step output
     const updateCaseStep = await pageObjects.workflowEditor.getStep('update_case');
@@ -95,8 +111,23 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     expect(updateCaseOutput).toBeDefined();
     expect(updateCaseOutput.length).toBeGreaterThan(0);
     expect(updateCaseOutput[0].id).toBe(caseId);
-    expect(updateCaseOutput[0].title).toBe('Updated');
+    expect(updateCaseOutput[0].title).toBe(`Updated: ${workflowInput.title}`);
     // Version should be incremented after update
     expect(updateCaseOutput[0].version).not.toBe(initialVersion);
+
+    // Verify get_case step output
+    const getCaseStep = await pageObjects.workflowEditor.getStep('get_case');
+    await getCaseStep.click();
+
+    const getCaseOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+      id: string;
+      version: string;
+      title: string;
+      description: string;
+    }>();
+    expect(getCaseOutput.id).toBe(caseId);
+    expect(getCaseOutput.title).toBe(`Updated: ${workflowInput.title}`);
+    expect(getCaseOutput.description).toBe(`Updated: ${workflowInput.description}`);
+    expect(getCaseOutput.version).toBeDefined();
   });
 });

@@ -8,19 +8,70 @@
  */
 
 export const createGetUpdateCase = `
-name: Case CRUD
+name: Case E2E test
 enabled: false
-description: This is a workflow to test create/update/delete cases
+description: This is a workflow to test case kibana E2E
 triggers:
   - type: manual
 
 inputs:
-  - name: title
-    type: string
-  - name: description
-    type: string
-  - name: severity
-    type: string
+  type: object
+  title: Alert
+  description: Alert metadata with severity level and comments
+
+  properties:
+    title:
+      type: string
+      description: Short human-readable title
+
+    description:
+      type: string
+      description: Detailed description of the alert
+
+    severity:
+      type: string
+      description: Severity level of the alert
+      enum:
+        - low
+        - medium
+        - high
+        - critical
+
+    comments:
+      type: array
+      description: List of comments associated with the alert
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - user
+            description: Comment category
+
+          owner:
+            type: string
+            enum:
+              - securitySolution
+              - observability
+            description: Owner of the comment
+
+          comment:
+            type: string
+            description: Comment text
+
+        required:
+          - owner
+          - type
+          - comment
+        additionalProperties: false
+
+  required:
+    - title
+    - description
+    - severity
+
+  additionalProperties: false
 
 steps:
   - name: create_case
@@ -39,23 +90,46 @@ steps:
         syncAlerts: false
       tags:
         - Example
+  - name: set_version
+    type: data.set
+    with:
+      case_id: \${{steps.create_case.output.id}}
+      case_version: \${{steps.create_case.output.version}}
   
   - name: wait
     type: wait
     with:
       duration: 7s
   
-  - name: get_case
-    type: kibana.getCase
-    with:
-      caseId: \${{steps.create_case.output.id}}
-      includeComments: false
+  - name: loop_through_comments
+    type: foreach
+    foreach: \${{inputs.comments}}
+    steps:
+      - name: create_case_comment
+        type: kibana.addCaseComment
+        with:
+          caseId: \${{variables.case_id}}
+          comment: \${{foreach.item.comment}}
+          type: user
+          owner: securitySolution
+
+      - name: set_new_version
+        type: data.set
+        with:
+          case_version: \${{steps.create_case_comment.output.version}}
 
   - name: update_case
     type: kibana.updateCase
     with:
       cases:
-        - id: \${{steps.get_case.output.id}}
-          version: \${{steps.get_case.output.version}}
-          title: 'Updated'
+        - id: \${{variables.case_id}}
+          version: \${{variables.case_version}}
+          title: 'Updated: {{inputs.title}}'
+          description: 'Updated: {{inputs.description}}'
+
+  - name: get_case
+    type: kibana.getCase
+    with:
+      caseId: \${{variables.case_id}}
+      includeComments: false
 `;
