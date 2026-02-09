@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Connection from <client_ip> established');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from <client_ip> established' })
+      );
     });
 
     apiTest('should redact email address', async ({ testBed }) => {
@@ -57,7 +59,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Contact user at <email> for details');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Contact user at <email> for details' })
+      );
     });
 
     apiTest('should redact multiple patterns', async ({ testBed }) => {
@@ -80,7 +84,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'User <email> connected from <ip>');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'User <email> connected from <ip>' })
+      );
     });
 
     apiTest('should redact with custom prefix and suffix', async ({ testBed }) => {
@@ -105,7 +111,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Request from [REDACTED:client]');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Request from [REDACTED:client]' })
+      );
     });
 
     apiTest('should redact MAC address', async ({ testBed }) => {
@@ -128,7 +136,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Device MAC: <mac_address>');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Device MAC: <mac_address>' })
+      );
     });
 
     apiTest(
@@ -154,8 +164,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        expect(ingestedDocs[0]).toHaveProperty('message', 'some_value');
-        expect(ingestedDocs[0]).not.toHaveProperty('nonexistent');
+        expect(ingestedDocs[0]).toStrictEqual(expect.objectContaining({ message: 'some_value' }));
+        expect((ingestedDocs[0] as Record<string, unknown>).nonexistent).toBeUndefined();
       }
     );
 
@@ -211,11 +221,13 @@ apiTest.describe(
 
       // Production doc should have IP redacted
       const prodDoc = ingestedDocs.find((d: any) => d.environment === 'production');
-      expect(prodDoc).toHaveProperty('message', 'Connection from <ip>');
+      expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
       const devDoc = ingestedDocs.find((d: any) => d.environment === 'development');
-      expect(devDoc).toHaveProperty('message', 'Connection from 192.168.1.2');
+      expect(devDoc).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from 192.168.1.2' })
+      );
     });
 
     apiTest('should redact UUID', async ({ testBed }) => {
@@ -238,7 +250,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'User <user_id> logged in');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'User <user_id> logged in' })
+      );
     });
 
     apiTest('should not modify field when no pattern matches', async ({ testBed }) => {
@@ -261,7 +275,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', 'Hello world, no IP here');
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Hello world, no IP here' })
+      );
     });
 
     [

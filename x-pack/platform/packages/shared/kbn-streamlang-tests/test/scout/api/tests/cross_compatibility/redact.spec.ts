@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -36,7 +36,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-ip', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Connection from <client_ip> established');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from <client_ip> established' })
+      );
     }
   );
 
@@ -64,7 +66,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-email', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Contact user at <email> for details');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Contact user at <email> for details' })
+      );
     }
   );
 
@@ -92,7 +96,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-multiple', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'User <email> connected from <ip>');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'User <email> connected from <ip>' })
+      );
     }
   );
 
@@ -122,7 +128,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-custom-delim', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Request from [REDACTED:client]');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Request from [REDACTED:client]' })
+      );
     }
   );
 
@@ -150,7 +158,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-mac', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Device MAC: <mac_address>');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Device MAC: <mac_address>' })
+      );
     }
   );
 
@@ -199,8 +209,12 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
 
       expect(ingestDoc1).toStrictEqual(esqlDoc1);
       expect(ingestDoc2).toStrictEqual(esqlDoc2);
-      expect(ingestDoc1).toHaveProperty('message', 'Connection from <ip>');
-      expect(ingestDoc2).toHaveProperty('message', 'Connection from 192.168.1.2');
+      expect(ingestDoc1).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from <ip>' })
+      );
+      expect(ingestDoc2).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from 192.168.1.2' })
+      );
     }
   );
 
@@ -228,7 +242,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-no-match', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Hello world, no IP here');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Hello world, no IP here' })
+      );
     }
   );
 
@@ -256,7 +272,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-uuid', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'User <user_id> logged in');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'User <user_id> logged in' })
+      );
     }
   );
 
@@ -284,7 +302,9 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex('esql-redact-uri', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Visited <url> today');
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Visited <url> today' })
+      );
     }
   );
 

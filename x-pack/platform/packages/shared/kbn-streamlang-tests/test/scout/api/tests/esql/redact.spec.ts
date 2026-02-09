@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,9 +33,8 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty(
-        'message',
-        'Connection from <client_ip> established'
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ message: 'Connection from <client_ip> established' })
       );
     }
   );
@@ -60,9 +59,8 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty(
-      'message',
-      'Contact user at <email> for details'
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'Contact user at <email> for details' })
     );
   });
 
@@ -86,7 +84,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'User <email> connected from <ip>');
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'User <email> connected from <ip>' })
+    );
   });
 
   apiTest('should redact with custom prefix and suffix', async ({ testBed, esql }) => {
@@ -111,7 +111,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Request from [REDACTED:client]');
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'Request from [REDACTED:client]' })
+    );
   });
 
   apiTest('should redact MAC address', async ({ testBed, esql }) => {
@@ -134,7 +136,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Device MAC: <mac_address>');
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'Device MAC: <mac_address>' })
+    );
   });
 
   apiTest(
@@ -165,8 +169,8 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
       expect(esqlResult.documents).toHaveLength(2);
       const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
       const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-      expect(doc1).toHaveProperty('message', 'Connection from <ip>');
-      expect(doc2).toHaveProperty('message', null);
+      expect(doc1).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
+      expect(doc2).toStrictEqual(expect.objectContaining({ message: null }));
     }
   );
 
@@ -196,8 +200,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
 
       // ES|QL filters out documents with missing field when ignore_missing: false
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ status: 'doc1' }));
-      expect(esqlResult.documents[0]).toHaveProperty('message', 'Connection from <ip>');
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ status: 'doc1', message: 'Connection from <ip>' })
+      );
     }
   );
 
@@ -231,11 +236,13 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
 
     // Production doc should have IP redacted
     const prodDoc = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    expect(prodDoc).toHaveProperty('message', 'Connection from <ip>');
+    expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
     // Development doc should keep original IP
     const devDoc = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(devDoc).toHaveProperty('message', 'Connection from 192.168.1.2');
+    expect(devDoc).toStrictEqual(
+      expect.objectContaining({ message: 'Connection from 192.168.1.2' })
+    );
   });
 
   apiTest('should redact UUID', async ({ testBed, esql }) => {
@@ -258,7 +265,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'User <user_id> logged in');
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'User <user_id> logged in' })
+    );
   });
 
   apiTest('should not modify field when no pattern matches', async ({ testBed, esql }) => {
@@ -281,7 +290,9 @@ apiTest.describe('Streamlang to ES|QL - Redact Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Hello world, no IP here');
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ message: 'Hello world, no IP here' })
+    );
   });
 
   apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {
