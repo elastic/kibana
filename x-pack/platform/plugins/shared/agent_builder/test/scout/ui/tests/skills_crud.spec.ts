@@ -36,16 +36,6 @@ test.describe('Skills CRUD - UI flows', { tag: ['@ess'] }, () => {
     connectorId = (response.data as { id: string }).id;
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    if (connectorId) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/actions/connector/${connectorId}`,
-        ignoreErrors: [404],
-      });
-    }
-  });
-
   test.beforeEach(() => {
     uniqueSkillId = `${SKILL_ID_PREFIX}-${Date.now()}`;
   });
@@ -60,6 +50,16 @@ test.describe('Skills CRUD - UI flows', { tag: ['@ess'] }, () => {
       });
     } catch {
       // Skill may already be deleted or not created
+    }
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    if (connectorId) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `/api/actions/connector/${connectorId}`,
+        ignoreErrors: [404],
+      });
     }
   });
 
