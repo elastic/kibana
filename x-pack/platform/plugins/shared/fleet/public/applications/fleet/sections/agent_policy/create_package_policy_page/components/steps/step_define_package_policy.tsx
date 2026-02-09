@@ -290,6 +290,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={handleVarGroupSelectionChange}
                   isAgentlessEnabled={isAgentlessSelected}
+                  disabled={isEditPage && isCloudConnector}
                 />
               </EuiFlexItem>
             ))}

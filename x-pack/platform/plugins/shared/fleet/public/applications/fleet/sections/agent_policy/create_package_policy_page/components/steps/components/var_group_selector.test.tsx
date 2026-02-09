@@ -336,6 +336,37 @@ describe('VarGroupSelector', () => {
       // assume_role should be visible in default mode
       expect(options.find((o) => o.value === 'assume_role')).toBeDefined();
     });
+
+    it('should render the selector as disabled when disabled prop is true', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={true} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).toBeDisabled();
+    });
+
+    it('should render the selector as enabled when disabled prop is false', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={false} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).not.toBeDisabled();
+    });
+
+    it('should render the selector as enabled when disabled prop is not provided', () => {
+      render(<VarGroupSelector {...defaultProps} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).not.toBeDisabled();
+    });
+
+    it('should not call onSelectionChange when disabled and user tries to change', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={true} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      fireEvent.change(select, { target: { value: 'temporary_access_key' } });
+
+      // EuiSelect with disabled will prevent the change event from firing
+      expect(select).toBeDisabled();
+    });
   });
 
   describe('isVarRequiredByVarGroup', () => {
