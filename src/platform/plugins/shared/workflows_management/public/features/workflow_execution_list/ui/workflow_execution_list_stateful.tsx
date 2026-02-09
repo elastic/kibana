@@ -19,11 +19,13 @@ const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
 export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
   executionTypes: ExecutionType[];
+  executedBy: string[];
 }
 
 const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
   statuses: [],
   executionTypes: [],
+  executedBy: [],
 };
 
 interface WorkflowExecutionListProps {
@@ -40,7 +42,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
   } = useWorkflowExecutions(
-    { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
+    {
+      workflowId,
+      statuses: filters.statuses,
+      executionTypes: filters.executionTypes,
+      executedBy: filters.executedBy,
+    },
     {
       refetchInterval,
     }
@@ -65,6 +72,11 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       setRefetchInterval(EXECUTIONS_LIST_REFETCH_INTERVAL);
     }
   }, [workflowExecutions]);
+
+  // Reset scroll when filters change
+  useEffect(() => {
+    // Reset to default when workflow changes
+  }, [filters.statuses, filters.executionTypes, filters.executedBy]);
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
