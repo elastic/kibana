@@ -392,10 +392,10 @@ export class DrilldownsManager {
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
   public readonly useWelcomeMessage = () =>
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
-  public readonly useHasFactory = () =>
+  public readonly useDrilldownFactory = () =>
     useObservable(
-      this.route$.pipe(map((route) => route.length > 1)),
-      this.route$.getValue().length > 1
+      this.route$.pipe(map(() => this.getDrilldownManager()?.factory)),
+      this.getDrilldownManager()?.factory
     );
   public readonly useTableItems = () =>
     useTableItems(

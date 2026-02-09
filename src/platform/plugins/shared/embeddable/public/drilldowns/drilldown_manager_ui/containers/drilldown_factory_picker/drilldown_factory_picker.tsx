@@ -10,20 +10,21 @@
 import React from 'react';
 import { DrilldownFactoryPicker as DrilldownFactoryPickerUi } from '../../components/drilldown_factory_picker';
 import { useDrilldownsManager } from '../context';
+import { DrilldownFactoryView } from '../drilldown_factory_view';
 
 export const DrilldownFactoryPicker: React.FC = ({}) => {
   const drilldowns = useDrilldownsManager();
-  const hasFactory = drilldowns.useHasFactory();
+  const factory = drilldowns.useDrilldownFactory();
 
-  if (hasFactory) {
-    return <div>ActionFactoryView</div>;
+  if (!!factory) {
+    return <DrilldownFactoryView factory={factory} />;
   }
 
   return (
     <DrilldownFactoryPickerUi
       factories={drilldowns.deps.factories}
-      onSelect={(factory) => {
-        drilldowns.setDrilldownFactory(factory);
+      onSelect={(next) => {
+        drilldowns.setDrilldownFactory(next);
       }}
     />
   );
