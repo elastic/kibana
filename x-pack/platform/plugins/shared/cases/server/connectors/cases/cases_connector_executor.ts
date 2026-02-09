@@ -167,6 +167,45 @@ export class CasesConnectorExecutor {
      * comments (if available) and alerts to the corresponding cases.
      */
     await this.attachCommentAndAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
+
+    /**
+     * Now that all cases have been updated, we can push updates to external connectors
+     */
+    if (params.autoPushCase) {
+      await this.pushCaseUpdates(groupedAlertsWithClosedCasesHandled, params);
+    }
+  }
+
+  private async pushCaseUpdates(
+    groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
+    params: CasesConnectorRunParams
+  ) {
+    return pMap(
+      Array.from(groupedAlertsWithCases.values()),
+      /**
+       * attachments.bulkCreate throws an error on errors
+       */
+      async (groupedAlertsWithCase) => {
+        const { theCase } = groupedAlertsWithCase;
+        if (theCase.connector && params.autoPushCase) {
+          return this.casesClient.cases
+            .push({
+              caseId: theCase.id,
+              connectorId: theCase.connector.id,
+              pushType: 'automatic',
+            })
+            .catch((error) => {
+              this.logger.debug(
+                `[CasesConnector][CasesConnectorExecutor][pushCaseUpdates] Failed to auto-push case (id: ${theCase.id}): ${error}`
+              );
+            });
+        }
+        return Promise.resolve();
+      },
+      {
+        concurrency: MAX_CONCURRENT_ES_REQUEST,
+      }
+    );
   }
 
   private groupAlerts({

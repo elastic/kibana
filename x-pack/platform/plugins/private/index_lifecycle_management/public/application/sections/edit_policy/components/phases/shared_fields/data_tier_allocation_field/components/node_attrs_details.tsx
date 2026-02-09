@@ -86,6 +86,10 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         ]}
         pagination={true}
         sorting={true}
+        tableCaption={i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.tableCaption', {
+          defaultMessage: 'Nodes that contain the attribute {selectedNodeAttrs}',
+          values: { selectedNodeAttrs },
+        })}
       />
     );
   }

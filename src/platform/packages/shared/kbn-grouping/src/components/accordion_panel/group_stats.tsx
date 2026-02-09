@@ -18,18 +18,15 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
 interface GroupStatsProps<T> {
   bucketKey: string;
-  groupFilter: Filter[];
-  groupNumber: number;
   onTakeActionsOpen?: () => void;
   stats?: GroupStatsItem[];
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
+  actionItems?: JSX.Element;
   /** Optional array of additional action buttons to display before the Take actions button */
   additionalActionButtons?: React.ReactElement[];
 }
@@ -51,20 +48,15 @@ const Separator = () => {
 
 const GroupStatsComponent = <T,>({
   bucketKey,
-  groupFilter,
-  groupNumber,
   onTakeActionsOpen,
   stats,
-  takeActionItems: getTakeActionItems,
+  actionItems,
   additionalActionButtons,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const takeActionItems = useMemo(() => {
-    return getTakeActionItems?.(groupFilter, groupNumber);
-  }, [getTakeActionItems, groupFilter, groupNumber]);
 
   const onButtonClick = useCallback(() => {
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
@@ -129,7 +121,7 @@ const GroupStatsComponent = <T,>({
 
   const takeActionMenu = useMemo(
     () =>
-      takeActionItems ? (
+      actionItems ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
@@ -147,11 +139,11 @@ const GroupStatsComponent = <T,>({
             isOpen={isPopoverOpen}
             panelPaddingSize="none"
           >
-            {takeActionItems}
+            {actionItems}
           </EuiPopover>
         </EuiFlexItem>
       ) : null,
-    [isPopoverOpen, onButtonClick, takeActionItems]
+    [isPopoverOpen, onButtonClick, actionItems]
   );
 
   return (

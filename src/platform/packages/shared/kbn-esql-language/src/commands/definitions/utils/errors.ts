@@ -265,6 +265,45 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlMissingParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParam', {
+          defaultMessage: '[PROMQL] Missing required param "{param}"',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingParamValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParamValue', {
+          defaultMessage: '[PROMQL] Missing value for "{param}"',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlInvalidDateParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateParam', {
+          defaultMessage:
+            '[PROMQL] Invalid {param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlInvalidStepParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
+          defaultMessage: '[PROMQL] Invalid step value',
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingQuery':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
+          defaultMessage: '[PROMQL] Missing query',
+        }),
+        type: 'error',
+      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(

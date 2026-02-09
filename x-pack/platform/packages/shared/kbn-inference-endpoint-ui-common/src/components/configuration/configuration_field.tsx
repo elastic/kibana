@@ -68,8 +68,12 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   );
 
   useEffect(() => {
-    setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
-  }, [defaultValue, value]);
+    // Only sync from external value if it has actual content
+    // Don't reset to default when user clears the field (value becomes null)
+    if (value != null && String(value).length > 0) {
+      setInnerValue(value);
+    }
+  }, [value]);
   return (
     <EuiFieldText
       disabled={isLoading || (isEdit && !updatable)}
@@ -145,8 +149,12 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
-    setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
-  }, [defaultValue, value]);
+    // Only sync from external value if it has actual content
+    // Don't reset to default when user clears the field (value becomes null)
+    if (value != null && String(value).length > 0) {
+      setInnerValue(value);
+    }
+  }, [value]);
   return (
     <EuiFormControlLayout
       isDisabled={isLoading || (isEdit && !updatable) || isPreconfigured}

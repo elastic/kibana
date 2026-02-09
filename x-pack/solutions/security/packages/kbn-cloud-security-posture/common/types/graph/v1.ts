@@ -15,6 +15,7 @@ import type {
   graphResponseSchema,
   groupNodeDataSchema,
   labelNodeDataSchema,
+  relationshipNodeDataSchema,
   nodeColorSchema,
   nodeShapeSchema,
   nodeDocumentDataSchema,
@@ -49,9 +50,15 @@ export type GroupNodeDataModel = TypeOf<typeof groupNodeDataSchema>;
 
 export type LabelNodeDataModel = TypeOf<typeof labelNodeDataSchema>;
 
+export type RelationshipNodeDataModel = TypeOf<typeof relationshipNodeDataSchema>;
+
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
-export type NodeDataModel = EntityNodeDataModel | GroupNodeDataModel | LabelNodeDataModel;
+export type NodeDataModel =
+  | EntityNodeDataModel
+  | GroupNodeDataModel
+  | LabelNodeDataModel
+  | RelationshipNodeDataModel;
 
 export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;
 

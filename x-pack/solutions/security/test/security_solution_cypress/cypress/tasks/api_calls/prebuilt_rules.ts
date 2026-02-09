@@ -120,10 +120,11 @@ export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, { packages: [] });
 };
 
-const installByUploadPrebuiltRulesPackage = (packagePath: string): void => {
-  cy.fixture(packagePath, 'binary')
+const installByUploadPrebuiltRulesPackage = (packagePath: string): Cypress.Chainable => {
+  return cy
+    .fixture(packagePath, 'binary')
     .then(Cypress.Blob.binaryStringToBlob)
-    .then((blob) => {
+    .then((blob) =>
       rootRequest({
         method: 'POST',
         url: '/api/fleet/epm/packages',
@@ -134,22 +135,24 @@ const installByUploadPrebuiltRulesPackage = (packagePath: string): void => {
         },
         body: blob,
         encoding: 'binary',
-      });
+        timeout: 120000, // 2 minutes for slow package installation in CI
+      })
+    )
+    .then(() => {
+      if (!Cypress.env(IS_SERVERLESS)) {
+        refreshSavedObjectIndices();
+      }
     });
-
-  if (!Cypress.env(IS_SERVERLESS)) {
-    refreshSavedObjectIndices();
-  }
 };
 
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
  */
-export const installMockPrebuiltRulesPackage = (): void => {
+export const installMockPrebuiltRulesPackage = (): Cypress.Chainable => {
   cy.log('Install mock prebuilt rules package');
 
-  installByUploadPrebuiltRulesPackage(
+  return installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'
   );
 };

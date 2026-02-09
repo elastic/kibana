@@ -52,11 +52,7 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 export const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
 export const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
 export const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
-export const AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ =
-  'launchCloudConnectorArmAccordianInstructions';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azureCredentialsTypeSelector';
-export const AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ =
-  'azureLaunchCloudConnectorArmTemplate';
 
 export const AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
   ARM_TEMPLATE: 'cloudSetupAzureArmTemplate',
@@ -76,26 +72,3 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
 
 export const ADVANCED_OPTION_ACCORDION_TEST_SUBJ = 'advancedOptionsAccordion';
 export const NAMESPACE_INPUT_TEST_SUBJ = 'namespaceInputTestId';
-
-// Cloud Connector test subjects
-export const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'aws-cloud-connector-super-select';
-export const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connector-super-select';
-export const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
-export const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = 'cloudConnectorEditIcon';
-export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
-  `${CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ}-${connectorId}`;
-
-export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
-  FLYOUT: 'cloudConnectorPoliciesFlyout',
-  CLOSE_BUTTON: 'euiFlyoutCloseButton',
-  TITLE: 'cloudConnectorPoliciesFlyoutTitle',
-  IDENTIFIER_TEXT: 'cloudConnectorIdentifierText',
-  COPY_IDENTIFIER_BUTTON: 'cloudConnectorCopyIdentifier',
-  NAME_INPUT: 'cloudConnectorNameInput',
-  SAVE_NAME_BUTTON: 'cloudConnectorSaveNameButton',
-  USAGE_COUNT_TEXT: 'cloudConnectorUsageCountText',
-  POLICIES_TABLE: 'cloudConnectorPoliciesTable',
-  POLICY_LINK: 'cloudConnectorPolicyLink',
-  EMPTY_STATE: 'cloudConnectorPoliciesEmptyState',
-  ERROR_STATE: 'cloudConnectorPoliciesErrorState',
-};

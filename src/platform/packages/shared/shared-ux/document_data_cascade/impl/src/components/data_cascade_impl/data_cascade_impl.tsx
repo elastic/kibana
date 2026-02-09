@@ -23,12 +23,14 @@ import { TableHeader, useCascadeTable, type Table, type CellContext } from '../.
 import {
   useCascadeVirtualizer,
   VirtualizedCascadeRowList,
+  calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
 import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
+import { ScrollSyncProvider } from '../../lib/core/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
@@ -142,12 +144,21 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const {
     getVirtualItems,
     getTotalSize,
-    activeStickyIndex,
+    range,
     measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
     scrollOffset: virtualizerScrollOffset,
+    isScrolling,
   } = virtualizerInstance.current;
+
+  // Calculate activeStickyIndex directly from the virtualizer's current range.
+  // This ensures the value is always current and never stale from intermediate memoization.
+  const activeStickyIndex = calculateActiveStickyIndex(
+    rows,
+    range?.startIndex ?? 0,
+    enableStickyGroupHeader
+  );
 
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
@@ -205,24 +216,30 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   ...scrollContainerSize,
                 }}
               >
-                <>
-                  {shouldRenderStickyHeader && (
-                    <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
-                      <div ref={activeStickyRenderSlotRef} />
-                    </div>
-                  )}
-                </>
+                {/* Always render the slot so the ref is available immediately.
+                    Use hidden style when not visible to avoid layout impact. */}
+                <div
+                  css={
+                    shouldRenderStickyHeader
+                      ? styles.cascadeTreeGridHeaderStickyRenderSlot
+                      : styles.cascadeTreeGridHeaderStickyRenderSlotHidden
+                  }
+                >
+                  <div ref={activeStickyRenderSlotRef} />
+                </div>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
-                    <VirtualizedCascadeRowList<G>
-                      {...{
-                        activeStickyIndex,
-                        getVirtualItems,
-                        virtualizedRowComputedTranslateValue,
-                        rows,
-                        listItemRenderer: virtualCascadeRowRenderer,
-                      }}
-                    />
+                    <ScrollSyncProvider disableScrollSync={isScrolling}>
+                      <VirtualizedCascadeRowList<G>
+                        {...{
+                          activeStickyIndex,
+                          getVirtualItems,
+                          virtualizedRowComputedTranslateValue,
+                          rows,
+                          listItemRenderer: virtualCascadeRowRenderer,
+                        }}
+                      />
+                    </ScrollSyncProvider>
                   </div>
                 </div>
               </div>
