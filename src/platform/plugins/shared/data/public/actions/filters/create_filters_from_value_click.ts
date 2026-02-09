@@ -36,7 +36,7 @@ export interface ValueClickDataContext {
     table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
     column: number;
     row: number;
-    value: unknown;
+    value: string | number | boolean | null;
   }>;
   timeFieldName?: string;
   negate?: boolean;
@@ -67,7 +67,7 @@ const getOtherBucketFilterTerms = (
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms: unknown[] = rows.map((row) => row[table.columns[columnIndex].id]);
+  const terms: Array<string | number> = rows.map((row) => row[table.columns[columnIndex].id]);
 
   return [
     ...new Set(
@@ -107,14 +107,15 @@ export const createFilter = async (
   }
   const column = table.columns[columnIndex];
   const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
-    .sourceParams as Record<string, unknown>;
+    .sourceParams as { indexPatternId: string; [key: string]: unknown };
   const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
-    await getIndexPatterns().get(indexPatternId as string),
+    await getIndexPatterns().get(indexPatternId),
     [aggConfigParams as AggConfigSerialized]
   );
   const aggConfig = aggConfigsInstance.aggs[0];
   let filter: Filter[] = [];
-  const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+  const value: string | number | boolean | null =
+    rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -246,7 +247,7 @@ export const createFiltersFromValueClickAction = async ({
   );
 };
 
-function getOperationForWhere(value: unknown, negate: boolean) {
+function getOperationForWhere(value: string | number | boolean | null, negate: boolean) {
   if (value == null) {
     return negate ? 'is_not_null' : 'is_null';
   }
@@ -279,7 +280,8 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
 
       if (table?.columns?.[columnIndex]) {
         const column = table.columns[columnIndex];
-        const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+        const value: string | number | boolean | null =
+          rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
         const queryWithWhere = appendWhereClauseToESQLQuery(
           queryString,
           column.name,

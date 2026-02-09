@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { Filter, DataViewFieldBase, DataViewBase, RangeFilterParams } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase, DataViewBase } from '@kbn/es-query';
 import {
   isExistsFilter,
   isPhraseFilter,
@@ -29,7 +29,7 @@ import type { FilterManager } from '../filter_manager';
 function getExistingFilter(
   appFilters: Filter[],
   fieldName: string,
-  value: unknown
+  value: Serializable
 ): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
   return _.find(appFilters, function (filter): boolean {
@@ -85,7 +85,9 @@ export function generateFilters(
   operation: string,
   index: DataViewBase
 ): Filter[] {
-  const valuesArr = Array.isArray(values) ? _.uniq(values) : [values];
+  const valuesArr: Serializable[] = (
+    Array.isArray(values) ? _.uniq(values) : [values]
+  ) as Serializable[];
 
   const fieldObj = (_.isObject(field) ? field : { name: field }) as DataViewFieldBase;
   const fieldName = fieldObj.name;
@@ -135,7 +137,7 @@ export function generateFilters(
    * strict_date_optional_time_nanos).
    * @param value
    */
-  function castValue(value: unknown): unknown | RangeFilterParams {
+  function castValue(value: Serializable): Serializable {
     if (fieldObj.type === KBN_FIELD_TYPES.DATE && typeof value === 'string') {
       const format = fieldObj.esTypes?.includes('date_nanos')
         ? 'strict_date_optional_time_nanos'
@@ -158,7 +160,7 @@ export function generateFilters(
         updateExistingFilter(existing, negate);
       }
 
-      return existing ?? generateFilter(value as Serializable);
+      return existing ?? generateFilter(value);
     })
     .value();
 }
