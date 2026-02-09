@@ -118,9 +118,9 @@ export interface DrilldownFactory
     | 'euiIcon'
     | 'getInitialState'
     | 'isStateValid'
-    | 'order'
     | 'supportedTriggers'
   > {
+  order: number;
   type: string;
   isLicenseCompatible: boolean;
 }

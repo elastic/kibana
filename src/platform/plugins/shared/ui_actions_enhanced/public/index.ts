@@ -40,7 +40,6 @@ export type { DynamicActionsState } from './services/ui_actions_service_enhancem
 
 export type {
   DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
-  DrilldownTemplate as UiActionsEnhancedDrilldownTemplate,
 } from './drilldowns';
 export type {
   UrlDrilldownConfig,

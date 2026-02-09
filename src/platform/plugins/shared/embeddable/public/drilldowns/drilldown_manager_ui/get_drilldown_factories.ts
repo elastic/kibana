@@ -25,7 +25,7 @@ export async function getDrilldownFactories(
       euiIcon: drilldownDefinition.euiIcon,
       getInitialState: drilldownDefinition.getInitialState,
       isStateValid: drilldownDefinition.isStateValid,
-      order: drilldownDefinition.order,
+      order: drilldownDefinition.order ?? 0,
       supportedTriggers: drilldownDefinition.supportedTriggers,
     };
   });

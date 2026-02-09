@@ -32,7 +32,6 @@ const createStartContract = (): Start => {
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
     hasActionFactory: jest.fn(),
-    DrilldownManager: jest.fn(),
   };
 
   return startContract;

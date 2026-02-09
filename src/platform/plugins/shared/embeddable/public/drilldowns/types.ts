@@ -70,7 +70,11 @@ export type DrilldownDefinition<
     featureName: string;
   };
 
-  order: number;
+  /**
+   * Determines the display order of the drilldowns in the flyout picker.
+   * Higher numbers are displayed first.
+   */
+  order?: number;
 
   /**
    * List of triggers supported by drilldown type

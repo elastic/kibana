@@ -8,4 +8,3 @@
  */
 
 export type * from './drilldown_definition';
-export * from './drilldown_manager';
