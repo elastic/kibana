@@ -122,6 +122,7 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
           // Test execution steps (one per affected module)
           ...burnInSteps.map(({ label, key, group, agents }) => ({
             label,
+            key,
             command: getRequiredEnv('SCOUT_BURN_IN_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
             agents,
