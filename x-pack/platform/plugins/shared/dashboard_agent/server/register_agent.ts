@@ -9,7 +9,7 @@ import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import {
   dashboardElement,
   visualizationElement,
-} from '@kbn/agent-builder-common/tools/tool_result';
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { dashboardTools } from '../common';
 
