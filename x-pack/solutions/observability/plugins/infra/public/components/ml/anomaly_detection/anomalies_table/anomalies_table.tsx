@@ -619,7 +619,7 @@ export const AnomaliesTable = ({
           onChange={onTableChange}
           loading={isLoading}
           tableCaption={i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesCaption', {
-            defaultMessage: 'Anomaly results',
+            defaultMessage: 'Anomaly detection results',
           })}
           noItemsMessage={
             isLoading ? (
