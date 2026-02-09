@@ -40,6 +40,7 @@ export const getRuleHistory = async ({
     sort: { '@timestamp': 'desc' },
   });
   return {
+    startDate: history.startDate,
     total: history.total,
     items: history.items.map(mapHistoryItem),
   };

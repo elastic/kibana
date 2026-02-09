@@ -24,24 +24,16 @@ import { diffDocs } from './utils';
 
 export * from './types';
 
-type RulesDataStreamClient = DataStreamClient<typeof changeHistoryMappings, ChangeHistoryDocument>;
+type RulesDataStreamClient = DataStreamClient<
+  typeof changeHistoryMappings,
+  ChangeHistoryDocument
+> & { startDate: Date };
 
 const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
   executionStatus: false,
   monitoring: false,
   lastRun: false,
   nextRun: false,
-  params: {
-    // TODO: some of these fields are specific to each solution..
-    // meaning we'll have to figure out a way to include them,
-    // perhaps during `initialize()`
-    meta: { kibana_siem_app_url: false },
-    timestampOverrideFallbackDisabled: false,
-    ruleSource: {
-      isCustomized: false,
-      customizedFields: false,
-    },
-  },
 };
 
 export interface IChangeTrackingService {
@@ -99,15 +91,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
       // Step 1: Create data stream definition
       // TODO: "Generic" functionality should allow certain things:
       // - Override ILM policy (defaults to none = keep forever)
-      const mappings = {
-        ...changeHistoryMappings,
-        // meta: { created: new Date().toISOString() }, // <-- track the creation date (we'll use this later)
-      };
+      const mappings = { ...changeHistoryMappings };
+      const now = new Date();
       const dataStream: DataStreamDefinition<typeof mappings> = {
         name: dataStreamName,
         version: 1,
         hidden: true,
         template: {
+          _meta: { changeHistoryStartDate: now.toISOString() },
           priority: 100,
           mappings,
         },
@@ -125,6 +116,21 @@ export class ChangeTrackingService implements IChangeTrackingService {
         // TODO: Dont throw all the way up to the plugin.start().
         throw new Error('Client not initialized properly');
       }
+
+      // Step 3: Get date history started
+      client.startDate = now;
+      try {
+        const {
+          data_streams: [{ _meta: meta }],
+        } = await elasticsearchClient.indices.getDataStream({
+          name: dataStreamName,
+        });
+        if (meta) client.startDate = meta?.changeHistoryStartDate;
+      } catch (err) {
+        this.logger.error('Unable to get change history start date');
+      }
+
+      // Step 4: Stash the client for later use
       this.dataStreams[module] = client;
     }
   }
@@ -137,9 +143,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
     kibanaVersion: string,
     overrides?: Partial<ChangeHistoryDocument>
   ) {
-    this.logger.warn(
-      `ChangeTrackingService.logChange(action: ${action}, userId: ${userId}, rule: ${ruleData.id})`
-    );
     this.logBulkChange(action, userId, [ruleData], spaceId, kibanaVersion, overrides);
   }
 
@@ -213,6 +216,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
       sort: [{ '@timestamp': { order: 'desc' } }],
     });
     return {
+      startDate: client.startDate,
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
       items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
     };

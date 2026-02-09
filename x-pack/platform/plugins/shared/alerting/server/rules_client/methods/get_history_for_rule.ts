@@ -6,8 +6,12 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-import type { ChangeHistoryDocument } from '../lib/change_tracking';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { getRuleSo } from '../../data/rule';
+import type { GetHistoryResult } from '../lib/change_tracking';
 import type { RulesClientContext } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetHistoryByParams {
   module: RuleTypeSolution;
@@ -21,16 +25,35 @@ export interface GetHistoryByParams {
   sort: estypes.Sort;
 }
 
-export interface GetHistoryResult {
-  items: ChangeHistoryDocument[];
-  total: number;
-}
-
 export async function getHistoryForRule(
   context: RulesClientContext,
   params: GetHistoryByParams
 ): Promise<GetHistoryResult> {
   context.logger.debug(`getHistoryForRule(): getting history log for rule ${params.ruleId}`);
+
+  const { id, attributes } = await getRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    id: params.ruleId,
+  });
+
+  const ruleAuditEventData = {
+    action: RuleAuditAction.GET_HISTORY,
+    savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
+  };
+
+  try {
+    await context.authorization.ensureAuthorized({
+      ruleTypeId: attributes.alertTypeId,
+      consumer: attributes.consumer,
+      operation: ReadOperations.GetHistory,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+    context.auditLogger?.log(ruleAuditEvent(ruleAuditEventData));
+  } catch (error) {
+    context.auditLogger?.log(ruleAuditEvent({ ...ruleAuditEventData, error }));
+    throw error;
+  }
+
   if (context.changeTrackingService?.initialized(params.module)) {
     return await context.changeTrackingService.getHistory(params.module, params.ruleId);
   }

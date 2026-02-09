@@ -12,6 +12,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -33,6 +34,7 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
+import type { RuleData } from '../../lib/change_tracking';
 
 export interface BulkEditOccOptions<Params extends RuleParams> {
   filter: KueryNode | null;
@@ -61,6 +63,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       }
     );
 
+  const originalRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const skipped: BulkEditActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
@@ -70,6 +73,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
 
   for await (const response of rulesFinder.find()) {
     context.logger.info(`response.saved_objects ${JSON.stringify(response.saved_objects)}`);
+    originalRules.push(...response.saved_objects);
     if (options.shouldValidateSchedule) {
       const intervals = response.saved_objects
         .filter((rule) => rule.attributes.enabled)
@@ -150,6 +154,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const { result, apiKeysToInvalidate } = await saveBulkUpdatedRules({
     context,
     rules,
+    originalRules,
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
   });
@@ -166,11 +171,13 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
 async function saveBulkUpdatedRules({
   context,
   rules,
+  originalRules,
   apiKeysMap,
   shouldInvalidateApiKeys,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  originalRules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
 }) {
@@ -185,6 +192,27 @@ async function saveBulkUpdatedRules({
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
+
+    // 1. Track changes
+    const trackChangeHistoryRuleData = rules.map((rule) => {
+      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      return {
+        id: rule.id,
+        type: rule.type,
+        current: originalRules.find((r) => rule.id === r.id)?.attributes,
+        next: rule.attributes,
+        module: type.solution,
+        references: rule.references,
+      } as RuleData;
+    });
+    context.changeTrackingService?.logBulkChange(
+      RuleChangeTrackingAction.ruleUpdate,
+      (await context.getUserName()) ?? 'unknown',
+      trackChangeHistoryRuleData,
+      context.spaceId,
+      context.kibanaVersion,
+      { metadata: { bulkCount: rules.length } }
+    );
   } catch (e) {
     // avoid unused newly generated API keys
     if (apiKeysMap.size > 0) {

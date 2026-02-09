@@ -25,6 +25,7 @@ export const ChangeHistoryResult = z.object({
 });
 export type ChangeHistoryResponse = z.infer<typeof ChangeHistoryResponse>;
 export const ChangeHistoryResponse = z.object({
+  startDate: z.date().optional(),
   items: z.array(ChangeHistoryResult).optional(),
   total: z.number().int().optional(),
 });
@@ -59,9 +60,12 @@ export const useChangeHistory = (
   return useQuery(
     [...GET_RULES_CHANGE_HISTORY_QUERY_KEY, queryArgs],
     async ({ signal }) => {
-      const response = await fetchRuleChangeHistoryById({ signal, ...queryArgs });
+      const { startDate, total, items } = await fetchRuleChangeHistoryById({
+        signal,
+        ...queryArgs,
+      });
 
-      return { items: response.items, total: response.total };
+      return { startDate, total, items };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

@@ -57,8 +57,13 @@ export const getRuleHistoryRoute = (router: SecuritySolutionPluginRouter, logger
 
           // What if client not initialized?
           const client = await ctx.alerting.getRulesClient();
-          const { total, items } = await getRuleHistory({ client, ruleId, page, perPage });
-          const body = { total, page, perPage, items };
+          const { startDate, total, items } = await getRuleHistory({
+            client,
+            ruleId,
+            page,
+            perPage,
+          });
+          const body = { startDate, total, page, perPage, items };
 
           return response.ok({ body });
         } catch (err) {

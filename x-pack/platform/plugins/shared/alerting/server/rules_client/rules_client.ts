@@ -37,7 +37,7 @@ import type {
   GetGlobalExecutionLogParams,
 } from './methods/get_execution_log';
 import { getExecutionLogForRule, getGlobalExecutionLogWithAuth } from './methods/get_execution_log';
-import { type GetHistoryByParams, getHistoryForRule } from './methods/get_history_log';
+import { type GetHistoryByParams, getHistoryForRule } from './methods/get_history_for_rule';
 import type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 import { getActionErrorLog, getActionErrorLogWithAuth } from './methods/get_action_error_log';
 import type {

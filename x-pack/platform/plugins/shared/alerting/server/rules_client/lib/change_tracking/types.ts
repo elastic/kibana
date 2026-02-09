@@ -70,6 +70,7 @@ export type LogChangeOverrides = Partial<ChangeHistoryDocument>;
  * Result from a history query.
  */
 export interface GetHistoryResult {
+  startDate?: Date;
   total: number;
   items: ChangeHistoryDocument[];
 }
