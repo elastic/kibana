@@ -4,7 +4,7 @@ This directory contains Scout API tests migrated from FTR tests located in `src/
 
 ## Status
 
-🚧 **Partial migration** (2 config files + 4 test files)
+🚧 **Partial migration** (1 config file + 4 test files)
 
 ## Structure
 
@@ -18,7 +18,8 @@ src/platform/plugins/shared/data_views/test/scout/api/
 │   ├── data_views_crud_create_main.spec.ts        # ✅ Created
 │   ├── data_views_crud_create_spaces.spec.ts      # ✅ Created - Namespaces/spaces tests
 │   └── data_views_crud_delete_errors.spec.ts      # ✅ Created
-└── README.md                                       # This file
+└── README.md                                      # Current file
+└── tsconfig.json                                  # TypeScript configuration
 ```
 
 ## Test Files (4 files)
