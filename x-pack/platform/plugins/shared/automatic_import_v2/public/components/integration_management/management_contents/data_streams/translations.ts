@@ -218,6 +218,12 @@ export const DELETE_MODAL = Object.freeze({
 });
 
 export const EDIT_PIPELINE_FLYOUT = Object.freeze({
+  tableCaption: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.tableCaption',
+    {
+      defaultMessage: 'Pipeline fields',
+    }
+  ),
   documents: i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.documents', {
     defaultMessage: 'Documents',
   }),

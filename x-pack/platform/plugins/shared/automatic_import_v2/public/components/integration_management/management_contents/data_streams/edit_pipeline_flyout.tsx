@@ -31,6 +31,18 @@ import { useGetDataStreamResults } from '../../../../common';
 import { useUIState } from '../../contexts';
 import * as i18n from './translations';
 
+interface EditPipelineFlyoutProps {
+  integrationId: string;
+  dataStream: DataStreamResponse;
+  onClose: () => void;
+}
+
+interface TableRow {
+  field: string;
+  value: string;
+  type: string;
+}
+
 export const getIconFromType = (type: string | null | undefined): EuiTokenProps['iconType'] => {
   switch (type) {
     case 'string':
@@ -58,18 +70,6 @@ export const getIconFromType = (type: string | null | undefined): EuiTokenProps[
   }
 };
 
-interface EditPipelineFlyoutProps {
-  integrationId: string;
-  dataStream: DataStreamResponse;
-  onClose: () => void;
-}
-
-interface TableRow {
-  field: string;
-  value: string;
-  type: string;
-}
-
 const getFieldType = (value: unknown): string => {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
@@ -80,7 +80,7 @@ const getFieldType = (value: unknown): string => {
   return 'string';
 };
 
-const flattenObject = (
+const flattenPipelineObject = (
   obj: Record<string, unknown>,
   parentKey = ''
 ): Array<{ field: string; value: string; type: string }> => {
@@ -90,7 +90,7 @@ const flattenObject = (
     const fieldName = parentKey ? `${parentKey}.${key}` : key;
 
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      result.push(...flattenObject(value as Record<string, unknown>, fieldName));
+      result.push(...flattenPipelineObject(value as Record<string, unknown>, fieldName));
     } else {
       result.push({
         field: fieldName,
@@ -120,8 +120,17 @@ export const EditPipelineFlyout = ({
     if (!data?.results || data.results.length === 0) return [];
     const currentDoc = data.results[activeDocument];
     if (!currentDoc) return [];
-    return flattenObject(currentDoc as Record<string, unknown>);
+    return flattenPipelineObject(currentDoc as Record<string, unknown>);
   }, [data?.results, activeDocument]);
+
+  const stringifiedPipeline = useMemo(() => {
+    if (!data?.ingest_pipeline) return '';
+    try {
+      return JSON.stringify(data.ingest_pipeline, null, 2);
+    } catch (_error) {
+      return '';
+    }
+  }, [data?.ingest_pipeline]);
 
   const handlePageClick = (doc: number) => {
     setActiveDocument(doc);
@@ -163,6 +172,10 @@ export const EditPipelineFlyout = ({
   };
 
   const pageCount = data?.results?.length ?? 0;
+
+  const isTableVisible = !isLoading && !isError && selectedPipelineTab === 'table';
+  const isEditorVisible =
+    !isLoading && !isError && selectedPipelineTab === 'pipeline' && pageCount > 0;
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="editPipelineFlyoutTitle">
@@ -221,18 +234,19 @@ export const EditPipelineFlyout = ({
           </EuiCallOut>
         )}
 
-        {!isLoading && !isError && selectedPipelineTab === 'table' && (
+        {isTableVisible && (
           <EuiInMemoryTable
             items={tableData}
             columns={columns}
             searchFormat="text"
             search={search}
+            tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
             pagination
             sorting
           />
         )}
 
-        {!isLoading && !isError && selectedPipelineTab === 'pipeline' && data?.ingest_pipeline && (
+        {isEditorVisible && (
           <CodeEditor
             isCopyable
             enableFindAction
@@ -244,7 +258,7 @@ export const EditPipelineFlyout = ({
               tabSize: 2,
               wordWrap: 'on',
             }}
-            value={JSON.stringify(data.ingest_pipeline, null, 2)}
+            value={stringifiedPipeline}
           />
         )}
       </EuiFlyoutBody>
