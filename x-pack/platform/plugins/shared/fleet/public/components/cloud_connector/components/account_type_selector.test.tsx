@@ -40,9 +40,9 @@ describe('AccountTypeSelector', () => {
   describe('rendering', () => {
     it('renders account type label', () => {
       renderSelector();
-      expect(screen.getByText('Cloud Connector Account Type')).toBeInTheDocument();
-      expect(screen.getByText('Organization')).toBeInTheDocument();
-      expect(screen.getByText('Single Account')).toBeInTheDocument();
+      expect(screen.getByText('Cloud connector account type')).toBeInTheDocument();
+      expect(screen.getByText('Organization account')).toBeInTheDocument();
+      expect(screen.getByText('Single account')).toBeInTheDocument();
 
       expect(screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR)).toBeInTheDocument();
       expect(

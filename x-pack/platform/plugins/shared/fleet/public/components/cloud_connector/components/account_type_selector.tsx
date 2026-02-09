@@ -27,7 +27,7 @@ const ACCOUNT_TYPE_OPTIONS = [
   {
     id: ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.organizationLabel', {
-      defaultMessage: 'Organization',
+      defaultMessage: 'Organization account',
     }),
     'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION,
   },
