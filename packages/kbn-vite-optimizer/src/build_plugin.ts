@@ -8,10 +8,32 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 // Note: Vite is ESM-only, so we import @kbn/vite-config types here
 // and dynamically import the actual modules in the build function
 import type { BundleRemote } from '@kbn/vite-config';
+
+/**
+ * Try to find an entry file (index.{ts,tsx,js,jsx}) in a directory.
+ * Returns the absolute path to the first match, or null if none found.
+ */
+const ENTRY_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+
+function resolveEntryFile(pluginDir: string, subDir: string): string | null {
+  const dir = Path.resolve(pluginDir, subDir);
+  for (const ext of ENTRY_EXTENSIONS) {
+    const candidate = Path.join(dir, `index${ext}`);
+    try {
+      if (Fs.statSync(candidate).isFile()) {
+        return candidate;
+      }
+    } catch {
+      // doesn't exist, try next
+    }
+  }
+  return null;
+}
 
 /**
  * Configuration for building a plugin bundle
@@ -130,15 +152,29 @@ export async function buildPlugin(
     } = kbnViteConfig;
 
     // Determine entry points
-    const entry: Record<string, string> = {
-      [bundleId]: Path.resolve(pluginDir, 'public/index.ts'),
-    };
+    const entry: Record<string, string> = {};
 
-    // Add extra public dirs
+    // Find the main public entry — try common extensions
+    const mainEntry = resolveEntryFile(pluginDir, 'public');
+    if (mainEntry) {
+      entry[bundleId] = mainEntry;
+    } else {
+      throw new Error(
+        `Cannot find entry file for plugin [${bundleId}]: ` +
+          `no index.{ts,tsx,js,jsx} in ${Path.resolve(pluginDir, 'public')}`
+      );
+    }
+
+    // Add extra public dirs (skip dirs that no longer exist)
     if (manifest.extraPublicDirs) {
       for (const dir of manifest.extraPublicDirs) {
-        const entryName = `${bundleId}/${dir}`;
-        entry[entryName] = Path.resolve(pluginDir, dir, 'index.ts');
+        const entryFile = resolveEntryFile(pluginDir, dir);
+        if (entryFile) {
+          const entryName = `${bundleId}/${dir}`;
+          entry[entryName] = entryFile;
+        }
+        // If the dir/entry doesn't exist, skip silently — the manifest
+        // may reference dirs that were removed or moved.
       }
     }
 

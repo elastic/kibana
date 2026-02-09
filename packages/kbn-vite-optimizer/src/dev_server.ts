@@ -190,7 +190,7 @@ async function generateKbnAliases(repoRoot: string): Promise<Record<string, stri
  * Create Vite plugin for serving plugin source files as ESM
  * No bundling - just transformation
  */
-function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin {
+function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string, log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void }): Plugin {
   const pluginMap = new Map(plugins.map((p) => [p.id, p]));
 
   // Cache resolved file paths — plugin source files don't move at runtime.
@@ -215,8 +215,7 @@ function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin 
         const [, pluginId, filePath] = match;
         const plugin = pluginMap.get(pluginId);
         if (!plugin) {
-          // eslint-disable-next-line no-console
-          console.warn(`[vite] Plugin not found in pluginMap: ${pluginId}`);
+          log.warn(`Plugin not found in pluginMap: ${pluginId}`);
           return next();
         }
 
@@ -249,8 +248,7 @@ function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin 
         }
 
         if (!resolvedPath) {
-          // eslint-disable-next-line no-console
-          console.warn(`[vite] Plugin file not found: ${pluginId}/${filePath}`);
+          log.warn(`Plugin file not found: ${pluginId}/${filePath}`);
           return next();
         }
 
@@ -270,8 +268,7 @@ function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string): Plugin 
             return;
           }
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(`[vite] Error transforming ${resolvedPath}:`, e);
+          log.error(`Error transforming ${resolvedPath}: ${e}`);
         }
 
         next();
@@ -379,6 +376,25 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
 
   // eslint-disable-next-line no-new-func
   const dynamicImport = new Function('specifier', 'return import(specifier)');
+
+  // Formatted logger matching the kbn tooling log style with colors.
+  // picocolors ships with Vite and is always available at runtime.
+  const pc = await dynamicImport('picocolors').then((m: any) => m.default || m);
+  const fmtTime = () => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+  };
+  const logPrefix = ` np bld    log   `;
+  const coloredName = pc.magentaBright('@kbn/vite-optimizer');
+  const log = {
+    // eslint-disable-next-line no-console
+    info: (msg: string) => console.log(`${logPrefix}[${fmtTime()}] [${pc.green('info')}][${coloredName}] ${msg}`),
+    // eslint-disable-next-line no-console
+    warn: (msg: string) => console.log(`${logPrefix}[${fmtTime()}] [${pc.yellow('warning')}][${coloredName}] ${msg}`),
+    // eslint-disable-next-line no-console
+    error: (msg: string) => console.error(`${logPrefix}[${fmtTime()}] [${pc.red('error')}][${coloredName}] ${msg}`),
+  };
+
   const [vite, kbnViteConfig, reactPlugin] = await Promise.all([
     dynamicImport('vite'),
     dynamicImport('@kbn/vite-config'),
@@ -390,8 +406,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
     throw new Error('No UI plugins found');
   }
 
-  // eslint-disable-next-line no-console
-  console.log(`[vite] Discovered ${plugins.length} UI plugins for ESM serving`);
+  log.info(`Discovered ${plugins.length} UI plugins for ESM serving`);
 
   const kbnAliases = await generateKbnAliases(repoRoot);
 
@@ -409,8 +424,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
 
     // Skip plugins with known broken exports for dependency scanning
     if (excludeFromScan.has(plugin.id)) {
-      // eslint-disable-next-line no-console
-      console.log(`[vite] Excluding plugin '${plugin.id}' from dependency scan (known issues)`);
+      log.info(`Excluding plugin '${plugin.id}' from dependency scan (known issues)`);
       continue;
     }
 
@@ -425,10 +439,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
     }
   }
 
-  // eslint-disable-next-line no-console
-  console.log(
-    `[vite] Pre-analyzing ${pluginEntryPoints.length} plugin entry points for dependency discovery`
-  );
+  log.info(`Pre-analyzing ${pluginEntryPoints.length} plugin entry points for dependency discovery`);
 
   const server = await vite.createServer({
     root: repoRoot,
@@ -740,7 +751,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
       euiIconsPlugin(repoRoot),
 
       // Serve plugin source files
-      kbnPluginRoutesPlugin(plugins, repoRoot),
+      kbnPluginRoutesPlugin(plugins, repoRoot, log),
 
       // Kibana-specific plugins from @kbn/vite-config
       kbnViteConfig.kbnResolverPlugin({ repoRoot }),
@@ -1170,21 +1181,15 @@ ${contents
       const depCount = depsOptimizer.metadata
         ? Object.keys(depsOptimizer.metadata.optimized || {}).length
         : 0;
-      // eslint-disable-next-line no-console
-      console.log(
-        `[vite-optimize] Pre-bundled ${depCount} dependencies in ${Date.now() - optimizeStartTime}ms`
-      );
+      log.info(`Pre-bundled ${depCount} dependencies in ${Date.now() - optimizeStartTime}ms`);
     }
   } catch {
     // Optimization state not accessible — not critical
   }
 
-  // eslint-disable-next-line no-console
-  console.log(`[vite] ESM dev server running at ${url}`);
-  if (hmr) {
-    // eslint-disable-next-line no-console
-    console.log(`[vite] HMR enabled at ws://${host}:${hmrPort}`);
-  }
+  // Server URL and HMR status are logged by the outer ViteServer wrapper
+  // in kbn-cli-dev-mode/src/vite_server.ts, so we skip logging them here
+  // to avoid duplicate "server running at" messages.
 
   // Build plugin dependencies map
   const pluginDependencies: Record<string, string[]> = {};
