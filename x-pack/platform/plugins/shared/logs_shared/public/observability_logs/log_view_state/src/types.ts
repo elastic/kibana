@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AnyActorRef, Snapshot } from 'xstate';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type NotificationChannel } from '@kbn/xstate-utils';
 import type {
@@ -157,8 +156,6 @@ export type LogViewEvent =
   | { type: 'LOG_VIEW_URL_KEY_REMOVED' }
   | { type: 'LOG_VIEW_URL_KEY_CHANGED' };
 
-export type LogViewActorRef = AnyActorRef;
-export type LogViewSnapshot = Snapshot<unknown>;
 export type LogViewNotificationChannel = NotificationChannel<
   LogViewContext,
   LogViewEvent,

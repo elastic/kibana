@@ -30,6 +30,7 @@ import type {
 
 export const logViewStateMachine = setup({
     types: {
+      input: {} as LogViewContextWithReference,
       context: {} as LogViewContext,
       events: {} as LogViewEvent,
     },
@@ -122,7 +123,7 @@ export const logViewStateMachine = setup({
       isPersistedLogView: ({ context }) => context.logViewReference.type === 'log-view-reference',
     },
   }).createMachine({
-    context: initialContext,
+    context: ({ input }) => input,
     id: 'LogView',
     initial: 'uninitialized',
     states: {
@@ -305,8 +306,7 @@ export const logViewStateMachine = setup({
     },
   });
 
-export interface LogViewStateMachineDependencies {
-  initialContext: LogViewContextWithReference;
+export interface LogViewStateMachineImplementationDependencies {
   logViews: ILogViewsClient;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
   initializeFromUrl?: InitializeFromUrl;
@@ -314,73 +314,68 @@ export interface LogViewStateMachineDependencies {
   listenForUrlChanges?: ListenForUrlChanges;
 }
 
-export const createLogViewStateMachine = ({
-  initialContext,
+export const createLogViewStateMachineImplementations = ({
   logViews,
   notificationChannel,
   initializeFromUrl,
   updateContextInUrl,
   listenForUrlChanges,
-}: LogViewStateMachineDependencies) =>
-  createPureLogViewStateMachine(initialContext).provide({
-    actions: {
-      ...(notificationChannel != null
-        ? {
-            notifyLoadingStarted: notificationChannel.notify(
-              logViewNotificationEventSelectors.loadingLogViewStarted
-            ),
-            notifyLoadingSucceeded: notificationChannel.notify(
-              logViewNotificationEventSelectors.loadingLogViewSucceeded
-            ),
-            notifyLoadingFailed: notificationChannel.notify(
-              logViewNotificationEventSelectors.loadingLogViewFailed
-            ),
-          }
-        : {}),
-      ...(updateContextInUrl ? { updateContextInUrl } : {}),
-    },
-    actors: {
-      ...(initializeFromUrl ? { initializeFromUrl } : {}),
-      ...(listenForUrlChanges ? { listenForUrlChanges } : {}),
-      // XState v5: Use fromPromise for single-value async operations
-      // Return value directly - XState will call onDone with { output: value }
-      // Throw error - XState will call onError with { error }
-      loadLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
-        if (!('logViewReference' in input)) {
-          throw new Error('Failed to load log view');
+}: LogViewStateMachineImplementationDependencies) => ({
+  actions: {
+    ...(notificationChannel != null
+      ? {
+          notifyLoadingStarted: notificationChannel.notify(
+            logViewNotificationEventSelectors.loadingLogViewStarted
+          ),
+          notifyLoadingSucceeded: notificationChannel.notify(
+            logViewNotificationEventSelectors.loadingLogViewSucceeded
+          ),
+          notifyLoadingFailed: notificationChannel.notify(
+            logViewNotificationEventSelectors.loadingLogViewFailed
+          ),
         }
-        return await logViews.getLogView(input.logViewReference);
-      }),
-      updateLogView: fromPromise(
-        async ({ input }: { input: { context: LogViewContext; event: LogViewEvent } }) => {
-          if (!('logViewReference' in input.context) || input.event.type !== 'UPDATE') {
-            throw new Error(
-              'Failed to update log view: Not invoked by update event with matching id.'
-            );
-          }
-          return await logViews.putLogView(input.context.logViewReference, input.event.attributes);
+      : {}),
+    ...(updateContextInUrl ? { updateContextInUrl } : {}),
+  },
+  actors: {
+    ...(initializeFromUrl ? { initializeFromUrl } : {}),
+    ...(listenForUrlChanges ? { listenForUrlChanges } : {}),
+    loadLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+      if (!('logViewReference' in input)) {
+        throw new Error('Failed to load log view');
+      }
+      return await logViews.getLogView(input.logViewReference);
+    }),
+    updateLogView: fromPromise(
+      async ({ input }: { input: { context: LogViewContext; event: LogViewEvent } }) => {
+        if (!('logViewReference' in input.context) || input.event.type !== 'UPDATE') {
+          throw new Error(
+            'Failed to update log view: Not invoked by update event with matching id.'
+          );
         }
-      ),
-      persistInlineLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
-        if (!('logViewReference' in input) || input.logViewReference.type !== 'log-view-inline') {
-          throw new Error('Failed to persist inline Log View.');
-        }
-        return await logViews.putLogView(
-          { type: 'log-view-reference', logViewId: input.logViewReference.id },
-          input.logViewReference.attributes
-        );
-      }),
-      resolveLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
-        if (!('logView' in input)) {
-          throw new Error('Failed to resolve log view: No log view found in context.');
-        }
-        return await logViews.resolveLogView(input.logView.id, input.logView.attributes);
-      }),
-      loadLogViewStatus: fromPromise(async ({ input }: { input: LogViewContext }) => {
-        if (!('resolvedLogView' in input)) {
-          throw new Error('Failed to resolve log view: No log view found in context.');
-        }
-        return await logViews.getResolvedLogViewStatus(input.resolvedLogView);
-      }),
-    },
-  });
+        return await logViews.putLogView(input.context.logViewReference, input.event.attributes);
+      }
+    ),
+    persistInlineLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+      if (!('logViewReference' in input) || input.logViewReference.type !== 'log-view-inline') {
+        throw new Error('Failed to persist inline Log View.');
+      }
+      return await logViews.putLogView(
+        { type: 'log-view-reference', logViewId: input.logViewReference.id },
+        input.logViewReference.attributes
+      );
+    }),
+    resolveLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+      if (!('logView' in input)) {
+        throw new Error('Failed to resolve log view: No log view found in context.');
+      }
+      return await logViews.resolveLogView(input.logView.id, input.logView.attributes);
+    }),
+    loadLogViewStatus: fromPromise(async ({ input }: { input: LogViewContext }) => {
+      if (!('resolvedLogView' in input)) {
+        throw new Error('Failed to resolve log view: No log view found in context.');
+      }
+      return await logViews.getResolvedLogViewStatus(input.resolvedLogView);
+    }),
+  },
+});

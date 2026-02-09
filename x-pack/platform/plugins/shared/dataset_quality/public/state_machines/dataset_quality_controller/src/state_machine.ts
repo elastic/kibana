@@ -7,6 +7,7 @@
 
 import type { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom } from 'xstate';
 import { assign, fromCallback, fromPromise, setup } from 'xstate';
 import type {
@@ -37,21 +38,6 @@ import {
   updateFailureStoreSuccessNotifier,
 } from './notifications';
 import type { DatasetQualityControllerContext, DatasetQualityControllerEvent } from './types';
-
-const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
-  Object.entries(datasetTypesPrivileges)
-    .filter(([_type, priv]) => priv.canMonitor || priv.canRead)
-    .map(([type, _priv]) => type.replace(/-\*-\*$/, '')) as DataStreamType[];
-
-const generateInvokePerType = () => {
-  return {
-    invoke: KNOWN_TYPES.map((type) => ({
-      id: `${type}`,
-      src: 'loadDataStreamDocsStats' as const,
-      input: ({ context }: { context: DatasetQualityControllerContext }) => ({ context, type }),
-    })),
-  };
-};
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
@@ -189,46 +175,14 @@ export const createPureDatasetQualityControllerStateMachine = (
       notifyUpdateFailureStoreFailed: () => {},
     },
     actors: {
-      loadDatasetTypesPrivileges: fromPromise<GetDataStreamsTypesPrivilegesResponse, void>(
-        async () => {
-          throw new Error('Not implemented');
-        }
-      ),
-      loadDataStreamStats: fromPromise<
-        DataStreamStatServiceResponse,
-        DatasetQualityControllerContext
-      >(async () => {
-        throw new Error('Not implemented');
-      }),
-      loadDataStreamDocsStats: fromCallback<
-        DatasetQualityControllerEvent,
-        { context: DatasetQualityControllerContext; type: DataStreamType }
-      >(() => {}),
-      loadDegradedDocs: fromPromise<DataStreamDocsStat[], DatasetQualityControllerContext>(
-        async () => {
-          throw new Error('Not implemented');
-        }
-      ),
-      loadFailedDocs: fromPromise<DataStreamDocsStat[], DatasetQualityControllerContext>(
-        async () => {
-          throw new Error('Not implemented');
-        }
-      ),
-      loadNonAggregatableDatasets: fromPromise<
-        NonAggregatableDatasets,
-        DatasetQualityControllerContext
-      >(async () => {
-        throw new Error('Not implemented');
-      }),
-      loadIntegrations: fromPromise<Integration[], void>(async () => {
-        throw new Error('Not implemented');
-      }),
-      updateFailureStore: fromPromise<
-        void,
-        { context: DatasetQualityControllerContext; event: DatasetQualityControllerEvent }
-      >(async () => {
-        throw new Error('Not implemented');
-      }),
+      loadDatasetTypesPrivileges: getPlaceholderFor(createLoadDatasetTypesPrivilegesActor),
+      loadDataStreamStats: getPlaceholderFor(createLoadDataStreamStatsActor),
+      loadDataStreamDocsStats: getPlaceholderFor(createLoadDataStreamDocsStatsActor),
+      loadDegradedDocs: getPlaceholderFor(createLoadDegradedDocsActor),
+      loadFailedDocs: getPlaceholderFor(createLoadFailedDocsActor),
+      loadNonAggregatableDatasets: getPlaceholderFor(createLoadNonAggregatableDatasetsActor),
+      loadIntegrations: getPlaceholderFor(createLoadIntegrationsActor),
+      updateFailureStore: getPlaceholderFor(createUpdateFailureStoreActor),
     },
     guards: {
       hasAuthorizedTypes: ({ event }) => {
@@ -570,12 +524,10 @@ export const createPureDatasetQualityControllerStateMachine = (
     },
   });
 
-export interface DatasetQualityControllerStateMachineDependencies {
-  initialContext?: DatasetQualityControllerContext;
-  toasts: IToasts;
-  dataStreamStatsClient: IDataStreamsStatsClient;
-  isDatasetQualityAllSignalsAvailable: boolean;
-}
+const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
+  Object.entries(datasetTypesPrivileges)
+    .filter(([_type, priv]) => priv.canMonitor || priv.canRead)
+    .map(([type, _priv]) => type.replace(/-\*-\*$/, '')) as DataStreamType[];
 
 const getValidDatasetTypes = (
   context: DatasetQualityControllerContext,
@@ -591,13 +543,143 @@ const isTypeSelected = (type: DataStreamType, context: DatasetQualityControllerC
   (context.filters.types.length === 0 && context.authorizedDatasetTypes.includes(type)) ||
   context.filters.types.includes(type);
 
+interface ActorDeps {
+  dataStreamStatsClient: IDataStreamsStatsClient;
+  isDatasetQualityAllSignalsAvailable: boolean;
+}
+
+const createLoadDatasetTypesPrivilegesActor = ({ dataStreamStatsClient }: ActorDeps) =>
+  fromPromise(async () => {
+    return dataStreamStatsClient.getDataStreamsTypesPrivileges({
+      types: KNOWN_TYPES,
+    });
+  });
+
+const createLoadDataStreamStatsActor = ({
+  dataStreamStatsClient,
+  isDatasetQualityAllSignalsAvailable,
+}: ActorDeps) =>
+  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
+    return dataStreamStatsClient.getDataStreamsStats({
+      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      datasetQuery: input.filters.query,
+    });
+  });
+
+const createLoadDataStreamDocsStatsActor = ({ dataStreamStatsClient }: ActorDeps) =>
+  fromCallback<
+    DatasetQualityControllerEvent,
+    { context: DatasetQualityControllerContext; type: DataStreamType }
+  >(({ sendBack, input }) => {
+    const { context, type } = input;
+    const fetchDocs = async () => {
+      try {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+        const totalDocsStats = await (isTypeSelected(type, context)
+          ? dataStreamStatsClient.getDataStreamsTotalDocs({ type, start, end })
+          : Promise.resolve([]));
+        sendBack({ type: 'SAVE_TOTAL_DOCS_STATS', data: totalDocsStats, dataStreamType: type });
+      } catch (e) {
+        sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', data: e as Error });
+      }
+    };
+    fetchDocs();
+  });
+
+const createLoadDegradedDocsActor = ({
+  dataStreamStatsClient,
+  isDatasetQualityAllSignalsAvailable,
+}: ActorDeps) =>
+  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
+    const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
+    return dataStreamStatsClient.getDataStreamsDegradedStats({
+      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      datasetQuery: input.filters.query,
+      start,
+      end,
+    });
+  });
+
+const createLoadFailedDocsActor = ({
+  dataStreamStatsClient,
+  isDatasetQualityAllSignalsAvailable,
+}: ActorDeps) =>
+  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
+    const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
+    return dataStreamStatsClient.getDataStreamsFailedStats({
+      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      datasetQuery: input.filters.query,
+      start,
+      end,
+    });
+  });
+
+const createLoadNonAggregatableDatasetsActor = ({
+  dataStreamStatsClient,
+  isDatasetQualityAllSignalsAvailable,
+}: ActorDeps) =>
+  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
+    const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
+    return dataStreamStatsClient.getNonAggregatableDatasets({
+      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      start,
+      end,
+    });
+  });
+
+const createLoadIntegrationsActor = ({ dataStreamStatsClient }: ActorDeps) =>
+  fromPromise(async () => {
+    return dataStreamStatsClient.getIntegrations();
+  });
+
+const createUpdateFailureStoreActor = ({ dataStreamStatsClient }: ActorDeps) =>
+  fromPromise(
+    async ({
+      input,
+    }: {
+      input: { context: DatasetQualityControllerContext; event: DatasetQualityControllerEvent };
+    }): Promise<void> => {
+      const { event } = input;
+      if (
+        'dataStream' in event &&
+        event.dataStream &&
+        event.dataStream.hasFailureStore !== undefined
+      ) {
+        await dataStreamStatsClient.updateFailureStore({
+          dataStream: event.dataStream.rawName,
+          failureStoreEnabled: event.dataStream.hasFailureStore,
+          customRetentionPeriod: event.dataStream.customRetentionPeriod,
+        });
+      }
+    }
+  );
+
+const generateInvokePerType = () => {
+  return {
+    invoke: KNOWN_TYPES.map((type) => ({
+      id: `${type}`,
+      src: 'loadDataStreamDocsStats' as const,
+      input: ({ context }: { context: DatasetQualityControllerContext }) => ({ context, type }),
+    })),
+  };
+};
+
+export interface DatasetQualityControllerStateMachineDependencies {
+  initialContext?: DatasetQualityControllerContext;
+  toasts: IToasts;
+  dataStreamStatsClient: IDataStreamsStatsClient;
+  isDatasetQualityAllSignalsAvailable: boolean;
+}
+
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
   isDatasetQualityAllSignalsAvailable,
-}: DatasetQualityControllerStateMachineDependencies) =>
-  createPureDatasetQualityControllerStateMachine(initialContext).provide({
+}: DatasetQualityControllerStateMachineDependencies) => {
+  const actorDeps: ActorDeps = { dataStreamStatsClient, isDatasetQualityAllSignalsAvailable };
+
+  return createPureDatasetQualityControllerStateMachine(initialContext).provide({
     actions: {
       storeAuthorizedDatasetTypes: assign(({ context, event }) => {
         if (!('output' in event)) return {};
@@ -681,92 +763,17 @@ export const createDatasetQualityControllerStateMachine = ({
       },
     },
     actors: {
-      loadDatasetTypesPrivileges: fromPromise(async () => {
-        return dataStreamStatsClient.getDataStreamsTypesPrivileges({
-          types: KNOWN_TYPES,
-        });
-      }),
-      loadDataStreamStats: fromPromise(
-        async ({ input }: { input: DatasetQualityControllerContext }) => {
-          return dataStreamStatsClient.getDataStreamsStats({
-            types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-            datasetQuery: input.filters.query,
-          });
-        }
-      ),
-      loadDataStreamDocsStats: fromCallback<
-        DatasetQualityControllerEvent,
-        { context: DatasetQualityControllerContext; type: DataStreamType }
-      >(({ sendBack, input }) => {
-        const { context, type } = input;
-        const fetchDocs = async () => {
-          try {
-            const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
-            const totalDocsStats = await (isTypeSelected(type, context)
-              ? dataStreamStatsClient.getDataStreamsTotalDocs({ type, start, end })
-              : Promise.resolve([]));
-            sendBack({ type: 'SAVE_TOTAL_DOCS_STATS', data: totalDocsStats, dataStreamType: type });
-          } catch (e) {
-            sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', data: e as Error });
-          }
-        };
-        fetchDocs();
-      }),
-      loadDegradedDocs: fromPromise(
-        async ({ input }: { input: DatasetQualityControllerContext }) => {
-          const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
-          return dataStreamStatsClient.getDataStreamsDegradedStats({
-            types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-            datasetQuery: input.filters.query,
-            start,
-            end,
-          });
-        }
-      ),
-      loadFailedDocs: fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
-        const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
-        return dataStreamStatsClient.getDataStreamsFailedStats({
-          types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-          datasetQuery: input.filters.query,
-          start,
-          end,
-        });
-      }),
-      loadNonAggregatableDatasets: fromPromise(
-        async ({ input }: { input: DatasetQualityControllerContext }) => {
-          const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
-          return dataStreamStatsClient.getNonAggregatableDatasets({
-            types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-            start,
-            end,
-          });
-        }
-      ),
-      loadIntegrations: fromPromise(async () => {
-        return dataStreamStatsClient.getIntegrations();
-      }),
-      updateFailureStore: fromPromise(
-        async ({
-          input,
-        }: {
-          input: { context: DatasetQualityControllerContext; event: DatasetQualityControllerEvent };
-        }): Promise<void> => {
-          const { event } = input;
-          if (
-            'dataStream' in event &&
-            event.dataStream &&
-            event.dataStream.hasFailureStore !== undefined
-          ) {
-            await dataStreamStatsClient.updateFailureStore({
-              dataStream: event.dataStream.rawName,
-              failureStoreEnabled: event.dataStream.hasFailureStore,
-              customRetentionPeriod: event.dataStream.customRetentionPeriod,
-            });
-          }
-        }
-      ),
+      loadDatasetTypesPrivileges: createLoadDatasetTypesPrivilegesActor(actorDeps),
+      loadDataStreamStats: createLoadDataStreamStatsActor(actorDeps),
+      loadDataStreamDocsStats: createLoadDataStreamDocsStatsActor(actorDeps),
+      loadDegradedDocs: createLoadDegradedDocsActor(actorDeps),
+      loadFailedDocs: createLoadFailedDocsActor(actorDeps),
+      loadNonAggregatableDatasets: createLoadNonAggregatableDatasetsActor(actorDeps),
+      loadIntegrations: createLoadIntegrationsActor(actorDeps),
+      updateFailureStore: createUpdateFailureStoreActor(actorDeps),
     },
   });
+};
 
 export type DatasetQualityControllerStateService = ActorRefFrom<
   ReturnType<typeof createDatasetQualityControllerStateMachine>

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useActorRef, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate';
 import type { LogViewAttributes, LogViewReference, LogViewStatus } from '../../common/log_views';
 import { DEFAULT_LOG_VIEW } from '../../common/log_views';
@@ -18,50 +19,43 @@ import type {
 } from '../observability_logs/log_view_state/src/url_state_storage_service';
 import {
   createLogViewNotificationChannel,
-  createLogViewStateMachine,
+  logViewStateMachine,
+  createLogViewStateMachineImplementations,
 } from '../observability_logs/log_view_state';
 import type { ILogViewsClient } from '../services/log_views';
-import { isDevMode } from '../utils/dev_mode';
 
 export const useLogView = ({
   initialLogViewReference,
   logViews,
-  useDevTools = isDevMode(),
   initializeFromUrl,
   updateContextInUrl,
   listenForUrlChanges,
 }: {
   initialLogViewReference?: LogViewReference;
   logViews: ILogViewsClient;
-  useDevTools?: boolean;
   initializeFromUrl?: InitializeFromUrl;
   updateContextInUrl?: UpdateContextInUrl;
   listenForUrlChanges?: ListenForUrlChanges;
 }) => {
   const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
 
-  // Memoize the machine to prevent infinite re-renders in XState v5
-  // useActorRef expects a stable machine reference
-  const logViewStateMachine = useMemo(
-    () =>
-      createLogViewStateMachine({
-        initialContext: {
-          logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
-        },
+  const logViewStateService = useActorRef(
+    logViewStateMachine.provide(
+      createLogViewStateMachineImplementations({
         logViews,
         notificationChannel: logViewStateNotifications,
         initializeFromUrl,
         updateContextInUrl,
         listenForUrlChanges,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [] // Only create the machine once on mount
+      })
+    ),
+    {
+      inspect: createConsoleInspector(),
+      input: {
+        logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
+      },
+    }
   );
-
-  const logViewStateService = useActorRef(logViewStateMachine, {
-    // eslint-disable-next-line no-console
-    inspect: useDevTools ? console.log : undefined,
-  });
 
   const changeLogViewReference = useCallback(
     (logViewReference: LogViewReference) => {
