@@ -6,7 +6,7 @@
  */
 
 import Handlebars from '@kbn/handlebars';
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import { coerce, satisfies } from 'semver';
 
@@ -84,7 +84,7 @@ export function compileTemplate(
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
   try {
-    const yamlFromCompiledTemplate = load(compiledTemplate, {});
+    const yamlFromCompiledTemplate = parse(compiledTemplate);
 
     // Hack to keep empty string ('') values around in the end yaml because
     // `load` replaces empty strings with null
@@ -179,7 +179,7 @@ function buildTemplateVariables(
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
+      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? parse(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       if (recordEntry.value.ids) {
         varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
@@ -283,7 +283,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? dump(val) : ''
+      val ? stringify(val) : ''
     );
   });
 

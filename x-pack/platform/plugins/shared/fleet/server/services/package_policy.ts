@@ -26,7 +26,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import semverGt from 'semver/functions/gt';
 
 import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -3374,7 +3374,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => {
@@ -3920,7 +3920,7 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

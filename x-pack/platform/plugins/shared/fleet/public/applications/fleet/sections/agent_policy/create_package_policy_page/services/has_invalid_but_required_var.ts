@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type {
   PackagePolicyConfigRecord,
@@ -81,7 +81,7 @@ export const hasInvalidButRequiredVar = (
       packagePolicyVars[registryVar.name],
       registryVar,
       registryVar.name,
-      load,
+      parse,
       undefined,
       requiredByVarGroup
     );

@@ -7,7 +7,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { dump } from 'js-yaml';
+import { stringify, Document, isMap, isScalar } from 'yaml';
+import type { YAMLMap } from 'yaml';
 import yamlDoc from 'yaml';
 
 import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
@@ -206,13 +207,9 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
   } else if (format === 'yml') {
-    const yaml = dump(
-      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) },
-      {
-        skipInvalid: true,
-        sortKeys: _sortYamlKeys,
-      }
-    );
+    const data = { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
+    const doc = new Document(data, { sortMapEntries: _sortYamlKeys, strict: false });
+    const yaml = doc.toString();
     return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 

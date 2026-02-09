@@ -11,7 +11,7 @@ import { promisify } from 'util';
 import path from 'path';
 
 import { merge } from '@kbn/std';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { pick } from 'lodash';
 import semverMajor from 'semver/functions/major';
 import semverPrerelease from 'semver/functions/prerelease';
@@ -238,7 +238,7 @@ export function parseAndVerifyArchive(
   let manifest: ArchivePackage;
   try {
     logger.debug(`Verifying archive - loading yaml`);
-    manifest = yaml.load(manifestBuffer.toString());
+    manifest = parse(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(
       `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
@@ -318,7 +318,7 @@ export function parseAndVerifyArchive(
   if (paths.includes(tagsFile) || tagsBuffer) {
     let tags: PackageSpecTags[];
     try {
-      tags = yaml.load(tagsBuffer.toString());
+      tags = parse(tagsBuffer.toString());
       logger.debug(`Parsing archive - parsing kibana/tags.yml file`);
       if (tags.length) {
         parsed.asset_tags = tags;
@@ -376,7 +376,7 @@ export function parseAndVerifyDataStreams(opts: {
 
     let manifest;
     try {
-      manifest = yaml.load(manifestBuffer.toString());
+      manifest = parse(manifestBuffer.toString());
     } catch (error) {
       throw new PackageInvalidArchiveError(
         `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
@@ -389,7 +389,7 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamRoutingRules: RegistryDataStreamRoutingRules[] | undefined;
     if (routingRulesBuffer) {
       try {
-        dataStreamRoutingRules = yaml.load(routingRulesBuffer.toString());
+        dataStreamRoutingRules = parse(routingRulesBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
           `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
@@ -402,7 +402,7 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
     if (lifecyleBuffer) {
       try {
-        dataStreamLifecyle = yaml.load(lifecyleBuffer.toString());
+        dataStreamLifecyle = parse(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
           `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
