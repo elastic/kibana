@@ -61,7 +61,7 @@ const TestTemplatedFormRenderer = ({
   });
 
   if (!parseResult.success) {
-    return <>{`Invalid templateDefinition: ${parseResult.error}`}</>;
+    return <>{`Invalid template definition:\n ${parseResult.error}`}</>;
   }
 
   const {
