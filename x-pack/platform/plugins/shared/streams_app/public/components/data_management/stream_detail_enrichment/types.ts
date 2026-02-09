@@ -11,6 +11,7 @@ import type {
   DissectProcessor,
   DropDocumentProcessor,
   GrokProcessor,
+  UriPartsProcessor,
   ManualIngestPipelineProcessor,
   MathProcessor,
   ReplaceProcessor,
@@ -68,6 +69,7 @@ export type MathFormState = MathProcessor;
 export type UppercaseFormState = UppercaseProcessor;
 export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
+export type UriPartsFormState = UriPartsProcessor;
 export type JoinFormState = JoinProcessor;
 export type SplitFormState = SplitProcessor;
 export type SortFormState = SortProcessor;
@@ -94,6 +96,7 @@ export type SpecialisedFormState =
   | UppercaseFormState
   | LowercaseFormState
   | TrimFormState
+  | UriPartsFormState
   | JoinFormState
   | SplitFormState
   | SortFormState
