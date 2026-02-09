@@ -296,7 +296,7 @@ async function getSuggestionsWithinCommandExpression(
     const { rangeToReplace, filterText } =
       suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
     const insertText = rangeToReplace
-      ? fullText.substring(rangeToReplace.start, rangeToReplace.end)
+      ? fullText.substring(rangeToReplace.start, rangeToReplace.end - 1) // end is exclusive
       : '';
     const commandArgs = buildResourceBrowserCommandArgs({
       sources: context.sources,
