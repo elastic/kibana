@@ -12,11 +12,12 @@ import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import { PanelFooter } from './footer';
 import { PanelContent } from './content';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
-import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
+import { AttackDetailsRightPanelKey } from './constants/panel_keys';
 import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
 import { useTabs } from './hooks/use_tabs';
+import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
 
@@ -27,8 +28,9 @@ export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
  */
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
-  const { openRightPanel, openLeftPanel } = useExpandableFlyoutApi();
+  const { openRightPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
+  const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
@@ -44,13 +46,6 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
     },
     [attackId, indexName, openRightPanel, storage]
   );
-
-  const expandDetails = useCallback(() => {
-    openLeftPanel({
-      id: AttackDetailsLeftPanelKey,
-      params: { attackId, indexName },
-    });
-  }, [attackId, indexName, openLeftPanel]);
 
   return (
     <>

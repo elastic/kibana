@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   SAMPLE_DATA_SET_ID,

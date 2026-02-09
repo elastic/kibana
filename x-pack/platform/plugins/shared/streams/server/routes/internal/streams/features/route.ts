@@ -146,6 +146,36 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
+export const listAllFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features across streams',
+    description: 'Fetches all features the user has access to',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getScopedClients, server }): Promise<{ features: Feature[] }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams.map((stream) => stream.name);
+
+    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+
+    return {
+      features,
+    };
+  },
+});
+
 export const bulkFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_bulk',
   options: {
@@ -325,6 +355,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,

@@ -25,6 +25,7 @@ const COMPUTED_FEATURE_TYPES = [
 
 export const baseFeatureSchema = z.object({
   id: z.string(),
+  stream_name: z.string(),
   type: z.string(),
   subtype: z.string().optional(),
   title: z.string().optional(),

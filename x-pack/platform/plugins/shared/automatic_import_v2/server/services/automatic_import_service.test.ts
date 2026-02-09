@@ -590,6 +590,79 @@ describe('AutomaticImportSetupService', () => {
     });
   });
 
+  describe('getDataStreamResults', () => {
+    it('returns ingest_pipeline as JSON string and results when completed', async () => {
+      const mockGetDataStream = jest.fn().mockResolvedValue({
+        attributes: {
+          job_info: { status: 'completed' },
+          result: {
+            ingest_pipeline: { processors: [] },
+            pipeline_docs: [{ a: 1 }],
+          },
+        },
+      });
+
+      (service as any).savedObjectService = {
+        getDataStream: mockGetDataStream,
+      };
+
+      const res = await service.getDataStreamResults('integration-1', 'ds-1');
+      expect(res.ingest_pipeline).toEqual({ processors: [] });
+      expect(res.results).toEqual([{ a: 1 }]);
+    });
+
+    it('throws when data stream is not completed', async () => {
+      const mockGetDataStream = jest.fn().mockResolvedValue({
+        attributes: {
+          job_info: { status: 'processing' },
+          result: {},
+        },
+      });
+
+      (service as any).savedObjectService = {
+        getDataStream: mockGetDataStream,
+      };
+
+      await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
+        'has not completed yet'
+      );
+    });
+
+    it('throws when data stream is failed', async () => {
+      const mockGetDataStream = jest.fn().mockResolvedValue({
+        attributes: {
+          job_info: { status: 'failed' },
+          result: {},
+        },
+      });
+
+      (service as any).savedObjectService = {
+        getDataStream: mockGetDataStream,
+      };
+
+      await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
+        'failed and has no results'
+      );
+    });
+
+    it('throws when ingest pipeline is missing even if completed', async () => {
+      const mockGetDataStream = jest.fn().mockResolvedValue({
+        attributes: {
+          job_info: { status: 'completed' },
+          result: { pipeline_docs: [{ a: 1 }] },
+        },
+      });
+
+      (service as any).savedObjectService = {
+        getDataStream: mockGetDataStream,
+      };
+
+      await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
+        'has no ingest pipeline results'
+      );
+    });
+  });
+
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
@@ -724,7 +797,7 @@ describe('AutomaticImportSetupService', () => {
       // Mock agent service
       const mockInvokeAgent = jest.fn().mockResolvedValue({
         current_pipeline: { processors: [] },
-        pipeline_generation_results: { docs: [] },
+        pipeline_generation_results: [],
       });
 
       (taskManagerService as any).agentService = {
@@ -760,7 +833,8 @@ describe('AutomaticImportSetupService', () => {
       expect(mockUpdateDataStream).toHaveBeenCalledWith({
         integrationId: 'test-integration',
         dataStreamId: 'test-datastream',
-        ingestPipeline: expect.any(String),
+        ingestPipeline: expect.any(Object),
+        pipelineDocs: expect.any(Array),
         status: 'completed',
       });
     });

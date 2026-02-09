@@ -118,8 +118,7 @@ subquery
     ;
 
 indexPattern
-    : clusterString COLON unquotedIndexString
-    | unquotedIndexString CAST_OP selectorString
+    : (clusterString COLON)? unquotedIndexString (CAST_OP selectorString)?
     | indexString
     ;
 

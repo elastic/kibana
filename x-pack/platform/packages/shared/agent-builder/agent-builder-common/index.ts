@@ -44,7 +44,7 @@ export {
   type ErrorResult,
   type QueryResult,
   type ResourceResult,
-  type TabularDataResult,
+  type EsqlResults,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,

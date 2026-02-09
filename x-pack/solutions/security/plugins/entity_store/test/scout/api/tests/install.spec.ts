@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 

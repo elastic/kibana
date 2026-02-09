@@ -100,6 +100,8 @@ export const useWorkflowBulkActions = ({
           {
             id: workflow.id,
             workflow: updateData,
+            isBulkAction: true,
+            bulkActionCount: totalCount,
           },
           {
             onSettled: (data, error) => {

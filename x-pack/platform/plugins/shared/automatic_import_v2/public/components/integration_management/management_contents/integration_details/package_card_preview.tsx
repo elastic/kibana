@@ -67,7 +67,6 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({}) => {
       <EuiPanel paddingSize="l" color="subdued" hasShadow={false} borderRadius="m">
         <EuiCard
           css={cardCss.card}
-          data-test-subj="packageCardPreview"
           layout="horizontal"
           title={title ?? ''}
           description={description ?? ''}

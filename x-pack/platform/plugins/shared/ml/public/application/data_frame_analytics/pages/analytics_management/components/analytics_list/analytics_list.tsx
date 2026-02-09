@@ -221,7 +221,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     return (
       <div data-test-subj="mlAnalyticsJobList">
         <EuiSpacer size="m" />
-        <AnalyticsEmptyPrompt showDocsLink />
+        <AnalyticsEmptyPrompt showDocsLink iconSize="s" />
       </div>
     );
   }

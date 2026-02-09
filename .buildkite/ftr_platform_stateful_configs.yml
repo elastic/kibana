@@ -91,6 +91,7 @@ enabled:
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
+  - src/platform/test/functional/apps/discover/query_mode/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
@@ -151,6 +152,8 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group6/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group7/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group9/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
@@ -250,8 +253,11 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts

@@ -13,6 +13,7 @@ import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
+  streamName: string;
   sampleDocuments: Array<Record<string, any>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -21,6 +22,7 @@ export interface IdentifyFeaturesOptions {
 }
 
 export async function identifyFeatures({
+  streamName,
   sampleDocuments,
   systemPrompt,
   inferenceClient,
@@ -47,6 +49,10 @@ export async function identifyFeatures({
 
   const features = response.toolCalls
     .flatMap((toolCall) => toolCall.function.arguments.features)
+    .map((feature) => ({
+      ...feature,
+      stream_name: streamName,
+    }))
     .filter((feature) => {
       const result = baseFeatureSchema.safeParse(feature);
       return result.success;

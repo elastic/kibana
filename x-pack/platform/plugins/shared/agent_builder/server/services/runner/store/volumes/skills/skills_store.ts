@@ -9,7 +9,6 @@ import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
 import { createSkillEntries, getSkillEntryPath } from './utils';
-import { SKILLS_ENABLED } from '../../../../skills/constants';
 
 export const createSkillsStore = ({ skills }: { skills: SkillDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
@@ -21,9 +20,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
 
   constructor({ skills = [] }: { skills?: SkillDefinition[] }) {
     this.volume = new MemoryVolume('skills');
-    if (SKILLS_ENABLED) {
-      skills.forEach((skill) => this.add(skill));
-    }
+    skills.forEach((skill) => this.add(skill));
   }
 
   getVolume() {

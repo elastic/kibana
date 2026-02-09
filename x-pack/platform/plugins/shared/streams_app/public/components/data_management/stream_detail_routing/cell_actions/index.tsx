@@ -50,7 +50,9 @@ const FilterBtn = ({
   mode: BtnMode;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const isRuleActive = routingSnapshot.matches({ ready: { creatingNewRule: 'changing' } });
+  const isRuleActive = routingSnapshot.matches({
+    ready: { ingestMode: { creatingNewRule: 'changing' } },
+  });
 
   const currentRule = isRuleActive ? selectCurrentRule(routingSnapshot.context) : {};
 

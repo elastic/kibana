@@ -250,7 +250,7 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(this.logger)
+        createStreamsGlobalSearchResultProvider(core, this.logger)
       );
     }
 

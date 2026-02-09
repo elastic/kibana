@@ -21,6 +21,7 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
+import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
@@ -109,14 +110,28 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
 
+  const { getScrollMargin, getScrollOffset } = useVirtualizedRowScrollState({
+    getVirtualizer,
+    rowIndex: row.index,
+  });
+
+  // Keep a reference to the virtualizer for cleanup and scroll-to operations
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
+
   const virtualRow = useMemo(
     () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
     [rootVirtualizer, row]
   );
-  const getScrollMargin = useCallback(() => virtualRow?.start ?? 0, [virtualRow]);
+
   const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
-  const getScrollOffset = useCallback(() => rootVirtualizer.scrollOffset ?? 0, [rootVirtualizer]);
+
+  /**
+   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
+   * Returns an unregister function.
+   */
+  const preventSizeChangePropagation = useCallback(() => {
+    return rootVirtualizer.preventRowSizeChangePropagation(row.index);
+  }, [rootVirtualizer, row.index]);
 
   useEffect(
     () => () => {
@@ -135,7 +150,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
         });
       }
     },
-    [getScrollMargin, getScrollOffset, rootVirtualizer, virtualRow?.index]
+    [rootVirtualizer, virtualRow?.index, getScrollOffset, getScrollMargin]
   );
 
   const memoizedChild = useMemo(() => {
@@ -147,6 +162,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
+      preventSizeChangePropagation,
     });
   }, [
     children,
@@ -156,6 +172,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollElement,
     getScrollOffset,
     getScrollMargin,
+    preventSizeChangePropagation,
   ]);
 
   return (

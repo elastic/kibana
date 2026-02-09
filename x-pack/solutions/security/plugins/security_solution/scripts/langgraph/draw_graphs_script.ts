@@ -19,6 +19,7 @@ import type {
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ExperimentalFeatures } from '../../common';
 import { getRulesMigrationTools } from '../../server/lib/siem_migrations/rules/task/agent/tools';
 import type { DashboardMigrationsRetriever } from '../../server/lib/siem_migrations/dashboards/task/retrievers';
 import { getDashboardMigrationAgent } from '../../server/lib/siem_migrations/dashboards/task/agent';
@@ -81,6 +82,7 @@ async function getSiemDashboardMigrationGraph(logger: Logger): Promise<Drawable>
     inference: {} as InferenceServerStart,
     request: {} as KibanaRequest,
     connectorId: 'test-connector-id',
+    experimentalFeatures: {} as unknown as ExperimentalFeatures,
   });
   return graph.getGraphAsync({ xray: true });
 }

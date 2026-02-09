@@ -23,6 +23,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
@@ -48,6 +49,7 @@ export interface ApmPluginContextValue {
   kibanaEnvironment: KibanaEnvContext;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  metricsDataAccess?: MetricsDataPluginStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

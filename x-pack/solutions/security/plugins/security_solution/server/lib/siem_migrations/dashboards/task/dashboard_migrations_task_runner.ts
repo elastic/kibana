@@ -53,6 +53,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new DashboardMigrationsRetriever(this.migrationId, {
       data: this.data,
+      experimentalFeatures: this.dependencies.experimentalFeatures,
     });
   }
 
@@ -93,6 +94,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       inference: inferenceService,
       request: this.request,
       connectorId,
+      experimentalFeatures: this.dependencies.experimentalFeatures,
     });
 
     this.telemetry = telemetryClient;

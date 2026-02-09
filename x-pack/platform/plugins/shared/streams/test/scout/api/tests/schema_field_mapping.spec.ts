@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
@@ -23,7 +23,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('unmappedFields');
+    expect(body.unmappedFields).toBeDefined();
     expect(Array.isArray(body.unmappedFields)).toBe(true);
   });
 
@@ -64,7 +64,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
     expect(['unknown', 'success', 'failure']).toContain(body.status);
   });
 
@@ -83,7 +83,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - match_only_text
@@ -104,7 +104,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
       );
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('status');
+      expect(body.status).toBeDefined();
     }
   );
 
@@ -127,7 +127,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate single long field', async ({ apiClient, samlAuth }) => {
@@ -145,7 +145,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - double
@@ -167,7 +167,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate single double field', async ({ apiClient, samlAuth }) => {
@@ -185,7 +185,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - boolean
@@ -204,7 +204,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate multiple boolean fields', async ({ apiClient, samlAuth }) => {
@@ -226,7 +226,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - date
@@ -245,7 +245,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate multiple date fields', async ({ apiClient, samlAuth }) => {
@@ -267,7 +267,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - ip
@@ -289,7 +289,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate single ip field', async ({ apiClient, samlAuth }) => {
@@ -307,7 +307,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Field type simulation - geo_point
@@ -326,7 +326,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should simulate multiple geo_point fields', async ({ apiClient, samlAuth }) => {
@@ -347,7 +347,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Mixed field types
@@ -376,7 +376,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
       );
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('status');
+      expect(body.status).toBeDefined();
     }
   );
 
@@ -399,7 +399,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   apiTest('should handle ECS-style field names', async ({ apiClient, samlAuth }) => {
@@ -423,7 +423,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
   });
 
   // Error handling
@@ -549,7 +549,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     );
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('status');
+    expect(body.status).toBeDefined();
     // Response should have either success/unknown or failure with error details
   });
 });

@@ -8,12 +8,10 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { TriggerType } from '@kbn/workflows';
-import {
-  AlertRuleTriggerSchema,
-  ManualTriggerSchema,
-  ScheduledTriggerSchema,
-} from '@kbn/workflows';
+import { AlertRuleTriggerSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import { ManualTriggerSchema } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { ScheduledTriggerSchema } from '@kbn/workflows/spec/schema/triggers/scheduled_trigger_schema';
+import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 /**

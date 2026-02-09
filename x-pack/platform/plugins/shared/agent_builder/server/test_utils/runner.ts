@@ -12,6 +12,7 @@ import {
   httpServerMock,
   savedObjectsServiceMock,
   securityServiceMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -248,6 +249,10 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     filestore: createFileSystemStoreMock(),
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
+    experimentalFeatures: {
+      filestore: false,
+      skills: false,
+    },
   };
 };
 
@@ -302,6 +307,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
@@ -325,6 +331,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),

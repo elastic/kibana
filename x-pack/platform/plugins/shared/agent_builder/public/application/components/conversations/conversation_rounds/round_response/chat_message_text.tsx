@@ -25,7 +25,7 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   visualizationElement,
   dashboardElement,
-} from '@kbn/agent-builder-common/tools/tool_result';
+} from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
   Cursor,
