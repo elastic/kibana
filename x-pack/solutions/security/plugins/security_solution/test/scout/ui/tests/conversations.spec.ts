@@ -21,24 +21,22 @@ import { waitForPageReady } from './common/constants';
 const mockConvo1 = { id: 'spooky', title: 'Spooky convo', messages: [] };
 const mockConvo2 = { id: 'silly', title: 'Silly convo', messages: [] };
 
-test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient }) => {
-    await deleteConnectors(kbnClient);
-    await deleteConversations(esClient);
-    await deleteAlertsAndRules(kbnClient);
-    await createConversation(kbnClient, mockConvo1);
-    await createConversation(kbnClient, mockConvo2);
-  });
+test.describe(
+  'AI Assistant Conversations - Welcome Setup',
+  { tag: ['@ess', '@svlSecurity'] },
+  () => {
+    test.beforeEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deleteAlertsAndRules(kbnClient);
+    });
 
-  test.describe('No connectors or conversations exist', { tag: ['@ess', '@svlSecurity'] }, () => {
     test('Shows welcome setup when no connectors or conversations exist', async ({
       browserAuth,
       page,
       pageObjects,
       kbnUrl,
     }) => {
-      // Delete the conversations we just created for this specific test
-      // (this test checks the empty state)
       await browserAuth.loginAsAdmin();
       await page.goto(kbnUrl.get('/app/security/get_started'));
       await waitForPageReady(page);
@@ -59,10 +57,19 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
       await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
       await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
     });
-  });
+  }
+);
 
-  test.describe('Changing conversations', () => {
-    test.beforeEach(async ({ kbnClient, browserAuth }) => {
+test.describe(
+  'AI Assistant Conversations - Switching',
+  { tag: ['@ess', '@svlSecurity'] },
+  () => {
+    test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deleteAlertsAndRules(kbnClient);
+      await createConversation(kbnClient, mockConvo1);
+      await createConversation(kbnClient, mockConvo2);
       await createAzureConnector(kbnClient);
       await createBedrockConnector(kbnClient);
       await browserAuth.loginAsAdmin();
@@ -73,7 +80,7 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
       pageObjects,
       kbnUrl,
     }) => {
-      test.slow();
+      test.setTimeout(180_000);
       await page.goto(kbnUrl.get('/app/security/get_started'));
       await waitForPageReady(page);
       await pageObjects.assistant.openAssistant();
@@ -107,7 +114,7 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
       pageObjects,
       kbnUrl,
     }) => {
-      test.slow();
+      test.setTimeout(180_000);
       await page.goto(kbnUrl.get('/app/security/get_started'));
       await waitForPageReady(page);
       await pageObjects.assistant.openAssistant();
@@ -116,5 +123,5 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
         azureConnectorPayload.name
       );
     });
-  });
-});
+  }
+);
