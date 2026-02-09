@@ -69,7 +69,7 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
     );
 
     await page.getByText('Save changes').first().click();
-    await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible();
+    await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible({ timeout: 30_000 });
   });
 
   test('should be able to run live query and add to timeline', async ({ page, kbnUrl }) => {

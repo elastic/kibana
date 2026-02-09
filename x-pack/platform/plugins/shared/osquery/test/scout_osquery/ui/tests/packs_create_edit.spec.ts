@@ -412,9 +412,12 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
       await viewInLensButton.waitFor({ state: 'visible', timeout: 30_000 });
       await viewInLensButton.click();
 
-      // Visit the captured lens URL
+      // Visit the captured lens URL (may be relative, so resolve against current origin)
       if (lensUrl) {
-        await page.goto(lensUrl);
+        const absoluteLensUrl = lensUrl.startsWith('http')
+          ? lensUrl
+          : new URL(lensUrl, page.url()).href;
+        await page.goto(absoluteLensUrl);
         await expect(page.testSubj.locator('lnsWorkspace')).toBeVisible({ timeout: 60_000 });
         await expect(page.testSubj.locator('breadcrumbs')).toContainText(
           `Action pack_${packName}_${savedQueryName}`
