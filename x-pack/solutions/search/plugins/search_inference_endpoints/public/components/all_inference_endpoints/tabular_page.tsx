@@ -25,7 +25,7 @@ import { useTableData } from '../../hooks/use_table_data';
 import type { FilterOptions } from './types';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
-import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
+import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
@@ -60,7 +60,10 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     InferenceInferenceEndpointInfo | undefined
   >(undefined);
   const [searchKey, setSearchKey] = React.useState('');
-  const { filterOptions, setFilterOptions } = useAllInferenceEndpointsState();
+  const [filterOptions, setFilterOptionsState] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const setFilterOptions = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    setFilterOptionsState((prev) => ({ ...prev, ...newFilterOptions }));
+  }, []);
 
   const copyContent = useCallback(
     (inferenceId: string) => {
