@@ -16,12 +16,14 @@ interface LifecycleBarProps {
   gridTemplateColumns: string;
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
+  testSubjPrefix?: string;
 }
 
 const renderLifecyclePhase = (
   phase: LifecyclePhase,
   index: number,
-  onPhaseClick?: (phase: LifecyclePhase, index: number) => void
+  onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
+  testSubjPrefix?: string
 ) => {
   const commonProps = {
     label: phase.label,
@@ -31,6 +33,7 @@ const renderLifecyclePhase = (
     description: phase.description,
     minAge: phase.min_age,
     isReadOnly: phase.isReadOnly,
+    testSubjPrefix,
   };
 
   return phase.isDelete ? (
@@ -52,6 +55,7 @@ export const LifecycleBar = ({
   gridTemplateColumns,
   phaseColumnSpans,
   onPhaseClick,
+  testSubjPrefix,
 }: LifecycleBarProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -97,7 +101,7 @@ export const LifecycleBar = ({
                 justifyContent: 'center',
               }}
             >
-              {renderLifecyclePhase(phase, index, onPhaseClick)}
+              {renderLifecyclePhase(phase, index, onPhaseClick, testSubjPrefix)}
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

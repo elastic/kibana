@@ -33,6 +33,7 @@ interface DataLifecycleSummaryProps {
   loading?: boolean;
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   downsampleSteps?: DownsampleStep[];
+  testSubjPrefix?: string;
 }
 
 export const DataLifecycleSummary = ({
@@ -40,6 +41,7 @@ export const DataLifecycleSummary = ({
   loading = false,
   onPhaseClick,
   downsampleSteps,
+  testSubjPrefix,
 }: DataLifecycleSummaryProps) => {
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
@@ -88,6 +90,7 @@ export const DataLifecycleSummary = ({
                   gridTemplateColumns={gridTemplateColumns}
                   phaseColumnSpans={phaseColumnSpans}
                   onPhaseClick={onPhaseClick}
+                  testSubjPrefix={testSubjPrefix}
                 />
                 <DownsamplingBar
                   segments={downsamplingSegments}

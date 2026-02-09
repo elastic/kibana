@@ -59,7 +59,9 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('lifecyclePhase-Failed ingest-name')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('failureStore-lifecyclePhase-Failed ingest-name')
+      ).toBeInTheDocument();
     });
 
     it('should display storage size', () => {
@@ -68,9 +70,9 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('lifecyclePhase-Failed ingest-size')).toHaveTextContent(
-        /100\.0\s?KB/
-      );
+      expect(
+        screen.getByTestId('failureStore-lifecyclePhase-Failed ingest-size')
+      ).toHaveTextContent(/100\.0\s?KB/);
     });
 
     it('should render delete icon when retention period is set', () => {
@@ -79,7 +81,7 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
 
     it('should use custom retention period when set', () => {
@@ -91,7 +93,7 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
   });
 
@@ -106,7 +108,7 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('lifecyclePhase-Hot-name')).toBeInTheDocument();
+      expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-name')).toBeInTheDocument();
     });
 
     it('should display storage size', () => {
@@ -115,7 +117,9 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('lifecyclePhase-Hot-size')).toHaveTextContent(/250\.0\s?KB/);
+      expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-size')).toHaveTextContent(
+        /250\.0\s?KB/
+      );
     });
 
     it('should render delete icon when retention period is set', () => {
@@ -124,7 +128,7 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
   });
 
@@ -139,7 +143,9 @@ describe('FailureStoreSummary', () => {
 
       render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
 
-      expect(screen.queryByTestId('dataLifecycle-delete-icon')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('failureStore-dataLifecycle-delete-icon')
+      ).not.toBeInTheDocument();
     });
 
     it('should render infinite symbol when retention is disabled', () => {

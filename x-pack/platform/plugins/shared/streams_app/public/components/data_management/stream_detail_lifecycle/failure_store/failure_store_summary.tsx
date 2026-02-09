@@ -53,5 +53,5 @@ export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreS
     deletePhaseColor: ilmPhases.delete.color,
   });
 
-  return <DataLifecycleSummary phases={phases} />;
+  return <DataLifecycleSummary phases={phases} testSubjPrefix="failureStore" />;
 };
