@@ -115,6 +115,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
     - '!target/**/*'
 tasks:
   jest:
