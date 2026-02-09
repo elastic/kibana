@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
+import { pick } from 'lodash';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
@@ -30,6 +31,7 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -85,6 +87,13 @@ export const getSearchEmbeddableFactory = ({
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         runtimeState?.savedObjectDescription
       );
+      const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
+      const isSelectedTabDeleted$ = new BehaviorSubject<boolean>(
+        runtimeState.isSelectedTabDeleted ?? false
+      );
+
+      const tabs = runtimeState.tabs ?? [];
+      let rawSavedObjectAttributes = runtimeState.rawSavedObjectAttributes;
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -109,13 +118,27 @@ export const getSearchEmbeddableFactory = ({
       const serialize = (savedObjectId?: string) =>
         serializeState({
           uuid,
-          initialState: runtimeState,
+          initialState: { ...runtimeState, rawSavedObjectAttributes },
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: dynamicActionsManager?.getLatestState,
           savedObjectId,
+          selectedTabId: selectedTabId$.getValue(),
         });
+
+      const switchTab = async (tabId: string) => {
+        const tab = tabs.find((t) => t.id === tabId);
+
+        if (!tab) return;
+
+        dataLoading$.next(true);
+        selectedTabId$.next(tabId);
+        isSelectedTabDeleted$.next(false);
+
+        await searchEmbeddable.switchToTab(tab);
+        rawSavedObjectAttributes = pick(tab, EDITABLE_SAVED_SEARCH_KEYS);
+      };
 
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
@@ -125,14 +148,30 @@ export const getSearchEmbeddableFactory = ({
           ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
           searchEmbeddable.anyStateChange$,
           titleManager.anyStateChange$,
-          timeRangeManager.anyStateChange$
+          timeRangeManager.anyStateChange$,
+          selectedTabId$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
+          const isDeleted = isSelectedTabDeleted$.getValue();
+
           return {
             ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
+            // When the selected tab was deleted, skip all attribute comparators
+            // so the fallback to the first tab doesn't trigger unsaved changes
+            ...(isDeleted
+              ? Object.fromEntries(
+                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip' as const])
+                )
+              : {}),
+            selectedTabId: isDeleted
+              ? ('skip' as const)
+              : (a: string | undefined, b: string | undefined) => a === b,
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
@@ -154,11 +193,29 @@ export const getSearchEmbeddableFactory = ({
           timeRangeManager.reinitializeState(lastSaved?.rawState);
           titleManager.reinitializeState(lastSaved?.rawState);
           if (lastSaved) {
+            const currentTabId = selectedTabId$.getValue();
+
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,
               discoverServices,
             });
-            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+
+            selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
+            isSelectedTabDeleted$.next(lastSavedRuntimeState.isSelectedTabDeleted ?? false);
+            rawSavedObjectAttributes = lastSavedRuntimeState.rawSavedObjectAttributes;
+
+            const resolvedTabId = lastSavedRuntimeState.isSelectedTabDeleted
+              ? tabs[0]?.id
+              : lastSavedRuntimeState.selectedTabId ?? tabs[0]?.id;
+
+            if (currentTabId !== resolvedTabId && resolvedTabId) {
+              const resolvedTab = tabs.find((t) => t.id === resolvedTabId);
+
+              if (resolvedTab) await searchEmbeddable.switchToTab(resolvedTab);
+              else searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+            } else {
+              searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+            }
           }
         },
       });
@@ -348,6 +405,10 @@ export const getSearchEmbeddableFactory = ({
                               : true
                           }
                           stateManager={searchEmbeddable.stateManager}
+                          selectedTabId$={selectedTabId$}
+                          isSelectedTabDeleted$={isSelectedTabDeleted$}
+                          tabs={tabs}
+                          onTabChange={switchTab}
                         />
                       </CellActionsProvider>
                     )}

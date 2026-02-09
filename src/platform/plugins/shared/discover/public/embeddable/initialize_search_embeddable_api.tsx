@@ -22,7 +22,11 @@ import type {
   ProjectRoutingOverrides,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
-import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverGridSettings,
+  DiscoverSessionTab,
+  SavedSearch,
+} from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
@@ -105,6 +109,7 @@ export const initializeSearchEmbeddableApi = async (
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
   reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
+  switchToTab: (tab: DiscoverSessionTab) => Promise<void>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
@@ -271,6 +276,33 @@ export const initializeSearchEmbeddableApi = async (
       headerRowHeight$.next(lastSaved?.headerRowHeight);
       savedSearchViewMode$.next(lastSaved?.viewMode);
       density$.next(lastSaved?.density);
+    },
+    switchToTab: async (tab: DiscoverSessionTab) => {
+      sort$.next(tab.sort);
+      columns$.next(tab.columns);
+      grid$.next(tab.grid);
+      sampleSize$.next(tab.sampleSize);
+      rowsPerPage$.next(tab.rowsPerPage);
+      rowHeight$.next(tab.rowHeight);
+      headerRowHeight$.next(tab.headerRowHeight);
+      savedSearchViewMode$.next(tab.viewMode);
+      density$.next(tab.density);
+
+      const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+        discoverServices,
+        tab.serializedSearchSource
+      );
+
+      searchSource$.next(newSearchSource);
+
+      if (newDataView) dataViews$.next([newDataView]);
+
+      const newQuery = newSearchSource.getField('query');
+      const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
+
+      query$.next(newQuery);
+      filters$.next(newFilters);
+      projectRoutingOverrides$.next(getProjectRoutingOverrides(newQuery));
     },
   };
 };

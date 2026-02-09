@@ -26,7 +26,11 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
+import type {
+  DiscoverSessionTab,
+  SavedSearch,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
@@ -79,6 +83,9 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    isSelectedTabDeleted?: boolean;
+    selectedTabId?: string;
+    tabs?: DiscoverSessionTab[];
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &

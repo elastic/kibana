@@ -38,18 +38,39 @@ export const deserializeState = async ({
     .savedObjectId;
   if (savedObjectId) {
     // by reference
-    const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId, true);
+    const { getDiscoverSession } = discoverServices.savedSearch;
+    const session = await getDiscoverSession(savedObjectId);
 
-    const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
-    const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
+    const selectedTabId = (serializedState.rawState as SearchEmbeddableByReferenceState)
+      .selectedTabId;
+    let resolvedTab = session.tabs[0];
+    let isSelectedTabDeleted = false;
+
+    if (selectedTabId) {
+      const found = session.tabs.find((t) => t.id === selectedTabId);
+
+      if (found) resolvedTab = found;
+      else isSelectedTabDeleted = true;
+    }
+
+    const rawSavedObjectAttributes = pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
+    // Skip stale dashboard overrides when the selected tab was deleted
+    const savedObjectOverride = isSelectedTabDeleted
+      ? {}
+      : pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
+
     return {
-      // ignore the time range from the saved object - only global time range + panel time range matter
-      ...omit(so, 'timeRange'),
+      // Build runtime state from the resolved tab's attributes
+      // ignore the time range from the tab - only global time range + panel time range matter
+      ...omit(resolvedTab, 'timeRange'),
       savedObjectId,
-      savedObjectTitle: so.title,
-      savedObjectDescription: so.description,
-      // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
+      savedObjectTitle: session.title,
+      savedObjectDescription: session.description,
+      selectedTabId,
+      isSelectedTabDeleted,
+      tabs: session.tabs,
+
+      // Overwrite SO state with dashboard state for title, description, etc.
       ...panelState,
       ...savedObjectOverride,
 
@@ -64,8 +85,11 @@ export const deserializeState = async ({
       serializedState.rawState as SearchEmbeddableByValueState,
       true
     );
+
+    const { tabs, ...savedSearchWithoutTabs } = savedSearch;
+
     return {
-      ...savedSearch,
+      ...savedSearchWithoutTabs,
       ...panelState,
       nonPersistedDisplayOptions: serializedState.rawState.nonPersistedDisplayOptions,
     };
@@ -80,6 +104,7 @@ export const serializeState = ({
   serializeTimeRange,
   serializeDynamicActions,
   savedObjectId,
+  selectedTabId,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -88,6 +113,7 @@ export const serializeState = ({
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
+  selectedTabId?: string;
 }): SerializedPanelState<SearchEmbeddableState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
@@ -113,6 +139,7 @@ export const serializeState = ({
         ...serializeDynamicActions?.(),
         ...overwriteState,
         savedObjectId,
+        ...(selectedTabId ? { selectedTabId } : {}),
       },
       references: [],
     };

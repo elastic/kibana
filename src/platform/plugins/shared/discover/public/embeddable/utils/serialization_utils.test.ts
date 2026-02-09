@@ -11,6 +11,7 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type {
@@ -18,12 +19,12 @@ import type {
   SearchEmbeddableState,
 } from '../../../common/embeddable/types';
 import { deserializeState, serializeState } from './serialization_utils';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/server';
+import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '@kbn/saved-search-plugin/server';
 
 describe('Serialization utils', () => {
   const uuid = 'mySearchEmbeddable';
 
-  const tabs: DiscoverSessionTab[] = [
+  const tabs: DiscoverSessionTabSchema[] = [
     {
       id: 'tab-1',
       label: 'Tab 1',
@@ -62,6 +63,29 @@ describe('Serialization utils', () => {
     ],
   };
 
+  const mockDiscoverSessionTab = (
+    overrides: Partial<DiscoverSessionTab> & { id: string; label: string }
+  ): DiscoverSessionTab => ({
+    sort: [['order_date', 'desc']],
+    columns: ['_source'],
+    grid: {},
+    hideChart: false,
+    sampleSize: 100,
+    isTextBasedQuery: false,
+    serializedSearchSource: {
+      index: dataViewMock.id,
+    } as SerializedSearchSourceFields,
+    ...overrides,
+  });
+
+  const mockDiscoverSession = (sessionTabs: DiscoverSessionTab[]): DiscoverSession => ({
+    id: 'savedSearch',
+    title: 'test1',
+    description: 'description',
+    tabs: sessionTabs,
+    managed: false,
+  });
+
   describe('deserialize state', () => {
     test('by value', async () => {
       const serializedState: SerializedPanelState<SearchEmbeddableState> = {
@@ -91,16 +115,19 @@ describe('Serialization utils', () => {
       expect(deserializedState.title).toEqual('test panel title');
     });
 
-    test('by reference', async () => {
-      discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue({
-        savedObjectId: 'savedSearch',
-        ...(await discoverServiceMock.savedSearch.byValueToSavedSearch(
-          {
-            attributes: mockedSavedSearchAttributes,
-          },
-          true
-        )),
-      });
+    test('by reference - default tab (no selectedTabId)', async () => {
+      const sessionTabs = [
+        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
+        mockDiscoverSessionTab({
+          id: 'tab-2',
+          label: 'Tab 2',
+          columns: ['col-a', 'col-b'],
+          sort: [['timestamp', 'asc']],
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
       const serializedState: SerializedPanelState<SearchEmbeddableState> = {
         rawState: {
@@ -118,7 +145,120 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.title).toEqual('test panel title');
+      // Dashboard override should be applied on top of tab-1 defaults
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
+      expect(deserializedState.columns).toEqual(['_source']); // from tab-1
+      expect(deserializedState.selectedTabId).toBeUndefined();
+      expect(deserializedState.isSelectedTabDeleted).toBe(false);
+      expect(deserializedState.tabs).toEqual(sessionTabs);
+    });
+
+    test('by reference - valid selectedTabId', async () => {
+      const sessionTabs = [
+        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
+        mockDiscoverSessionTab({
+          id: 'tab-2',
+          label: 'Tab 2',
+          columns: ['col-a', 'col-b'],
+          sort: [['timestamp', 'asc']],
+          sampleSize: 200,
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
+        rawState: {
+          title: 'test panel title',
+          savedObjectId: 'savedSearch',
+          selectedTabId: 'tab-2',
+        },
+        references: [],
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+      expect(deserializedState.savedObjectId).toEqual('savedSearch');
+      expect(deserializedState.selectedTabId).toEqual('tab-2');
+      expect(deserializedState.isSelectedTabDeleted).toBe(false);
+      // Attributes should come from tab-2
+      expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
+      expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
+      expect(deserializedState.sampleSize).toEqual(200);
+    });
+
+    test('by reference - deleted selectedTabId falls back to first tab', async () => {
+      const sessionTabs = [
+        mockDiscoverSessionTab({
+          id: 'tab-1',
+          label: 'Tab 1',
+          columns: ['fallback-col'],
+          sort: [['fallback_field', 'desc']],
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
+        rawState: {
+          title: 'test panel title',
+          savedObjectId: 'savedSearch',
+          selectedTabId: 'deleted-tab-id',
+          // Stale overrides from the deleted tab
+          columns: ['stale-col-a'],
+          sort: [['stale_field', 'asc']],
+        },
+        references: [],
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+      expect(deserializedState.selectedTabId).toEqual('deleted-tab-id');
+      expect(deserializedState.isSelectedTabDeleted).toBe(true);
+      // Should use fallback tab-1 attributes, NOT stale overrides
+      expect(deserializedState.columns).toEqual(['fallback-col']);
+      expect(deserializedState.sort).toEqual([['fallback_field', 'desc']]);
+    });
+
+    test('by reference - valid selectedTabId with dashboard overrides', async () => {
+      const sessionTabs = [
+        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
+        mockDiscoverSessionTab({
+          id: 'tab-2',
+          label: 'Tab 2',
+          columns: ['col-a', 'col-b'],
+          sort: [['timestamp', 'asc']],
+        }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
+        rawState: {
+          title: 'test panel title',
+          savedObjectId: 'savedSearch',
+          selectedTabId: 'tab-2',
+          // Dashboard override for columns on top of tab-2
+          columns: ['custom-col'],
+        },
+        references: [],
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+      // Dashboard override should take precedence over tab-2 defaults
+      expect(deserializedState.columns).toEqual(['custom-col']);
+      // Other attributes should come from tab-2
+      expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
   });
 
@@ -137,6 +277,8 @@ describe('Serialization utils', () => {
         uuid,
         initialState: {
           ...mockedSavedSearchAttributes,
+          tabs: [],
+          selectedTabId: undefined,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
         savedSearch,
@@ -216,6 +358,51 @@ describe('Serialization utils', () => {
           rawState: {
             sampleSize: 500,
             sort: [['order_date', 'asc']],
+            savedObjectId: 'test-id',
+          },
+          references: [],
+        });
+      });
+
+      test('includes selectedTabId when provided', () => {
+        const serializedState = serializeState({
+          uuid,
+          initialState: {
+            rawSavedObjectAttributes: savedSearch,
+          },
+          savedSearch,
+          serializeTitles: jest.fn(),
+          serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
+          savedObjectId: 'test-id',
+          selectedTabId: 'tab-2',
+        });
+
+        expect(serializedState).toEqual({
+          rawState: {
+            savedObjectId: 'test-id',
+            selectedTabId: 'tab-2',
+          },
+          references: [],
+        });
+      });
+
+      test('does not include selectedTabId when undefined', () => {
+        const serializedState = serializeState({
+          uuid,
+          initialState: {
+            rawSavedObjectAttributes: savedSearch,
+          },
+          savedSearch,
+          serializeTitles: jest.fn(),
+          serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
+          savedObjectId: 'test-id',
+          selectedTabId: undefined,
+        });
+
+        expect(serializedState).toEqual({
+          rawState: {
             savedObjectId: 'test-id',
           },
           references: [],
