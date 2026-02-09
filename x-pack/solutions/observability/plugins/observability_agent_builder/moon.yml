@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/server-route-repository-client'
   - '@kbn/apm-types'
+  - '@kbn/slo-schema'
 tags:
   - plugin
   - prod
