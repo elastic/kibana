@@ -142,25 +142,6 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![5]).not.toHaveProperty('timeout');
   });
 
-  it('should allow overriding globalSetupTimeout when runGlobalSetup is true', () => {
-    const testDir = './my_tests';
-    const customTimeout = 60000;
-
-    const config = createPlaywrightConfig({
-      testDir,
-      runGlobalSetup: true,
-      globalSetupTimeout: customTimeout,
-    });
-
-    expect(config.projects).toHaveLength(6);
-    expect(config.projects![0].name).toEqual('setup-local');
-    expect(config.projects![0].timeout).toBe(customTimeout);
-    expect(config.projects![2].name).toEqual('setup-ech');
-    expect(config.projects![2].timeout).toBe(customTimeout);
-    expect(config.projects![4].name).toEqual('setup-mki');
-    expect(config.projects![4].timeout).toBe(customTimeout);
-  });
-
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {
     mockGenerateTestRunId.mockReturnValue(mockedRunId);
 

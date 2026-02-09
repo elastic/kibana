@@ -32,6 +32,4 @@ export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'test
    * Defaults to false.
    */
   runGlobalSetup?: boolean;
-  /** Timeout for the global setup step, in milliseconds. Defaults to 3 minutes (180000 ms). */
-  globalSetupTimeout?: number;
 }
