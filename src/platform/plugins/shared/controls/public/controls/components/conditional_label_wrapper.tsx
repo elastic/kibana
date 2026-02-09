@@ -28,6 +28,7 @@ export const ConditionalLabelWrapper = ({
       css={css`
         gap: 2px;
         padding: 4px 8px 1px 8px;
+        overflow: hidden;
       `}
     >
       <EuiFlexItem
@@ -40,6 +41,9 @@ export const ConditionalLabelWrapper = ({
           color="subdued"
           css={css`
             line-height: 1rem;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
           `}
           component="p"
         >
