@@ -8,14 +8,8 @@
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { UserService } from './user_service';
-
-interface CreateUserServiceOptions {
-  request?: KibanaRequest;
-  uid?: string | null;
-}
 
 const mockProfile: UserProfileWithSecurity = {
   uid: 'elastic_profile_uid',
@@ -29,11 +23,11 @@ const mockProfile: UserProfileWithSecurity = {
   labels: {},
 };
 
-export function createUserService(options: CreateUserServiceOptions = {}): {
+export function createUserService(): {
   userService: UserService;
   userProfile: jest.Mocked<UserProfileServiceStart>;
 } {
-  const request = options.request ?? httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest();
   const userProfile = userProfileServiceMock.createStart();
 
   userProfile.getCurrent.mockResolvedValue(createUserProfile());
