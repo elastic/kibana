@@ -20,24 +20,35 @@ globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, e
     log.debug(`[setup] Streams may already be enabled: ${error}`);
   }
 
-  // Index a document to the 'logs' stream to initialize the data stream
+  // Index documents to both 'logs.otel' and 'logs.ecs' streams to initialize the data streams
   // This is required for the processing simulation API to work, as it needs
-  // a data stream with at least one index to simulate against
+  // data streams with at least one index to simulate against
+  // Both streams are guaranteed to exist after enableStreams() in fresh installations
 
-  log.debug('[setup] Indexing test document to logs stream...');
+  log.debug('[setup] Indexing test documents to logs.otel and logs.ecs streams...');
   try {
-    await esClient.index({
-      index: 'logs',
-      document: {
-        '@timestamp': new Date().toISOString(),
-        log: { message: 'Test document for streams API tests' },
-      },
-      refresh: true,
-    });
-    log.debug('[setup] Test document indexed successfully');
+    await Promise.all([
+      esClient.index({
+        index: 'logs.otel',
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'body.text': 'Test document for streams API tests',
+        },
+        refresh: true,
+      }),
+      esClient.index({
+        index: 'logs.ecs',
+        document: {
+          '@timestamp': new Date().toISOString(),
+          message: 'Test document for streams API tests',
+        },
+        refresh: true,
+      }),
+    ]);
+    log.debug('[setup] Test documents indexed successfully');
   } catch (error) {
     throw new Error(
-      `[setup] Failed to index test document - this is required for processing simulation tests: ${error}`
+      `[setup] Failed to index test documents - this is required for processing simulation tests: ${error}`
     );
   }
 });

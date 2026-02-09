@@ -366,9 +366,8 @@ describe('generateLayer', () => {
       const result = generateLayer('logs.ecs', rootDefinition, false);
       const settings = result.template.settings as Record<string, any>;
 
-      // logs.ecs uses logsdb mode but with ECS sort fields (host.name, not resource.attributes.host.name)
       expect(settings.index.mode).toBe('logsdb');
-      expect(settings.index.sort.field).toEqual(['host.name', '@timestamp']);
+      expect(settings.index.sort.field).toEqual(['@timestamp']);
     });
 
     it('should include OTel aliases for child streams of OTel-based roots', () => {

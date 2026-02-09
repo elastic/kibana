@@ -35,7 +35,7 @@ api/
 
 1. Start Elasticsearch and Kibana servers:
    ```bash
-   node scripts/scout run-servers --stateful
+   node scripts/scout.js run-servers --stateful
    ```
 
 2. Run the API tests:

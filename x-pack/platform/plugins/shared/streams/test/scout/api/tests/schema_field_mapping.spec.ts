@@ -10,12 +10,15 @@ import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'] }, () => {
+  // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+  const testStream = 'logs.otel';
+
   // Unmapped fields tests
   apiTest('should get unmapped fields for a stream', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.get(
-      'internal/streams/logs/schema/unmapped_fields',
+      `internal/streams/${testStream}/schema/unmapped_fields`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         responseType: 'json',
@@ -50,7 +53,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -72,7 +75,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -93,7 +96,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/schema/fields_simulation',
+        `internal/streams/${testStream}/schema/fields_simulation`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -113,7 +116,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -134,7 +137,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -153,7 +156,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -174,7 +177,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -193,7 +196,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -211,7 +214,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -234,7 +237,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -252,7 +255,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -275,7 +278,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -296,7 +299,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -315,7 +318,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -333,7 +336,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -357,7 +360,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/schema/fields_simulation',
+        `internal/streams/${testStream}/schema/fields_simulation`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -385,7 +388,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -406,7 +409,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -430,13 +433,16 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
   apiTest('should return error for invalid field type', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-    const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_simulation', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: {
-        field_definitions: [{ name: 'test.field', type: 'invalid_type' }],
-      },
-      responseType: 'json',
-    });
+    const { statusCode } = await apiClient.post(
+      `internal/streams/${testStream}/schema/fields_simulation`,
+      {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ name: 'test.field', type: 'invalid_type' }],
+        },
+        responseType: 'json',
+      }
+    );
 
     expect(statusCode).toBe(400);
   });
@@ -445,7 +451,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
@@ -481,13 +487,16 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
   apiTest('should handle missing field name', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-    const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_simulation', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: {
-        field_definitions: [{ type: 'keyword' }],
-      },
-      responseType: 'json',
-    });
+    const { statusCode } = await apiClient.post(
+      `internal/streams/${testStream}/schema/fields_simulation`,
+      {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ type: 'keyword' }],
+        },
+        responseType: 'json',
+      }
+    );
 
     expect(statusCode).toBe(400);
   });
@@ -495,13 +504,16 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
   apiTest('should handle missing field type', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-    const { statusCode } = await apiClient.post('internal/streams/logs/schema/fields_simulation', {
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-      body: {
-        field_definitions: [{ name: 'test.field' }],
-      },
-      responseType: 'json',
-    });
+    const { statusCode } = await apiClient.post(
+      `internal/streams/${testStream}/schema/fields_simulation`,
+      {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          field_definitions: [{ name: 'test.field' }],
+        },
+        responseType: 'json',
+      }
+    );
 
     expect(statusCode).toBe(400);
   });
@@ -514,7 +526,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
 
       // Try to map a field that would conflict with existing data
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/schema/fields_simulation',
+        `internal/streams/${testStream}/schema/fields_simulation`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -538,7 +550,7 @@ apiTest.describe('Stream schema - field mapping API', { tag: ['@ess', '@svlOblt'
     const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
     const { statusCode, body } = await apiClient.post(
-      'internal/streams/logs/schema/fields_simulation',
+      `internal/streams/${testStream}/schema/fields_simulation`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
         body: {
