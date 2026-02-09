@@ -36,6 +36,9 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
   LISTS_API_READ,
+  MANUAL_RUN_RULES_API_PRIVILEGE,
+  MANUAL_RUN_RULES_SUBFEATURE_ID,
+  MANUAL_RUN_RULES_UI,
   SERVER_APP_ID,
 } from '../../constants';
 
@@ -183,6 +186,43 @@ export const getEnableDisableRulesSubFeature = (): SubFeatureConfig => ({
           },
           ui: [ENABLE_DISABLE_RULES_UI],
           api: [ENABLE_DISABLE_RULES_API_PRIVILEGE],
+        },
+      ],
+    },
+  ],
+});
+
+export const getManualRunRulesSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.manualRunSubFeatureName',
+    {
+      defaultMessage: 'Manual rule run',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          id: MANUAL_RUN_RULES_SUBFEATURE_ID,
+          includeIn: 'all',
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.manualRunRulesPrivilegeName',
+            {
+              defaultMessage: 'Manual run rules',
+            }
+          ),
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          alerting: {
+            rule: {
+              manual_run: alertingFeatures,
+            },
+          },
+          ui: [MANUAL_RUN_RULES_UI],
+          api: [MANUAL_RUN_RULES_API_PRIVILEGE],
         },
       ],
     },
