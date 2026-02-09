@@ -1099,6 +1099,96 @@ describe('DELETE /api/data_sources', () => {
       });
     });
   });
+
+  describe('bulk delete with ids', () => {
+    it('should use provided IDs directly without PIT finder', async () => {
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        taskType: 'data-sources:bulk-delete-task',
+        state: { isDone: false, deletedCount: 0, errors: [] },
+      };
+      mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { ids: ['ds-10', 'ds-20', 'ds-30'] },
+      });
+
+      await routeHandler(context, mockRequest, mockResponse);
+
+      // Should NOT use PIT finder
+      const coreCtx = await context.core;
+      expect(coreCtx.savedObjects.client.createPointInTimeFinder).not.toHaveBeenCalled();
+
+      // Should schedule with the provided IDs
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-10', 'ds-20', 'ds-30'] },
+        }),
+        expect.objectContaining({
+          request: mockRequest,
+        })
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          taskId: expect.any(String),
+        }),
+      });
+    });
+
+    it('should use PIT finder when no ids are provided', async () => {
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        taskType: 'data-sources:bulk-delete-task',
+        state: { isDone: false, deletedCount: 0, errors: [] },
+      };
+      mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      await routeHandler(context, mockRequest, mockResponse);
+
+      // Should use PIT finder for delete-all
+      const coreCtx = await context.core;
+      expect(coreCtx.savedObjects.client.createPointInTimeFinder).toHaveBeenCalled();
+
+      // Should schedule with IDs from PIT finder
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-1', 'ds-2'] },
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should schedule task with single ID', async () => {
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        taskType: 'data-sources:bulk-delete-task',
+        state: { isDone: false, deletedCount: 0, errors: [] },
+      };
+      mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { ids: ['ds-only'] },
+      });
+
+      await routeHandler(context, mockRequest, mockResponse);
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { dataSourceIds: ['ds-only'] },
+        }),
+        expect.any(Object)
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          taskId: expect.any(String),
+        }),
+      });
+    });
+  });
 });
 
 describe('GET /api/data_sources/_tasks/{taskId}', () => {
@@ -1149,13 +1239,16 @@ describe('GET /api/data_sources/_tasks/{taskId}', () => {
   });
 
   describe('task in progress', () => {
-    it('should return current state when task is in progress', async () => {
+    it('should return current state and dataSourceIds when task is in progress', async () => {
       const mockTask = {
         id: 'test-task-id',
         state: {
           isDone: false,
           deletedCount: 50,
           errors: [],
+        },
+        params: {
+          dataSourceIds: ['ds-1', 'ds-2', 'ds-3'],
         },
       };
       mockTaskManager.get.mockResolvedValue(mockTask as any);
@@ -1171,19 +1264,23 @@ describe('GET /api/data_sources/_tasks/{taskId}', () => {
           isDone: false,
           deletedCount: 50,
           errors: [],
+          dataSourceIds: ['ds-1', 'ds-2', 'ds-3'],
         },
       });
     });
   });
 
   describe('task completed', () => {
-    it('should return final state when task is completed successfully', async () => {
+    it('should return final state with dataSourceIds when task is completed successfully', async () => {
       const mockTask = {
         id: 'test-task-id',
         state: {
           isDone: true,
           deletedCount: 100,
           errors: [],
+        },
+        params: {
+          dataSourceIds: ['ds-1', 'ds-2'],
         },
       };
       mockTaskManager.get.mockResolvedValue(mockTask as any);
@@ -1199,6 +1296,7 @@ describe('GET /api/data_sources/_tasks/{taskId}', () => {
           isDone: true,
           deletedCount: 100,
           errors: [],
+          dataSourceIds: ['ds-1', 'ds-2'],
         },
       });
     });
@@ -1214,6 +1312,9 @@ describe('GET /api/data_sources/_tasks/{taskId}', () => {
             { dataSourceId: 'data-source-2', error: 'Not found' },
           ],
         },
+        params: {
+          dataSourceIds: ['data-source-1', 'data-source-2', 'data-source-3'],
+        },
       };
       mockTaskManager.get.mockResolvedValue(mockTask as any);
 
@@ -1231,6 +1332,60 @@ describe('GET /api/data_sources/_tasks/{taskId}', () => {
             { dataSourceId: 'data-source-1', error: 'Failed to delete' },
             { dataSourceId: 'data-source-2', error: 'Not found' },
           ],
+          dataSourceIds: ['data-source-1', 'data-source-2', 'data-source-3'],
+        },
+      });
+    });
+
+    it('should default dataSourceIds to empty array when params is missing', async () => {
+      const mockTask = {
+        id: 'test-task-id',
+        state: {
+          isDone: true,
+          deletedCount: 0,
+          errors: [],
+        },
+      };
+      mockTaskManager.get.mockResolvedValue(mockTask as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: true,
+          deletedCount: 0,
+          errors: [],
+          dataSourceIds: [],
+        },
+      });
+    });
+
+    it('should default state fields when task.state is empty', async () => {
+      const mockTask = {
+        id: 'test-task-id',
+        state: {},
+        params: {
+          dataSourceIds: ['ds-1'],
+        },
+      };
+      mockTaskManager.get.mockResolvedValue(mockTask as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: false,
+          deletedCount: 0,
+          errors: [],
+          dataSourceIds: ['ds-1'],
         },
       });
     });

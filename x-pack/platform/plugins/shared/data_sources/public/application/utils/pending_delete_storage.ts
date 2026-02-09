@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const STORAGE_KEY = 'dataSources:pendingBulkDelete';
+export const STORAGE_KEY = 'dataSources:pendingBulkDelete';
 
 interface PendingBulkDelete {
   taskId: string;
