@@ -1,76 +1,88 @@
 Task: Create a system prompt for an LLM to extract "features" from log data.
 
 ## What are Features?
-Features are stable facts about real system entities (environment, deployment, agent, runtime, etc.) that are explicitly supported by log evidence. 
+Features are stable facts about real system components that are explicitly supported by log evidence. The primary focus is on identifying **entities** (what distinct components exist) and **dependencies** (how they are connected), supplemented by standalone **infrastructure** and **technology** features.
 
 **Required BaseFeature schema fields** (ALL must be present in every feature):
-- `type` (string): "infrastructure", "technology", or "dependency"
-- `name` (string): Generic name in snake_case
+- `type` (string): "entity", "infrastructure", "technology", or "dependency"
+- `subtype` (string): categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`)
+- `id` (string): unique concise identifier for deduplication
+- `title` (string): very short human-readable title for UI display
 - `description` (string): A summary of what this feature represents
-- `value` (object): Stable, low-cardinality properties for deduplication (e.g., cloud provider, library name)
+- `properties` (object): Stable, low-cardinality properties for deduplication (e.g., entity name, cloud provider, library name)
 - `confidence` (number): 0-100 score
 - `evidence` (array of strings): Supporting evidence from logs
 - `tags` (array of strings): Descriptive tags
-- `meta` (object): High-cardinality or variable data (e.g., availability zones, API endpoints), can be empty {}
+- `meta` (object): High-cardinality or variable data (e.g., availability zones, API endpoints, runtime details), can be empty {}
 
 ## Feature Types
+- **entity** (PRIMARY): High-level, stable system components (services, databases, queues, caches, API gateways, etc.)
+  - Each entity carries relevant technology and infrastructure context in its properties/meta
+  - Focus on high-level components, not individual instances (pods, containers, hosts)
+  - Only create when there is sufficient evidence; acceptable to omit when evidence is ambiguous
+  - Entity identification rules must remain generic, not tied to specific technologies or patterns
 - **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking, hardware
 - **technology**: Programming languages, web servers, databases, libraries, frameworks (e.g., nginx, postgresql, log4j, React)
-- **dependency**: Relationships between systems (service-to-service calls, database connections, API integrations)
+- **dependency**: Relationships between components (service-to-service calls, database connections, API integrations)
+
+## Entity Extraction Guidelines
+- Identify high-level components (services, databases, queues, caches) — not individual instances
+- Attach technology and infrastructure context to entities via properties/meta
+- This context may overlap with standalone infrastructure/technology features — that duplication is expected and desirable
+- Require sufficient evidence; do not speculatively create entities
+- Keep rules generic — any evidence revealing a distinct, named system component qualifies
 
 ## Consolidation Strategy
-- **Consolidate** when properties belong to the same entity and appear together in logs
-  - Example: Consolidate cloud provider with other stable deployment identifiers in one feature (see Value vs Meta rules for what belongs in `value` vs `meta`)
-  - Example: `{name: "cloud_deployment", value: {provider: "aws"}, meta: {regions: ["eu-west-1"]}}`
-- **Separate** distinct technologies even if related
-  - Example: Separate features for nginx, postgresql, redis (not one combined feature)
+- **Consolidate** when properties belong to the same logical component and appear together in logs
+  - Example: A single entity feature for a service with its technology stack and infrastructure context
+  - Example: `{subtype: "service", properties: {name: "order-service", technology: "java"}, meta: {runtime_version: "11"}}`
+- **Separate** distinct concerns
+  - Example: Separate entity features for each distinct component
+  - Example: Standalone infrastructure/technology features even when referenced in entity context
 
 ## Naming Conventions
-- Use **generic names** with specific values in the value object
-  - Good: `{name: "programming_language", value: {language: "java", version: "11"}}`
-  - Bad: `{name: "java_runtime", value: {version: "11"}}`
-- Use snake_case for feature names
-- Keep names descriptive but concise
+- Use **generic subtypes** with specific values in the properties object
+  - Good: `{subtype: "service", properties: {name: "order-service"}}`
+  - Bad: `{subtype: "order_service", properties: {}}`
+  - Good: `{subtype: "programming_language", properties: {language: "java", version: "11"}}`
+  - Bad: `{subtype: "java_runtime", properties: {version: "11"}}`
+- Use snake_case for subtypes
+- Keep subtypes descriptive but concise
 
-## Value vs Meta Field Usage
-The `value` field should contain **stable, low-cardinality properties** that enable feature deduplication. High-cardinality or highly variable data should go in `meta` instead.
+## Properties vs Meta Field Usage
+The `properties` field should contain **stable, low-cardinality properties** that enable feature deduplication. High-cardinality or highly variable data should go in `meta` instead.
 
-**Use `value` for**:
+**Use `properties` for**:
+- Entity name (stable service/component name)
 - Cloud provider name (aws, gcp, azure)
 - Programming language and major version
 - Database type (postgresql, mysql)
 - Service names in dependencies
 
 **Heuristics**:
-- Prefer `value` for categorical properties that are expected to have a small set of possible values across many deployments (e.g., provider, runtime, db type).
-- Prefer `meta` for identifiers and “instance-like” values (IDs, hostnames, pod/container names, IPs, URLs/paths, trace/request IDs).
+- Prefer `properties` for categorical properties expected to have a small set of possible values across many deployments
+- Prefer `meta` for identifiers and "instance-like" values (IDs, hostnames, pod/container names, IPs, URLs/paths, trace/request IDs)
 
 **Use `meta` for**:
 - Availability zones/regions (high cardinality across deployments)
 - Specific API endpoints or HTTP operations (many possible values)
 - Instance IDs, pod names, container IDs
-- Non-semver labels and build metadata attached to versions (e.g., distro codenames, edition labels, build hashes)
-
-**Example**: For a REST API dependency:
-- `value: {source: "api-service", target: "user-service"}` (stable, dedupable)
-- `meta: {endpoints: ["/users", "/users/:id", "/users/:id/profile"]}` (high cardinality)
+- Runtime version details, build metadata
+- Non-semver labels and build metadata attached to versions
 
 **Conflict & cardinality rules**:
-- If multiple values are observed for the same property (e.g., multiple versions), prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` along with evidence.
+- If multiple values are observed for the same property, prefer the most frequently supported value in `properties` and record alternates in `meta.observed_*` along with evidence.
 - Avoid emitting separate features that differ only by high-cardinality metadata. Merge them into one feature and store the varying details in `meta`.
 
 ## Inference Rules
 - Allow **one-level inference** from strong patterns with lower confidence
-  - Example: "NullPointerException" in logs → infer `programming_language: java` with confidence 40-60
-  - Must tag inferred features with "inferred" tag and explain the inference briefly in `meta.notes`
+  - Must tag inferred features with "inferred" tag and explain the inference briefly in `meta.note`
 - Accept features with confidence ≥ 30 if evidence supports them
-- Extract version numbers when available (important for CVE/vulnerability analysis)
+- Extract version numbers when available (important for vulnerability analysis)
 - **Version formatting**:
-  - Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
+  - Prefer normalized numeric versions in `properties.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
   - Strip leading `v` and surrounding text; keep only the numeric portion when possible
-  - If the version contains extra labels (LTS, Enterprise, codenames, build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
-  - Example: `attributes.host.os.version: 20.04.6 LTS (Focal Fossa)` → record as `version: "20.04.6"`
-  - Remove codenames, release names, edition labels (LTS, Enterprise, etc.) from version values
+  - If the version contains extra labels (LTS, Enterprise, codenames, build metadata), store the normalized numeric part in `properties.version` and store the original in `meta.raw_version`
 
 ## Confidence Scoring
 - 90-100: Explicit, unambiguous evidence
@@ -82,17 +94,8 @@ The `value` field should contain **stable, low-cardinality properties** that ena
 - Provide specific examples from logs (prefer `field.path=value` style; otherwise short direct quotes)
 - Multiple pieces of evidence strengthen confidence
 - Evidence must support the feature claim
-
-**Evidence formatting rules**:
-- Keep each evidence string short and specific; prefer stable field paths and values when present.
-- Provide 2–5 evidence strings per feature (merge/aggregate instead of duplicating many similar lines).
-
-## Purpose & Downstream Use
-These features will be used as input for another LLM workflow that generates:
-- Queries for significant events
-- Error pattern detection
-- CVE and vulnerability queries
-This is why extracting libraries/frameworks (like log4j) and their versions is important—the downstream system needs to know what technologies are present to generate relevant security and error queries.
+- Keep each evidence string short and specific; prefer stable field paths and values when present
+- Provide 2–5 evidence strings per feature (merge/aggregate instead of duplicating many similar lines)
 
 ## Input Context
 The LLM receives:
@@ -102,53 +105,45 @@ The LLM receives:
 Return features following the BaseFeature schema structure using the finalize_features tool.
 
 **Output quality requirements**:
-- Deduplicate: do not output multiple features with the same (`type`, `name`, `value`) tuple; merge evidence/tags/meta instead.
+- Prioritize entity identification: look for distinct system components first, then extract dependencies, and supplement with standalone infrastructure/technology features.
+- Deduplicate: do not output multiple features with the same (`type`, `subtype`, `properties`) tuple; merge evidence/tags/meta instead.
 - Prefer fewer, higher-confidence features over many speculative ones.
-- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
+- Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
 
 **Dependency feature anti-spam rules**:
-- Only emit a dependency feature when the logs contain explicit evidence of a relationship (e.g., clear client→server/service or service→database connection).
+- Only emit a dependency feature when the logs contain explicit evidence of a relationship.
 - Aggregate many endpoints/operations under a single dependency feature using `meta.endpoints` and cap the list (e.g., max 10; summarize additional entries).
 
-## Example Format Requirements
-
-**CRITICAL**: All examples MUST include ALL required schema fields:
-- `type` (string)
-- `name` (string) 
-- `description` (string) - A summary of what the feature represents
-- `value` (object)
-- `confidence` (number)
-- `evidence` (array)
-- `tags` (array)
-- `meta` (object) - Can be empty {} or contain relevant metadata
-
-Use **full JSON format in code blocks** for examples (not inline shorthand). Each example must be complete and valid.
-
 ## Examples to Include
-1. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
-2. Infrastructure feature showing value vs meta (e.g., cloud provider in value, region/availability zones in meta)
-3. Technology feature with version (e.g., log4j with version number, include security note in meta)
-4. Inferred feature with lower confidence (e.g., Java inferred from exceptions, explain inference in meta.notes)
-5. Dependency feature showing value vs meta + aggregation/capping (e.g., stable service names in value, many API endpoints in meta.endpoints)
+1. Entity: a service identified from logs with technology context
+2. Entity: a database identified from connection logs
+3. Infrastructure feature showing properties vs meta (e.g., cloud provider in properties, region/availability zones in meta)
+4. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
+5. Technology feature with version (e.g., library with version number, include security note in meta)
+6. Inferred technology feature with lower confidence (e.g., language inferred from patterns, explain inference in meta.note)
+7. Dependency feature showing properties vs meta + aggregation/capping (e.g., stable service names in properties, many API endpoints in meta.endpoints)
 
 ## Prompt Structure
 The prompt should follow this structure:
-1. Opening paragraph: Define features, list all required fields (type, name, description, value, confidence, evidence, tags, meta), state downstream purpose
-2. Feature Types section: List the three types (infrastructure, technology, dependency) with example names
-3. Consolidation Rules section: When to consolidate vs separate with examples
-4. Naming Conventions section: Generic names with good/bad examples using checkmarks
-5. Value vs Meta Fields section: Explain stable/low-cardinality in value, high-cardinality in meta, with examples
-6. Inference & Confidence section: One-level inference rules with examples, confidence scoring bands
-7. Evidence & Versions section: Evidence requirements and version formatting rules with examples
-8. Examples section: 5 complete examples with ALL schema fields in code blocks
-9. Closing: "Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results."
+1. Opening paragraph: Define features, state primary goal (entities + dependencies), list all required fields. No mention of specific downstream use cases.
+2. Feature Types section: List the four types (entity, infrastructure, technology, dependency) with example subtypes. Entity is primary focus.
+3. Entity Extraction Guidelines section: High-level components, attach context, require evidence, keep rules generic.
+4. Consolidation Rules section: When to consolidate vs separate with examples.
+5. Naming Conventions section: Generic subtypes with good/bad examples.
+6. Properties vs Meta Fields section: Explain stable/low-cardinality in properties, high-cardinality in meta, with examples.
+7. Inference & Confidence section: One-level inference rules, confidence scoring bands.
+8. Evidence & Versions section: Evidence requirements and version formatting rules.
+9. Examples section: 7 complete examples with ALL schema fields in code blocks.
+10. Output Quality Requirements: Prioritize entities, deduplication, confidence threshold, anti-spam rules.
+11. Closing: "Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results."
 
 ## Style Requirements
 - Keep prompt concise but complete
 - Use clear, directive language (imperatives: "Extract", "Consolidate", "Tag")
 - Use markdown headers (##) for major sections
 - Provide concrete examples with ALL schema fields included
-- Emphasize practical application for query generation
 - Format examples as complete JSON objects in code blocks (triple backticks)
 - Include both empty meta objects {} and populated ones to show flexibility
-- Every example must have a descriptive title like "Example 1 - Infrastructure with clean version"
+- Every example must have a descriptive title like "Example 1 — Entity: a service identified from logs"
+- Entity rules must be generic — not tied to specific technologies, log formats, or patterns
