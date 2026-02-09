@@ -35,6 +35,7 @@ import { registerAnalyticsContextProvider } from './register_analytics_context_p
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
 import {
+  handleBodyClasses,
   handleEuiFullScreenChanges,
   handleSystemColorModeChange,
   showCspWarningIfNeeded,
@@ -111,7 +112,6 @@ export class ChromeService {
     // 1. Create all chrome state
     const state = createChromeState({
       application,
-      kibanaVersion: this.params.kibanaVersion,
       docLinks,
       feedbackDeps: {
         isEnabled$: defer(() =>
@@ -121,7 +121,15 @@ export class ChromeService {
       },
     });
 
-    // 2. Setup side effects (fullscreen changes, system color mode)
+    // 2. Setup side effects (body classes, fullscreen changes, system color mode)
+    handleBodyClasses({
+      kibanaVersion: this.params.kibanaVersion,
+      headerBanner$: state.headerBanner.$,
+      isVisible$: state.visibility.isVisible$,
+      chromeStyle$: state.style.chromeStyle.$,
+      actionMenu$: application.currentActionMenu$,
+      stop$: this.stop$,
+    });
     handleEuiFullScreenChanges({
       isVisible$: state.visibility.isVisible$,
       setIsVisible: state.visibility.setIsVisible,

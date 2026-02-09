@@ -90,7 +90,6 @@ const createStartContractMock = () => {
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
     hasHeaderBanner$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-    getBodyClasses$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getChromeStyle$: jest.fn().mockReturnValue(new BehaviorSubject('classic')),
     setChromeStyle: jest.fn(),
     getActiveSolutionNavId$: jest.fn(),
