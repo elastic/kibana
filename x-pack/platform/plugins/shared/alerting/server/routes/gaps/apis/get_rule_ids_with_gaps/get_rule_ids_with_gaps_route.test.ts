@@ -31,6 +31,34 @@ describe('getRuleIdsWithGapsRoute', () => {
   const mockResult = {
     total: 1,
     ruleIds: ['rule-1'],
+    summary: {
+      totalUnfilledDurationMs: 1000,
+      totalInProgressDurationMs: 0,
+      totalFilledDurationMs: 0,
+      totalDurationMs: 1000,
+      rulesByGapFillStatus: {
+        unfilled: 1,
+        inProgress: 0,
+        filled: 0,
+      },
+    },
+  };
+
+  const mockResultWithSummary = {
+    total: 2,
+    ruleIds: ['rule-1', 'rule-2'],
+    latestGapTimestamp: 1704067200000,
+    summary: {
+      totalUnfilledDurationMs: 3600000,
+      totalInProgressDurationMs: 1800000,
+      totalFilledDurationMs: 900000,
+      totalDurationMs: 6300000,
+      rulesByGapFillStatus: {
+        unfilled: 1,
+        inProgress: 1,
+        filled: 0,
+      },
+    },
   };
 
   test('should get rules with gaps with the proper parameters', async () => {
@@ -52,6 +80,17 @@ describe('getRuleIdsWithGapsRoute', () => {
       body: {
         total: 1,
         rule_ids: ['rule-1'],
+        summary: {
+          total_unfilled_duration_ms: 1000,
+          total_in_progress_duration_ms: 0,
+          total_filled_duration_ms: 0,
+          total_duration_ms: 1000,
+          rules_by_gap_fill_status: {
+            unfilled: 1,
+            in_progress: 0,
+            filled: 0,
+          },
+        },
       },
     });
   });
@@ -81,5 +120,37 @@ describe('getRuleIdsWithGapsRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+
+  test('should transform response with summary correctly', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getRuleIdsWithGapsRoute(router, licenseState);
+
+    rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResultWithSummary);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: {
+        total: 2,
+        rule_ids: ['rule-1', 'rule-2'],
+        latest_gap_timestamp: 1704067200000,
+        summary: {
+          total_unfilled_duration_ms: 3600000,
+          total_in_progress_duration_ms: 1800000,
+          total_filled_duration_ms: 900000,
+          total_duration_ms: 6300000,
+          rules_by_gap_fill_status: {
+            unfilled: 1,
+            in_progress: 1,
+            filled: 0,
+          },
+        },
+      },
+    });
   });
 });
