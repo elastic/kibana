@@ -8,7 +8,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useId, useLayoutEffect, useMemo, useRef } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiShadow } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
@@ -17,8 +17,8 @@ import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { PanelResizeHandle } from './panel_resize_handle';
-import type { SidebarPanelApi } from './sidebar_panel_context';
-import { SidebarPanelContext } from './sidebar_panel_context';
+import type { SidebarPanelContextValue } from '@kbn/core-chrome-sidebar-context';
+import { SidebarPanelContext } from '@kbn/core-chrome-sidebar-context';
 
 const sidebarWrapperStyles = (theme: UseEuiTheme) => css`
   display: flex;
@@ -44,8 +44,6 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
 
 export interface SidebarPanelProps {
   children: ReactNode;
-  /** When this value changes, context state (label, onFocusRescue) resets. Typically the current app ID. */
-  resetKey?: string;
 }
 
 const defaultAriaLabel = i18n.translate('core.ui.chrome.sidebar.sidebarAriaLabel', {
@@ -59,30 +57,10 @@ const focusMainContent = () => {
   }
 };
 
-/** Manages panel context API state and resets it when `resetKey` changes (e.g. on app switch). */
-const usePanelApi = (resetKey?: string) => {
-  const onFocusRescueRef = useRef<(() => void) | undefined>();
-  const [contextLabel, setLabel] = useState<string | undefined>();
-
-  useEffect(() => {
-    setLabel(undefined);
-    onFocusRescueRef.current = undefined;
-  }, [resetKey]);
-
-  const setOnFocusRescue = useCallback((cb: (() => void) | undefined) => {
-    onFocusRescueRef.current = cb;
-  }, []);
-
-  const panelApi = useMemo<SidebarPanelApi>(
-    () => ({ setLabel, setOnFocusRescue }),
-    [setOnFocusRescue]
-  );
-
-  return { panelApi, contextLabel, onFocusRescueRef };
-};
-
 /** Rescues focus to main content (or custom callback) when the panel unmounts with focus inside. */
-const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefined>) => {
+const useFocusRescue = (
+  onFocusRescueRef: React.RefObject<(() => void) | undefined>
+) => {
   const asideRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -97,34 +75,34 @@ const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefin
   return asideRef;
 };
 
-const getAriaLabel = (label?: string) =>
-  label
-    ? i18n.translate('core.ui.chrome.sidebar.sidebarAriaLabelWithApp', {
-        defaultMessage: 'Side panel: {label}',
-        values: { label },
-      })
-    : defaultAriaLabel;
-
 /**
  * Minimal container for sidebar app content.
  * Apps are responsible for rendering their own header using SidebarHeader component.
  *
- * Provides {@link SidebarPanelContext} so child components can configure
- * the panel's aria-label and focus rescue behavior via {@link useSidebarPanel}.
+ * Provides {@link SidebarPanelCtx} so child components can access
+ * the panel's heading ID for aria-labelledby via {@link useSidebarPanel}.
  */
-export const SidebarPanel: FC<SidebarPanelProps> = ({ children, resetKey }) => {
+export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
   const { chromeStyle } = useLayoutConfig();
-  const { panelApi, contextLabel, onFocusRescueRef } = usePanelApi(resetKey);
+  const headingId = useId();
+  const onFocusRescueRef = useRef<(() => void) | undefined>();
+  const setOnFocusRescue = useCallback((cb: (() => void) | undefined) => {
+    onFocusRescueRef.current = cb;
+  }, []);
   const asideRef = useFocusRescue(onFocusRescueRef);
-  const ariaLabel = getAriaLabel(contextLabel);
+  const contextValue = useMemo<SidebarPanelContextValue>(
+    () => ({ headingId, setOnFocusRescue }),
+    [headingId, setOnFocusRescue]
+  );
 
   return (
-    <SidebarPanelContext.Provider value={panelApi}>
+    <SidebarPanelContext.Provider value={contextValue}>
       <aside
         ref={asideRef}
         css={sidebarWrapperStyles}
         data-test-subj="sidebarPanel"
-        aria-label={ariaLabel}
+        aria-labelledby={headingId}
+        aria-label={defaultAriaLabel}
       >
         <PanelResizeHandle />
         <EuiPanel
