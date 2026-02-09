@@ -12,6 +12,7 @@ const createConnectorTokenClientMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<ConnectorTokenClient>> = {
     create: jest.fn(),
     get: jest.fn(),
+    getOAuthPersonalToken: jest.fn(),
     update: jest.fn(),
     deleteConnectorTokens: jest.fn(),
     updateOrReplace: jest.fn(),

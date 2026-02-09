@@ -308,6 +308,28 @@ export interface ConnectorToken extends SavedObjectAttributes {
   refreshTokenExpiresAt?: string;
 }
 
+export interface UserConnectorToken extends SavedObjectAttributes {
+  id?: string;
+  profileUid: string;
+  connectorId: string;
+  credentialType: string;
+  credentials: SavedObjectAttributes;
+  expiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type OAuthPersonalCredentials = SavedObjectAttributes & {
+  accessToken: string;
+  refreshToken?: string;
+};
+
+export interface UserConnectorOAuthToken extends UserConnectorToken {
+  credentialType: 'oauth';
+  credentials: OAuthPersonalCredentials;
+}
+
 // This unallowlist should only contain connector types that require a request or API key for
 // execution.
 export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];

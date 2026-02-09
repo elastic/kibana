@@ -384,10 +384,10 @@ export const oauthCallbackRoute = (
           // Store tokens - first delete any existing tokens for this connector then create a new token record
           const connectorTokenClient = new ConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
             }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
             }),
             logger: routeLogger,
           });
