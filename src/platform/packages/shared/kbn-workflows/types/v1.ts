@@ -244,6 +244,12 @@ export const CreateWorkflowCommandSchema = z.object({
   id: z.string().optional(),
 });
 
+export const BulkCreateWorkflowsCommandSchema = z.object({
+  workflows: z.array(CreateWorkflowCommandSchema),
+});
+
+export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
+
 export const UpdateWorkflowCommandSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
