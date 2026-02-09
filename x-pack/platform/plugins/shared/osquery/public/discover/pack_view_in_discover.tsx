@@ -28,10 +28,10 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
   });
 
   const startDate = lastResultsData?.lastResultTime
-    ? moment(lastResultsData?.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
+    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
   const endDate = lastResultsData?.lastResultTime
-    ? moment(lastResultsData?.lastResultTime[0]).toISOString()
+    ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
 
   return (
@@ -40,7 +40,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.lastResultTime?.[0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
     />
   );
 };
