@@ -14,7 +14,6 @@ import * as esqlHook from '../../../hooks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { DIMENSIONS_COLUMN } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -127,7 +126,8 @@ describe('useChartLayers', () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
-      { name: DIMENSIONS_COLUMN, meta: { type: 'string' }, id: DIMENSIONS_COLUMN },
+      { name: 'service.name', meta: { type: 'string' }, id: 'service.name' },
+      { name: 'host.name', meta: { type: 'string' }, id: 'host.name' },
     ]);
 
     useEsqlQueryInfoMock.mockReturnValue({
