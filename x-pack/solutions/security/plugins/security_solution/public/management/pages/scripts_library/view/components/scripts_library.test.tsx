@@ -49,14 +49,6 @@ describe('ScriptsLibrary', () => {
     refetch: jest.fn(),
   };
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('scripts-library-tests');
     useUserPrivilegesMock.mockReturnValue({
