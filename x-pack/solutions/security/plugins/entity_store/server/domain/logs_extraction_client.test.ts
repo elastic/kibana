@@ -400,6 +400,71 @@ describe('LogsExtractionClient', () => {
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
 
+    it('should run query and return count without ingesting or updating when countOnly is true', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID, type: 'keyword' },
+          { name: 'user.name', type: 'keyword' },
+        ],
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1', 'user1'],
+          ['2024-01-02T11:00:00.000Z', 'hash2', 'user2'],
+          ['2024-01-02T12:00:00.000Z', 'hash3', 'user3'],
+        ],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.extractLogs('user', { countOnly: true });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(3);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should return count 0 when countOnly is true and ESQL returns no rows', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID, type: 'keyword' },
+        ],
+        values: [],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.extractLogs('user', { countOnly: true });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(0);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
     it('should handle errors from executeEsqlQuery', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
