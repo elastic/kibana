@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { useVersion } from './version_context';
 
@@ -18,15 +18,17 @@ export const VersionSwitcher: React.FC = () => {
   ];
 
   return (
-    <EuiSelect
-      id="ui-version-switcher"
-      options={options}
-      value={version}
-      onChange={(e) => setVersion(e.target.value as 'current' | '1.1')}
-      aria-label="Switch UI version"
-      data-test-subj="uiVersionSwitcher"
-      compressed
-      style={{ minWidth: '100px' }}
-    />
+    <EuiThemeProvider colorMode="dark">
+      <EuiSelect
+        id="ui-version-switcher"
+        options={options}
+        value={version}
+        onChange={(e) => setVersion(e.target.value as 'current' | '1.1')}
+        aria-label="Switch UI version"
+        data-test-subj="uiVersionSwitcher"
+        compressed
+        style={{ minWidth: '100px' }}
+      />
+    </EuiThemeProvider>
   );
 };
