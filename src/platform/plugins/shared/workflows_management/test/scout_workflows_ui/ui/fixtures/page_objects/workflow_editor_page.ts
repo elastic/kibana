@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 export class WorkflowEditorPage {
   public yamlEditor: Locator;
@@ -161,6 +162,11 @@ export class WorkflowEditorPage {
     return this.page.locator(selector);
   }
 
+
+  /**
+   * Expands all collapsed steps in the workflow execution panel tree view.
+   * Iterates through collapsed nodes and clicks their expansion arrows until all steps are expanded.
+   */
   async expandStepsTree() {
     while (true) {
       const collapsedLocators = await this.page.testSubj
@@ -174,5 +180,76 @@ export class WorkflowEditorPage {
       await collapsedLocators[0].scrollIntoViewIfNeeded();
       await collapsedLocators[0].locator('.euiTreeView__expansionArrow[role=presentation]').click();
     }
+  }
+  /**
+   * Wait for the workflow execution panel to show the specified status
+   * @param status - The execution status to wait for ('completed' or 'failed')
+   * @param timeout - The timeout
+   */
+  async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
+    const workflowExecutionPanelLocator = this.page.locator(
+      `[data-test-subj="workflowExecutionPanel"][data-execution-status="${status}"]`
+    );
+    await workflowExecutionPanelLocator.waitFor({ state: 'visible', timeout });
+  }
+
+  /**
+   * Selects a step in the workflow editor by navigating through a hierarchical path.
+   *
+   * @param path - The hierarchical path to the step, using '>' as separator (e.g., "Parent > Child > Target Step")
+   * @returns A promise that resolves to the locator for the target step button
+   * @throws Error if any node in the path is not found
+   */
+  async getStep(path: string): Promise<Locator> {
+    const nodes = path.split('>').map((substring) => substring.trim());
+    const workflowExecutionPanelLocator = this.page.testSubj.locator('workflowExecutionPanel');
+    let parentLocator = workflowExecutionPanelLocator.locator(
+      'ul[aria-label="Workflow step execution tree"]'
+    );
+
+    for (let i = 0; i < nodes.length; i++) {
+      const currentNode = nodes[i];
+      const allListItems = await parentLocator.locator('> li').all();
+      let found = false;
+
+      for (const listItem of allListItems) {
+        const buttonLocator = listItem.locator('> button');
+        const buttonText = await buttonLocator
+          .locator('span[data-test-subj="stepName"]')
+          .textContent();
+
+        if (buttonText?.trim() === currentNode) {
+          found = true;
+
+          // If this is the last node in the path, return the button
+          if (i === nodes.length - 1) {
+            return buttonLocator;
+          }
+
+          // Otherwise, navigate deeper into the tree
+          parentLocator = listItem.locator('> div > ul');
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Error(
+          `Step not found: "${currentNode}" in path "${path}" (failed at level ${i + 1})`
+        );
+      }
+    }
+
+    // This should never be reached due to the return in the loop
+    throw new Error(`Failed to navigate step path: ${path}`);
+  }
+
+  async getStepOutputJson<TOutput = unknown>(): Promise<TOutput> {
+    const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+    await workflowStepExecutionDetails.locator('button[data-test-subj="json"]').click();
+    const jsonEditorNthIndex = 1; // step output json editor index is 1, magic number, but this is the only way
+    const stringValue = await new KibanaCodeEditorWrapper(this.page).getCodeEditorValue(
+      jsonEditorNthIndex
+    );
+    return JSON.parse(stringValue);
   }
 }
