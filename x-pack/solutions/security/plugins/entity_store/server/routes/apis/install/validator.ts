@@ -16,123 +16,132 @@ import { DELAY_DEFAULT, LOOKBACK_PERIOD_DEFAULT } from '@kbn/entity-store/server
 const MIN_FREQUENCY_MS = 30 * 1000;
 
 export const BodySchema = z.object({
-    entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-    logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
+  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
 });
 
 export function validateKql(kql: string): boolean {
-    try {
-        if (!kql || kql.trim() === '') {
-            throw new Error('Filter cannot be empty');
-        }
-
-        fromKueryExpression(kql);
-
-        if (/(\s+)(and|or)\s*$/i.test(kql)) {
-            throw new Error('Incomplete KQL expression');
-        }
-
-        if (!kql.includes(':')) {
-            throw new Error('Field-based KQL is required');
-        }
-        return true;
-    } catch (error) {
-        return false;
+  try {
+    if (!kql || kql.trim() === '') {
+      throw new Error('Filter cannot be empty');
     }
-};
+
+    fromKueryExpression(kql);
+
+    if (/(\s+)(and|or)\s*$/i.test(kql)) {
+      throw new Error('Incomplete KQL expression');
+    }
+
+    if (!kql.includes(':')) {
+      throw new Error('Field-based KQL is required');
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 function validateFilter(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
-    if (data.filter === undefined) {
-        return;
-    }
-    if (!validateKql(data.filter)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['filter'],
-            message: 'must be a valid KQL query',
-        });
-    }
+  if (data.filter === undefined) {
+    return;
+  }
+  if (!validateKql(data.filter)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['filter'],
+      message: 'must be a valid KQL query',
+    });
+  }
 }
 
 function validateFrequencyParam(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
-    if (data.frequency === undefined) {
-        return;
-    }
-    if (parseDurationToMs(data.frequency) < MIN_FREQUENCY_MS) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['frequency'],
-            message: 'must be at least 30 seconds',
-        });
-    }
+  if (data.frequency === undefined) {
+    return;
+  }
+  if (!isValidFrequency(data.frequency)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['frequency'],
+      message: 'must be a valid duration of at least 30 seconds (e.g. 1m, 30s)',
+    });
+  }
+}
+
+function isValidFrequency(frequency: string): boolean {
+  try {
+    return parseDurationToMs(frequency) >= MIN_FREQUENCY_MS;
+  } catch {
+    return false;
+  }
 }
 
 function validateAdditionalIndexPatterns(
-    data: LogExtractionBodyParams,
-    ctx: z.RefinementCtx
+  data: LogExtractionBodyParams,
+  ctx: z.RefinementCtx
 ): void {
-    const patterns = data.additionalIndexPatterns;
-    if (patterns === undefined) {
-        return;
-    }
-    patterns.forEach((value, i) => {
-        const errors = validateDataView(value);
-        const illegalChars = errors.ILLEGAL_CHARACTERS ?? [];
-        const hasSpaces = errors.CONTAINS_SPACES;
-        if (illegalChars.length === 0 && !hasSpaces) return;
+  const patterns = data.additionalIndexPatterns;
+  if (patterns === undefined) {
+    return;
+  }
+  patterns.forEach((value, i) => {
+    const isEmpty = value.trim().length === 0;
+    const errors = validateDataView(value);
+    const illegalChars = errors.ILLEGAL_CHARACTERS ?? [];
+    const hasSpaces = errors.CONTAINS_SPACES;
+    const validIndexPattern = illegalChars.length === 0 && !hasSpaces;
 
-        const parts = illegalChars.length > 0 ? [illegalChars.join(', ')] : [];
-        if (hasSpaces) parts.push('(space)');
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['additionalIndexPatterns', i],
-            message: `must be a valid index pattern: cannot contain ${parts.join(', ')}`,
-        });
-    });
+    if (isEmpty || !validIndexPattern) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['additionalIndexPatterns', i],
+        message: 'must be a non-empty, valid index pattern (no spaces or illegal characters)',
+      });
+    }
+  });
 }
 
 function validateDelayVsLookbackPeriod(
-    data: LogExtractionBodyParams,
-    ctx: z.RefinementCtx
+  data: LogExtractionBodyParams,
+  ctx: z.RefinementCtx
 ): void {
-    const hasDelay = data.delay !== undefined;
-    const hasLookback = data.lookbackPeriod !== undefined;
-    if (!hasDelay && !hasLookback) {
-        return;
-    }
+  const hasDelay = data.delay !== undefined;
+  const hasLookback = data.lookbackPeriod !== undefined;
+  if (!hasDelay && !hasLookback) {
+    return;
+  }
 
-    if (isDelayGteLookbackPeriod(data.delay, data.lookbackPeriod)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['delay'],
-            message: 'must be less than lookbackPeriod',
-        });
-    }
+  if (isDelayGteLookbackPeriod(data.delay, data.lookbackPeriod)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['delay'],
+      message: 'must be less than lookbackPeriod',
+    });
+  }
 }
 
 function validateLogExtractionParams(
-    data: LogExtractionBodyParams | undefined,
-    ctx: z.RefinementCtx
+  data: LogExtractionBodyParams | undefined,
+  ctx: z.RefinementCtx
 ): void {
-    if (!data) return;
+  if (!data) return;
 
-    validateFilter(data, ctx);
-    validateFrequencyParam(data, ctx);
-    validateAdditionalIndexPatterns(data, ctx);
-    validateDelayVsLookbackPeriod(data, ctx);
+  validateFilter(data, ctx);
+  validateFrequencyParam(data, ctx);
+  validateAdditionalIndexPatterns(data, ctx);
+  validateDelayVsLookbackPeriod(data, ctx);
 }
 
 function isDelayGteLookbackPeriod(
-    delay?: string,
-    lookbackPeriod?: string
+  delay?: string,
+  lookbackPeriod?: string
 ): boolean {
-    const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
-    const delayValue = delay ?? DELAY_DEFAULT;
-    try {
-        const lookbackPeriodMs = parseDurationToMs(lookbackPeriodValue);
-        const delayMs = parseDurationToMs(delayValue);
-        return delayMs >= lookbackPeriodMs;
-    } catch {
-        return false;
-    }
+  const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
+  const delayValue = delay ?? DELAY_DEFAULT;
+  try {
+    const lookbackPeriodMs = parseDurationToMs(lookbackPeriodValue);
+    const delayMs = parseDurationToMs(delayValue);
+    return delayMs >= lookbackPeriodMs;
+  } catch {
+    return false;
+  }
 }
