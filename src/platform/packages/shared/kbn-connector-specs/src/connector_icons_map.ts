@@ -76,7 +76,7 @@ export const ConnectorIconsMap: Map<
   [
     '.jira-cloud',
     lazy(
-      () => import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira/icon')
+      () => import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
 ]);

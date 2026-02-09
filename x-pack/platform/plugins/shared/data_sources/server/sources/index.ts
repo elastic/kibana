@@ -8,7 +8,7 @@ import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { sharepointOnlineDataSource } from './sharepoint_online';
-import { jiraDataSource } from './jira';
+import { jiraDataSource } from './jira-cloud';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
