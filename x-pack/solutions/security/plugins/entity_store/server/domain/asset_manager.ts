@@ -94,7 +94,6 @@ export class AssetManager {
         namespace: this.namespace,
         request,
       });
-      
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       throw error;

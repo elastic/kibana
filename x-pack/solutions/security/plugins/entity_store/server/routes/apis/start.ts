@@ -44,7 +44,9 @@ export function registerStart(router: EntityStorePluginRouter) {
         logger.debug('Start API invoked');
 
         const { engines } = await assetManager.getStatus();
-        const stoppedTypes = new Set(engines.filter((e) => e.status === ENGINE_STATUS.STOPPED).map((e) => e.type));
+        const stoppedTypes = new Set(
+          engines.filter((e) => e.status === ENGINE_STATUS.STOPPED).map((e) => e.type)
+        );
         const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
 
         await Promise.all(toStart.map((type) => assetManager.start(req, type)));

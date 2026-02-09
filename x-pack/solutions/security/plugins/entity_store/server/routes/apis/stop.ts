@@ -45,7 +45,9 @@ export function registerStop(router: EntityStorePluginRouter) {
         logger.debug('Stop API invoked');
 
         const { engines } = await assetManager.getStatus();
-        const startedTypes = new Set(engines.filter((e) => e.status === ENGINE_STATUS.STARTED).map((e) => e.type));
+        const startedTypes = new Set(
+          engines.filter((e) => e.status === ENGINE_STATUS.STARTED).map((e) => e.type)
+        );
         const toStop = entityTypes.filter((type) => startedTypes.has(type));
 
         await Promise.all(toStop.map((type) => assetManager.stop(type)));
