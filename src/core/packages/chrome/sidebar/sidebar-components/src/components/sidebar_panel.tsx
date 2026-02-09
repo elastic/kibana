@@ -58,8 +58,13 @@ const focusMainContent = () => {
 };
 
 /** Rescues focus to main content (or custom callback) when the panel unmounts with focus inside. */
-const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefined>) => {
+const useFocusRescue = () => {
   const asideRef = useRef<HTMLElement>(null);
+  const onFocusRescueRef = useRef<(() => void) | undefined>();
+
+  const setOnFocusRescue = useCallback((cb: (() => void) | undefined) => {
+    onFocusRescueRef.current = cb;
+  }, []);
 
   useLayoutEffect(() => {
     const el = asideRef.current;
@@ -68,26 +73,22 @@ const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefin
         (onFocusRescueRef.current ?? focusMainContent)();
       }
     };
-  }, [onFocusRescueRef]);
+  }, []);
 
-  return asideRef;
+  return { asideRef, setOnFocusRescue };
 };
 
 /**
  * Minimal container for sidebar app content.
  * Apps are responsible for rendering their own header using SidebarHeader component.
  *
- * Provides {@link SidebarPanelCtx} so child components can access
+ * Provides {@link SidebarPanelContext} so child components can access
  * the panel's heading ID for aria-labelledby via {@link useSidebarPanel}.
  */
 export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
   const { chromeStyle } = useLayoutConfig();
   const headingId = useId();
-  const onFocusRescueRef = useRef<(() => void) | undefined>();
-  const setOnFocusRescue = useCallback((cb: (() => void) | undefined) => {
-    onFocusRescueRef.current = cb;
-  }, []);
-  const asideRef = useFocusRescue(onFocusRescueRef);
+  const { asideRef, setOnFocusRescue } = useFocusRescue();
   const contextValue = useMemo<SidebarPanelContextValue>(
     () => ({ headingId, setOnFocusRescue }),
     [headingId, setOnFocusRescue]
