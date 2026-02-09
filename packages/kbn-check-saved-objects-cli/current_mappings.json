@@ -313,6 +313,9 @@
       "groupingKey": {
         "type": "keyword"
       },
+      "kind": {
+        "type": "keyword"
+      },
       "lookbackWindow": {
         "type": "keyword"
       },
@@ -3510,6 +3513,9 @@
         "type": "keyword"
       },
       "sessionId": {
+        "type": "keyword"
+      },
+      "status": {
         "type": "keyword"
       },
       "username": {

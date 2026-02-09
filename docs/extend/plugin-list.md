@@ -102,6 +102,7 @@ mapped_pages:
 | [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
+| [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
 | [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
 | [workflowsExtensions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
@@ -158,6 +159,7 @@ mapped_pages:
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |
+| [feedback](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/feedback/README.md) | Universal way of giving feedback about Elastic in Kibana. |
 | [fieldsMetadata](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fields_metadata/README.md) | The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future. |
 | [fileUpload](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/file_upload) | WARNING: Missing or empty README. |
 | [fleet](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/README.md) | Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies. |
