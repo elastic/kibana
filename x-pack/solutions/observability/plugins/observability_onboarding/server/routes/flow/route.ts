@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
@@ -484,7 +484,7 @@ async function ensureInstalledIntegrations(
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        config: dump({
+        config: stringify({
           inputs: [
             {
               id: `filestream-${pkgName}`,
@@ -621,7 +621,7 @@ function generateAgentConfigTar(output: Output, installedIntegrations: Installed
       path: 'elastic-agent.yml',
       mode: 0o644,
       mtime: now,
-      data: dump({
+      data: stringify({
         outputs: {
           default: transformOutputToFullPolicyOutput(output, undefined, true),
         },
