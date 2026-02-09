@@ -110,7 +110,26 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
 
         // Get admin credentials once for all invalidations
         const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+        if (apiKeys.length === 0) {
+          return;
+        }
 
+        // Get admin credentials once for all invalidations
+        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+
+        // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
+        const response = await apiClient.post('internal/security/api_key/invalidate', {
+          headers: {
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+            ...adminCookieHeader,
+          },
+          body: {
+            apiKeys: apiKeys.map((apiKey) => ({ id: apiKey.id, name: apiKey.name })),
+            isAdmin: true,
+          },
+          responseType: 'json',
+        });
         // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
         const response = await apiClient.post('internal/security/api_key/invalidate', {
           headers: {
