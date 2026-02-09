@@ -107,11 +107,14 @@ function getDefaultQuery({
 
   // Lastly fall back to the last selected query mode if available
   const hasEsqlEnabled = services.uiSettings.get(ENABLE_ESQL);
+  const canUseEsql = hasEsqlEnabled && dataView instanceof DataView;
 
   const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
-  if (hasEsqlEnabled && queryMode === 'esql' && dataView instanceof DataView)
-    return { esql: getInitialESQLQuery(dataView, true) };
+  if (queryMode === 'esql' && canUseEsql) return { esql: getInitialESQLQuery(dataView, true) };
+  if (queryMode === 'classic') return services.data.query.queryString.getDefaultQuery();
 
+  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
+  if (isEsqlDefault && canUseEsql) return { esql: getInitialESQLQuery(dataView, true) };
   return services.data.query.queryString.getDefaultQuery();
 }
 
