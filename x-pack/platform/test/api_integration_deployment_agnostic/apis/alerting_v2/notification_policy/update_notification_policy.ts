@@ -19,26 +19,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Update Notification Policy API', function () {
     let roleAuthc: RoleCredentials;
-    let createdPolicyId: string;
-    let currentVersion: string;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [NOTIFICATION_POLICY_SO_TYPE] });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-
-      // Create a notification policy to test update
-      const createResponse = await supertestWithoutAuth
-        .post(NOTIFICATION_POLICY_API_PATH)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          name: 'original-policy',
-          description: 'original-policy description',
-          workflow_id: 'original-workflow-id',
-        });
-
-      createdPolicyId = createResponse.body.id;
-      currentVersion = createResponse.body.version;
     });
 
     after(async () => {
@@ -46,7 +30,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it('should update a notification policy name and workflow_id', async () => {
+    it('should update a notification policy', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'original-policy',
+          description: 'original-policy-description',
+          workflow_id: 'original-workflow-id',
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
       const response = await supertestWithoutAuth
         .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
@@ -54,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({
           name: 'updated-policy',
           workflow_id: 'updated-workflow-id',
+          description: 'updated-policy-description',
           version: currentVersion,
         });
 
@@ -62,12 +62,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('updated-policy');
       expect(response.body.workflow_id).to.be('updated-workflow-id');
+      expect(response.body.description).to.be('updated-policy-description');
       expect(response.body.updatedAt).to.be.a('string');
-
-      currentVersion = response.body.version;
     });
 
-    it('should update only name when workflow_id is not provided', async () => {
+    it('should update only name', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'original-policy',
+          description: 'original-policy-description',
+          workflow_id: 'original-workflow-id',
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
       const response = await supertestWithoutAuth
         .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
@@ -77,9 +91,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('only-name-updated');
-      expect(response.body.workflow_id).to.be('updated-workflow-id');
+      expect(response.body.description).to.be('original-policy-description');
+      expect(response.body.workflow_id).to.be('original-workflow-id');
+    });
 
-      currentVersion = response.body.version;
+    it('should update only description', async () => {
+      const createResponse = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'original-policy',
+          description: 'original-policy-description',
+          workflow_id: 'original-workflow-id',
+        });
+
+      expect(createResponse.status).to.be(200);
+
+      const createdPolicyId = createResponse.body.id as string;
+      const currentVersion = createResponse.body.version as string;
+
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ description: 'only-description-updated', version: currentVersion });
+
+      expect(response.status).to.be(200);
+      expect(response.body.version).to.be.a('string');
+      expect(response.body.name).to.be('original-policy');
+      expect(response.body.description).to.be('only-description-updated');
+      expect(response.body.workflow_id).to.be('original-workflow-id');
     });
 
     it('should return 404 when updating a non-existent notification policy', async () => {
@@ -87,7 +129,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'some-name', version: 'WzEsMV0=' });
+        .send({
+          name: 'some-name',
+          description: 'some-description',
+          workflow_id: 'some-workflow-id',
+          version: 'WzEsMV0=',
+        });
 
       expect(response.status).to.be(404);
     });
