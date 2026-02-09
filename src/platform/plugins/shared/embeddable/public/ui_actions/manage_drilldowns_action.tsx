@@ -30,6 +30,8 @@ import type { HasDrilldowns } from '../drilldowns/types';
 import { DRILLDOWN_ACTION_GROUP, MANAGE_DRILLDOWNS_ACTION } from './constants';
 import { core } from '../kibana_services';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
+import { getEmbeddableTriggers } from './get_embeddable_triggers';
+import { getDrilldownRegistryEntries } from '../drilldowns/registry';
 
 export type ManageDrilldownActionApi = CanAccessViewMode &
   HasDrilldowns &
@@ -81,22 +83,22 @@ export const manageDrilldownsAction: ActionDefinition<EmbeddableApiContext> = {
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        return <div>Manage drilldowns placehodler</div>;
-        /*
-        const templates = createDrilldownTemplatesFromSiblings(embeddable);
+        const { DrilldownManager, getDrilldownFactories } = await import(
+          '../drilldowns/drilldown_manager_ui'
+        );
+        const factories = await getDrilldownFactories(getDrilldownRegistryEntries());
+
         return (
-          <uiActionsEnhancedServices.DrilldownManager
+          <DrilldownManager
             initialRoute={'/manage'}
-            dynamicActionManager={embeddable.enhancements.dynamicActions}
-            triggers={[
-              ...ensureNestedTriggers(embeddable.supportedTriggers()),
-              CONTEXT_MENU_TRIGGER,
-            ]}
-            placeContext={{ embeddable }}
-            templates={templates}
+            drilldowns$={embeddable.drilldowns$}
+            setDrilldowns={embeddable.setDrilldowns}
+            triggers={getEmbeddableTriggers(embeddable)}
+            templates={[]}
             onClose={closeFlyout}
+            factories={factories}
           />
-        );*/
+        );
       },
       flyoutProps: {
         'data-test-subj': 'editDrilldownFlyout',
