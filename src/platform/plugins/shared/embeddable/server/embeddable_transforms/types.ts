@@ -59,10 +59,7 @@ export type EmbeddableTransformsSetup<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  getSchema?: (
-    getDrilldownsSchema: GetDrilldownsSchemaFnType,
-    legacyMode: boolean
-  ) => Type<object> | undefined;
+  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */
