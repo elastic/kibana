@@ -7,12 +7,7 @@
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 
-import type {
-  EsqlToolDefinition,
-  EsqlToolParam,
-  EsqlToolFieldTypes,
-  EsqlToolParamValue,
-} from '@kbn/agent-builder-common';
+import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/agent-builder-common';
 import { ToolType } from '@kbn/agent-builder-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
@@ -20,79 +15,6 @@ import {
   EsqlParamSource,
   type EsqlToolFormData,
 } from '../components/tools/form/types/tool_form_types';
-
-/**
- * Converts a defaultValue to the appropriate type based on the parameter type.
- * The enum values are: integer, string, float, boolean, date, array.
- */
-export const convertDefaultValueToType = (
-  value: EsqlToolParamValue,
-  type: EsqlToolFieldTypes
-): EsqlToolParamValue => {
-  if (value == null) {
-    return value;
-  }
-
-  switch (type) {
-    case 'integer':
-      if (typeof value === 'number' && Number.isInteger(value)) {
-        return value;
-      }
-      if (typeof value === 'string') {
-        const intValue = parseInt(value.trim(), 10);
-        if (isNaN(intValue)) {
-          throw new Error(`Invalid integer value: ${value}`);
-        }
-        return intValue;
-      }
-      throw new Error(`Invalid integer value: ${value}`);
-
-    case 'float':
-      if (typeof value === 'number') {
-        return value;
-      }
-      if (typeof value === 'string') {
-        const floatValue = parseFloat(value.trim());
-        if (isNaN(floatValue)) {
-          throw new Error(`Invalid number value: ${value}`);
-        }
-        return floatValue;
-      }
-      throw new Error(`Invalid number value: ${value}`);
-
-    case 'boolean':
-      if (typeof value === 'boolean') {
-        return value;
-      }
-      if (typeof value === 'string') {
-        const lowerValue = value.trim().toLowerCase();
-        if (lowerValue === 'true') {
-          return true;
-        } else if (lowerValue === 'false') {
-          return false;
-        } else {
-          throw new Error(`Invalid boolean value: ${value}. Must be 'true' or 'false'`);
-        }
-      }
-      throw new Error(`Invalid boolean value: ${value}`);
-
-    case 'string':
-    case 'date':
-      if (typeof value === 'string') {
-        return value;
-      }
-      return String(value);
-
-    case 'array':
-      if (Array.isArray(value)) {
-        return value;
-      }
-      return value;
-
-    default:
-      return value;
-  }
-};
 
 /**
  * Transforms an ES|QL tool into its UI form representation.
@@ -143,8 +65,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
 
           // Add defaultValue if provided and parameter is optional
           if (param.optional && param.defaultValue != null && param.defaultValue !== '') {
-            // Convert string defaultValue to appropriate type based on parameter type
-            paramConfig.defaultValue = convertDefaultValueToType(param.defaultValue, param.type);
+            paramConfig.defaultValue = param.defaultValue;
           }
 
           paramsMap[param.name] = paramConfig;
