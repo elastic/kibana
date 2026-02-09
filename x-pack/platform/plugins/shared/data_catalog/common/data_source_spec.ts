@@ -110,4 +110,11 @@ export interface DataSource {
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
+
+  /**
+   * Indicates if this data source requires a custom UI override when editing.
+   * Set to true for sources that use MCP connectors but need branded UIs (like GitHub).
+   * Defaults to false.
+   */
+  requiresUIOverride?: boolean;
 }

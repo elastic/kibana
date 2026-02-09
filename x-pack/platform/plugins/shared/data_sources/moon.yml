@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/connector-schemas'
   - '@kbn/task-manager-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/alerts-ui-shared'
   - '@kbn/workflows'
 tags:
   - plugin

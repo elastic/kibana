@@ -36,7 +36,7 @@ pageLoadAssetSize:
   data: 500179
   dataQuality: 11469
   datasetQuality: 49315
-  dataSources: 6748
+  dataSources: 9972
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17521
+  embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
@@ -83,7 +83,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13091
   imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522
@@ -209,6 +209,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 53333
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 8497
   workplaceAIApp: 65731

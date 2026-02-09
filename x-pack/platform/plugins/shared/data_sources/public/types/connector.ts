@@ -34,3 +34,24 @@ export interface ActiveSource {
   createdAt?: string;
   updatedAt?: string;
 }
+
+/**
+ * Request payload for creating a data source (data_connector saved object).
+ * This links a data source to its underlying stack connector.
+ *
+ * POST /internal/data-sources
+ */
+export interface CreateDataSourceRequest {
+  name: string;
+  stack_connector_id: string;
+  type: string;
+}
+
+/**
+ * Request payload for updating a data source name.
+ *
+ * PUT /internal/data-sources/{id}
+ */
+export interface UpdateDataSourceNameRequest {
+  name: string;
+}
