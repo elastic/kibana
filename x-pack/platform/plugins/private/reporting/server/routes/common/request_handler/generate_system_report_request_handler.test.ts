@@ -332,8 +332,9 @@ describe('handleGenerateSystemReportRequest', () => {
       mockHandleResponse
     );
 
-    expect(mockResponseFactory.unauthorized).toHaveBeenCalledWith({
+    expect(mockResponseFactory.customError).toHaveBeenCalledWith({
       body: `Sorry, you aren't authenticated`,
+      statusCode: 401,
     });
   });
 

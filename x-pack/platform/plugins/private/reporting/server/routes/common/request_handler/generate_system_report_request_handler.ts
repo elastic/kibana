@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -25,7 +26,7 @@ import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import type { RequestParams } from './request_handler';
 import { RequestHandler } from './request_handler';
-import { authorizedUserPreRouting } from '../authorized_user_pre_routing';
+import { getAuthorizedUser } from '../get_authorized_user';
 
 export interface InternalReportParams {
   title: string;
@@ -209,38 +210,49 @@ export async function handleGenerateSystemReportRequest(
     reporting: Promise.resolve(reporting.getContract()),
   };
 
-  const authorizedHandler = await authorizedUserPreRouting(reporting, (user) => {
-    const { title, searchSource, timezone } = reportParams;
+  let user: ReportingUser;
 
-    const exportTypeId = 'csv_searchsource';
-    const jobParams = {
-      title,
-      searchSource,
-      browserTimezone: timezone ?? 'UTC',
-      version: reporting.getKibanaPackageInfo().version,
-      objectType: 'search',
-      columns: searchSource.fields as string[],
-    };
-    const requestHandler = new GenerateSystemReportRequestHandler(
-      {
-        reporting,
-        user,
-        context: reportingContext,
-        path,
-        req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
-        res,
-        logger,
-      },
-      {
-        handleResponse,
-      }
-    );
+  try {
+    user = await getAuthorizedUser(reporting, req, { requireSecurity: true });
+  } catch (err) {
+    logger.error(`Failed to get authorized user: ${err.message}`);
+    if (err instanceof Boom.Boom) {
+      return res.customError({
+        statusCode: err.output.statusCode,
+        body: err.output.payload.message,
+      });
+    }
+    throw err;
+  }
 
-    return requestHandler.handleRequest({
-      exportTypeId,
-      jobParams,
-    });
+  const { title, searchSource, timezone } = reportParams;
+
+  const exportTypeId = 'csv_searchsource';
+  const jobParams = {
+    title,
+    searchSource,
+    browserTimezone: timezone ?? 'UTC',
+    version: reporting.getKibanaPackageInfo().version,
+    objectType: 'search',
+    columns: searchSource.fields as string[],
+  };
+  const requestHandler = new GenerateSystemReportRequestHandler(
+    {
+      reporting,
+      user,
+      context: reportingContext,
+      path,
+      req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
+      res,
+      logger,
+    },
+    {
+      handleResponse,
+    }
+  );
+
+  return requestHandler.handleRequest({
+    exportTypeId,
+    jobParams,
   });
-
-  return await authorizedHandler(reportingContext, req, res);
 }
