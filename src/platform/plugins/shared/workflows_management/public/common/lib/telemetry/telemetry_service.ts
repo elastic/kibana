@@ -12,15 +12,9 @@ import { workflowsTelemetryEvents } from './events/workflows';
 import type {
   TelemetryEventTypeData,
   TelemetryEventTypes,
+  TelemetryServiceClient,
   TelemetryServiceSetupParams,
 } from './types';
-
-export interface TelemetryServiceStart {
-  reportEvent: <T extends TelemetryEventTypes>(
-    eventType: T,
-    eventData: TelemetryEventTypeData<T>
-  ) => void;
-}
 
 /**
  * Service that interacts with the Core's analytics module
@@ -36,7 +30,7 @@ export class TelemetryService {
     );
   }
 
-  public start(): TelemetryServiceStart {
+  public getClient(): TelemetryServiceClient {
     const reportEvent = this.analytics?.reportEvent.bind(this.analytics);
 
     if (!this.analytics || !reportEvent) {

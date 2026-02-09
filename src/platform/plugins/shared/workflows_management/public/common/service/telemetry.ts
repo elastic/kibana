@@ -21,8 +21,9 @@ import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
 } from '../lib/telemetry/events/workflows/types';
+import type { WorkflowDetailTab } from '../lib/telemetry/events/workflows/ui/types';
 import type { WorkflowValidationErrorType } from '../lib/telemetry/events/workflows/validation/types';
-import type { TelemetryServiceStart } from '../lib/telemetry/types';
+import type { TelemetryServiceClient } from '../lib/telemetry/types';
 import {
   extractStepInfoFromWorkflowYaml,
   extractWorkflowMetadata,
@@ -32,7 +33,7 @@ export class WorkflowsBaseTelemetry {
   // Track reported validation errors per workflow ID
   private reportedValidationErrors = new Map<string | undefined, Set<string>>();
 
-  constructor(protected readonly telemetryService: TelemetryServiceStart) {}
+  constructor(protected readonly telemetryService: TelemetryServiceClient) {}
 
   protected getBaseResultParams = (
     error: Error | undefined
@@ -464,7 +465,7 @@ export class WorkflowsBaseTelemetry {
    */
   reportWorkflowDetailViewed = (params: {
     workflowId: string;
-    tab: 'workflow' | 'executions' | 'logs';
+    tab: WorkflowDetailTab;
     editorType?: WorkflowEditorType;
   }) => {
     const { workflowId, tab, editorType } = params;

@@ -30,11 +30,10 @@ export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
-import type { TelemetryServiceStart } from './common/lib/telemetry/types';
+import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
-export interface WorkflowsPublicPluginStart {
-  telemetry: TelemetryServiceStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkflowsPublicPluginStart {}
 
 export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -51,7 +50,9 @@ export interface WorkflowsPublicPluginStartDependencies {
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
-  workflowsManagement: WorkflowsPublicPluginStart;
+  workflowsManagement: {
+    telemetry: TelemetryServiceClient;
+  };
 }
 
 export type WorkflowsServices = CoreStart &

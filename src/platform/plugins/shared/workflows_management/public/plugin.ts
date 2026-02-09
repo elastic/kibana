@@ -113,9 +113,7 @@ export class WorkflowsPlugin
       }
     });
 
-    return {
-      telemetry: this.telemetryService.start(),
-    };
+    return {};
   }
 
   public stop() {}
@@ -125,11 +123,11 @@ export class WorkflowsPlugin
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
   ): Promise<WorkflowsServices> {
     // Get start services as specified in kibana.jsonc
-    const [coreStart, depsStart, pluginStart] = await core.getStartServices();
+    const [coreStart, depsStart] = await core.getStartServices();
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
-      workflowsManagement: pluginStart,
+      workflowsManagement: { telemetry: this.telemetryService.getClient() },
     };
 
     return {
