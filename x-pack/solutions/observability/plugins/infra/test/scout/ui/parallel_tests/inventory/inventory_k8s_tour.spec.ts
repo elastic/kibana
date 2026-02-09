@@ -10,8 +10,9 @@ import { test } from '../../fixtures';
 import { DATE_WITH_HOSTS_DATA } from '../../fixtures/constants';
 
 test.describe('Infrastructure Inventory - K8s Tour', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage }, kbnClient }) => {
     await browserAuth.loginAsViewer();
+    await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: false });
     await inventoryPage.goToPage();
     await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
   });
