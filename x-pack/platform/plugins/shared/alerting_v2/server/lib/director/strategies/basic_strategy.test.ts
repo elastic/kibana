@@ -6,36 +6,9 @@
  */
 
 import { BasicTransitionStrategy } from './basic_strategy';
-import {
-  alertEpisodeStatus,
-  alertEventStatus,
-  type AlertEpisodeStatus,
-  type AlertEventStatus,
-} from '../../../resources/alert_events';
-import { createAlertEvent } from '../../rule_executor/test_utils';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/alert_events';
 import { createRuleResponse } from '../../test_utils';
-import type { StateTransitionContext } from './types';
-import type { LatestAlertEventState } from '../queries';
-
-const buildCtx = (
-  episodeStatus: AlertEpisodeStatus | null | undefined,
-  eventStatus: AlertEventStatus
-): StateTransitionContext => ({
-  rule: createRuleResponse(),
-  alertEvent: createAlertEvent({ status: eventStatus }),
-  ...(episodeStatus !== undefined
-    ? {
-        previousEpisode: {
-          last_status: eventStatus,
-          last_episode_id: 'episode-1',
-          last_episode_status: episodeStatus,
-          last_episode_status_count: null,
-          last_episode_timestamp: '2025-01-01T00:00:00.000Z',
-          group_hash: 'hash-1',
-        } as LatestAlertEventState,
-      }
-    : {}),
-});
+import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
 
 describe('BasicTransitionStrategy', () => {
   let strategy: BasicTransitionStrategy;
@@ -59,19 +32,40 @@ describe('BasicTransitionStrategy', () => {
 
   describe('no previous episode', () => {
     it('returns pending when there is no previous episode', () => {
-      const result = strategy.getNextState(buildCtx(undefined, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
 
     it('returns pending when previous episode status is null', () => {
-      const result = strategy.getNextState(buildCtx(null, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: null,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
 
     it('returns pending when the current state is unknown', () => {
       const result = strategy.getNextState(
-        // @ts-expect-error - unknown state testing
-        buildCtx('unknown_state', alertEventStatus.breached)
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: {
+            ...buildLatestAlertEvent({
+              episodeStatus: alertEpisodeStatus.pending,
+              eventStatus: alertEventStatus.breached,
+            }),
+            // @ts-expect-error - unknown state testing
+            last_episode_status: 'unknown_state',
+          },
+        })
       );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
@@ -81,17 +75,41 @@ describe('BasicTransitionStrategy', () => {
     const currentState = alertEpisodeStatus.inactive;
 
     it('transitions to pending on breached event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
 
     it('stays inactive on recovered event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.recovered));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.recovered,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.inactive });
     });
 
     it('stays inactive on no_data event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.no_data));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.no_data,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.no_data,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.inactive });
     });
   });
@@ -100,17 +118,41 @@ describe('BasicTransitionStrategy', () => {
     const currentState = alertEpisodeStatus.pending;
 
     it('transitions to active on breached event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.active });
     });
 
     it('transitions to inactive on recovered event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.recovered));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.recovered,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.inactive });
     });
 
     it('stays pending on no_data event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.no_data));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.no_data,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.no_data,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
   });
@@ -119,17 +161,41 @@ describe('BasicTransitionStrategy', () => {
     const currentState = alertEpisodeStatus.active;
 
     it('stays active on breached event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.active });
     });
 
     it('transitions to recovering on recovered event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.recovered));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.recovered,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.recovering });
     });
 
     it('stays active on no_data event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.no_data));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.no_data,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.no_data,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.active });
     });
   });
@@ -138,17 +204,41 @@ describe('BasicTransitionStrategy', () => {
     const currentState = alertEpisodeStatus.recovering;
 
     it('transitions to active on breached event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.breached));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.active });
     });
 
     it('transitions to inactive on recovered event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.recovered));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.recovered,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.inactive });
     });
 
     it('stays recovering on no_data event', () => {
-      const result = strategy.getNextState(buildCtx(currentState, alertEventStatus.no_data));
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.no_data,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: currentState,
+            eventStatus: alertEventStatus.no_data,
+          }),
+        })
+      );
       expect(result).toEqual({ status: alertEpisodeStatus.recovering });
     });
   });
@@ -156,16 +246,31 @@ describe('BasicTransitionStrategy', () => {
   describe('defensive fallbacks', () => {
     it('returns pending for unknown current state', () => {
       const result = strategy.getNextState(
-        // @ts-expect-error - unknown state testing
-        buildCtx('unknown_state', alertEventStatus.breached)
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          previousEpisode: {
+            ...buildLatestAlertEvent({
+              episodeStatus: alertEpisodeStatus.pending,
+              eventStatus: alertEventStatus.breached,
+            }),
+            // @ts-expect-error - unknown state testing
+            last_episode_status: 'unknown_state',
+          },
+        })
       );
       expect(result).toEqual({ status: alertEpisodeStatus.pending });
     });
 
     it('returns current state for unknown event status', () => {
       const result = strategy.getNextState(
-        // @ts-expect-error - unknown event status testing
-        buildCtx(alertEpisodeStatus.active, 'unknown_event')
+        buildStrategyStateTransitionContext({
+          // @ts-expect-error - unknown event status testing
+          eventStatus: 'unknown_event',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.active,
+            eventStatus: alertEventStatus.breached,
+          }),
+        })
       );
       expect(result).toEqual({ status: alertEpisodeStatus.active });
     });

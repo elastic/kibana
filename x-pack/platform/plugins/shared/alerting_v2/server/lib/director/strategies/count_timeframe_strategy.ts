@@ -13,11 +13,14 @@ import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
 import { BasicTransitionStrategy } from './basic_strategy';
 import type { StateTransitionContext, StateTransitionResult } from './types';
+import type { LatestAlertEventState } from '../queries';
+
+const DEFAULT_STATUS_COUNT = 1;
 
 type Operator = 'AND' | 'OR';
 
 interface ThresholdConfig {
-  operator?: Operator;
+  operator: Operator;
   count?: number;
   timeframeMs?: number;
 }
@@ -106,14 +109,14 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
-    const { rule, previousEpisode } = ctx;
+    const { rule, previousEpisode, alertEvent } = ctx;
     const stateTransition = rule.stateTransition;
-    const currentEpisodeStatus = previousEpisode?.last_episode_status ?? undefined;
-    const currentStatusCount = previousEpisode?.last_episode_status_count ?? 0;
-    const elapsedMs = this.getElapsedMs(
-      ctx.alertEvent['@timestamp'],
-      previousEpisode?.last_episode_timestamp
-    );
+    const currentEpisodeStatus = previousEpisode?.last_episode_status;
+    const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
+    const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
+    const alertEventTimestamp = alertEvent['@timestamp'];
+
+    const elapsedMs = this.getElapsedMs(alertEventTimestamp, currentEpisodeTimestamp);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
@@ -124,12 +127,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
 
     // --- Handle pending count of 0: skip pending, go directly to active ---
     if (this.shouldSkipPending(stateTransition, basicResult.status)) {
-      return { status: alertEpisodeStatus.active };
+      return { status: alertEpisodeStatus.active, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     // --- Handle recovering count of 0: skip recovering, go directly to inactive ---
     if (this.shouldSkipRecovering(stateTransition, basicResult.status)) {
-      return { status: alertEpisodeStatus.inactive };
+      return { status: alertEpisodeStatus.inactive, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     // --- Pending → Active threshold ---
@@ -137,7 +140,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pendingOperator,
+        operator: stateTransition.pendingOperator ?? 'OR',
         count: stateTransition.pendingCount,
         timeframeMs: stateTransition.pendingTimeframe
           ? parseDurationToMs(stateTransition.pendingTimeframe)
@@ -152,7 +155,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recoveringOperator,
+        operator: stateTransition.recoveringOperator ?? 'OR',
         count: stateTransition.recoveringCount,
         timeframeMs: stateTransition.recoveringTimeframe
           ? parseDurationToMs(stateTransition.recoveringTimeframe)
@@ -162,21 +165,29 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       });
     }
 
-    // --- Entering pending for the first time ---
+    // --- Changing to pending for the first time ---
     if (
-      this.isEnteringStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
+      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
     ) {
-      return { status: alertEpisodeStatus.pending, statusCount: 1 };
+      return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
     }
 
-    // --- Entering recovering for the first time ---
+    // --- Changing to recovering for the first time ---
     if (
-      this.isEnteringStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
+      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
     ) {
-      return { status: alertEpisodeStatus.recovering, statusCount: 1 };
+      return { status: alertEpisodeStatus.recovering, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     return basicResult;
+  }
+
+  private getCurrentStatusCount(previousEpisode?: LatestAlertEventState): number {
+    if (!previousEpisode) {
+      return 0;
+    }
+
+    return previousEpisode.last_episode_status_count ?? DEFAULT_STATUS_COUNT;
   }
 
   private shouldSkipPending(
@@ -209,7 +220,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     );
   }
 
-  private isEnteringStatus(
+  private isChangingStatus(
     currentStatus: AlertEpisodeStatus | undefined | null,
     nextStatus: AlertEpisodeStatus,
     targetStatus: AlertEpisodeStatus
@@ -228,7 +239,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }: {
     currentStatusCount: number;
     elapsedMs: number;
-    operator?: Operator;
+    operator: Operator;
     count?: number;
     timeframeMs?: number;
     successStatus: AlertEpisodeStatus;
@@ -238,7 +249,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
     if (isThresholdMet(nextCount, elapsedMs, config)) {
-      return { status: successStatus };
+      return { status: successStatus, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     return { status: stayStatus, statusCount: nextCount };
