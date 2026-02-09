@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthHeaders } from '@kbn/core/server';
+import type { AuthHeaders, SessionStorageSetOptions } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '../../common';
 import type { UserProfileGrant } from '../user_profile';
@@ -47,6 +47,7 @@ interface AuthenticationOptions {
   challenges?: string[];
   redirectURL?: string;
   state?: unknown;
+  stateCookieOptions?: SessionStorageSetOptions;
   user?: AuthenticatedUser;
   authHeaders?: AuthHeaders;
   authResponseHeaders?: AuthHeaders;
@@ -62,6 +63,7 @@ export interface SucceededAuthenticationResultOptions {
 
 export interface RedirectedAuthenticationResultOptions {
   state?: unknown;
+  stateCookieOptions?: SessionStorageSetOptions;
   user?: AuthenticatedUser;
   authResponseHeaders?: AuthHeaders;
   userProfileGrant?: UserProfileGrant;
@@ -143,6 +145,7 @@ export class AuthenticationResult {
    * @param [authResponseHeaders] Optional dictionary of the HTTP headers with authentication
    * information that should be specified in the response we send to the client request.
    * @param [state] Optional state to be stored and reused for the next request.
+   * @param [stateCookieOptions] Optional overrides for cookie attributes when setting state cookie.
    */
   public static redirectTo(
     redirectURL: string,
@@ -151,6 +154,7 @@ export class AuthenticationResult {
       userProfileGrant,
       authResponseHeaders,
       state,
+      stateCookieOptions,
     }: RedirectedAuthenticationResultOptions = {}
   ) {
     if (!redirectURL) {
@@ -163,6 +167,7 @@ export class AuthenticationResult {
       userProfileGrant,
       authResponseHeaders,
       state,
+      stateCookieOptions,
     });
   }
 
@@ -206,6 +211,13 @@ export class AuthenticationResult {
    */
   public get state() {
     return this.options.state;
+  }
+
+  /**
+   * Optional overrides for cookie attributes when setting state cookie (only available for `redirected` result).
+   */
+  public get stateCookieOptions() {
+    return this.options.stateCookieOptions;
   }
 
   /**

@@ -46,7 +46,7 @@ describe('createChartInfoApi', () => {
         },
       } as unknown as VisualizationMap,
       {
-        from_based: {
+        formBased: {
           getDatasourceInfo: mockGetDatasourceInfo,
         },
       } as unknown as DatasourceMap
@@ -56,7 +56,7 @@ describe('createChartInfoApi', () => {
       visualizationType: 'lnsXY',
       state: {
         datasourceStates: {
-          from_based: {},
+          formBased: {},
         },
         visualization: {},
         filters: [],

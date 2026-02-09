@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { camelCase } from 'lodash';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type { StateComparators, StateManager, WithAllKeys } from './types';
 import { runComparator } from './state_comparators';
+import type { StateComparators, StateManager, WithAllKeys } from './types';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
 
@@ -19,15 +20,6 @@ interface UnstructuredSettersAndSubjects<StateType extends object> {
 
 type KeyToSubjectMap<StateType extends object> = {
   [Key in keyof StateType]?: SubjectOf<StateType>;
-};
-
-const snakeToCamel = (key: string): string => {
-  if (!/[_-]/.test(key)) {
-    return key;
-  }
-  return key.replace(/([-_][a-z])/gi, (keyPart) => {
-    return keyPart.toUpperCase().replace('-', '').replace('_', '');
-  });
 };
 
 /**
@@ -68,7 +60,7 @@ export const initializeStateManager = <StateType extends object>(
       }
     };
 
-    const camelCaseKey = snakeToCamel(key as string);
+    const camelCaseKey = camelCase(key as string);
     const capitalizedKey = camelCaseKey.charAt(0).toUpperCase() + camelCaseKey.slice(1);
     acc[`set${capitalizedKey}`] = setter;
     acc[`${camelCaseKey as string}$`] = subject;
