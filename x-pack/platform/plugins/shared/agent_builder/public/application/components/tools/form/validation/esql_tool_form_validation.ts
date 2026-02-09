@@ -54,13 +54,13 @@ const esqlI18nMessages = {
         values: { name },
       }),
     defaultValueRequiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.params.defaultValueRequiredError',
+      'xpack.agentBuilder.tools.newTool.validation.params.defaultValueRequiredError',
       {
         defaultMessage: 'Default value is required for optional parameters.',
       }
     ),
     defaultValueTypeError: (type: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.params.defaultValueTypeError', {
+      i18n.translate('xpack.agentBuilder.tools.newTool.validation.params.defaultValueTypeError', {
         defaultMessage: 'Default value must be a valid {type}.',
         values: { type },
       }),
