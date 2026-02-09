@@ -85,6 +85,18 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     if (!retryState) {
       return;
     }
+
+    // If we have resumeAt in state, we're exiting a previous wait period - proceed to retry without delay
+    if (retryState.resumeAt) {
+      const attempt = retryState.attempt + 1;
+      this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
+      // Clear resumeAt and increment attempt
+      this.stepExecutionRuntime.setCurrentStepState({ attempt });
+      this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
+      this.workflowRuntime.navigateToNextNode();
+      return;
+    }
+
     const config = this.node.configuration;
     const strategy = config.strategy ?? 'fixed';
 
