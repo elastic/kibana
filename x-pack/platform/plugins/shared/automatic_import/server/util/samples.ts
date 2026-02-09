@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
 interface SampleObj {
@@ -150,7 +150,7 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return dump(fieldsStructure, { sortKeys: false });
+  return stringify(fieldsStructure, { sortMapEntries: false });
 }
 
 export function isObject(value: any): boolean {

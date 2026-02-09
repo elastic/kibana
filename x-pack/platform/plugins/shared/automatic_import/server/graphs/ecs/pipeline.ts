@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
 import type { Pipeline, ESProcessorItem } from '../../../common';
@@ -216,7 +216,7 @@ export function createPipeline(state: EcsMappingState): Pipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  let ingestPipeline = load(renderedTemplate) as Pipeline;
+  let ingestPipeline = parse(renderedTemplate) as Pipeline;
   if (state.additionalProcessors.length > 0) {
     ingestPipeline = combineProcessors(ingestPipeline, state.additionalProcessors);
   }
