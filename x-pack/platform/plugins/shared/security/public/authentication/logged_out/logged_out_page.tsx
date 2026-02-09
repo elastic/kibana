@@ -18,7 +18,7 @@ import { parseNextURL } from '@kbn/std';
 import type { StartServices } from '../..';
 import { LOGOUT_REASON_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LogoutReason } from '../../../common/types';
-import { AuthenticationStatePage, formMessages, MessageType, renderMessage } from '../components';
+import { AuthenticationStatePage, formMessages, renderMessage } from '../components';
 interface Props {
   basePath: IBasePath;
   customBranding: CustomBrandingStart;
