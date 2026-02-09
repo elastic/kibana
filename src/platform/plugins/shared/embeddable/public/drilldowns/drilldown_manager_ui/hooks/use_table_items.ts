@@ -32,7 +32,7 @@ export const useTableItems = (
         icon: factory?.euiIcon,
         error: !factory
           ? invalidDrilldownType(drilldownState.type) // this shouldn't happen for the end user, but useful during development
-          : !factory.isCompatibleLicense
+          : !factory.isLicenseCompatible
           ? insufficientLicenseLevel
           : undefined,
         trigger: getTrigger(drilldownState.trigger),

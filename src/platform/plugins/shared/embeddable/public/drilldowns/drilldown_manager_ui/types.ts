@@ -113,10 +113,16 @@ export interface DrilldownTemplate {
 export interface DrilldownFactory
   extends Pick<
     DrilldownDefinition,
-    'displayName' | 'Editor' | 'euiIcon' | 'getInitialState' | 'isStateValid' | 'supportedTriggers'
+    | 'displayName'
+    | 'Editor'
+    | 'euiIcon'
+    | 'getInitialState'
+    | 'isStateValid'
+    | 'order'
+    | 'supportedTriggers'
   > {
   type: string;
-  isCompatibleLicense: boolean;
+  isLicenseCompatible: boolean;
 }
 
 /**

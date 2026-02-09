@@ -8,7 +8,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type {
   PublicDrilldownsManagerProps,
   DrilldownsManagerDependencies,
@@ -94,7 +94,7 @@ export class DrilldownsManager {
     const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.factories.some(
-      ({ isCompatibleLicense }) => !isCompatibleLicense
+      ({ isLicenseCompatible }) => !isLicenseCompatible
     );
 
     /* this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
@@ -181,38 +181,6 @@ export class DrilldownsManager {
   public readonly close = (): void => {
     this.deps.onClose();
   };
-
-  /**
-   * Get action factory context, which also contains a custom place context
-   * provided by the user who triggered rendering of the <DrilldownManager>.
-   */
-  /* public getActionFactoryContext(): BaseActionFactoryContext {
-    const placeContext = this.deps.placeContext ?? [];
-    const context: BaseActionFactoryContext = {
-      ...placeContext,
-      triggers: [],
-    };
-
-    return context;
-  }*/
-
-  /* public getCompatibleActionFactories(
-    context: BaseActionFactoryContext
-  ): Observable<ActionFactory[] | undefined> {
-    const compatibleActionFactories$ = new BehaviorSubject<undefined | ActionFactory[]>(undefined);
-    Promise.allSettled(
-      this.deps.actionFactories.map((factory) => factory.isCompatible(context))
-    ).then((factoryCompatibility) => {
-      compatibleActionFactories$.next(
-        this.deps.actionFactories.filter((_factory, i) => {
-          const result = factoryCompatibility[i];
-          // treat failed isCompatible checks as non-compatible
-          return result.status === 'fulfilled' && result.value;
-        })
-      );
-    });
-    return compatibleActionFactories$.asObservable();
-  }*/
 
   /**
    * Get state object of the drilldown which is currently being created.
@@ -424,8 +392,11 @@ export class DrilldownsManager {
   public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
   public readonly useWelcomeMessage = () =>
     useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
-  // public readonly useActionFactory = () =>
-  //  useObservable(this.actionFactory$, this.actionFactory$.getValue());
+  public readonly useHasFactory = () =>
+    useObservable(
+      this.route$.pipe(map((route) => route.length > 1)),
+      this.route$.getValue().length > 1
+    );
   public readonly useTableItems = () =>
     useTableItems(
       this.deps.drilldowns$,
@@ -433,9 +404,4 @@ export class DrilldownsManager {
       this.deps.getTrigger,
       this.deps.triggers
     );
-  /* public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
-    useObservable(
-      useMemo(() => this.getCompatibleActionFactories(context), [context]),
-      undefined
-    );*/
 }

@@ -70,6 +70,8 @@ export type DrilldownDefinition<
     featureName: string;
   };
 
+  order: number;
+
   /**
    * List of triggers supported by drilldown type
    * Used to narrow trigger selection when configuring drilldown

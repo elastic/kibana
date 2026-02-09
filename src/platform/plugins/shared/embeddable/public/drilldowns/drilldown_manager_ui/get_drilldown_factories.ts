@@ -19,12 +19,13 @@ export async function getDrilldownFactories(
     const drilldownDefinition = await getDrilldownDefinition();
     return {
       type,
-      isCompatibleLicense: await isCompatibleLicense(drilldownDefinition.license?.minimalLicense),
+      isLicenseCompatible: await isCompatibleLicense(drilldownDefinition.license?.minimalLicense),
       displayName: drilldownDefinition.displayName,
       Editor: drilldownDefinition.Editor,
       euiIcon: drilldownDefinition.euiIcon,
       getInitialState: drilldownDefinition.getInitialState,
       isStateValid: drilldownDefinition.isStateValid,
+      order: drilldownDefinition.order,
       supportedTriggers: drilldownDefinition.supportedTriggers,
     };
   });

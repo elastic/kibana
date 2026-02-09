@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownsManager } from '../context';
-// import { ActionFactoryPicker } from '../action_factory_picker';
+import { DrilldownFactoryPicker } from '../drilldown_factory_picker';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
 import { ButtonSubmit } from '../../components/button_submit';
@@ -51,7 +51,7 @@ export const CreateDrilldownForm: React.FC = () => {
   return (
     <>
       <DrilldownManagerTitle>{txtCreateDrilldown}</DrilldownManagerTitle>
-      <div>ActionFactoryPicker</div>
+      <DrilldownFactoryPicker />
       {!!drilldown && <DrilldownStateForm drilldown={drilldown} disabled={disabled} />}
       {!!drilldown && (
         <DrilldownManagerFooter>
