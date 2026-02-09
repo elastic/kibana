@@ -21,15 +21,29 @@ const fixedBottomContainer = css`
 `;
 
 const selectStyles = css`
-  min-width: 180px;
+  min-width: 300px;
   border-radius: 9999px !important;
   
   & .euiSelect {
     border-radius: 9999px !important;
+    width: 300px;
   }
   
   & input {
     border-radius: 9999px !important;
+  }
+  
+  & select {
+    width: 300px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  
+  & option {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 `;
 
@@ -38,10 +52,14 @@ export const VersionSwitcher: React.FC = () => {
 
   const options = [
     { value: 'current', text: 'Current' },
-    { value: '1', text: '1' },
-    { value: '2', text: '2' },
-    { value: '3', text: '3' },
+    { value: '1', text: 'v.1 (nav pref-s in primary nav)' },
+    { value: '2', text: 'v.2 (nav pref-s in a profile)' },
+    { value: '3', text: 'v.3 (nav pref-s in appearance, edit profile separate)' },
   ];
+
+  // Find the selected option text for tooltip
+  const selectedOption = options.find((opt) => opt.value === version);
+  const selectedText = selectedOption?.text || '';
 
   return (
     <div css={fixedBottomContainer} data-test-subj="versionSwitcherContainer">
@@ -54,7 +72,8 @@ export const VersionSwitcher: React.FC = () => {
             onChange={(e) => setVersion(e.target.value as 'current' | '1' | '2' | '3')}
             aria-label="Switch UI version"
             data-test-subj="uiVersionSwitcher"
-            style={{ borderRadius: '9999px' }}
+            style={{ borderRadius: '9999px', width: '300px' }}
+            title={selectedText}
           />
         </div>
       </EuiThemeProvider>
