@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiIconTip,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -33,7 +36,10 @@ import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
+  asDuration,
+  asInteger,
 } from '../../../../../common/utils/formatters';
+import { getServiceHealthStatusColor } from '../../../../../common/service_health_status';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -79,17 +85,16 @@ export function getServiceColumns({
   comparisonData,
   breakpoints,
   showAnomalyHealthStatusColumn,
-  showCombinedHealthStatusColumn,
   showAlertsColumn,
   showSlosColumn,
   link,
   serviceOverflowCount,
   onSloBadgeClick,
+  euiTheme,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showAnomalyHealthStatusColumn: boolean;
-  showCombinedHealthStatusColumn?: boolean;
   showAlertsColumn: boolean;
   showSlosColumn: boolean;
   comparisonDataLoading: boolean;
@@ -98,12 +103,33 @@ export function getServiceColumns({
   link: any;
   serviceOverflowCount: number;
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
+  euiTheme: EuiThemeComputed;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
 
   return [
+    // Combined Health Status Column - Always visible
+    {
+      field: ServiceInventoryFieldName.CombinedHealthStatus,
+      name: (
+        <ColumnHeaderWithTooltip
+          tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.combinedHealth', {
+            defaultMessage:
+              'Health status combines active alerts, SLO status, and ML anomaly detection for a comprehensive view of service health.',
+          })}
+          label={i18n.translate('xpack.apm.servicesTable.combinedHealthColumnLabel', {
+            defaultMessage: 'Health',
+          })}
+        />
+      ),
+      width: `${unit * 6}px`,
+      sortable: true,
+      render: (_, { combinedHealthStatus }) => (
+        <HealthBadge healthStatus={combinedHealthStatus ?? ServiceHealthStatus.unknown} />
+      ),
+    } as ITableColumn<ServiceListItem>,
     ...(showAlertsColumn
       ? [
           {
@@ -169,7 +195,7 @@ export function getServiceColumns({
                 })}
               />
             ),
-            width: `${unit * 8}px`,
+            width: `${unit * 6}px`,
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
               if (!sloStatus) {
@@ -193,28 +219,58 @@ export function getServiceColumns({
           {
             field: ServiceInventoryFieldName.AnomalyHealthStatus,
             name: (
-              <>
-                {i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-                  defaultMessage: 'Health',
-                })}{' '}
-                <EuiIconTip
-                  iconProps={{
-                    className: 'eui-alignTop',
-                  }}
-                  position="right"
-                  color="subdued"
-                  content={i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
+              <ColumnHeaderWithTooltip
+                tooltipContent={i18n.translate(
+                  'xpack.apm.servicesTable.tooltip.anomalyDetectionScore',
+                  {
                     defaultMessage:
-                      'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
-                  })}
-                />
-              </>
+                      'Anomaly detection score from ML jobs that monitor service performance metrics.',
+                  }
+                )}
+                label={i18n.translate('xpack.apm.servicesTable.anomalyDetectionColumnLabel', {
+                  defaultMessage: 'AD Score',
+                })}
+              />
             ),
-            width: `${unit * 6}px`,
+            width: `${unit * 10}px`,
             sortable: true,
-            render: (_, { anomalyHealthStatus }) => {
+            render: (_, { anomalyHealthStatus, anomalyScore, actualValue }) => {
+              if (!anomalyScore && anomalyScore !== 0) {
+                return (
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate('xpack.apm.servicesTable.anomalyDetection.notAvailable', {
+                      defaultMessage: 'N/A',
+                    })}
+                  </EuiText>
+                );
+              }
+
+              const displayedScore =
+                anomalyScore > 0 && anomalyScore < 1 ? '< 1' : asInteger(anomalyScore);
+
               return (
-                <HealthBadge healthStatus={anomalyHealthStatus ?? ServiceHealthStatus.unknown} />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth
+                      color={getServiceHealthStatusColor(
+                        euiTheme,
+                        anomalyHealthStatus ?? ServiceHealthStatus.unknown
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <div>
+                      <EuiText size="s">
+                        {displayedScore}
+                        {actualValue && (
+                          <EuiText color="subdued" size="s" component="span">
+                            &nbsp;({asDuration(actualValue)})
+                          </EuiText>
+                        )}
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -385,6 +441,7 @@ export function ApmServicesTable({
   const { core } = useApmPluginContext();
   const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
+  const { euiTheme } = useEuiTheme();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
@@ -487,8 +544,8 @@ export function ApmServicesTable({
       comparisonDataLoading,
       comparisonData,
       breakpoints,
+      euiTheme,
       showAnomalyHealthStatusColumn: displayAnomalyHealthStatus,
-      showCombinedHealthStatusColumn: displayCombinedHealthStatus,
       showAlertsColumn: displayAlerts,
       showSlosColumn: displaySlos,
       link,
@@ -502,12 +559,12 @@ export function ApmServicesTable({
     comparisonData,
     breakpoints,
     displayAnomalyHealthStatus,
-    displayCombinedHealthStatus,
     displayAlerts,
     displaySlos,
     link,
     serviceOverflowCount,
     openSloOverviewFlyout,
+    euiTheme,
   ]);
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(

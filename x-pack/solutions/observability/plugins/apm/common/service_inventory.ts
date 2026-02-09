@@ -20,6 +20,8 @@ export interface ServiceListItem {
   serviceName: string;
   anomalyHealthStatus?: ServiceHealthStatus; // ML anomaly detection health status
   combinedHealthStatus?: ServiceHealthStatus; // Combined health from alerts, SLOs, and anomalies
+  anomalyScore?: number;
+  actualValue?: number;
   transactionType?: string;
   agentName?: AgentName;
   throughput?: number;

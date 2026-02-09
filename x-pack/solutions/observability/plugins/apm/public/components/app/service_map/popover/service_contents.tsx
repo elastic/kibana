@@ -31,7 +31,6 @@ import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
-import type { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { SloStatus } from '../../../../../common/service_inventory';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
@@ -109,7 +108,6 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
 
   const { serviceAnomalyStats } = nodeData;
 
-  const combinedHealthStatus = nodeData.combinedHealthStatus as ServiceHealthStatus | undefined;
   const alertsCount = nodeData.alertsCount as number | undefined;
   const sloStatus = nodeData.sloStatus as SloStatus | undefined;
   const sloCount = nodeData.sloCount as number | undefined;
@@ -200,9 +198,8 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
           </>
         )}
 
-        {(combinedHealthStatus ||
-          (alertsCount && alertsCount > 0) ||
-          (sloCount && sloCount > 0)) && <EuiHorizontalRule margin="xs" />}
+        {((alertsCount !== undefined && alertsCount > 0) ||
+          (sloCount !== undefined && sloCount > 0)) && <EuiHorizontalRule margin="xs" />}
 
         {serviceAnomalyStats && (
           <>

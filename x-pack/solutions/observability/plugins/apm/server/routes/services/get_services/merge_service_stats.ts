@@ -25,6 +25,8 @@ export interface MergedServiceStat {
   throughput?: number;
   anomalyHealthStatus?: ServiceHealthStatus;
   combinedHealthStatus?: ServiceHealthStatus; // Combined health from alerts, SLOs, and anomalies
+  anomalyScore?: number;
+  actualValue?: number;
   alertsCount?: number;
   alertsSeverity?: ServiceAlertsSeverity;
   sloStatus?: SloStatus;

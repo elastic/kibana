@@ -28,7 +28,7 @@ import { asDuration, asInteger } from '../../../../../common/utils/formatters';
 import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
 import { popoverWidth } from '../cytoscape_options';
 
-const HealthStatusTitle = styled(EuiTitle)`
+const SectionTitle = styled(EuiTitle)`
   display: inline;
   text-transform: uppercase;
 `;
@@ -67,14 +67,14 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const transactionType = serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
 
-  const healthStatus = getServiceAnomaliesHealthStatus({ severity });
+  const anomalyHealthStatus = getServiceAnomaliesHealthStatus({ severity });
 
   return (
     <>
       <section>
-        <HealthStatusTitle size="xxs">
+        <SectionTitle size="xxs">
           <h3>{ANOMALY_DETECTION_TITLE}</h3>
-        </HealthStatusTitle>
+        </SectionTitle>
         &nbsp;
         <EuiIconTip type="info" content={ANOMALY_DETECTION_TOOLTIP} />
         {!mlJobId && <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>}
@@ -84,7 +84,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getServiceHealthStatusColor(euiTheme, healthStatus)} />
+                <EuiHealth color={getServiceHealthStatusColor(euiTheme, anomalyHealthStatus)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>
@@ -132,7 +132,7 @@ const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverTooltip',
   {
     defaultMessage:
-      'Service health indicators are powered by the anomaly detection feature in machine learning',
+      'Anomaly detection uses machine learning to identify unusual patterns in service performance',
   }
 );
 
@@ -149,7 +149,7 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',
   {
     defaultMessage:
-      'Display service health indicators by enabling anomaly detection in APM settings.',
+      'Enable anomaly detection in Machine Learning to detect unusual performance patterns for this service.',
   }
 );
 

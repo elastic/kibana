@@ -22,6 +22,8 @@ interface AggregationParams {
 export type ServiceAnomalyHealthStatusesResponse = Array<{
   serviceName: string;
   anomalyHealthStatus: ServiceHealthStatus;
+  anomalyScore?: number;
+  actualValue?: number;
 }>;
 
 export async function getAnomalyHealthStatuses({
@@ -49,6 +51,8 @@ export async function getAnomalyHealthStatuses({
     return {
       serviceName: anomalyStats.serviceName,
       anomalyHealthStatus,
+      anomalyScore: anomalyStats.anomalyScore,
+      actualValue: anomalyStats.actualValue,
     };
   });
 }
