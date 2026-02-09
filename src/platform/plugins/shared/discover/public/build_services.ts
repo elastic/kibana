@@ -9,27 +9,27 @@
 
 import type { History } from 'history';
 import type {
-  AnalyticsServiceStart,
-  ApplicationStart,
-  AppMountParameters,
   Capabilities,
   ChromeStart,
   CoreStart,
   DocLinksStart,
-  HttpStart,
+  ToastsStart,
   I18nStart,
   IUiSettingsClient,
-  NotificationsStart,
   PluginInitializerContext,
+  HttpStart,
+  NotificationsStart,
+  ApplicationStart,
+  AnalyticsServiceStart,
+  AppMountParameters,
   ScopedHistory,
   ThemeServiceStart,
-  ToastsStart,
   UserProfileService,
 } from '@kbn/core/public';
 import type {
-  DataPublicPluginStart,
   FilterManager,
   TimefilterContract,
+  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -53,11 +53,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type {
-  ContentClient,
-  ContentManagementPublicStart,
-} from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
@@ -73,7 +71,7 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, SECURITY_SOLUTION_FLYOUT } from './constants';
+import { CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
@@ -91,7 +89,6 @@ export interface UrlTracker {
 
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
-  getSecuritySolutionFlyoutEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -204,8 +201,6 @@ export const buildServices = ({
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
-      getSecuritySolutionFlyoutEnabled: () =>
-        core.featureFlags.getBooleanValue(SECURITY_SOLUTION_FLYOUT, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

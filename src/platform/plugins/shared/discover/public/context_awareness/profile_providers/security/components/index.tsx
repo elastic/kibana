@@ -18,10 +18,10 @@ export const AlertEventOverviewLazy = withSuspense(
   )
 );
 
-export const NewAlertEventOverviewLazy = withSuspense(
+export const EnhancedAlertEventOverviewLazy = withSuspense(
   lazy(() =>
-    import('./new_alert_event_overview').then((module) => ({
-      default: module.NewAlertEventOverview,
+    import('./enhanced_alert_event_overview').then((module) => ({
+      default: module.EnhancedAlertEventOverview,
     }))
   )
 );

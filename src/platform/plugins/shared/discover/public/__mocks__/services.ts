@@ -26,15 +26,15 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
-  HIDE_ANNOUNCEMENTS,
   MAX_DOC_FIELDS_DISPLAYED,
-  SAMPLE_ROWS_PER_PAGE_SETTING,
   SAMPLE_SIZE_SETTING,
-  SEARCH_ON_PAGE_LOAD_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  HIDE_ANNOUNCEMENTS,
+  SEARCH_ON_PAGE_LOAD_SETTING,
 } from '@kbn/discover-utils';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { calculateBounds, SearchSource, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, calculateBounds, SearchSource } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -285,7 +285,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
-      getSecuritySolutionFlyoutEnabled: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),

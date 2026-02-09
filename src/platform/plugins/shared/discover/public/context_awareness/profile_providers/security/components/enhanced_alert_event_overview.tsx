@@ -16,6 +16,6 @@ import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
  * The intention keep implementing its content as we're extracting flyout code from the Security Solution plugin to a set of package.
  * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
  */
-export const NewAlertEventOverview: DocViewerComponent = ({ hit }) => {
+export const EnhancedAlertEventOverview: DocViewerComponent = ({ hit }) => {
   return <></>;
 };
