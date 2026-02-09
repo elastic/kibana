@@ -114,6 +114,7 @@ export {
   ConversationRoundStatus,
   type ChatEventBase,
   type ChatEvent,
+  type ConversationAction,
   type ConversationCreatedEvent,
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,

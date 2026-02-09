@@ -6,19 +6,19 @@
  */
 
 import { z } from '@kbn/zod';
+import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import { v4 as uuid } from 'uuid';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 import {
-  type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/features_identification';
-import type { TaskResult } from '../../../../lib/tasks/types';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -59,7 +59,7 @@ export const upsertFeatureRoute = createServerRoute({
             ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(params.path.name, params.body),
+            uuid: uuid(),
           },
         },
       },
@@ -70,7 +70,7 @@ export const upsertFeatureRoute = createServerRoute({
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -82,7 +82,7 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), id: z.string() }),
+    path: z.object({ name: z.string(), uuid: z.string() }),
   }),
   handler: async ({
     params,
@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.id);
+    await featureClient.deleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },
@@ -256,25 +256,16 @@ export const featuresTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule'),
-        from: dateFromString,
-        to: dateFromString,
-        connector_id: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel'),
-      }),
-      z.object({
-        action: z.literal('acknowledge'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: dateFromString,
+      to: dateFromString,
+      connector_id: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+    }),
   }),
   handler: async ({
     params,
