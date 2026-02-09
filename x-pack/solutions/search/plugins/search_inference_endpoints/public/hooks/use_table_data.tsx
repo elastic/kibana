@@ -75,9 +75,9 @@ export const useTableData = (
       pageIndex: queryParams.page - 1,
       pageSize: queryParams.perPage,
       pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-      totalItemCount: inferenceEndpoints.length ?? 0,
+      totalItemCount: tableData.length ?? 0,
     }),
-    [inferenceEndpoints, queryParams]
+    [tableData, queryParams]
   );
 
   const paginatedSortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
