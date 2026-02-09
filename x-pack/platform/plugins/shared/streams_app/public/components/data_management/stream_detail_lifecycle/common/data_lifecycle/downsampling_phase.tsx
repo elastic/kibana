@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -26,6 +27,8 @@ interface DownsamplingPhaseProps {
   stepNumber: number;
   phaseName?: string;
   color?: string;
+  onRemoveStep?: (stepNumber: number) => void;
+  canManageLifecycle: boolean;
 }
 
 export const DownsamplingPhase = ({
@@ -33,10 +36,17 @@ export const DownsamplingPhase = ({
   stepNumber,
   phaseName,
   color,
+  onRemoveStep,
+  canManageLifecycle,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const intervalLabel = downsample.fixed_interval;
+
+  const handleRemoveStep = () => {
+    onRemoveStep?.(stepNumber);
+    setIsPopoverOpen(false);
+  };
 
   const button = (
     <EuiPanel
@@ -100,10 +110,33 @@ export const DownsamplingPhase = ({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle data-test-subj={`downsamplingPopover-step${stepNumber}-title`}>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
-          defaultMessage: 'Downsample step {stepNumber}',
-          values: { stepNumber },
-        })}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
+              defaultMessage: 'Downsample step {stepNumber}',
+              values: { stepNumber },
+            })}
+          </EuiFlexItem>
+          {onRemoveStep && canManageLifecycle && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                display="base"
+                iconType="trash"
+                size="s"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
+                  {
+                    defaultMessage: 'Remove downsample step {stepNumber}',
+                    values: { stepNumber },
+                  }
+                )}
+                data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
+                onClick={handleRemoveStep}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
         style={{ width: '300px' }}

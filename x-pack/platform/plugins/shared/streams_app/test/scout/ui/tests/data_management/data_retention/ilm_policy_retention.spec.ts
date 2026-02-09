@@ -126,4 +126,163 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     // Close the popover by pressing Escape
     await page.keyboard.press('Escape');
   });
+
+  test('should remove a downsampling step from an ILM policy', async ({
+    page,
+    esClient,
+    apiServices,
+  }) => {
+    const policyName = 'downsampling-policy';
+
+    await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    await esClient.ilm.putLifecycle({
+      name: policyName,
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: { max_age: '30d' },
+            },
+          },
+          warm: {
+            min_age: '1d',
+            actions: {
+              downsample: { fixed_interval: '1h' },
+            },
+          },
+          delete: {
+            min_age: '7d',
+            actions: {
+              delete: {},
+            },
+          },
+        },
+      },
+    });
+
+    try {
+      const extraStreamName = 'logs.downsample';
+      await apiServices.streams.forkStream('logs', extraStreamName, {
+        field: 'service.name',
+        eq: 'downsample',
+      });
+      const extraStreamDefinition = await apiServices.streams.getStreamDefinition(extraStreamName);
+      await apiServices.streams.updateStream(extraStreamName, {
+        ingest: {
+          ...extraStreamDefinition.stream.ingest,
+          processing: omit(extraStreamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { ilm: { policy: policyName } },
+        },
+      });
+
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+
+      // Click ILM policy button and select the downsampling policy
+      await page.getByRole('button', { name: 'ILM policy' }).click();
+      const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
+      await ilmListbox.waitFor();
+      await page.getByPlaceholder('Filter options').fill(policyName);
+      await page.getByTestId(`ilmPolicy-${policyName}`).click();
+      await saveRetentionChanges(page);
+
+      // Verify downsampling is rendered for the policy
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+
+      // Remove the downsampling step from the policy
+      await page.getByTestId('downsamplingPhase-1h-label').click();
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-overwriteButton').click();
+
+      await expect(page.getByTestId('lifecyclePhase-warm-button')).toBeVisible();
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+    } finally {
+      await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    }
+  });
+
+  test('should create a new policy when removing a downsampling step', async ({
+    page,
+    esClient,
+    apiServices,
+  }) => {
+    const policyName = 'downsampling-policy';
+    const newPolicyName = `${policyName}-copy`;
+
+    await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
+    await esClient.ilm.putLifecycle({
+      name: policyName,
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: { max_age: '30d' },
+            },
+          },
+          warm: {
+            min_age: '1d',
+            actions: {
+              downsample: { fixed_interval: '1h' },
+            },
+          },
+          delete: {
+            min_age: '7d',
+            actions: {
+              delete: {},
+            },
+          },
+        },
+      },
+    });
+
+    try {
+      const extraStreamName = 'logs.downsample-save-as-new';
+      await apiServices.streams.forkStream('logs', extraStreamName, {
+        field: 'service.name',
+        eq: 'downsample-save-as-new',
+      });
+      const extraStreamDefinition = await apiServices.streams.getStreamDefinition(extraStreamName);
+      await apiServices.streams.updateStream(extraStreamName, {
+        ingest: {
+          ...extraStreamDefinition.stream.ingest,
+          processing: omit(extraStreamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { ilm: { policy: policyName } },
+        },
+      });
+
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+
+      // Click ILM policy button and select the downsampling policy
+      await page.getByRole('button', { name: 'ILM policy' }).click();
+      const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
+      await ilmListbox.waitFor();
+      await page.getByPlaceholder('Filter options').fill(policyName);
+      await page.getByTestId(`ilmPolicy-${policyName}`).click();
+      await saveRetentionChanges(page);
+
+      // Verify downsampling is rendered for the policy
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+
+      // Remove the downsampling step from the policy
+      await page.getByTestId('downsamplingPhase-1h-label').click();
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-saveAsNewButton').click();
+
+      await expect(page.getByTestId('createPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
+      await page.getByTestId('createPolicyModal-saveButton').click();
+
+      await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText(newPolicyName);
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+    } finally {
+      await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+      await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
+    }
+  });
 });
