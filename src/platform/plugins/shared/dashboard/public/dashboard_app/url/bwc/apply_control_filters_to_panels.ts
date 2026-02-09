@@ -275,7 +275,7 @@ export function applyControlFiltersToPanels(
 
   // Track which filters successfully matched
   const matchedIndices = new Set<number>();
-  let updatedPanels = [...controlPanels];
+  const updatedPanels = [...controlPanels];
 
   // Try to match each filter to a control
   matchableFilters.forEach((filter, index) => {

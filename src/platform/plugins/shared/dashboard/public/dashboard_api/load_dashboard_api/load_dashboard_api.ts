@@ -90,7 +90,10 @@ export async function loadDashboardApi({
   // When overrideState.filters is defined (even if empty), we use the saved state
   // for pinned_panels rather than unsaved changes. This ensures that navigating
   // without filters doesn't retain control selections from previous navigations.
-  let controlFilterOverrides: { pinned_panels?: typeof lastSavedState.pinned_panels; filters?: Filter[] } = {};
+  const controlFilterOverrides: {
+    pinned_panels?: typeof lastSavedState.pinned_panels;
+    filters?: Filter[];
+  } = {};
 
   if (overrideState.filters !== undefined) {
     // Start with saved state for controls (not unsaved changes)
