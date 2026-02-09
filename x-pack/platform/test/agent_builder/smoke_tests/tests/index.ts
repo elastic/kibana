@@ -34,8 +34,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('EIS Models (dynamically configured)', function () {
-      // 10 min per-test timeout. Increase if models grow significantly.
-      this.timeout(600000);
+      this.timeout(300000);
 
       if (eisModels.length === 0) {
         it('should skip - no EIS models discovered', function () {
@@ -51,11 +50,9 @@ export default function (providerContext: FtrProviderContext) {
                 `For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`
             );
           }
-          // Enable CCM to provision EIS endpoints - preconfigured connectors will then work
-          await enableCcm(es, eisCcmApiKey, log);
+          await enableCcm(es, eisCcmApiKey, log); // Enable CCM to provision EIS endpoints
         });
 
-        // Test each model using its preconfigured connector (created in config.stateful.ts)
         for (const model of eisModels) {
           const connectorId = `eis-${model.modelId}`;
           converseApiSuite(model.modelId, connectorId, providerContext);

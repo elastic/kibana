@@ -16,7 +16,6 @@ const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrContext: FtrConfigProviderContext) {
-  // Merge existing preconfigured connectors with EIS model connectors
   const preconfiguredConnectors = {
     ...getPreconfiguredConnectorConfig(),
     ...buildEisPreconfiguredConnectors(),

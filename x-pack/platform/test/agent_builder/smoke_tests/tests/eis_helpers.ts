@@ -11,7 +11,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-// Path to pre-discovered EIS models JSON file (created by CI "Discover EIS Models" step)
 const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
 export interface DiscoveredModel {
@@ -19,7 +18,6 @@ export interface DiscoveredModel {
   modelId: string;
 }
 
-// Reads pre-discovered EIS models from JSON file. Returns empty array if file doesn't exist.
 export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   if (!existsSync(EIS_MODELS_PATH)) {
     return [];
