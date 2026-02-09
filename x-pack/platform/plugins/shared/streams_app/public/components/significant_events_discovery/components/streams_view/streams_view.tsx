@@ -19,8 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { TableRow } from './utils';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -40,6 +39,7 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
+import type { TableRow } from './utils';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -93,6 +93,7 @@ export function StreamsView({
       0
     ) ?? 0;
   const hasSignificantEvents = totalSignificantEvents > 0;
+  const isInitialStatusUpdateDone = useRef(false);
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
@@ -111,8 +112,17 @@ export function StreamsView({
         [streamName]: taskResult,
       }));
 
+      /**
+       * Preventing showing error toasts and doing extra work
+       * for the initial status update when the page loads for
+       * the first time
+       */
+      if (!isInitialStatusUpdateDone.current) {
+        return;
+      }
+
       if (taskResult.status === TaskStatus.Failed) {
-        toasts.addDanger(taskResult.error, {
+        toasts.addError(getFormattedError(new Error(taskResult.error)), {
           title: ONBOARDING_FAILURE_TITLE,
         });
       }
@@ -138,7 +148,9 @@ export function StreamsView({
     streamsListFetch.value.streams.forEach((item) => {
       onboardingStatusUpdateQueue.add(item.stream.name);
     });
-    processStatusUpdateQueue();
+    processStatusUpdateQueue().finally(() => {
+      isInitialStatusUpdateDone.current = true;
+    });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {

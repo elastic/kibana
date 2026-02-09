@@ -50,15 +50,19 @@ export function Summary({ count, insightsTask, refreshInsightsTask }: SummaryPro
   } = useInsightsDiscoveryApi(aiFeatures?.genAiConnectors.selectedConnector);
 
   const [{ value: localTask }, getLocalTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
-    await scheduleInsightsDiscoveryTask();
-    const refresh = refreshInsightsTask ?? getLocalTaskStatus;
-    await refresh();
-  }, [scheduleInsightsDiscoveryTask, refreshInsightsTask, getLocalTaskStatus]);
 
   const isControlled = insightsTask !== undefined && refreshInsightsTask !== undefined;
   const task = isControlled ? insightsTask : localTask;
   const getTaskStatus = isControlled ? refreshInsightsTask! : getLocalTaskStatus;
+
+  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
+    /**
+     * Combining scheduling and immediate status update to prevent
+     * React updating the UI in between states causing flickering
+     */
+    await scheduleInsightsDiscoveryTask();
+    await getTaskStatus();
+  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
   useEffect(() => {
     if (!isControlled) {
@@ -82,11 +86,7 @@ export function Summary({ count, insightsTask, refreshInsightsTask }: SummaryPro
     }
 
     if (task?.status === TaskStatus.Completed) {
-      if (
-        !isControlled &&
-        previousStatus === TaskStatus.InProgress &&
-        task.insights.length === 0
-      ) {
+      if (!isControlled && previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
         notifications.toasts.addInfo({
           title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
             defaultMessage: 'No insights found',

@@ -7,11 +7,12 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
 import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -79,7 +80,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({
-                    streamName,
+                    streamName: stream.name,
                     sampleDocuments,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
@@ -91,6 +92,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     esClient,
+                    logger: taskContext.logger.get('computed_features'),
                   }),
                 ]);
 
@@ -148,7 +150,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -161,6 +163,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { connectorId, start, end, streamName },
                   errorMessage
                 );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

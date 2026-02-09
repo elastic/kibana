@@ -56,13 +56,11 @@ export function SignificantEventsDiscoveryPage() {
   const { getInsightsDiscoveryTaskStatus } = useInsightsDiscoveryApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );
-  const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-
-  useTaskPolling(
-    insightsTask,
-    getInsightsDiscoveryTaskStatus,
-    getInsightsTaskStatus
+  const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
+    getInsightsDiscoveryTaskStatus
   );
+
+  useTaskPolling(insightsTask, getInsightsDiscoveryTaskStatus, getInsightsTaskStatus);
 
   useEffect(() => {
     getInsightsTaskStatus();
@@ -74,10 +72,7 @@ export function SignificantEventsDiscoveryPage() {
     const previousStatus = previousInsightsTaskStatusRef.current;
     previousInsightsTaskStatusRef.current = insightsTask?.status;
 
-    if (
-      insightsTask?.status === TaskStatus.Failed &&
-      previousStatus !== TaskStatus.Failed
-    ) {
+    if (insightsTask?.status === TaskStatus.Failed && previousStatus !== TaskStatus.Failed) {
       core.notifications.toasts.addError(getFormattedError(new Error(insightsTask.error)), {
         title: i18n.translate('xpack.streams.insights.errorTitle', {
           defaultMessage: 'Error generating insights',
@@ -86,17 +81,15 @@ export function SignificantEventsDiscoveryPage() {
       return;
     }
 
-    if (
-      insightsTask?.status === TaskStatus.Completed &&
-      previousStatus === TaskStatus.InProgress
-    ) {
+    if (insightsTask?.status === TaskStatus.Completed && previousStatus === TaskStatus.InProgress) {
       const insightsCount = insightsTask.insights?.length ?? 0;
       const toast = core.notifications.toasts.addSuccess(
         {
           title:
             insightsCount > 0
               ? i18n.translate('xpack.streams.insights.discoveryCompleteToastTitle', {
-                  defaultMessage: '{count} {count, plural, one {insight} other {insights}} generated',
+                  defaultMessage:
+                    '{count} {count, plural, one {insight} other {insights}} generated',
                   values: { count: insightsCount },
                 })
               : i18n.translate('xpack.streams.insights.discoveryCompleteNoInsightsToastTitle', {
@@ -252,10 +245,7 @@ export function SignificantEventsDiscoveryPage() {
         {tab === 'features' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'insights' && (
-          <InsightsTab
-            insightsTask={insightsTask}
-            refreshInsightsTask={getInsightsTaskStatus}
-          />
+          <InsightsTab insightsTask={insightsTask} refreshInsightsTask={getInsightsTaskStatus} />
         )}
       </StreamsAppPageTemplate.Body>
     </>

@@ -16,6 +16,7 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { StreamsTaskType, TaskContext } from '.';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
@@ -143,7 +144,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -162,6 +163,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   },
                   errorMessage
                 );
+                return getDeleteTaskRunResult();
               }
             },
             runContext,
@@ -192,7 +194,7 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
       const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
       if (result.status === TaskStatus.Failed) {
-        reject(new Error(`Subtask with ID ${subtaskId} has failed`));
+        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
       }
 
       if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
