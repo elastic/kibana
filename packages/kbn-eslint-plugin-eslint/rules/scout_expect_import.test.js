@@ -57,39 +57,72 @@ ruleTester.run('@kbn/eslint/scout_expect_import', rule, {
   ],
 
   invalid: [
-    // Solutions API: missing /api suffix → suggests @kbn/scout-oblt/api
+    // Multi-import: different source paths (missing suffix, wrong suffix, external package)
     {
       filename: OBLT_API_FILE,
-      code: `import { expect } from '@kbn/scout-oblt';`,
-      output: `import { expect } from '@kbn/scout-oblt/api';`,
+      code: `import { test, expect, page } from '@kbn/scout-oblt';`,
+      output: `import { test, page } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/api';`,
       errors: [{ messageId: 'wrongImportPath' }],
     },
-    // Solutions API: wrong /ui suffix → suggests @kbn/scout-oblt/api
-    {
-      filename: OBLT_API_FILE,
-      code: `import { expect } from '@kbn/scout-oblt/ui';`,
-      output: `import { expect } from '@kbn/scout-oblt/api';`,
-      errors: [{ messageId: 'wrongImportPath' }],
-    },
-    // Solutions UI: wrong /api suffix → suggests @kbn/scout-oblt/ui
     {
       filename: OBLT_UI_FILE,
-      code: `import { expect } from '@kbn/scout-oblt/api';`,
-      output: `import { expect } from '@kbn/scout-oblt/ui';`,
+      code: `import { expect, test } from '@kbn/scout-oblt/api';`,
+      output: `import { test } from '@kbn/scout-oblt/api';
+import { expect } from '@kbn/scout-oblt/ui';`,
       errors: [{ messageId: 'wrongImportPath' }],
     },
-    // Platform API: missing suffix → suggests @kbn/scout/api
+    {
+      filename: OBLT_API_FILE,
+      code: `import { test, expect } from '@playwright/test';`,
+      output: `import { test } from '@playwright/test';
+import { expect } from '@kbn/scout-oblt/api';`,
+      errors: [{ messageId: 'wrongImportPath' }],
+    },
+    // Platform: single import (multi-import behavior already covered above)
     {
       filename: PLATFORM_API_FILE,
       code: `import { expect } from '@kbn/scout';`,
       output: `import { expect } from '@kbn/scout/api';`,
       errors: [{ messageId: 'wrongImportPath' }],
     },
-    // Playwright import → suggests correct scout package
+    // Existing import: append, duplicate removal, multi-import merge
     {
       filename: OBLT_API_FILE,
-      code: `import { expect } from '@playwright/test';`,
-      output: `import { expect } from '@kbn/scout-oblt/api';`,
+      code: `import { test } from '@kbn/scout-oblt/api';
+import { expect } from '@playwright/test';`,
+      output: `import { test, expect } from '@kbn/scout-oblt/api';
+`,
+      errors: [{ messageId: 'wrongImportPath' }],
+    },
+    {
+      filename: OBLT_UI_FILE,
+      code: `import { test, expect } from '@kbn/scout-oblt/ui';
+import { expect } from '@playwright/test';`,
+      output: `import { test, expect } from '@kbn/scout-oblt/ui';
+`,
+      errors: [{ messageId: 'wrongImportPath' }],
+    },
+    {
+      filename: OBLT_API_FILE,
+      code: `import { test, page } from '@kbn/scout-oblt/api';
+import { page, expect } from '@playwright/test';`,
+      output: `import { test, page, expect } from '@kbn/scout-oblt/api';
+import { page } from '@playwright/test';`,
+      errors: [{ messageId: 'wrongImportPath' }],
+    },
+    // Alias: single and multi-import
+    {
+      filename: OBLT_API_FILE,
+      code: `import { expect as e } from '@playwright/test';`,
+      output: `import { expect as e } from '@kbn/scout-oblt/api';`,
+      errors: [{ messageId: 'wrongImportPath' }],
+    },
+    {
+      filename: OBLT_UI_FILE,
+      code: `import { test, expect as e } from '@playwright/test';`,
+      output: `import { test } from '@playwright/test';
+import { expect as e } from '@kbn/scout-oblt/ui';`,
       errors: [{ messageId: 'wrongImportPath' }],
     },
   ],
