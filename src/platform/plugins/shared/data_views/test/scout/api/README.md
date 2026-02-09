@@ -4,7 +4,7 @@ This directory contains Scout API tests migrated from FTR tests located in `src/
 
 ## Status
 
-✅ **All test files migrated and implemented!** (2 config files + 38 test files)
+🚧 **Partial migration** (2 config files + 4 test files)
 
 ## Structure
 
@@ -14,100 +14,22 @@ src/platform/plugins/shared/data_views/test/scout/api/
 ├── fixtures/
 │   └── constants.ts               # Shared constants and test data paths
 ├── tests/
-│   ├── es_errors.spec.ts                           # ✅ Created - ES error handling tests
-│   ├── existing_indices_route_params.spec.ts      # ✅ Created - Existing indices params validation
-│   ├── existing_indices_route_response.spec.ts    # ✅ Created
-│   ├── fields_for_wildcard_route_params.spec.ts   # ✅ Created
-│   ├── fields_for_wildcard_route_response.spec.ts # ✅ Created
-│   ├── fields_for_wildcard_route_conflicts.spec.ts # ✅ Created
-│   ├── fields_for_wildcard_route_filter.spec.ts   # ✅ Created
 │   ├── data_views_crud_create_validation.spec.ts  # ✅ Created
 │   ├── data_views_crud_create_main.spec.ts        # ✅ Created
 │   ├── data_views_crud_create_spaces.spec.ts      # ✅ Created - Namespaces/spaces tests
-│   ├── data_views_crud_get_errors.spec.ts         # ✅ Created
-│   ├── data_views_crud_get_main.spec.ts           # ✅ Created
-│   ├── data_views_crud_get_all.spec.ts            # ✅ Created
-│   ├── data_views_crud_delete_main.spec.ts        # ✅ Created
-│   ├── data_views_crud_delete_errors.spec.ts      # ✅ Created
-│   ├── data_views_crud_update_errors.spec.ts      # ✅ Created
-│   ├── data_views_crud_update_main.spec.ts        # ✅ Created
-│   ├── fields_api_update_errors.spec.ts           # ✅ Created
-│   ├── fields_api_update_main.spec.ts             # ✅ Created
-│   ├── runtime_fields_create_main.spec.ts         # ✅ Created
-│   ├── runtime_fields_create_errors.spec.ts       # ✅ Created
-│   ├── runtime_fields_get_errors.spec.ts          # ✅ Created
-│   ├── runtime_fields_get_main.spec.ts            # ✅ Created
-│   ├── runtime_fields_delete_errors.spec.ts       # ✅ Created
-│   ├── runtime_fields_delete_main.spec.ts         # ✅ Created
-│   ├── runtime_fields_put_errors.spec.ts          # ✅ Created
-│   ├── runtime_fields_put_main.spec.ts            # ✅ Created
-│   ├── runtime_fields_update_main.spec.ts         # ✅ Created
-│   ├── runtime_fields_update_errors.spec.ts       # ✅ Created
-│   ├── has_user_index_pattern.spec.ts             # ✅ Created
-│   ├── default_index_pattern.spec.ts              # ✅ Created
-│   ├── swap_references_errors.spec.ts             # ✅ Created
-│   ├── swap_references_main.spec.ts               # ✅ Created
-│   └── integration.spec.ts                        # ✅ Created
+│   └── data_views_crud_delete_errors.spec.ts      # ✅ Created
 └── README.md                                       # This file
 ```
 
-## All 38 Test Files Created ✅
+## Test Files (4 files)
 
-### Configuration & Fixtures (2 files)
-1. **playwright.config.ts** - Playwright configuration
-2. **fixtures/constants.ts** - Common headers and archive paths
-
-### Test Files (38 files)
-
-All test files are fully implemented with proper Scout structure and best practices.
-
-**ES Errors (1 file):**
-- `es_errors.spec.ts`
-
-**Existing Indices Route (2 files):**
-- `existing_indices_route_params.spec.ts`
-- `existing_indices_route_response.spec.ts`
-
-**Fields for Wildcard Route (4 files):**
-- `fields_for_wildcard_route_params.spec.ts`
-- `fields_for_wildcard_route_response.spec.ts`
-- `fields_for_wildcard_route_conflicts.spec.ts`
-- `fields_for_wildcard_route_filter.spec.ts`
-
-**Data Views CRUD (10 files):**
+**Data Views CRUD - Create (3 files):**
 - `data_views_crud_create_validation.spec.ts`
 - `data_views_crud_create_main.spec.ts`
 - `data_views_crud_create_spaces.spec.ts` - Tests for namespaces/spaces functionality
-- `data_views_crud_get_errors.spec.ts`
-- `data_views_crud_get_main.spec.ts`
-- `data_views_crud_get_all.spec.ts`
-- `data_views_crud_delete_main.spec.ts`
+
+**Data Views CRUD - Delete (1 file):**
 - `data_views_crud_delete_errors.spec.ts`
-- `data_views_crud_update_errors.spec.ts`
-- `data_views_crud_update_main.spec.ts`
-
-**Fields API (2 files):**
-- `fields_api_update_errors.spec.ts`
-- `fields_api_update_main.spec.ts`
-
-**Runtime Fields CRUD (10 files):**
-- `runtime_fields_create_main.spec.ts`
-- `runtime_fields_create_errors.spec.ts`
-- `runtime_fields_get_errors.spec.ts`
-- `runtime_fields_get_main.spec.ts`
-- `runtime_fields_delete_errors.spec.ts`
-- `runtime_fields_delete_main.spec.ts`
-- `runtime_fields_put_errors.spec.ts`
-- `runtime_fields_put_main.spec.ts`
-- `runtime_fields_update_main.spec.ts`
-- `runtime_fields_update_errors.spec.ts`
-
-**Other (5 files):**
-- `has_user_index_pattern.spec.ts`
-- `default_index_pattern.spec.ts`
-- `swap_references_errors.spec.ts`
-- `swap_references_main.spec.ts`
-- `integration.spec.ts`
 
 ## Running Tests
 
@@ -125,13 +47,6 @@ The following FTR tests were **intentionally not migrated** because they test de
 - `deprecations/scripted_fields.ts` - Tests scripted fields deprecation warnings
 - `es_errors/errors.js` - Unit tests for error utilities (not API endpoint tests)
 
-### Best Practices Applied
-
-- **Cleanup in hooks**: All tests use `afterEach` hooks to clean up created resources
-- **Response body validation**: Tests verify response structure, not just status codes
-- **Deployment agnostic**: All tests use `tags.DEPLOYMENT_AGNOSTIC` tag
-- **API credentials**: Tests use `requestAuth.getApiKey()` for authentication
-
 ### Admin Role Usage
 
 These tests use the `admin` role because they require:
@@ -139,7 +54,57 @@ These tests use the `admin` role because they require:
 - Managing Kibana spaces
 - Full index pattern management privileges
 
-For tests that only need to read data views, consider using a `viewer` or `editor` role.
+## Pending Migration
+
+The following FTR test files still need to be migrated to Scout:
+
+**Data Views CRUD (6 files):**
+- `data_views_crud/delete_data_view/main.ts` → `data_views_crud_delete_main.spec.ts`
+- `data_views_crud/get_data_view/errors.ts` → `data_views_crud_get_errors.spec.ts`
+- `data_views_crud/get_data_view/main.ts` → `data_views_crud_get_main.spec.ts`
+- `data_views_crud/get_data_views/main.ts` → `data_views_crud_get_all.spec.ts`
+- `data_views_crud/update_data_view/errors.ts` → `data_views_crud_update_errors.spec.ts`
+- `data_views_crud/update_data_view/main.ts` → `data_views_crud_update_main.spec.ts`
+
+**Existing Indices Route (2 files):**
+- `existing_indices_route/params.ts` → `existing_indices_route_params.spec.ts`
+- `existing_indices_route/response.ts` → `existing_indices_route_response.spec.ts`
+
+**Fields for Wildcard Route (4 files):**
+- `fields_for_wildcard_route/params.ts` → `fields_for_wildcard_route_params.spec.ts`
+- `fields_for_wildcard_route/response.ts` → `fields_for_wildcard_route_response.spec.ts`
+- `fields_for_wildcard_route/conflicts.ts` → `fields_for_wildcard_route_conflicts.spec.ts`
+- `fields_for_wildcard_route/filter.ts` → `fields_for_wildcard_route_filter.spec.ts`
+
+**Fields Route (4 files):**
+- `fields_route/cache.ts` → `fields_route_cache.spec.ts`
+- `fields_route/conflicts.ts` → `fields_route_conflicts.spec.ts`
+- `fields_route/params.ts` → `fields_route_params.spec.ts`
+- `fields_route/response.ts` → `fields_route_response.spec.ts`
+
+**Fields API (2 files):**
+- `fields_api/update_fields/errors.ts` → `fields_api_update_errors.spec.ts`
+- `fields_api/update_fields/main.ts` → `fields_api_update_main.spec.ts`
+
+**Runtime Fields CRUD (10 files):**
+- `runtime_fields_crud/create_runtime_field/main.ts` → `runtime_fields_create_main.spec.ts`
+- `runtime_fields_crud/create_runtime_field/errors.ts` → `runtime_fields_create_errors.spec.ts`
+- `runtime_fields_crud/get_runtime_field/errors.ts` → `runtime_fields_get_errors.spec.ts`
+- `runtime_fields_crud/get_runtime_field/main.ts` → `runtime_fields_get_main.spec.ts`
+- `runtime_fields_crud/delete_runtime_field/errors.ts` → `runtime_fields_delete_errors.spec.ts`
+- `runtime_fields_crud/delete_runtime_field/main.ts` → `runtime_fields_delete_main.spec.ts`
+- `runtime_fields_crud/put_runtime_field/errors.ts` → `runtime_fields_put_errors.spec.ts`
+- `runtime_fields_crud/put_runtime_field/main.ts` → `runtime_fields_put_main.spec.ts`
+- `runtime_fields_crud/update_runtime_field/errors.ts` → `runtime_fields_update_errors.spec.ts`
+- `runtime_fields_crud/update_runtime_field/main.ts` → `runtime_fields_update_main.spec.ts`
+
+**Other (6 files):**
+- `has_user_index_pattern/has_user_index_pattern.ts` → `has_user_index_pattern.spec.ts`
+- `default_index_pattern/default_index_pattern.ts` → `default_index_pattern.spec.ts`
+- `swap_references/errors.ts` → `swap_references_errors.spec.ts`
+- `swap_references/main.ts` → `swap_references_main.spec.ts`
+- `integration/integration.ts` → `integration.spec.ts`
+- `resolve_index/resolve_index.ts` → `resolve_index.spec.ts`
 
 ## Tags
 
@@ -147,8 +112,3 @@ All tests use `tags.DEPLOYMENT_AGNOSTIC` since these are platform-level API test
 - ESS (Stateful)
 - Serverless (all project types)
 
-## Reference Documentation
-
-- Scout README: `src/platform/packages/shared/kbn-scout/README.md`
-- Scout Best Practices: `src/platform/packages/private/kbn-scout-info/llms/scout-best-practices.md`
-- Original FTR tests: `src/platform/test/api_integration/apis/data_views/`
