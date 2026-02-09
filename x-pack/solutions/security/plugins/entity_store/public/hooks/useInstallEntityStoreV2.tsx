@@ -9,15 +9,20 @@ import type { Logger } from '@kbn/logging';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { ENTITY_STORE_ROUTES, EntityStoreStatus, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 
-interface Services {
+export interface Services {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   logger: Logger;
   spaces: SpacesPluginStart;
 }
 
+const getStatusRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.STATUS,
+  body: JSON.stringify({}),
+  query: { apiVersion: '2' },
+};
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.INSTALL,
   body: JSON.stringify({}),
@@ -32,12 +37,16 @@ export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
     async function install() {
       try {
-        // TODO: check v1 opt-out status before sinitializing
         const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
         if (space.id !== 'default') return;
+
+        const statusResponse = await services.http.post<{ status: EntityStoreStatus }>(
+          getStatusRequest
+        );
+        if (isEntityStoreInstalled(statusResponse.status)) return;
 
         await services.http.post(installAllEntitiesRequest);
       } catch (e) {
@@ -48,3 +57,6 @@ export const useInstallEntityStoreV2 = (services: Services) => {
     install();
   }, [services.http, services.uiSettings, services.logger, services.spaces]);
 };
+
+const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
+  status !== EntityStoreStatus.Values.not_installed;

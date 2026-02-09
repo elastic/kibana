@@ -74,10 +74,6 @@ export class AssetManager {
     type: EntityType,
     logExtractionParams?: LogExtractionBodyParams
   ) {
-    if (await isEntityEnabled(this.engineDescriptorClient, type)) {
-      this.logger.get(type).warn(`Entity type ${type} is already enabled. Skipping init.`);
-      return;
-    }
     await this.install(type, logExtractionParams); // TODO: async
     await this.start(request, type);
   }
@@ -349,19 +345,3 @@ export class AssetManager {
     return ENTITY_STORE_STATUS.RUNNING;
   }
 }
-
-const isEntityEnabled = async (
-  engineDescriptorClient: EngineDescriptorClient,
-  type: EntityType
-): Promise<boolean> => {
-  const record = await engineDescriptorClient.find(type);
-  if (record.total === 0) {
-    return false;
-  }
-  const status = record.saved_objects[0].attributes.status;
-  return (
-    status === ENGINE_STATUS.STARTED ||
-    status === ENGINE_STATUS.INSTALLING ||
-    status === ENGINE_STATUS.UPDATING
-  );
-};
