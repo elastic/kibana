@@ -54,7 +54,7 @@ export const AccountTypeSelector: React.FC<AccountTypeSelectorProps> = ({
   return (
     <EuiFormRow
       label={i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.label', {
-        defaultMessage: 'Cloud Connector Account Type',
+        defaultMessage: 'Cloud connector account type',
       })}
       data-test-subj={ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR}
     >
