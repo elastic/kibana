@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
 import { castArray, isPlainObject, forEach, unset } from 'lodash';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
-import zodToJsonSchema from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
 
 function dropUnknownProperties(object: CompatibleJSONSchema) {
   if (!isPlainObject(object)) {
@@ -39,7 +38,7 @@ function dropUnknownProperties(object: CompatibleJSONSchema) {
 
       case 'properties':
         forEach(object.properties, (propertyValue, propertyKey) => {
-          dropUnknownProperties(propertyValue);
+          dropUnknownProperties(propertyValue as CompatibleJSONSchema);
         });
         break;
 
@@ -53,11 +52,10 @@ function dropUnknownProperties(object: CompatibleJSONSchema) {
 }
 
 export function convertSchemaToOpenApi(typeSchema: z.ZodType<any>): CompatibleJSONSchema {
-  // @ts-ignore
-  const plainOpenApiSchema: JSONSchema = zodToJsonSchema(typeSchema, {
-    target: 'openApi3',
-    $refStrategy: 'none',
+  const plainOpenApiSchema = z.toJSONSchema(typeSchema, {
+    target: 'openapi-3.0',
+    reused: 'inline',
   });
 
-  return dropUnknownProperties(plainOpenApiSchema);
+  return dropUnknownProperties(plainOpenApiSchema as CompatibleJSONSchema);
 }

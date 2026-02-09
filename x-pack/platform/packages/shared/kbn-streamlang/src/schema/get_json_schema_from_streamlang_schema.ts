@@ -9,9 +9,7 @@
 // to that found in src/platform/packages/shared/kbn-workflows/spec/lib/get_json_schema_from_yaml_schema.ts
 // from Workflows. We may be able to align / share these utilities in the future once both projects aren't
 // in flux.
-import type { JsonSchema7Type } from 'zod-to-json-schema';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
@@ -22,11 +20,11 @@ import type { StreamType } from '../../types/streamlang';
  * so we capture that structure here to provide type safety when we later
  * mutate the generated schema tree.
  */
-type StreamlangJsonSchema = JsonSchema7Type & {
+type StreamlangJsonSchema = z.core.JSONSchema.JSONSchema & {
   $ref: '#/definitions/StreamlangSchema';
   $schema: 'http://json-schema.org/draft-07/schema#';
   definitions: {
-    StreamlangSchema: JsonSchema7Type;
+    StreamlangSchema: z.core.JSONSchema.JSONSchema;
   };
 };
 
@@ -46,9 +44,10 @@ export function getJsonSchemaFromStreamlangSchema(
   streamType?: StreamType
 ): StreamlangJsonSchema {
   // Generate the json schema from zod schema
-  const jsonSchema = zodToJsonSchema(streamlangSchema, {
-    name: 'StreamlangSchema',
-    target: 'jsonSchema7',
+  const jsonSchema = z.toJSONSchema(streamlangSchema, {
+    target: 'draft-7',
+    unrepresentable: 'any',
+    reused: 'ref',
   });
 
   // Apply targeted fixes to make it valid for JSON Schema validators

@@ -9,7 +9,6 @@
 
 import { z, isZod } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers';
-import zodToJsonSchema from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
 import type { KnownParameters } from '../../type';
@@ -296,9 +295,10 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
 export const convert = (schema: z.ZodTypeAny) => {
   return {
     shared: {},
-    schema: zodToJsonSchema(schema, {
-      target: 'openApi3',
-      $refStrategy: 'none',
+    schema: z.toJSONSchema(schema, {
+      target: 'openapi-3.0',
+      cycles: 'ref',
+      reused: 'inline',
     }) as OpenAPIV3.SchemaObject,
   };
 };

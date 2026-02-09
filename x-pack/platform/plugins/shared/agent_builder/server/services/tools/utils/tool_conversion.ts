@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
-import zodToJsonSchema from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
@@ -50,7 +49,7 @@ export const toDescriptorWithSchema = async (
 ): Promise<ToolDefinitionWithSchema> => {
   const descriptor = toDescriptor(tool);
   const schema = await tool.getSchema();
-  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
+  const jsonSchema = z.toJSONSchema(schema);
   return { ...descriptor, schema: jsonSchema };
 };
 

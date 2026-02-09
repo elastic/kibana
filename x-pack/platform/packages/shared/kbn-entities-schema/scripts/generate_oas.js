@@ -8,7 +8,7 @@
 require('@kbn/setup-node-env');
 
 const swaggerJsdoc = require('swagger-jsdoc');
-const { zodToJsonSchema } = require('zod-to-json-schema');
+const { z } = require('@kbn/zod');
 
 const {
   createEntityDefinitionQuerySchema,
@@ -22,8 +22,9 @@ const {
 } = require('..');
 
 const schemaOptions = {
-  target: 'openApi3',
-  $refStrategy: 'none',
+  target: 'openapi-3.0',
+  cycles: 'ref',
+  reused: 'inline',
 };
 
 export const generateOAS = (options) =>
@@ -36,29 +37,29 @@ export const generateOAS = (options) =>
       },
       components: {
         schemas: {
-          createEntityDefinitionQuerySchema: zodToJsonSchema(
+          createEntityDefinitionQuerySchema: z.toJSONSchema(
             createEntityDefinitionQuerySchema,
             schemaOptions
           ),
-          getEntityDefinitionQuerySchema: zodToJsonSchema(
+          getEntityDefinitionQuerySchema: z.toJSONSchema(
             getEntityDefinitionQuerySchema,
             schemaOptions
           ),
-          resetEntityDefinitionParamsSchema: zodToJsonSchema(
+          resetEntityDefinitionParamsSchema: z.toJSONSchema(
             resetEntityDefinitionParamsSchema,
             schemaOptions
           ),
-          deleteEntityDefinitionParamsSchema: zodToJsonSchema(
+          deleteEntityDefinitionParamsSchema: z.toJSONSchema(
             deleteEntityDefinitionParamsSchema,
             schemaOptions
           ),
-          deleteEntityDefinitionQuerySchema: zodToJsonSchema(
+          deleteEntityDefinitionQuerySchema: z.toJSONSchema(
             deleteEntityDefinitionQuerySchema,
             schemaOptions
           ),
-          entityDefinitionSchema: zodToJsonSchema(entityDefinitionSchema, schemaOptions),
-          entitySummarySchema: zodToJsonSchema(entityLatestSchema, schemaOptions),
-          entityHistorySchema: zodToJsonSchema(entityHistorySchema, schemaOptions),
+          entityDefinitionSchema: z.toJSONSchema(entityDefinitionSchema, schemaOptions),
+          entitySummarySchema: z.toJSONSchema(entityLatestSchema, schemaOptions),
+          entityHistorySchema: z.toJSONSchema(entityHistorySchema, schemaOptions),
         },
       },
     },

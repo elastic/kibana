@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import type { z } from '@kbn/zod';
 
 /**
  * Possible types of tools
@@ -75,5 +75,5 @@ export interface ToolDefinitionWithSchema<
   /**
    * the JSON schema associated with this tool's input parameters.
    */
-  schema: JsonSchema7ObjectType;
+  schema: z.core.JSONSchema.JSONSchema;
 }

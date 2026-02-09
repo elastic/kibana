@@ -5,18 +5,13 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getMcpToolType, listMcpTools } from './tool_type';
 
-jest.mock('@n8n/json-schema-to-zod', () => ({
-  jsonSchemaToZod: jest.fn(),
-}));
-
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
-
-const mockJsonSchemaToZod = jsonSchemaToZod as jest.MockedFunction<typeof jsonSchemaToZod>;
+const mockJsonSchemaToZod = (z.fromJSONSchema = jest.fn());
 
 describe('MCP tool_type', () => {
   let mockActions: jest.Mocked<ActionsPluginStart>;

@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z3 from 'zod/v3';
-import type * as z4 from 'zod/v4';
+import * as z4 from 'zod';
 
-export function isZod(value: unknown): value is z3.ZodTypeAny | z4.ZodType {
-  // Check for v3
-  if (value instanceof z3.ZodType) {
+export function isZod(value: unknown): value is z4.ZodType {
+  if (value instanceof z4.ZodType) {
     return true;
   }
   // Check for v4 (has _zod symbol)
