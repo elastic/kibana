@@ -94,14 +94,30 @@ function readKibanaJsonc(filePath: string): KibanaJsonc | null {
 
 /**
  * Get the list of files changed in the PR compared to the target branch.
- * Uses git diff to compare the PR HEAD against the merge-base with the target branch.
+ * Uses the pre-computed GITHUB_PR_MERGE_BASE env var (set by Kibana's bootstrap)
+ * to diff against the merge-base, avoiding issues with shallow clones in CI.
  */
 function getChangedFiles(): string[] {
+  // Prefer the merge-base already computed by Kibana's bootstrap (set_git_merge_base in util.sh)
+  const mergeBase = process.env.GITHUB_PR_MERGE_BASE;
+
+  if (mergeBase) {
+    try {
+      const output = execSync(`git diff --name-only ${mergeBase} HEAD`, {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+      return output.trim().split('\n').filter(Boolean);
+    } catch (ex) {
+      console.error(`scout burn-in: git diff with GITHUB_PR_MERGE_BASE failed: ${ex}`);
+    }
+  }
+
+  // Fallback: compute merge-base manually (works outside CI or when env var is missing)
   const baseBranch = process.env.GITHUB_PR_TARGET_BRANCH || 'main';
 
-  // Ensure the base branch ref is available for diff
   try {
-    execSync(`git fetch origin ${baseBranch} --depth=1`, {
+    execSync(`git fetch origin ${baseBranch} --depth=200`, {
       encoding: 'utf-8',
       stdio: 'pipe',
     });
@@ -110,19 +126,19 @@ function getChangedFiles(): string[] {
   }
 
   try {
-    const mergeBase = execSync(`git merge-base origin/${baseBranch} HEAD`, {
+    const computedMergeBase = execSync(`git merge-base origin/${baseBranch} HEAD`, {
       encoding: 'utf-8',
       stdio: 'pipe',
     }).trim();
 
-    const output = execSync(`git diff --name-only ${mergeBase} HEAD`, {
+    const output = execSync(`git diff --name-only ${computedMergeBase} HEAD`, {
       encoding: 'utf-8',
       stdio: 'pipe',
     });
 
     return output.trim().split('\n').filter(Boolean);
   } catch {
-    // Fallback: try three-dot diff syntax
+    // Last resort fallback: three-dot diff syntax
     try {
       const output = execSync(`git diff --name-only origin/${baseBranch}...HEAD`, {
         encoding: 'utf-8',
