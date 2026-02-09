@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import MarkdownIt from 'markdown-it';
-import cheerio from 'cheerio';
+import { load as cheerioLoad } from 'cheerio';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 
@@ -63,7 +63,7 @@ export const discoverPlugins = (pluginDir: string): Plugins =>
 
         const md = new MarkdownIt();
         const parsed = md.render(Fs.readFileSync(readmePath, 'utf8'));
-        const $ = cheerio.load(parsed);
+        const $ = cheerioLoad(parsed);
 
         const firstParagraph = $('p')[0];
         if (firstParagraph) {

@@ -8,8 +8,9 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import fastGlob from 'fast-glob';
-import type { Cheerio, AnyNode } from 'cheerio';
-import $, { load } from 'cheerio';
+import type { AnyNode } from 'domhandler';
+import type { Cheerio, CheerioAPI } from 'cheerio';
+import { load } from 'cheerio';
 import { partition } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pLimit from 'p-limit';
@@ -134,24 +135,26 @@ async function processFile({
       executePrompt,
     });
   } else if (basename === '_lookup_join.html') {
-    const $element = load(fileContent)('*');
+    const $ = load(fileContent);
+    const $element = $('*');
     const command: ExtractedCommandOrFunc = {
       name: 'lookup-join',
       markdownContent: await executePrompt(
-        convertToMarkdownPrompt({ htmlContent: getSimpleText($element) })
+        convertToMarkdownPrompt({ htmlContent: getSimpleText($, $element) })
       ),
       command: true,
     };
     output.commands.push(command);
   } else if (contextArticles.includes(basename)) {
-    const $element = load(fileContent)('*');
+    const $ = load(fileContent);
+    const $element = $('*');
     output.pages.push({
       sourceFile: basename,
       name:
         basename === 'esql.html'
           ? 'overview'
           : basename.replace(/^esql-/, '').replace(/\.html$/, ''),
-      content: getSimpleText($element),
+      content: getSimpleText($, $element),
     });
   } else {
     output.skippedFile.push(basename);
@@ -171,9 +174,10 @@ async function processFunctionsAndOperators({
   log: ToolingLog;
   limiter: pLimit.Limit;
 }) {
-  const $element = load(fileContent.toString())('*');
+  const $ = load(fileContent.toString());
+  const $element = $('*');
 
-  const sections = extractSections($element);
+  const sections = extractSections($, $element);
 
   const searches = [
     'Binary operators',
@@ -241,9 +245,10 @@ async function processCommands({
   log: ToolingLog;
   limiter: pLimit.Limit;
 }) {
-  const $element = load(fileContent.toString())('*');
+  const $ = load(fileContent.toString());
+  const $element = $('*');
 
-  const sections = extractSections($element).filter(({ title }) => !!title.match(/^[A-Z_]+$/));
+  const sections = extractSections($, $element).filter(({ title }) => !!title.match(/^[A-Z_]+$/));
 
   const markdownFiles = await Promise.all(
     sections.map(async (section) => {
@@ -262,7 +267,7 @@ async function processCommands({
   output.commands.push(...markdownFiles);
 }
 
-function getSimpleText($element: Cheerio<AnyNode>) {
+function getSimpleText($: CheerioAPI, $element: Cheerio<AnyNode>) {
   $element.remove('.navfooter');
   $element.remove('#sticky_content');
   $element.remove('.edit_me');
@@ -276,12 +281,12 @@ function getSimpleText($element: Cheerio<AnyNode>) {
     .replaceAll(/([\n]\s*){2,}/g, '\n');
 }
 
-export function extractSections(cheerio: Cheerio<AnyNode>) {
+export function extractSections($: CheerioAPI, selection: Cheerio<AnyNode>) {
   const sections: Array<{
     title: string;
     content: string;
   }> = [];
-  cheerio.find('.section .position-relative').each((index, element) => {
+  selection.find('.section .position-relative').each((_index, element) => {
     const untilNextHeader = $(element).nextUntil('.position-relative');
 
     const title = $(element).text().trim().replace('edit', '');
@@ -292,7 +297,7 @@ export function extractSections(cheerio: Cheerio<AnyNode>) {
     untilNextHeader.find('table').remove();
 
     const htmlContent = untilNextHeader
-      .map((i, node) => $(node).prop('outerHTML'))
+      .map((_i: number, node: AnyNode) => $(node).prop('outerHTML'))
       .toArray()
       .join('');
 
