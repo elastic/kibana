@@ -11,9 +11,8 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { MetricField, Dimension } from '../../../../../../types';
-import { hasValue } from '../../../../../../common/utils/fields';
+import { hasValue, getMetricKey } from '../../../../../../common/utils/fields';
 import { DIMENSION_TYPES } from '../../../../../../common/constants';
-import { getMetricKey } from '../../../../../../common/utils/metric_key/get_metric_key';
 
 const FILTER_OUT_FIELDS = new Set([
   '_id',
