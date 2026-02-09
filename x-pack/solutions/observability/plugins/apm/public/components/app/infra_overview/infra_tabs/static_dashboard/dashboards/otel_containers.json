@@ -1,90 +1,2352 @@
 {
-  "attributes": {
-    "controlGroupInput": {
-      "panelsJSON": "{\"31d62d82-ab91-4238-9baa-d53deb91257d\":{\"order\":0,\"type\":\"optionsListControl\",\"width\":\"medium\",\"grow\":false,\"explicitInput\":{\"fieldName\":\"service.name\",\"useGlobalFilters\":true,\"ignoreValidations\":false,\"exclude\":false,\"existsSelected\":false,\"selectedOptions\":[\"frontend\"],\"sort\":{\"by\":\"_count\",\"direction\":\"desc\"},\"searchTechnique\":\"prefix\",\"dataViewRefName\":\"31d62d82-ab91-4238-9baa-d53deb91257d:optionsListDataView\"}}}"
-    },
-    "description": "",
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
-    },
-    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
-    "panelsJSON": "[{\"type\":\"links\",\"embeddableConfig\":{\"title\":\"Quick Nav (internal only)\",\"description\":\"\",\"layout\":\"horizontal\",\"links\":[{\"destinationRefName\":\"link_0cb6bb83-3704-4633-8042-b957201aac5b_dashboard\",\"id\":\"0cb6bb83-3704-4633-8042-b957201aac5b\",\"label\":\"OTel : K8s Version\",\"order\":0,\"type\":\"dashboardLink\"},{\"destinationRefName\":\"link_747e56ce-c28a-4bcb-81c7-083488934fc1_dashboard\",\"id\":\"747e56ce-c28a-4bcb-81c7-083488934fc1\",\"label\":\"OTel : Containers Version\",\"options\":{\"openInNewTab\":false,\"useCurrentDateRange\":true,\"useCurrentFilters\":true},\"order\":1,\"type\":\"dashboardLink\"},{\"destinationRefName\":\"link_bf24f6e7-5b5f-48a1-bb5a-3423968dae89_dashboard\",\"id\":\"bf24f6e7-5b5f-48a1-bb5a-3423968dae89\",\"label\":\"OTel : Hosts Version\",\"order\":2,\"type\":\"dashboardLink\"}],\"savedObjectId\":\"6b17998b-0965-47ce-971c-3cb0e7024a67\"},\"panelIndex\":\"3c33c426-9c7b-44f9-9323-694bf44524d0\",\"gridData\":{\"y\":0,\"x\":0,\"w\":48,\"h\":3,\"i\":\"3c33c426-9c7b-44f9-9323-694bf44524d0\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"90abf6be-5bd1-4864-b2a0-7eabe86fa3cd\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"factoryId\":\"OPEN_IN_DISCOVER_DRILLDOWN\",\"name\":\"View Pod\",\"config\":{\"openInNewTab\":true}}},{\"eventId\":\"c1185188-b308-4bde-82a2-f3d4f8c0e475\",\"triggers\":[\"VALUE_CLICK_TRIGGER\"],\"action\":{\"factoryId\":\"URL_DRILLDOWN\",\"name\":\"View Host\",\"config\":{\"url\":{\"template\":\"{{kibanaUrl}}/app/metrics/detail/host/{{event.points.[0].value}}\"},\"openInNewTab\":true,\"encodeUrl\":true}}}]}},\"title\":\"All Containers\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsDatatable\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"}],\"state\":{\"visualization\":{\"columns\":[{\"columnId\":\"f643aa07-258a-4edc-a1b2-8df010b3a174\",\"isTransposed\":false,\"isMetric\":true},{\"columnId\":\"267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d\",\"isTransposed\":false,\"isMetric\":false,\"width\":573},{\"columnId\":\"c61a5ef7-0088-4367-b3e8-9616486debc9\",\"isTransposed\":false,\"isMetric\":false},{\"columnId\":\"41b224c5-dfab-49ba-95de-d963c49dcea5\",\"isTransposed\":false,\"isMetric\":true}],\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"layerType\":\"data\",\"density\":\"compact\",\"paging\":{\"enabled\":true,\"size\":100}},\"query\":{\"query\":\"container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"f643aa07-258a-4edc-a1b2-8df010b3a174\":{\"label\":\"Container CPU (avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.cpu.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":true,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"customLabel\":true},\"267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d\":{\"label\":\"Container\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"k8s.container.name\",\"isBucketed\":true,\"params\":{\"size\":9,\"orderBy\":{\"type\":\"column\",\"columnId\":\"f643aa07-258a-4edc-a1b2-8df010b3a174\"},\"orderDirection\":\"desc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"multi_terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[\"container.id\"]},\"customLabel\":true},\"c61a5ef7-0088-4367-b3e8-9616486debc9\":{\"label\":\"Host\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"host.name\",\"isBucketed\":true,\"params\":{\"size\":9,\"orderBy\":{\"type\":\"column\",\"columnId\":\"f643aa07-258a-4edc-a1b2-8df010b3a174\"},\"orderDirection\":\"desc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false},\"customLabel\":true},\"41b224c5-dfab-49ba-95de-d963c49dcea5X0\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"41b224c5-dfab-49ba-95de-d963c49dcea5X1\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"41b224c5-dfab-49ba-95de-d963c49dcea5X2\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.available\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"41b224c5-dfab-49ba-95de-d963c49dcea5X3\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"divide\",\"args\":[\"41b224c5-dfab-49ba-95de-d963c49dcea5X0\",{\"type\":\"function\",\"name\":\"add\",\"args\":[\"41b224c5-dfab-49ba-95de-d963c49dcea5X1\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X2\"],\"location\":{\"min\":33,\"max\":100},\"text\":\"average(container.memory.usage)+average(container.memory.available)\"}],\"location\":{\"min\":0,\"max\":101},\"text\":\"average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))\"}},\"references\":[\"41b224c5-dfab-49ba-95de-d963c49dcea5X0\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X1\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X2\"],\"customLabel\":true},\"41b224c5-dfab-49ba-95de-d963c49dcea5\":{\"label\":\"Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"41b224c5-dfab-49ba-95de-d963c49dcea5X3\"],\"customLabel\":true}},\"columnOrder\":[\"267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d\",\"c61a5ef7-0088-4367-b3e8-9616486debc9\",\"f643aa07-258a-4edc-a1b2-8df010b3a174\",\"41b224c5-dfab-49ba-95de-d963c49dcea5\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X0\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X1\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X2\",\"41b224c5-dfab-49ba-95de-d963c49dcea5X3\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}}}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"42127512-f52b-433a-828d-280939046bc4\",\"gridData\":{\"y\":0,\"x\":0,\"w\":48,\"h\":12,\"i\":\"42127512-f52b-433a-828d-280939046bc4\",\"sectionId\":\"c8cd9149-1ddd-4ada-a7b5-4a3421bd6e3c\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"Container Memory Usage\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"},{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"legendStats\":[\"average\",\"min\",\"max\",\"lastNonNullValue\"],\"showSingleSeries\":true},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"yLeftExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"seriesType\":\"line\",\"xAccessor\":\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"splitAccessor\":\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"accessors\":[\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}},{\"layerId\":\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\",\"layerType\":\"referenceLine\",\"accessors\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"yConfig\":[{\"forAccessor\":\"659fe489-2bb0-4d7a-a282-409882abbf0f\",\"axisMode\":\"left\",\"lineStyle\":\"dashed\"}]}],\"emphasizeFitting\":true},\"query\":{\"query\":\"container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\":{\"label\":\"Container\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"k8s.container.name\",\"isBucketed\":true,\"params\":{\"size\":100,\"orderBy\":{\"type\":\"alphabetical\",\"fallback\":true},\"orderDirection\":\"asc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"multi_terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[\"container.id\"]},\"customLabel\":true},\"45148fea-00b8-43c1-92db-60ebf27b3f92\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"3e829468-e8e0-449d-a994-1a2df6314124X0\":{\"label\":\"Part of Container Memory Usage (avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X1\":{\"label\":\"Part of Container Memory Usage (avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X2\":{\"label\":\"Part of Container Memory Usage (avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.memory.available\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X3\":{\"label\":\"Part of Container Memory Usage (avg)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"divide\",\"args\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",{\"type\":\"function\",\"name\":\"add\",\"args\":[\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"location\":{\"min\":33,\"max\":100},\"text\":\"average(container.memory.usage)+average(container.memory.available)\"}],\"location\":{\"min\":0,\"max\":101},\"text\":\"average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))\"}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124\":{\"label\":\"Container Memory Usage (avg)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X3\"],\"customLabel\":true}},\"columnOrder\":[\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"3e829468-e8e0-449d-a994-1a2df6314124\",\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\",\"3e829468-e8e0-449d-a994-1a2df6314124X3\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"},\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\":{\"linkToLayers\":[],\"columns\":{\"659fe489-2bb0-4d7a-a282-409882abbf0f\":{\"label\":\"100%\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"1\"},\"references\":[],\"customLabel\":true}},\"columnOrder\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"}},\"currentIndexPatternId\":\"metrics-*\"}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"166c7fea-3b68-41c2-a462-532cece970b4\",\"gridData\":{\"y\":12,\"x\":25,\"w\":23,\"h\":19,\"i\":\"166c7fea-3b68-41c2-a462-532cece970b4\",\"sectionId\":\"c8cd9149-1ddd-4ada-a7b5-4a3421bd6e3c\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"Container CPU Usage\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"container.id : * AND container.cpu.usage : *\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"},{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"legendStats\":[\"average\",\"min\",\"max\",\"lastNonNullValue\"],\"showSingleSeries\":true},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"yLeftExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"seriesType\":\"line\",\"xAccessor\":\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"splitAccessor\":\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"accessors\":[\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}},{\"layerId\":\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\",\"layerType\":\"referenceLine\",\"accessors\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"yConfig\":[{\"forAccessor\":\"659fe489-2bb0-4d7a-a282-409882abbf0f\",\"axisMode\":\"left\",\"lineStyle\":\"dashed\"}]}],\"emphasizeFitting\":true},\"query\":{\"query\":\"container.id : * AND container.cpu.usage : *\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\":{\"label\":\"Container\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"k8s.container.name\",\"isBucketed\":true,\"params\":{\"size\":100,\"orderBy\":{\"type\":\"column\",\"columnId\":\"3e829468-e8e0-449d-a994-1a2df6314124\"},\"orderDirection\":\"desc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"multi_terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[\"container.id\"]},\"customLabel\":true},\"45148fea-00b8-43c1-92db-60ebf27b3f92\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"3e829468-e8e0-449d-a994-1a2df6314124\":{\"label\":\"Container CPU (avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"container.cpu.usage\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":true,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"customLabel\":true}},\"columnOrder\":[\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"},\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\":{\"linkToLayers\":[],\"columns\":{\"659fe489-2bb0-4d7a-a282-409882abbf0f\":{\"label\":\"100%\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"1\"},\"references\":[],\"customLabel\":true}},\"columnOrder\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"}},\"currentIndexPatternId\":\"metrics-*\"}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"43f02183-8a60-4402-ba2c-2305f3a97927\",\"gridData\":{\"y\":12,\"x\":0,\"w\":25,\"h\":19,\"i\":\"43f02183-8a60-4402-ba2c-2305f3a97927\",\"sectionId\":\"c8cd9149-1ddd-4ada-a7b5-4a3421bd6e3c\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"c1185188-b308-4bde-82a2-f3d4f8c0e475\",\"triggers\":[\"VALUE_CLICK_TRIGGER\"],\"action\":{\"factoryId\":\"URL_DRILLDOWN\",\"name\":\"View Host\",\"config\":{\"url\":{\"template\":\"{{kibanaUrl}}/app/metrics/detail/host/{{event.points.[0].value}}\"},\"openInNewTab\":true,\"encodeUrl\":true}}}]}},\"title\":\"Hosts\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"host.name : *  AND (metrics.system.cpu.utilization : * OR metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : * OR system.memory.utilization : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsDatatable\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"}],\"state\":{\"visualization\":{\"columns\":[{\"columnId\":\"562dbab9-b985-44c9-b62c-f0f18f10a2f1\",\"isTransposed\":false,\"isMetric\":false,\"oneClickFilter\":true,\"width\":264.5333333333333},{\"columnId\":\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488\",\"isTransposed\":false,\"isMetric\":true},{\"columnId\":\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7\",\"isTransposed\":false,\"isMetric\":true},{\"columnId\":\"91877375-3736-4929-afdc-c21950e4db99\",\"isTransposed\":false,\"isMetric\":true}],\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"layerType\":\"data\",\"density\":\"compact\",\"paging\":{\"enabled\":true,\"size\":100}},\"query\":{\"query\":\"host.name : *  AND (metrics.system.cpu.utilization : * OR metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : * OR system.memory.utilization : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"562dbab9-b985-44c9-b62c-f0f18f10a2f1\":{\"label\":\"Host\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"host.name\",\"isBucketed\":true,\"params\":{\"size\":20,\"orderBy\":{\"type\":\"alphabetical\",\"fallback\":true},\"orderDirection\":\"asc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[]},\"customLabel\":true},\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: idle\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: wait\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"subtract\",\"args\":[1,{\"type\":\"function\",\"name\":\"add\",\"args\":[\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1\"],\"location\":{\"min\":2,\"max\":121},\"text\":\"(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\"}],\"location\":{\"min\":0,\"max\":121},\"text\":\"1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\"}},\"references\":[\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1\"],\"customLabel\":true},\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488\":{\"label\":\"CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2\"],\"customLabel\":true},\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0\":{\"label\":\"Part of Normalised Load (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.load_average.1m\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1\":{\"label\":\"Part of Normalised Load (avg.)\",\"dataType\":\"number\",\"operationType\":\"max\",\"sourceField\":\"metrics.system.cpu.logical.count\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2\":{\"label\":\"Part of Normalised Load (avg.)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"divide\",\"args\":[\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1\"],\"location\":{\"min\":0,\"max\":83},\"text\":\"average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)\"}},\"references\":[\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1\"],\"customLabel\":true},\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7\":{\"label\":\"Normalised Load (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":2}}},\"references\":[\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2\"],\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99X0\":{\"label\":\"Part of Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: used\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99X1\":{\"label\":\"Part of Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: buffered\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99X2\":{\"label\":\"Part of Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: slab_reclaimable\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99X3\":{\"label\":\"Part of Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: slab_unreclaimable\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99X4\":{\"label\":\"Part of Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"add\",\"args\":[{\"type\":\"function\",\"name\":\"add\",\"args\":[{\"type\":\"function\",\"name\":\"add\",\"args\":[\"91877375-3736-4929-afdc-c21950e4db99X0\",\"91877375-3736-4929-afdc-c21950e4db99X1\"]},\"91877375-3736-4929-afdc-c21950e4db99X2\"]},\"91877375-3736-4929-afdc-c21950e4db99X3\"],\"location\":{\"min\":0,\"max\":251},\"text\":\"average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')\"}},\"references\":[\"91877375-3736-4929-afdc-c21950e4db99X0\",\"91877375-3736-4929-afdc-c21950e4db99X1\",\"91877375-3736-4929-afdc-c21950e4db99X2\",\"91877375-3736-4929-afdc-c21950e4db99X3\"],\"customLabel\":true},\"91877375-3736-4929-afdc-c21950e4db99\":{\"label\":\"Memory Usage avg)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":2}}},\"references\":[\"91877375-3736-4929-afdc-c21950e4db99X4\"],\"customLabel\":true}},\"columnOrder\":[\"562dbab9-b985-44c9-b62c-f0f18f10a2f1\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1\",\"4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1\",\"57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2\",\"91877375-3736-4929-afdc-c21950e4db99\",\"91877375-3736-4929-afdc-c21950e4db99X0\",\"91877375-3736-4929-afdc-c21950e4db99X1\",\"91877375-3736-4929-afdc-c21950e4db99X2\",\"91877375-3736-4929-afdc-c21950e4db99X3\",\"91877375-3736-4929-afdc-c21950e4db99X4\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}}}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"a723f891-fab9-4284-804f-0cac35e0871d\",\"gridData\":{\"y\":0,\"x\":0,\"w\":48,\"h\":13,\"i\":\"a723f891-fab9-4284-804f-0cac35e0871d\",\"sectionId\":\"decc554c-d83d-4b00-823e-bb5fe840a54d\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"CPU Usage (avg.)\",\"description\":\"Won't show metrics if filtered by 'service.name'\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"host.name : * AND (metrics.system.cpu.utilization : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"},{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\"},{\"type\":\"index-pattern\",\"id\":\"3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0\",\"name\":\"xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"legendStats\":[\"average\",\"min\",\"max\",\"lastNonNullValue\"],\"showSingleSeries\":true},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"yLeftExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"seriesType\":\"line\",\"xAccessor\":\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"splitAccessor\":\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"accessors\":[\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}},{\"layerId\":\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\",\"layerType\":\"referenceLine\",\"accessors\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"yConfig\":[{\"forAccessor\":\"659fe489-2bb0-4d7a-a282-409882abbf0f\",\"axisMode\":\"left\",\"lineStyle\":\"dashed\"}]},{\"layerId\":\"8025da01-8c48-4c5b-be42-647bb9c164f0\",\"layerType\":\"annotations\",\"annotations\":[{\"type\":\"query\",\"id\":\"f54574c5-435d-4ba1-a1ba-4b2ca829172f\",\"label\":\"Event\",\"key\":{\"type\":\"point_in_time\"},\"timeField\":\"@timestamp\",\"icon\":\"triangle\",\"filter\":{\"type\":\"kibana_query\",\"query\":\"kibana.alert.group : \\\"frontend\\\"\",\"language\":\"kuery\"}}],\"ignoreGlobalFilters\":true,\"persistanceType\":\"byValue\"}],\"emphasizeFitting\":true},\"query\":{\"query\":\"host.name : * AND (metrics.system.cpu.utilization : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\":{\"label\":\"Host\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"host.name\",\"isBucketed\":true,\"params\":{\"size\":100,\"orderBy\":{\"type\":\"alphabetical\",\"fallback\":true},\"orderDirection\":\"asc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[]},\"customLabel\":true},\"45148fea-00b8-43c1-92db-60ebf27b3f92\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"3e829468-e8e0-449d-a994-1a2df6314124X0\":{\"label\":\"Part of CPU Usage\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: idle\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X1\":{\"label\":\"Part of CPU Usage\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: wait\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X2\":{\"label\":\"Part of CPU Usage\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"subtract\",\"args\":[1,{\"type\":\"function\",\"name\":\"add\",\"args\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\"],\"location\":{\"min\":2,\"max\":121},\"text\":\"(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\"}],\"location\":{\"min\":0,\"max\":121},\"text\":\"1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\"}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\"],\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124\":{\"label\":\"CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"customLabel\":true}},\"columnOrder\":[\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"3e829468-e8e0-449d-a994-1a2df6314124\",\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}},\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\":{\"linkToLayers\":[],\"columns\":{\"659fe489-2bb0-4d7a-a282-409882abbf0f\":{\"label\":\"100%\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"1\"},\"references\":[],\"customLabel\":true}},\"columnOrder\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}}}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"954c6c25-84c1-45bf-a245-6a85d0cf1983\",\"gridData\":{\"y\":13,\"x\":0,\"w\":25,\"h\":16,\"i\":\"954c6c25-84c1-45bf-a245-6a85d0cf1983\",\"sectionId\":\"decc554c-d83d-4b00-823e-bb5fe840a54d\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"Memory Usage (avg.)\",\"description\":\"Won't show metrics if filtered by 'service.name'\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"host.name : * AND (system.memory.utilization : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"},{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"legendStats\":[\"average\",\"min\",\"max\",\"lastNonNullValue\"],\"showSingleSeries\":true},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"yLeftExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"seriesType\":\"line\",\"xAccessor\":\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"splitAccessor\":\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"accessors\":[\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}},{\"layerId\":\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\",\"layerType\":\"referenceLine\",\"accessors\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"yConfig\":[{\"forAccessor\":\"659fe489-2bb0-4d7a-a282-409882abbf0f\",\"axisMode\":\"left\",\"lineStyle\":\"dashed\"}]}],\"emphasizeFitting\":true},\"query\":{\"query\":\"host.name : * AND (system.memory.utilization : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\":{\"label\":\"Host\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"host.name\",\"isBucketed\":true,\"params\":{\"size\":100,\"orderBy\":{\"type\":\"alphabetical\",\"fallback\":true},\"orderDirection\":\"asc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[]},\"customLabel\":true},\"45148fea-00b8-43c1-92db-60ebf27b3f92\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"3e829468-e8e0-449d-a994-1a2df6314124X0\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: used\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X1\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: buffered\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X2\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: slab_reclaimable\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X3\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"system.memory.utilization\",\"isBucketed\":false,\"filter\":{\"query\":\"state: slab_unreclaimable\",\"language\":\"kuery\"},\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X4\":{\"label\":\"Part of Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"add\",\"args\":[{\"type\":\"function\",\"name\":\"add\",\"args\":[{\"type\":\"function\",\"name\":\"add\",\"args\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\"]},\"3e829468-e8e0-449d-a994-1a2df6314124X2\"]},\"3e829468-e8e0-449d-a994-1a2df6314124X3\"],\"location\":{\"min\":0,\"max\":251},\"text\":\"average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')\"}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\",\"3e829468-e8e0-449d-a994-1a2df6314124X3\"],\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124\":{\"label\":\"Memory Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X4\"],\"customLabel\":true}},\"columnOrder\":[\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"3e829468-e8e0-449d-a994-1a2df6314124\",\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\",\"3e829468-e8e0-449d-a994-1a2df6314124X3\",\"3e829468-e8e0-449d-a994-1a2df6314124X4\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"},\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\":{\"linkToLayers\":[],\"columns\":{\"659fe489-2bb0-4d7a-a282-409882abbf0f\":{\"label\":\"100%\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"1\"},\"references\":[],\"customLabel\":true}},\"columnOrder\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{},\"indexPatternId\":\"metrics-*\"}},\"currentIndexPatternId\":\"metrics-*\"}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"02fa5761-bcb4-4bca-9d78-a563dcdbbb47\",\"gridData\":{\"y\":13,\"x\":25,\"w\":23,\"h\":16,\"i\":\"02fa5761-bcb4-4bca-9d78-a563dcdbbb47\",\"sectionId\":\"decc554c-d83d-4b00-823e-bb5fe840a54d\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"Normalised Load (avg.)\",\"description\":\"Won't show metrics if filtered by 'service.name'\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"query\":\"host.name : * AND (metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : *)\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12\"},{\"type\":\"index-pattern\",\"id\":\"metrics-*\",\"name\":\"indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\"},{\"type\":\"index-pattern\",\"id\":\"3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0\",\"name\":\"xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"bottom\",\"legendStats\":[\"average\",\"min\",\"max\",\"lastNonNullValue\"],\"showSingleSeries\":true},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"yLeftExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"line\",\"layers\":[{\"layerId\":\"0c02b254-96e3-4af2-875d-79e425428b12\",\"seriesType\":\"line\",\"xAccessor\":\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"splitAccessor\":\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"accessors\":[\"3e829468-e8e0-449d-a994-1a2df6314124\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}},{\"layerId\":\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\",\"layerType\":\"referenceLine\",\"accessors\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"yConfig\":[{\"forAccessor\":\"659fe489-2bb0-4d7a-a282-409882abbf0f\",\"axisMode\":\"left\",\"lineStyle\":\"dashed\"}]},{\"layerId\":\"8025da01-8c48-4c5b-be42-647bb9c164f0\",\"layerType\":\"annotations\",\"annotations\":[{\"type\":\"query\",\"id\":\"f54574c5-435d-4ba1-a1ba-4b2ca829172f\",\"label\":\"Event\",\"key\":{\"type\":\"point_in_time\"},\"timeField\":\"@timestamp\",\"icon\":\"triangle\",\"filter\":{\"type\":\"kibana_query\",\"query\":\"kibana.alert.group : \\\"frontend\\\"\",\"language\":\"kuery\"}}],\"ignoreGlobalFilters\":true,\"persistanceType\":\"byValue\"}],\"emphasizeFitting\":true},\"query\":{\"query\":\"host.name : * AND (metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : *)\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"0c02b254-96e3-4af2-875d-79e425428b12\":{\"columns\":{\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\":{\"label\":\"Host\",\"dataType\":\"string\",\"operationType\":\"terms\",\"sourceField\":\"host.name\",\"isBucketed\":true,\"params\":{\"size\":100,\"orderBy\":{\"type\":\"alphabetical\",\"fallback\":true},\"orderDirection\":\"asc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"},\"include\":[],\"exclude\":[],\"includeIsRegex\":false,\"excludeIsRegex\":false,\"secondaryFields\":[]},\"customLabel\":true},\"45148fea-00b8-43c1-92db-60ebf27b3f92\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"3e829468-e8e0-449d-a994-1a2df6314124X0\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"average\",\"sourceField\":\"metrics.system.cpu.load_average.1m\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X1\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"max\",\"sourceField\":\"metrics.system.cpu.logical.count\",\"isBucketed\":false,\"params\":{\"emptyAsNull\":false},\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124X2\":{\"label\":\"Part of CPU Usage (avg.)\",\"dataType\":\"number\",\"operationType\":\"math\",\"isBucketed\":false,\"params\":{\"tinymathAst\":{\"type\":\"function\",\"name\":\"divide\",\"args\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\"],\"location\":{\"min\":0,\"max\":83},\"text\":\"average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)\"}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\"],\"customLabel\":true},\"3e829468-e8e0-449d-a994-1a2df6314124\":{\"label\":\"Normalised Load (avg.)\",\"dataType\":\"number\",\"operationType\":\"formula\",\"isBucketed\":false,\"params\":{\"formula\":\"average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)\",\"isFormulaBroken\":false,\"format\":{\"id\":\"percent\",\"params\":{\"decimals\":0}}},\"references\":[\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"customLabel\":true}},\"columnOrder\":[\"6c0c864a-5e5e-4ff2-87da-d600c7d6edef\",\"45148fea-00b8-43c1-92db-60ebf27b3f92\",\"3e829468-e8e0-449d-a994-1a2df6314124\",\"3e829468-e8e0-449d-a994-1a2df6314124X0\",\"3e829468-e8e0-449d-a994-1a2df6314124X1\",\"3e829468-e8e0-449d-a994-1a2df6314124X2\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}},\"d6d3b5cd-6ed2-4795-8087-6faa122a3ba3\":{\"linkToLayers\":[],\"columns\":{\"659fe489-2bb0-4d7a-a282-409882abbf0f\":{\"label\":\"100%\",\"dataType\":\"number\",\"operationType\":\"static_value\",\"isBucketed\":false,\"params\":{\"value\":\"1\"},\"references\":[],\"customLabel\":true}},\"columnOrder\":[\"659fe489-2bb0-4d7a-a282-409882abbf0f\"],\"sampling\":1,\"ignoreGlobalFilters\":false,\"incompleteColumns\":{}}}}},\"internalReferences\":[],\"adHocDataViews\":{}},\"version\":1}},\"panelIndex\":\"2a630f1f-a895-4ac7-b68d-c7f656a50333\",\"gridData\":{\"y\":29,\"x\":0,\"w\":25,\"h\":16,\"i\":\"2a630f1f-a895-4ac7-b68d-c7f656a50333\",\"sectionId\":\"decc554c-d83d-4b00-823e-bb5fe840a54d\"}}]",
-    "sections": [
-      {
-        "collapsed": false,
-        "gridData": {
-          "i": "c8cd9149-1ddd-4ada-a7b5-4a3421bd6e3c",
-          "y": 3
-        },
-        "title": "Container Metrics"
+  "panels": [
+    {
+      "title": "Container Metrics",
+      "collapsed": false,
+      "grid": {
+        "y": 3
       },
-      {
-        "collapsed": false,
-        "gridData": {
-          "i": "decc554c-d83d-4b00-823e-bb5fe840a54d",
-          "y": 4
+      "uid": "c8cd9149-1ddd-4ada-a7b5-4a3421bd6e3c",
+      "panels": [
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 48,
+            "h": 12
+          },
+          "uid": "42127512-f52b-433a-828d-280939046bc4",
+          "config": {
+            "title": "All Containers",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsDatatable",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "columns": [
+                    {
+                      "columnId": "f643aa07-258a-4edc-a1b2-8df010b3a174",
+                      "isTransposed": false,
+                      "isMetric": true
+                    },
+                    {
+                      "columnId": "267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d",
+                      "isTransposed": false,
+                      "isMetric": false,
+                      "width": 573
+                    },
+                    {
+                      "columnId": "c61a5ef7-0088-4367-b3e8-9616486debc9",
+                      "isTransposed": false,
+                      "isMetric": false
+                    },
+                    {
+                      "columnId": "41b224c5-dfab-49ba-95de-d963c49dcea5",
+                      "isTransposed": false,
+                      "isMetric": true
+                    }
+                  ],
+                  "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                  "layerType": "data",
+                  "density": "compact",
+                  "paging": {
+                    "enabled": true,
+                    "size": 100
+                  }
+                },
+                "query": {
+                  "query": "container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "f643aa07-258a-4edc-a1b2-8df010b3a174": {
+                            "label": "Container CPU (avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.cpu.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": true,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          },
+                          "267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d": {
+                            "label": "Container",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.container.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 9,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "f643aa07-258a-4edc-a1b2-8df010b3a174"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "multi_terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": [
+                                "container.id"
+                              ]
+                            },
+                            "customLabel": true
+                          },
+                          "c61a5ef7-0088-4367-b3e8-9616486debc9": {
+                            "label": "Host",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "host.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 9,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "f643aa07-258a-4edc-a1b2-8df010b3a174"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            },
+                            "customLabel": true
+                          },
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X0": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X1": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X2": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.available",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X3": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "divide",
+                                "args": [
+                                  "41b224c5-dfab-49ba-95de-d963c49dcea5X0",
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      "41b224c5-dfab-49ba-95de-d963c49dcea5X1",
+                                      "41b224c5-dfab-49ba-95de-d963c49dcea5X2"
+                                    ],
+                                    "location": {
+                                      "min": 33,
+                                      "max": 100
+                                    },
+                                    "text": "average(container.memory.usage)+average(container.memory.available)"
+                                  }
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 101
+                                },
+                                "text": "average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))"
+                              }
+                            },
+                            "references": [
+                              "41b224c5-dfab-49ba-95de-d963c49dcea5X0",
+                              "41b224c5-dfab-49ba-95de-d963c49dcea5X1",
+                              "41b224c5-dfab-49ba-95de-d963c49dcea5X2"
+                            ],
+                            "customLabel": true
+                          },
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5": {
+                            "label": "Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "41b224c5-dfab-49ba-95de-d963c49dcea5X3"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "267e61e9-3a3e-4a1b-b7f8-1014eb98ce1d",
+                          "c61a5ef7-0088-4367-b3e8-9616486debc9",
+                          "f643aa07-258a-4edc-a1b2-8df010b3a174",
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5",
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X0",
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X1",
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X2",
+                          "41b224c5-dfab-49ba-95de-d963c49dcea5X3"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": [
+                  {
+                    "eventId": "90abf6be-5bd1-4864-b2a0-7eabe86fa3cd",
+                    "triggers": [
+                      "FILTER_TRIGGER"
+                    ],
+                    "action": {
+                      "factoryId": "OPEN_IN_DISCOVER_DRILLDOWN",
+                      "name": "View Pod",
+                      "config": {
+                        "openInNewTab": true
+                      }
+                    }
+                  },
+                  {
+                    "eventId": "c1185188-b308-4bde-82a2-f3d4f8c0e475",
+                    "triggers": [
+                      "VALUE_CLICK_TRIGGER"
+                    ],
+                    "action": {
+                      "factoryId": "URL_DRILLDOWN",
+                      "name": "View Host",
+                      "config": {
+                        "url": {
+                          "template": "{{kibanaUrl}}/app/metrics/detail/host/{{event.points.[0].value}}"
+                        },
+                        "openInNewTab": true,
+                        "encodeUrl": true
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
-        "title": "Host Metrics"
-      }
-    ],
-    "timeFrom": "now-15m",
-    "timeRestore": true,
-    "timeTo": "now",
-    "title": "Infrastructure Tab : OTel Containers"
-  },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 25,
+            "y": 12,
+            "w": 23,
+            "h": 19
+          },
+          "uid": "166c7fea-3b68-41c2-a462-532cece970b4",
+          "config": {
+            "title": "Container Memory Usage",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastNonNullValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "splitAccessor": "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      }
+                    },
+                    {
+                      "layerId": "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
+                      "layerType": "referenceLine",
+                      "accessors": [
+                        "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                      ],
+                      "yConfig": [
+                        {
+                          "forAccessor": "659fe489-2bb0-4d7a-a282-409882abbf0f",
+                          "axisMode": "left",
+                          "lineStyle": "dashed"
+                        }
+                      ]
+                    }
+                  ],
+                  "emphasizeFitting": true
+                },
+                "query": {
+                  "query": "container.id : * AND (container.cpu.usage : * OR container.memory.usage : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Container",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.container.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 100,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": true
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "multi_terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": [
+                                "container.id"
+                              ]
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0": {
+                            "label": "Part of Container Memory Usage (avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1": {
+                            "label": "Part of Container Memory Usage (avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2": {
+                            "label": "Part of Container Memory Usage (avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.memory.available",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X3": {
+                            "label": "Part of Container Memory Usage (avg)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "divide",
+                                "args": [
+                                  "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                                      "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                                    ],
+                                    "location": {
+                                      "min": 33,
+                                      "max": 100
+                                    },
+                                    "text": "average(container.memory.usage)+average(container.memory.available)"
+                                  }
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 101
+                                },
+                                "text": "average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))"
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                            ],
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "Container Memory Usage (avg)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(container.memory.usage)/(average(container.memory.usage)+average(container.memory.available))",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X3"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X3"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      },
+                      "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
+                        "linkToLayers": [],
+                        "columns": {
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f": {
+                            "label": "100%",
+                            "dataType": "number",
+                            "operationType": "static_value",
+                            "isBucketed": false,
+                            "params": {
+                              "value": "1"
+                            },
+                            "references": [],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      }
+                    },
+                    "currentIndexPatternId": "{{indexPattern}}"
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": []
+              }
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 12,
+            "w": 25,
+            "h": 19
+          },
+          "uid": "43f02183-8a60-4402-ba2c-2305f3a97927",
+          "config": {
+            "title": "Container CPU Usage",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "container.id : * AND container.cpu.usage : *",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastNonNullValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "splitAccessor": "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      }
+                    },
+                    {
+                      "layerId": "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
+                      "layerType": "referenceLine",
+                      "accessors": [
+                        "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                      ],
+                      "yConfig": [
+                        {
+                          "forAccessor": "659fe489-2bb0-4d7a-a282-409882abbf0f",
+                          "axisMode": "left",
+                          "lineStyle": "dashed"
+                        }
+                      ]
+                    }
+                  ],
+                  "emphasizeFitting": true
+                },
+                "query": {
+                  "query": "container.id : * AND container.cpu.usage : *",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Container",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.container.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 100,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "3e829468-e8e0-449d-a994-1a2df6314124"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "multi_terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": [
+                                "container.id"
+                              ]
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "Container CPU (avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "container.cpu.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": true,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      },
+                      "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
+                        "linkToLayers": [],
+                        "columns": {
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f": {
+                            "label": "100%",
+                            "dataType": "number",
+                            "operationType": "static_value",
+                            "isBucketed": false,
+                            "params": {
+                              "value": "1"
+                            },
+                            "references": [],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      }
+                    },
+                    "currentIndexPatternId": "{{indexPattern}}"
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": []
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Host Metrics",
+      "collapsed": false,
+      "grid": {
+        "y": 4
+      },
+      "uid": "decc554c-d83d-4b00-823e-bb5fe840a54d",
+      "panels": [
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 48,
+            "h": 13
+          },
+          "uid": "a723f891-fab9-4284-804f-0cac35e0871d",
+          "config": {
+            "title": "Hosts",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "host.name : *  AND (metrics.system.cpu.utilization : * OR metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : * OR system.memory.utilization : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsDatatable",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "columns": [
+                    {
+                      "columnId": "562dbab9-b985-44c9-b62c-f0f18f10a2f1",
+                      "isTransposed": false,
+                      "isMetric": false,
+                      "oneClickFilter": true,
+                      "width": 264.5333333333333
+                    },
+                    {
+                      "columnId": "4d13eb59-f4dd-4ffd-96be-3b0c06aba488",
+                      "isTransposed": false,
+                      "isMetric": true
+                    },
+                    {
+                      "columnId": "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7",
+                      "isTransposed": false,
+                      "isMetric": true
+                    },
+                    {
+                      "columnId": "91877375-3736-4929-afdc-c21950e4db99",
+                      "isTransposed": false,
+                      "isMetric": true
+                    }
+                  ],
+                  "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                  "layerType": "data",
+                  "density": "compact",
+                  "paging": {
+                    "enabled": true,
+                    "size": 100
+                  }
+                },
+                "query": {
+                  "query": "host.name : *  AND (metrics.system.cpu.utilization : * OR metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : * OR system.memory.utilization : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "562dbab9-b985-44c9-b62c-f0f18f10a2f1": {
+                            "label": "Host",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "host.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 20,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": true
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": []
+                            },
+                            "customLabel": true
+                          },
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: idle",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: wait",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "subtract",
+                                "args": [
+                                  1,
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0",
+                                      "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1"
+                                    ],
+                                    "location": {
+                                      "min": 2,
+                                      "max": 121
+                                    },
+                                    "text": "(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))"
+                                  }
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 121
+                                },
+                                "text": "1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))"
+                              }
+                            },
+                            "references": [
+                              "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0",
+                              "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1"
+                            ],
+                            "customLabel": true
+                          },
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488": {
+                            "label": "CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2"
+                            ],
+                            "customLabel": true
+                          },
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0": {
+                            "label": "Part of Normalised Load (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.load_average.1m",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1": {
+                            "label": "Part of Normalised Load (avg.)",
+                            "dataType": "number",
+                            "operationType": "max",
+                            "sourceField": "metrics.system.cpu.logical.count",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2": {
+                            "label": "Part of Normalised Load (avg.)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "divide",
+                                "args": [
+                                  "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0",
+                                  "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1"
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 83
+                                },
+                                "text": "average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)"
+                              }
+                            },
+                            "references": [
+                              "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0",
+                              "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1"
+                            ],
+                            "customLabel": true
+                          },
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7": {
+                            "label": "Normalised Load (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 2
+                                }
+                              }
+                            },
+                            "references": [
+                              "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2"
+                            ],
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99X0": {
+                            "label": "Part of Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: used",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99X1": {
+                            "label": "Part of Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: buffered",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99X2": {
+                            "label": "Part of Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: slab_reclaimable",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99X3": {
+                            "label": "Part of Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: slab_unreclaimable",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99X4": {
+                            "label": "Part of Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "add",
+                                "args": [
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      {
+                                        "type": "function",
+                                        "name": "add",
+                                        "args": [
+                                          "91877375-3736-4929-afdc-c21950e4db99X0",
+                                          "91877375-3736-4929-afdc-c21950e4db99X1"
+                                        ]
+                                      },
+                                      "91877375-3736-4929-afdc-c21950e4db99X2"
+                                    ]
+                                  },
+                                  "91877375-3736-4929-afdc-c21950e4db99X3"
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 251
+                                },
+                                "text": "average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')"
+                              }
+                            },
+                            "references": [
+                              "91877375-3736-4929-afdc-c21950e4db99X0",
+                              "91877375-3736-4929-afdc-c21950e4db99X1",
+                              "91877375-3736-4929-afdc-c21950e4db99X2",
+                              "91877375-3736-4929-afdc-c21950e4db99X3"
+                            ],
+                            "customLabel": true
+                          },
+                          "91877375-3736-4929-afdc-c21950e4db99": {
+                            "label": "Memory Usage avg)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 2
+                                }
+                              }
+                            },
+                            "references": [
+                              "91877375-3736-4929-afdc-c21950e4db99X4"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "562dbab9-b985-44c9-b62c-f0f18f10a2f1",
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488",
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X0",
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X1",
+                          "4d13eb59-f4dd-4ffd-96be-3b0c06aba488X2",
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7",
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X0",
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X1",
+                          "57fc4d8a-9608-4eac-91c0-a0dc97fa6dd7X2",
+                          "91877375-3736-4929-afdc-c21950e4db99",
+                          "91877375-3736-4929-afdc-c21950e4db99X0",
+                          "91877375-3736-4929-afdc-c21950e4db99X1",
+                          "91877375-3736-4929-afdc-c21950e4db99X2",
+                          "91877375-3736-4929-afdc-c21950e4db99X3",
+                          "91877375-3736-4929-afdc-c21950e4db99X4"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": [
+                  {
+                    "eventId": "c1185188-b308-4bde-82a2-f3d4f8c0e475",
+                    "triggers": [
+                      "VALUE_CLICK_TRIGGER"
+                    ],
+                    "action": {
+                      "factoryId": "URL_DRILLDOWN",
+                      "name": "View Host",
+                      "config": {
+                        "url": {
+                          "template": "{{kibanaUrl}}/app/metrics/detail/host/{{event.points.[0].value}}"
+                        },
+                        "openInNewTab": true,
+                        "encodeUrl": true
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 13,
+            "w": 25,
+            "h": 16
+          },
+          "uid": "954c6c25-84c1-45bf-a245-6a85d0cf1983",
+          "config": {
+            "title": "CPU Usage (avg.)",
+            "description": "Won't show metrics if filtered by 'service.name'",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "host.name : * AND (metrics.system.cpu.utilization : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastNonNullValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "splitAccessor": "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      }
+                    },
+                    {
+                      "layerId": "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
+                      "layerType": "referenceLine",
+                      "accessors": [
+                        "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                      ],
+                      "yConfig": [
+                        {
+                          "forAccessor": "659fe489-2bb0-4d7a-a282-409882abbf0f",
+                          "axisMode": "left",
+                          "lineStyle": "dashed"
+                        }
+                      ]
+                    },
+                    {
+                      "layerId": "8025da01-8c48-4c5b-be42-647bb9c164f0",
+                      "layerType": "annotations",
+                      "annotations": [
+                        {
+                          "type": "query",
+                          "id": "f54574c5-435d-4ba1-a1ba-4b2ca829172f",
+                          "label": "Event",
+                          "key": {
+                            "type": "point_in_time"
+                          },
+                          "timeField": "@timestamp",
+                          "icon": "triangle",
+                          "filter": {
+                            "type": "kibana_query",
+                            "query": "kibana.alert.group : \"frontend\"",
+                            "language": "kuery"
+                          }
+                        }
+                      ],
+                      "ignoreGlobalFilters": true,
+                      "persistanceType": "byValue"
+                    }
+                  ],
+                  "emphasizeFitting": true
+                },
+                "query": {
+                  "query": "host.name : * AND (metrics.system.cpu.utilization : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Host",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "host.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 100,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": true
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": []
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0": {
+                            "label": "Part of CPU Usage",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: idle",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1": {
+                            "label": "Part of CPU Usage",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: wait",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2": {
+                            "label": "Part of CPU Usage",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "subtract",
+                                "args": [
+                                  1,
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                                      "3e829468-e8e0-449d-a994-1a2df6314124X1"
+                                    ],
+                                    "location": {
+                                      "min": 2,
+                                      "max": 121
+                                    },
+                                    "text": "(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))"
+                                  }
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 121
+                                },
+                                "text": "1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))"
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X1"
+                            ],
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      },
+                      "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
+                        "linkToLayers": [],
+                        "columns": {
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f": {
+                            "label": "100%",
+                            "dataType": "number",
+                            "operationType": "static_value",
+                            "isBucketed": false,
+                            "params": {
+                              "value": "1"
+                            },
+                            "references": [],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": []
+              }
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 25,
+            "y": 13,
+            "w": 23,
+            "h": 16
+          },
+          "uid": "02fa5761-bcb4-4bca-9d78-a563dcdbbb47",
+          "config": {
+            "title": "Memory Usage (avg.)",
+            "description": "Won't show metrics if filtered by 'service.name'",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "host.name : * AND (system.memory.utilization : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastNonNullValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "splitAccessor": "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      }
+                    },
+                    {
+                      "layerId": "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
+                      "layerType": "referenceLine",
+                      "accessors": [
+                        "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                      ],
+                      "yConfig": [
+                        {
+                          "forAccessor": "659fe489-2bb0-4d7a-a282-409882abbf0f",
+                          "axisMode": "left",
+                          "lineStyle": "dashed"
+                        }
+                      ]
+                    }
+                  ],
+                  "emphasizeFitting": true
+                },
+                "query": {
+                  "query": "host.name : * AND (system.memory.utilization : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Host",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "host.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 100,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": true
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": []
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: used",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: buffered",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: slab_reclaimable",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X3": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "system.memory.utilization",
+                            "isBucketed": false,
+                            "filter": {
+                              "query": "state: slab_unreclaimable",
+                              "language": "kuery"
+                            },
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X4": {
+                            "label": "Part of Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "add",
+                                "args": [
+                                  {
+                                    "type": "function",
+                                    "name": "add",
+                                    "args": [
+                                      {
+                                        "type": "function",
+                                        "name": "add",
+                                        "args": [
+                                          "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                                          "3e829468-e8e0-449d-a994-1a2df6314124X1"
+                                        ]
+                                      },
+                                      "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                                    ]
+                                  },
+                                  "3e829468-e8e0-449d-a994-1a2df6314124X3"
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 251
+                                },
+                                "text": "average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')"
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X2",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X3"
+                            ],
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "Memory Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X4"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X3",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X4"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      },
+                      "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
+                        "linkToLayers": [],
+                        "columns": {
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f": {
+                            "label": "100%",
+                            "dataType": "number",
+                            "operationType": "static_value",
+                            "isBucketed": false,
+                            "params": {
+                              "value": "1"
+                            },
+                            "references": [],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "{{indexPattern}}"
+                      }
+                    },
+                    "currentIndexPatternId": "{{indexPattern}}"
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": []
+              }
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 29,
+            "w": 25,
+            "h": 16
+          },
+          "uid": "2a630f1f-a895-4ac7-b68d-c7f656a50333",
+          "config": {
+            "title": "Normalised Load (avg.)",
+            "description": "Won't show metrics if filtered by 'service.name'",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "host.name : * AND (metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : *)",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "{{indexPattern}}",
+                  "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastNonNullValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "splitAccessor": "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      }
+                    },
+                    {
+                      "layerId": "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
+                      "layerType": "referenceLine",
+                      "accessors": [
+                        "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                      ],
+                      "yConfig": [
+                        {
+                          "forAccessor": "659fe489-2bb0-4d7a-a282-409882abbf0f",
+                          "axisMode": "left",
+                          "lineStyle": "dashed"
+                        }
+                      ]
+                    },
+                    {
+                      "layerId": "8025da01-8c48-4c5b-be42-647bb9c164f0",
+                      "layerType": "annotations",
+                      "annotations": [
+                        {
+                          "type": "query",
+                          "id": "f54574c5-435d-4ba1-a1ba-4b2ca829172f",
+                          "label": "Event",
+                          "key": {
+                            "type": "point_in_time"
+                          },
+                          "timeField": "@timestamp",
+                          "icon": "triangle",
+                          "filter": {
+                            "type": "kibana_query",
+                            "query": "kibana.alert.group : \"frontend\"",
+                            "language": "kuery"
+                          }
+                        }
+                      ],
+                      "ignoreGlobalFilters": true,
+                      "persistanceType": "byValue"
+                    }
+                  ],
+                  "emphasizeFitting": true
+                },
+                "query": {
+                  "query": "host.name : * AND (metrics.system.cpu.load_average.1m : * OR metrics.system.cpu.logical.count : *)",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Host",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "host.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 100,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": true
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": []
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "metrics.system.cpu.load_average.1m",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "max",
+                            "sourceField": "metrics.system.cpu.logical.count",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2": {
+                            "label": "Part of CPU Usage (avg.)",
+                            "dataType": "number",
+                            "operationType": "math",
+                            "isBucketed": false,
+                            "params": {
+                              "tinymathAst": {
+                                "type": "function",
+                                "name": "divide",
+                                "args": [
+                                  "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                                  "3e829468-e8e0-449d-a994-1a2df6314124X1"
+                                ],
+                                "location": {
+                                  "min": 0,
+                                  "max": 83
+                                },
+                                "text": "average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)"
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                              "3e829468-e8e0-449d-a994-1a2df6314124X1"
+                            ],
+                            "customLabel": true
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "Normalised Load (avg.)",
+                            "dataType": "number",
+                            "operationType": "formula",
+                            "isBucketed": false,
+                            "params": {
+                              "formula": "average(metrics.system.cpu.load_average.1m) / max(metrics.system.cpu.logical.count)",
+                              "isFormulaBroken": false,
+                              "format": {
+                                "id": "percent",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "references": [
+                              "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                            ],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X0",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X1",
+                          "3e829468-e8e0-449d-a994-1a2df6314124X2"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      },
+                      "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
+                        "linkToLayers": [],
+                        "columns": {
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f": {
+                            "label": "100%",
+                            "dataType": "number",
+                            "operationType": "static_value",
+                            "isBucketed": false,
+                            "params": {
+                              "value": "1"
+                            },
+                            "references": [],
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "659fe489-2bb0-4d7a-a282-409882abbf0f"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 1
+            },
+            "enhancements": {
+              "dynamicActions": {
+                "events": []
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
   "references": [
     {
-      "id": "f79ca796-69a9-492b-80bf-938ffed9eca4",
-      "name": "tag-ref-f79ca796-69a9-492b-80bf-938ffed9eca4",
-      "type": "tag"
-    },
-    {
-      "id": "90f4308c-0c95-4ddf-be28-05c6185d04ff",
-      "name": "tag-ref-90f4308c-0c95-4ddf-be28-05c6185d04ff",
-      "type": "tag"
-    },
-    {
-      "id": "6b17998b-0965-47ce-971c-3cb0e7024a67",
-      "name": "3c33c426-9c7b-44f9-9323-694bf44524d0:savedObjectRef",
-      "type": "links"
-    },
-    {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "42127512-f52b-433a-828d-280939046bc4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "a723f891-fab9-4284-804f-0cac35e0871d:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "954c6c25-84c1-45bf-a245-6a85d0cf1983:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "954c6c25-84c1-45bf-a245-6a85d0cf1983:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
@@ -94,22 +2356,22 @@
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "02fa5761-bcb4-4bca-9d78-a563dcdbbb47:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "02fa5761-bcb4-4bca-9d78-a563dcdbbb47:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "2a630f1f-a895-4ac7-b68d-c7f656a50333:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "2a630f1f-a895-4ac7-b68d-c7f656a50333:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
@@ -119,7 +2381,7 @@
       "type": "index-pattern"
     },
     {
-      "id": "metrics-*",
+      "id": "{{indexPattern}}",
       "name": "31d62d82-ab91-4238-9baa-d53deb91257d:optionsListDataView",
       "type": "index-pattern"
     }

@@ -14,18 +14,21 @@ import type {
   DashboardPanel,
   DashboardSection,
   DashboardState,
-  SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import { Parser, BasicPrettyPrinter } from '@kbn/esql-language';
-import type { ESQLSource } from '@kbn/esql-language';
 import {
   existingDashboardFileNames,
   loadDashboardFile,
   type InfrastructureDashboardType,
 } from './dashboards/dashboard_catalog';
 
-export interface DashboardPanelsResult {
+/**
+ * Placeholder used in the dashboard JSON POJOs for the index pattern.
+ * All occurrences are replaced with the actual index pattern at load time.
+ */
+const INDEX_PATTERN_PLACEHOLDER = '{{indexPattern}}';
+
+export interface DashboardDefinition {
   panels: DashboardState['panels'];
   references: Reference[];
 }
@@ -40,195 +43,160 @@ export interface InfrastructureDashboardProps {
   timeRange?: { from: string; to: string };
 }
 
-interface SavedSection {
-  title: string;
-  collapsed?: boolean;
-  gridData: { y: number; i: string };
-}
-
-// Extend SavedDashboardPanel with sectionId which exists in saved object format
-type SavedPanelWithSection = SavedDashboardPanel & {
-  gridData: SavedDashboardPanel['gridData'] & { sectionId?: string };
-};
-
 export function hasDashboard(dashboardType: InfrastructureDashboardType): boolean {
   return existingDashboardFileNames.has(dashboardType);
 }
 
 /**
- * Replace the index pattern in an ES|QL query using AST manipulation.
- * Finds the FROM command and replaces the source index with the provided pattern.
- *
- * @param esql - The ES|QL query string
- * @param newIndexPattern - The new index pattern to use
- * @returns The modified ES|QL query string, or the original if parsing fails
+ * Replace placeholder index pattern in a single ES|QL query string.
  */
-function replaceEsqlIndexPattern(esql: string, newIndexPattern: string): string {
-  try {
-    const { root, errors } = Parser.parse(esql);
-    if (errors.length > 0) {
-      return esql;
-    }
-
-    // Find the FROM or TS command
-    const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
-    if (!sourceCommand) {
-      return esql;
-    }
-
-    // Replace the index source in the FROM command args
-    const args = sourceCommand.args as ESQLSource[];
-    for (const arg of args) {
-      if (arg.sourceType === 'index') {
-        // BasicPrettyPrinter uses index.valueUnquoted for printing (quoted patterns)
-        if (arg.index) {
-          arg.index.valueUnquoted = newIndexPattern;
-          arg.index.value = newIndexPattern;
-        }
-        // Also update name for unquoted patterns
-        arg.name = newIndexPattern;
-      }
-    }
-
-    return BasicPrettyPrinter.print(root);
-  } catch (e) {
-    return esql;
-  }
+function replaceEsqlPlaceholder(esql: string, indexPattern: string): string {
+  return esql.replaceAll(INDEX_PATTERN_PLACEHOLDER, indexPattern);
 }
 
 /**
- * Replace ES|QL index patterns and data view IDs in a Lens panel config.
+ * Inject the real index pattern and data view ID into a single Lens panel config.
+ * Each location where the placeholder can appear is handled explicitly.
  */
-function replaceLensDataViewReferences(
+function injectDataViewIntoConfig(
   config: Record<string, unknown>,
-  newIndexPattern: string,
-  newDataViewId: string
+  indexPattern: string,
+  dataViewId: string
 ): void {
-  // Top-level ES|QL query
+  // 1. Top-level embeddable query (config.query.esql)
   const query = config.query as AggregateQuery | undefined;
   if (query?.esql) {
-    query.esql = replaceEsqlIndexPattern(query.esql, newIndexPattern);
+    query.esql = replaceEsqlPlaceholder(query.esql, indexPattern);
   }
 
   const state = get(config, 'attributes.state') as Record<string, unknown> | undefined;
   if (!state) return;
 
-  // ES|QL layers (textBased datasource)
+  // 2. Lens state-level query (attributes.state.query.esql)
+  const stateQuery = state.query as AggregateQuery | undefined;
+  if (stateQuery?.esql) {
+    stateQuery.esql = replaceEsqlPlaceholder(stateQuery.esql, indexPattern);
+  }
+
+  // 3. Text-based (ES|QL) layer queries
   const textBasedLayers = get(state, 'datasourceStates.textBased.layers') as
     | Record<string, TextBasedLayer>
     | undefined;
   for (const layer of Object.values(textBasedLayers ?? {})) {
     if (layer.query?.esql) {
-      layer.query.esql = replaceEsqlIndexPattern(layer.query.esql, newIndexPattern);
+      layer.query.esql = replaceEsqlPlaceholder(layer.query.esql, indexPattern);
     }
   }
 
-  // Form-based + visualization layers have indexPatternId
-  const allLayers = [
-    ...Object.values(
-      (get(state, 'datasourceStates.formBased.layers') ?? {}) as Record<
-        string,
-        { indexPatternId?: string }
-      >
-    ),
-    ...((get(state, 'visualization.layers') ?? []) as Array<{ indexPatternId?: string }>),
-  ];
-  for (const layer of allLayers) {
-    if (layer.indexPatternId) layer.indexPatternId = newDataViewId;
+  // 4. Text-based indexPatternRefs (title shown in Lens editor)
+  const indexPatternRefs = get(state, 'datasourceStates.textBased.indexPatternRefs') as
+    | Array<{ id?: string; title?: string }>
+    | undefined;
+  for (const ref of indexPatternRefs ?? []) {
+    if (ref.title === INDEX_PATTERN_PLACEHOLDER) ref.title = indexPattern;
+  }
+
+  // 5. Ad-hoc data views (title and name)
+  const adHocDataViews = get(state, 'adHocDataViews') as
+    | Record<string, { title?: string; name?: string }>
+    | undefined;
+  for (const dv of Object.values(adHocDataViews ?? {})) {
+    if (dv.title === INDEX_PATTERN_PLACEHOLDER) dv.title = indexPattern;
+    if (dv.name === INDEX_PATTERN_PLACEHOLDER) dv.name = indexPattern;
+  }
+
+  // 6. Form-based layers (indexPatternId → data view ID)
+  const formBasedLayers = get(state, 'datasourceStates.formBased.layers') as
+    | Record<string, { indexPatternId?: string }>
+    | undefined;
+  for (const layer of Object.values(formBasedLayers ?? {})) {
+    if (layer.indexPatternId === INDEX_PATTERN_PLACEHOLDER) layer.indexPatternId = dataViewId;
+  }
+
+  // 7. Form-based currentIndexPatternId
+  const formBased = get(state, 'datasourceStates.formBased') as
+    | { currentIndexPatternId?: string }
+    | undefined;
+  if (formBased?.currentIndexPatternId === INDEX_PATTERN_PLACEHOLDER) {
+    formBased.currentIndexPatternId = dataViewId;
   }
 }
 
 /**
- * Convert saved dashboard JSON to DashboardState['panels'] for by-value embedding.
- *
- * This is a POC using DashboardRenderer. Parameters are structured to align with
- * DashboardLocatorParams for easier migration to saved dashboards.
+ * Walk panels (including sections) and inject data view into each panel config.
  */
-export async function getDashboardPanels(
-  props: InfrastructureDashboardProps
-): Promise<DashboardPanelsResult | undefined> {
-  const dashboardModule = hasDashboard(props.dashboardType)
-    ? await loadDashboardFile(props.dashboardType)
-    : undefined;
+function injectDataViewIntoPanels(
+  panels: DashboardState['panels'],
+  indexPattern: string,
+  dataViewId: string
+): void {
+  if (!panels) return;
+  for (const item of panels) {
+    if ('panels' in item) {
+      const section = item as DashboardSection;
+      if (section.panels) {
+        injectDataViewIntoPanels(section.panels, indexPattern, dataViewId);
+      }
+    } else {
+      const panel = item as DashboardPanel;
+      if (panel.config) {
+        injectDataViewIntoConfig(panel.config as Record<string, unknown>, indexPattern, dataViewId);
+      }
+    }
+  }
+}
 
-  const dashboardJSON = dashboardModule
+/**
+ * Load a dashboard definition and inject the data view.
+ *
+ * Dashboard JSON files are POJOs with `{{indexPattern}}` as a placeholder.
+ * Each known config location is updated explicitly.
+ */
+export async function loadDashboardDefinition(
+  props: InfrastructureDashboardProps
+): Promise<DashboardDefinition | undefined> {
+  if (!hasDashboard(props.dashboardType)) {
+    return undefined;
+  }
+
+  const dashboardModule = await loadDashboardFile(props.dashboardType);
+  const raw = dashboardModule
     ? 'default' in dashboardModule
       ? dashboardModule.default
       : dashboardModule
     : undefined;
 
-  if (!dashboardJSON?.attributes?.panelsJSON) {
+  if (!raw?.panels) {
     return undefined;
   }
 
-  const savedPanels = JSON.parse(dashboardJSON.attributes.panelsJSON) as SavedPanelWithSection[];
-  const savedSections = (dashboardJSON.attributes.sections || []) as SavedSection[];
+  // Deep clone so we don't mutate the imported module
+  const { panels, references } = JSON.parse(JSON.stringify(raw)) as DashboardDefinition;
 
-  // Replace data view IDs in references
-  const references = ((dashboardJSON.references || []) as Reference[]).map((ref) =>
-    ref.type === 'index-pattern' ? { ...ref, id: props.dataView.id ?? ref.id } : ref
+  const indexPattern = props.dataView.getIndexPattern();
+  const dataViewId = props.dataView.id ?? '';
+
+  // Inject into all panel configs
+  injectDataViewIntoPanels(panels, indexPattern, dataViewId);
+
+  // Patch reference IDs
+  const updatedReferences = references.map((ref) =>
+    ref.type === 'index-pattern' && ref.id === INDEX_PATTERN_PLACEHOLDER
+      ? { ...ref, id: dataViewId }
+      : ref
   );
 
-  // Build sections map
-  const sectionsMap: Record<string, DashboardSection> = Object.fromEntries(
-    savedSections.map(({ gridData: { i: uid, ...grid }, ...rest }) => [
-      uid,
-      { ...rest, grid, panels: [], uid },
-    ])
-  );
-
-  // Convert panels and group by section
-  const topLevelPanels: DashboardPanel[] = [];
-
-  for (const panel of savedPanels) {
-    if (panel.type === 'links') continue; // Skip links panels (require saved object references)
-
-    const { x, y, w, h, sectionId } = panel.gridData;
-    const config = {
-      id: panel.panelIndex,
-      ...panel.embeddableConfig,
-      title: panel.title,
-      enhancements: (panel.embeddableConfig as Record<string, unknown>)?.enhancements ?? {
-        dynamicActions: { events: [] },
-      },
-    };
-
-    // Inject data view references
-    replaceLensDataViewReferences(
-      config,
-      props.dataView.getIndexPattern(),
-      props.dataView.id ?? ''
-    );
-
-    const runtimePanel: DashboardPanel = {
-      type: panel.type,
-      grid: { x, y, w, h },
-      uid: panel.panelIndex,
-      config,
-    };
-
-    if (sectionId && sectionsMap[sectionId]) {
-      sectionsMap[sectionId].panels.push(runtimePanel);
-    } else {
-      topLevelPanels.push(runtimePanel);
-    }
-  }
-
-  return {
-    panels: [...topLevelPanels, ...Object.values(sectionsMap)],
-    references,
-  };
+  return { panels, references: updatedReferences };
 }
 
 /**
- * Build proper Kibana filters for infrastructure filtering
- * Uses buildCombinedFilter with OR relation for multiple values
+ * Build proper Kibana filters for infrastructure filtering.
+ * Uses buildCombinedFilter with OR relation for multiple values.
  */
 export function buildInfrastructureFilters(props: InfrastructureDashboardProps): Filter[] {
   const { dataView, podNames, containerNames, hostNames } = props;
   const filters: Filter[] = [];
 
-  // Build filter for pod names
   if (podNames && podNames.length > 0) {
     const podField = dataView.getFieldByName('kubernetes.pod.name');
     if (podField) {
@@ -237,7 +205,6 @@ export function buildInfrastructureFilters(props: InfrastructureDashboardProps):
     }
   }
 
-  // Build filter for container names (handles both container.name and container.id)
   if (containerNames && containerNames.length > 0) {
     const containerIdField = dataView.getFieldByName('container.id');
     const containerNameField = dataView.getFieldByName('container.name');
@@ -255,7 +222,6 @@ export function buildInfrastructureFilters(props: InfrastructureDashboardProps):
     }
   }
 
-  // Build filter for host names
   if (hostNames && hostNames.length > 0) {
     const hostField = dataView.getFieldByName('host.name');
     if (hostField) {

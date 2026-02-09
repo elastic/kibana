@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildPhraseFilter } from '@kbn/es-query';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { InfrastructureDashboardProps } from './helper';
-import { getDashboardPanels, buildInfrastructureFilters } from './helper';
+import { loadDashboardDefinition, buildInfrastructureFilters } from './helper';
 import type { InfrastructureDashboardType } from './dashboards/dashboard_catalog';
 
 export interface InfrastructureDashboardComponentProps {
@@ -69,13 +69,13 @@ async function getCreationOptions(
   notifications: NotificationsStart
 ): Promise<DashboardCreationOptions> {
   try {
-    const result = await getDashboardPanels(dashboardProps);
+    const definition = await loadDashboardDefinition(dashboardProps);
 
-    if (!result) {
-      throw new Error('Failed parsing dashboard panels.');
+    if (!definition) {
+      throw new Error('Failed to load dashboard definition.');
     }
 
-    const { panels, references } = result;
+    const { panels, references } = definition;
 
     const filters: Filter[] = [];
 
