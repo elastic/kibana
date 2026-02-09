@@ -33,6 +33,7 @@ const createMockPublicSkillDefinition = (
 });
 
 const createMockBuiltinProvider = (skills: SkillDefinition[]): ReadonlySkillProvider => ({
+  id: 'builtin',
   readonly: true,
   has: jest.fn(async (id: string) => skills.some((s) => s.id === id)),
   get: jest.fn(async (id: string) => skills.find((s) => s.id === id)),
@@ -40,6 +41,7 @@ const createMockBuiltinProvider = (skills: SkillDefinition[]): ReadonlySkillProv
 });
 
 const createMockPersistedProvider = (skills: PublicSkillDefinition[]): WritableSkillProvider => ({
+  id: 'persisted',
   readonly: false,
   has: jest.fn(async (id: string) => skills.some((s) => s.id === id)),
   get: jest.fn(async (id: string) => skills.find((s) => s.id === id)),
@@ -67,7 +69,6 @@ describe('CompositeSkillRegistry', () => {
   const builtinSkill1 = createMockSkillDefinition('builtin-skill-1');
   const builtinSkill2 = createMockSkillDefinition('builtin-skill-2');
   const persistedSkill1 = createMockPublicSkillDefinition('custom-skill-1');
-  const persistedSkill2 = createMockPublicSkillDefinition('custom-skill-2');
 
   describe('has', () => {
     it('should return true for a built-in skill', async () => {
