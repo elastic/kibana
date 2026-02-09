@@ -212,13 +212,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    const sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> =
-      await scopedClusterClient.asCurrentUser.search({
-        index: params.path.name,
-        // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-        runtime_mappings: propertiesForSample,
-        ...documentSamplesSearchBody,
-      });
+    const sampleResults: SearchResponse<
+      unknown,
+      Record<string, AggregationsAggregate>
+    > = await scopedClusterClient.asCurrentUser.search({
+      index: params.path.name,
+      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+      runtime_mappings: propertiesForSample,
+      ...documentSamplesSearchBody,
+    });
 
     if (sampleResults?.hits.hits.length === 0) {
       return {

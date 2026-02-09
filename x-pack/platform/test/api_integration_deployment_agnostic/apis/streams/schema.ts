@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
-import { MAX_PRIORITY } from '../../../../plugins/shared/streams/server/lib/streams/index_templates/generate_index_template';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -204,7 +204,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const existingIndexTemplateResponse = await esClient.indices.getIndexTemplate({
           name: indexTemplateName,
         });
-        const existingIndexTemplate = existingIndexTemplateResponse.index_templates[0].index_template;
+        const existingIndexTemplate =
+          existingIndexTemplateResponse.index_templates[0].index_template;
 
         // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
         // when updating templates. Build a "put-safe" body from the known writable properties.
@@ -217,7 +218,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           _meta: existingIndexTemplate._meta,
           data_stream: existingIndexTemplate.data_stream,
           allow_auto_create: existingIndexTemplate.allow_auto_create,
-          ignore_missing_component_templates: existingIndexTemplate.ignore_missing_component_templates,
+          ignore_missing_component_templates:
+            existingIndexTemplate.ignore_missing_component_templates,
         };
 
         await esClient.cluster.putComponentTemplate({
