@@ -454,7 +454,8 @@ export function useEsqlDataCascadeRowHeaderComponents(
                           <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
                         ) : (
                           <EuiBadge color="hollow" css={textSlotStyles}>
-                            {aggregatedValue
+                            {([] as string[])
+                              .concat(aggregatedValue)
                               .map((value) => {
                                 return (
                                   value ||
