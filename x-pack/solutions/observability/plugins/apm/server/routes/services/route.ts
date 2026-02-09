@@ -50,6 +50,11 @@ import { getServicesAlerts } from './get_services/get_service_alerts';
 import type { ServiceSlosResponse } from './get_service_slos';
 import { getServiceSlos } from './get_service_slos';
 import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
+import type { ServiceSloStatsResponse } from './get_services/get_services_slo_stats';
+import { getServicesSloStats } from './get_services/get_services_slo_stats';
+import { calculateCombinedHealthStatus } from '../../../common/service_health_status';
+import type { ServiceHealthStatus } from '../../../common/service_health_status';
+import type { SloStatus, ServiceAlertsSeverity } from '../../../common/service_inventory';
 import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
@@ -915,6 +920,87 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceHealthStatusRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/health_status',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, environmentRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (
+    resources
+  ): Promise<{
+    serviceName: string;
+    combinedHealthStatus: ServiceHealthStatus;
+    alertsCount: number;
+    alertsSeverity?: ServiceAlertsSeverity;
+    sloStatus?: SloStatus;
+    sloCount: number;
+  }> => {
+    const { params, logger } = resources;
+    const {
+      query: { start, end, environment },
+    } = params;
+    const { serviceName } = params.path;
+
+    const [apmAlertsClient, sloClient] = await Promise.all([
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
+    ]);
+
+    // Fetch alerts data
+    const alertsPromise = getServicesAlerts({
+      serviceName,
+      apmAlertsClient,
+      environment,
+      start,
+      end,
+    }).catch((error: Error): ServiceAlertsResponse => {
+      logger.warn(`Unable to retrieve alerts for service ${serviceName}`, { error });
+      return [];
+    });
+
+    // Fetch SLO data
+    const sloPromise = getServicesSloStats({
+      sloClient,
+      environment,
+      maxNumServices: 1,
+      serviceNames: [serviceName],
+    }).catch((error: Error): ServiceSloStatsResponse => {
+      logger.warn(`Unable to retrieve SLO stats for service ${serviceName}`, { error });
+      return [];
+    });
+
+    const [alerts, sloStats] = await Promise.all([alertsPromise, sloPromise]);
+
+    const alertData = alerts.length > 0 ? alerts[0] : undefined;
+    const sloData = sloStats.length > 0 ? sloStats[0] : undefined;
+
+    const alertsCount = alertData?.alertsCount ?? 0;
+    const alertsSeverity = alertData?.alertsSeverity;
+    const sloStatus = sloData?.sloStatus;
+    const sloCount = sloData?.sloCount ?? 0;
+
+    // Calculate combined health status
+    const combinedHealthStatus = calculateCombinedHealthStatus({
+      alertsSeverity,
+      sloStatus,
+      anomalyHealthStatus: undefined, // We don't need anomaly status for the header
+    });
+
+    return {
+      serviceName,
+      combinedHealthStatus,
+      alertsCount,
+      alertsSeverity,
+      sloStatus,
+      sloCount,
+    };
+  },
+});
+
 const serviceSlosRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/slos',
   params: t.type({
@@ -975,5 +1061,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceHealthStatusRoute,
   ...serviceSlosRoute,
 };
