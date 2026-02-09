@@ -8,6 +8,7 @@
  */
 
 import { get, isString } from 'lodash';
+import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
@@ -119,12 +120,17 @@ async function fetchAlerts(
         const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
 
         const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
-        // Format alert using the registered rule type's formatAlert function if available, use the raw source otherwise
+        // Format alert using the registered rule type's formatAlert function if available,
+        // otherwise use expandFlattenedAlert to convert flat ECS keys to nested objects
         if (registeredRuleType?.alerts?.formatAlert) {
           alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
         }
 
-        alerts.push({ _id: doc._id, _index: doc._index, ...alert });
+        const expandedAlert = expandFlattenedAlert(alert as object) as Alert;
+
+        // Preserve flat keys (alert) and add nested structure (expandedAlert) for backward compatibility
+        // TODO: deprecate this in favor of only using the expandedAlert
+        alerts.push({ _id: doc._id, _index: doc._index, ...alert, ...expandedAlert });
       } else {
         logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
       }

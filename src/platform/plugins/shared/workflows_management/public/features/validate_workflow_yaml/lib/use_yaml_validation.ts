@@ -13,6 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
 import { collectAllVariables } from './collect_all_variables';
+import { validateAlertBracketKeyUsage } from './validate_alert_bracket_key_usage';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
@@ -135,7 +136,8 @@ export function useYamlValidation(
             workflowDefinition,
             yamlDocument
           ),
-          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model),
+          ...validateAlertBracketKeyUsage(model.getValue(), workflowDefinition)
         );
       }
 
