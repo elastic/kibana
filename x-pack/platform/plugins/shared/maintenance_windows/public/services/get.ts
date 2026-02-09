@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
-import type { MaintenanceWindow, MaintenanceWindowResponse } from '../../common';
+import type { MaintenanceWindowUI, MaintenanceWindowResponse } from '../../common';
 
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
@@ -16,7 +16,7 @@ export async function getMaintenanceWindow({
 }: {
   http: HttpSetup;
   maintenanceWindowId: string;
-}): Promise<MaintenanceWindow> {
+}): Promise<MaintenanceWindowUI> {
   const res = await http.get<MaintenanceWindowResponse>(
     `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${encodeURIComponent(maintenanceWindowId)}`
   );
