@@ -14,7 +14,7 @@ const dedent = require('dedent');
 const DEFAULT_ERROR_MSG =
   'The `apiClient` fixture should be used in `apiTest` to call an endpoint and later verify response code and body.';
 const ALT_ERROR_MSG =
-  'One of `apiClient` or `esArchiver` fixtures should be used in `apiTest` to interact with an endpoint and later verify the response.';
+  'One of `apiClient` or `esClient` fixtures should be used in `apiTest` to interact with an endpoint and later verify the response.';
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
   parserOptions: {
@@ -232,7 +232,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
 });
 
 // --- Tests with alternativeFixtures option ---
-const altOptions = [{ alternativeFixtures: ['esArchiver'] }];
+const altOptions = [{ alternativeFixtures: ['esClient'] }];
 
 ruleTester.run(
   '@kbn/eslint/scout_require_api_client_in_api_test (with alternativeFixtures)',
@@ -251,8 +251,8 @@ ruleTester.run(
       // Alternative fixture used instead of apiClient
       {
         code: dedent`
-        apiTest('uses esArchiver', async ({ esArchiver }) => {
-          await esArchiver.load('path/to/archive');
+        apiTest('uses esClient', async ({ esClient }) => {
+          await esClient.load('path/to/archive');
         });
       `,
         options: altOptions,

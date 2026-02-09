@@ -2720,10 +2720,11 @@ module.exports = {
       },
     },
     {
-      // Security Solution
+      // Platform & Solutions API Tests
       files: [
-        'x-pack/solutions/security/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/security/**/test/{scout,scout_*}/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
