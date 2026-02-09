@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { getDevToolsOptions } from '@kbn/xstate-utils';
+import { createConsoleInspector } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { createActor } from 'xstate';
@@ -46,13 +46,9 @@ export const createDatasetQualityControllerFactory =
       ),
     });
 
-    const devToolsOptions = getDevToolsOptions();
     const service = createActor(machine, {
-      // eslint-disable-next-line no-console
-      inspect: devToolsOptions ? console.log : undefined,
+      inspect: createConsoleInspector(),
     });
-
-    service.start();
 
     const state$ = from(service).pipe(
       map((snapshot) => getPublicStateFromContext(snapshot.context)),
