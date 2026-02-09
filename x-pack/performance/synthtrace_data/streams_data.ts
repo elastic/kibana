@@ -61,10 +61,7 @@ export async function enableStreams(kibanaServer: KibanaServer, log: ToolingLog)
  * Create a single classic stream via the internal API.
  * Idempotent — ignores 409 if the stream already exists.
  */
-async function createSingleClassicStream(
-  kibanaServer: KibanaServer,
-  name: string
-): Promise<void> {
+async function createSingleClassicStream(kibanaServer: KibanaServer, name: string): Promise<void> {
   try {
     await kibanaServer.request({
       path: '/internal/streams/_create_classic',
