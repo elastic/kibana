@@ -18,8 +18,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
-  EuiBadge,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -58,7 +56,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -421,40 +419,10 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                   {item.stream.name === LOGS_ROOT_STREAM_NAME && (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.streams.streamsTreeTable.deprecatedLogsBadgeTooltip',
-                          {
-                            defaultMessage: 'The logs root stream is deprecated.',
-                          }
-                        )}
-                      >
-                        {openFlyout && !getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams ? (
-                          <EuiBadge
-                            color="warning"
-                            onClick={openFlyout}
-                            onClickAriaLabel={i18n.translate(
-                              'xpack.streams.streamsTreeTable.deprecatedLogsBadgeAriaLabel',
-                              {
-                                defaultMessage: 'The logs root stream is deprecated.',
-                              }
-                            )}
-                          >
-                            {i18n.translate('xpack.streams.streamsTreeTable.deprecatedBadgeLabel', {
-                              defaultMessage: 'Deprecated',
-                            })}
-                          </EuiBadge>
-                        ) : (
-                          <EuiBadge color="warning">
-                            {' '}
-                            {i18n.translate('xpack.streams.streamsTreeTable.deprecatedBadgeLabel', {
-                              defaultMessage: 'Deprecated',
-                            })}
-                          </EuiBadge>
-                        )}
-                      </EuiToolTip>
-                    </EuiFlexItem>
+                    <DeprecatedLogsBadge
+                      openFlyout={openFlyout}
+                      hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                    />
                   )}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
                 </EuiFlexGroup>
