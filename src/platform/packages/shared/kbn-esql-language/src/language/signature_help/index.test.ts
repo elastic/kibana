@@ -145,7 +145,7 @@ describe('getSignatureHelp', () => {
 
       expect(result).toBeDefined();
       expect(result?.signatures[0].label).toBe(`COUNT(
-  field?:aggregate_metric_double|boolean|cartesian_point|…+17 more
+  field?:aggregate_metric_double|boolean|cartesian_point|…+18 more
 ): long`);
     });
 
