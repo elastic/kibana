@@ -177,5 +177,22 @@ export {
   type Plan,
   DEFAULT_AGENT_MODE,
 } from './chat';
+export {
+  type SkillSelection,
+  type PublicSkillDefinition,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  type SkillReferencedContent,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+  skillCreateRequestSchema,
+  skillUpdateRequestSchema,
+  validateSkillId,
+  skillIdMaxLength,
+  skillIdRegexp,
+} from './skills';
 export * from './telemetry';
 export { getLatestVersion, type VersionedAttachment } from './attachments';

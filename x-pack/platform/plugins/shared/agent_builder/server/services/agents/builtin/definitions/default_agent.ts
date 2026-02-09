@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  defaultAgentToolIds,
+  allBuiltInSkillsSelection,
+} from '@kbn/agent-builder-common';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 
 export const createDefaultAgentDefinition = (): BuiltInAgentDefinition => {
@@ -15,6 +19,7 @@ export const createDefaultAgentDefinition = (): BuiltInAgentDefinition => {
     description: 'Elastic AI Agent',
     configuration: {
       tools: [{ tool_ids: [...defaultAgentToolIds] }],
+      skills: allBuiltInSkillsSelection,
     },
   };
 };

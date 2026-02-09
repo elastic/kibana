@@ -453,6 +453,143 @@ export const labels = {
       ),
     },
   },
+  skills: {
+    title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
+    newSkillButton: i18n.translate('xpack.agentBuilder.skills.newSkillButton', {
+      defaultMessage: 'New skill',
+    }),
+    newSkillTitle: i18n.translate('xpack.agentBuilder.skills.newSkillTitle', {
+      defaultMessage: 'Create a new skill',
+    }),
+    editSkillTitle: i18n.translate('xpack.agentBuilder.skills.editSkillTitle', {
+      defaultMessage: 'Edit skill',
+    }),
+    readOnly: i18n.translate('xpack.agentBuilder.skills.readOnly', {
+      defaultMessage: 'Read-only',
+    }),
+    builtinLabel: i18n.translate('xpack.agentBuilder.skills.builtinLabel', {
+      defaultMessage: 'Built-in',
+    }),
+    customLabel: i18n.translate('xpack.agentBuilder.skills.customLabel', {
+      defaultMessage: 'Custom',
+    }),
+    skillsTableCaption: (skillsCount: number) =>
+      i18n.translate('xpack.agentBuilder.skills.skillsTableCaption', {
+        defaultMessage: 'Available skills for AI agents: {skillsCount} skills',
+        values: { skillsCount },
+      }),
+    skillIdLabel: i18n.translate('xpack.agentBuilder.skills.idLabel', { defaultMessage: 'ID' }),
+    nameLabel: i18n.translate('xpack.agentBuilder.skills.nameLabel', { defaultMessage: 'Name' }),
+    descriptionLabel: i18n.translate('xpack.agentBuilder.skills.descriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    contentLabel: i18n.translate('xpack.agentBuilder.skills.contentLabel', {
+      defaultMessage: 'Instructions',
+    }),
+    toolsLabel: i18n.translate('xpack.agentBuilder.skills.toolsLabel', { defaultMessage: 'Tools' }),
+    typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
+    saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+    cancelButtonLabel: i18n.translate('xpack.agentBuilder.skills.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+    saveButtonTooltip: i18n.translate('xpack.agentBuilder.skills.saveButtonTooltip', {
+      defaultMessage: 'Resolve all form errors to save.',
+    }),
+    editSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.editSkillButtonLabel', {
+      defaultMessage: 'Edit',
+    }),
+    viewSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.viewSkillButtonLabel', {
+      defaultMessage: 'View',
+    }),
+    deleteSkillButtonLabel: i18n.translate('xpack.agentBuilder.skills.deleteSkillButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+    skillContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.skills.skillContextMenuButtonLabel',
+      {
+        defaultMessage: 'Skill context menu',
+      }
+    ),
+    searchSkillsPlaceholder: i18n.translate('xpack.agentBuilder.skills.searchSkillsPlaceholder', {
+      defaultMessage: 'Search',
+    }),
+    noSkillsMatchMessage: i18n.translate('xpack.agentBuilder.skills.noSkillsMatchMessage', {
+      defaultMessage: 'No skills match your search.',
+    }),
+    noSkillsMessage: i18n.translate('xpack.agentBuilder.skills.noSkillsMessage', {
+      defaultMessage: "It looks like you don't have any custom skills defined yet.",
+    }),
+    listSkillsErrorMessage: i18n.translate('xpack.agentBuilder.skills.listSkillsErrorMessage', {
+      defaultMessage: 'Failed to fetch skills',
+    }),
+    includeBuiltinSkillsSwitchLabel: i18n.translate(
+      'xpack.agentBuilder.skills.includeBuiltinSkillsSwitchLabel',
+      {
+        defaultMessage: 'Include built-in skills',
+      }
+    ),
+    deleteSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" deleted',
+        values: { skillId },
+      }),
+    createSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.createSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" created',
+        values: { skillId },
+      }),
+    editSkillSuccessToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.editSkillSuccessToast', {
+        defaultMessage: 'Skill "{skillId}" updated',
+        values: { skillId },
+      }),
+    deleteSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillErrorToast', {
+        defaultMessage: 'Unable to delete skill "{skillId}"',
+        values: { skillId },
+      }),
+    createSkillErrorToast: i18n.translate('xpack.agentBuilder.skills.createSkillErrorToast', {
+      defaultMessage: 'Unable to create skill',
+    }),
+    editSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.editSkillErrorToast', {
+        defaultMessage: 'Unable to update skill "{skillId}"',
+        values: { skillId },
+      }),
+    loadSkillErrorToast: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.loadSkillErrorToast', {
+        defaultMessage: 'Unable to load "{skillId}"',
+        values: { skillId },
+      }),
+    loadSkillsErrorToast: i18n.translate('xpack.agentBuilder.skills.loadSkillsErrorToast', {
+      defaultMessage: 'Unable to load skills',
+    }),
+    deleteSkillTitle: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillTitle', {
+        defaultMessage: 'Delete {skillId}?',
+        values: { skillId },
+      }),
+    deleteSkillCancelButton: i18n.translate('xpack.agentBuilder.skills.deleteSkillCancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    deleteSkillConfirmButton: i18n.translate('xpack.agentBuilder.skills.deleteSkillConfirmButton', {
+      defaultMessage: 'Delete skill',
+    }),
+    deleteSkillConfirmationText: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillConfirmationText',
+      {
+        defaultMessage: 'This action will permanently remove the skill. This cannot be undone.',
+      }
+    ),
+    toolIdsLabel: i18n.translate('xpack.agentBuilder.skills.toolIdsLabel', {
+      defaultMessage: 'Associated tools',
+    }),
+    toolIdsHelpText: i18n.translate('xpack.agentBuilder.skills.toolIdsHelpText', {
+      defaultMessage: 'Select tools that this skill can use.',
+    }),
+  },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
     newAgent: i18n.translate('xpack.agentBuilder.agents.new.title', {

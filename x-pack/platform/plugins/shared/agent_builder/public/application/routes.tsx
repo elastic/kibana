@@ -15,6 +15,9 @@ import { AgentBuilderToolCreatePage } from './pages/tool_create';
 import { AgentBuilderToolDetailsPage } from './pages/tool_details';
 import { AgentBuilderToolsPage } from './pages/tools';
 import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
+import { AgentBuilderSkillsPage } from './pages/skills';
+import { AgentBuilderSkillCreatePage } from './pages/skill_create';
+import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   return (
@@ -49,6 +52,18 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
 
       <Route path="/tools">
         <AgentBuilderToolsPage />
+      </Route>
+
+      <Route path="/skills/new">
+        <AgentBuilderSkillCreatePage />
+      </Route>
+
+      <Route path="/skills/:skillId">
+        <AgentBuilderSkillDetailsPage />
+      </Route>
+
+      <Route path="/skills">
+        <AgentBuilderSkillsPage />
       </Route>
 
       {/* Default to conversations page */}
