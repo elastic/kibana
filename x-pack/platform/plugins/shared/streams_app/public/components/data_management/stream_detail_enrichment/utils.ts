@@ -14,6 +14,7 @@ import type {
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
+  RedactProcessor,
   ReplaceProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
@@ -55,6 +56,7 @@ import type {
   ManualIngestPipelineFormState,
   MathFormState,
   ProcessorFormState,
+  RedactFormState,
   ReplaceFormState,
   SetFormState,
   TrimFormState,
@@ -72,6 +74,7 @@ export const SPECIALISED_TYPES = [
   'math',
   'set',
   'replace',
+  'redact',
   'drop_document',
   'uppercase',
   'lowercase',
@@ -227,6 +230,15 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
+  action: 'redact' as const,
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [{ value: '' }], // Start with one empty pattern field (required validation will catch if not filled)
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
   action: 'uppercase' as const,
   from: '',
@@ -298,6 +310,7 @@ const defaultProcessorFormStateByType: Record<
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  redact: defaultRedactProcessorFormState,
   uppercase: defaultUppercaseProcessorFormState,
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
@@ -327,6 +340,15 @@ export const getFormStateFromActionStep = (
       ...restStep,
       patterns: patterns.map((p) => ({ value: p })),
     }) as GrokFormState;
+  }
+
+  if (step.action === 'redact') {
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    // Convert string[] patterns to RedactPatternWrapper[] for useFieldArray compatibility
+    return {
+      ...structuredClone(restStep),
+      patterns: patterns.map((pattern) => ({ value: pattern })),
+    };
   }
 
   if (
@@ -526,6 +548,38 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ReplaceProcessor,
+      };
+    }
+
+    if (formState.action === 'redact') {
+      const {
+        from,
+        patterns,
+        pattern_definitions,
+        prefix,
+        suffix,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
+
+      // Convert RedactPatternWrapper[] back to string[] and filter empty values
+      const patternsArray = Array.isArray(patterns)
+        ? patterns.map((p) => p.value).filter((p) => !isEmpty(p))
+        : [];
+
+      return {
+        processorDefinition: {
+          action: 'redact',
+          from,
+          patterns: patternsArray,
+          pattern_definitions: isEmpty(pattern_definitions) ? undefined : pattern_definitions,
+          prefix: isEmpty(prefix) ? undefined : prefix,
+          suffix: isEmpty(suffix) ? undefined : suffix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RedactProcessor,
       };
     }
 
