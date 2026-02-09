@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { validateDataView } from '@kbn/data-view-validation';
-import { EntityType, ALL_ENTITY_TYPES } from '../../../domain/definitions/entity_schema';
+import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 import { LogExtractionBodyParams } from '../../constants';
 import { fromKueryExpression } from '@kbn/es-query';
 import { parseDurationToMs } from '../../../infra/time';
