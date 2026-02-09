@@ -149,6 +149,7 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
+  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -158,6 +159,7 @@ const bulkDisableRulesWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
+        rulesFinderRules.push(...response.saved_objects);
         await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
         await pMap(response.saved_objects, async (rule) => {
           const ruleName = rule.attributes.name;
@@ -233,6 +235,7 @@ const bulkDisableRulesWithOCC = async (
         ? ({
             id: rule.id,
             type: rule.type,
+            current: rulesFinderRules.find((r) => r.id === rule.id)?.attributes,
             next: rule.attributes,
             module: type.solution,
             references: rule.references,

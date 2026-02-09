@@ -334,18 +334,6 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
-  // 1. Track changes
-  const trackChangeHistoryRuleData = rulesToEnable.map((rule) => {
-    const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
-    return {
-      id: rule.id,
-      type: rule.type,
-      next: rule.attributes,
-      module: type.solution,
-      references: rule.references,
-    } as RuleData;
-  });
-
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -363,6 +351,17 @@ const bulkEnableRulesWithOCC = async (
 
   // Track history
   // TODO: Remove items that failed
+  const trackChangeHistoryRuleData = rulesToEnable.map((rule) => {
+    const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+    return {
+      id: rule.id,
+      type: rule.type,
+      current: rulesFinderRules.find((r) => r.id === rule.id)?.attributes,
+      next: rule.attributes,
+      module: type.solution,
+      references: rule.references,
+    } as RuleData;
+  });
   context.changeTrackingService?.logBulkChange(
     RuleChangeTrackingAction.ruleEnable,
     username ?? 'unknown',

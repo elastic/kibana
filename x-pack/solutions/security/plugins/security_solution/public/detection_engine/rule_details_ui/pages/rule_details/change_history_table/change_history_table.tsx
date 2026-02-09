@@ -19,6 +19,8 @@ import {
   EuiTimeline,
   EuiText,
   EuiAvatar,
+  EuiIcon,
+  EuiLink,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -95,6 +97,13 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
         {' creating the rule.'}
       </>
     ),
+    [SecurityRuleChangeTrackingAction.ruleDuplicate]: (item) => (
+      <>
+        {' made revision '}
+        <EuiBadge color="hollow">{item.revision}</EuiBadge>
+        {' duplicating the rule.'}
+      </>
+    ),
     [SecurityRuleChangeTrackingAction.ruleInstall]: (item) => (
       <>
         {' made revision '}
@@ -103,28 +112,41 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
       </>
     ),
     [RuleChangeTrackingAction.ruleUpdate]: (item) => {
-      const limit = 3;
+      const INLINE_LIMIT = 3;
+      const MAX_TOOLTIP_ITEMS = 30;
       const changes = item.changes
         .map((f) => f.replace(/^(\w|\.)+\./, ''))
         .reduce((res, c, i, arr) => {
-          if (i < limit)
+          if (i < INLINE_LIMIT)
             res.push(
               <EuiBadge key={i} color="hollow">
                 {c}
               </EuiBadge>
             );
-          else if (i === limit && arr.length > limit)
+          else if (i === INLINE_LIMIT && arr.length > INLINE_LIMIT)
             res.push(
               <React.Fragment key={i}>
                 {` and `}
-                <EuiToolTip position="top" content={arr.slice(limit).join(', ')}>
+                <EuiToolTip
+                  css={css`
+                    color: ${euiTheme.colors.ink};
+                    background-color: ${backgroundBaseSubdued};
+                  `}
+                  position="top"
+                  content={arr.slice(INLINE_LIMIT, INLINE_LIMIT + MAX_TOOLTIP_ITEMS).map((k) => (
+                    <>
+                      {k}
+                      <br />
+                    </>
+                  ))}
+                >
                   <EuiBadge
                     css={css`
                       cursor: 'pointer';
                     `}
                     tabIndex={0}
                     color="hollow"
-                  >{`${arr.length - limit} other`}</EuiBadge>
+                  >{`${arr.length - INLINE_LIMIT} other`}</EuiBadge>
                 </EuiToolTip>
               </React.Fragment>
             );
@@ -135,7 +157,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           {' made revision '}
           <EuiBadge color="hollow">{item.revision}</EuiBadge>
           {' updating '}
-          {changes}
+          {changes.length ? changes : `(no changes)`}
         </>
       );
     },
@@ -145,22 +167,35 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
 
   const items: EuiTimelineItemProps['items'] = data?.items?.map((item) => {
     const visibleChanges = item.changes.filter((c) => !IGNORED_FIELDS.includes(c));
+    const template =
+      ACTION_TEMPLATE[item.action] || ACTION_TEMPLATE[RuleChangeTrackingAction.ruleUpdate];
     return {
       icon: <EuiAvatar name="User" iconType="user" color={backgroundBaseSubdued} />,
       children: (
         <EuiText
           css={css`
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
             padding: ${euiTheme.size.s} ${euiTheme.size.s};
             border-radius: 6px;
             background-color: ${backgroundBaseSubdued};
           `}
           size="s"
         >
-          <p>
+          <div>
             {`On ${moment(item.timestamp).format('MMM D YYYY @ HH.mm')} `}
             <EuiBadge color="hollow">{item.userId}</EuiBadge>
-            {ACTION_TEMPLATE[item.action]({ ...item, changes: visibleChanges })}
-          </p>
+            {template({ ...item, changes: visibleChanges })}
+          </div>
+          {![RuleChangeTrackingAction.ruleEnable, RuleChangeTrackingAction.ruleDisable].includes(
+            item.action
+          ) && (
+            <EuiLink>
+              {`View `}
+              <EuiIcon type="expand" />
+            </EuiLink>
+          )}
         </EuiText>
       ),
     };
