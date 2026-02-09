@@ -29,6 +29,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
 import { i18nMessages } from '../../i18n';
 import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
+import { EsqlParamValueInput, getEmptyValue } from './esql_param_value_input';
 
 const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
   [EsqlToolFieldType.STRING]: 'tokenString',
@@ -62,9 +63,14 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
     triggerEsqlParamWarnings();
   }, [triggerEsqlParamFieldsValidation, triggerEsqlParamWarnings]);
 
-  const [warning, source, isOptional] = useWatch({
+  const [warning, source, isOptional, paramType] = useWatch({
     control,
-    name: [`params.${index}.warning`, `params.${index}.source`, `params.${index}.optional`],
+    name: [
+      `params.${index}.warning`,
+      `params.${index}.source`,
+      `params.${index}.optional`,
+      `params.${index}.type`,
+    ],
   });
 
   const paramErrors = errors.params?.[index];
@@ -209,7 +215,10 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.type`}
-          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+          render={({
+            field: { ref, onChange, value: typeValue, ...field },
+            fieldState: { invalid, error },
+          }) => (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiSuperSelect
                 compressed
@@ -235,8 +244,13 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
                     </EuiFlexGroup>
                   ),
                 }))}
-                valueOfSelected={field.value}
+                valueOfSelected={typeValue as EsqlToolFieldType}
                 isInvalid={invalid}
+                onChange={(newType) => {
+                  onChange(newType);
+                  setValue(`params.${index}.defaultValue`, getEmptyValue(newType));
+                  handleValidation();
+                }}
                 {...field}
               />
               {isMobile && invalid && error?.message && (
@@ -270,24 +284,21 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.defaultValue`}
-          render={({
-            field: { ref, onChange, value, ...field },
-            fieldState: { invalid, error },
-          }) => (
+          render={({ field: { ref, onChange, value }, fieldState: { invalid, error } }) => (
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFieldText
+              <EsqlParamValueInput
+                type={paramType as EsqlToolFieldType}
                 compressed
                 fullWidth
                 disabled={!isOptional}
                 placeholder={i18nMessages.defaultValuePlaceholder}
                 inputRef={ref}
                 isInvalid={isOptional && invalid}
-                value={value != null ? String(value) : ''}
-                onChange={(e) => {
-                  onChange(e.target.value);
+                value={value}
+                onChange={(newValue) => {
+                  onChange(newValue);
                   handleValidation();
                 }}
-                {...field}
               />
               {isMobile && isOptional && invalid && error?.message && (
                 <EuiText size="xs" color="danger">

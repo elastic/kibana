@@ -142,7 +142,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
           };
 
           // Add defaultValue if provided and parameter is optional
-          if (param.optional && param.defaultValue) {
+          if (param.optional && param.defaultValue != null && param.defaultValue !== '') {
             // Convert string defaultValue to appropriate type based on parameter type
             paramConfig.defaultValue = convertDefaultValueToType(param.defaultValue, param.type);
           }
