@@ -9,7 +9,7 @@
 
 require('@kbn/setup-node-env');
 
-var yaml = require('js-yaml');
+const { parse } = require('yaml');
 var fs = require('fs');
 var path = require('path');
 
@@ -20,7 +20,7 @@ var allManifestPaths = Object.values(manifestsSource).flat();
 
 try {
   for (var manifestRelPath of allManifestPaths) {
-    var manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
+    var manifest = parse(fs.readFileSync(manifestRelPath, 'utf8'));
     if (manifest.enabled) {
       manifest.enabled.forEach(function (x) {
         console.log(x);

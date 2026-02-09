@@ -13,7 +13,7 @@ import path from 'path';
 import json5 from 'json5';
 import _ from 'lodash';
 
-import jsYaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 import type { Package } from '@kbn/repo-packages';
 
@@ -56,9 +56,9 @@ export function filterPackages(allPackages: Package[], filter: string[]): Packag
 }
 
 export function writeYaml(filePath: string, obj: any, preamble: string | null = null) {
-  let fileContent = jsYaml.dump(obj, {
+  let fileContent = stringify(obj, {
     lineWidth: 300,
-    noRefs: true,
+    aliasDuplicateObjects: false,
   });
 
   if (preamble) {

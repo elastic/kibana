@@ -9,13 +9,13 @@
 
 import fs from 'fs';
 import { extname } from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 
 export const readRolesFromResource = (resourcePath: string) => {
   if (!fs.existsSync(resourcePath) || extname(resourcePath) !== '.yml') {
     throw new Error(`${resourcePath} does not exist or not a yml file`);
   }
-  const data = loadYaml(fs.readFileSync(resourcePath, 'utf8'));
+  const data = parseYaml(fs.readFileSync(resourcePath, 'utf8'));
   if (typeof data === 'object' && data !== null) {
     return Object.keys(data);
   } else {
@@ -27,7 +27,7 @@ export const readRolesDescriptorsFromResource = (resourcePath: string) => {
   if (!fs.existsSync(resourcePath) || extname(resourcePath) !== '.yml') {
     throw new Error(`${resourcePath} does not exist or not a yml file`);
   }
-  const data = loadYaml(fs.readFileSync(resourcePath, 'utf8'));
+  const data = parseYaml(fs.readFileSync(resourcePath, 'utf8'));
   if (typeof data === 'object' && data !== null) {
     return data;
   } else {
