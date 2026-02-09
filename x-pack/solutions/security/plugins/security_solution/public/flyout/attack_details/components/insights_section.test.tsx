@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
+import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { InsightsSection } from './insights_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -26,6 +27,15 @@ jest.mock('../../shared/hooks/use_expand_section', () => ({
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
+}));
+
+jest.mock('../hooks/use_attack_entities_counts', () => ({
+  useAttackEntitiesCounts: jest.fn().mockReturnValue({
+    relatedUsers: 0,
+    relatedHosts: 0,
+    loading: false,
+    error: false,
+  }),
 }));
 
 jest.mock('../../shared/components/expandable_section', () => ({
@@ -92,7 +102,7 @@ describe('InsightsSection', () => {
     const user = userEvent.setup();
     renderWithEui(<InsightsSection />);
 
-    const titleLink = screen.getByTestId('sectionPanelTitleLink');
+    const titleLink = screen.getByTestId(`${INSIGHTS_ENTITIES_TEST_ID}TitleLink`);
     expect(titleLink).toBeInTheDocument();
 
     await user.click(titleLink);
