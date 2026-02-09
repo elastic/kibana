@@ -12,7 +12,6 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
@@ -28,11 +27,9 @@ const errorDataSchema = z.object({
 export type ErrorAttachmentData = z.infer<typeof errorDataSchema>;
 
 export function createErrorAttachmentType({
-  core,
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {

@@ -56,6 +56,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
+import { registerDataProviders } from './agent_builder/register_data_provider';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -162,6 +163,8 @@ export class SLOPlugin
           }),
       };
     }) as SLORoutesDependencies['plugins'];
+
+    registerDataProviders({ core, plugins, logger: this.logger });
 
     registerServerRoutes({
       core,

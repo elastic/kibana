@@ -12,23 +12,22 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID } from '../../common';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 const GET_SLO_DETAILS_TOOL_ID = 'get_slo_details';
 
 const sloDataSchema = z.object({
   sloId: z.string(),
+  sloInstanceId: z.string().optional(),
+  remoteName: z.string().optional(),
 });
 
 export type SloAttachmentData = z.infer<typeof sloDataSchema>;
 
 export function createSloAttachmentType({
-  core,
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID, SloAttachmentData> {
@@ -42,7 +41,7 @@ export function createSloAttachmentType({
       return { valid: false, error: parsed.error.message };
     },
     format: (attachment) => {
-      const { sloId } = attachment.data;
+      const { sloId, sloInstanceId, remoteName } = attachment.data;
 
       return {
         getRepresentation: () => ({
@@ -53,17 +52,41 @@ export function createSloAttachmentType({
           {
             id: GET_SLO_DETAILS_TOOL_ID,
             type: ToolType.builtin,
-            description: `Fetch the full SLO information for SLO ${sloId}.`,
+            description: `Fetch the full details for SLO ${sloId}.`,
             schema: z.object({}),
             handler: async (_args, context) => {
-              return {
-                results: [
-                  {
-                    type: ToolResultType.other,
-                    data: {},
-                  },
-                ],
-              };
+              try {
+                const sloDetails = await dataRegistry.getData('sloDetails', {
+                  request: context.request,
+                  sloId,
+                  sloInstanceId,
+                  remoteName,
+                });
+
+                return {
+                  results: [
+                    {
+                      type: ToolResultType.other,
+                      data: sloDetails as Record<string, unknown>,
+                    },
+                  ],
+                };
+              } catch (error) {
+                logger.error(`Failed to fetch SLO details for attachment: ${error?.message}`);
+                logger.debug(error);
+
+                return {
+                  results: [
+                    {
+                      type: ToolResultType.error,
+                      data: {
+                        message: `Failed to fetch SLO details: ${error.message}`,
+                        stack: error.stack,
+                      },
+                    },
+                  ],
+                };
+              }
             },
           },
         ],
