@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { isPlainObjectType } from './is_plain_object_type';
 
 /**
@@ -33,8 +33,8 @@ export function extractByJsonPointer(document: unknown, pointer: string): unknow
       throw new Error(
         `JSON Pointer ${chalk.bold(pointer)} resolution failure. Expected ${chalk.magenta(
           path.join('/')
-        )} to be a plain object but it has type "${typeof target}" in \n\n${dump(document, {
-          skipInvalid: true,
+        )} to be a plain object but it has type "${typeof target}" in \n\n${stringify(document, {
+          strict: false,
         })}`
       );
     }
@@ -69,7 +69,7 @@ export function extractObjectByJsonPointer(
     throw new Error(
       `JSON Pointer resolution failure. Expected ${chalk.magenta(
         pointer
-      )} to be a plain object in \n\n${dump(document, { skipInvalid: true })}`
+      )} to be a plain object in \n\n${stringify(document, { strict: false })}`
     );
   }
 
