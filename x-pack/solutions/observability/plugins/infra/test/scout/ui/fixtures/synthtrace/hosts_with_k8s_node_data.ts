@@ -16,7 +16,9 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
     .rate(1)
     .generator((timestamp) =>
       K8S_HOSTS.flatMap(({ hostName, cpuValue }) => {
-        // Generate semconv (OTel) format metrics
+        // Generate BOTH ECS and semconv (OTel) format metrics to support testing both schemas
+        
+        // ============ SEMCONV (OTel) FORMAT ============
         // cpuValue is the target CPU usage (e.g., 0.5 = 50%)
         // Formula: cpuUsage = 1 - (idle + wait)
         // So: idle + wait = 1 - cpuValue
@@ -25,7 +27,7 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
         const cpuUserUtilization = cpuValue * 0.6; // 60% of used CPU is user
         const cpuSystemUtilization = cpuValue * 0.4; // 40% of used CPU is system
 
-        const base = {
+        const semconvBase = {
           'agent.id': `agent-${hostName}`,
           'host.hostname': hostName,
           '@timestamp': timestamp,
@@ -39,13 +41,13 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
         };
 
         // CPU metrics with state dimension (OTel/semconv format)
-        const cpuDocs = [
+        const semconvCpuDocs = [
           { state: 'idle', 'metrics.system.cpu.utilization': cpuIdleUtilization },
           { state: 'wait', 'metrics.system.cpu.utilization': cpuWaitUtilization },
           { state: 'user', 'metrics.system.cpu.utilization': cpuUserUtilization },
           { state: 'system', 'metrics.system.cpu.utilization': cpuSystemUtilization },
         ].map((cpu) => ({
-          ...base,
+          ...semconvBase,
           ...cpu,
           'metricset.name': 'cpu',
           'metrics.system.cpu.logical.count': 4,
@@ -57,7 +59,7 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
         const memUsed = totalMemory * 0.35; // 35% used
         const memFree = totalMemory - memUsed;
 
-        const memDocs = [
+        const semconvMemDocs = [
           {
             state: 'used',
             'metrics.system.memory.utilization': 0.35,
@@ -69,39 +71,55 @@ export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: s
             'metrics.system.memory.usage': memFree,
           },
         ].map((mem) => ({
-          ...base,
+          ...semconvBase,
           ...mem,
           'metricset.name': 'memory',
         }));
 
         // Filesystem metrics
-        const diskDoc = {
-          ...base,
+        const semconvDiskDoc = {
+          ...semconvBase,
           'metricset.name': 'filesystem',
           'metrics.system.filesystem.utilization': 12.23, // 1223% as shown in test
         };
 
         // Network metrics
-        const networkDocs = [
+        const semconvNetworkDocs = [
           { direction: 'transmit', 'metrics.system.network.io': 1000000 },
           { direction: 'receive', 'metrics.system.network.io': 1000000 },
         ].map((net) => ({
-          ...base,
+          ...semconvBase,
           ...net,
           'metricset.name': 'network',
         }));
 
-        const semconvDocs = [...cpuDocs, ...memDocs, diskDoc, ...networkDocs].map(
-          (doc) => new Serializable(doc)
-        );
+        const semconvDocs = [
+          ...semconvCpuDocs,
+          ...semconvMemDocs,
+          semconvDiskDoc,
+          ...semconvNetworkDocs,
+        ].map((doc) => new Serializable(doc));
 
-        // Also generate K8s node and pod metrics using the infra client
+        // ============ ECS FORMAT (using infra client) ============
+        // Generate ECS format data using the existing infra client methods
+        const ecsDocs = [
+          infra.host(hostName).cpu({ 'system.cpu.total.norm.pct': cpuValue }).timestamp(timestamp),
+          infra.host(hostName).memory().timestamp(timestamp),
+          infra.host(hostName).network().timestamp(timestamp),
+          infra.host(hostName).load().timestamp(timestamp),
+          infra.host(hostName).filesystem().timestamp(timestamp),
+          infra.host(hostName).diskio().timestamp(timestamp),
+          infra.host(hostName).core().timestamp(timestamp),
+        ];
+
+        // K8s node and pod metrics
         const k8sDocs = [
           infra.host(hostName).node(K8S_HOST_NAME).metrics().timestamp(timestamp),
           infra.host(hostName).pod(K8S_POD_NAME).metrics().timestamp(timestamp),
         ];
 
-        return [...semconvDocs, ...k8sDocs];
+        // Return both ECS and semconv data so tests can work with either schema
+        return [...semconvDocs, ...ecsDocs, ...k8sDocs];
       })
     );
 }
