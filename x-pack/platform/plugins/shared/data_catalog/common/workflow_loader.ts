@@ -10,6 +10,7 @@ import { join, extname } from 'path';
 import { parse } from 'yaml';
 import type { OpeningAndClosingTags } from 'mustache';
 import Mustache from 'mustache';
+import type { Logger } from '@kbn/logging';
 import type { WorkflowInfo, WorkflowsConfig } from './data_source_spec';
 
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
@@ -29,21 +30,29 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
  */
 export async function loadWorkflows(
   stackConnectorIds: Record<string, string>,
-  config: WorkflowsConfig
+  config: WorkflowsConfig,
+  logger?: Logger
 ): Promise<WorkflowInfo[]> {
   const { directory, templateInputs } = config;
 
   const workflowInfos: WorkflowInfo[] = [];
   try {
-    for (const stackConnectorType of Object.keys(stackConnectorIds)) {
-      const files = await fs.readdir(join(directory, stackConnectorType));
+    for (const stackConnectorType of Object.entries(stackConnectorIds)) {
+      if (logger) {
+        logger.info(`Loading workflows for stack connector type: ${stackConnectorType[0]}`);
+        logger.info(`Stack connector ID: ${stackConnectorIds[stackConnectorType[0]]}`);
+      }
+      const files = await fs.readdir(join(directory));
 
-      const stackConnectorId = stackConnectorIds[stackConnectorType];
+      const stackConnectorId = stackConnectorIds[stackConnectorType[0]];
 
       const typedTemplateInputs = {
         ...templateInputs,
         stackConnectorId,
       };
+      if (logger) {
+        logger.info(`Template inputs: ${JSON.stringify(typedTemplateInputs)}`);
+      }
 
       // Filter for YAML files
       const yamlFiles = files.filter((file) => {
@@ -58,7 +67,7 @@ export async function loadWorkflows(
       // Load and process each YAML file
       const workflowInfo = await Promise.all(
         yamlFiles.map(async (fileName) => {
-          const filePath = join(directory, stackConnectorType, fileName);
+          const filePath = join(directory, fileName);
           const rawContent = await fs.readFile(filePath, 'utf-8');
           const content = Mustache.render(
             rawContent,

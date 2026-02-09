@@ -1,19 +1,25 @@
 version: '1'
 name: 'sources.github.search'
-description: 'Search fthrough GitHub code, repositories, issues, pull requests, and users'
+description: 'Search through GitHub code, repositories, issues, pull requests, and users'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
 inputs:
   - name: tool_name
-    type: string
+    type: choice
+    options:
+      - search_code
+      - search_repositories
+      - search_issues
+      - search_pull_requests
+      - search_users
     required: true
-    description: "The name of the tool to search for. Valid values: search_code, search_repositories, search_issues, search_pull_requests, search_users"
+    description: "Name of the search tool to use based on the choices"
   - name: query
     type: string
     required: true
-    description: "The query to search for. Use github query syntax example: 'repo:elastic/kibana is:open'"
+    description: "The query to search for. Use github query syntax."
   - name: order
     type: string
     default: "desc"

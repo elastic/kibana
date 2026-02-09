@@ -16,11 +16,13 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { trimStart } from 'lodash';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
+import type { ImportedTool } from '@kbn/data-catalog-plugin/common/data_source_spec';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -59,7 +61,7 @@ async function importMcpTools(
   actions: ActionsPluginStart,
   request: KibanaRequest,
   connectorId: string,
-  tools: Array<{ name: string; description: string }>,
+  tools: Array<ImportedTool>,
   name: string,
   logger: Logger
 ): Promise<string[]> {
@@ -140,9 +142,7 @@ export async function createDataSourceAndRelatedResources(
   for (const stackConnectorConfig of stackConnectorConfigs) {
     let finalStackConnectorId: string;
 
-    const connectorType = stackConnectorConfig.type.startsWith('.')
-      ? stackConnectorConfig.type.slice(1)
-      : stackConnectorConfig.type;
+    const connectorType = trimStart(stackConnectorConfig.type, '.');
 
     // Pattern 1: Reuse existing stack connector (from flyout) - only for first connector
     if (stackConnectorId) {
@@ -162,7 +162,7 @@ export async function createDataSourceAndRelatedResources(
       finalStackConnectorId = stackConnector.id;
     }
 
-    stackConnectorIds[connectorType] = finalStackConnectorId;
+    stackConnectorIds[`${connectorType}-stack-connector-id`] = finalStackConnectorId;
 
     if (stackConnectorConfig.type === '.mcp' && stackConnectorConfig.importedTools) {
       const importedToolIds = await importMcpTools(
@@ -181,14 +181,9 @@ export async function createDataSourceAndRelatedResources(
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
 
-  // Merge stackConnectorId into workflows' templateInputs
-  const templateInputs = {
-    ...dataSource.workflows.templateInputs,
-  };
-  const workflowInfos = await loadWorkflows(stackConnectorIds, {
-    directory: dataSource.workflows.directory,
-    templateInputs,
-  });
+  logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
+
+  const workflowInfos = await loadWorkflows(stackConnectorIds, dataSource.workflows, logger);
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
