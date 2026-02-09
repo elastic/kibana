@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTourStep, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 interface Props {
   children: ReactElement;
@@ -22,8 +23,12 @@ const dismissLabel = i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss
 });
 
 export const KubernetesTour = ({ children }: Props) => {
+  const { services } = useKibanaContextForPlugin();
   const [isTourSeen, setIsTourSeen] = useLocalStorage(KUBERNETES_TOUR_STORAGE_KEY, false);
   const markTourAsSeen = () => setIsTourSeen(true);
+  const isTourEnabled = services.notifications.tours.isEnabled();
+
+  if (!isTourEnabled) return <>{children}</>;
 
   return (
     <EuiTourStep

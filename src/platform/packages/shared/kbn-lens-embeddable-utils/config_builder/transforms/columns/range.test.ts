@@ -151,7 +151,7 @@ describe('Range Transforms', () => {
       const expected: LensApiHistogramOperation = {
         operation: 'histogram',
         field: 'price',
-        granularity: 10,
+        granularity: 'auto',
         include_empty_rows: true,
         format: { type: 'number', decimals: 0, compact: false },
       };

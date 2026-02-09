@@ -370,7 +370,7 @@ describe('<TableSection />', () => {
       });
     });
 
-    it('should pass the switch in additionalToolbarControls to GroupedAlertsTable', async () => {
+    it('should pass the additional controls in additionalToolbarControls to GroupedAlertsTable', async () => {
       render(
         <TestProviders>
           <TableSection {...defaultProps} />
@@ -385,7 +385,7 @@ describe('<TableSection />', () => {
         mockGroupedAlertsTable.mock.calls[mockGroupedAlertsTable.mock.calls.length - 1][0];
       expect(lastCall.additionalToolbarControls).toBeDefined();
       expect(Array.isArray(lastCall.additionalToolbarControls)).toBe(true);
-      expect(lastCall.additionalToolbarControls).toHaveLength(1);
+      expect(lastCall.additionalToolbarControls).toHaveLength(2);
     });
 
     it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {

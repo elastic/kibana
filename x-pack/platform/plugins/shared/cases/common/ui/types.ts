@@ -36,6 +36,8 @@ import type {
   Configuration,
   CustomFieldTypes,
   EventAttachment,
+  UnifiedAttachment,
+  CombinedAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -104,6 +106,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type CombinedAttachmentUI = SnakeToCamelCase<CombinedAttachment>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
