@@ -12,6 +12,11 @@
       "types": "./index.ts",
       "import": "./target/index.js",
       "default": "./target/index.js"
+    },
+    "./prototype": {
+      "types": "./prototype.ts",
+      "import": "./prototype.ts",
+      "default": "./prototype.ts"
     }
   },
   "scripts": {
