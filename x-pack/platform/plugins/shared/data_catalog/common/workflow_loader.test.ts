@@ -7,6 +7,7 @@
 
 import { promises as fs } from 'fs';
 import { loadWorkflows } from './workflow_loader';
+import type { WorkflowsConfig } from './data_source_spec';
 
 jest.mock('fs', () => ({
   promises: {
@@ -20,8 +21,8 @@ const mockReadFile = fs.readFile as jest.MockedFunction<typeof fs.readFile>;
 
 describe('loadWorkflows', () => {
   const TEST_DIR = '/path/to/workflows';
-  const mockStackConnectorIds = { notion: 'connector-1' };
-  const mockConfig = (overrides?: any) => ({
+  const mockStackConnectorIds = { '.notion': 'connector-1' };
+  const mockConfig = (overrides?: Partial<WorkflowsConfig>): WorkflowsConfig => ({
     directory: TEST_DIR,
     ...overrides,
   });
@@ -36,11 +37,11 @@ describe('loadWorkflows', () => {
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result).toHaveLength(1);
       expect(result[0].content).toBe(yamlContent);
-      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/notion/workflow.yaml`, 'utf-8');
+      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/workflow.yaml`, 'utf-8');
     });
 
     it('loads .yml files', async () => {
@@ -48,7 +49,7 @@ describe('loadWorkflows', () => {
       mockReaddir.mockResolvedValue(['workflow.yml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result).toHaveLength(1);
       expect(result[0].content).toBe(yamlContent);
@@ -61,7 +62,7 @@ describe('loadWorkflows', () => {
         .mockResolvedValueOnce('name: second')
         .mockResolvedValueOnce('name: third');
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result).toHaveLength(3);
       expect(mockReadFile).toHaveBeenCalledTimes(3);
@@ -77,12 +78,12 @@ describe('loadWorkflows', () => {
       ] as any);
       mockReadFile.mockResolvedValue('name: test');
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result).toHaveLength(2);
       expect(mockReadFile).toHaveBeenCalledTimes(2);
-      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/notion/workflow.yaml`, 'utf-8');
-      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/notion/another.yml`, 'utf-8');
+      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/workflow.yaml`, 'utf-8');
+      expect(mockReadFile).toHaveBeenCalledWith(`${TEST_DIR}/another.yml`, 'utf-8');
     });
   });
 
@@ -93,13 +94,13 @@ describe('loadWorkflows', () => {
       mockReadFile.mockResolvedValue(template);
 
       const result = await loadWorkflows(
-        mockStackConnectorIds,
         mockConfig({
           templateInputs: {
             workflowName: 'my-workflow',
             environment: 'production',
           },
-        })
+        }),
+        mockStackConnectorIds
       );
 
       expect(result[0].content).toBe('name: my-workflow\nenv: production');
@@ -111,8 +112,8 @@ describe('loadWorkflows', () => {
       mockReadFile.mockResolvedValue(content);
 
       const result = await loadWorkflows(
-        mockStackConnectorIds,
-        mockConfig({ templateInputs: undefined })
+        mockConfig({ templateInputs: undefined }),
+        mockStackConnectorIds
       );
 
       // Mustache leaves unreplaced variables empty when not found
@@ -124,7 +125,7 @@ describe('loadWorkflows', () => {
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(content);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig({ templateInputs: {} }));
+      const result = await loadWorkflows(mockConfig({ templateInputs: {} }), mockStackConnectorIds);
 
       expect(result[0].content).toBe('name: ');
     });
@@ -140,8 +141,8 @@ env:
       mockReadFile.mockResolvedValue(template);
 
       const result = await loadWorkflows(
-        mockStackConnectorIds,
-        mockConfig({ templateInputs: { customVar: 'my-value' } })
+        mockConfig({ templateInputs: { customVar: 'my-value' } }),
+        mockStackConnectorIds
       );
 
       expect(result[0].content).toContain('${{ secrets.GITHUB_TOKEN }}');
@@ -158,8 +159,8 @@ mustache_style: {{ mustacheVar }}
       mockReadFile.mockResolvedValue(template);
 
       const result = await loadWorkflows(
-        mockStackConnectorIds,
-        mockConfig({ templateInputs: { ejsVar: 'ejs-replaced' } })
+        mockConfig({ templateInputs: { ejsVar: 'ejs-replaced' } }),
+        mockStackConnectorIds
       );
 
       expect(result[0].content).toContain('ejs: ejs-replaced');
@@ -179,7 +180,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result[0].shouldGenerateABTool).toBe(true);
     });
@@ -194,7 +195,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result[0].shouldGenerateABTool).toBe(false);
     });
@@ -204,7 +205,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result[0].shouldGenerateABTool).toBe(false);
     });
@@ -214,7 +215,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result[0].shouldGenerateABTool).toBe(false);
     });
@@ -229,8 +230,8 @@ tags:
       mockReadFile.mockResolvedValue(template);
 
       const result = await loadWorkflows(
-        mockStackConnectorIds,
-        mockConfig({ templateInputs: { workflowName: 'dynamic-workflow' } })
+        mockConfig({ templateInputs: { workflowName: 'dynamic-workflow' } }),
+        mockStackConnectorIds
       );
 
       expect(result[0].shouldGenerateABTool).toBe(true);
@@ -245,17 +246,20 @@ tags:
       mockReaddir.mockRejectedValue(enoentError);
 
       await expect(
-        loadWorkflows(mockStackConnectorIds, {
-          directory: '/nonexistent/path',
-          templateInputs: {},
-        })
+        loadWorkflows(
+          {
+            directory: '/nonexistent/path',
+            templateInputs: {},
+          },
+          mockStackConnectorIds
+        )
       ).rejects.toThrow('Workflows directory does not exist: /nonexistent/path');
     });
 
     it('throws error when no YAML files are found in directory', async () => {
       mockReaddir.mockResolvedValue(['readme.md', 'config.json'] as any);
 
-      await expect(loadWorkflows(mockStackConnectorIds, mockConfig())).rejects.toThrow(
+      await expect(loadWorkflows(mockConfig(), mockStackConnectorIds)).rejects.toThrow(
         `No YAML workflow files found in directory: ${TEST_DIR}`
       );
     });
@@ -263,7 +267,7 @@ tags:
     it('throws error when directory is empty', async () => {
       mockReaddir.mockResolvedValue([] as any);
 
-      await expect(loadWorkflows(mockStackConnectorIds, mockConfig())).rejects.toThrow(
+      await expect(loadWorkflows(mockConfig(), mockStackConnectorIds)).rejects.toThrow(
         `No YAML workflow files found in directory: ${TEST_DIR}`
       );
     });
@@ -272,7 +276,7 @@ tags:
       const permissionError = new Error('EACCES: permission denied');
       mockReaddir.mockRejectedValue(permissionError);
 
-      await expect(loadWorkflows(mockStackConnectorIds, mockConfig())).rejects.toThrow(
+      await expect(loadWorkflows(mockConfig(), mockStackConnectorIds)).rejects.toThrow(
         `Failed to load workflows from ${TEST_DIR}: EACCES: permission denied`
       );
     });
@@ -282,7 +286,7 @@ tags:
       const readError = new Error('EACCES: permission denied');
       mockReadFile.mockRejectedValue(readError);
 
-      await expect(loadWorkflows(mockStackConnectorIds, mockConfig())).rejects.toThrow(
+      await expect(loadWorkflows(mockConfig(), mockStackConnectorIds)).rejects.toThrow(
         `Failed to load workflows from ${TEST_DIR}: EACCES: permission denied`
       );
     });
@@ -292,7 +296,7 @@ tags:
       mockReaddir.mockRejectedValue(originalError);
 
       try {
-        await loadWorkflows(mockStackConnectorIds, mockConfig());
+        await loadWorkflows(mockConfig(), mockStackConnectorIds);
         fail('Expected error to be thrown');
       } catch (error) {
         expect((error as Error).cause).toBe(originalError);
@@ -302,7 +306,7 @@ tags:
     it('rethrows non-Error objects as-is', async () => {
       mockReaddir.mockRejectedValue('string error');
 
-      await expect(loadWorkflows(mockStackConnectorIds, mockConfig())).rejects.toBe('string error');
+      await expect(loadWorkflows(mockConfig(), mockStackConnectorIds)).rejects.toBe('string error');
     });
 
     it('throws error when YAML file contains invalid syntax', async () => {
@@ -316,7 +320,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(invalidYaml);
 
-      const error = await loadWorkflows(mockStackConnectorIds, mockConfig()).catch((e) => e);
+      const error = await loadWorkflows(mockConfig(), mockStackConnectorIds).catch((e) => e);
       expect(error.message).toMatch(/Failed to load workflows from \/path\/to\/workflows:/);
       expect(error.cause.message).toMatch(/All mapping items must start at the same column/);
     });
@@ -328,7 +332,7 @@ tags:
       mockReaddir.mockResolvedValue(['workflow.yaml'] as any);
       mockReadFile.mockResolvedValue(yamlContent);
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result[0]).toEqual({
         content: yamlContent,
@@ -342,7 +346,7 @@ tags:
         .mockResolvedValueOnce('name: a\ntags:\n  - agent-builder-tool')
         .mockResolvedValueOnce('name: b');
 
-      const result = await loadWorkflows(mockStackConnectorIds, mockConfig());
+      const result = await loadWorkflows(mockConfig(), mockStackConnectorIds);
 
       expect(result).toEqual([
         { content: 'name: a\ntags:\n  - agent-builder-tool', shouldGenerateABTool: true },
