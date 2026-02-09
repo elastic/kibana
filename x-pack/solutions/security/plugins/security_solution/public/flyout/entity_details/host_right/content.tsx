@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -15,15 +17,10 @@ import { AssetCriticalityAccordion } from '../../../entity_analytics/components/
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
-import type { HostItem } from '../../../../common/search_strategy';
-import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { useObservedHostFields } from './hooks/use_observed_host_fields';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 
 interface HostPanelContentProps {
-  observedHost: ObservedEntityData<HostItem>;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
@@ -32,11 +29,12 @@ interface HostPanelContentProps {
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
+  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
 }
 
 export const HostPanelContent = ({
+  setLastSeenDate,
   hostName,
-  observedHost,
   riskScoreState,
   recalculatingScore,
   contextID,
@@ -45,8 +43,6 @@ export const HostPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
 }: HostPanelContentProps) => {
-  const observedFields = useObservedHostFields(observedHost);
-
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
@@ -79,11 +75,11 @@ export const HostPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
-      <ObservedEntity
-        observedData={observedHost}
+      <ObservedDataSection
+        setLastSeenDate={setLastSeenDate}
+        hostName={hostName}
         contextID={contextID}
         scopeId={scopeId}
-        observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
     </FlyoutBody>

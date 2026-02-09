@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { type Dispatch, type SetStateAction, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
@@ -23,7 +23,8 @@ import { sourcererSelectors } from '../../../../sourcerer/store';
 
 export const useObservedUser = (
   userName: string,
-  scopeId: string
+  scopeId: string,
+  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>
 ): Omit<ObservedEntityData<UserItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -74,6 +75,8 @@ export const useObservedUser = (
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
+
+  setLastSeenDate(firstSeen);
 
   return useMemo(
     () => ({

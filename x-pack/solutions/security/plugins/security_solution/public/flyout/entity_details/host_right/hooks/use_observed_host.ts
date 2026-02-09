@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { type Dispatch, type SetStateAction, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors, sourcererSelectors } from '../../../../common/store';
@@ -23,7 +23,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 export const useObservedHost = (
   hostName: string,
-  scopeId: string
+  scopeId: string,
+  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>
 ): Omit<ObservedEntityData<HostItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
@@ -74,6 +75,8 @@ export const useObservedHost = (
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
+
+  setLastSeenDate(firstSeen);
 
   return useMemo(
     () => ({

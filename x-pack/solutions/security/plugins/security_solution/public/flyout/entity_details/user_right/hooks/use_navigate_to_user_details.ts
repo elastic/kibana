@@ -27,7 +27,6 @@ interface UseNavigateToUserDetailsParams {
 
 export const useNavigateToUserDetails = ({
   userName,
-  email,
   scopeId,
   contextID,
   isRiskScoreExist,
@@ -51,7 +50,6 @@ export const useNavigateToUserDetails = ({
           scopeId,
           user: {
             name: userName,
-            email,
           },
           path,
           hasMisconfigurationFindings,
@@ -80,7 +78,6 @@ export const useNavigateToUserDetails = ({
       isRiskScoreExist,
       scopeId,
       userName,
-      email,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
       isPreviewMode,

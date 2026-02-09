@@ -6,10 +6,10 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
-import React from 'react';
+import React, { type Dispatch, type SetStateAction } from 'react';
+import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
-import type { UserItem } from '../../../../common/search_strategy';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -17,15 +17,11 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 
 interface UserPanelContentProps {
   userName: string;
-  observedUser: ObservedEntityData<UserItem>;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
@@ -33,11 +29,12 @@ interface UserPanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
+  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
 }
 
 export const UserPanelContent = ({
+  setLastSeenDate,
   userName,
-  observedUser,
   riskScoreState,
   recalculatingScore,
   contextID,
@@ -46,8 +43,6 @@ export const UserPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
 }: UserPanelContentProps) => {
-  const observedFields = useObservedUserItems(observedUser);
-
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
@@ -80,11 +75,11 @@ export const UserPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
-      <ObservedEntity
-        observedData={observedUser}
+      <ObservedDataSection
+        setLastSeenDate={setLastSeenDate}
+        userName={userName}
         contextID={contextID}
         scopeId={scopeId}
-        observedFields={observedFields}
         queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
