@@ -8,5 +8,5 @@
  */
 
 export type * from './types';
-export * from './telemetry_service';
+export { TelemetryService } from './telemetry_service';
 export * from './events/workflows';

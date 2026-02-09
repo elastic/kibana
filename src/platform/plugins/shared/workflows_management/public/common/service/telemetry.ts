@@ -20,8 +20,8 @@ import type { WorkflowTriggerTab } from '../lib/telemetry/events/workflows/execu
 import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
-  WorkflowValidationErrorType,
 } from '../lib/telemetry/events/workflows/types';
+import type { WorkflowValidationErrorType } from '../lib/telemetry/events/workflows/validation/types';
 import type { TelemetryServiceStart } from '../lib/telemetry/types';
 import {
   extractStepInfoFromWorkflowYaml,

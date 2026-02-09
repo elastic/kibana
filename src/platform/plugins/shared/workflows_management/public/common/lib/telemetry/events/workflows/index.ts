@@ -9,16 +9,12 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import { workflowExecutionEventNames, workflowExecutionEventSchemas } from './execution';
+import type { WorkflowExecutionEventTypes } from './execution/types';
 import { workflowLifecycleEventNames, workflowLifecycleEventSchemas } from './lifecycle';
-import type {
-  BaseResultActionParams,
-  WorkflowExecutionEventTypes,
-  WorkflowLifecycleEventTypes,
-  WorkflowsTelemetryEvent,
-  WorkflowsTelemetryEventsMap,
-  WorkflowUIEventTypes,
-} from './types';
+import type { WorkflowLifecycleEventTypes } from './lifecycle/types';
+import type { WorkflowsTelemetryEvent, WorkflowsTelemetryEventsMap } from './types';
 import { workflowUIEventNames, workflowUIEventSchemas } from './ui';
+import type { WorkflowUIEventTypes } from './ui/types';
 import { workflowValidationEventNames, workflowValidationEventSchemas } from './validation';
 import type { WorkflowValidationEventTypes } from './validation/types';
 
@@ -34,35 +30,6 @@ export const workflowEventNames = {
   ...workflowLifecycleEventNames,
   ...workflowUIEventNames,
   ...workflowValidationEventNames,
-};
-
-const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
-  result: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Indicates whether the action/request succeeded or failed. Can be one of `success` or `failed`. This event tracks the attempt, not just successful outcomes.',
-      optional: false,
-    },
-  },
-  errorMessage: {
-    type: 'text',
-    _meta: {
-      description:
-        'The error message if the action/request failed. Only present when result is `failed`.',
-      optional: true,
-    },
-  },
-};
-
-const eventNameSchema: RootSchema<{ eventName: string }> = {
-  eventName: {
-    type: 'keyword',
-    _meta: {
-      description: 'The event name/description',
-      optional: false,
-    },
-  },
 };
 
 // This type ensures that the event schemas are correctly typed according to the event type
