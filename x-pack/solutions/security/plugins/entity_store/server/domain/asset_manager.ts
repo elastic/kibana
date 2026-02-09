@@ -75,30 +75,42 @@ export class AssetManager {
     logExtractionParams?: LogExtractionBodyParams
   ) {
     await this.install(type, logExtractionParams); // TODO: async
-    await this.start(request, type, logExtractionParams?.frequency);
+    await this.start(request, type);
   }
 
-  public async start(request: KibanaRequest, type: EntityType, logExtractionFrequency?: string) {
-    this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
+  public async start(request: KibanaRequest, type: EntityType) {
+    try {
+      this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
+      const {
+        logExtractionState: { frequency },
+      } = await this.engineDescriptorClient.findOrThrow(type);
 
-    // TODO: if this fails, set status to failed
-    await scheduleExtractEntityTask({
-      logger: this.logger,
-      taskManager: this.taskManager,
-      type,
-      frequency: logExtractionFrequency,
-      namespace: this.namespace,
-      request,
-    });
+      await scheduleExtractEntityTask({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        type,
+        frequency,
+        namespace: this.namespace,
+        request,
+      });
+    } catch (error) {
+      this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
+      throw error;
+    }
   }
 
   public async stop(type: EntityType) {
-    await stopExtractEntityTask({
-      taskManager: this.taskManager,
-      logger: this.logger,
-      type,
-      namespace: this.namespace,
-    });
+    try {
+      await stopExtractEntityTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        type,
+        namespace: this.namespace,
+      });
+    } catch (error) {
+      this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
+      throw error;
+    }
   }
 
   public async install(
