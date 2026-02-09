@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { hasBracketDottedKeyUsage } from '../../../widgets/workflow_yaml_editor/lib/alert_trigger_bracket_key_usage';
+import { findBracketDottedKeyUsages } from '../../../widgets/workflow_yaml_editor/lib/alert_trigger_bracket_key_usage';
 import type { YamlValidationResult } from '../model/types';
 
 /**
- * Returns a syntax warning when the workflow has an alert trigger and uses
- * bracket notation with dotted keys in variables (e.g. event.alerts[0]['kibana.alert.rule.name']).
- * Prefer dot notation (e.g. event.alerts[0].kibana.alert.rule.name) for better compatibility.
+ * Returns a syntax warning for each occurrence of bracket notation with dotted keys
+ * (e.g. event.alerts[0]['kibana.alert.rule.name']) when the workflow has an alert trigger.
+ * Each warning points to the exact position of the offending usage.
  */
 export function validateAlertBracketKeyUsage(
   yamlContent: string,
@@ -24,27 +24,31 @@ export function validateAlertBracketKeyUsage(
   if (!workflowDefinition?.triggers?.some((t) => t.type === 'alert')) {
     return [];
   }
-  if (!hasBracketDottedKeyUsage(yamlContent)) {
+
+  const matches = findBracketDottedKeyUsages(yamlContent);
+  if (matches.length === 0) {
     return [];
   }
-  const message = i18n.translate(
-    'workflows.yamlEditor.alertTriggerBracketKeyWarning.validationMessage',
-    {
-      defaultMessage:
-        "Deprecated: variables use bracket notation with dotted keys (e.g. ['kibana.alert.rule.name']). Prefer dot notation (e.g. .kibana.alert.rule.name) for alert triggers.",
-    }
-  );
-  return [
-    {
-      id: 'alert-bracket-key-syntax',
-      startLineNumber: 1,
-      startColumn: 1,
-      endLineNumber: 1,
-      endColumn: 1,
-      severity: 'warning',
+
+  return matches.map((match, index) => {
+    const message = i18n.translate(
+      'workflows.yamlEditor.alertTriggerBracketKeyWarning.validationMessage',
+      {
+        defaultMessage:
+          'Deprecated: {bracketKey} uses bracket notation with dotted keys. Prefer dot notation (e.g. .kibana.alert.rule.name) for alert triggers.',
+        values: { bracketKey: match.text },
+      }
+    );
+    return {
+      id: `alert-bracket-key-syntax-${index}`,
+      startLineNumber: match.lineNumber,
+      startColumn: match.startColumn,
+      endLineNumber: match.lineNumber,
+      endColumn: match.endColumn,
+      severity: 'warning' as const,
       message,
-      owner: 'alert-bracket-key-validation',
+      owner: 'alert-bracket-key-validation' as const,
       hoverMessage: message,
-    },
-  ];
+    };
+  });
 }

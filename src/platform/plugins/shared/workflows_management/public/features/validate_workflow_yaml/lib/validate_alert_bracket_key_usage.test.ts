@@ -19,7 +19,7 @@ describe('validateAlertBracketKeyUsage', () => {
     triggers: [{ type: 'manual' }],
   } as WorkflowYaml;
 
-  it('returns a warning when workflow has alert trigger and uses bracket dotted keys', () => {
+  it('returns a warning per match with correct position', () => {
     const yaml = `steps:
   - type: log
     with:
@@ -28,7 +28,19 @@ describe('validateAlertBracketKeyUsage', () => {
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('warning');
     expect(result[0].owner).toBe('alert-bracket-key-validation');
-    expect(result[0].message).toContain('bracket notation');
+    expect(result[0].startLineNumber).toBe(4);
+    expect(result[0].startColumn).toBeGreaterThan(1);
+    expect(result[0].endColumn).toBeGreaterThan(result[0].startColumn);
+    expect(result[0].message).toContain("['kibana.alert.rule.name']");
+  });
+
+  it('returns multiple warnings for multiple matches', () => {
+    const yaml = `a: "{{ x['a.b'] }}"
+b: "{{ y['c.d'] }}"`;
+    const result = validateAlertBracketKeyUsage(yaml, workflowWithAlertTrigger);
+    expect(result).toHaveLength(2);
+    expect(result[0].startLineNumber).toBe(1);
+    expect(result[1].startLineNumber).toBe(2);
   });
 
   it('returns empty when workflow has alert trigger but no bracket dotted keys', () => {
