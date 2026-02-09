@@ -8,14 +8,16 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
+import { omit } from 'lodash';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
+import { UserService } from '../services/user_service/user_service';
 import type {
   CreateNotificationPolicyParams,
   NotificationPolicyResponse,
-  UpdateNotificationPolicyData,
+  UpdateNotificationPolicyParams,
 } from './types';
 
 @injectable()
@@ -34,6 +36,7 @@ export class NotificationPolicyClient {
 
     const notificationPolicyAttributes: NotificationPolicySavedObjectAttributes = {
       name: params.data.name,
+      description: params.data.description,
       workflow_id: params.data.workflow_id,
       createdBy: userProfileUid,
       createdAt: now,
@@ -41,12 +44,13 @@ export class NotificationPolicyClient {
       updatedAt: now,
     };
 
-    let id: string;
     try {
-      id = await this.notificationPolicySavedObjectService.create({
+      const { id, version } = await this.notificationPolicySavedObjectService.create({
         attrs: notificationPolicyAttributes,
         id: params.options?.id,
       });
+
+      return { id, version, ...notificationPolicyAttributes };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -54,15 +58,12 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
-
-    return { id, ...notificationPolicyAttributes };
   }
 
   public async getNotificationPolicy({ id }: { id: string }): Promise<NotificationPolicyResponse> {
     try {
       const doc = await this.notificationPolicySavedObjectService.get(id);
-      const attrs = doc.attributes;
-      return { id, ...attrs };
+      return { id, version: doc.version, ...doc.attributes };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Notification policy with id "${id}" not found`);
@@ -71,65 +72,45 @@ export class NotificationPolicyClient {
     }
   }
 
-  public async updateNotificationPolicy({
-    id,
-    data,
-  }: {
-    id: string;
-    data: UpdateNotificationPolicyData;
-  }): Promise<NotificationPolicyResponse> {
+  public async updateNotificationPolicy(
+    params: UpdateNotificationPolicyParams
+  ): Promise<NotificationPolicyResponse> {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    let existingAttrs: NotificationPolicySavedObjectAttributes;
-    let existingVersion: string | undefined;
-    try {
-      const doc = await this.notificationPolicySavedObjectService.get(id);
-      existingAttrs = doc.attributes;
-      existingVersion = doc.version;
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Notification policy with id "${id}" not found`);
-      }
-      throw e;
-    }
+    const existingNotificationPolicy = await this.getNotificationPolicy({ id: params.options.id });
+    const existingAttrs: NotificationPolicySavedObjectAttributes = omit(
+      existingNotificationPolicy,
+      ['id', 'version']
+    );
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
       ...existingAttrs,
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.workflow_id !== undefined && { workflow_id: data.workflow_id }),
+      ...params.data,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
 
     try {
-      await this.notificationPolicySavedObjectService.update({
-        id,
+      const updated = await this.notificationPolicySavedObjectService.update({
+        id: params.options.id,
         attrs: nextAttrs,
-        version: existingVersion,
+        version: params.options.version,
       });
+
+      return { id: params.options.id, version: updated.version, ...nextAttrs };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
-          `Notification policy with id "${id}" has already been updated by another user`
+          `Notification policy with id "${params.options.id}" has already been updated by another user`
         );
       }
       throw e;
     }
-
-    return { id, ...nextAttrs };
   }
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
-    try {
-      await this.notificationPolicySavedObjectService.get(id);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Notification policy with id "${id}" not found`);
-      }
-      throw e;
-    }
-
+    await this.getNotificationPolicy({ id });
     await this.notificationPolicySavedObjectService.delete({ id });
   }
 

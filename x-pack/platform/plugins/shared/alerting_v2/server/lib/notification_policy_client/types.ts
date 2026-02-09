@@ -7,12 +7,19 @@
 
 export interface CreateNotificationPolicyData {
   name: string;
+  description: string;
   workflow_id: string;
 }
 
 export interface UpdateNotificationPolicyData {
   name?: string;
+  description?: string;
   workflow_id?: string;
+}
+
+export interface UpdateNotificationPolicyParams {
+  data: UpdateNotificationPolicyData;
+  options: { id: string; version: string };
 }
 
 export interface CreateNotificationPolicyParams {
@@ -22,10 +29,12 @@ export interface CreateNotificationPolicyParams {
 
 export interface NotificationPolicyResponse {
   id: string;
+  version?: string;
   name: string;
+  description: string;
   workflow_id: string;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;
-  updatedAt: string;
+  updatedAt: string | null;
 }

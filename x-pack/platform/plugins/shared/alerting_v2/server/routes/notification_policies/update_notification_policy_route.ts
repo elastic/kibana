@@ -6,25 +6,24 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { z } from '@kbn/zod';
+import { inject, injectable } from 'inversify';
+import { NotificationPolicyClient } from '../../lib/notification_policy_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-import type { UpdateNotificationPolicyData } from '../lib/notification_policy_client';
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from './constants';
-
-const updateNotificationPolicyParamsSchema = schema.object({
-  id: schema.string(),
+const updateNotificationPolicyParamsSchema = z.object({
+  id: z.string(),
 });
 
-const updateNotificationPolicyBodySchema = schema.object({
-  name: schema.maybe(schema.string()),
-  workflow_id: schema.maybe(schema.string()),
+const updateNotificationPolicyBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  workflow_id: z.string().optional(),
+  version: z.string(),
 });
 
 @injectable()
@@ -39,17 +38,17 @@ export class UpdateNotificationPolicyRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: updateNotificationPolicyBodySchema,
-      params: updateNotificationPolicyParamsSchema,
+      body: buildRouteValidationWithZod(updateNotificationPolicyBodySchema),
+      params: buildRouteValidationWithZod(updateNotificationPolicyParamsSchema),
     },
   } as const;
 
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof updateNotificationPolicyParamsSchema>,
+      z.infer<typeof updateNotificationPolicyParamsSchema>,
       unknown,
-      UpdateNotificationPolicyData
+      z.infer<typeof updateNotificationPolicyBodySchema>
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
@@ -59,8 +58,8 @@ export class UpdateNotificationPolicyRoute {
   async handle() {
     try {
       const updated = await this.notificationPolicyClient.updateNotificationPolicy({
-        id: this.request.params.id,
         data: this.request.body,
+        options: { id: this.request.params.id, version: this.request.body.version },
       });
 
       return this.response.ok({ body: updated });

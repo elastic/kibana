@@ -18,7 +18,10 @@ import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
 export interface NotificationPolicySavedObjectServiceContract {
-  create(params: { attrs: NotificationPolicySavedObjectAttributes; id?: string }): Promise<string>;
+  create(params: {
+    attrs: NotificationPolicySavedObjectAttributes;
+    id?: string;
+  }): Promise<{ id: string; version?: string }>;
   get(
     id: string,
     spaceId?: string
@@ -26,8 +29,8 @@ export interface NotificationPolicySavedObjectServiceContract {
   update(params: {
     id: string;
     attrs: NotificationPolicySavedObjectAttributes;
-    version?: string;
-  }): Promise<void>;
+    version: string;
+  }): Promise<{ id: string; version?: string }>;
   delete(params: { id: string }): Promise<void>;
 }
 
@@ -54,9 +57,9 @@ export class NotificationPolicySavedObjectService
   }: {
     attrs: NotificationPolicySavedObjectAttributes;
     id?: string;
-  }): Promise<string> {
+  }): Promise<{ id: string; version?: string }> {
     const notificationPolicyId = id ?? SavedObjectsUtils.generateId();
-    await this.client.create<NotificationPolicySavedObjectAttributes>(
+    const result = await this.client.create<NotificationPolicySavedObjectAttributes>(
       NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       attrs,
       {
@@ -64,7 +67,8 @@ export class NotificationPolicySavedObjectService
         overwrite: false,
       }
     );
-    return notificationPolicyId;
+
+    return { id: result.id, version: result.version };
   }
 
   public async get(
@@ -91,16 +95,15 @@ export class NotificationPolicySavedObjectService
   }: {
     id: string;
     attrs: NotificationPolicySavedObjectAttributes;
-    version?: string;
-  }): Promise<void> {
-    await this.client.update<NotificationPolicySavedObjectAttributes>(
+    version: string;
+  }): Promise<{ id: string; version?: string }> {
+    const result = await this.client.update<NotificationPolicySavedObjectAttributes>(
       NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       id,
       attrs,
-      {
-        ...(version ? { version } : {}),
-      }
+      { version }
     );
+    return { id: result.id, version: result.version };
   }
 
   public async delete({ id }: { id: string }): Promise<void> {

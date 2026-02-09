@@ -13,7 +13,8 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    name: { type: 'text' },
+    name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
+    description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     workflow_id: { type: 'keyword' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },

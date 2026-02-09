@@ -6,27 +6,26 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger as KibanaLogger } from '@kbn/logging';
-import { inject, injectable } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import type { CreateNotificationPolicyData } from '../lib/notification_policy_client';
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from './constants';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import type { Logger as KibanaLogger } from '@kbn/logging';
+import { z } from '@kbn/zod';
+import { inject, injectable } from 'inversify';
+import { NotificationPolicyClient } from '../../lib/notification_policy_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-const createNotificationPolicyParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+const createNotificationPolicyParamsSchema = z.object({
+  id: z.string().optional(),
 });
 
-const createNotificationPolicyBodySchema = schema.object({
-  name: schema.string(),
-  workflow_id: schema.string(),
+const createNotificationPolicyBodySchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  workflow_id: z.string(),
 });
 
 @injectable()
@@ -41,8 +40,8 @@ export class CreateNotificationPolicyRoute implements RouteHandler {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: createNotificationPolicyBodySchema,
-      params: createNotificationPolicyParamsSchema,
+      body: buildRouteValidationWithZod(createNotificationPolicyBodySchema),
+      params: buildRouteValidationWithZod(createNotificationPolicyParamsSchema),
     },
   } as const;
 
@@ -50,9 +49,9 @@ export class CreateNotificationPolicyRoute implements RouteHandler {
     @inject(Logger) private readonly logger: KibanaLogger,
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof createNotificationPolicyParamsSchema>,
+      z.infer<typeof createNotificationPolicyParamsSchema>,
       unknown,
-      CreateNotificationPolicyData
+      z.infer<typeof createNotificationPolicyBodySchema>
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)

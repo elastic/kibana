@@ -6,19 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { z } from '@kbn/zod';
+import { inject, injectable } from 'inversify';
+import { NotificationPolicyClient } from '../../lib/notification_policy_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from './constants';
-
-const getNotificationPolicyParamsSchema = schema.object({
-  id: schema.string(),
+const getNotificationPolicyParamsSchema = z.object({
+  id: z.string(),
 });
 
 @injectable()
@@ -33,14 +31,14 @@ export class GetNotificationPolicyRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      params: getNotificationPolicyParamsSchema,
+      params: buildRouteValidationWithZod(getNotificationPolicyParamsSchema),
     },
   } as const;
 
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof getNotificationPolicyParamsSchema>,
+      z.infer<typeof getNotificationPolicyParamsSchema>,
       unknown,
       unknown
     >,
