@@ -15,11 +15,15 @@ import type {
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
-import { Parser, isSource } from '@kbn/esql-language';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { BROWSER_POPOVER_WIDTH } from '@kbn/esql-resource-browser';
 import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
-import { computeInsertionText, computeRemovalRange, getLocatedSourceItemsFromQuery } from './utils';
+import {
+  computeInsertionText,
+  computeRemovalRange,
+  getLocatedSourceItemsFromQuery,
+  getSourceCommandContextFromQuery,
+} from './utils';
 import { IndicesBrowserOpenMode } from './open_mode';
 
 interface UseDataSourceBrowserParams {
@@ -133,40 +137,34 @@ export function useDataSourceBrowser({
 
       const cursorPosition = editor.getPosition();
       openCursorOffsetRef.current = cursorPosition ? model.getOffsetAt(cursorPosition) : undefined;
-      insertionOffsetRef.current = openCursorOffsetRef.current;
 
       // Get the range of the sources
-      try {
-        const { root } = Parser.parse(fullText, { withFormatting: true });
-        const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
-        isTSCommandRef.current = sourceCommand?.name === 'ts';
+      const sourceCtx = getSourceCommandContextFromQuery({
+        queryText: fullText,
+        cursorOffset: openCursorOffsetRef.current,
+        openedFrom: openModeRef.current,
+      });
+      isTSCommandRef.current = sourceCtx.command === 'ts';
 
-        const sources = (sourceCommand?.args ?? []).filter(isSource);
-
-        if (sources.length > 0) {
-          const startOffset = Math.min(...sources.map((s) => s.location.min));
-          const endOffset = Math.max(...sources.map((s) => s.location.max)) + 1;
-          sourcesRangeRef.current = getRangeFromOffsets(model, startOffset, endOffset);
-          // If opened from the badge, we always insert at the beginning of the sources list.
-          if (openModeRef.current === IndicesBrowserOpenMode.Badge) {
-            insertionOffsetRef.current = startOffset;
-          }
-        } else {
-          const offset = openCursorOffsetRef.current;
-          if (offset) {
-            sourcesRangeRef.current = getRangeFromOffsets(model, offset, offset);
-            insertionOffsetRef.current = offset;
-          }
-        }
-      } catch {
-        // If parsing fails, fall back to inserting at the current cursor position.
-        const offset = openCursorOffsetRef.current;
-        if (typeof offset === 'number') {
-          sourcesRangeRef.current = getRangeFromOffsets(model, offset, offset);
-          insertionOffsetRef.current = offset;
-        }
-        isTSCommandRef.current = false;
+      if (
+        typeof sourceCtx.sourcesStartOffset === 'number' &&
+        typeof sourceCtx.sourcesEndOffset === 'number'
+      ) {
+        sourcesRangeRef.current = getRangeFromOffsets(
+          model,
+          sourceCtx.sourcesStartOffset,
+          sourceCtx.sourcesEndOffset
+        );
+      } else if (typeof sourceCtx.insertionOffset === 'number') {
+        // No sources yet (or parsing failed): fall back to using the cursor as the insertion point.
+        sourcesRangeRef.current = getRangeFromOffsets(
+          model,
+          sourceCtx.insertionOffset,
+          sourceCtx.insertionOffset
+        );
       }
+
+      insertionOffsetRef.current = sourceCtx.insertionOffset;
 
       const preloadedSources = options?.preloadedSources;
       const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;

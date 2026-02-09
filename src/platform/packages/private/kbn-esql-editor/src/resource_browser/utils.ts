@@ -8,6 +8,7 @@
  */
 
 import { Parser, isSource } from '@kbn/esql-language';
+import { IndicesBrowserOpenMode } from './open_mode';
 
 export interface CommandRange {
   lineNumber: number; // 1-based, assumes the command is on a single line
@@ -61,6 +62,70 @@ export interface LocatedSourceItem {
   type?: string;
   name?: string;
 }
+
+export interface SourceCommandContext {
+  /** The main source command in the query, if present. */
+  command?: 'from' | 'ts';
+  /**
+   * `[start, end)` offsets of the *existing* source arguments for the main `FROM`/`TS` command.
+   * When there are no existing sources (e.g. `FROM |`), these are `undefined`.
+   */
+  sourcesStartOffset?: number;
+  sourcesEndOffset?: number;
+  /**
+   * Where a newly selected source should be inserted, as a 0-based offset into the query string.
+   *
+   * - If opened from the badge and there are existing sources, we insert at the beginning of the
+   *   sources list.
+   * - Otherwise, we insert at the cursor (when available).
+   */
+  insertionOffset?: number;
+}
+
+/**
+ * Computes the source-command context for opening the indices browser.
+ *
+ * This is a small, pure helper so we can unit test the "where do we insert" and "what range do we
+ * treat as the sources list" logic without having to pass Monaco models/editors or React refs.
+ */
+export const getSourceCommandContextFromQuery = ({
+  queryText,
+  cursorOffset,
+  openedFrom,
+}: {
+  queryText: string;
+  cursorOffset?: number;
+  openedFrom: IndicesBrowserOpenMode;
+}): SourceCommandContext => {
+  try {
+    const { root } = Parser.parse(queryText, { withFormatting: true });
+    const sourceCommand = root.commands.find(({ name }) => name === 'from' || name === 'ts');
+
+    const command = sourceCommand?.name as 'from' | 'ts' | undefined;
+    const sources = (sourceCommand?.args ?? []).filter(isSource);
+
+    if (sources.length > 0) {
+      const sourcesStartOffset = Math.min(...sources.map((s) => s.location.min));
+      const sourcesEndOffset = Math.max(...sources.map((s) => s.location.max)) + 1;
+      const insertionOffset =
+        openedFrom === IndicesBrowserOpenMode.Badge ? sourcesStartOffset : cursorOffset;
+
+      return {
+        command,
+        sourcesStartOffset,
+        sourcesEndOffset,
+        insertionOffset,
+      };
+    }
+
+    return {
+      command,
+      insertionOffset: cursorOffset,
+    };
+  } catch {
+    return { insertionOffset: cursorOffset };
+  }
+};
 
 /**
  * Parses the query and returns the `location.min/max` for each *existing* `source` argument
