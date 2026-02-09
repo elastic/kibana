@@ -7,24 +7,17 @@
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { LensApiSchemaType, LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
-
+import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 import {
   buildMarkdownPanel as buildMarkdownPanelBase,
+  getLensPanelWidthFromAttributes,
   getMarkdownPanelHeight as getMarkdownPanelHeightBase,
+  getPanelDimensions as getPanelDimensionsBase,
   normalizePanels as normalizePanelsBase,
-  type PanelLayoutConfig,
-  DEFAULT_PANEL_HEIGHT,
-  SMALL_PANEL_WIDTH,
-  LARGE_PANEL_WIDTH,
-  MARKDOWN_PANEL_WIDTH,
-  MARKDOWN_MIN_HEIGHT,
-  MARKDOWN_MAX_HEIGHT,
-  SMALL_CHART_TYPES,
+  panelLayout,
 } from '../../common';
 
 /**
@@ -38,34 +31,8 @@ export const checkDashboardToolsAvailability = async ({
   return { status: enabled ? 'available' : 'unavailable' };
 };
 
-const panelLayout: PanelLayoutConfig = {
-  defaultPanelHeight: DEFAULT_PANEL_HEIGHT,
-  smallPanelWidth: SMALL_PANEL_WIDTH,
-  largePanelWidth: LARGE_PANEL_WIDTH,
-  markdownPanelWidth: MARKDOWN_PANEL_WIDTH,
-  markdownMinHeight: MARKDOWN_MIN_HEIGHT,
-  markdownMaxHeight: MARKDOWN_MAX_HEIGHT,
-  smallChartTypes: SMALL_CHART_TYPES,
-  dashboardGridColumnCount: DASHBOARD_GRID_COLUMN_COUNT,
-};
-
-const getLensPanelWidthFromAttributes = (lensAttributes: LensAttributes): number => {
-  const visType = lensAttributes.visualizationType;
-  const isSmallChart =
-    visType === 'lnsMetric' || visType === 'lnsLegacyMetric' || visType === 'lnsGauge';
-  return isSmallChart ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
-};
-
-/**
- * Calculates panel dimensions based on chart type.
- * Matches the logic in panel_utils.ts normalizePanels function.
- */
-export const getPanelDimensions = (chartType: string): { width: number; height: number } => {
-  return {
-    width: SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH,
-    height: DEFAULT_PANEL_HEIGHT,
-  };
-};
+export const getPanelDimensions = (chartType: string): { width: number; height: number } =>
+  getPanelDimensionsBase(chartType);
 
 /**
  * Builds a markdown panel for dashboard summaries with dynamic height based on content.

@@ -33,7 +33,7 @@ import {
 } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { normalizePanels, buildMarkdownPanel, getMarkdownPanelHeight } from '../utils/panel_utils';
+import { normalizePanels, buildMarkdownPanel, getMarkdownPanelHeight } from '../../common';
 import type { AttachmentStore } from '../services/attachment_store';
 
 const arePanelsEqual = (

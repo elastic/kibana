@@ -11,9 +11,11 @@ export {
   buildMarkdownPanel,
   buildPanelFromRawConfig,
   calculateMarkdownPanelHeight,
+  getLensPanelWidthFromAttributes,
   getMarkdownPanelHeight,
-  getPanelWidth,
+  getPanelDimensions,
   normalizePanels,
+  panelLayout,
 } from './panel_utils';
 export type { BuildPanelFromRawConfigOptions, PanelLayoutConfig } from './panel_utils';
 export {

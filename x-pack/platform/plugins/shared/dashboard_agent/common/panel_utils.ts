@@ -6,7 +6,6 @@
  */
 
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
@@ -18,6 +17,18 @@ import {
   isLensAttachmentPanel,
   isGenericAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
+import {
+  DEFAULT_PANEL_HEIGHT,
+  SMALL_PANEL_WIDTH,
+  LARGE_PANEL_WIDTH,
+  MARKDOWN_PANEL_WIDTH,
+  MARKDOWN_MIN_HEIGHT,
+  MARKDOWN_MAX_HEIGHT,
+  SMALL_CHART_TYPES,
+} from './panel_constants';
+
+const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const MARKDOWN_EMBEDDABLE_TYPE = 'DASHBOARD_MARKDOWN';
 
 export interface PanelLayoutConfig {
   defaultPanelHeight: number;
@@ -30,27 +41,62 @@ export interface PanelLayoutConfig {
   dashboardGridColumnCount: number;
 }
 
+export const panelLayout: PanelLayoutConfig = {
+  defaultPanelHeight: DEFAULT_PANEL_HEIGHT,
+  smallPanelWidth: SMALL_PANEL_WIDTH,
+  largePanelWidth: LARGE_PANEL_WIDTH,
+  markdownPanelWidth: MARKDOWN_PANEL_WIDTH,
+  markdownMinHeight: MARKDOWN_MIN_HEIGHT,
+  markdownMaxHeight: MARKDOWN_MAX_HEIGHT,
+  smallChartTypes: SMALL_CHART_TYPES,
+  dashboardGridColumnCount: DASHBOARD_GRID_COLUMN_COUNT,
+};
+
+export const getLensPanelWidthFromAttributes = (lensAttributes: LensAttributes): number => {
+  const visType = lensAttributes.visualizationType;
+  const isSmallChart =
+    visType === 'lnsMetric' || visType === 'lnsLegacyMetric' || visType === 'lnsGauge';
+  return isSmallChart ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
+};
+
 export const getPanelWidth = (chartType: string, layout: PanelLayoutConfig): number => {
   return layout.smallChartTypes.has(chartType) ? layout.smallPanelWidth : layout.largePanelWidth;
 };
 
+export const getPanelDimensions = (chartType: string): { width: number; height: number } => {
+  return {
+    width: getPanelWidth(chartType, panelLayout),
+    height: DEFAULT_PANEL_HEIGHT,
+  };
+};
+
 export const calculateMarkdownPanelHeight = (
   content: string,
-  layout: PanelLayoutConfig
+  layout: PanelLayoutConfig = panelLayout
 ): number => {
   const lineCount = content.split('\n').length;
   const estimatedHeight = lineCount + 2;
   return Math.max(layout.markdownMinHeight, Math.min(layout.markdownMaxHeight, estimatedHeight));
 };
 
-export const buildMarkdownPanel = (content: string, layout: PanelLayoutConfig): DashboardPanel => ({
+export const buildMarkdownPanel = (
+  content: string,
+  layout: PanelLayoutConfig = panelLayout
+): DashboardPanel => ({
   type: MARKDOWN_EMBEDDABLE_TYPE,
   config: { content },
-  grid: { x: 0, y: 0, w: layout.markdownPanelWidth, h: calculateMarkdownPanelHeight(content, layout) },
+  grid: {
+    x: 0,
+    y: 0,
+    w: layout.markdownPanelWidth,
+    h: calculateMarkdownPanelHeight(content, layout),
+  },
 });
 
-export const getMarkdownPanelHeight = (content: string, layout: PanelLayoutConfig): number =>
-  calculateMarkdownPanelHeight(content, layout);
+export const getMarkdownPanelHeight = (
+  content: string,
+  layout: PanelLayoutConfig = panelLayout
+): number => calculateMarkdownPanelHeight(content, layout);
 
 export const buildLensPanelFromApi = (
   config: LensApiSchemaType,
@@ -85,15 +131,7 @@ export interface BuildPanelFromRawConfigOptions {
 export const buildPanelFromRawConfig = (
   options: BuildPanelFromRawConfigOptions
 ): DashboardPanel | null => {
-  const {
-    embeddableType,
-    rawConfig,
-    title,
-    position,
-    layout,
-    uid,
-    getLensPanelWidth,
-  } = options;
+  const { embeddableType, rawConfig, title, position, layout, uid, getLensPanelWidth } = options;
   const { currentX, currentY } = position;
 
   if (embeddableType === 'lens') {
@@ -162,18 +200,19 @@ export const buildPanelFromRawConfig = (
 export interface NormalizePanelsOptions {
   panels: AttachmentPanel[] | undefined;
   yOffset?: number;
-  layout: PanelLayoutConfig;
+  layout?: PanelLayoutConfig;
   includePanelIdAsUid?: boolean;
   getLensPanelWidth?: (lensAttributes: LensAttributes) => number;
 }
 
-export const normalizePanels = ({
+const normalizePanelsWithLayout = ({
   panels,
   yOffset = 0,
   layout,
   includePanelIdAsUid = false,
   getLensPanelWidth,
 }: NormalizePanelsOptions): DashboardPanel[] => {
+  const normalizedLayout = layout ?? panelLayout;
   const panelList = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
@@ -184,11 +223,11 @@ export const normalizePanels = ({
 
     if (isLensAttachmentPanel(panel)) {
       const config = panel.visualization as LensApiSchemaType;
-      const w = getPanelWidth(config.type, layout);
+      const w = getPanelWidth(config.type, normalizedLayout);
 
-      if (currentX + w > layout.dashboardGridColumnCount) {
+      if (currentX + w > normalizedLayout.dashboardGridColumnCount) {
         currentX = 0;
-        currentY += layout.defaultPanelHeight;
+        currentY += normalizedLayout.defaultPanelHeight;
       }
 
       dashboardPanel = buildLensPanelFromApi(
@@ -197,7 +236,7 @@ export const normalizePanels = ({
           x: currentX,
           y: currentY,
           w,
-          h: layout.defaultPanelHeight,
+          h: normalizedLayout.defaultPanelHeight,
         },
         includePanelIdAsUid ? panel.panelId : undefined
       );
@@ -211,16 +250,16 @@ export const normalizePanels = ({
           currentX,
           currentY,
         },
-        layout,
+        layout: normalizedLayout,
         uid: includePanelIdAsUid ? panel.panelId : undefined,
         getLensPanelWidth,
       });
 
       if (dashboardPanel) {
         currentX += dashboardPanel.grid.w;
-        if (currentX >= layout.dashboardGridColumnCount) {
+        if (currentX >= normalizedLayout.dashboardGridColumnCount) {
           currentX = 0;
-          currentY += layout.defaultPanelHeight;
+          currentY += normalizedLayout.defaultPanelHeight;
         }
       }
     }
@@ -232,3 +271,39 @@ export const normalizePanels = ({
 
   return dashboardPanels;
 };
+
+export function normalizePanels(
+  panels: AttachmentPanel[] | undefined,
+  yOffset?: number
+): DashboardPanel[];
+export function normalizePanels(options: NormalizePanelsOptions): DashboardPanel[];
+export function normalizePanels(
+  panelsOrOptions: AttachmentPanel[] | NormalizePanelsOptions | undefined,
+  yOffset: number = 0
+): DashboardPanel[] {
+  if (Array.isArray(panelsOrOptions) || panelsOrOptions === undefined) {
+    return normalizePanelsWithLayout({
+      panels: panelsOrOptions,
+      yOffset,
+      layout: panelLayout,
+      includePanelIdAsUid: true,
+      getLensPanelWidth: getLensPanelWidthFromAttributes,
+    });
+  }
+
+  const {
+    panels,
+    yOffset: optionsYOffset = 0,
+    layout = panelLayout,
+    includePanelIdAsUid = false,
+    getLensPanelWidth = getLensPanelWidthFromAttributes,
+  } = panelsOrOptions;
+
+  return normalizePanelsWithLayout({
+    panels,
+    yOffset: optionsYOffset,
+    layout,
+    includePanelIdAsUid,
+    getLensPanelWidth,
+  });
+}
