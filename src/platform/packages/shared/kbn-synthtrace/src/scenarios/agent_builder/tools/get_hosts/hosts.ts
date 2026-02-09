@@ -24,7 +24,7 @@
  * at 30-second intervals). For faster execution, use shorter time ranges (15-30 minutes):
  *
  * ```
- * node scripts/synthtrace <path> --from "now-15m" --to "now" --clean --workers=1
+ * node scripts/synthtrace <path> --from "now-15m" --to "now" --clean
  * ```
  *
  * Validate via:
