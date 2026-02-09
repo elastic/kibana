@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { test, expect } from './fixtures';
+import { waitForPageReady } from './common/constants';
+
+// NOTE: This test requires serverless mode with Security Essentials product tier.
+// TODO: Enable when serverless Scout testing is configured.
+test.describe.skip('App Features for Security Essentials', { tag: ['@svlSecurity'] }, () => {
+  test('should not have AI Assistant available', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await page.goto(kbnUrl.get('/app/security/get_started'));
+    await waitForPageReady(page);
+    await expect(pageObjects.assistant.assistantButton).not.toBeVisible();
+  });
+});

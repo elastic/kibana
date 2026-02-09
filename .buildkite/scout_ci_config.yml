@@ -39,3 +39,4 @@ packages:
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout/ui/ai_assistant.playwright.config.ts
