@@ -16,7 +16,7 @@ import {
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
@@ -39,33 +39,54 @@ export function WorkflowsPage() {
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
   const history = useHistory();
-  const [search, setSearch] = useState<WorkflowsSearchParams>(() => {
+
+  // Keep filters in local state (not in URL)
+  const [filters, setFilters] = useState<Partial<WorkflowsSearchParams>>({});
+
+  // Derive search from URL params + local filters
+  const search = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return {
-      size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
-      page: 1,
+      size: Number(params.get('size')) || WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
+      page: Number(params.get('page')) || 1,
       query: params.get('query') || '',
+      ...filters, // merge in filters from state
     };
-  });
+  }, [location.search, filters]);
 
-  // Sync search.query to URL whenever it changes
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
+  // Update search: sync query/page/size to URL, keep filters in state
+  const setSearch = useCallback(
+    (updater: WorkflowsSearchParams | ((prev: WorkflowsSearchParams) => WorkflowsSearchParams)) => {
+      const currentSearch = search;
+      const newSearch = typeof updater === 'function' ? updater(currentSearch) : updater;
 
-    if (search.query) {
-      params.set('query', search.query);
-    } else {
-      params.delete('query');
-    }
+      // Extract URL params and filter params
+      const { query, page, size, ...restFilters } = newSearch;
 
-    const newSearch = params.toString();
-    const currentSearch = location.search.replace(/^\?/, '');
+      // Update URL with query, page, size (only if non-default)
+      const params = new URLSearchParams();
 
-    // Only update if URL actually changed to avoid infinite loops
-    if (newSearch !== currentSearch) {
-      history.replace({ search: newSearch });
-    }
-  }, [search.query, history, location.search]);
+      if (query) {
+        params.set('query', query);
+      }
+
+      // Only add page if not default (1)
+      if (page && page !== 1) {
+        params.set('page', String(page));
+      }
+
+      // Only add size if not default
+      if (size && size !== WORKFLOWS_TABLE_INITIAL_PAGE_SIZE) {
+        params.set('size', String(size));
+      }
+
+      history.replace({ search: params.toString() });
+
+      // Update local filter state
+      setFilters(restFilters);
+    },
+    [history, search]
+  );
 
   const navigateToCreateWorkflow = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });
