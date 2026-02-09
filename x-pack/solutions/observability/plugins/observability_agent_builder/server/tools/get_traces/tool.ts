@@ -15,7 +15,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { DEFAULT_TIME_RANGE } from './constants';
+import { DEFAULT_MAX_TRACES, DEFAULT_TIME_RANGE, DEFAULT_TRACE_FIELDS } from './constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
@@ -27,12 +27,20 @@ const getTracesSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'KQL filter used to find anchor documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxSequences`) and returns APM trace events and logs for each discovered trace.id.'
+      'KQL filter used to find anchor documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxTraceSize`) and returns APM trace events and logs for each discovered trace.id.'
     ),
-  maxSequences: z
+  maxTraceSize: z
     .number()
     .default(10)
     .describe('Maximum number of unique traces (trace.id values) to return.'),
+  maxTraces: z
+    .number()
+    .default(DEFAULT_MAX_TRACES)
+    .describe('Maximum number of traces to return per trace.id'),
+  fields: z
+    .array(z.string())
+    .default(DEFAULT_TRACE_FIELDS)
+    .describe('Fields to include in the returned trace events.'),
 });
 
 export function createGetTracesTool({
@@ -69,7 +77,10 @@ export function createGetTracesTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, maxSequences }, { esClient }) => {
+    handler: async (
+      { start, end, index, kqlFilter, maxTraceSize, maxTraces, fields },
+      { esClient }
+    ) => {
       try {
         const { sequences } = await getToolHandler({
           core,
@@ -80,7 +91,9 @@ export function createGetTracesTool({
           end,
           index,
           kqlFilter,
-          maxSequences,
+          maxTraceSize,
+          fields,
+          maxTraces,
         });
 
         return {

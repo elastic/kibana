@@ -8,9 +8,7 @@
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 export interface TraceSequence {
-  correlation: Correlation;
-  traceItems: Record<string, unknown>[];
-  logs: Record<string, unknown>[];
+  traces: Record<string, unknown>[];
   isTruncated?: boolean;
 }
 

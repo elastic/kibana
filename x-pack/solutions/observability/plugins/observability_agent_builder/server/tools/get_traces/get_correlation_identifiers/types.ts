@@ -16,7 +16,7 @@ interface AnchorDocTopHitsAgg {
   };
 }
 
-interface UniqueValuesTermsAgg {
+interface TraceIdsTermsAgg {
   buckets: Array<{
     key: string;
     doc_count: number;
@@ -24,9 +24,11 @@ interface UniqueValuesTermsAgg {
   }>;
 }
 
-interface DiversifiedSamplerAgg {
+interface SampleAgg {
   doc_count: number;
-  unique_values?: UniqueValuesTermsAgg;
+  trace_ids?: TraceIdsTermsAgg;
 }
 
-export type CorrelationFieldAggregations = Record<string, DiversifiedSamplerAgg>;
+export interface TraceIdAggregations {
+  sample?: SampleAgg;
+}

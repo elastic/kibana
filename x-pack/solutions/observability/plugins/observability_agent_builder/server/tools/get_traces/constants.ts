@@ -5,60 +5,89 @@
  * 2.0.
  */
 
-export const DEFAULT_LOG_SOURCE_FIELDS = [
-  '@timestamp',
-  'message',
-  'trace.id',
-  'transaction.id',
-  'span.id',
-  'log.level',
-  'service.*',
-  'host.*',
-  'container.*',
-  'kubernetes.*',
-  'cloud.*',
-  'error.*',
-  'event.*',
-  'url.*',
-  'user_agent.*',
-  'http.request.method',
-  'http.response.status_code',
-  'client.ip',
-];
+import {
+  AT_TIMESTAMP,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  ERROR_LOG_MESSAGE,
+  EVENT_OUTCOME,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  PARENT_ID,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+  SPAN_ACTION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_ID,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_PAGE_URL,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
+  URL_FULL,
+} from '@kbn/apm-types';
 
 export const DEFAULT_TRACE_FIELDS = [
-  '@timestamp',
-  'trace.id',
-  'agent.name',
-  'db.system',
-  'db.name',
-  'db.statement',
-  'error.exception.message',
-  'error.exception.type',
-  'event.outcome',
-  'host.name',
-  'http.request.method',
-  'http.response.status_code',
-  'log.level',
+  // Timeline + identity
+  '_index',
+  '_id',
+  AT_TIMESTAMP,
+  TRACE_ID,
+  AT_TIMESTAMP,
   'message',
-  'parent.id',
-  'processor.event',
-  'service.name',
-  'service.environment',
-  'span.destination.service.resource',
-  'span.duration.us',
-  'span.id',
-  'span.name',
-  'span.type',
-  'transaction.duration.us',
-  'transaction.id',
-  'transaction.name',
-  'transaction.type',
-  'url.path',
+  'log.level',
+
+  // Error fields
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  ERROR_LOG_MESSAGE,
+
+  // Service fields
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+
+  // Transaction summary
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_RESULT,
+  TRANSACTION_DURATION,
+
+  // Span summary
+  SPAN_ID,
+  SPAN_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_ACTION,
+  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  PARENT_ID,
+
+  // Outcome
+  EVENT_OUTCOME,
+
+  // HTTP fields
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_PAGE_URL,
+  URL_FULL,
 ];
 
-export const DEFAULT_MAX_APM_EVENTS = 500;
-export const DEFAULT_MAX_LOG_EVENTS = 200;
+export const DEFAULT_MAX_TRACES = 100;
 
 export const DEFAULT_TIME_RANGE = {
   start: 'now-1h',

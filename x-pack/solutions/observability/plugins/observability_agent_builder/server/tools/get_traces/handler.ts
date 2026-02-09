@@ -7,7 +7,6 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchHit } from '@kbn/es-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -17,12 +16,6 @@ import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
-import {
-  DEFAULT_MAX_APM_EVENTS,
-  DEFAULT_MAX_LOG_EVENTS,
-  DEFAULT_LOG_SOURCE_FIELDS,
-  DEFAULT_TRACE_FIELDS,
-} from './constants';
 import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
 import type { Correlation, TraceSequence } from './types';
 
@@ -73,7 +66,9 @@ export async function getToolHandler({
   end,
   index,
   kqlFilter,
-  maxSequences,
+  fields,
+  maxTraces,
+  maxTraceSize,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -83,7 +78,9 @@ export async function getToolHandler({
   end: string;
   index?: string;
   kqlFilter?: string;
-  maxSequences: number;
+  fields: string[];
+  maxTraces: number;
+  maxTraceSize: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
   const apmIndexPatterns = [
@@ -102,45 +99,27 @@ export async function getToolHandler({
     endTime,
     kqlFilter,
     logger,
-    maxSequences,
+    maxTraceSize,
   });
 
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
   const sequences: TraceSequence[] = await Promise.all(
     correlationIdentifiers.map(async (correlation) => {
-      const apmHits = await getDocuments({
+      const traces = await getDocuments({
         esClient,
         correlationIdentifier: correlation.identifier,
-        index: apmIndexPatterns,
+        index: indices,
         startTime: correlation.start,
         endTime: correlation.end,
-        size: DEFAULT_MAX_APM_EVENTS,
-        fields: DEFAULT_TRACE_FIELDS,
-      });
-
-      const logHits = await getDocuments({
-        esClient,
-        correlationIdentifier: correlation.identifier,
-        index: dataSources.logIndexPatterns,
-        startTime: correlation.start,
-        endTime: correlation.end,
-        size: DEFAULT_MAX_LOG_EVENTS,
-        fields: DEFAULT_LOG_SOURCE_FIELDS,
+        size: maxTraceSize,
+        fields,
       });
 
       return {
-        correlation,
-        traceItems: mapHitsToEntries(apmHits),
-        logs: mapHitsToEntries(logHits),
+        traces: traces.map((hit) => unwrapEsFields(hit.fields)),
       };
     })
   );
 
   return { sequences };
-}
-
-function mapHitsToEntries(
-  hits: SearchHit<undefined, string[], undefined>[]
-): Record<string, unknown>[] {
-  return hits.map((hit) => ({ _id: hit._id, ...unwrapEsFields(hit.fields) }));
 }
