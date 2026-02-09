@@ -38,7 +38,7 @@ fields:
   - name: effort
     control: INPUT_NUMBER
     label: Input number label
-    type: keyword
+    type: integer
   - name: details
     control: TEXTAREA
     label: Textarea label

@@ -19,6 +19,17 @@ export const InputTextFieldSchema = BaseFieldSchema.extend({
 
 export const InputNumberFieldSchema = BaseFieldSchema.extend({
   control: z.literal('INPUT_NUMBER'),
+  type: z.union([
+    z.literal('long'),
+    z.literal('integer'),
+    z.literal('short'),
+    z.literal('byte'),
+    z.literal('double'),
+    z.literal('float'),
+    z.literal('half_float'),
+    z.literal('scaled_float'),
+    z.literal('unsigned_long'),
+  ]),
 });
 
 export const SelectBasicFieldSchema = BaseFieldSchema.extend({
