@@ -185,8 +185,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
-          const esClient = scopedClusterClient.asCurrentUser;
-
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
             ruleMonitoringService,
