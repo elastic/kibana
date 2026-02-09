@@ -11,7 +11,8 @@ import { test, expect } from '../../../../../src/playwright';
 import { EuiSelectableWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/243242
+test.describe.skip('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`selectable with search field`, async ({ page, log }) => {
     const selector = {
       locator: 'xpath=//h2[@id="searchable"]/following::div[contains(@class, "euiSelectable")][1]',
