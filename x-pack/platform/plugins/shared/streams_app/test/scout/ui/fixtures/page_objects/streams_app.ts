@@ -8,7 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { EuiComboBoxWrapper } from '@kbn/scout';
 import type { ProcessorType } from '@kbn/streamlang';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
