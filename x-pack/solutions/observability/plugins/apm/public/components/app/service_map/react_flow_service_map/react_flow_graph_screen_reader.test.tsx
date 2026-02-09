@@ -167,7 +167,8 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
 
     const instructions = screen.getByText(/This is an interactive service map/i);
     expect(instructions).toBeInTheDocument();
-    expect(instructions).toHaveAttribute('id', 'service-map-instructions');
+    expect(instructions).toHaveAttribute('id');
+    expect(instructions.getAttribute('id')).toMatch(/^serviceMap/);
   });
 
   it('links service map container to instructions via aria-describedby', () => {
@@ -178,7 +179,10 @@ describe('ReactFlowServiceMap - Screen Reader Announcements', () => {
     );
 
     const serviceMapContainer = screen.getByTestId('reactFlowServiceMap');
-    expect(serviceMapContainer).toHaveAttribute('aria-describedby', 'service-map-instructions');
+    const instructions = screen.getByText(/This is an interactive service map/i);
+    const instructionsId = instructions.getAttribute('id');
+
+    expect(serviceMapContainer).toHaveAttribute('aria-describedby', instructionsId);
   });
 
   it('includes node count in aria-label', () => {

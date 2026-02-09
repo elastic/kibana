@@ -20,7 +20,12 @@ import {
   type NodeMouseHandler,
   type EdgeMouseHandler,
 } from '@xyflow/react';
-import { useEuiTheme, EuiScreenReaderOnly, EuiScreenReaderLive } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiScreenReaderOnly,
+  EuiScreenReaderLive,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
@@ -79,6 +84,7 @@ function ReactFlowGraphInner({
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -314,18 +320,15 @@ function ReactFlowGraphInner({
       role="group"
       tabIndex={0}
       aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
-        defaultMessage:
-          'Service map with {nodeCount} services and dependencies. Use Tab to navigate nodes, Arrow keys to move between adjacent nodes.',
+        defaultMessage: 'Service map with {nodeCount} services and dependencies.',
         values: { nodeCount: nodes.length },
       })}
-      aria-describedby="service-map-instructions"
+      aria-describedby={serviceMapId}
     >
       <EuiScreenReaderOnly>
-        <div id="service-map-instructions">{screenReaderInstructions}</div>
+        <div id={serviceMapId}>{screenReaderInstructions}</div>
       </EuiScreenReaderOnly>
-      <EuiScreenReaderLive aria-live="polite" aria-atomic="true">
-        {screenReaderAnnouncement}
-      </EuiScreenReaderLive>
+      <EuiScreenReaderLive>{screenReaderAnnouncement}</EuiScreenReaderLive>
       <ReactFlow
         nodes={nodes}
         edges={edges}
