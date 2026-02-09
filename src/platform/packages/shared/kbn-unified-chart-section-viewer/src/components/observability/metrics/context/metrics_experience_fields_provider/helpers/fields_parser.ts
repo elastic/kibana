@@ -13,6 +13,7 @@ import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { MetricField, Dimension } from '../../../../../../types';
 import { hasValue } from '../../../../../../common/utils/fields';
 import { ALLOWED_METRIC_TYPES, DIMENSION_TYPES } from '../../../../../../common/constants';
+import { getMetricKey } from '../../../../../../common/utils/metric_key/get_metric_key';
 
 const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 
@@ -76,12 +77,14 @@ export const categorizeFields = ({
       dataViewField.timeSeriesMetric &&
       ALLOWED_METRIC_TYPES_SET.has(dataViewField.timeSeriesMetric)
     ) {
+      const metricIndex = column.meta?.index ?? index;
       metricFields.push({
-        index: column.meta?.index ?? index,
+        index: metricIndex,
         name: columnName,
         type: fieldType,
         instrument: dataViewField.timeSeriesMetric,
         dimensions: [],
+        uniqueKey: getMetricKey(metricIndex, columnName),
       });
     } else if (dataViewField.timeSeriesDimension || DIMENSION_TYPES.includes(fieldType)) {
       dimensions.push({

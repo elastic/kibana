@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricField } from '../../../types';
-
 /**
  * Generates a unique key for a MetricField.
  * Format: dataViewIndex::metricName
@@ -23,14 +21,4 @@ import type { MetricField } from '../../../types';
  */
 export const getMetricKey = (dataViewIndex: string, metricName: string): string => {
   return `${dataViewIndex}::${metricName}`;
-};
-
-/**
- * Creates a Map for O(1) metric lookup by key.
- *
- * @param fields - Array of MetricField objects
- * @returns A Map where keys are metric keys and values are MetricField objects
- */
-export const createMetricFieldsMap = (fields: MetricField[]): Map<string, MetricField> => {
-  return new Map(fields.map((f) => [getMetricKey(f.index, f.name), f]));
 };

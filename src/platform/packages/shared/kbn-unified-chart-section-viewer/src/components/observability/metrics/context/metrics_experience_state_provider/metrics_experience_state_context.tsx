@@ -30,7 +30,13 @@ export const MetricsExperienceStateContext =
   createContext<MetricsExperienceStateContextValue | null>(null);
 
 export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
-  const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
+  const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0, {
+    // Never restore currentPage on tab duplication.
+    // The page index is relative to the query results, which may differ between tabs
+    // TODO: Once we have consistent query results across duplicated tabs, we can
+    // reconsider restoring the page if the data is identical.
+    shouldIgnoredRestoredValue: () => true,
+  });
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);

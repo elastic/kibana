@@ -35,7 +35,7 @@ describe('MetricFlyoutBody', () => {
 
   const createDefaultFlyoutState = (overrides = {}) => ({
     gridPosition: 0,
-    metricKey: { name: 'system.cpu.user.pct', dataViewIndex: 'metrics-*' },
+    metricUniqueKey: 'metrics-*::system.cpu.user.pct',
     esqlQuery: 'FROM metrics-*',
     selectedTabId: undefined,
     ...overrides,
