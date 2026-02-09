@@ -13,7 +13,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import { EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS } from '../fixtures/expected_builtin_roles_kibana_access';
 
