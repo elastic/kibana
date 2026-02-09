@@ -235,10 +235,12 @@ describe('filterCollapsedStreamRows', () => {
 
   it('filters out grandchildren if parent is collapsed', () => {
     // Add a grandchild for testing
+    const logsOtel = createStream('logs.otel', '1d');
+    const logsOtelChild = createStream('logs.otel.child1', '8h');
     const grandchild = createStream('logs.otel.child1.grandchild', '1h');
     const streamsWithGrandchild = asTrees([
-      rootA,
-      aChild1,
+      logsOtel,
+      logsOtelChild,
       grandchild,
       aChild2,
       aChild3,
