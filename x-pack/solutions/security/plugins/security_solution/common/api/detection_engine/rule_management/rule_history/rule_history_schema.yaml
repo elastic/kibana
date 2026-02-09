@@ -90,9 +90,17 @@ components:
           type: string
         revision:
           type: integer
-        message:
+        version:
+          type: integer
+        action:
           type: string
-        changedFields:
+        changes:
           type: array
           items:
             type: string
+        oldvalues:
+          type: object
+        snapshot:
+          type: object
+        metadata:
+          type: object

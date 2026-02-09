@@ -22,6 +22,14 @@ export const ChangeHistoryResult = z.object({
   userId: z.string(),
   action: z.string(),
   changes: z.array(z.string()),
+  oldvalues: z.object({}).passthrough().optional(),
+  snapshot: z.object({}).passthrough().optional(),
+  metadata: z
+    .object({
+      originalRuleId: z.string(),
+    })
+    .partial()
+    .optional(),
 });
 export type ChangeHistoryResponse = z.infer<typeof ChangeHistoryResponse>;
 export const ChangeHistoryResponse = z.object({

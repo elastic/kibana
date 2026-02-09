@@ -8,7 +8,6 @@
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
-import type { EuiTimelineItemProps } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -17,27 +16,27 @@ import {
   EuiBadge,
   EuiSpacer,
   EuiTimeline,
+  EuiTimelineItem,
   EuiText,
   EuiAvatar,
   EuiIcon,
   EuiLink,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
 // import type { Filter, Query } from '@kbn/es-query';
 // import { FILTERS } from '@kbn/es-query';
 
-import { RuleChangeTrackingAction, SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { Rule } from '../../../../rule_management/logic';
 import { HeaderSection } from '../../../../../common/components/header_section';
 // import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 // import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
-import type { ChangeHistoryResult } from '../../../../rule_management/api/hooks/use_change_history';
 import { useChangeHistory } from '../../../../rule_management/api/hooks/use_change_history';
 import { RuleDetailTabs } from '../use_rule_details_tabs';
 import { useRuleDetailsContext } from '../rule_details_context';
+import { CHANGE_HISTORY_ACTION_TEMPLATE } from './templates';
 
 const IGNORED_FIELDS = [
   'updatedAt',
@@ -89,89 +88,15 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   // const items = data?.items || [];
   const maxItems = data?.total ?? 0;
 
-  const ACTION_TEMPLATE = {
-    [RuleChangeTrackingAction.ruleCreate]: (item) => (
-      <>
-        {' made revision '}
-        <EuiBadge color="hollow">{item.revision}</EuiBadge>
-        {' creating the rule.'}
-      </>
-    ),
-    [SecurityRuleChangeTrackingAction.ruleDuplicate]: (item) => (
-      <>
-        {' made revision '}
-        <EuiBadge color="hollow">{item.revision}</EuiBadge>
-        {' duplicating the rule.'}
-      </>
-    ),
-    [SecurityRuleChangeTrackingAction.ruleInstall]: (item) => (
-      <>
-        {' made revision '}
-        <EuiBadge color="hollow">{item.revision}</EuiBadge>
-        {' installing the rule.'}
-      </>
-    ),
-    [RuleChangeTrackingAction.ruleUpdate]: (item) => {
-      const INLINE_LIMIT = 3;
-      const MAX_TOOLTIP_ITEMS = 30;
-      const changes = item.changes
-        .map((f) => f.replace(/^(\w|\.)+\./, ''))
-        .reduce((res, c, i, arr) => {
-          if (i < INLINE_LIMIT)
-            res.push(
-              <EuiBadge key={i} color="hollow">
-                {c}
-              </EuiBadge>
-            );
-          else if (i === INLINE_LIMIT && arr.length > INLINE_LIMIT)
-            res.push(
-              <React.Fragment key={i}>
-                {` and `}
-                <EuiToolTip
-                  css={css`
-                    color: ${euiTheme.colors.ink};
-                    background-color: ${backgroundBaseSubdued};
-                  `}
-                  position="top"
-                  content={arr.slice(INLINE_LIMIT, INLINE_LIMIT + MAX_TOOLTIP_ITEMS).map((k) => (
-                    <>
-                      {k}
-                      <br />
-                    </>
-                  ))}
-                >
-                  <EuiBadge
-                    css={css`
-                      cursor: 'pointer';
-                    `}
-                    tabIndex={0}
-                    color="hollow"
-                  >{`${arr.length - INLINE_LIMIT} other`}</EuiBadge>
-                </EuiToolTip>
-              </React.Fragment>
-            );
-          return res;
-        }, [] as JSX.Element[]);
-      return (
-        <>
-          {' made revision '}
-          <EuiBadge color="hollow">{item.revision}</EuiBadge>
-          {' updating '}
-          {changes.length ? changes : `(no changes)`}
-        </>
-      );
-    },
-    [RuleChangeTrackingAction.ruleEnable]: () => <>{' enabled the rule.'}</>,
-    [RuleChangeTrackingAction.ruleDisable]: () => <>{' disabled the rule.'}</>,
-  } as Record<string, (item: ChangeHistoryResult) => JSX.Element>;
-
-  const items: EuiTimelineItemProps['items'] = data?.items?.map((item) => {
+  const items = data?.items?.map((item) => {
     const visibleChanges = item.changes.filter((c) => !IGNORED_FIELDS.includes(c));
     const template =
-      ACTION_TEMPLATE[item.action] || ACTION_TEMPLATE[RuleChangeTrackingAction.ruleUpdate];
-    return {
-      icon: <EuiAvatar name="User" iconType="user" color={backgroundBaseSubdued} />,
-      children: (
+      CHANGE_HISTORY_ACTION_TEMPLATE[item.action] ||
+      CHANGE_HISTORY_ACTION_TEMPLATE[RuleChangeTrackingAction.ruleUpdate];
+    return (
+      <EuiTimelineItem
+        icon={<EuiAvatar name="User" iconType="user" color={backgroundBaseSubdued} />}
+      >
         <EuiText
           css={css`
             display: flex;
@@ -186,10 +111,10 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           <div>
             {`On ${moment(item.timestamp).format('MMM D YYYY @ HH.mm')} `}
             <EuiBadge color="hollow">{item.userId}</EuiBadge>
-            {template({ ...item, changes: visibleChanges })}
+            {template({ ...item, changes: visibleChanges }, euiTheme)}
           </div>
           {![RuleChangeTrackingAction.ruleEnable, RuleChangeTrackingAction.ruleDisable].includes(
-            item.action
+            item.action as RuleChangeTrackingAction
           ) && (
             <EuiLink>
               {`View `}
@@ -197,14 +122,15 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
             </EuiLink>
           )}
         </EuiText>
-      ),
-    };
+      </EuiTimelineItem>
+    );
   });
 
   // TODO: Only at the end (watch out for pagination)
-  items?.push({
-    icon: <EuiAvatar name="Elastic" iconType="logoElastic" color={backgroundBasePrimary} />,
-    children: (
+  items?.push(
+    <EuiTimelineItem
+      icon={<EuiAvatar name="Elastic" iconType="logoElastic" color={backgroundBasePrimary} />}
+    >
       <EuiText
         key={'end'}
         css={css`
@@ -219,8 +145,8 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           {`Rule history tracking started`}
         </p>
       </EuiText>
-    ),
-  });
+    </EuiTimelineItem>
+  );
 
   //   // Callbacks
   // const onTableChangeCallback = useCallback(
@@ -275,7 +201,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
         // itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
         data-test-subj="executionsTable"
       /> */}
-      <EuiTimeline items={items} aria-label="Change History table" />
+      <EuiTimeline aria-label="Change History table">{items}</EuiTimeline>
     </EuiPanel>
   );
 };

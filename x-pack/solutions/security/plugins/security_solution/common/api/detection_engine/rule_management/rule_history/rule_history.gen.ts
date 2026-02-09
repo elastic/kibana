@@ -26,6 +26,9 @@ export const RuleHistoryResult = z.object({
   version: z.number().int().optional(),
   action: z.string().optional(),
   changes: z.array(z.string()).optional(),
+  oldvalues: z.object({}).passthrough().optional(),
+  snapshot: z.object({}).passthrough().optional(),
+  metadata: z.object({}).passthrough().optional(),
 });
 
 export type RuleHistoryRequestQuery = z.infer<typeof RuleHistoryRequestQuery>;

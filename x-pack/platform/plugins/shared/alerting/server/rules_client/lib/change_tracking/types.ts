@@ -39,11 +39,11 @@ export interface ChangeHistoryDocument {
     type: string;
     hash: string;
     changes?: string[];
-    oldvalues?: object;
-    snapshot?: object;
+    oldvalues?: Record<string, unknown>;
+    snapshot?: Record<string, unknown>;
   };
 
-  metadata?: object;
+  metadata?: Record<string, unknown>;
 
   kibana: {
     space_id: string;

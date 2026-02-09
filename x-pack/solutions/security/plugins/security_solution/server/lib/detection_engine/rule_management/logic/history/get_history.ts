@@ -22,6 +22,7 @@ export interface GetRuleHistoryOptions {
 }
 
 export interface GetRuleHistoryResponse {
+  startDate?: Date;
   total: number;
   items: RuleHistoryResult[];
 }
@@ -47,13 +48,16 @@ export const getRuleHistory = async ({
 };
 
 const mapHistoryItem = (item: ChangeHistoryDocument): RuleHistoryResult => {
-  const { user, event, object } = item;
+  const { user, event, object, metadata } = item;
   return {
     timestamp: item['@timestamp'],
     userId: user?.id,
-    revision: object.snapshot?.revision,
-    version: object.snapshot?.version,
+    revision: object.snapshot?.revision as number | undefined,
+    version: object.snapshot?.version as number | undefined,
     action: event.action,
     changes: object.changes ?? [],
+    snapshot: object.snapshot,
+    oldvalues: object.oldvalues,
+    metadata,
   };
 };

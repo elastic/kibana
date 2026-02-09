@@ -316,7 +316,10 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
-                    options: { action: SecurityRuleChangeTrackingAction.ruleDuplicate },
+                    options: {
+                      originalId: rule.id,
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                    },
                   });
 
                   // we try to create exceptions after rule created, and then update rule

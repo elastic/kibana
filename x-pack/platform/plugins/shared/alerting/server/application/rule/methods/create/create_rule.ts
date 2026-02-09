@@ -45,6 +45,7 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 export interface CreateRuleOptions {
   id?: string;
   action?: ChangeTrackingAction;
+  originalId?: string;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -244,7 +245,7 @@ export async function createRule<Params extends RuleParams = never>(
 
   // Success? Track changes
   context.changeTrackingService?.logChange(
-    createParams.options?.action ?? RuleChangeTrackingAction.ruleCreate,
+    options?.action ?? RuleChangeTrackingAction.ruleCreate,
     username ?? 'unknown',
     {
       id,
@@ -254,7 +255,8 @@ export async function createRule<Params extends RuleParams = never>(
       module: ruleType.solution,
     },
     context.spaceId,
-    context.kibanaVersion
+    context.kibanaVersion,
+    { metadata: { originalRuleId: options?.originalId } }
   );
 
   // Convert ES RawRule back to domain rule object
