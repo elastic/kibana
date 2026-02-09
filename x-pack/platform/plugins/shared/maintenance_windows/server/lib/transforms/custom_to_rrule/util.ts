@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { DURATION_REGEX } from '../../constants';
+import { DURATION_REGEX } from '../../../routes/schemas/schedule/constants';
 
 export const getDurationInMilliseconds = (duration: string): number => {
   const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];

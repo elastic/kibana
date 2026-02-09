@@ -8,8 +8,8 @@
 import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
-import type { RRule } from '../../../../../application/types';
-import type { ScheduleRequest } from '../../types/v1';
+import type { RRule } from '../../../application/types';
+import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
 
 const DEFAULT_INTERVAL = 1;
 
