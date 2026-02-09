@@ -9,7 +9,6 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -120,9 +119,9 @@ export const OptionsListControl = ({
     invalidSelections,
     field,
     loading,
-    panelTitle,
+    label,
+    fieldName,
     fieldFormatter,
-    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
     componentApi.exclude$,
     componentApi.existsSelected$,
@@ -130,9 +129,9 @@ export const OptionsListControl = ({
     componentApi.invalidSelections$,
     componentApi.field$,
     componentApi.dataLoading$,
-    componentApi.title$,
-    componentApi.fieldFormatter,
-    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.label$,
+    componentApi.fieldName$,
+    componentApi.fieldFormatter
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
@@ -237,7 +236,7 @@ export const OptionsListControl = ({
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={Boolean(selectedOptionsCount)}
       textProps={{ css: styles.filterButtonText }}
-      aria-label={panelTitle ?? defaultPanelTitle}
+      aria-label={label ?? fieldName}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
       role="combobox"
@@ -249,7 +248,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <ConditionalLabelWrapper label={panelTitle ?? defaultPanelTitle} isPinned={isPinned}>
+    <ConditionalLabelWrapper label={label ?? fieldName} isPinned={isPinned}>
       <EuiFilterGroup
         className={'kbnGridLayout--hideDragHandle'}
         fullWidth
@@ -272,8 +271,8 @@ export const OptionsListControl = ({
           closePopover={() => setPopoverOpen(false)}
           panelClassName="optionsList__popoverOverride"
           panelProps={{
-            title: panelTitle ?? defaultPanelTitle,
-            'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
+            title: label ?? fieldName,
+            'aria-label': OptionsListStrings.popover.getAriaLabel(label ?? fieldName!),
           }}
         >
           <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />

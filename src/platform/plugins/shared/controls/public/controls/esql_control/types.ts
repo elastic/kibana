@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { ESQLControlState, PublishesESQLVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
   PublishesDataLoading,
-  TitlesApi,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { Filter } from '@kbn/es-query';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<ESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  TitlesApi &
-  PublishesDataLoading;
+  PublishesDataLoading & {
+    label$: PublishingSubject<string | undefined>;
+    setLabel: (label: string | undefined) => void;
+  };
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
 type HideExistsUnusedState = Pick<OptionsListComponentState, 'existsSelected'>;

@@ -17,7 +17,6 @@ import type {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -31,16 +30,17 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = StateManager<DataControlState>['api'] &
+export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &
   PublishesField &
-  Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesDataLoading &
   AppliesFilters &
   HasPanelCapabilities & {
+    label$: PublishingSubject<string | undefined>;
+    setLabel: (label: string | undefined) => void;
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

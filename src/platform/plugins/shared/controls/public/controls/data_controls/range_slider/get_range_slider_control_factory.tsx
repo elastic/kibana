@@ -228,7 +228,6 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             fieldName,
             viewMode,
             title,
-            defaultPanelTitle,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -239,8 +238,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             selections.value$,
             dataControlManager.api.fieldName$,
             viewMode$,
-            dataControlManager.api.title$,
-            dataControlManager.api.defaultTitle$ ?? new BehaviorSubject(undefined)
+            dataControlManager.api.label$
           );
 
           useEffect(() => {
@@ -268,7 +266,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               uuid={uuid}
               compressed={isCompressed(api)}
               isPinned={isPinned}
-              label={title ?? defaultPanelTitle}
+              label={title ?? fieldName}
             />
           );
         },

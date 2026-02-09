@@ -7,27 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
+import { omit } from 'lodash';
+import { BehaviorSubject, combineLatest, merge, switchMap, tap, map } from 'rxjs';
 
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  initializeTitleManager,
-  titleComparators,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
+import { titleComparators, type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
-  ...titleComparators,
+  title: titleComparators.title,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => (a ?? true) === (b ?? true),
@@ -69,11 +66,13 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const titlesManager = initializeTitleManager({ ...state, hide_title: true });
+  const label$ = new BehaviorSubject<string | undefined>(state.title);
 
-  const dataControlStateManager = initializeStateManager<
-    Omit<DataControlState, 'title' | 'description'>
-  >(state, defaultDataControlState, defaultDataControlComparators);
+  const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
+    omit(state, 'title'), // we use the term `label` and manage it ourselves to prevent default title handling
+    defaultDataControlState,
+    defaultDataControlComparators
+  );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -171,7 +170,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     // open the editor to get the new state
     openDataControlEditor<DataControlState & EditorState>({
       initialState: {
-        ...titlesManager.getLatestState(),
+        title: label$.getValue(),
         ...dataControlStateManager.getLatestState(),
         ...editorStateManager.getLatestState(),
       },
@@ -180,7 +179,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       initialDefaultPanelTitle: defaultTitle$.getValue(),
       parentApi,
       onUpdate: (newState) => {
-        titlesManager.reinitializeState(newState);
+        label$.next(newState.title);
         dataControlStateManager.reinitializeState(newState);
         editorStateManager.reinitializeState(newState);
       },
@@ -203,8 +202,11 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
   return {
     api: {
-      ...titlesManager.api,
       ...dataControlStateManager.api,
+      label$,
+      setLabel: (newLabel: string | undefined) => {
+        label$.next(newLabel);
+      },
       dataLoading$,
       blockingError$,
       setBlockingError,
@@ -215,7 +217,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       onEdit,
       appliedFilters$,
       filtersLoading$,
-      defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
       isExpandable: false,
@@ -236,14 +237,17 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(false);
       },
     },
-    anyStateChange$: merge(dataControlStateManager.anyStateChange$, titlesManager.anyStateChange$),
+    anyStateChange$: merge(
+      dataControlStateManager.anyStateChange$,
+      label$.pipe(map(() => undefined))
+    ),
     getLatestState: () => ({
       ...dataControlStateManager.getLatestState(),
-      ...titlesManager.getLatestState(),
+      title: label$.getValue(),
     }),
     reinitializeState: (newState) => {
       dataControlStateManager.reinitializeState(newState);
-      titlesManager.reinitializeState(newState);
+      label$.next(newState?.title);
     },
   };
 };
