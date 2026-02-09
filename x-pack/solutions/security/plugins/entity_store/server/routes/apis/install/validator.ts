@@ -100,10 +100,7 @@ function validateAdditionalIndexPatterns(
   });
 }
 
-function validateDelayVsLookbackPeriod(
-  data: LogExtractionBodyParams,
-  ctx: z.RefinementCtx
-): void {
+function validateDelayVsLookbackPeriod(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
   const hasDelay = data.delay !== undefined;
   const hasLookback = data.lookbackPeriod !== undefined;
   if (!hasDelay && !hasLookback) {
@@ -131,10 +128,7 @@ function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-function isDelayGteLookbackPeriod(
-  delay?: string,
-  lookbackPeriod?: string
-): boolean {
+function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): boolean {
   const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
   const delayValue = delay ?? DELAY_DEFAULT;
   try {
