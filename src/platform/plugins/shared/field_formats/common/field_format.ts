@@ -217,7 +217,7 @@ export abstract class FieldFormat {
     return Boolean(fieldFormat && typeof fieldFormat === 'object' && 'convert' in fieldFormat);
   }
 
-  checkForMissingValueText(val: unknown): string | void {
+  protected checkForMissingValueText(val: unknown): string | void {
     if (val === '') {
       return EMPTY_LABEL;
     }
@@ -226,7 +226,7 @@ export abstract class FieldFormat {
     }
   }
 
-  checkForMissingValueHtml(val: unknown): string | void {
+  protected checkForMissingValueHtml(val: unknown): string | void {
     if (val === '') {
       return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
     }
