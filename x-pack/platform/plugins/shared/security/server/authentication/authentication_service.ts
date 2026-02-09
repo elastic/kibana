@@ -360,6 +360,7 @@ export class AuthenticationService {
       applicationName,
       kibanaFeatures,
       buildFlavor,
+      uiam,
     });
 
     const uiamAPIKeys = uiam

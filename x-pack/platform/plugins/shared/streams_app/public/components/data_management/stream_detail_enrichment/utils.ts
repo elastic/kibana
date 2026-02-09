@@ -6,7 +6,6 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConcatProcessor,
   ConvertProcessor,
@@ -36,9 +35,8 @@ import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
+import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
-import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
@@ -203,7 +201,7 @@ const defaultGrokProcessorFormState: (
 ) => ({
   action: 'grok',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-  patterns: [new DraftGrokExpression(formStateDependencies.grokCollection, '')],
+  patterns: [{ value: '' }],
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -348,19 +346,13 @@ export const getFormStateFromActionStep = (
 ): ProcessorFormState => {
   if (!step) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
 
+  // Handle grok separately to convert patterns from string[] to { value: string }[]
   if (step.action === 'grok') {
-    const { customIdentifier, parentId, ...restStep } = step;
-
-    const clone: GrokFormState = structuredClone({
-      ...omit(restStep, 'patterns'),
-      patterns: [],
-    });
-
-    clone.patterns = step.patterns.map(
-      (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
-    );
-
-    return clone;
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    return structuredClone({
+      ...restStep,
+      patterns: patterns.map((p) => ({ value: p })),
+    }) as GrokFormState;
   }
 
   if (
@@ -420,7 +412,6 @@ export const convertFormStateToProcessor = (
   formState: ProcessorFormState
 ): {
   processorDefinition: StreamlangProcessorDefinition;
-  processorResources?: ProcessorResources;
 } => {
   const description = 'description' in formState ? formState.description : undefined;
 
@@ -433,16 +424,12 @@ export const convertFormStateToProcessor = (
           action: 'grok',
           where: formState.where,
           description,
-          patterns: patterns
-            .map((pattern) => pattern.getExpression().trim())
-            .filter((pattern) => !isEmpty(pattern)),
+          // Convert { value: string }[] to flat string[]
+          patterns: patterns.map((p) => p.value.trim()).filter((pattern) => !isEmpty(pattern)),
           pattern_definitions,
           from,
           ignore_failure,
           ignore_missing,
-        },
-        processorResources: {
-          grokExpressions: patterns,
         },
       };
     }

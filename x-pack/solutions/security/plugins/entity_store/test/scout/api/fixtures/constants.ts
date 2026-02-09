@@ -17,6 +17,7 @@ export const COMMON_HEADERS = {
  */
 export const ENTITY_STORE_ROUTES = {
   INSTALL: 'internal/security/entity-store/install',
+  START: 'internal/security/entity-store/start',
   STOP: 'internal/security/entity-store/stop',
   UNINSTALL: 'internal/security/entity-store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
@@ -25,3 +26,5 @@ export const ENTITY_STORE_ROUTES = {
 
 // ESS Only until we have LAST/FIRST enabled for serverless
 export const ENTITY_STORE_TAGS = ['@ess' /* '@svlSecurity'*/];
+
+export const UPDATES_INDEX = '.entities.v2.updates.security_default';
