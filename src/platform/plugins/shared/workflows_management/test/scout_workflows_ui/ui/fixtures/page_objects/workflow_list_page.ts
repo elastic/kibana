@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { expect, KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class WorkflowListPage {
   constructor(private readonly page: ScoutPage) {}
