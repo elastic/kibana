@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/es-types'
   - '@kbn/spaces-utils'
-  - '@kbn/search-types'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
@@ -43,7 +42,6 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/yaml-rule-editor'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/core-security-common'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-elasticsearch-client-server-mocks'
@@ -58,6 +56,9 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/esql-language'
   - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server-mocks'
+  - '@kbn/core-user-profile-server'
 tags:
   - plugin
   - prod

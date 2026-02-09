@@ -30,6 +30,7 @@ import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { RulesApi } from '../services/rules_api';
 
 const DEFAULT_RULE_YAML = `name: Example rule
+kind: alert
 tags: []
 schedule:
   custom: 1m
@@ -41,6 +42,7 @@ groupingKey: []`;
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
   name: 'Example rule',
+  kind: 'alert',
   tags: [],
   schedule: { custom: '1m' },
   enabled: true,
@@ -114,6 +116,7 @@ export const CreateRulePage = () => {
         const nextPayload: CreateRuleData = {
           ...DEFAULT_RULE_VALUES,
           name: rule.name,
+          kind: rule.kind ?? DEFAULT_RULE_VALUES.kind,
           tags: rule.tags ?? DEFAULT_RULE_VALUES.tags,
           schedule: rule.schedule?.custom
             ? { custom: rule.schedule.custom }
