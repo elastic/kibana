@@ -412,14 +412,14 @@ export function createSharedZodSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
-    booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
-    ipType: z.string().ip({ version: 'v4' }),
+    booleanDefault: z.boolean().default(true).describe('defaults to to true'),
+    ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     record: z.record(z.string(), z.string()),
     union: z.union([
-      z.string({ description: 'Union string' }).max(1),
-      z.number({ description: 'Union number' }).min(0),
+      z.string().max(1).describe('Union string'),
+      z.number().min(0).describe('Union number'),
     ]),
-    uri: z.string().url().default('prototest://something'),
+    uri: z.url().default('prototest://something'),
   });
 }

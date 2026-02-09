@@ -18,7 +18,7 @@ import type {
 } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
 import fs from 'node:fs';
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 
 export const ScoutTestConfigStatsEntrySchema = z.object({
   path: z.string(),

@@ -17,11 +17,11 @@ export const passThroughValidationObject = {
 };
 
 export const noParamsValidationObject = {
-  params: z.object({}).strict(),
-  query: z.object({}).strict(),
+  params: z.strictObject({}),
+  query: z.strictObject({}),
   body: z.union([
     // If the route uses POST, the body should be empty object or null
-    z.object({}).strict(),
+    z.strictObject({}),
     z.null(),
     // If the route uses GET, body is undefined,
     z.undefined(),

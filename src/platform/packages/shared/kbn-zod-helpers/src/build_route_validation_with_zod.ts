@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf, ZodType } from '@kbn/zod';
+import type { z, ZodType } from '@kbn/zod';
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
 import { stringifyZodError } from './stringify_zod_error';
 
@@ -36,9 +36,9 @@ import { stringifyZodError } from './stringify_zod_error';
  *     },
  * ```
  */
-export function buildRouteValidationWithZod<ZodSchema extends ZodType, Type = TypeOf<ZodSchema>>(
+export function buildRouteValidationWithZod<ZodSchema extends ZodType>(
   schema: ZodSchema
-): RouteValidationFunction<Type> {
+): RouteValidationFunction<z.output<ZodSchema>> {
   return (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
     const decoded = schema.safeParse(inputValue);
 

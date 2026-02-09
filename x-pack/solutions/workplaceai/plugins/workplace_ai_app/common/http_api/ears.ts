@@ -33,7 +33,7 @@ export interface StartOAuthRequest {
 
 export const startOAuthResponseSchema = z.object({
   request_id: z.string(),
-  auth_url: z.string().url(),
+  auth_url: z.url(),
 });
 
 export type StartOAuthResponse = z.infer<typeof startOAuthResponseSchema>;

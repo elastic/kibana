@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { createSidebarStore } from '@kbn/core-chrome-sidebar';
 import { SidebarService } from './sidebar_service';

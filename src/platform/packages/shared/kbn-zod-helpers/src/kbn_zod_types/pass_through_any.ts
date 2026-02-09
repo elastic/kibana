@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import { z } from '@kbn/zod';
 import type { KbnZodType } from './kbn_zod_type';
 import { KbnZodTypes } from './kbn_zod_type';
 
@@ -15,18 +15,16 @@ import { KbnZodTypes } from './kbn_zod_type';
  * This is a helper schema to pass through any value without validation.
  * KbnZodTypes.PassThroughAny heps identify that it is a deliberate pass through of any value without validation.
  */
-class KbnPassThroughAny extends z.ZodAny implements KbnZodType {
-  readonly kbnTypeName = KbnZodTypes.PassThroughAny;
 
-  static create() {
-    return new KbnPassThroughAny({ typeName: z.ZodFirstPartyTypeKind.ZodAny }).describe(
-      'Pass through any value without validation.'
-    );
-  }
-}
+// Use z.any() with added KbnZodType marker
+const passThroughAnySchema = z.any().describe('Pass through any value without validation.');
 
-export const PassThroughAny = KbnPassThroughAny.create();
+type PassThroughAnyType = typeof passThroughAnySchema & KbnZodType;
 
-export const isPassThroughAny = (val: unknown): val is KbnPassThroughAny => {
-  return (val as KbnPassThroughAny).kbnTypeName === KbnZodTypes.PassThroughAny;
+export const PassThroughAny = Object.assign(passThroughAnySchema, {
+  kbnTypeName: KbnZodTypes.PassThroughAny,
+}) as PassThroughAnyType;
+
+export const isPassThroughAny = (val: unknown): val is PassThroughAnyType => {
+  return (val as Partial<KbnZodType>)?.kbnTypeName === KbnZodTypes.PassThroughAny;
 };

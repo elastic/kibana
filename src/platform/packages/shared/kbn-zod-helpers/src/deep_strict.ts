@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodIssueCode } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { difference, isArray, isPlainObject } from 'lodash';
 
 function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
@@ -24,53 +24,52 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
   return keys;
 }
 
-function parseStrict<TSchema extends z.Schema>(
-  source: z.Schema,
-  input: z.ParseInput
-): z.ParseReturnType<z.output<TSchema>> {
-  const next = source._parse(input);
-  if (!z.isValid(next)) {
-    return next;
-  }
-
-  const allInputKeys = Array.from(getFlattenedKeys(input.data));
-  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>));
-
-  const excessKeys = difference(allInputKeys, allOutputKeys);
-
-  if (excessKeys.length) {
-    input.parent.common.issues.push({
-      code: ZodIssueCode.unrecognized_keys,
-      keys: excessKeys,
-      message: `Excess keys are not allowed`,
-      path: input.path,
-    });
-    return z.INVALID;
-  }
-  return next;
-}
-
-export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
-  // We really only want to override _parse, but:
-  // - it should not have the same identity as the wrapped schema
-  // - all methods should be bound to the original schema
-  // if we use { ..., _parse: overrideParse } it won't work because Zod
-  // explicitly binds all properties in the constructor.
-  // so what we do is:
-  // - get the prototype of the schema
-  // - wrap the schema in a proxy
-  // - if there's a function being accessed, return one that is bound
-  // to the proxy receiver
-  // - if _parse is being accessed, override with our parseStrict fn
+export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema): TSchema {
+  // Use Proxy to intercept parse/safeParse methods and add deep strict validation
   const proto = Object.getPrototypeOf(schema);
   const proxy = new Proxy(schema, {
     get(target, accessor, receiver) {
-      if (accessor === '_parse') {
-        return parseStrict.bind(null, schema);
+      // Intercept parse and safeParse to add excess key checking
+      if (accessor === 'parse' || accessor === 'safeParse') {
+        return function (data: unknown, ...args: any[]) {
+          // Call the original parse method on the target (not the proxy)
+          const result = proto[accessor].call(target, data, ...args);
+
+          // For safeParse, check if parsing failed
+          if (accessor === 'safeParse' && !result.success) {
+            return result;
+          }
+
+          // Get the parsed data (result for parse, result.data for safeParse)
+          const parsedData = accessor === 'safeParse' ? result.data : result;
+
+          // Compare input keys vs output keys
+          const allInputKeys = Array.from(getFlattenedKeys(data));
+          const allOutputKeys = Array.from(getFlattenedKeys(parsedData));
+          const excessKeys = difference(allInputKeys, allOutputKeys);
+
+          if (excessKeys.length) {
+            const error = new z.ZodError([
+              {
+                code: 'unrecognized_keys',
+                keys: excessKeys,
+                message: `Excess keys are not allowed`,
+                path: [],
+              },
+            ]);
+
+            if (accessor === 'safeParse') {
+              return { success: false, error };
+            }
+            throw error;
+          }
+
+          return result;
+        };
       }
 
+      // For other properties/methods, bind them to the proxy receiver
       const original = Reflect.getOwnPropertyDescriptor(target, accessor)?.value;
-
       if (typeof original === 'function') {
         return proto[accessor].bind(receiver);
       }
@@ -78,5 +77,5 @@ export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
       return Reflect.get(target, accessor, receiver);
     },
   });
-  return proxy;
+  return proxy as TSchema;
 }

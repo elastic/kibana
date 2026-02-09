@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
 import { PassThroughAny, isPassThroughAny } from './pass_through_any';
 
 describe('PassThroughAny', () => {
@@ -28,9 +27,7 @@ describe('PassThroughAny', () => {
     expect(PassThroughAny.description).toBe('Pass through any value without validation.');
   });
 
-  it('has the correct zod and kbn type', () => {
-    expect(PassThroughAny instanceof z.ZodAny).toBe(true);
-    expect(PassThroughAny._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodAny);
+  it('has the correct kbn type', () => {
     expect(isPassThroughAny(PassThroughAny)).toBe(true);
   });
 });

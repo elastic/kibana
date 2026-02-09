@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { BooleanFromString, isBooleanFromString } from './boolean_from_string';
 
 describe('BooleanFromString', () => {
@@ -26,9 +26,7 @@ describe('BooleanFromString', () => {
     );
   });
 
-  it('has the correct zod and kbn type', () => {
-    expect(BooleanFromString instanceof z.ZodUnion).toBe(true);
-    expect(BooleanFromString._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodUnion);
+  it('has the correct kbn type', () => {
     expect(isBooleanFromString(BooleanFromString)).toBe(true);
   });
 

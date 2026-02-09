@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 import { createSidebarStore, type SidebarContext } from '@kbn/core-chrome-sidebar';
 import { createLiveStore, type SidebarStorage } from './create_live_store';
 

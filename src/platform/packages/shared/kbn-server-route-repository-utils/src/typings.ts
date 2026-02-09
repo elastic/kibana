@@ -42,9 +42,9 @@ export interface RouteParams {
 }
 
 export type ZodParamsObject = z.ZodObject<{
-  path?: z.ZodSchema;
-  query?: z.ZodSchema;
-  body?: z.ZodSchema;
+  path?: z.ZodType;
+  query?: z.ZodType;
+  body?: z.ZodType;
 }>;
 
 export type IoTsParamsObject = WithoutIncompatibleMethods<t.Type<RouteParams>>;
@@ -195,9 +195,12 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodType<
+        infer Output extends Record<string, any>,
+        infer Input extends Record<string, any>
+      >
     ? MaybeOptional<{
-        params: z.input<TRouteParamsRT>;
+        params: Input;
       }>
     : never;
 
@@ -206,9 +209,12 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodType<
+        infer Output extends Record<string, any>,
+        infer Input extends Record<string, any>
+      >
     ? MaybeOptional<{
-        params: z.output<TRouteParamsRT>;
+        params: Output;
       }>
     : never;
 

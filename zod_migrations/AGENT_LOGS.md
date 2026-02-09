@@ -1,0 +1,26 @@
+# List of Agent migrated files
+a simple list of ts files:
+- x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts
+- x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/steps/rerank/rerank_step.ts
+- x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/to_inference/tools.ts
+- x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts
+- src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts
+- src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts
+- src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.test.ts
+- src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts
+- src/core/packages/chrome/sidebar/sidebar-internal/src/services/create_live_store.test.ts
+- src/core/packages/chrome/sidebar/sidebar-internal/src/services/sidebar_service.test.ts
+- src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_error.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_success.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/stringify_zod_error.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.test.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.test.ts
+- src/platform/packages/shared/kbn-zod-helpers/src/build_route_validation_with_zod.ts
+- src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.test.fixture.ts
+- src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.test.util.ts
+- src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts
+- src/core/packages/http/router-server-internal/src/validator.ts
