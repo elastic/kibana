@@ -83,7 +83,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n4d-standard-16
+      machineType: n4d-standard-32
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
