@@ -13,14 +13,13 @@ import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 export const fromCounterRateAPItoLensState = (
-  options: LensApiCounterRateOperation,
-  ref?: { id: string; field: string }
+  options: LensApiCounterRateOperation
 ): CounterRateIndexPatternColumn => {
   const { format } = options;
   const { reducedTimeRange, ...sharedProps } = getLensStateMetricSharedProps(options);
   return {
     operationType: 'counter_rate',
-    references: ref && ref.id ? [ref.id] : [],
+    references: [], // populated later when we have the ID of the referenced column
     ...sharedProps,
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),

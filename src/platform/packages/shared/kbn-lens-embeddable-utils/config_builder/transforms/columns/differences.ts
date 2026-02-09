@@ -16,12 +16,11 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromDifferencesAPItoLensState(
-  options: LensApiDifferencesOperation,
-  ref: { id: string; field: string; label: string }
+  options: LensApiDifferencesOperation
 ): DerivativeIndexPatternColumn {
   return {
     operationType: 'differences',
-    references: [ref.id],
+    references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
     params: {
       ...(options.format ? { format: fromFormatAPIToLensState(options.format) } : {}),

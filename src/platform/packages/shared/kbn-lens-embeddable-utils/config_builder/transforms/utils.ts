@@ -12,6 +12,7 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
+  ReferenceBasedIndexPatternColumn,
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
@@ -428,12 +429,17 @@ export const addLayerColumn = (
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
   const name = columnName + postfix;
-  const referenceColumnId = `${name}_reference`;
   layer.columns = {
     ...layer.columns,
     [name]: column,
-    ...(referenceColumn ? { [referenceColumnId]: referenceColumn } : {}),
   };
+
+  const referenceColumnId = `${name}_reference`;
+  if (referenceColumn) {
+    layer.columns[referenceColumnId] = referenceColumn;
+    (layer.columns[name] as ReferenceBasedIndexPatternColumn).references = [referenceColumnId];
+  }
+
   if (first) {
     layer.columnOrder.unshift(name);
     if (referenceColumn) {
