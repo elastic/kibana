@@ -29,6 +29,7 @@ import { PackagePolicyRequestError } from '../../errors';
 
 import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
+import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -134,44 +135,62 @@ export function storedPackagePoliciesToAgentPermissions(
         break;
 
       default:
-        // - Normal packages store some of the `data_stream` metadata in
-        //   `packagePolicy.inputs[].streams[].data_stream`
-        // - The rest of the metadata needs to be fetched from the
-        //   `data_stream` object in the package. The link is
-        //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
-        // - Some packages (custom logs) have a compiled dataset, stored in
-        //   `input.streams.compiled_stream.data_stream.dataset`
-        dataStreamsForPermissions = packagePolicy.inputs
-          .filter((i) => i.enabled)
-          .flatMap((input) => {
-            if (!input.streams) {
-              return [];
-            }
+        // - Input packages with dynamic_signal_types produce logs, metrics, and traces;
+        //   grant index permissions for all three patterns (logs-*-*, metrics-*-*, traces-*-*).
+        if (
+          (pkg as PackageInfo & { type?: string }).type === 'input' &&
+          hasDynamicSignalTypes(pkg)
+        ) {
+          const dynamicStreamMeta: DataStreamMeta = {
+            type: 'logs',
+            dataset: '',
+            elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+          };
+          dataStreamsForPermissions = [
+            dynamicStreamMeta,
+            { ...dynamicStreamMeta, type: 'metrics' },
+            { ...dynamicStreamMeta, type: 'traces' },
+          ];
+        } else {
+          // - Normal packages store some of the `data_stream` metadata in
+          //   `packagePolicy.inputs[].streams[].data_stream`
+          // - The rest of the metadata needs to be fetched from the
+          //   `data_stream` object in the package. The link is
+          //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
+          // - Some packages (custom logs) have a compiled dataset, stored in
+          //   `input.streams.compiled_stream.data_stream.dataset`
+          dataStreamsForPermissions = packagePolicy.inputs
+            .filter((i) => i.enabled)
+            .flatMap((input) => {
+              if (!input.streams) {
+                return [];
+              }
 
-            const dataStreams_: DataStreamMeta[] = [];
+              const dataStreams_: DataStreamMeta[] = [];
 
-            input.streams
-              .filter((s) => s.enabled)
-              .forEach((stream) => {
-                if (!('data_stream' in stream)) {
-                  return;
-                }
+              input.streams
+                .filter((s) => s.enabled)
+                .forEach((stream) => {
+                  if (!('data_stream' in stream)) {
+                    return;
+                  }
 
-                const ds: DataStreamMeta = {
-                  type: stream.data_stream.type,
-                  dataset:
-                    stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
-                };
+                  const ds: DataStreamMeta = {
+                    type: stream.data_stream.type,
+                    dataset:
+                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                  };
 
-                if (stream.data_stream.elasticsearch) {
-                  ds.elasticsearch = stream.data_stream.elasticsearch;
-                }
+                  if (stream.data_stream.elasticsearch) {
+                    ds.elasticsearch = stream.data_stream.elasticsearch;
+                  }
 
-                dataStreams_.push(ds);
-              });
+                  dataStreams_.push(ds);
+                });
 
-            return dataStreams_;
-          });
+              return dataStreams_;
+            });
+        }
     }
 
     let clusterRoleDescriptor = {};

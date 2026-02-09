@@ -287,6 +287,31 @@ packageInfoCache.set('apm-8.9.0-preview', {
   },
 });
 
+packageInfoCache.set('input_otel-1.0.0', {
+  format_version: '2.7.0',
+  name: 'input_otel',
+  title: 'Input OTel',
+  version: '1.0.0',
+  type: 'input',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'otel',
+      title: 'OTel',
+      description: 'OpenTelemetry input',
+      type: 'logs',
+      input: 'otelcol',
+      template_path: 'input.yml.hbs',
+      dynamic_signal_types: true,
+      vars: [],
+    },
+  ],
+  data_streams: [],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+});
+
 packageInfoCache.set('elastic_connectors-1.0.0', {
   format_version: '2.7.0',
   name: 'elastic_connectors',
@@ -754,6 +779,55 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
             names: ['traces-apm.sampled-*'],
             privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
           },
+        ],
+      },
+    });
+  });
+
+  it('grants logs-*-*, metrics-*-*, and traces-*-* for input package with dynamic_signal_types: true', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-dynamic-signal',
+        name: 'otel-policy',
+        namespace: 'default',
+        enabled: true,
+        package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-1',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                vars: {},
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'default',
+      packagePolicies
+    );
+
+    expect(permissions).toMatchObject({
+      'package-policy-dynamic-signal': {
+        indices: [
+          { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['traces-*-*'], privileges: ['auto_configure', 'create_doc'] },
         ],
       },
     });
