@@ -4375,27 +4375,6 @@
       "enabled": true
     },
     {
-      "groupName": "xstate",
-      "matchDepNames": [
-        "xstate",
-        "@xstate/react"
-      ],
-      "reviewers": [
-        "team:obs-onboarding-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:obs-onboarding",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "separateMajorMinor": true,
-      "enabled": true
-    },
-    {
       "groupName": "constate",
       "matchDepNames": [
         "constate"
