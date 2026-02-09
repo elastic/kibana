@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
+import { createSidebarStore } from '@kbn/core-chrome-sidebar';
 import { SidebarService } from './sidebar_service';
 
 const BASE_PATH = '/test';
@@ -18,29 +19,49 @@ const APP_STORAGE_PREFIX = `${BASE_PATH}:core.chrome.sidebar.app`;
 const APP_ID_A: SidebarAppId = 'sidebarExampleAppA';
 const APP_ID_B: SidebarAppId = 'sidebarExampleAppB';
 
-const getParamsSchema = () =>
-  z.object({
-    count: z.number().default(0),
-    name: z.string().default(''),
+const stateSchema = z.object({
+  count: z.number().default(0),
+  name: z.string().default(''),
+});
+
+const createTestStore = () =>
+  createSidebarStore({
+    schema: stateSchema,
+    actions: (set, get, sidebar) => ({
+      setCount: (count: number) => set({ count }),
+      increment: () => set((s) => ({ count: s.count + 1 })),
+      setName: (name: string) => set({ name }),
+      reset: () => set({ count: 0, name: '' }),
+      getCountPlusOne: () => get().count + 1,
+      /** Opens sidebar with a specific count */
+      openWithCount: (count: number) => {
+        set({ count });
+        sidebar.open();
+      },
+      /** Closes sidebar via context */
+      closeViaContext: () => sidebar.close(),
+      /** Check if this app is current */
+      checkIsCurrent: () => sidebar.isCurrent(),
+    }),
   });
 
-type Params = z.infer<ReturnType<typeof getParamsSchema>>;
+type TestState = ReturnType<typeof createTestStore>['types']['state'];
+type TestActions = ReturnType<typeof createTestStore>['types']['actions'];
 
 const createService = (): SidebarService => {
   return new SidebarService({ basePath: BASE_PATH });
 };
 
-const registerApp = (
+const registerApp = <TState = undefined, TActions = undefined>(
   service: SidebarService,
-  app: Partial<SidebarAppDefinition> & Pick<SidebarAppDefinition, 'appId'>
+  app: Partial<SidebarAppDefinition<TState, TActions>> & Pick<SidebarAppDefinition, 'appId'>
 ) => {
   return service.setup().registerApp({
     status: 'accessible',
     restoreOnReload: true,
-    getParamsSchema,
     loadComponent: async () => () => null,
     ...app,
-  });
+  } as SidebarAppDefinition<TState, TActions>);
 };
 
 describe('SidebarService (integration)', () => {
@@ -79,16 +100,19 @@ describe('SidebarService (integration)', () => {
       expect(start.getCurrentAppId()).toBe(null);
     });
 
-    it('restores current app and params after reload', () => {
+    it('restores current app and state after reload', () => {
       const initialService = createService();
-      registerApp(initialService, { appId: APP_ID_A, getParamsSchema });
+      registerApp<TestState, TestActions>(initialService, {
+        appId: APP_ID_A,
+        store: createTestStore(),
+      });
 
       const initialStart = initialService.start();
-      const initialApp = initialStart.getApp<Params>(APP_ID_A);
+      const initialApp = initialStart.getApp<TestState, TestActions>(APP_ID_A);
 
-      initialApp.open({ count: 3 });
+      initialApp.actions.openWithCount(3);
       expect(initialStart.getCurrentAppId()).toBe(APP_ID_A);
-      expect(initialApp.getParams()).toEqual({ count: 3, name: '' });
+      expect(initialApp.getState()).toEqual({ count: 3, name: '' });
       expect(localStorage.getItem(`${APP_STORAGE_PREFIX}:${APP_ID_A}`)).toBe(
         JSON.stringify({ count: 3, name: '' })
       );
@@ -97,13 +121,16 @@ describe('SidebarService (integration)', () => {
       );
 
       const reloadedService = createService();
-      registerApp(reloadedService, { appId: APP_ID_A, getParamsSchema });
+      registerApp<TestState, TestActions>(reloadedService, {
+        appId: APP_ID_A,
+        store: createTestStore(),
+      });
 
       const reloadedStart = reloadedService.start();
-      const reloadedApp = reloadedStart.getApp<Params>(APP_ID_A);
+      const reloadedApp = reloadedStart.getApp<TestState, TestActions>(APP_ID_A);
 
       expect(reloadedStart.getCurrentAppId()).toBe(APP_ID_A);
-      expect(reloadedApp.getParams()).toEqual({ count: 3, name: '' });
+      expect(reloadedApp.getState()).toEqual({ count: 3, name: '' });
     });
   });
 
@@ -134,25 +161,24 @@ describe('SidebarService (integration)', () => {
     });
   });
 
-  describe('app params', () => {
-    it('throws when setParams is used without a schema', () => {
+  describe('app state and actions', () => {
+    it('returns undefined state for apps without a store', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A, getParamsSchema: undefined });
+      registerApp(service, { appId: APP_ID_A });
 
       const start = service.start();
       const app = start.getApp(APP_ID_A);
 
-      const initialParams = app.getParams();
-      expect(() => app.setParams({ count: 1 })).toThrow(
-        "[Sidebar] Cannot set params for app 'sidebarExampleAppA': no params schema defined."
-      );
-      expect(app.getParams()).toBe(initialParams);
-      expect(localStorage.getItem(`${APP_STORAGE_PREFIX}:${APP_ID_A}`)).toBe(null);
+      // Stateless apps have all methods, but state-related ones return undefined
+      expect(app.actions).toBeUndefined();
+      expect(app.getState()).toBeUndefined();
+      expect(typeof app.open).toBe('function');
+      expect(typeof app.close).toBe('function');
     });
 
-    it('falls back to defaults when restoring invalid params', () => {
+    it('falls back to defaults when restoring invalid state', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A, getParamsSchema });
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
 
       localStorage.setItem(
         `${APP_STORAGE_PREFIX}:${APP_ID_A}`,
@@ -162,42 +188,151 @@ describe('SidebarService (integration)', () => {
       const start = service.start();
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-      expect(start.getApp<Params>(APP_ID_A).getParams()).toEqual({ count: 0, name: '' });
+      expect(start.getApp<TestState, TestActions>(APP_ID_A).getState()).toEqual({
+        count: 0,
+        name: '',
+      });
       expect(warnSpy).toHaveBeenCalled();
 
       warnSpy.mockRestore();
     });
 
-    it('merges params passed to open with schema defaults', () => {
+    it('opens with schema defaults (no initial state parameter)', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A, getParamsSchema });
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
 
       const start = service.start();
-      const app = start.getApp<Params>(APP_ID_A);
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
 
-      app.open({ count: 1 });
-      expect(app.getParams()).toEqual({ count: 1, name: '' });
-      expect(localStorage.getItem(`${APP_STORAGE_PREFIX}:${APP_ID_A}`)).toBe(
-        JSON.stringify({ count: 1, name: '' })
-      );
+      app.open();
+      expect(app.getState()).toEqual({ count: 0, name: '' });
+      expect(start.getCurrentAppId()).toBe(APP_ID_A);
       expect(sessionStorage.getItem(`${STATE_STORAGE_PREFIX}:currentAppId`)).toBe(
         JSON.stringify(APP_ID_A)
       );
+    });
+
+    it('sets state through actions before opening', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+
+      const start = service.start();
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
+
+      // Use action that sets state and opens
+      app.actions.openWithCount(5);
+      expect(app.getState()).toEqual({ count: 5, name: '' });
+      expect(start.getCurrentAppId()).toBe(APP_ID_A);
+      expect(localStorage.getItem(`${APP_STORAGE_PREFIX}:${APP_ID_A}`)).toBe(
+        JSON.stringify({ count: 5, name: '' })
+      );
+    });
+
+    it('modifies state through actions', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+
+      const start = service.start();
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
+
+      expect(app.getState()).toEqual({ count: 0, name: '' });
+
+      app.actions.setCount(5);
+      expect(app.getState()).toEqual({ count: 5, name: '' });
+
+      app.actions.increment();
+      expect(app.getState()).toEqual({ count: 6, name: '' });
+
+      app.actions.setName('test');
+      expect(app.getState()).toEqual({ count: 6, name: 'test' });
+
+      expect(localStorage.getItem(`${APP_STORAGE_PREFIX}:${APP_ID_A}`)).toBe(
+        JSON.stringify({ count: 6, name: 'test' })
+      );
+    });
+
+    it('actions can read current state with get()', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+
+      const start = service.start();
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
+
+      app.actions.setCount(10);
+      expect(app.actions.getCountPlusOne()).toBe(11);
+    });
+  });
+
+  describe('sidebar context in actions', () => {
+    it('actions can open sidebar via context', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+
+      const start = service.start();
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
+
+      expect(start.isOpen()).toBe(false);
+
+      app.actions.openWithCount(10);
+
+      expect(start.isOpen()).toBe(true);
+      expect(start.getCurrentAppId()).toBe(APP_ID_A);
+      expect(app.getState()).toEqual({ count: 10, name: '' });
+    });
+
+    it('actions can close sidebar via context', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+
+      const start = service.start();
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
+
+      app.open();
+      expect(start.isOpen()).toBe(true);
+
+      app.actions.closeViaContext();
+      expect(start.isOpen()).toBe(false);
+      expect(start.getCurrentAppId()).toBe(null);
+    });
+
+    it('actions can check if app is current via context', () => {
+      const service = createService();
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_B, store: createTestStore() });
+
+      const start = service.start();
+      const appA = start.getApp<TestState, TestActions>(APP_ID_A);
+      const appB = start.getApp<TestState, TestActions>(APP_ID_B);
+
+      expect(appA.actions.checkIsCurrent()).toBe(false);
+      expect(appB.actions.checkIsCurrent()).toBe(false);
+
+      appA.open();
+      expect(appA.actions.checkIsCurrent()).toBe(true);
+      expect(appB.actions.checkIsCurrent()).toBe(false);
+
+      appB.open();
+      expect(appA.actions.checkIsCurrent()).toBe(false);
+      expect(appB.actions.checkIsCurrent()).toBe(true);
+
+      start.close();
+      expect(appA.actions.checkIsCurrent()).toBe(false);
+      expect(appB.actions.checkIsCurrent()).toBe(false);
     });
   });
 
   describe('app-bound API', () => {
     it('returns stable observable instances', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A });
+      registerApp<TestState, TestActions>(service, { appId: APP_ID_A, store: createTestStore() });
 
       const start = service.start();
-      const app = start.getApp<Params>(APP_ID_A);
+      const app = start.getApp<TestState, TestActions>(APP_ID_A);
 
       expect(start.isOpen$()).toBe(start.isOpen$());
       expect(start.getWidth$()).toBe(start.getWidth$());
       expect(start.getCurrentAppId$()).toBe(start.getCurrentAppId$());
-      expect(app.getParams$()).toBe(app.getParams$());
+      expect(app.getState$()).toBe(app.getState$());
     });
 
     it('returns stable app-bound API instances', () => {
