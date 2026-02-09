@@ -64,6 +64,7 @@ export function ErrorBudgetChartFlyoutPanel({
             defaultMessage: 'Error budget burn down',
           })}
           renderTooltip
+          data-test-subj="errorBudgetChartPanel"
           append={
             !isDashboardContext && (
               <EuiFlexItem grow={false}>

@@ -69,7 +69,10 @@ export function SloInstanceComboBox({
     buildInstanceFromSloComponents(slo.instanceId, slo.groupings)
   );
   const [search, setSearch] = useState<string>();
-  const debouncedSearch = debounce((value) => setSearch(value), 200);
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => setSearch(value), 200),
+    [setSearch]
+  );
 
   const { isLoading, isError, data } = useFetchSloInstances({
     sloId: slo.id,
@@ -92,13 +95,14 @@ export function SloInstanceComboBox({
   const options = useMemo(() => buildOptions(data?.results ?? []), [data?.results]);
 
   useEffect(() => {
-    if (slo.instanceId === ALL_VALUE) {
-      setSelectedInstance(ALL_VALUE);
-      return;
-    }
-
     setSelectedInstance(buildInstanceFromSloComponents(slo.instanceId, slo.groupings));
   }, [slo.instanceId, slo.groupings]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   if (isError) {
     return (

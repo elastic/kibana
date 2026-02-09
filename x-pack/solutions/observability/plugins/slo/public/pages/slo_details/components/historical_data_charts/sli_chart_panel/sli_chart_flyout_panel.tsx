@@ -41,6 +41,7 @@ export function SliChartFlyoutPanel({
         defaultMessage: 'Historical SLI',
       })}
       renderTooltip
+      data-test-subj="sliChartPanel"
     >
       <EuiFlexGroup
         direction="row"
