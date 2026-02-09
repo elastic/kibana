@@ -113,27 +113,14 @@ export class GenAiSettingsPage {
    * Get the AI Assistants side nav setting
    */
   getAIAssistantSideNavSetting() {
-    return this.page.testSubj.locator(
-      'nav-item nav-item-stack_management.management_ai.management:aiAssistantManagementSelection nav-item-deepLinkId-management:aiAssistantManagementSelection nav-item-id-management:aiAssistantManagementSelection'
-    );
+    return this.page.testSubj.locator('*nav-item-id-management:aiAssistantManagementSelection');
   }
 
   /**
    * Get the AI Assistant side nav button for Observability
    */
-  getAIAssistantSideNavButtonObservability() {
-    return this.page.testSubj.locator(
-      'nav-item nav-item-aiAssistantContainer nav-item-deepLinkId-observabilityAIAssistant nav-item-id-aiAssistantContainer'
-    );
-  }
-
-  /**
-   * Get the AI Assistant side nav button for Security
-   */
-  getAIAssistantSideNavButtonSecurity() {
-    return this.page.testSubj.locator(
-      'nav-item nav-item-stack_management.node-3.management:aiAssistantManagementSelection nav-item-deepLinkId-management:aiAssistantManagementSelection nav-item-id-management:aiAssistantManagementSelection'
-    );
+  getAIAssistantSideNavButton() {
+    return this.page.testSubj.locator('*nav-item-id-aiAssistantContainer');
   }
 
   /**
@@ -168,9 +155,7 @@ export class GenAiSettingsPage {
    * Get the Agent side nav button
    */
   getAgentSideNavButton() {
-    return this.page.testSubj.locator(
-      'nav-item nav-item-agent_builder nav-item-deepLinkId-agent_builder nav-item-id-agent_builder'
-    );
+    return this.page.testSubj.locator('*nav-item-id-agent_builder');
   }
 
   /**

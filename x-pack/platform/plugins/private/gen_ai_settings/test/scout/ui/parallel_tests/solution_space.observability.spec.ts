@@ -55,8 +55,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify AI Assistants side nav button is visible', async () => {
-        const aiAssistantSideNavButton =
-          pageObjects.genAiSettings.getAIAssistantSideNavButtonObservability();
+        const aiAssistantSideNavButton = pageObjects.genAiSettings.getAIAssistantSideNavButton();
         await expect(aiAssistantSideNavButton).toBeVisible();
       });
 

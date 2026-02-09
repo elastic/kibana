@@ -44,8 +44,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify AI Assistants side nav setting is visible', async () => {
-        const aiAssistantSideNavSetting =
-          pageObjects.genAiSettings.getAIAssistantSideNavButtonSecurity();
+        const aiAssistantSideNavSetting = pageObjects.genAiSettings.getAIAssistantSideNavSetting();
         await expect(aiAssistantSideNavSetting).toBeVisible();
       });
 
