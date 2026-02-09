@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_MARGIN_BOTTOM = 16;
+export const DEFAULT_MARGIN_BOTTOM = 32;
 
 // Calculates the available height for content within a flyout tab
 export function getTabContentAvailableHeight(
