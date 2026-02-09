@@ -6,12 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
@@ -22,14 +20,17 @@ import {
   buildMarkdownPanel,
   getMarkdownPanelHeight,
 } from '../utils';
+import type { DashboardContent } from '../types';
 
 const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
   description: z.string().describe('A description of the dashboard.'),
-  panels: z
-    .array(z.unknown())
+  visualizations: z
+    .array(z.string())
     .optional()
-    .describe('An array of panel configurations (PanelJSON or lens_tool_artifact).'),
+    .describe(
+      'An array of tool_result_ids from previous create_visualizations calls. These reference the visualizations to include in the dashboard.'
+    ),
   markdownContent: z
     .string()
     .describe(
@@ -37,14 +38,13 @@ const createDashboardSchema = z.object({
     ),
 });
 
-export const createDashboardTool = (
-  dashboard: DashboardPluginStart,
-  savedObjects: SavedObjectsServiceStart,
-  {
-    dashboardLocator,
-    spaces,
-  }: { dashboardLocator: DashboardAppLocator; spaces?: SpacesPluginStart }
-): BuiltinToolDefinition<typeof createDashboardSchema> => {
+export const createDashboardTool = ({
+  dashboardLocator,
+  spaces,
+}: {
+  dashboardLocator: DashboardAppLocator;
+  spaces?: SpacesPluginStart;
+}): BuiltinToolDefinition<typeof createDashboardSchema> => {
   return {
     id: dashboardTools.createDashboard,
     type: ToolType.builtin,
@@ -52,64 +52,67 @@ export const createDashboardTool = (
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Create a dashboard with the specified title, description, panels, and a markdown summary.
+    description: `Create an in-memory dashboard with the specified title, description, visualizations, and a markdown summary.
 
 This tool will:
 1. Accept a title and description for the dashboard
 2. Accept markdown content for a summary panel at the top
-3. Accept an array of panel configurations
-4. Create a dashboard with the markdown panel followed by visualization panels`,
+3. Accept an array of visualization tool_result_ids from previous create_visualizations calls
+4. Generate an in-memory dashboard URL (not saved until user explicitly saves it)
+
+The dashboard is created in edit mode so the user can review and save it.`,
     schema: createDashboardSchema,
     tags: [],
     handler: async (
-      { title, description, panels, markdownContent },
-      { logger, request, esClient, resultStore }
+      { title, description, visualizations, markdownContent },
+      { logger, request, resultStore }
     ) => {
       try {
-        const coreContext = {
-          savedObjects: {
-            client: savedObjects.getScopedClient(request),
-            typeRegistry: savedObjects.getTypeRegistry(),
-          },
-        };
+        const visualizationIds = visualizations ?? [];
 
-        // Create a minimal request handler context
-        const requestHandlerContext = {
-          core: Promise.resolve(coreContext),
-          resolve: async () => ({ core: coreContext }),
-        } as unknown as RequestHandlerContext;
-
-        // Build markdown panel and offset other panels accordingly
+        // Build markdown panel and visualization panels
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = getMarkdownPanelHeight(markdownContent);
-        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
-
-        const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
-          data: { title, description, panels: normalizedPanels },
-        });
-
-        logger.info(`Dashboard created successfully: ${dashboardCreateResponse.id}`);
+        const dashboardPanels = [
+          markdownPanel,
+          ...normalizePanels(visualizationIds, yOffset, resultStore),
+        ];
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
-        const dashboardUrl = await dashboardLocator?.getRedirectUrl(
-          { dashboardId: dashboardCreateResponse.id },
+
+        // Generate dashboard URL
+        const dashboardUrl = await dashboardLocator.getRedirectUrl(
+          {
+            // No dashboardId means it will be an unsaved "create" dashboard
+            panels: dashboardPanels,
+            title,
+            description,
+            viewMode: 'edit', // Allow user to edit and save
+            // TODO: Improve time range selection
+            time_range: { from: 'now-15m', to: 'now' },
+          },
           { spaceId }
         );
+
+        logger.info(`In-memory dashboard created with ${dashboardPanels.length} panels`);
+
+        const toolResultId = getToolResultId();
+
+        const content: DashboardContent = {
+          url: dashboardUrl,
+          title,
+          description,
+          markdownContent,
+          panelCount: dashboardPanels.length,
+          visualizationIds,
+        };
 
         return {
           results: [
             {
               type: ToolResultType.dashboard,
-              tool_result_id: getToolResultId(),
-              data: {
-                id: dashboardCreateResponse.id,
-                title,
-                content: {
-                  url: dashboardUrl,
-                  description,
-                  panelCount: normalizedPanels.length,
-                },
-              },
+              tool_result_id: toolResultId,
+              data: { content },
             },
           ],
         };

@@ -29,5 +29,6 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   createDashboard: dashboardTool('create_dashboard'),
-  updateDashboard: dashboardTool('update_dashboard'),
+  createVisualizations: dashboardTool('create_visualizations'),
+  manageDashboard: dashboardTool('manage_dashboard'),
 } as const;

@@ -6,7 +6,7 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
@@ -73,33 +73,22 @@ export const getMarkdownPanelHeight = (content: string): number =>
   calculateMarkdownPanelHeight(content);
 
 /**
- * Filters out markdown panels from an array of dashboard panels.
- * Used when replacing the markdown summary during dashboard updates.
- * Note: Dashboard panels array can contain both panels and sections.
- */
-export const filterOutMarkdownPanels = (
-  panels: (DashboardPanel | DashboardSection)[] | undefined
-): (DashboardPanel | DashboardSection)[] =>
-  panels?.filter((item) => !('type' in item) || item.type !== MARKDOWN_EMBEDDABLE_TYPE) ?? [];
-
-/**
- * Normalizes panel configurations to the correct DashboardPanel format.
- * This is a temporary function to handle lens API schema conversion.
- * @param panels - Array of panel configurations
+ * Normalizes panel configurations (tool_result_ids) to the correct DashboardPanel format.
+ * @param panels - Array of tool_result_id strings referencing visualizations
  * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
  */
 export const normalizePanels = (
-  panels: unknown[] | undefined,
+  panels: string[] | undefined,
   yOffset: number = 0,
   resultStore?: ToolResultStore
 ): DashboardPanel[] => {
-  const panelConfigs = panels ?? [];
+  const panelIds = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
   let currentY = yOffset;
 
-  for (const panel of panelConfigs) {
-    const config = resolveLensConfig(panel, resultStore);
+  for (const panelId of panelIds) {
+    const config = resolveLensConfig(panelId, resultStore);
     const w = getPanelWidth(config.type);
 
     // Check if panel fits in current row, if not move to next row
@@ -119,43 +108,33 @@ export const normalizePanels = (
 };
 
 export const resolveLensConfig = (
-  panel: unknown,
+  toolResultId: string,
   resultStore?: ToolResultStore
 ): LensApiSchemaType => {
-  if (typeof panel === 'string') {
-    if (!isToolResultId(panel)) {
-      throw new Error(
-        `Invalid panel reference "${panel}". Expected a tool_result_id from a previous visualization tool call.`
-      );
-    }
-    if (!resultStore || !resultStore.has(panel)) {
-      throw new Error(`Panel reference "${panel}" was not found in the tool result store.`);
-    }
-
-    const result = resultStore.get(panel);
-    if (result.type !== ToolResultType.visualization) {
-      throw new Error(
-        `Provided tool_result_id "${panel}" is not a visualization result (got "${result.type}").`
-      );
-    }
-
-    const visualization = result.data.visualization;
-    if (!visualization || typeof visualization !== 'object') {
-      throw new Error(
-        `Visualization result "${panel}" does not contain a valid visualization config.`
-      );
-    }
-
-    return visualization as LensApiSchemaType;
+  if (!isToolResultId(toolResultId)) {
+    throw new Error(
+      `Invalid panel reference "${toolResultId}". Expected a tool_result_id from a previous visualization tool call.`
+    );
+  }
+  if (!resultStore || !resultStore.has(toolResultId)) {
+    throw new Error(`Panel reference "${toolResultId}" was not found in the tool result store.`);
   }
 
-  if (typeof panel !== 'object' || panel === null || !('type' in panel)) {
+  const result = resultStore.get(toolResultId);
+  if (result.type !== ToolResultType.visualization) {
     throw new Error(
-      `Invalid panel configuration. Expected a Lens API config object with a "type" property.`
+      `Provided tool_result_id "${toolResultId}" is not a visualization result (got "${result.type}").`
     );
   }
 
-  return panel as LensApiSchemaType;
+  const visualization = result.data.visualization;
+  if (!visualization || typeof visualization !== 'object') {
+    throw new Error(
+      `Visualization result "${toolResultId}" does not contain a valid visualization config.`
+    );
+  }
+
+  return visualization as LensApiSchemaType;
 };
 
 const buildLensPanelFromApi = (
@@ -174,4 +153,16 @@ const buildLensPanelFromApi = (
     grid,
     config: lensConfig,
   };
+};
+
+/**
+ * Filters out visualization IDs from an array.
+ * Used by manage_dashboard to remove visualizations before rebuilding the dashboard.
+ */
+export const filterVisualizationIds = (
+  visualizationIds: string[],
+  idsToRemove: string[]
+): string[] => {
+  const removeSet = new Set(idsToRemove);
+  return visualizationIds.filter((id) => !removeSet.has(id));
 };
