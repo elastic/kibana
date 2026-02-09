@@ -116,7 +116,7 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
-  it('should add global.setup.ts as pre-step when runGlobalSetup is true', () => {
+  it('should add global.setup.ts as pre-step when runGlobalSetup is true and apply default timeout', () => {
     const testDir = './my_tests';
 
     const config = createPlaywrightConfig({ testDir, runGlobalSetup: true });
@@ -125,14 +125,38 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects).toHaveLength(6);
     expect(config.projects![0].name).toEqual('setup-local');
     expect(config.projects![0].testMatch).toEqual(/global.setup\.ts/);
+    expect(config.projects![0].timeout).toBe(180000);
     expect(config.projects![1].name).toEqual('local');
     expect(config.projects![1]).toHaveProperty('dependencies', ['setup-local']);
+    expect(config.projects![1]).not.toHaveProperty('timeout'); // local
     expect(config.projects![2].name).toEqual('setup-ech');
+    expect(config.projects![2].timeout).toBe(180000);
     expect(config.projects![3].name).toEqual('ech');
     expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
+    expect(config.projects![3]).not.toHaveProperty('timeout'); // ec
     expect(config.projects![4].name).toEqual('setup-mki');
+    expect(config.projects![4].timeout).toBe(180000);
     expect(config.projects![5].name).toEqual('mki');
     expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
+    expect(config.projects![5]).not.toHaveProperty('timeout'); // mki
+  });
+
+  it('should allow overriding globalSetupTimeout when runGlobalSetup is true', () => {
+    const testDir = './my_tests';
+
+    const config = createPlaywrightConfig({
+      testDir,
+      runGlobalSetup: true,
+      globalSetupTimeout: 60000,
+    });
+
+    expect(config.projects).toHaveLength(6);
+    expect(config.projects![0].name).toEqual('setup-local');
+    expect(config.projects![0].timeout).toBe(60000);
+    expect(config.projects![2].name).toEqual('setup-ech');
+    expect(config.projects![2].timeout).toBe(60000);
+    expect(config.projects![4].name).toEqual('setup-mki');
+    expect(config.projects![4].timeout).toBe(60000);
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {
