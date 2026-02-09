@@ -92,7 +92,7 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('optional-label')).toHaveLength(4);
+    expect(getAllByTestId('optional-label')).toHaveLength(3);
   });
 
   test('azure ai connector fields are rendered', async () => {
