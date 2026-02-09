@@ -6,10 +6,12 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import type { RRuleRequestV1 } from '../../../r_rule';
-import type { ScheduleRequest } from '../../types/v1';
-import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
-import { getDurationInMilliseconds } from './util';
+import type { RRuleRequestV1 } from '../../../routes/schemas/r_rule';
+import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
+import {
+  DEFAULT_TIMEZONE,
+  INTERVAL_FREQUENCY_REGEXP,
+} from '../../../routes/schemas/schedule/constants';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {
@@ -31,18 +33,14 @@ const transformEveryToFrequency = (frequency?: string) => {
 export const transformCustomScheduleToRRule = (
   schedule: ScheduleRequest
 ): {
-  duration: number;
   rRule: RRuleRequestV1;
 } => {
-  const { recurring, duration, start, timezone } = schedule;
+  const { recurring, start, timezone } = schedule;
 
   const [, interval, frequency] = recurring?.every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
   const transformedFrequency = transformEveryToFrequency(frequency);
 
-  const durationInMilliseconds = getDurationInMilliseconds(duration);
-
   return {
-    duration: durationInMilliseconds,
     rRule: {
       byweekday: recurring?.onWeekDay,
       bymonthday: recurring?.onMonthDay,
