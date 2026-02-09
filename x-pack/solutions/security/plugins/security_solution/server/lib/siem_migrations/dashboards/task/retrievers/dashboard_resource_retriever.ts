@@ -7,14 +7,14 @@
 
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { SiemMigrationsDataResourcesClient } from '../../../common/data/siem_migrations_data_resources_client';
 import { ResourceRetriever } from '../../../common/task/retrievers/resource_retriever';
+import type { ResourceRetrieverDeps } from '../../../common/task/retrievers/types';
 
 export class DashboardResourceRetriever extends ResourceRetriever<DashboardMigrationDashboard> {
   constructor(
     protected readonly migrationId: string,
-    protected readonly resourcesDataClient: SiemMigrationsDataResourcesClient
+    protected readonly deps: ResourceRetrieverDeps
   ) {
-    super(migrationId, resourcesDataClient, DashboardResourceIdentifier);
+    super(migrationId, DashboardResourceIdentifier, deps);
   }
 }
