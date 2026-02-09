@@ -74,11 +74,6 @@ steps:
       query:
         term:
           category: canyon
-  - name: log_results
-    type: console
-    with:
-      message: |-
-        Found {{ steps.search_park_data.output.hits.total.value }} parks in category "canyon".
   - name: loop_over_results
     type: foreach
     foreach: "{{steps.search_park_data.output.hits.hits | json}}"

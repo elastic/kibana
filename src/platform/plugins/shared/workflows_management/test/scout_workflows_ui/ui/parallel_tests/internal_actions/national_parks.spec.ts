@@ -34,17 +34,44 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
     await pageObjects.workflowEditor.expandStepsTree();
 
-    const processItemsLocator = workflowExecutionPanelLocator
-      .locator('.euiTreeView__nodeInner')
-      .filter({ hasText: 'process-item' });
+    // verify output of create_parks_index
+    await pageObjects.workflowEditor
+      .getStep('create_parks_index')
+      .then((locator) => locator.click());
+    expect(
+      await pageObjects.workflowEditor.getStepOutputJson<Record<string, unknown>>()
+    ).toStrictEqual({
+      acknowledged: true,
+      shards_acknowledged: true,
+      index: 'national-parks',
+    });
 
+    // verify output of bulk_index_park_data
+    await pageObjects.workflowEditor
+      .getStep('bulk_index_park_data')
+      .then((locator) => locator.click());
+    const bulkIndexOutput = await pageObjects.workflowEditor.getStepOutputJson<
+      Record<string, unknown>
+    >();
+    expect(bulkIndexOutput.errors).toBe(false);
+    expect(bulkIndexOutput.items).toHaveLength(5);
+
+    // verify output of search_park_data
+    await pageObjects.workflowEditor.getStep('search_park_data').then((locator) => locator.click());
+    const searchParkOutput = await pageObjects.workflowEditor.getStepOutputJson<{
+      hits: {
+        total: { value: number };
+        hits: unknown[];
+      };
+    }>();
+    expect(searchParkOutput.hits).toBeDefined();
+    expect(searchParkOutput.hits.total.value).toBe(2);
+    expect(searchParkOutput.hits.hits).toHaveLength(2);
+
+    // verify outputs of process-item
     const requiredOutputs = ['Grand Canyon National Park', 'Zion National Park'];
 
-    await expect(processItemsLocator).toHaveCount(requiredOutputs.length);
-
-    const processItemSteps = await processItemsLocator.all();
-
-    for (let i = 0; i < processItemSteps.length; i++) {
+    for (let i = 0; i < requiredOutputs.length; i++) {
       await pageObjects.workflowEditor
         .getStep(`loop_over_results > ${i} > process-item`)
         .then((locator) => locator.click());
