@@ -85,10 +85,7 @@ const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Fe
               },
               {
                 path: DE_RULE_HEALTH_PATH,
-                main: withSecurityRoutePageWrapper(
-                  DetectionEngineRuleHealthPage,
-                  SecurityPageName.ruleHealth
-                ),
+                main: DetectionEngineRuleHealthPage,
                 exact: true,
               },
             ]
