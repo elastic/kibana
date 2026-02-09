@@ -55,7 +55,7 @@ steps:
     key: checks
     agents:
       machineType: n2d-standard-2
-      diskType: hyperdisk-balanced
+      diskType: pd-ssd
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
@@ -69,7 +69,7 @@ steps:
     label: 'Linting'
     agents:
       machineType: n2d-standard-16
-      diskType: hyperdisk-balanced
+      diskType: pd-ssd
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
@@ -84,7 +84,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       machineType: n2d-standard-32
-      diskType: hyperdisk-balanced
+      diskType: pd-ssd
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
