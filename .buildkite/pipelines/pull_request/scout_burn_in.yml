@@ -1,0 +1,18 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_burn_in_test_run_builder.sh
+    label: 'Scout Burn-in Builder'
+    agents:
+      machineType: n2-standard-4
+    key: build_scout_burn_in
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_scout_tests
+    env:
+      SCOUT_BURN_IN_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_BURN_IN_SUMMARY_SCRIPT: '.buildkite/scripts/steps/test/scout_burn_in_summary.sh'
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1

@@ -278,4 +278,17 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_pairs"
 fi
 
+# Store burn-in result in metadata so the summary step can aggregate it
+if [[ -n "${SCOUT_BURN_IN_REPEAT_EACH:-}" && -n "${SCOUT_CONFIG_GROUP_KEY:-}" ]]; then
+  BURN_IN_KEY="scout_burn_in_result_${SCOUT_CONFIG_GROUP_KEY}"
+
+  if [[ $FINAL_EXIT_CODE -ne 0 ]]; then
+    buildkite-agent meta-data set "$BURN_IN_KEY" "failed"
+  elif [[ ${#configWithoutTests[@]} -gt 0 && ${#results[@]} -eq 0 ]]; then
+    buildkite-agent meta-data set "$BURN_IN_KEY" "no_tests"
+  else
+    buildkite-agent meta-data set "$BURN_IN_KEY" "passed"
+  fi
+fi
+
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures

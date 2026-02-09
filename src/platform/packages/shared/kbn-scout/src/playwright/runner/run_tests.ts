@@ -164,6 +164,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   }
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+
+  // Support burn-in testing: when SCOUT_BURN_IN_REPEAT_EACH is set,
+  // each test will run N times to validate stability of changed code.
+  const burnInRepeatEach = parseInt(process.env.SCOUT_BURN_IN_REPEAT_EACH || '0', 10);
+
   const pwCmdArgs = [
     'test',
     ...(pwTestFiles.length ? pwTestFiles : []),
@@ -171,6 +176,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
+    ...(burnInRepeatEach > 0 ? [`--repeat-each=${burnInRepeatEach}`] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
