@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssistantMessage, Message } from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
 import {
   MessageRole,
   type Prompt,
@@ -123,18 +123,6 @@ export async function executeUntilValid(
       prevMessages,
     });
 
-    // When the model returns tool calls, preserve that assistant turn in the conversation
-    // history. Many providers (OpenAI-compatible) require a `role: "tool"` message to
-    // immediately follow a preceding assistant message that contains `tool_calls`.
-    const assistantToolCallsMessage: AssistantMessage | undefined = response.toolCalls.length
-      ? {
-          role: MessageRole.Assistant,
-          // Tool-call-only assistant messages are allowed to have null content.
-          content: null,
-          toolCalls: response.toolCalls,
-        }
-      : undefined;
-
     const toolMessages = response.toolCalls.length
       ? (await callTools(response.toolCalls)).map((toolMessage) => {
           return {
@@ -162,10 +150,7 @@ export async function executeUntilValid(
       }
 
       return innerCallPromptUntil({
-        messages: prevMessages.concat(
-          ...(assistantToolCallsMessage ? [assistantToolCallsMessage] : []),
-          ...toolMessages
-        ),
+        messages: prevMessages.concat(...toolMessages),
         stepsLeft: stepsLeft - 1,
       });
     }

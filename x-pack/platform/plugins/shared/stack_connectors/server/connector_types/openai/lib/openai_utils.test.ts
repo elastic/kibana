@@ -92,40 +92,6 @@ describe('Open AI Utils', () => {
       );
       expect(sanitizedBodyString).toEqual(bodyString);
     });
-
-    it('omits tool_choice when no tools are defined (provider compatibility)', () => {
-      const body = {
-        model: 'gpt-4',
-        tool_choice: 'auto',
-        messages: [{ role: 'user', content: 'This is a test' }],
-      };
-
-      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body), DEFAULT_MODEL);
-        const parsed = JSON.parse(sanitizedBodyString);
-        expect(parsed.tool_choice).toBeUndefined();
-        expect(parsed.tools).toBeUndefined();
-      });
-    });
-
-    it('does not omit tool_choice when tools are present', () => {
-      const body = {
-        model: 'gpt-4',
-        tool_choice: 'auto',
-        tools: [
-          { type: 'function', function: { name: 'foo', description: 'bar', parameters: {} } },
-        ],
-        messages: [{ role: 'user', content: 'This is a test' }],
-      };
-
-      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
-        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body), DEFAULT_MODEL);
-        const parsed = JSON.parse(sanitizedBodyString);
-        expect(parsed.tool_choice).toBe('auto');
-        expect(Array.isArray(parsed.tools)).toBe(true);
-        expect(parsed.tools).toHaveLength(1);
-      });
-    });
   });
 
   describe('getRequestWithStreamOption', () => {

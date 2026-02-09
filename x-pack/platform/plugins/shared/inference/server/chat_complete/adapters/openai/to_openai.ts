@@ -78,16 +78,6 @@ export function toolChoiceToOpenAI(
   toolChoice: ToolOptions['toolChoice'],
   context?: { connector?: InferenceConnector; tools?: ToolOptions['tools'] }
 ): OpenAI.ChatCompletionCreateParams['tool_choice'] {
-  // Some providers (especially OpenAI-compatible proxies like LiteLLM) reject tool-calling-related
-  // parameters unless `tools` is present. If we were given tool context and there are no tools,
-  // omit `tool_choice` entirely to avoid provider-side 400s.
-  if (context) {
-    const toolCount = context.tools ? Object.keys(context.tools).length : 0;
-    if (toolCount === 0) {
-      return undefined;
-    }
-  }
-
   // Base mapping
   const mapped =
     typeof toolChoice === 'string'

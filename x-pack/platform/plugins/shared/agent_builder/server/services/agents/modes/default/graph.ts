@@ -186,16 +186,9 @@ export const createAgentGraph = ({
     }
   };
 
-  // IMPORTANT:
-  // The answer prompt can include tool-call/tool-result history from the research phase.
-  // Some providers (and proxies like LiteLLM for Anthropic) reject requests containing tool
-  // messages unless `tools` is present. Bind tools here but force `tool_choice: none` so the
-  // answering agent can't call tools while still keeping the request valid.
-  const answeringModel = chatModel
-    .bindTools(toolManager.list(), { tool_choice: 'none' })
-    .withConfig({
-      tags: [tags.agent, tags.answerAgent],
-    });
+  const answeringModel = chatModel.withConfig({
+    tags: [tags.agent, tags.answerAgent],
+  });
 
   const answerAgent = async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {

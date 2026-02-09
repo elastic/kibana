@@ -50,11 +50,7 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
         return {
           ...rest,
           ...nextOptions,
-          // `prevMessages` must come first to preserve chronological order.
-          // Appending them can produce invalid sequences for providers that
-          // validate tool calling (e.g. `role: "tool"` must immediately follow
-          // a preceding assistant `tool_calls` message).
-          messages: (prevMessages ?? []).concat(nextOptions.messages),
+          messages: nextOptions.messages.concat(prevMessages ?? []),
           metadata: {
             ...rest.metadata,
             attributes: {

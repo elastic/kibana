@@ -269,7 +269,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
             responseSchema: RunActionResponseSchema,
@@ -283,8 +283,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
@@ -300,7 +299,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
@@ -316,8 +315,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({
@@ -348,7 +346,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
@@ -363,8 +361,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({
@@ -409,7 +406,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -425,8 +422,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -436,7 +432,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -453,8 +449,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
             signal,
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -464,7 +459,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'https://api.openai.com/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -481,7 +476,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
             timeout,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -959,7 +954,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
             responseSchema: RunActionResponseSchema,
@@ -972,8 +967,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
@@ -989,7 +983,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
@@ -1004,8 +998,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({
@@ -1036,7 +1029,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
@@ -1050,8 +1043,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({
@@ -1096,7 +1088,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -1110,8 +1102,7 @@ describe('OpenAIConnector', () => {
               'X-My-Custom-Header': 'foo',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -1121,7 +1112,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -1136,8 +1127,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
             signal,
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -1147,7 +1137,7 @@ describe('OpenAIConnector', () => {
         await connector.invokeStream({ ...sampleOpenAiBody, timeout }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'http://localhost:1234/v1/chat/completions',
             method: 'post',
             responseSchema: StreamingResponseSchema,
@@ -1162,7 +1152,7 @@ describe('OpenAIConnector', () => {
               'content-type': 'application/json',
             },
             timeout,
-          }),
+          },
           connectorUsageCollector
         );
       });
@@ -1371,7 +1361,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
             method: 'post',
             responseSchema: RunActionResponseSchema,
@@ -1380,8 +1370,7 @@ describe('OpenAIConnector', () => {
               'api-key': '123',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
@@ -1397,7 +1386,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
             method: 'post',
@@ -1411,8 +1400,7 @@ describe('OpenAIConnector', () => {
               'api-key': '123',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({
@@ -1439,7 +1427,7 @@ describe('OpenAIConnector', () => {
         );
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             responseType: 'stream',
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
             method: 'post',
@@ -1453,8 +1441,7 @@ describe('OpenAIConnector', () => {
               'api-key': '123',
               'content-type': 'application/json',
             },
-            timeout: DEFAULT_TIMEOUT_MS,
-          }),
+          },
           connectorUsageCollector
         );
         expect(response).toEqual({

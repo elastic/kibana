@@ -105,17 +105,8 @@ describe('executeUntilValid', () => {
 
     const secondCallOptions = promptSpy.mock.calls[1][0];
 
-    // The retry must include the assistant tool-calls message before the tool response,
-    // otherwise OpenAI-compatible providers will reject the sequence.
-    expect(secondCallOptions.prevMessages).toHaveLength(2);
-    expect(secondCallOptions.prevMessages[0]).toEqual(
-      expect.objectContaining({
-        role: MessageRole.Assistant,
-        content: null,
-        toolCalls: [expect.objectContaining({ toolCallId: 'call-1' })],
-      })
-    );
-    expect(secondCallOptions.prevMessages[1]).toEqual<ToolMessage>(
+    expect(secondCallOptions.prevMessages).toHaveLength(1);
+    expect(secondCallOptions.prevMessages[0]).toEqual<ToolMessage>(
       expect.objectContaining({
         name: 'repair',
         role: MessageRole.Tool,

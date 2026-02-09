@@ -6,7 +6,7 @@
  */
 
 import type { ToolOptions } from '@kbn/inference-common';
-import { InferenceEndpointProvider, MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import { InferenceEndpointProvider, MessageRole } from '@kbn/inference-common';
 import { fixSchemaArrayProperties } from '../../bedrock/convert_tools';
 import type { CreateOpenAIRequestOptions } from '../types';
 import { getProvider, getElasticModelProvider } from '../utils';
@@ -24,38 +24,6 @@ export const applyProviderTransforms = (
     options = applyBedrockTransforms(options);
   }
 
-  options = ensureToolsForToolUseInHistory(options);
-
-  return options;
-};
-
-const ensureToolsForToolUseInHistory = (
-  options: CreateOpenAIRequestOptions
-): CreateOpenAIRequestOptions => {
-  const hasToolUse = options.messages.some(
-    (message) =>
-      message.role === MessageRole.Tool ||
-      (message.role === MessageRole.Assistant && message.toolCalls?.length)
-  );
-
-  // Some providers (and OpenAI-compatible proxies) reject tool-call-related message history
-  // unless `tools` is present in the request. If the conversation contains tool use but we don't
-  // currently have any tool definitions, inject a dummy tool and force tool_choice to "none" so:
-  // - The request stays compatible
-  // - The model cannot call the dummy tool
-  if (hasToolUse && Object.keys(options.tools ?? {}).length === 0) {
-    options.tools = {
-      doNotCallThisTool: {
-        description: 'Do not call this tool, it is strictly forbidden',
-        schema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-    };
-    options.toolChoice = ToolChoiceType.none;
-  }
-
   return options;
 };
 
@@ -71,6 +39,26 @@ const applyBedrockTransforms = (
 
       return tools;
     }, {} as Required<ToolOptions>['tools']);
+  }
+
+  const hasToolUse = options.messages.some(
+    (message) =>
+      message.role === MessageRole.Tool ||
+      (message.role === MessageRole.Assistant && message.toolCalls?.length)
+  );
+
+  // bedrock does not accept tool calls in conversation history
+  // if no tools are present in the request.
+  if (hasToolUse && Object.keys(options.tools ?? {}).length === 0) {
+    options.tools = {
+      doNotCallThisTool: {
+        description: 'Do not call this tool, it is strictly forbidden',
+        schema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+    };
   }
 
   return options;

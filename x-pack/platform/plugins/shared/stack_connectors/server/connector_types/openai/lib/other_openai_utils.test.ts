@@ -158,39 +158,6 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
         stream: true,
       });
     });
-
-    it('omits tool-calling params when no tools are defined (provider compatibility)', () => {
-      const body = {
-        model: 'mistral',
-        tool_choice: 'auto',
-        parallel_tool_calls: true,
-        function_call: 'auto',
-        messages: [{ role: 'user', content: 'This is a test' }],
-      };
-
-      const sanitizedBodyString = getRequestWithStreamOption(JSON.stringify(body), true);
-      const parsed = JSON.parse(sanitizedBodyString);
-      expect(parsed.tool_choice).toBeUndefined();
-      expect(parsed.parallel_tool_calls).toBeUndefined();
-      expect(parsed.function_call).toBeUndefined();
-    });
-
-    it('does not omit tool_choice when tools are present', () => {
-      const body = {
-        model: 'mistral',
-        tool_choice: 'auto',
-        tools: [
-          { type: 'function', function: { name: 'foo', description: 'bar', parameters: {} } },
-        ],
-        messages: [{ role: 'user', content: 'This is a test' }],
-      };
-
-      const sanitizedBodyString = getRequestWithStreamOption(JSON.stringify(body), true);
-      const parsed = JSON.parse(sanitizedBodyString);
-      expect(parsed.tool_choice).toBe('auto');
-      expect(Array.isArray(parsed.tools)).toBe(true);
-      expect(parsed.tools).toHaveLength(1);
-    });
   });
   describe('PKI utils', () => {
     it('pkiErrorHandler returns undefined for unrecognized PKI-related error messages', () => {

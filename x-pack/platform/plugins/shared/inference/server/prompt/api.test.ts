@@ -179,8 +179,8 @@ describe('createPromptApi', () => {
     const resultOptions = callbackFn(mockExecutor);
 
     expect(resultOptions.messages).toEqual([
-      { role: MessageRole.Assistant, content: 'Previous message' },
       { role: MessageRole.User, content: 'Hello world' },
+      { role: MessageRole.Assistant, content: 'Previous message' },
     ]);
   });
 

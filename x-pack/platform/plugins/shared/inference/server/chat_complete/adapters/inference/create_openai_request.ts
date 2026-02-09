@@ -41,7 +41,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
-      tool_choice: toolChoiceToOpenAI(toolChoice, { connector: options.connector, tools }),
+      tool_choice: toolChoiceToOpenAI(toolChoice),
       tools: toolsToOpenAI(tools),
     };
   }

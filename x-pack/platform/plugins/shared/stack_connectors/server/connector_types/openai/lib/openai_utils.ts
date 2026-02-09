@@ -9,25 +9,6 @@ import { OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL } from '@kbn/connector-sc
 
 const APIS_ALLOWING_STREAMING = new Set<string>([OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL]);
 
-function stripToolCallingParamsIfNoTools(jsonBody: Record<string, unknown>) {
-  // Some OpenAI-compatible providers (e.g. Anthropic via LiteLLM behind an OpenAI provider config)
-  // reject tool-calling parameters unless `tools` is explicitly provided. If we don't have any
-  // tools, omit tool-calling params to keep the request compatible.
-  const tools = (jsonBody as { tools?: unknown }).tools;
-  const toolCount = Array.isArray(tools) ? tools.length : 0;
-  if (toolCount === 0) {
-    delete (jsonBody as { tool_choice?: unknown }).tool_choice;
-    delete (jsonBody as { parallel_tool_calls?: unknown }).parallel_tool_calls;
-  }
-
-  // Legacy function-calling parameters (pre-`tools`). If there are no functions, omit function_call.
-  const functions = (jsonBody as { functions?: unknown }).functions;
-  const functionCount = Array.isArray(functions) ? functions.length : 0;
-  if (functionCount === 0) {
-    delete (jsonBody as { function_call?: unknown }).function_call;
-  }
-}
-
 /**
  * Sanitizes the Open AI request body to set stream to false
  * so users cannot specify a streaming response when the framework
@@ -64,9 +45,6 @@ export const getRequestWithStreamOption = (
         }
       }
       jsonBody.model = jsonBody.model || defaultModel;
-      if (typeof jsonBody === 'object') {
-        stripToolCallingParamsIfNoTools(jsonBody as Record<string, unknown>);
-      }
     }
 
     return JSON.stringify(jsonBody);

@@ -57,25 +57,6 @@ import {
 } from './lib/utils';
 import { getPKISSLOverrides, pkiErrorHandler } from './lib/other_openai_utils';
 
-function stripToolCallingParamsIfNoTools(body: Record<string, unknown>) {
-  // Some OpenAI-compatible providers (e.g. Anthropic via LiteLLM) reject tool-calling-related
-  // parameters unless `tools` (or legacy `functions`) are present. If we don't have any tools,
-  // omit tool-calling params to keep the request compatible.
-  const tools = (body as { tools?: unknown }).tools;
-  const toolCount = Array.isArray(tools) ? tools.length : 0;
-  if (toolCount === 0) {
-    delete (body as { tool_choice?: unknown }).tool_choice;
-    delete (body as { parallel_tool_calls?: unknown }).parallel_tool_calls;
-  }
-
-  // Legacy function-calling parameters (pre-`tools`). If there are no functions, omit function_call.
-  const functions = (body as { functions?: unknown }).functions;
-  const functionCount = Array.isArray(functions) ? functions.length : 0;
-  if (functionCount === 0) {
-    delete (body as { function_call?: unknown }).function_call;
-  }
-}
-
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url: string;
   private provider: OpenAiProviderType;
@@ -335,9 +316,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             ...this.headers,
             ...axiosOptions.headers,
           },
-          // Default to the same request timeout as non-streamed requests to avoid the implicit
-          // 60s client timeout (which is too low for slower models).
-          timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          timeout,
           sslOverrides: this.sslOverrides,
         },
         connectorUsageCollector
@@ -449,15 +428,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         model,
       };
 
-      // `invokeAsyncIterator` bypasses the JSON-body sanitization path (`sanitizeRequest` /
-      // `getRequestWithStreamOption`). Ensure we never send tool-calling params without tools,
-      // to keep strict OpenAI-compatible providers (e.g. Anthropic via LiteLLM) happy.
-      stripToolCallingParamsIfNoTools(requestBody as unknown as Record<string, unknown>);
-
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
-        ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+        timeout, // do not default if not provided
       });
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();

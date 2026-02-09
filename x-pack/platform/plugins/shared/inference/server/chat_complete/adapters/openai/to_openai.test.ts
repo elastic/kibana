@@ -21,25 +21,6 @@ describe('toolChoiceToOpenAI', () => {
     expect(toolChoiceToOpenAI(undefined)).toBeUndefined();
   });
 
-  it('omits tool_choice when no tools are defined (provider compatibility)', () => {
-    const connector = {
-      config: { apiProvider: OpenAiProviderType.Other },
-    } as unknown as InferenceConnector;
-
-    expect(
-      toolChoiceToOpenAI(ToolChoiceType.auto, { connector, tools: undefined })
-    ).toBeUndefined();
-    expect(
-      toolChoiceToOpenAI(ToolChoiceType.required, { connector, tools: undefined })
-    ).toBeUndefined();
-    expect(
-      toolChoiceToOpenAI(ToolChoiceType.none, { connector, tools: undefined })
-    ).toBeUndefined();
-    expect(
-      toolChoiceToOpenAI({ function: 'foo' }, { connector, tools: undefined })
-    ).toBeUndefined();
-  });
-
   it('returns the right value for named functions', () => {
     expect(toolChoiceToOpenAI({ function: 'foo' })).toEqual({
       type: 'function',
