@@ -151,16 +151,10 @@ export const DiscoverTopNav = ({
     };
   }, []);
 
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const { detail } = event as CustomEvent<{ isOpen?: boolean }>;
-      if (detail?.isOpen) {
-        dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
-      }
-    };
-
-    window.addEventListener('esqlDocsFlyoutVisibilityChange', handler);
-    return () => window.removeEventListener('esqlDocsFlyoutVisibilityChange', handler);
+  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+    }
   }, []);
 
   const canEditDataView =
@@ -395,6 +389,7 @@ export const DiscoverTopNav = ({
         onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         esqlVariablesConfig={
           isEsqlMode
             ? {

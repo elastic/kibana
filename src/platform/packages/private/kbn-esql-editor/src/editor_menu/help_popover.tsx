@@ -35,7 +35,9 @@ import type { ESQLEditorDeps } from '../types';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { helpLabel } from './menu_i18n';
 
-export const HelpPopover: React.FC = () => {
+export const HelpPopover: React.FC<{
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+}> = ({ onESQLDocsFlyoutVisibilityChanged }) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, data } = kibana.services;
   const { docLinks, http, chrome, analytics, notifications } = core;
@@ -52,15 +54,8 @@ export const HelpPopover: React.FC = () => {
   const [adHocDataview, setAdHocDataview] = useState<DataView | undefined>(undefined);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    window.dispatchEvent(
-      new CustomEvent('esqlDocsFlyoutVisibilityChange', {
-        detail: { isOpen: isLanguageComponentOpen },
-      })
-    );
-  }, [isLanguageComponentOpen]);
+    onESQLDocsFlyoutVisibilityChanged?.(isLanguageComponentOpen);
+  }, [isLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]);
 
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]

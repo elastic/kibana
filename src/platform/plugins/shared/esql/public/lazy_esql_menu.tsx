@@ -20,7 +20,10 @@ const LazyEsqlEditorActionsProvider = React.lazy(async () => {
   return { default: module.EsqlEditorActionsProvider };
 });
 
-export const ESQLMenu: React.FC<{ hideHistory?: boolean }> = (props) => (
+export const ESQLMenu: React.FC<{
+  hideHistory?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+}> = (props) => (
   <Suspense
     fallback={
       <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>

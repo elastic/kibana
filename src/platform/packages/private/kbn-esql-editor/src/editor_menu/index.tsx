@@ -25,7 +25,13 @@ const LazyHelpPopover = React.lazy(async () => {
   return { default: module.HelpPopover };
 });
 
-export function ESQLMenu({ hideHistory }: { hideHistory?: boolean } = {}) {
+export function ESQLMenu({
+  hideHistory,
+  onESQLDocsFlyoutVisibilityChanged,
+}: {
+  hideHistory?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+} = {}) {
   const editorActions = useEsqlEditorActions();
   const { euiTheme } = useEuiTheme();
   const onToggleVisor = editorActions?.toggleVisor;
@@ -107,7 +113,7 @@ export function ESQLMenu({ hideHistory }: { hideHistory?: boolean } = {}) {
             </EuiToolTip>
           }
         >
-          <LazyHelpPopover />
+          <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
         </Suspense>
       </EuiFlexItem>
     </EuiFlexGroup>

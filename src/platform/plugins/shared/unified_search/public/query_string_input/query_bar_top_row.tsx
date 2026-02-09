@@ -239,6 +239,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   useBackgroundSearchButton?: boolean;
 }
 
@@ -898,7 +899,7 @@ export const QueryBarTopRow = React.memo(
 
       return (
         <EuiFlexItem grow={false}>
-          <ESQLMenu />
+          <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
         </EuiFlexItem>
       );
     }
