@@ -430,6 +430,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 runPayload: body.run,
               });
               errors.push(...bulkActionErrors);
@@ -447,6 +448,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 fillGapsPayload: body.fill_gaps,
               });
               errors.push(...bulkActionErrors);

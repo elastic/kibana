@@ -222,6 +222,35 @@ export const rulesAll: Role = {
   },
 };
 
+export const rulesReadWithManualRun: Role = {
+  name: 'rules_read_with_manual_run',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV4: ['minimal_read', 'security_solution_manual_run_rules'],
+          actions: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesReadWithManualRunUser: User = {
+  username: 'rules_read_with_manual_run_user',
+  password: 'password',
+  roles: [rulesReadWithManualRun.name],
+};
+
 export const rulesAllWithCases: Role = {
   name: 'rules_all_role',
   privileges: {

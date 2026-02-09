@@ -46,15 +46,17 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 const getGapsTableColumns = (
-  hasCRUDPermissions: boolean,
   ruleId: string,
   enabled: boolean,
-  gapReasonDetectionEnabled: boolean
+  canManualRunRules: boolean
 ) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
     align: 'right' as const,
-    render: (gap: Gap) => <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} />,
+    render: (gap: Gap) =>
+      canManualRunRules ? (
+        <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} />
+      ) : null,
     width: '15%',
   };
 
@@ -195,7 +197,7 @@ const getGapsTableColumns = (
     },
   ];
 
-  if (hasCRUDPermissions) {
+  if (canManualRunRules) {
     columns.push(fillActions);
   }
 
@@ -212,11 +214,16 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     end: 'now',
   });
   const { timelines } = useKibana().services;
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
+  const {
+    rulesPrivileges: {
+      manualRun: { edit: canManualRunRules },
+    },
+  } = useUserPrivileges();
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
+  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
+  const isFillRuleGapsButtonEnabled = canManualRunRules && isBulkFillRuleGapsEnabled;
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -248,7 +255,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(canEditRules, ruleId, enabled, gapReasonDetectionEnabled);
+  const columns = getGapsTableColumns(ruleId, enabled, canManualRunRules);
 
   const onRefreshCallback = () => {
     refetch();

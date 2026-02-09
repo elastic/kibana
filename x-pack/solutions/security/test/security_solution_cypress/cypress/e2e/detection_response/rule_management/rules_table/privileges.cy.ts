@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ADD_ELASTIC_RULES_BTN,
   CREATE_NEW_RULE_BTN,
@@ -21,6 +22,8 @@ import {
   rulesReadUser,
   secAll as rulesNone,
   secAllUser as rulesNoneUser,
+  rulesReadWithManualRunUser,
+  rulesReadWithManualRun,
 } from '../../../../tasks/privileges';
 
 import { RULES_URL } from '../../../../urls/navigation';
@@ -32,10 +35,16 @@ import {
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
 } from '../../../../tasks/create_new_rule';
-import { enableRule, selectRulesByName } from '../../../../tasks/alerts_detection_rules';
+import {
+  bulkGapFillFromRulesTablePage,
+  bulkManualRuleRunFromRulesTablePage,
+  enableRule,
+  selectRulesByName,
+} from '../../../../tasks/alerts_detection_rules';
 import {
   BULK_ACTIONS_BTN,
   BULK_EXPORT_ACTION_BTN,
+  BULK_FILL_RULE_GAPS_BTN,
   BULK_MANUAL_RULE_RUN_BTN,
   DELETE_RULE_BULK_BTN,
   DISABLE_RULE_BULK_BTN,
@@ -44,16 +53,20 @@ import {
 } from '../../../../screens/rules_bulk_actions';
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 import { assertSuccessToast } from '../../../../screens/common/toast';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone];
+import type { CreateRulePropsRewrites } from '../../../../objects/types';
+const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadWithManualRunUser];
+const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadWithManualRun];
 
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {
-  const ruleName = 'My rule';
-  const createRule = () => {
-    const rule = getCustomQueryRuleParams({ name: ruleName });
+  const testRuleName = 'My rule';
+  const createRule = (
+    ruleName: string,
+    rewrites: CreateRulePropsRewrites<QueryRuleCreateProps> = {}
+  ) => {
+    const rule = getCustomQueryRuleParams({ name: ruleName, ...rewrites });
     loginWithUser(rulesAllUser);
     visit(RULES_URL);
     cy.get(CREATE_NEW_RULE_BTN).click();
@@ -68,7 +81,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    createRule();
+    createRule(testRuleName);
   });
 
   describe('securitySolutionRulesV1.all', () => {
@@ -88,7 +101,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     it(`should see enabled bulk actions from context menu`, () => {
-      selectRulesByName([ruleName]);
+      selectRulesByName([testRuleName]);
       cy.get(BULK_ACTIONS_BTN).click();
 
       type ActionsButtonEnableArray = [string, 'enabled' | 'disabled'][];
@@ -142,6 +155,33 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
 
     it(`should be able to "Add" a prebuilt rule`, () => {
       cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
+    });
+  });
+
+  describe('securitySolutionRulesV4.read with manual run', () => {
+    const ruleNameForManualRunPrivilegesTest = 'ruleNameForManualRunPrivilegesTest';
+
+    before(() => {
+      loginWithUser(rulesAllUser);
+      createRule(ruleNameForManualRunPrivilegesTest, { from: 'now', interval: '1s' });
+    });
+
+    beforeEach(() => {
+      loginWithUser(rulesReadWithManualRunUser);
+      visit(RULES_URL);
+
+      selectRulesByName([ruleNameForManualRunPrivilegesTest]);
+      cy.get(BULK_ACTIONS_BTN).click();
+    });
+
+    it('should be able to trigger manual runs', () => {
+      cy.get(BULK_MANUAL_RULE_RUN_BTN).should('be.enabled');
+      bulkManualRuleRunFromRulesTablePage(1);
+    });
+
+    it('should be able to trigger gap fills', () => {
+      cy.get(BULK_FILL_RULE_GAPS_BTN).should('be.enabled');
+      bulkGapFillFromRulesTablePage();
     });
   });
 

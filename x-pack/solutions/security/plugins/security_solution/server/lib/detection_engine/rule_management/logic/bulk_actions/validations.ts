@@ -34,6 +34,10 @@ interface BulkEnableDisableActionValidationArgs extends BulkActionsValidationArg
   rulesAuthz: DetectionRulesAuthz;
 }
 
+interface BulkManualRunActionValidationArgs extends BulkActionsValidationArgs {
+  rulesAuthz: DetectionRulesAuthz;
+}
+
 /**
  * throws ML authorization error wrapped with MACHINE_LEARNING_AUTH error code
  * @param mlAuthz - {@link MlAuthz}
@@ -120,9 +124,22 @@ export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsVa
 
 /**
  * runs validation for bulk schedule backfill for a single rule
- * @param params - {@link DryRunManualRuleRunBulkActionsValidationArgs}
+ * @param params - {@link BulkManualRunActionValidationArgs}
  */
-export const validateBulkScheduleBackfill = async ({ rule }: BulkActionsValidationArgs) => {
+export const validateBulkScheduleBackfill = async ({
+  rule,
+  rulesAuthz,
+  mlAuthz,
+}: BulkManualRunActionValidationArgs) => {
+  await throwDryRunError(
+    () =>
+      invariant(
+        rulesAuthz.canManualRunRules,
+        'User does not have permission to run rules manually'
+      ),
+    BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
+  );
+  await throwMlAuthError(mlAuthz, rule.params.type);
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
     BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE
@@ -131,9 +148,22 @@ export const validateBulkScheduleBackfill = async ({ rule }: BulkActionsValidati
 
 /**
  * runs validation for bulk gap filling for a single rule
- * @param params - {@link DryRunRuleFillGapsBulkActionsValidationArgs}
+ * @param params - {@link BulkManualRunActionValidationArgs}
  */
-export const validateBulkRuleGapFilling = async ({ rule }: BulkActionsValidationArgs) => {
+export const validateBulkRuleGapFilling = async ({
+  rule,
+  rulesAuthz,
+  mlAuthz,
+}: BulkManualRunActionValidationArgs) => {
+  await throwDryRunError(
+    () =>
+      invariant(
+        rulesAuthz.canManualRunRules,
+        'User does not have permission to run rules manually'
+      ),
+    BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
+  );
+  await throwMlAuthError(mlAuthz, rule.params.type);
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot bulk fill gaps for a disabled rule'),
     BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE

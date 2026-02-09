@@ -101,6 +101,7 @@ export const useBulkActions = ({
     rulesPrivileges: {
       rules: { edit: canEditRules },
       enableDisable: { edit: canEnableDisableRules },
+      manualRun: { edit: canManualRunRules },
       customHighlightedFields: { edit: canEditCustomHighlightedFields },
     },
   } = useUserPrivileges();
@@ -609,18 +610,28 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
               name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
               'data-test-subj': 'scheduleRuleRunBulk',
-              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              disabled:
+                containsLoading ||
+                (!containsEnabled && !isAllSelected) ||
+                !canManualRunRules,
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
-            {
-              key: i18n.BULK_ACTION_FILL_RULE_GAPS,
-              name: i18n.BULK_ACTION_FILL_RULE_GAPS,
-              'data-test-subj': 'scheduleFillGaps',
-              disabled: containsLoading || (!containsEnabled && !isAllSelected),
-              onClick: handleScheduleFillGapsAction,
-              icon: undefined,
-            },
+            ...(isBulkFillRuleGapsEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    'data-test-subj': 'scheduleFillGaps',
+                    disabled:
+                      containsLoading ||
+                      (!containsEnabled && !isAllSelected) ||
+                      !canManualRunRules,
+                    onClick: handleScheduleFillGapsAction,
+                    icon: undefined,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -776,6 +787,7 @@ export const useBulkActions = ({
       isAlertSuppressionLicenseValid,
       isAllSelected,
       canEnableDisableRules,
+      canManualRunRules,
       canEditCustomHighlightedFields,
       alertSuppressionUpsellingMessage,
       canCreateTimelines,
