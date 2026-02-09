@@ -89,9 +89,15 @@ describe('Rules Endpoint response actions validators', () => {
     });
 
     it('should only validate .endpoint response actions', async () => {
-      rulePayload.response_actions!.push({ action_type_id: '.osquery', params: {} });
+      endpointAuthz.canIsolateHost = false;
+      rulePayload.response_actions = [
+        { action_type_id: '.osquery', params: {} },
+        createRulePayloadResponseActionMock(),
+      ];
 
-      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      await expect(validateRuleResponseActions(options)).rejects.toThrow(
+        'User is not authorized to create/update isolate response action'
+      );
     });
 
     interface AuthzTestCase {

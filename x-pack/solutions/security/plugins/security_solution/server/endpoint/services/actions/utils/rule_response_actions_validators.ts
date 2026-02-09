@@ -102,24 +102,23 @@ export const validateRuleResponseActions = async <
   );
 
   for (const actionData of responseActionsToValidate) {
-    if (!isEndpointResponseAction(actionData)) {
+    if (isEndpointResponseAction(actionData)) {
+      validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
+
+      // Individual response action payload validations
+      switch (actionData.params.command) {
+        case 'kill-process':
+        case 'suspend-process':
+          validateEndpointKillSuspendProcessResponseAction(actionData.params);
+          break;
+      }
+    } else {
       logger.debug(
         () =>
-          `Skipping validation for response action - not an action type id not '.endpoint': ${stringify(
+          `Skipping validation of response action - not an action type id not '.endpoint': ${stringify(
             actionData
           )}`
       );
-      return;
-    }
-
-    validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
-
-    // Individual response action payload validations
-    switch (actionData.params.command) {
-      case 'kill-process':
-      case 'suspend-process':
-        validateEndpointKillSuspendProcessResponseAction(actionData.params);
-        break;
     }
   }
 
