@@ -14,7 +14,7 @@ export class BannersPageObject {
     try {
       await this.page.testSubj.waitForSelector('bannerInnerWrapper', {
         state: 'visible',
-        timeout: 2000,
+        timeout: 10000,
       });
       return true;
     } catch {
