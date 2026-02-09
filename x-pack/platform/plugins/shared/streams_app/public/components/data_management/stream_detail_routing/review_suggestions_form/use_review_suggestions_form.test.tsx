@@ -385,4 +385,205 @@ describe('useReviewSuggestionsForm', () => {
 
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
+
+  describe('bulk selection', () => {
+    it('toggleSuggestionSelection adds and removes indexes from selection', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      // Select first suggestion
+      act(() => {
+        result.current.toggleSuggestionSelection(0);
+      });
+
+      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
+      expect(result.current.isSuggestionSelected(0)).toBe(true);
+
+      // Select second suggestion
+      act(() => {
+        result.current.toggleSuggestionSelection(1);
+      });
+
+      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
+      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+
+      // Deselect first suggestion
+      act(() => {
+        result.current.toggleSuggestionSelection(0);
+      });
+
+      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(false);
+      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+    });
+
+    it('selectAllSuggestions selects all suggestions', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      act(() => {
+        result.current.selectAllSuggestions();
+      });
+
+      expect(result.current.selectedSuggestionIndexes.size).toBe(2);
+      expect(result.current.isSuggestionSelected(0)).toBe(true);
+      expect(result.current.isSuggestionSelected(1)).toBe(true);
+    });
+
+    it('clearSuggestionSelection clears all selections', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      // Select all
+      act(() => {
+        result.current.selectAllSuggestions();
+      });
+
+      expect(result.current.selectedSuggestionIndexes.size).toBe(2);
+
+      // Clear selection
+      act(() => {
+        result.current.clearSuggestionSelection();
+      });
+
+      expect(result.current.selectedSuggestionIndexes.size).toBe(0);
+    });
+
+    it('removeSuggestion shifts selected indexes correctly', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      // Select second suggestion (index 1)
+      act(() => {
+        result.current.toggleSuggestionSelection(1);
+      });
+
+      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(true);
+
+      // Remove first suggestion (index 0)
+      act(() => {
+        result.current.removeSuggestion(0);
+      });
+
+      // Selection should shift down
+      expect(result.current.selectedSuggestionIndexes.has(0)).toBe(true);
+      expect(result.current.selectedSuggestionIndexes.has(1)).toBe(false);
+    });
+
+    it('bulkAcceptSuggestions removes multiple suggestions at once', async () => {
+      const mockResponse = {
+        partitions: [
+          { name: 'logs.api', condition },
+          { name: 'logs.ui', condition },
+          { name: 'logs.db', condition },
+        ],
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn((observer) => {
+          observer.next(mockResponse);
+          observer.complete();
+        }),
+      };
+      mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      // Select first and third suggestions
+      act(() => {
+        result.current.toggleSuggestionSelection(0);
+        result.current.toggleSuggestionSelection(2);
+      });
+
+      // Bulk accept selected suggestions
+      act(() => {
+        result.current.bulkAcceptSuggestions([0, 2]);
+      });
+
+      // Only the middle suggestion should remain
+      expect(result.current.suggestions).toHaveLength(1);
+      expect(result.current.suggestions![0].name).toBe('logs.ui');
+      // Selection should be cleared
+      expect(result.current.selectedSuggestionIndexes.size).toBe(0);
+    });
+
+    it('bulkAcceptSuggestions resets form when all suggestions are removed', async () => {
+      setupSuggestionsApi();
+
+      const { result } = renderHook(() => useReviewSuggestionsForm());
+
+      await act(async () => {
+        await result.current.fetchSuggestions({
+          streamName: 'test-stream',
+          connectorId: 'test-connector',
+          start: 0,
+          end: 1000,
+        });
+      });
+
+      // Bulk accept all suggestions
+      act(() => {
+        result.current.bulkAcceptSuggestions([0, 1]);
+      });
+
+      expect(result.current.suggestions).toBeUndefined();
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'suggestion.preview',
+          condition: { always: {} },
+          name: '',
+          index: 0,
+          toggle: false,
+        })
+      );
+    });
+  });
 });
