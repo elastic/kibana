@@ -11,7 +11,7 @@ require('@kbn/setup-node-env');
 const path = require('node:path');
 const fs = require('node:fs');
 const { run } = require('@kbn/dev-cli-runner');
-const yaml = require('js-yaml');
+const { stringify, parse } = require('yaml');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const NON_SPACE_PATH_PREFIXES = [
@@ -47,7 +47,7 @@ run(
   async ({ log, flagsReader }) => {
     const [relativeFilePath] = flagsReader.getPositionals();
     const absPath = path.resolve(REPO_ROOT, relativeFilePath);
-    const oasDoc = yaml.load(fs.readFileSync(absPath, 'utf8'));
+    const oasDoc = parse(fs.readFileSync(absPath, 'utf8'));
 
     for (const [_pathName, pathValue] of Object.entries(oasDoc.paths)) {
       const pathName = _pathName.trim();
@@ -71,7 +71,11 @@ run(
     }
 
     log.info(`Writing file with spaces promoted to ${absPath}`);
-    fs.writeFileSync(absPath, yaml.dump(oasDoc, { noRefs: true, lineWidth: -1 }), 'utf8');
+    fs.writeFileSync(
+      absPath,
+      stringify(oasDoc, { aliasDuplicateObjects: false, lineWidth: -1 }),
+      'utf8'
+    );
   },
   {
     description: 'Promote space awareness in OAS documents',
