@@ -18,7 +18,7 @@ import {
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
-import { PromQLLang } from '../../..';
+import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
