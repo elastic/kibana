@@ -49,6 +49,22 @@ export const FullScreenWaterfall = ({
   )?.render;
   const { euiTheme } = useEuiTheme();
 
+  /*
+   * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
+   * rendered inside nested flyouts.
+   *
+   * EuiDataGrid popovers use EuiPortal, which inserts content at the document root. When nested
+   * flyouts unmount, Emotion's style cleanup can target portals that have already been removed
+   * from the DOM, resulting in a white screen crash.
+   *
+   * By injecting a plain <style> element into document.head, we bypass Emotion entirely,
+   * avoiding the cleanup race condition while still ensuring the popover renders
+   * above the flyout layers.
+   *
+   * TODO: Remove this workaround once EUI provides a proper fix for popover z-index handling
+   * inside nested flyouts (see: https://github.com/elastic/eui/issues/8801).
+   */
+
   useEffect(() => {
     const style = document.createElement('style');
 
