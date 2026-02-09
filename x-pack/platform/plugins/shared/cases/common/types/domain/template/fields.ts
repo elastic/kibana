@@ -11,6 +11,7 @@ const BaseFieldSchema = z.object({
   name: z.string(),
   label: z.string().optional(),
   type: z.literal('keyword'),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 export const InputTextFieldSchema = BaseFieldSchema.extend({
