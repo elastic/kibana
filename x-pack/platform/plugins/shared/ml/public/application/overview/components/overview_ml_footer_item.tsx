@@ -7,18 +7,9 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 interface OverviewFooterItemProps {
-  icon: 'machineLearningApp' | 'documentation' | 'dashboardApp';
   title: string;
   description: string;
   docLink: string;
@@ -26,24 +17,12 @@ interface OverviewFooterItemProps {
 }
 
 export const OverviewFooterItem: FC<OverviewFooterItemProps> = ({
-  icon,
   title,
   description,
   docLink,
   callToAction,
 }) => (
   <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        display="base"
-        color="primary"
-        href={docLink}
-        iconType={icon}
-        aria-label={i18n.translate('xpack.ml.overviewFooterItem.documentationLink', {
-          defaultMessage: 'Documentation link',
-        })}
-      />
-    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
         <h3>{title}</h3>
