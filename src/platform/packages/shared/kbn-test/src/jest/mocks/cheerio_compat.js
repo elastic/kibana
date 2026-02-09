@@ -26,7 +26,9 @@ const Path = require('path');
 // Resolve the real cheerio package by absolute path to avoid re-entering this shim
 // through the Jest resolver redirect.
 const cheerioDir = Path.dirname(require.resolve('cheerio/package.json'));
+// eslint-disable-next-line import/no-dynamic-require
 const realCheerio = require(Path.join(cheerioDir, 'dist', 'commonjs', 'index.js'));
+// eslint-disable-next-line import/no-dynamic-require
 const staticMethods = require(Path.join(cheerioDir, 'dist', 'commonjs', 'static.js'));
 
 // Build a callable default export that mimics cheerio rc.12 behavior.
