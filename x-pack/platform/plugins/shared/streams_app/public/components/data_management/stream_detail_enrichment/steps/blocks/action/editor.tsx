@@ -55,6 +55,7 @@ import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ReplaceProcessorForm } from './replace';
+import { RedactProcessorForm } from './redact';
 import { SetProcessorForm } from './set';
 import { SplitProcessorForm } from './split';
 import { SortProcessorForm } from './sort';
@@ -149,6 +150,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 <EuiSpacer size="m" />
                 {type === 'convert' && <ConvertProcessorForm />}
                 {type === 'replace' && <ReplaceProcessorForm />}
+                {type === 'redact' && <RedactProcessorForm />}
                 {type === 'date' && <DateProcessorForm />}
                 {type === 'grok' && <GrokProcessorForm />}
                 {type === 'dissect' && <DissectProcessorForm />}

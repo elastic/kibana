@@ -102,6 +102,12 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'redact':
+      if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'math':
       if (processor.to) {
         fields.push(processor.to);
@@ -220,6 +226,7 @@ export function getProcessorOutputType(
 
     case 'dissect':
     case 'replace':
+    case 'redact':
     case 'uppercase':
     case 'lowercase':
     case 'trim':
@@ -289,6 +296,12 @@ export function getExpectedInputType(
       return null;
 
     case 'replace':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'redact':
       if (processor.from === fieldName) {
         return ['string'];
       }
@@ -381,6 +394,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'date':
       case 'convert':
       case 'replace':
+      case 'redact':
       case 'remove':
       case 'grok':
       case 'dissect':

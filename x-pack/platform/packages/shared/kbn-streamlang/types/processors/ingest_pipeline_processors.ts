@@ -20,6 +20,7 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   TrimProcessor,
   LowercaseProcessor,
@@ -100,6 +101,12 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
 // Math (uses script processor internally)
 export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   MathProcessor,
@@ -167,6 +174,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
   | IngestPipelineUppercaseProcessor
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
