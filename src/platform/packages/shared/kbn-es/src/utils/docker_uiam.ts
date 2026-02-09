@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 import {
   generateCosmosDBApiRequestHeaders,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
@@ -26,7 +28,7 @@ import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
-import URL from 'url';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
@@ -38,10 +40,10 @@ const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251223';
 export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
-const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
-// Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-1171ce2fde41';
-export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
+const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
+
+// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
+export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
 
@@ -81,7 +83,7 @@ export const UIAM_CONTAINERS = [
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
       '-p',
-      `127.0.0.1:${URL.parse(MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL)?.port}:8081`, // Cosmos DB gateway
+      `127.0.0.1:${new URL(MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL)?.port}:8081`, // Cosmos DB gateway
       '-p',
       `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
 
@@ -115,7 +117,7 @@ export const UIAM_CONTAINERS = [
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
 
       '-p',
-      `127.0.0.1:${URL.parse(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port}:8080`, // UIAM API port
+      `127.0.0.1:${new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port}:8080`, // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -220,6 +222,7 @@ export async function runUiamContainer(
 
     healthcheckRetries++;
     if (healthcheckRetries >= MAX_HEALTHCHECK_RETRIES) {
+      await tryExportLogs(container.name, log);
       throw new Error(
         `The "${
           container.name
@@ -314,4 +317,16 @@ export async function initializeUiamContainers(log: ToolingLog) {
       `Cosmos DB (${MOCK_IDP_UIAM_COSMOS_DB_URL}/${MOCK_IDP_UIAM_COSMOS_DB_NAME}) has been successfully initialized.`
     )
   );
+}
+
+async function tryExportLogs(containerName: string, log: ToolingLog) {
+  try {
+    const { stdout: logs } = await execa('docker', ['logs', containerName]);
+    await mkdir(join(REPO_ROOT, '.es'), {
+      recursive: true,
+    });
+    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+  } catch (err) {
+    log.error(`Failed to export logs for container ${containerName}: ${err}`);
+  }
 }

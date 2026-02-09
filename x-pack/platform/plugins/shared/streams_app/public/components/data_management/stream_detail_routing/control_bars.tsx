@@ -65,7 +65,9 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
     setRequestPreviewCodeContent('');
   };
 
-  const isForking = routingSnapshot.matches({ ready: { creatingNewRule: 'forking' } });
+  const isForking = routingSnapshot.matches({
+    ready: { ingestMode: { creatingNewRule: 'forking' } },
+  });
   const canForkRouting = routingSnapshot.can({ type: 'routingRule.fork' });
   const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
@@ -137,7 +139,9 @@ export const EditRoutingRuleControls = ({
 
   const routingRuleName = routingRule.destination;
 
-  const isUpdating = routingSnapshot.matches({ ready: { editingRule: 'updatingRule' } });
+  const isUpdating = routingSnapshot.matches({
+    ready: { ingestMode: { editingRule: 'updatingRule' } },
+  });
 
   const canUpdateRouting = routingSnapshot.can({ type: 'routingRule.save' });
   const canRemoveRoutingRule = routingSnapshot.can({ type: 'routingRule.remove' });
