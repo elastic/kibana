@@ -8,13 +8,8 @@
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
-import * as transformsModule from '../lib/transforms/rrule_to_custom/latest';
 
 jest.mock('./schema');
-jest.mock('../lib/transforms/rrule_to_custom/latest', () => ({
-  __esModule: true,
-  ...jest.requireActual('../lib/transforms/rrule_to_custom/latest'),
-}));
 
 describe('maintenanceWindowModelVersions', () => {
   describe('version 1', () => {
@@ -77,10 +72,6 @@ describe('maintenanceWindowModelVersions', () => {
 
   describe('version 4', () => {
     const modelVersion4 = maintenanceWindowModelVersions[4] as SavedObjectsFullModelVersion;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
 
     it('should have correct changes', () => {
       expect(modelVersion4.changes).toMatchInlineSnapshot(`
@@ -309,7 +300,7 @@ describe('maintenanceWindowModelVersions', () => {
           attributes: {
             duration: 3600000,
             rRule: {
-              dtstart: '2026-01-08T12:01:17.327Z',
+              dtstart: 'invalid-date-string',
               tzid: 'Europe/London',
               freq: 4,
               interval: 1,
@@ -351,12 +342,6 @@ describe('maintenanceWindowModelVersions', () => {
           namespaces: ['default'],
           originId: 'test-origin',
         };
-
-        jest
-          .spyOn(transformsModule, 'transformRRuleToCustomSchedule')
-          .mockImplementationOnce(() => {
-            throw new Error('Transform failed');
-          });
 
         const result =
           version4?.changes[0]?.type === 'data_backfill'
