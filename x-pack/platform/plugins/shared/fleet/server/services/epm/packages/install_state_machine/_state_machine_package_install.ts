@@ -204,6 +204,7 @@ const streamingStatesDefinition: StateMachineStates<string> = {
     onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   update_so: {
     onPreTransition: cleanUpUnusedKibanaAssetsStep,
