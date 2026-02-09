@@ -279,26 +279,6 @@ describe('EvaluationScoreRepository', () => {
     });
   });
 
-  describe('preflightConnection', () => {
-    it('should throw when unable to connect to Elasticsearch', async () => {
-      mockEsClient.info.mockRejectedValue(new Error('boom'));
-
-      await expect(repository.preflightConnection()).rejects.toThrow(
-        'Evals preflight failed: cannot connect to Elasticsearch'
-      );
-    });
-
-    it('should warn when evaluations datastream is missing', async () => {
-      mockEsClient.info.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
-
-      await expect(repository.preflightConnection()).resolves.toBeUndefined();
-      expect(mockLog.warning).toHaveBeenCalledWith(
-        expect.stringContaining('Evaluations data stream ".kibana-evaluations" does not exist')
-      );
-    });
-  });
-
   describe('getStatsByRunId', () => {
     it('should return stats from aggregations', async () => {
       mockEsClient.search

@@ -181,38 +181,6 @@ const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
-  /**
-   * Fail-fast check that we can connect to Elasticsearch before running expensive evals.
-   *
-   * This intentionally does NOT write any documents (or upsert templates) so that running evals
-   * against a shared/"golden" cluster doesn't require delete/create privileges for canary docs.
-   */
-  async preflightConnection(): Promise<void> {
-    try {
-      await this.esClient.info();
-    } catch (error) {
-      throw new Error('Evals preflight failed: cannot connect to Elasticsearch', { cause: error });
-    }
-
-    // Best-effort check: warn if the evaluations data stream doesn't exist. We don't create it here
-    // to avoid mutating shared clusters during development.
-    try {
-      await this.esClient.indices.getDataStream({ name: EVALUATIONS_DATA_STREAM_ALIAS });
-    } catch (error: any) {
-      if (error?.statusCode === 404) {
-        this.log.warning(
-          `Evaluations data stream "${EVALUATIONS_DATA_STREAM_ALIAS}" does not exist. ` +
-            `Score export will fail until it is created.`
-        );
-        return;
-      }
-
-      // Permission errors / unsupported API versions shouldn't block running evals; export will
-      // surface the real error if/when it happens.
-      this.log.debug(`Preflight could not verify datastream existence: ${String(error)}`);
-    }
-  }
-
   async exportScores(
     documents: EvaluationScoreDocument[],
     options: ExportScoresOptions = {}

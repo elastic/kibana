@@ -197,7 +197,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-      await scoreRepository.preflightConnection();
 
       const executorClient = usePhoenixExecutor
         ? new KibanaPhoenixClient({
