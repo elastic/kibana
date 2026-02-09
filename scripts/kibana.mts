@@ -74,6 +74,24 @@ registerHooks({
     try {
       return nextResolve(specifier, context);
     } catch (err: unknown) {
+      // .js → .ts/.tsx remapping: when a .js import fails, try the
+      // corresponding .ts/.tsx file. This supports the standard ESM
+      // convention where TypeScript sources use .js extensions in
+      // imports (which TS resolves to .ts at type-check time).
+      if (specifier.endsWith('.js')) {
+        try {
+          return nextResolve(specifier.slice(0, -3) + '.ts', context);
+        } catch {
+          // continue
+        }
+        try {
+          return nextResolve(specifier.slice(0, -3) + '.tsx', context);
+        } catch {
+          // fall through to throw original error
+        }
+        throw err;
+      }
+
       if (/\.\w+$/.test(specifier)) {
         throw err;
       }

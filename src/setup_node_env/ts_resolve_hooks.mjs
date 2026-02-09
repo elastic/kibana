@@ -123,6 +123,25 @@ export async function resolve(specifier, context, nextResolve) {
       }
     }
 
+    // If the specifier ends with .js, try the corresponding .ts/.tsx file.
+    // This supports the standard ESM convention where TypeScript sources use
+    // .js extensions in imports (which TS resolves to .ts at type-check time).
+    if (specifier.endsWith('.js')) {
+      const tsSpecifier = specifier.slice(0, -3) + '.ts';
+      try {
+        return await nextResolve(tsSpecifier, context);
+      } catch {
+        // try .tsx as well
+      }
+      const tsxSpecifier = specifier.slice(0, -3) + '.tsx';
+      try {
+        return await nextResolve(tsxSpecifier, context);
+      } catch {
+        // fall through to throw original error
+      }
+      throw err;
+    }
+
     // If the specifier already has a file extension, don't try alternatives
     if (/\.\w+$/.test(specifier)) {
       throw err;
