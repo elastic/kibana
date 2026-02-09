@@ -7,6 +7,9 @@
 
 import type { EvaluationCriterion } from '@kbn/evals';
 
+export const VALID_FEATURE_TYPES = ['entity', 'infrastructure', 'technology', 'dependency'] as const;
+export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
+
 export interface FeatureIdentificationEvaluationExample {
   input: {
     sample_documents: Array<Record<string, any>>;
@@ -14,6 +17,11 @@ export interface FeatureIdentificationEvaluationExample {
   output: {
     criteria: EvaluationCriterion[];
     weight?: number;
+    min_features?: number;
+    max_features?: number;
+    max_confidence?: number;
+    required_types?: ValidFeatureType[];
+    forbidden_types?: ValidFeatureType[];
   };
   metadata: {
     description?: string;
@@ -59,10 +67,10 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           '@timestamp': '2026-01-12T10:00:00.501Z',
-          message: 'retrieved cloud metadata successfully',
-          'cloud.provider': 'aws',
-          'cloud.region': 'us-east-1',
+          message:
+            'retrieved cloud metadata successfully provider=aws region=us-east-1 account_id=123456789012',
           'service.name': 'checkout-api',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-01-12T10:00:00.612Z',
@@ -85,7 +93,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message:
             'external api call POST https://api.stripe.com/v1/payment_intents completed status=200 target=stripe',
           'service.name': 'checkout-api',
-          'peer.service': 'stripe',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-01-12T10:00:01.140Z',
@@ -149,16 +157,13 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
         {
-          id: 'evidence-grounding',
-          text: 'All evidence fields must contain actual text snippets from the provided log messages, not fabricated quotes',
-          score: 1,
-        },
-        {
           id: 'meta-separation',
           text: 'Pod names and node identifiers must appear in meta, not in properties; technology names and versions must appear in properties',
           score: 1,
         },
       ],
+      min_features: 5,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Go microservice on AWS/K8s with explicit version strings for all components',
@@ -200,9 +205,8 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-02-05T14:30:00.520Z',
           message:
             'loaded GCP environment: project_id=acme-prod compute_zone=us-central1-f vm_instance=order-svc-7d8f9c',
-          'cloud.provider': 'gcp',
-          'cloud.region': 'us-central1',
           'service.name': 'order-service',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-02-05T14:30:00.640Z',
@@ -222,8 +226,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-02-05T14:30:00.900Z',
           message: 'upstream GET /api/stock?sku=ABC123 inventory-service returned 200 elapsed=45ms',
           'service.name': 'order-service',
-          'peer.service': 'inventory-service',
-          'http.method': 'GET',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-02-05T14:30:01.020Z',
@@ -233,7 +236,8 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           '@timestamp': '2026-02-05T14:30:01.150Z',
-          message: 'startup completed: app_start=2.14s jvm_uptime=3.01s',
+          message:
+            '{"event":"app_ready","app_start_ms":2140,"jvm_uptime_ms":3010,"gc_pauses":2,"heap_used_mb":512}',
           'service.name': 'order-service',
           'log.level': 'INFO',
         },
@@ -282,16 +286,13 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
         {
-          id: 'evidence-grounding',
-          text: 'All evidence fields must contain actual text snippets from the provided log messages',
-          score: 1,
-        },
-        {
           id: 'meta-separation',
           text: 'Stable identifiers (service names, technology names) must be in properties; variable data (VM instance names, IPs) in meta',
           score: 1,
         },
       ],
+      min_features: 5,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Java Spring Boot microservice on GCP with MySQL and Kafka',
@@ -331,13 +332,13 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         {
           '@timestamp': '2026-03-18T08:45:00.490Z',
           message: 'cloud environment detected: Azure sub=abc123 region=westus2 vm=vm-telemetry-01',
-          'cloud.provider': 'azure',
-          'cloud.region': 'westus2',
           'service.name': 'telemetry-collector',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-03-18T08:45:00.600Z',
-          message: 'metrics exporter bound to 0.0.0.0:9090/metrics format=prometheus',
+          message:
+            '{"component":"metrics","bind":"0.0.0.0:9090","path":"/metrics","format":"prometheus","scrape_interval_ms":15000}',
           'service.name': 'telemetry-collector',
           'log.level': 'INFO',
         },
@@ -352,7 +353,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message:
             'rpc to metrics-aggregator successful: /telemetry.Metrics/Push status=OK latency=12ms',
           'service.name': 'telemetry-collector',
-          'peer.service': 'metrics-aggregator',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-03-18T08:45:00.940Z',
@@ -406,16 +407,13 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
         {
-          id: 'evidence-grounding',
-          text: 'All evidence fields must contain actual text snippets from the provided log messages',
-          score: 1,
-        },
-        {
           id: 'meta-separation',
           text: 'Subscription IDs and VM identifiers must appear in meta, not in properties',
           score: 1,
         },
       ],
+      min_features: 5,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Rust service on Azure with MongoDB and NATS',
@@ -468,8 +466,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message:
             'outgoing request POST /api/recommend -> recommendation-engine responded 200 took=89ms',
           'service.name': 'search-api',
-          'peer.service': 'recommendation-engine',
-          'http.method': 'POST',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-04-22T16:15:00.840Z',
@@ -485,6 +482,19 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           '@timestamp': '2026-04-22T16:15:01.060Z',
+          message:
+            'Error: ECONNRESET socket hang up\n    at connResetException (node:internal/errors:720:14)\n    at TLSSocket.socketOnEnd (node:_http_client:518:23)',
+          'service.name': 'search-api',
+          'log.level': 'ERROR',
+        },
+        {
+          '@timestamp': '2026-04-22T16:15:01.170Z',
+          message: 'retrying recommendation-engine request attempt=2 backoff=500ms',
+          'service.name': 'search-api',
+          'log.level': 'WARN',
+        },
+        {
+          '@timestamp': '2026-04-22T16:15:01.780Z',
           message: 'healthcheck route mounted: GET /health',
           'service.name': 'search-api',
           'log.level': 'DEBUG',
@@ -533,12 +543,9 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           text: 'Must NOT identify any cloud provider since the logs explicitly say "cloud detection failed, deployment appears to be on-premises"',
           score: 2,
         },
-        {
-          id: 'evidence-grounding',
-          text: 'All evidence fields must contain actual text snippets from the provided log messages',
-          score: 1,
-        },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Node.js Express service on-prem with Elasticsearch and Redis cluster',
@@ -550,46 +557,52 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     input: {
       sample_documents: [
         {
-          '@timestamp': '2026-05-10T12:00:00.001Z',
+          '@timestamp': '2026-05-10T09:15:22.401Z',
           message: 'worker-pool initializing threads=8 queue_size=1000',
           'service.name': 'data-processor',
           'log.level': 'DEBUG',
         },
         {
-          '@timestamp': '2026-05-10T12:00:00.105Z',
-          message: 'memory stats: heap_used=1.2GB heap_max=4.0GB gc_count=47',
-          'service.name': 'data-processor',
-          'log.level': 'DEBUG',
-        },
-        {
-          '@timestamp': '2026-05-10T12:00:00.210Z',
+          '@timestamp': '2026-05-10T09:15:23.105Z',
           message: 'runtime info: Python 3.10.8 CPython',
           'service.name': 'data-processor',
           'log.level': 'INFO',
         },
         {
-          '@timestamp': '2026-05-10T12:00:00.315Z',
+          '@timestamp': '2026-05-10T09:15:23.630Z',
+          message: 'db client ready: PostgreSQL 14.7 host=db-primary.local:5432',
+          'service.name': 'data-processor',
+          'log.level': 'INFO',
+        },
+        {
+          '@timestamp': '2026-05-10T09:15:24.012Z',
+          message: 'cloud env detected provider=aws region=us-west-2',
+          'service.name': 'data-processor',
+          'log.level': 'INFO',
+        },
+        {
+          '@timestamp': '2026-05-10T10:30:44.105Z',
+          message: 'memory stats: heap_used=1.2GB heap_max=4.0GB gc_count=47',
+          'service.name': 'data-processor',
+          'log.level': 'DEBUG',
+        },
+        {
+          '@timestamp': '2026-05-10T10:30:44.315Z',
           message: 'request latency: p50=45ms p95=120ms p99=340ms',
           'service.name': 'data-processor',
           'log.level': 'INFO',
         },
         {
-          '@timestamp': '2026-05-10T12:00:00.420Z',
+          '@timestamp': '2026-05-10T11:45:12.420Z',
           message: 'cache hit ratio: 0.847 total_requests=45892',
           'service.name': 'data-processor',
           'log.level': 'DEBUG',
         },
         {
-          '@timestamp': '2026-05-10T12:00:00.525Z',
+          '@timestamp': '2026-05-10T11:45:12.525Z',
           message: 'thread pool: active=3 idle=5 completed=8947',
           'service.name': 'data-processor',
           'log.level': 'DEBUG',
-        },
-        {
-          '@timestamp': '2026-05-10T12:00:00.630Z',
-          message: 'db client ready: PostgreSQL 14.7 host=db-primary.local:5432',
-          'service.name': 'data-processor',
-          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-05-10T12:00:00.735Z',
@@ -602,13 +615,6 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message: 'network stats: bytes_in=847MB bytes_out=1.2GB packets=847291',
           'service.name': 'data-processor',
           'log.level': 'DEBUG',
-        },
-        {
-          '@timestamp': '2026-05-10T12:00:00.945Z',
-          message: 'cloud env detected provider=aws region=us-west-2',
-          'cloud.provider': 'aws',
-          'service.name': 'data-processor',
-          'log.level': 'INFO',
         },
       ],
     },
@@ -639,12 +645,9 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           text: 'Must NOT extract features from operational metrics lines (heap stats, latency percentiles, cache ratios, thread pool stats, network stats, queue depth)',
           score: 2,
         },
-        {
-          id: 'evidence-grounding',
-          text: 'Evidence must reference actual infrastructure log lines, not metrics/statistics lines',
-          score: 1,
-        },
       ],
+      min_features: 3,
+      required_types: ['entity', 'technology', 'infrastructure'],
     },
     metadata: {
       description: 'Signal extraction from noisy logs with operational metrics',
@@ -721,6 +724,8 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
       ],
+      min_features: 2,
+      required_types: ['entity', 'technology'],
     },
     metadata: {
       description: 'Version upgrade during log window',
@@ -802,8 +807,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message:
             'Request to upstream service: GET https://inventory.internal/api/v1/items -> 200',
           'service.name': 'etl-worker',
-          'peer.service': 'inventory-service',
-          'http.method': 'GET',
+          'log.level': 'INFO',
         },
       ],
     },
@@ -855,6 +859,8 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure'],
     },
     metadata: {
       description: 'Python worker with implicit tech signals (tracebacks, client libs, metadata)',
@@ -979,6 +985,8 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure'],
     },
     metadata: {
       description: 'Ruby Rails service with implicit signals from framework internals and AWS SDK',
@@ -1102,6 +1110,8 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
       ],
+      min_features: 5,
+      required_types: ['entity', 'technology', 'infrastructure'],
     },
     metadata: {
       description: 'PHP Laravel service on DigitalOcean with MariaDB',
@@ -1167,13 +1177,20 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           message:
             'REST call to reporting-service: POST https://reporting.internal/api/report -> 200',
           'service.name': 'analytics-engine',
-          'peer.service': 'reporting-service',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-04-12T15:20:01.090Z',
           message: 'JVM heap: 4096MB max, 2048MB used',
           'service.name': 'analytics-engine',
           'log.level': 'DEBUG',
+        },
+        {
+          '@timestamp': '2026-04-12T15:20:01.210Z',
+          message:
+            'FATAL: OutOfMemoryError in analytics-system-dispatcher-3, restarting actor',
+          'service.name': 'analytics-engine',
+          'log.level': 'FATAL',
         },
       ],
     },
@@ -1220,6 +1237,8 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Scala/Akka service on IBM Cloud with Cassandra and Spark',
@@ -1301,6 +1320,8 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 2,
+      required_types: ['entity', 'technology'],
     },
     metadata: {
       description: 'Polyglot service with Go main process and Python ML subprocess',
@@ -1378,11 +1399,6 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     output: {
       criteria: [
         {
-          id: 'restraint-max-features',
-          text: 'Must extract at most 2 features given the highly ambiguous and contradictory signals',
-          score: 3,
-        },
-        {
           id: 'no-entity-from-ports',
           text: 'Must NOT create entity features (database, cache) based solely on port numbers (9042, 5432) without corroborating technology-specific evidence',
           score: 2,
@@ -1398,11 +1414,13 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
         {
-          id: 'evidence-grounding',
-          text: 'Any features extracted must have evidence containing direct quotes from the log messages',
+          id: 'inferred-tag-if-emitted',
+          text: 'Any features extracted must be tagged as "inferred" with meta.notes explaining the weak reasoning',
           score: 1,
         },
       ],
+      max_features: 2,
+      max_confidence: 50,
     },
     metadata: {
       description: 'Mixed signals: Java exception, JS TypeError, port hints - none corroborate',
@@ -1479,11 +1497,6 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     output: {
       criteria: [
         {
-          id: 'restraint-max-features',
-          text: 'Must extract at most 1 feature — these logs contain no real infrastructure signals',
-          score: 3,
-        },
-        {
           id: 'no-redis-from-path',
           text: 'Must NOT identify Redis from the URL path "/api/redis/status" — this is an API route, not infrastructure evidence',
           score: 2,
@@ -1504,6 +1517,9 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      max_features: 1,
+      max_confidence: 40,
+      forbidden_types: ['entity'],
     },
     metadata: {
       description:
@@ -1579,11 +1595,6 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     output: {
       criteria: [
         {
-          id: 'restraint-max-features',
-          text: 'Must extract at most 2 features given pervasive ambiguity across all signals',
-          score: 3,
-        },
-        {
           id: 'no-aws-from-s3-url',
           text: 'Must NOT confidently identify AWS from s3:// URL alone — S3-compatible storage (MinIO, Ceph) is common on-premises',
           score: 2,
@@ -1599,11 +1610,13 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
         {
-          id: 'evidence-grounding',
-          text: 'Any features extracted must have evidence containing direct quotes from the log messages',
+          id: 'inferred-tag-if-emitted',
+          text: 'Any features extracted must be tagged as "inferred" with meta.notes explaining the ambiguity',
           score: 1,
         },
       ],
+      max_features: 2,
+      max_confidence: 50,
     },
     metadata: {
       description: 'Cloud-like signals but no definitive provider identification',
@@ -1678,11 +1691,6 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     output: {
       criteria: [
         {
-          id: 'restraint-max-features',
-          text: 'Must extract at most 1 feature — these logs are entirely generic proxy/LB behavior',
-          score: 3,
-        },
-        {
           id: 'no-db-from-pool-label',
           text: 'Must NOT identify a database from "database-cluster" — this is a routing pool label, not a database technology indicator',
           score: 2,
@@ -1703,6 +1711,9 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      max_features: 1,
+      max_confidence: 40,
+      forbidden_types: ['entity'],
     },
     metadata: {
       description: 'Generic proxy/load balancer logs with no specific technology indicators',
@@ -1756,12 +1767,9 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           text: 'If any database feature is emitted despite the conflict, it must include meta.notes explaining the contradictory PostgreSQL vs MySQL signals',
           score: 2,
         },
-        {
-          id: 'low-confidence-if-emitted',
-          text: 'Any database feature emitted must have confidence below 50 given the contradictory evidence',
-          score: 2,
-        },
       ],
+      max_features: 2,
+      max_confidence: 50,
     },
     metadata: {
       description: 'Conflicting database signals (PostgreSQL port with MySQL error)',
@@ -1821,7 +1829,14 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           text: 'Must distinguish between "needs X" (dependency requirement) and "has X" (actual running infrastructure)',
           score: 2,
         },
+        {
+          id: 'no-dependency-features',
+          text: 'Must NOT create dependency features for postgresql, mongodb, redis, elasticsearch, cassandra, kafka, rabbitmq, mysql, or oracle since none of these are actually connected or running',
+          score: 2,
+        },
       ],
+      max_features: 0,
+      forbidden_types: ['entity', 'technology', 'dependency'],
     },
     metadata: {
       description: 'Adversarial case: technology names in error about missing dependencies',
@@ -1855,8 +1870,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         {
           '@timestamp': '2026-01-15T09:10:00.330Z',
           message: 'cloud.provider=azure cloud.region=westeurope',
-          'cloud.provider': 'azure',
           'service.name': 'web-api',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-01-15T09:10:00.480Z',
@@ -1883,7 +1898,7 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-01-15T09:10:01.220Z',
           message: 'Calling auth-service at https://auth.internal/oauth/token status=200',
           'service.name': 'web-api',
-          'peer.service': 'auth-service',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-01-15T09:10:01.650Z',
@@ -1946,6 +1961,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 3,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: '.NET/Azure service with misleading tech mentions in user content',
@@ -1970,8 +1987,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         {
           '@timestamp': '2026-02-28T11:20:00.280Z',
           message: 'AWS SageMaker endpoint ready: ml-inference-prod',
-          'cloud.provider': 'aws',
           'service.name': 'ml-inference',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-02-28T11:20:00.410Z',
@@ -2004,7 +2021,14 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-02-28T11:20:00.930Z',
           message: 'Fetched model from prediction-service: POST /api/predict -> 200',
           'service.name': 'ml-inference',
-          'peer.service': 'prediction-service',
+          'log.level': 'INFO',
+        },
+        {
+          '@timestamp': '2026-02-28T11:20:00.935Z',
+          message:
+            '[envoy] upstream_rq_completed{cluster=ml-inference,response_code=200} rq_total=1847',
+          'service.name': 'envoy-sidecar',
+          'log.level': 'DEBUG',
         },
         {
           '@timestamp': '2026-02-28T11:20:01.060Z',
@@ -2073,6 +2097,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Python ML service with competitor products and alternatives mentioned in logs',
@@ -2097,8 +2123,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         {
           '@timestamp': '2026-03-22T16:40:00.270Z',
           message: 'Oracle Cloud metadata: compartmentId=ocid1.compartment.oc1..aaa tenancy=acme',
-          'cloud.provider': 'oci',
           'service.name': 'api-gateway',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-03-22T16:40:00.400Z',
@@ -2123,7 +2149,7 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-03-22T16:40:00.790Z',
           message: 'REST call to user-service: GET /api/users/123 -> 200',
           'service.name': 'api-gateway',
-          'peer.service': 'user-service',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-03-22T16:40:00.920Z',
@@ -2193,6 +2219,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 3,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description:
@@ -2224,8 +2252,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         {
           '@timestamp': '2026-04-15T13:55:00.440Z',
           message: 'Alibaba Cloud ECS metadata: region=cn-hangzhou instance-type=ecs.g7.xlarge',
-          'cloud.provider': 'alibabacloud',
           'service.name': 'report-generator',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-04-15T13:55:00.580Z',
@@ -2249,7 +2277,7 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           '@timestamp': '2026-04-15T13:55:01.000Z',
           message: 'POST to notification-hub: /api/notify -> 201 (34ms)',
           'service.name': 'report-generator',
-          'peer.service': 'notification-hub',
+          'log.level': 'INFO',
         },
         {
           '@timestamp': '2026-04-15T13:55:01.140Z',
@@ -2318,6 +2346,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology', 'infrastructure', 'dependency'],
     },
     metadata: {
       description: 'Java Quarkus service on Alibaba Cloud with competitor comparisons in logs',
@@ -2404,6 +2434,8 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 1,
         },
       ],
+      min_features: 4,
+      required_types: ['entity', 'technology'],
     },
     metadata: {
       description: 'Migration tool with both source (MySQL) and target (PostgreSQL) databases',
@@ -2485,6 +2517,9 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
           score: 2,
         },
       ],
+      min_features: 1,
+      max_features: 3,
+      required_types: ['entity', 'technology'],
     },
     metadata: {
       description: 'Configuration validator testing various DB configs without actually using them',
