@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,7 +33,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
     });
 
     apiTest('should sort an array field in descending order', async ({ testBed }) => {
@@ -56,7 +58,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['charlie', 'bravo', 'alpha']);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['charlie', 'bravo', 'alpha'] })
+      );
     });
 
     apiTest('should sort an array field to a target field', async ({ testBed }) => {
@@ -80,8 +84,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['charlie', 'alpha', 'bravo']); // Original preserved
-      expect(ingestedDocs[0]).toHaveProperty('sorted_tags', ['alpha', 'bravo', 'charlie']); // New field created
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({
+          tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+          sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
+        })
+      );
     });
 
     apiTest('should sort numeric arrays', async ({ testBed }) => {
@@ -104,7 +112,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('numbers', [1, 1, 2, 3, 4, 5, 6, 9]);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ numbers: [1, 1, 2, 3, 4, 5, 6, 9] })
+      );
     });
 
     apiTest('should fail if field is missing and ignore_failure is false', async ({ testBed }) => {
@@ -151,8 +161,8 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('message', 'some_value');
-        expect(source).not.toHaveProperty('nonexistent');
+        expect(source).toStrictEqual(expect.objectContaining({ message: 'some_value' }));
+        expect((source as Record<string, unknown>).nonexistent).toBeUndefined();
       }
     );
 
@@ -179,8 +189,8 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('message', 'some_value');
-        expect(source).not.toHaveProperty('nonexistent');
+        expect(source).toStrictEqual(expect.objectContaining({ message: 'some_value' }));
+        expect((source as Record<string, unknown>).nonexistent).toBeUndefined();
       }
     );
 
@@ -204,7 +214,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
     });
 
     apiTest('should sort field conditionally with where condition', async ({ testBed }) => {
@@ -237,13 +249,15 @@ apiTest.describe(
 
       // First doc should have tags sorted (where condition matched)
       const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-      expect(doc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
-      expect(doc1).toHaveProperty('event.kind', 'test');
+      expect(doc1).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'], 'event.kind': 'test' })
+      );
 
       // Second doc should keep original order (where condition not matched)
       const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-      expect(doc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
-      expect(doc2).toHaveProperty('event.kind', 'production');
+      expect(doc2).toStrictEqual(
+        expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'], 'event.kind': 'production' })
+      );
     });
 
     apiTest(
@@ -279,15 +293,23 @@ apiTest.describe(
 
         // First doc should have sorted_tags created (where condition matched)
         const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-        expect(doc1).toHaveProperty('tags', ['charlie', 'alpha', 'bravo']); // Original preserved
-        expect(doc1).toHaveProperty('sorted_tags', ['alpha', 'bravo', 'charlie']); // New field created
-        expect(doc1).toHaveProperty('event.kind', 'test');
+        expect(doc1).toStrictEqual(
+          expect.objectContaining({
+            tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+            sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
+            'event.kind': 'test',
+          })
+        );
 
         // Second doc should not have sorted_tags (where condition not matched)
         const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-        expect(doc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
-        expect(doc2).not.toHaveProperty('sorted_tags');
-        expect(doc2).toHaveProperty('event.kind', 'production');
+        expect(doc2).toStrictEqual(
+          expect.objectContaining({
+            tags: ['zulu', 'xray', 'yankee'],
+            'event.kind': 'production',
+          })
+        );
+        expect((doc2 as Record<string, unknown>).sorted_tags).toBeUndefined();
       }
     );
 

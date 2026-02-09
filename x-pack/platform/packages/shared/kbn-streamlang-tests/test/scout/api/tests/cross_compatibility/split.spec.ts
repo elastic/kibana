@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -36,7 +36,9 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
       const esqlResult = await esql.queryOnIndex('esql-split-basic', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['foo', 'bar', 'baz'] })
+      );
     }
   );
 
@@ -63,8 +65,12 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
     const esqlResult = await esql.queryOnIndex('esql-split-target', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('tags', 'foo,bar,baz'); // Original preserved
-    expect(ingestResult[0]).toHaveProperty('tags_array', ['foo', 'bar', 'baz']); // New field created
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({
+        tags: 'foo,bar,baz', // Original preserved
+        tags_array: ['foo', 'bar', 'baz'], // New field created
+      })
+    );
   });
 
   apiTest('should split with different delimiters', async ({ testBed, esql }) => {
@@ -89,7 +95,9 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
     const esqlResult = await esql.queryOnIndex('esql-split-slash', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('path', ['home', 'user', 'documents']);
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({ path: ['home', 'user', 'documents'] })
+    );
   });
 
   apiTest('should handle single value (no delimiter found)', async ({ testBed, esql }) => {
@@ -114,7 +122,7 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
     const esqlResult = await esql.queryOnIndex('esql-split-single', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('tags', ['single']);
+    expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
   });
 
   apiTest('should support conditional split with where clause', async ({ testBed, esql }) => {
@@ -154,11 +162,11 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
     const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_split === 'no');
 
     expect(ingestDoc1).toStrictEqual(esqlDoc1);
-    expect(ingestDoc1).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+    expect(ingestDoc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
 
     // Both transpilers should keep the original string when condition doesn't match
-    expect(ingestDoc2).toHaveProperty('tags', 'one,two,three');
-    expect(esqlDoc2).toHaveProperty('tags', 'one,two,three');
+    expect(ingestDoc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
+    expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
   });
 
   // *** Template validation tests ***
@@ -233,7 +241,9 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
 
       // Both should produce the same result with single space delimiter
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', ['hello', 'world', 'test']);
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ message: ['hello', 'world', 'test'] })
+      );
     }
   );
 
@@ -299,7 +309,9 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
       // NOTE: BEHAVIORAL DIFFERENCE - preserve_trailing handling
       // Ingest Pipeline: With preserve_trailing=true, keeps empty trailing elements
       // ES|QL: Does not support preserve_trailing option, behavior may differ
-      expect(ingestResult[0]).toHaveProperty('tags', ['A', '', 'B', '', '']);
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['A', '', 'B', '', ''] })
+      );
 
       // ES|QL SPLIT behavior: trailing empty strings are typically preserved by default
       // but the exact behavior depends on the ES|QL version

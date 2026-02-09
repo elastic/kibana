@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['foo', 'bar', 'baz'] })
+      );
     });
 
     apiTest('should split a string field to a target field', async ({ testBed }) => {
@@ -58,8 +60,12 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('tags', 'foo,bar,baz'); // Original preserved
-      expect(ingestedDocs[0]).toHaveProperty('tags_array', ['foo', 'bar', 'baz']); // New field created
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({
+          tags: 'foo,bar,baz', // Original preserved
+          tags_array: ['foo', 'bar', 'baz'], // New field created
+        })
+      );
     });
 
     apiTest('should split using regex pattern', async ({ testBed }) => {
@@ -82,7 +88,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('message', ['hello', 'world', 'test']);
+      expect(ingestedDocs[0]).toStrictEqual(
+        expect.objectContaining({ message: ['hello', 'world', 'test'] })
+      );
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -129,8 +137,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('message', 'some_value');
-      expect(source).not.toHaveProperty('nonexistent');
+      expect(source).toStrictEqual(expect.objectContaining({ message: 'some_value' }));
+      expect((source as Record<string, unknown>).nonexistent).toBeUndefined();
     });
 
     apiTest(
@@ -156,7 +164,9 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['A', '', 'B', '', '']);
+        expect(ingestedDocs[0]).toStrictEqual(
+          expect.objectContaining({ tags: ['A', '', 'B', '', ''] })
+        );
       }
     );
 
@@ -183,7 +193,7 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
-        expect(ingestedDocs[0]).toHaveProperty('tags', ['A', '', 'B']);
+        expect(ingestedDocs[0]).toStrictEqual(expect.objectContaining({ tags: ['A', '', 'B'] }));
       }
     );
 
@@ -217,13 +227,15 @@ apiTest.describe(
 
       // First doc should have tags split (where condition matched)
       const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-      expect(doc1).toHaveProperty('tags', ['foo', 'bar', 'baz']);
-      expect(doc1).toHaveProperty('event.kind', 'test');
+      expect(doc1).toStrictEqual(
+        expect.objectContaining({ tags: ['foo', 'bar', 'baz'], 'event.kind': 'test' })
+      );
 
       // Second doc should keep original tags (where condition not matched)
       const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-      expect(doc2).toHaveProperty('tags', 'one,two,three');
-      expect(doc2).toHaveProperty('event.kind', 'production');
+      expect(doc2).toStrictEqual(
+        expect.objectContaining({ tags: 'one,two,three', 'event.kind': 'production' })
+      );
     });
 
     apiTest(
@@ -259,15 +271,23 @@ apiTest.describe(
 
         // First doc should have tags_array created (where condition matched)
         const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
-        expect(doc1).toHaveProperty('tags', 'foo,bar,baz'); // Original preserved
-        expect(doc1).toHaveProperty('tags_array', ['foo', 'bar', 'baz']); // New field created
-        expect(doc1).toHaveProperty('event.kind', 'test');
+        expect(doc1).toStrictEqual(
+          expect.objectContaining({
+            tags: 'foo,bar,baz', // Original preserved
+            tags_array: ['foo', 'bar', 'baz'], // New field created
+            'event.kind': 'test',
+          })
+        );
 
         // Second doc should not have tags_array (where condition not matched)
         const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
-        expect(doc2).toHaveProperty('tags', 'one,two,three');
-        expect(doc2).not.toHaveProperty('tags_array');
-        expect(doc2).toHaveProperty('event.kind', 'production');
+        expect(doc2).toStrictEqual(
+          expect.objectContaining({
+            tags: 'one,two,three',
+            'event.kind': 'production',
+          })
+        );
+        expect((doc2 as Record<string, unknown>).tags_array).toBeUndefined();
       }
     );
 

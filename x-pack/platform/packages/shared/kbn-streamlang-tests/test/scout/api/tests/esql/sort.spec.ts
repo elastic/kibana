@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -32,7 +32,9 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
     }
   );
 
@@ -58,7 +60,9 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('tags', ['charlie', 'bravo', 'alpha']);
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['charlie', 'bravo', 'alpha'] })
+      );
     }
   );
 
@@ -85,8 +89,12 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('tags', ['charlie', 'alpha', 'bravo']); // Original preserved
-      expect(esqlResult.documents[0]).toHaveProperty('sorted_tags', ['alpha', 'bravo', 'charlie']); // New field created
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({
+          tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+          sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
+        })
+      );
     }
   );
 
@@ -110,7 +118,9 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('numbers', [1, 1, 2, 3, 4, 5, 6, 9]);
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ numbers: [1, 1, 2, 3, 4, 5, 6, 9] })
+    );
   });
 
   apiTest('should handle single element array', async ({ testBed, esql }) => {
@@ -132,7 +142,7 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('tags', ['single']);
+    expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
   });
 
   apiTest('should sort field conditionally with EVAL CASE', async ({ testBed, esql }) => {
@@ -165,12 +175,12 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
 
     // First doc should have tags sorted (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    expect(doc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep original order (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
+    expect(doc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
     expect(doc2?.['event.kind']).toBe('production');
   });
 
@@ -215,14 +225,22 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
 
     // First doc should have sorted_tags created (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    expect(doc1).toHaveProperty('tags', ['charlie', 'alpha', 'bravo']); // Original preserved
-    expect(doc1).toHaveProperty('sorted_tags', ['alpha', 'bravo', 'charlie']); // New field sorted
+    expect(doc1).toStrictEqual(
+      expect.objectContaining({
+        tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+        sorted_tags: ['alpha', 'bravo', 'charlie'], // New field sorted
+      })
+    );
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should have sorted_tags as empty array (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
-    expect(doc2).toHaveProperty('sorted_tags', []);
+    expect(doc2).toStrictEqual(
+      expect.objectContaining({
+        tags: ['zulu', 'xray', 'yankee'],
+        sorted_tags: [],
+      })
+    );
     expect(doc2?.['event.kind']).toBe('production');
   });
 
@@ -251,8 +269,8 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(esqlResult.documents).toHaveLength(2);
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
-    expect(doc2).toHaveProperty('tags', null);
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
+    expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
   });
 
   apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {

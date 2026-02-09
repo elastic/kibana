@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -35,7 +35,9 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
       const esqlResult = await esql.queryOnIndex('esql-sort-asc', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(ingestResult[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
     }
   );
 
@@ -61,7 +63,9 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-sort-desc', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('tags', ['charlie', 'bravo', 'alpha']);
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({ tags: ['charlie', 'bravo', 'alpha'] })
+    );
   });
 
   apiTest('should correctly sort an array to a target field', async ({ testBed, esql }) => {
@@ -87,8 +91,12 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-sort-target', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('tags', ['charlie', 'alpha', 'bravo']); // Original preserved
-    expect(ingestResult[0]).toHaveProperty('sorted_tags', ['alpha', 'bravo', 'charlie']); // New field created
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({
+        tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+        sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
+      })
+    );
   });
 
   apiTest('should sort numeric arrays', async ({ testBed, esql }) => {
@@ -113,7 +121,9 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-sort-numeric', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('numbers', [1, 1, 2, 3, 4, 5, 6, 9]);
+    expect(ingestResult[0]).toStrictEqual(
+      expect.objectContaining({ numbers: [1, 1, 2, 3, 4, 5, 6, 9] })
+    );
   });
 
   apiTest('should handle single element array', async ({ testBed, esql }) => {
@@ -137,7 +147,7 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-sort-single', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-    expect(ingestResult[0]).toHaveProperty('tags', ['single']);
+    expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
   });
 
   apiTest('should support conditional sort with where clause', async ({ testBed, esql }) => {
@@ -177,11 +187,13 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
     const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_sort === 'no');
 
     expect(ingestDoc1).toStrictEqual(esqlDoc1);
-    expect(ingestDoc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+    expect(ingestDoc1).toStrictEqual(
+      expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+    );
 
     // Both transpilers should keep the original array order when condition doesn't match
-    expect(ingestDoc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
-    expect(esqlDoc2).toHaveProperty('tags', ['zulu', 'xray', 'yankee']);
+    expect(ingestDoc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
+    expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: ['zulu', 'xray', 'yankee'] }));
   });
 
   apiTest(
@@ -219,14 +231,18 @@ apiTest.describe('Cross-compatibility - Sort Processor', { tag: ['@ess', '@svlOb
       const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
         (d: any) => d.status === 'has_tags'
       );
-      expect(ingestDoc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
-      expect(esqlDoc1).toHaveProperty('tags', ['alpha', 'bravo', 'charlie']);
+      expect(ingestDoc1).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
+      expect(esqlDoc1).toStrictEqual(
+        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] })
+      );
 
       // Document without tags should pass through unchanged
       const ingestDoc2 = ingestResult.find((d: any) => d.status === 'no_tags');
       const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.status === 'no_tags');
-      expect(ingestDoc2).not.toHaveProperty('tags');
-      expect(esqlDoc2).toHaveProperty('tags', null);
+      expect((ingestDoc2 as Record<string, unknown>).tags).toBeUndefined();
+      expect(esqlDoc2).toStrictEqual(expect.objectContaining({ tags: null }));
     }
   );
 

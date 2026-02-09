@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -33,7 +33,9 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ tags: ['foo', 'bar', 'baz'] })
+      );
     }
   );
 
@@ -60,8 +62,12 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('tags', 'foo,bar,baz'); // Original preserved
-      expect(esqlResult.documents[0]).toHaveProperty('tags_array', ['foo', 'bar', 'baz']); // New field created
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({
+          tags: 'foo,bar,baz', // Original preserved
+          tags_array: ['foo', 'bar', 'baz'], // New field created
+        })
+      );
     }
   );
 
@@ -85,7 +91,9 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('path', ['home', 'user', 'documents']);
+    expect(esqlResult.documents[0]).toStrictEqual(
+      expect.objectContaining({ path: ['home', 'user', 'documents'] })
+    );
   });
 
   apiTest('should handle single value (no delimiter found)', async ({ testBed, esql }) => {
@@ -108,7 +116,7 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('tags', ['single']);
+    expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
   });
 
   apiTest(
@@ -136,8 +144,9 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
 
       // ES|QL filters out documents with missing field when ignore_missing: false
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ status: 'doc1' }));
-      expect(esqlResult.documents[0]).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ status: 'doc1', tags: ['foo', 'bar', 'baz'] })
+      );
     }
   );
 
@@ -167,8 +176,8 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
     expect(esqlResult.documents).toHaveLength(2);
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc1).toHaveProperty('tags', ['foo', 'bar', 'baz']);
-    expect(doc2).toHaveProperty('tags', null);
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
+    expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
   });
 
   apiTest('should split field conditionally with EVAL CASE', async ({ testBed, esql }) => {
@@ -201,12 +210,12 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
 
     // First doc should have tags split (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    expect(doc1).toHaveProperty('tags', ['foo', 'bar', 'baz']);
+    expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep original tags (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toHaveProperty('tags', 'one,two,three');
+    expect(doc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
     expect(doc2?.['event.kind']).toBe('production');
   });
 
@@ -253,14 +262,22 @@ apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlO
 
       // First doc should have tags_array created (where condition matched)
       const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-      expect(doc1).toHaveProperty('tags', 'foo,bar,baz'); // Original preserved
-      expect(doc1).toHaveProperty('tags_array', ['foo', 'bar', 'baz']); // New field created
+      expect(doc1).toStrictEqual(
+        expect.objectContaining({
+          tags: 'foo,bar,baz', // Original preserved
+          tags_array: ['foo', 'bar', 'baz'], // New field created
+        })
+      );
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should have tags_array as empty string (where condition not matched)
       const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-      expect(doc2).toHaveProperty('tags', 'one,two,three');
-      expect(doc2).toHaveProperty('tags_array', '');
+      expect(doc2).toStrictEqual(
+        expect.objectContaining({
+          tags: 'one,two,three',
+          tags_array: '',
+        })
+      );
       expect(doc2?.['event.kind']).toBe('production');
     }
   );
