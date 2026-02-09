@@ -101,7 +101,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
         items={items}
         columns={columns}
         data-test-subj="otel-instructions-table"
-        tableCaption={i18n.translate('xpack.apm.tutorial.config_otel.tableCaption', {
+        tableCaption={i18n.translate('xpack.apm.tutorial.configOtel.tableCaption', {
           defaultMessage: 'OpenTelemetry instructions',
         })}
       />
