@@ -78,7 +78,7 @@ interface UseEsqlCallbacksParams {
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
-  isResourceBrowserEnabled: () => boolean;
+  isResourceBrowserEnabled: () => Promise<boolean>;
 }
 
 export const useEsqlCallbacks = ({
