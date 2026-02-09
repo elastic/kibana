@@ -410,6 +410,9 @@ src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentation
+src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
+src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -1859,7 +1862,6 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/platform/test/fixtures/es_archives/dashboard/async_search @elastic/kibana-presentation
 /src/platform/test/functional/fixtures/kbn_archiver/dashboard @elastic/kibana-presentation
 /src/platform/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
-/src/platform/test/api_integration/apis/dashboards @elastic/kibana-presentation
 /src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 /src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/services/canvas_element.ts @elastic/kibana-presentation
