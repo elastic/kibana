@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 
@@ -41,5 +41,14 @@ export class BoolFormat extends FieldFormat {
       default:
         return asPrettyString(value, options);
     }
+  };
+
+  htmlConvert: HtmlContextTypeConvert = (value, options) => {
+    const missing = this.checkForMissingValueHtml(value);
+    if (missing) {
+      return missing;
+    }
+
+    return this.textConvert(value, options);
   };
 }
