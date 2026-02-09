@@ -348,6 +348,8 @@ export const ConfigSchema = schema.object({
         certificateAuthorities: schema.maybe(
           schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
         ),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
       }),
       sharedSecret: schema.conditional(
         schema.siblingRef('enabled'),

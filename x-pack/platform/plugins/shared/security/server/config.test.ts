@@ -1824,6 +1824,29 @@ describe('config schema', () => {
         );
       }
     });
+
+    it('accepts UIAM config with mTLS client certificate and key', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uaim.service',
+              sharedSecret: 'some-secret',
+              ssl: {
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam.ssl
+      ).toEqual({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      });
+    });
   });
 });
 
