@@ -526,6 +526,7 @@
     "@kbn/data-views-plugin": "link:src/platform/plugins/shared/data_views",
     "@kbn/data-visualizer-plugin": "link:x-pack/platform/plugins/private/data_visualizer",
     "@kbn/dataset-quality-plugin": "link:x-pack/platform/plugins/shared/dataset_quality",
+    "@kbn/date-range-picker": "link:src/platform/packages/shared/shared-ux/datetime/date_range_picker",
     "@kbn/datemath": "link:src/platform/packages/shared/kbn-datemath",
     "@kbn/deeplinks-agent-builder": "link:src/platform/packages/shared/deeplinks/agent_builder",
     "@kbn/deeplinks-analytics": "link:src/platform/packages/shared/deeplinks/analytics",
