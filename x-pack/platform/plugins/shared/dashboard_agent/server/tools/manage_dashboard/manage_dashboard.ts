@@ -15,12 +15,10 @@ import {
   guessChartType,
   getSchemaForChartType,
 } from '@kbn/agent-builder-platform-plugin/server';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANEL_REMOVED_EVENT,
-  type DashboardAttachmentData,
   type AttachmentPanel,
   type LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
@@ -29,6 +27,7 @@ import { dashboardTools } from '../../../common';
 import {
   checkDashboardToolsAvailability,
   getPanelDimensions,
+  retrieveLatestVersion,
   resolveLensConfigFromAttachment,
 } from '../utils';
 
@@ -39,13 +38,6 @@ export { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT };
  */
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
-};
-
-/**
- * Helper to extract panel ID from any panel entry type.
- */
-const getPanelId = (panel: AttachmentPanel): string => {
-  return panel.panelId;
 };
 
 /**
@@ -77,14 +69,10 @@ interface VisualizationQueryInput {
 const resolveExistingVisualizations = async ({
   visualizationIds,
   attachments,
-  dashboardAttachmentId,
-  events,
   logger,
 }: {
   visualizationIds: string[];
   attachments: Parameters<BuiltinToolDefinition['handler']>[1]['attachments'];
-  dashboardAttachmentId: string;
-  events: Parameters<BuiltinToolDefinition['handler']>[1]['events'];
   logger: Parameters<BuiltinToolDefinition['handler']>[1]['logger'];
 }): Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }> => {
   const panels: LensAttachmentPanel[] = [];
@@ -101,17 +89,6 @@ const resolveExistingVisualizations = async ({
         title: vizConfig.title,
       };
       panels.push(panelEntry);
-
-      events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
-        dashboardAttachmentId,
-        panel: {
-          type: 'lens',
-          panelId: panelEntry.panelId,
-          visualization: vizConfig,
-          title: vizConfig.title,
-          dimensions: getPanelDimensions(vizConfig.type),
-        },
-      });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(`Error resolving visualization attachment "${attachmentId}": ${errorMessage}`);
@@ -137,14 +114,12 @@ const generateVisualizationsFromQueries = async ({
   queries,
   modelProvider,
   esClient,
-  dashboardAttachmentId,
   events,
   logger,
 }: {
   queries: VisualizationQueryInput[];
   modelProvider: Parameters<BuiltinToolDefinition['handler']>[1]['modelProvider'];
   esClient: Parameters<BuiltinToolDefinition['handler']>[1]['esClient'];
-  dashboardAttachmentId: string;
   events: Parameters<BuiltinToolDefinition['handler']>[1]['events'];
   logger: Parameters<BuiltinToolDefinition['handler']>[1]['logger'];
 }): Promise<{ panels: LensAttachmentPanel[]; failures: VisualizationFailure[] }> => {
@@ -157,7 +132,7 @@ const generateVisualizationsFromQueries = async ({
   for (let i = 0; i < queries.length; i++) {
     const { query: nlQuery, index, chartType, esql } = queries[i];
 
-    events.reportProgress(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
+    events.reportProgress?.(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
 
     try {
       let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
@@ -202,17 +177,6 @@ const generateVisualizationsFromQueries = async ({
       };
 
       panels.push(panelEntry);
-
-      events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
-        dashboardAttachmentId,
-        panel: {
-          type: 'lens',
-          panelId: panelEntry.panelId,
-          visualization: validatedConfig,
-          title: panelEntry.title,
-          dimensions: getPanelDimensions(validatedConfig.type),
-        },
-      });
 
       logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
     } catch (error) {
@@ -315,62 +279,10 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
       { logger, attachments, esClient, modelProvider, events }
     ) => {
       try {
-        let currentAttachmentId: string;
-        let previousData: DashboardAttachmentData;
-        let isNewDashboard = false;
+        const latestVersion = retrieveLatestVersion(attachments, dashboardAttachmentId);
+        const currentAttachmentId = dashboardAttachmentId ?? uuidv4();
 
-        if (dashboardAttachmentId) {
-          // Updating existing dashboard
-          currentAttachmentId = dashboardAttachmentId;
-
-          const dashboardAttachment = attachments.getAttachmentRecord(currentAttachmentId);
-          if (!dashboardAttachment) {
-            throw new Error(`Dashboard attachment "${currentAttachmentId}" not found.`);
-          }
-
-          if (dashboardAttachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
-            throw new Error(`Attachment "${currentAttachmentId}" is not a dashboard attachment.`);
-          }
-
-          const latestVersion = getLatestVersion(dashboardAttachment);
-          if (!latestVersion) {
-            throw new Error(
-              `Could not retrieve latest version of dashboard attachment "${currentAttachmentId}".`
-            );
-          }
-
-          previousData = latestVersion.data as DashboardAttachmentData;
-        } else {
-          // Creating new dashboard
-          isNewDashboard = true;
-
-          if (!title) {
-            throw new Error('Title is required when creating a new dashboard.');
-          }
-          if (!description) {
-            throw new Error('Description is required when creating a new dashboard.');
-          }
-
-          const initialData: DashboardAttachmentData = {
-            title,
-            description,
-            markdownContent,
-            panels: [],
-          };
-
-          const newAttachment = await attachments.add({
-            type: DASHBOARD_ATTACHMENT_TYPE,
-            data: initialData,
-            description: `Dashboard: ${title}`,
-          });
-
-          currentAttachmentId = newAttachment.id;
-          previousData = initialData;
-          logger.debug(`Created new dashboard attachment: ${currentAttachmentId}`);
-        }
-
-        // Start with existing panels
-        let panels: AttachmentPanel[] = [...previousData.panels];
+        let panels: AttachmentPanel[] = [...(latestVersion?.data.panels ?? [])];
 
         // Track failures to report to the user
         const failures: VisualizationFailure[] = [];
@@ -378,15 +290,15 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         // Remove panels if specified
         if (removePanelIds && removePanelIds.length > 0) {
           const removeSet = new Set(removePanelIds);
-          const removedPanels = panels.filter((panel) => removeSet.has(getPanelId(panel)));
 
-          panels = panels.filter((panel) => !removeSet.has(getPanelId(panel)));
+          const removedPanels = panels.filter((panel) => removeSet.has(panel.panelId));
+          panels = panels.filter((panel) => !removeSet.has(panel.panelId));
 
           // Emit panel removed events
           for (const removedPanel of removedPanels) {
             events.sendUiEvent(DASHBOARD_PANEL_REMOVED_EVENT, {
               dashboardAttachmentId: currentAttachmentId,
-              panelId: getPanelId(removedPanel),
+              panelId: removedPanel.panelId,
             });
           }
 
@@ -397,12 +309,26 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           const result = await resolveExistingVisualizations({
             visualizationIds: existingVisualizationIds,
             attachments,
-            dashboardAttachmentId: currentAttachmentId,
-            events,
             logger,
           });
           panels.push(...result.panels);
           failures.push(...result.failures);
+
+          // todo: come up with a listening mechanism for the dashboard app to update its state in real-time.
+          for (const panel of result.panels) {
+            events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
+              dashboardAttachmentId: currentAttachmentId,
+              panel: {
+                type: 'lens',
+                panelId: panel.panelId,
+                visualization: panel.visualization,
+                title: panel.title,
+                dimensions: getPanelDimensions(
+                  (panel.visualization as { type?: string }).type ?? 'unknown'
+                ),
+              },
+            });
+          }
         }
 
         // Generate new visualizations from queries (slow - requires LLM)
@@ -411,30 +337,46 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             queries: visualizationQueries,
             modelProvider,
             esClient,
-            dashboardAttachmentId: currentAttachmentId,
             events,
             logger,
           });
           panels.push(...result.panels);
           failures.push(...result.failures);
+
+          // todo: come up with a listening mechanism for the dashboard app to update its state in real-time.
+          for (const panel of result.panels) {
+            events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, {
+              dashboardAttachmentId: currentAttachmentId,
+              panel: {
+                type: 'lens',
+                panelId: panel.panelId,
+                visualization: panel.visualization,
+                title: panel.title,
+                dimensions: getPanelDimensions(
+                  (panel.visualization as { type?: string }).type ?? 'unknown'
+                ),
+              },
+            });
+          }
         }
 
-        // Build updated metadata
-        const updatedTitle = title ?? previousData.title;
-        const updatedDescription = description ?? previousData.description;
-        const updatedMarkdownContent = markdownContent ?? previousData.markdownContent;
-
-        // add a wait here for 1 minut
-        await new Promise((resolve) => setTimeout(resolve, 60000));
-        const updatedAttachment = await attachments.update(currentAttachmentId, {
+        const input = {
+          id: currentAttachmentId,
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          description: `Dashboard: ${title ?? latestVersion?.data.title}`,
           data: {
-            title: updatedTitle,
-            description: updatedDescription,
-            markdownContent: updatedMarkdownContent,
+            title: title ?? latestVersion?.data.title,
+            description: description ?? latestVersion?.data.description,
+            markdownContent: markdownContent ?? latestVersion?.data.markdownContent,
             panels,
           },
-          description: `Dashboard: ${updatedTitle}`,
-        });
+        };
+
+        const isNewDashboard = !latestVersion;
+
+        const attachment = isNewDashboard
+          ? await attachments.add(input)
+          : await attachments.update(currentAttachmentId, input);
 
         logger.info(
           `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panels.length} panels`
@@ -446,16 +388,16 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                dashboardAttachmentId: currentAttachmentId,
-                version: updatedAttachment?.current_version ?? 1,
-                title: updatedTitle,
-                description: updatedDescription,
-                markdownContent: updatedMarkdownContent,
-                panelCount: panels.length + (updatedMarkdownContent ? 1 : 0),
-                panels: panels.map((panel) => ({
-                  type: panel.type,
-                  panelId: getPanelId(panel),
-                  title: panel.title,
+                // todo: normalize the output to be more close to attachment type.
+                dashboardAttachmentId: attachment?.id,
+                version: attachment?.current_version ?? 1,
+                title: input.data.title,
+                description: input.data.description,
+                markdownContent: input.data.markdownContent ?? '',
+                panels: input.data.panels.map(({ type, panelId, title: panelTitle }) => ({
+                  type,
+                  panelId,
+                  title: panelTitle,
                 })),
                 failures: failures.length > 0 ? failures : undefined,
               },

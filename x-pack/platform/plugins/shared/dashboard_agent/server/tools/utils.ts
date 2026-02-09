@@ -10,13 +10,15 @@ import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
+import {
+  getLatestVersion,
+  type AttachmentVersion,
+} from '@kbn/agent-builder-common/attachments';
+import { DASHBOARD_ATTACHMENT_TYPE, type DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import {
   buildMarkdownPanel as buildMarkdownPanelBase,
-  getLensPanelWidthFromAttributes,
   getMarkdownPanelHeight as getMarkdownPanelHeightBase,
   getPanelDimensions as getPanelDimensionsBase,
-  normalizePanels as normalizePanelsBase,
   panelLayout,
 } from '../../common';
 
@@ -48,24 +50,36 @@ export const getMarkdownPanelHeight = (content: string): number =>
   getMarkdownPanelHeightBase(content, panelLayout);
 
 /**
- * Normalizes panel configurations to the correct DashboardPanel format.
- * Handles two panel types:
- * - LensAttachmentPanel: Lens panels with visualization config in API format (LensApiSchemaType)
- * - GenericAttachmentPanel: Non-Lens panels with raw config (type is the actual embeddable type)
- *
- * @param panels - Array of panel entries
- * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
+ * Retrieves and validates the latest version of an attachment by ID and expected type.
  */
-export const normalizePanels = (
-  panels: AttachmentPanel[] | undefined,
-  yOffset: number = 0
-): DashboardPanel[] => {
-  return normalizePanelsBase({
-    panels,
-    yOffset,
-    layout: panelLayout,
-    getLensPanelWidth: getLensPanelWidthFromAttributes,
-  });
+export const retrieveLatestVersion =(
+  attachments: Pick<AttachmentStateManager, 'getAttachmentRecord'>,
+  attachmentId: string | undefined,
+): AttachmentVersion<DashboardAttachmentData> | undefined => {
+  if (!attachmentId) {
+    return undefined;
+  }
+  if (!attachmentId) {
+    throw new Error('Attachment ID is required.');
+  }
+
+  const attachment = attachments.getAttachmentRecord(attachmentId);
+  if (!attachment) {
+    throw new Error(`Dashboard attachment "${attachmentId}" not found.`);
+  }
+
+  if (attachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
+    throw new Error(`Attachment "${attachmentId}" is not a ${DASHBOARD_ATTACHMENT_TYPE} attachment.`);
+  }
+
+  const latestVersion = getLatestVersion(attachment) as unknown as AttachmentVersion<DashboardAttachmentData>;
+  if (!latestVersion) {
+    throw new Error(
+      `Could not retrieve latest version of dashboard attachment "${attachmentId}".`
+    );
+  }
+
+  return latestVersion;
 };
 
 /**

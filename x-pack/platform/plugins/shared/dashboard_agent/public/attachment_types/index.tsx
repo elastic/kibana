@@ -10,7 +10,6 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -18,11 +17,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DashboardFlyout } from '../components/dashboard_flyout';
 import type { AttachmentStore } from '../services/attachment_store';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 
-type DashboardAttachment = Attachment<
-  typeof DASHBOARD_ATTACHMENT_TYPE,
-  { title?: string } & Record<string, unknown>
->;
+
 
 /**
  * Registers the dashboard attachment UI definition, including the icon and label.
@@ -74,6 +71,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         maxWidth: '50vw',
         paddingSize: 'none',
         type: 'push',
+        isResizable: true,
       }
     );
   };

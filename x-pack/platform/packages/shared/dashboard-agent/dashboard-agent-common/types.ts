@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod';
 import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
-import type { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT } from './constants';
+import type { DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT } from './constants';
+import { Attachment } from '@kbn/agent-builder-common/attachments';
 
 /**
  * Zod schema for Lens panel entries.
@@ -149,3 +150,5 @@ export interface PanelRemovedEventData {
 export type DashboardUiEvent =
   | ToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>
   | ToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>;
+
+  export type DashboardAttachment = Attachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>;
