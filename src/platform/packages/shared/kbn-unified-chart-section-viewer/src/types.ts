@@ -36,6 +36,7 @@ export interface MetricField {
   instrument?: MappingTimeSeriesMetricType;
   unit?: MetricUnit;
   dimensions: Dimension[];
+  uniqueKey: string;
 }
 
 export type MetricUnit =

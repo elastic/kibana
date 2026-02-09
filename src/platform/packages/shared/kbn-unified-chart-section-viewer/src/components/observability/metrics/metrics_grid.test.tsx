@@ -77,12 +77,14 @@ describe('MetricsGrid', () => {
       dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: ES_FIELD_TYPES.LONG,
+      uniqueKey: 'metrics-*::system.cpu.utilization',
     },
     {
       name: 'system.memory.utilization',
       dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: ES_FIELD_TYPES.LONG,
+      uniqueKey: 'metrics-*::system.memory.utilization',
     },
   ];
 
@@ -378,7 +380,7 @@ describe('MetricsGrid', () => {
       mockUseMetricsExperienceState.mockReturnValue({
         flyoutState: {
           gridPosition: 0,
-          metricKey: { name: 'system.cpu.utilization', dataViewIndex: 'metrics-*' },
+          metricUniqueKey: 'metrics-*::system.cpu.utilization',
           esqlQuery: 'FROM metrics-*',
         },
         onFlyoutStateChange: mockOnFlyoutStateChange,
@@ -396,7 +398,7 @@ describe('MetricsGrid', () => {
       mockUseMetricsExperienceState.mockReturnValue({
         flyoutState: {
           gridPosition: 0,
-          metricKey: { name: 'non.existent.metric', dataViewIndex: 'metrics-*' },
+          metricUniqueKey: 'metrics-*::non.existent.metric',
           esqlQuery: 'FROM metrics-*',
         },
         onFlyoutStateChange: mockOnFlyoutStateChange,
@@ -408,13 +410,13 @@ describe('MetricsGrid', () => {
       expect(screen.queryByTestId('metricsInsightsFlyout')).not.toBeInTheDocument();
     });
 
-    it('reconstructs flyoutData correctly using metricKey', () => {
+    it('reconstructs flyoutData correctly using metricUniqueKey', () => {
       const expectedMetric = fields[1]; // system.memory.utilization
 
       mockUseMetricsExperienceState.mockReturnValue({
         flyoutState: {
           gridPosition: 1,
-          metricKey: { name: expectedMetric.name, dataViewIndex: expectedMetric.index },
+          metricUniqueKey: expectedMetric.uniqueKey,
           esqlQuery: 'FROM metrics-*',
         },
         onFlyoutStateChange: mockOnFlyoutStateChange,
@@ -434,19 +436,21 @@ describe('MetricsGrid', () => {
           dimensions: [],
           index: 'metrics-system-*',
           type: ES_FIELD_TYPES.LONG,
+          uniqueKey: 'metrics-system-*::cpu.usage',
         },
         {
           name: 'cpu.usage',
           dimensions: [],
           index: 'metrics-kubernetes-*',
           type: ES_FIELD_TYPES.LONG,
+          uniqueKey: 'metrics-kubernetes-*::cpu.usage',
         },
       ];
 
       mockUseMetricsExperienceState.mockReturnValue({
         flyoutState: {
           gridPosition: 1,
-          metricKey: { name: 'cpu.usage', dataViewIndex: 'metrics-kubernetes-*' },
+          metricUniqueKey: 'metrics-kubernetes-*::cpu.usage',
           esqlQuery: 'FROM metrics-kubernetes-*',
         },
         onFlyoutStateChange: mockOnFlyoutStateChange,
@@ -458,6 +462,44 @@ describe('MetricsGrid', () => {
       const flyout = screen.getByTestId('metricsInsightsFlyout');
       expect(flyout).toBeInTheDocument();
       expect(flyout).toHaveAttribute('data-metric-name', 'cpu.usage');
+    });
+
+    it('does not render flyout when gridPosition metric does not match saved metricUniqueKey', () => {
+      // This test simulates the scenario where pagination resets after tab duplication.
+      // The flyoutState was saved with gridPosition: 2, but after pagination reset,
+      // the metric at position 2 is different from what was originally there.
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 0,
+          // metricUniqueKey points to a metric that is NOT at position 0
+          metricUniqueKey: 'metrics-*::system.memory.utilization',
+          esqlQuery: 'FROM metrics-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid();
+
+      // The flyout should NOT render because position 0 has 'system.cpu.utilization',
+      // not 'system.memory.utilization'
+      expect(screen.queryByTestId('metricsInsightsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('does not render flyout when isTabSelected is false', () => {
+      mockUseMetricsExperienceState.mockReturnValue({
+        flyoutState: {
+          gridPosition: 0,
+          metricUniqueKey: 'metrics-*::system.cpu.utilization',
+          esqlQuery: 'FROM metrics-*',
+        },
+        onFlyoutStateChange: mockOnFlyoutStateChange,
+        onFlyoutTabChange: mockOnFlyoutTabChange,
+      });
+
+      renderMetricsGrid({ isTabSelected: false });
+
+      expect(screen.queryByTestId('metricsInsightsFlyout')).not.toBeInTheDocument();
     });
   });
 });

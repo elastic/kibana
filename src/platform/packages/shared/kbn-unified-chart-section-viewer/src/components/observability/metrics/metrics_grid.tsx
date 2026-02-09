@@ -19,7 +19,7 @@ import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, createMetricFieldsMap, getMetricKey } from '../../../common/utils';
+import { createESQLQuery } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -56,21 +56,19 @@ export const MetricsGrid = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
   const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
-  const fieldsMap = useMemo(() => createMetricFieldsMap(fields), [fields]);
 
   const flyoutData = useMemo(() => {
-    if (!flyoutState) return undefined;
-    if (!flyoutState.metricKey?.name || !flyoutState.metricKey?.dataViewIndex) return undefined;
+    if (!flyoutState?.metricUniqueKey) return undefined;
 
-    const key = getMetricKey(flyoutState.metricKey.dataViewIndex, flyoutState.metricKey.name);
-    const metric = fieldsMap.get(key);
-    if (!metric) return undefined;
+    const metricAtPosition = fields[flyoutState.gridPosition];
+    if (metricAtPosition?.uniqueKey !== flyoutState.metricUniqueKey) return undefined;
+
     return {
       gridPosition: flyoutState.gridPosition,
-      metric,
+      metric: metricAtPosition,
       esqlQuery: flyoutState.esqlQuery,
     };
-  }, [flyoutState, fieldsMap]);
+  }, [flyoutState, fields]);
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(fields.length / gridColumns);
@@ -87,10 +85,7 @@ export const MetricsGrid = ({
     (gridPosition: number, esqlQuery: string, metric: MetricField) => {
       onFlyoutStateChange({
         gridPosition,
-        metricKey: {
-          name: metric.name,
-          dataViewIndex: metric.index,
-        },
+        metricUniqueKey: metric.uniqueKey,
         esqlQuery,
       });
     },

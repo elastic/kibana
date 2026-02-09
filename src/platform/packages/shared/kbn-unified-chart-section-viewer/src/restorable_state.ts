@@ -12,14 +12,9 @@ import type { Dimension } from './types';
 
 export type FlyoutTabId = 'overview' | 'esql-query';
 
-export interface MetricKey {
-  name: string;
-  dataViewIndex: string;
-}
-
 export interface FlyoutState {
   gridPosition: number;
-  metricKey: MetricKey;
+  metricUniqueKey: string;
   esqlQuery: string;
   selectedTabId?: FlyoutTabId;
 }
