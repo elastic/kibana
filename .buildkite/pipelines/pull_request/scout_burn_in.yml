@@ -7,7 +7,6 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - build_scout_tests
     env:
       SCOUT_BURN_IN_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
       SCOUT_BURN_IN_SUMMARY_SCRIPT: '.buildkite/scripts/steps/test/scout_burn_in_summary.sh'
