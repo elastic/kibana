@@ -58,7 +58,7 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
-    await pageObjects.alertPage.goto('non-existent-alert-ixy');
+    await pageObjects.alertPage.goto('non-existent-alert-id');
     await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
   });
 
