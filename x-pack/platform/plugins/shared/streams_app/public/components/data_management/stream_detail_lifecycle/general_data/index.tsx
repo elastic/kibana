@@ -51,7 +51,7 @@ export const StreamDetailGeneralData = ({
   const { signal } = useAbortController();
 
   const getIlmPolicies = async (): Promise<IlmPolicy[]> => {
-    return streamsRepositoryClient.fetch('GET /internal/streams/lifecycle/policies', { signal });
+    return streamsRepositoryClient.fetch('GET /internal/streams/lifecycle/_policies', { signal });
   };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {

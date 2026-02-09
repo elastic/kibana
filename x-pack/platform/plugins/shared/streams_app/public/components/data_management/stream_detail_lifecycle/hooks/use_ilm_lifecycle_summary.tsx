@@ -81,7 +81,7 @@ export const useIlmLifecycleSummary = ({
   const [policyNames, setPolicyNames] = useState<string[]>([]);
 
   const buildAffectedResources = (policy: IlmPolicyWithUsage): AffectedResource[] => {
-    const streams = (policy.in_use_by?.dataStreams ?? []).filter(
+    const streams = (policy.in_use_by?.data_streams ?? []).filter(
       (streamName) => streamName !== definition.stream.name
     );
     const indices = policy.in_use_by?.indices ?? [];
@@ -98,7 +98,7 @@ export const useIlmLifecycleSummary = ({
 
   const fetchPolicies = async () => {
     const policies = await streamsRepositoryClient.fetch(
-      'GET /internal/streams/lifecycle/policies',
+      'GET /internal/streams/lifecycle/_policies',
       { signal }
     );
     const foundPolicy = policies.find((policy) => policy.name === policyName);
@@ -160,7 +160,11 @@ export const useIlmLifecycleSummary = ({
     setDeleteContext(null);
   };
 
-  const saveIlmPolicy = async (policy: IlmPolicy, allowOverwrite = false) => {
+  const saveIlmPolicy = async (
+    policy: IlmPolicy,
+    allowOverwrite = false,
+    allowMissingHot = false
+  ) => {
     const phases = Object.fromEntries(
       Object.entries(policy.phases).map(([phaseName, phase]) => [
         phaseName,
@@ -168,14 +172,17 @@ export const useIlmLifecycleSummary = ({
       ])
     );
 
-    await streamsRepositoryClient.fetch('POST /internal/streams/lifecycle/policy', {
+    await streamsRepositoryClient.fetch('POST /internal/streams/lifecycle/_policy', {
       params: {
+        query: {
+          allow_overwrite: allowOverwrite,
+          allow_missing_hot: allowMissingHot,
+        },
         body: {
           name: policy.name,
           phases,
-          _meta: policy._meta,
+          meta: policy.meta,
           deprecated: policy.deprecated,
-          allowOverwrite,
         },
       },
       signal,
@@ -215,11 +222,12 @@ export const useIlmLifecycleSummary = ({
       const updatedPolicy: IlmPolicy = {
         name: policyName,
         phases: modifiedPhases,
-        _meta: currentPolicy.current._meta,
+        meta: currentPolicy.current.meta,
         deprecated: currentPolicy.current.deprecated,
       };
 
-      await saveIlmPolicy(updatedPolicy, true);
+      const originalMissingHot = !currentPolicy.current.phases.hot;
+      await saveIlmPolicy(updatedPolicy, true, originalMissingHot);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.lifecycleSummary.policyUpdated', {
@@ -253,7 +261,7 @@ export const useIlmLifecycleSummary = ({
       }
 
       const resources = buildAffectedResources(currentPolicy.current);
-      const isManaged = currentPolicy.current._meta?.managed === true;
+      const isManaged = currentPolicy.current.meta?.managed === true;
 
       if (resources.length === 0 && !isManaged) {
         applyOverwrite(context);
@@ -307,30 +315,31 @@ export const useIlmLifecycleSummary = ({
 
       const modifiedPhases = getModifiedPhases(currentPolicy.current, deleteContext);
 
-      // Validate that the new policy has a hot phase - required for new ILM policies
-      if (!('hot' in modifiedPhases)) {
+      const originalHasHot = Boolean(currentPolicy.current.phases.hot);
+      if (originalHasHot && !('hot' in modifiedPhases)) {
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.streams.lifecycleSummary.cannotCreateWithoutHot', {
             defaultMessage: 'Cannot create policy without hot phase',
           }),
           text: i18n.translate('xpack.streams.lifecycleSummary.cannotCreateWithoutHotDescription', {
-            defaultMessage: 'A new ILM policy must include a hot phase.',
+            defaultMessage:
+              'The original policy includes a hot phase. A cloned policy must also include it.',
           }),
         });
         setIsProcessing(false);
         return;
       }
 
-      // Strip the 'managed' field from _meta when creating a new policy
-      const { managed: _managed, ...restMeta } = currentPolicy.current._meta ?? {};
+      // Strip the 'managed' field from meta when creating a new policy
+      const { managed: _managed, ...restMeta } = currentPolicy.current.meta ?? {};
 
       const updatedPolicy: IlmPolicy = {
         name: newPolicyName,
         phases: modifiedPhases,
-        _meta: restMeta,
+        meta: restMeta,
       };
 
-      await saveIlmPolicy(updatedPolicy);
+      await saveIlmPolicy(updatedPolicy, false, !originalHasHot);
 
       await updateStreamLifecycle({ ilm: { policy: newPolicyName } });
 

@@ -159,13 +159,13 @@ export interface IlmPolicyPhases {
 export interface IlmPolicy {
   name: string;
   phases: IlmPolicyPhases;
-  _meta?: Record<string, unknown>;
+  meta?: Record<string, unknown>;
   deprecated?: boolean;
 }
 
 export interface IlmPolicyUsage {
   in_use_by: {
-    dataStreams: string[];
+    data_streams: string[];
     indices: string[];
   };
 }

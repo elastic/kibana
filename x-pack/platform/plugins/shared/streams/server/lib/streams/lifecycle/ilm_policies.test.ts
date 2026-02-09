@@ -10,36 +10,52 @@ import { buildPolicyUsage, normalizeIlmPhases } from './ilm_policies';
 describe('lifecycle helpers', () => {
   describe('buildPolicyUsage', () => {
     it('derives data streams from backing indices', () => {
-      const usage = buildPolicyUsage({
-        in_use_by: {
-          indices: [
-            '.ds-logs-nginx.access-2024.01.01-000001',
-            '.ds-logs-nginx.access-2024.01.02-000002',
-            '.ds-logs-system.auth-2024.01.02-000001',
-            'regular-index-000001',
-          ],
+      const dataStreamByBackingIndices: Record<string, string> = {
+        '.ds-logs-nginx.access-2024.01.01-000001': 'logs-nginx.access',
+        '.ds-logs-nginx.access-2024.01.02-000002': 'logs-nginx.access',
+        '.ds-logs-system.auth-2024.01.02-000001': 'logs-system.auth',
+      };
+
+      const usage = buildPolicyUsage(
+        {
+          in_use_by: {
+            indices: [
+              '.ds-logs-nginx.access-2024.01.01-000001',
+              '.ds-logs-nginx.access-2024.01.02-000002',
+              '.ds-logs-system.auth-2024.01.02-000001',
+              'regular-index-000001',
+            ],
+          },
         },
-      });
+        dataStreamByBackingIndices
+      );
 
       expect(usage).toEqual({
         in_use_by: {
-          dataStreams: ['logs-nginx.access', 'logs-system.auth'],
+          data_streams: ['logs-nginx.access', 'logs-system.auth'],
           indices: ['regular-index-000001'],
         },
       });
     });
 
     it('merges explicit and derived data streams without duplicates', () => {
-      const usage = buildPolicyUsage({
-        in_use_by: {
-          indices: ['.ds-logs-nginx.access-2024.01.01-000001', 'regular-index-000001'],
-          data_streams: ['logs-explicit', 'logs-nginx.access'],
+      const dataStreamByBackingIndices: Record<string, string> = {
+        '.ds-logs-nginx.access-2024.01.01-000001': 'logs-nginx.access',
+      };
+
+      const usage = buildPolicyUsage(
+        {
+          in_use_by: {
+            indices: ['.ds-logs-nginx.access-2024.01.01-000001', 'regular-index-000001'],
+            data_streams: ['logs-explicit', 'logs-nginx.access'],
+          },
         },
-      });
+        dataStreamByBackingIndices
+      );
 
       expect(usage).toEqual({
         in_use_by: {
-          dataStreams: ['logs-explicit', 'logs-nginx.access'],
+          data_streams: ['logs-explicit', 'logs-nginx.access'],
           indices: ['regular-index-000001'],
         },
       });

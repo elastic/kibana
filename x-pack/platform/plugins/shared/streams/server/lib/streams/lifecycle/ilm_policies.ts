@@ -30,30 +30,19 @@ export interface IlmPoliciesResponse {
   [policyName: string]: IlmPolicyEntry;
 }
 
-export const buildPolicyUsage = (policyEntry: IlmPolicyEntry): IlmPolicyUsage => {
+export const buildPolicyUsage = (
+  policyEntry: IlmPolicyEntry,
+  dataStreamByBackingIndices: Record<string, string> = {}
+): IlmPolicyUsage => {
   const inUseIndices = policyEntry.in_use_by?.indices ?? [];
-  const indices = inUseIndices.filter((indexName) => !indexName.startsWith('.ds-'));
+  const indices = inUseIndices.filter((indexName) => !dataStreamByBackingIndices[indexName]);
   const explicitDataStreams = policyEntry.in_use_by?.data_streams ?? [];
   const derivedDataStreams = inUseIndices
-    .map((indexName) => getDataStreamFromBackingIndex(indexName))
+    .map((indexName) => dataStreamByBackingIndices[indexName])
     .filter((value): value is string => Boolean(value));
   const dataStreams = Array.from(new Set([...explicitDataStreams, ...derivedDataStreams]));
 
-  return { in_use_by: { dataStreams, indices } };
-};
-
-const getDataStreamFromBackingIndex = (indexName: string) => {
-  if (!indexName.startsWith('.ds-')) {
-    return undefined;
-  }
-
-  const withoutPrefix = indexName.slice(4);
-  const parts = withoutPrefix.split('-');
-  if (parts.length < 3) {
-    return undefined;
-  }
-
-  return parts.slice(0, -2).join('-');
+  return { in_use_by: { data_streams: dataStreams, indices } };
 };
 
 export const normalizeIlmPhases = (phases?: IlmPolicyPhases): IlmPolicy['phases'] => {

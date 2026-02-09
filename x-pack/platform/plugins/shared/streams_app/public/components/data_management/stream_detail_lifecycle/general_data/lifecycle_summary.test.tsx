@@ -177,7 +177,7 @@ describe('LifecycleSummary', () => {
         {
           name: 'test-policy',
           phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } },
-          in_use_by: { dataStreams: ['other-stream'], indices: [] },
+          in_use_by: { data_streams: ['other-stream'], indices: [] },
         },
       ];
       const ilmStatsValue = {
@@ -195,7 +195,7 @@ describe('LifecycleSummary', () => {
       });
 
       mockFetch.mockImplementation((endpoint: string) => {
-        if (endpoint === 'GET /internal/streams/lifecycle/policies') {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
         }
         return Promise.resolve(undefined);
@@ -229,7 +229,7 @@ describe('LifecycleSummary', () => {
         {
           name: 'test-policy',
           phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } },
-          in_use_by: { dataStreams: ['test-stream'], indices: [] },
+          in_use_by: { data_streams: ['test-stream'], indices: [] },
         },
       ];
       const ilmStatsValue = {
@@ -247,7 +247,7 @@ describe('LifecycleSummary', () => {
       });
 
       mockFetch.mockImplementation((endpoint: string) => {
-        if (endpoint === 'GET /internal/streams/lifecycle/policies') {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
         }
         return Promise.resolve(undefined);
@@ -273,7 +273,7 @@ describe('LifecycleSummary', () => {
       // Wait for async openDeleteModal -> fetchPolicies -> applyOverwrite -> saveIlmPolicy
       await waitFor(() =>
         expect(mockFetch).toHaveBeenCalledWith(
-          'POST /internal/streams/lifecycle/policy',
+          'POST /internal/streams/lifecycle/_policy',
           expect.any(Object)
         )
       );
