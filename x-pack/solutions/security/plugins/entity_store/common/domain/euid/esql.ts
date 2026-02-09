@@ -60,7 +60,7 @@ export function getEuidEsqlEvaluation(
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
 
-    return appendTypeId(entityType, firstField.field, withTypeId);
+    return appendTypeIdIfNeeded(entityType, firstField.field, withTypeId);
   }
 
   const euidLogic = identityField.euidFields.map((composedField) => {
@@ -93,10 +93,10 @@ export function getEuidEsqlEvaluation(
   });
 
   const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;
-  return appendTypeId(entityType, idLogic, withTypeId);
+  return appendTypeIdIfNeeded(entityType, idLogic, withTypeId);
 }
 
-function appendTypeId(entityType: EntityType, euidLogic: string, withTypeId: boolean) {
+function appendTypeIdIfNeeded(entityType: EntityType, euidLogic: string, withTypeId: boolean) {
   if (withTypeId) {
     return `CONCAT("${entityType}:", ${euidLogic})`;
   }
