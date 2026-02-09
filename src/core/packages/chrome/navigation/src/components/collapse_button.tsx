@@ -56,67 +56,21 @@ interface NavItemConfig {
 }
 
 // Appearance settings component for version 1.2
-const AppearanceSettingsSection: FC = () => {
-  const [colorMode, setColorMode] = useState<string>('system');
-  const [contrastMode, setContrastMode] = useState<string>('system');
-  const [originalColorMode, setOriginalColorMode] = useState<string>('system');
-  const [originalContrastMode, setOriginalContrastMode] = useState<string>('system');
+interface AppearanceSettingsSectionProps {
+  colorMode: string;
+  contrastMode: string;
+  onColorModeChange: (mode: string) => void;
+  onContrastModeChange: (mode: string) => void;
+}
 
-  // Load current user profile settings
-  useEffect(() => {
-    const loadUserProfile = () => {
-      // Request user profile data via custom event
-      const requestEvent = new CustomEvent('getUserProfileForPreferences');
-      window.dispatchEvent(requestEvent);
-      
-      // Listen for response
-      const handleResponse = (e: Event) => {
-        const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
-        if (customEvent.detail?.userSettings) {
-          const darkMode = customEvent.detail.userSettings.darkMode || 'system';
-          const contrast = customEvent.detail.userSettings.contrastMode || 'system';
-          setColorMode(darkMode);
-          setContrastMode(contrast);
-          setOriginalColorMode(darkMode);
-          setOriginalContrastMode(contrast);
-        }
-        window.removeEventListener('userProfileForPreferences', handleResponse);
-      };
-      
-      window.addEventListener('userProfileForPreferences', handleResponse);
-      
-      return () => {
-        window.removeEventListener('userProfileForPreferences', handleResponse);
-      };
-    };
-    
-    const cleanup = loadUserProfile();
-    return cleanup;
-  }, []);
-
-  // Expose revert function via global
-  useEffect(() => {
-    (window as any).__revertAppearanceSettings = () => {
-      setColorMode(originalColorMode);
-      setContrastMode(originalContrastMode);
-      // Revert via custom event
-      const event = new CustomEvent('updateUserProfileForPreferences', {
-        detail: {
-          userSettings: {
-            darkMode: originalColorMode,
-            contrastMode: originalContrastMode,
-          },
-        },
-      });
-      window.dispatchEvent(event);
-    };
-    return () => {
-      delete (window as any).__revertAppearanceSettings;
-    };
-  }, [originalColorMode, originalContrastMode]);
-
+const AppearanceSettingsSection: FC<AppearanceSettingsSectionProps> = ({
+  colorMode,
+  contrastMode,
+  onColorModeChange,
+  onContrastModeChange,
+}) => {
   const handleColorModeChange = useCallback((mode: string) => {
-    setColorMode(mode);
+    onColorModeChange(mode);
     // Apply preview immediately via custom event
     const event = new CustomEvent('updateUserProfileForPreferences', {
       detail: {
@@ -127,10 +81,10 @@ const AppearanceSettingsSection: FC = () => {
       },
     });
     window.dispatchEvent(event);
-  }, [contrastMode]);
+  }, [contrastMode, onColorModeChange]);
 
   const handleContrastModeChange = useCallback((mode: string) => {
-    setContrastMode(mode);
+    onContrastModeChange(mode);
     // Apply preview immediately via custom event
     const event = new CustomEvent('updateUserProfileForPreferences', {
       detail: {
@@ -141,7 +95,7 @@ const AppearanceSettingsSection: FC = () => {
       },
     });
     window.dispatchEvent(event);
-  }, [colorMode]);
+  }, [colorMode, onContrastModeChange]);
 
   const colorModeItems = [
     { id: 'system', label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.systemLabel', { defaultMessage: 'System' }), icon: 'desktop' },
@@ -366,10 +320,18 @@ export const SideNavCollapseButton: FC<Props> = ({
   const [initialState, setInitialState] = useState<{
     showLabels: boolean;
     navItemsConfig: NavItemConfig[];
+    appearanceSettings?: {
+      darkMode: string;
+      contrastMode: string;
+    };
   } | null>(null);
 
   // Local state for modal (not saved until Apply is clicked)
   const [localShowLabels, setLocalShowLabels] = useState(showLabels);
+  
+  // Appearance settings state (for version 1.2)
+  const [localColorMode, setLocalColorMode] = useState<string>('system');
+  const [localContrastMode, setLocalContrastMode] = useState<string>('system');
 
   // Initialize nav items config from primaryItems with saved preferences
   const [navItemsConfig, setNavItemsConfig] = useState<NavItemConfig[]>(() => {
@@ -418,6 +380,7 @@ export const SideNavCollapseButton: FC<Props> = ({
   const [originalShowLabels, setOriginalShowLabels] = useState(showLabels);
   const [originalNavItemsOrder, setOriginalNavItemsOrder] = useState<string[]>([]);
   const [originalNavItemsVisibility, setOriginalNavItemsVisibility] = useState<Record<string, boolean>>({});
+  const [originalAppearanceSettings, setOriginalAppearanceSettings] = useState<{ darkMode: string; contrastMode: string } | null>(null);
   const [isApplying, setIsApplying] = useState(false);
 
   const closeModal = useCallback(() => {
@@ -455,8 +418,19 @@ export const SideNavCollapseButton: FC<Props> = ({
       }
       
       // Revert appearance settings if version 1.2
-      if (currentVersion === '1.2' && typeof (window as any).__revertAppearanceSettings === 'function') {
-        (window as any).__revertAppearanceSettings();
+      if (currentVersion === '1.2' && originalAppearanceSettings) {
+        setLocalColorMode(originalAppearanceSettings.darkMode);
+        setLocalContrastMode(originalAppearanceSettings.contrastMode);
+        // Revert via custom event
+        const event = new CustomEvent('updateUserProfileForPreferences', {
+          detail: {
+            userSettings: {
+              darkMode: originalAppearanceSettings.darkMode,
+              contrastMode: originalAppearanceSettings.contrastMode,
+            },
+          },
+        });
+        window.dispatchEvent(event);
       }
     }
     
@@ -470,11 +444,16 @@ export const SideNavCollapseButton: FC<Props> = ({
     // Reset local state when closing
     setLocalShowLabels(showLabels);
     setInitialState(null);
-    // Reset tab selection for version 1.2
+    // Reset appearance settings state for version 1.2
     if (currentVersion === '1.2') {
       setSelectedTabId('appearance');
+      // Reset to original values if not applying
+      if (!isApplying && originalAppearanceSettings) {
+        setLocalColorMode(originalAppearanceSettings.darkMode);
+        setLocalContrastMode(originalAppearanceSettings.contrastMode);
+      }
     }
-  }, [isApplying, initialState, localShowLabels, originalShowLabels, originalNavItemsOrder, originalNavItemsVisibility, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, currentVersion]);
+  }, [isApplying, initialState, localShowLabels, originalShowLabels, originalNavItemsOrder, originalNavItemsVisibility, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, currentVersion, originalAppearanceSettings]);
 
   const openModal = useCallback(() => {
     // Sync state when opening modal - load current preferences
@@ -525,14 +504,76 @@ export const SideNavCollapseButton: FC<Props> = ({
     setNavItemsConfig(initialConfig);
     setLocalShowLabels(showLabels);
     
-    // Store initial state for change detection
-    setInitialState({
-      showLabels,
-      navItemsConfig: initialConfig,
-    });
+    // Load appearance settings for version 1.2
+    if (currentVersion === '1.2') {
+      // Request user profile data via custom event
+      const requestEvent = new CustomEvent('getUserProfileForPreferences');
+      window.dispatchEvent(requestEvent);
+      
+      let responseReceived = false;
+      
+      // Listen for response
+      const handleResponse = (e: Event) => {
+        responseReceived = true;
+        const customEvent = e as CustomEvent<{ userSettings?: { darkMode?: string; contrastMode?: string } }>;
+        if (customEvent.detail?.userSettings) {
+          const darkMode = customEvent.detail.userSettings.darkMode || 'system';
+          const contrast = customEvent.detail.userSettings.contrastMode || 'system';
+          setLocalColorMode(darkMode);
+          setLocalContrastMode(contrast);
+          setOriginalAppearanceSettings({ darkMode, contrast });
+          
+          // Store initial state for change detection
+          setInitialState({
+            showLabels,
+            navItemsConfig: initialConfig,
+            appearanceSettings: { darkMode, contrast },
+          });
+        } else {
+          // Default values if no user settings
+          const defaultDarkMode = 'system';
+          const defaultContrast = 'system';
+          setLocalColorMode(defaultDarkMode);
+          setLocalContrastMode(defaultContrast);
+          setOriginalAppearanceSettings({ darkMode: defaultDarkMode, contrast: defaultContrast });
+          
+          setInitialState({
+            showLabels,
+            navItemsConfig: initialConfig,
+            appearanceSettings: { darkMode: defaultDarkMode, contrast: defaultContrast },
+          });
+        }
+        window.removeEventListener('userProfileForPreferences', handleResponse);
+      };
+      
+      window.addEventListener('userProfileForPreferences', handleResponse);
+      
+      // Set a timeout to handle case where response doesn't come
+      setTimeout(() => {
+        if (!responseReceived) {
+          const defaultDarkMode = 'system';
+          const defaultContrast = 'system';
+          setLocalColorMode(defaultDarkMode);
+          setLocalContrastMode(defaultContrast);
+          setOriginalAppearanceSettings({ darkMode: defaultDarkMode, contrast: defaultContrast });
+          
+          setInitialState({
+            showLabels,
+            navItemsConfig: initialConfig,
+            appearanceSettings: { darkMode: defaultDarkMode, contrast: defaultContrast },
+          });
+        }
+      }, 100);
+    } else {
+      // Store initial state for change detection (non-1.2 version)
+      setInitialState({
+        showLabels,
+        navItemsConfig: initialConfig,
+      });
+    }
     
     setIsModalOpen(true);
-  }, [primaryItems, isLocked, showLabels]);
+  }, [primaryItems, isLocked, showLabels, currentVersion]);
 
   // Expose openModal function globally and listen for custom event
   useEffect(() => {
@@ -663,8 +704,18 @@ export const SideNavCollapseButton: FC<Props> = ({
     
     count += visibilityChanges;
     
+    // Check appearance settings changes (for version 1.2)
+    if (currentVersion === '1.2' && initialState.appearanceSettings) {
+      if (
+        localColorMode !== initialState.appearanceSettings.darkMode ||
+        localContrastMode !== initialState.appearanceSettings.contrastMode
+      ) {
+        count++;
+      }
+    }
+    
     return count;
-  }, [initialState, localShowLabels, navItemsConfig]);
+  }, [initialState, localShowLabels, navItemsConfig, currentVersion, localColorMode, localContrastMode]);
 
   const hasChanges = changeCount > 0;
 
@@ -686,8 +737,12 @@ export const SideNavCollapseButton: FC<Props> = ({
     return {
       showLabels: false, // Default is false (collapsed)
       navItemsConfig: defaultNavItemsConfig,
+      appearanceSettings: currentVersion === '1.2' ? {
+        darkMode: 'system',
+        contrastMode: 'system',
+      } : undefined,
     };
-  }, [primaryItems, isLocked]);
+  }, [primaryItems, isLocked, currentVersion]);
 
   // Check if current state matches default state
   const isDefaultState = useMemo(() => {
@@ -711,14 +766,40 @@ export const SideNavCollapseButton: FC<Props> = ({
       return false;
     }
     
+    // Check appearance settings (for version 1.2)
+    if (currentVersion === '1.2' && defaultState.appearanceSettings) {
+      if (
+        localColorMode !== defaultState.appearanceSettings.darkMode ||
+        localContrastMode !== defaultState.appearanceSettings.contrastMode
+      ) {
+        return false;
+      }
+    }
+    
     return true;
-  }, [localShowLabels, navItemsConfig, getDefaultState]);
+  }, [localShowLabels, navItemsConfig, getDefaultState, currentVersion, localColorMode, localContrastMode]);
 
   // Handle discard - reset to initial state (when modal was opened)
   const handleDiscard = useCallback(() => {
     if (!initialState) return;
     setLocalShowLabels(initialState.showLabels);
     setNavItemsConfig(initialState.navItemsConfig);
+    
+    // Revert appearance settings (for version 1.2)
+    if (currentVersion === '1.2' && initialState.appearanceSettings) {
+      setLocalColorMode(initialState.appearanceSettings.darkMode);
+      setLocalContrastMode(initialState.appearanceSettings.contrastMode);
+      // Revert via custom event
+      const event = new CustomEvent('updateUserProfileForPreferences', {
+        detail: {
+          userSettings: {
+            darkMode: initialState.appearanceSettings.darkMode,
+            contrastMode: initialState.appearanceSettings.contrastMode,
+          },
+        },
+      });
+      window.dispatchEvent(event);
+    }
     
     // Apply preview immediately - revert to initial state
     onSetShowLabels(initialState.showLabels);
@@ -752,13 +833,29 @@ export const SideNavCollapseButton: FC<Props> = ({
         // Ignore storage errors
       }
     }
-  }, [initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
+  }, [initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, currentVersion]);
 
   // Handle reset - reset to default state (as if opening deployment for first time)
   const handleReset = useCallback(() => {
     const defaultState = getDefaultState();
     setNavItemsConfig(defaultState.navItemsConfig);
     setLocalShowLabels(defaultState.showLabels);
+    
+    // Reset appearance settings (for version 1.2)
+    if (currentVersion === '1.2' && defaultState.appearanceSettings) {
+      setLocalColorMode(defaultState.appearanceSettings.darkMode);
+      setLocalContrastMode(defaultState.appearanceSettings.contrastMode);
+      // Apply preview immediately via custom event
+      const event = new CustomEvent('updateUserProfileForPreferences', {
+        detail: {
+          userSettings: {
+            darkMode: defaultState.appearanceSettings.darkMode,
+            contrastMode: defaultState.appearanceSettings.contrastMode,
+          },
+        },
+      });
+      window.dispatchEvent(event);
+    }
     
     // Apply preview immediately
     onSetShowLabels(defaultState.showLabels);
@@ -794,7 +891,7 @@ export const SideNavCollapseButton: FC<Props> = ({
         // Ignore storage errors
       }
     }
-  }, [getDefaultState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility]);
+  }, [getDefaultState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, currentVersion]);
 
   // Handle apply - changes are already applied, just close modal
   const handleApply = useCallback(() => {
@@ -825,11 +922,33 @@ export const SideNavCollapseButton: FC<Props> = ({
       }
     });
     
+    // Save appearance settings (for version 1.2)
+    if (currentVersion === '1.2' && initialState?.appearanceSettings) {
+      const hasAppearanceChanges =
+        localColorMode !== initialState.appearanceSettings.darkMode ||
+        localContrastMode !== initialState.appearanceSettings.contrastMode;
+      
+      if (hasAppearanceChanges) {
+        // Save via user profile API client
+        const userProfileApiClient = (window as any).__kbnUserProfileApiClient;
+        if (userProfileApiClient) {
+          userProfileApiClient.partialUpdate({
+            userSettings: {
+              darkMode: localColorMode,
+              contrastMode: localContrastMode,
+            },
+          }).catch(() => {
+            // Error handling is done by the API client
+          });
+        }
+      }
+    }
+    
     // Close modal after saving
     setTimeout(() => {
       closeModal();
     }, 100);
-  }, [hasChanges, localShowLabels, showLabels, navItemsConfig, initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, closeModal]);
+  }, [hasChanges, localShowLabels, showLabels, navItemsConfig, initialState, onSetShowLabels, onSetNavItemsOrder, onSetNavItemVisibility, closeModal, currentVersion, localColorMode, localContrastMode]);
 
   const button = (
     <EuiButtonIcon
@@ -900,28 +1019,44 @@ export const SideNavCollapseButton: FC<Props> = ({
           <EuiModalBody style={{ flex: 1, overflowY: 'auto', paddingBottom: '80px' }}>
             {currentVersion === '1.2' ? (
               <>
-                <EuiTabs size="s">
-                  <EuiTab
-                    onClick={() => setSelectedTabId('appearance')}
-                    isSelected={selectedTabId === 'appearance'}
-                    data-test-subj="preferencesAppearanceTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.navControlComponent.preferencesModal.appearanceTab"
-                      defaultMessage="Appearance"
-                    />
-                  </EuiTab>
-                  <EuiTab
-                    onClick={() => setSelectedTabId('navigation')}
-                    isSelected={selectedTabId === 'navigation'}
-                    data-test-subj="preferencesNavigationTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.navControlComponent.preferencesModal.navigationTab"
-                      defaultMessage="Navigation"
-                    />
-                  </EuiTab>
-                </EuiTabs>
+                <div
+                  css={css`
+                    position: sticky;
+                    top: 0;
+                    background: ${euiTheme.colors.emptyShade};
+                    z-index: 1;
+                    padding-top: ${euiTheme.size.m};
+                    padding-bottom: ${euiTheme.size.m};
+                    margin-top: -${euiTheme.size.m};
+                    margin-left: -${euiTheme.size.m};
+                    margin-right: -${euiTheme.size.m};
+                    padding-left: ${euiTheme.size.m};
+                    padding-right: ${euiTheme.size.m};
+                  `}
+                >
+                  <EuiTabs size="s">
+                    <EuiTab
+                      onClick={() => setSelectedTabId('appearance')}
+                      isSelected={selectedTabId === 'appearance'}
+                      data-test-subj="preferencesAppearanceTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.navControlComponent.preferencesModal.appearanceTab"
+                        defaultMessage="Appearance"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      onClick={() => setSelectedTabId('navigation')}
+                      isSelected={selectedTabId === 'navigation'}
+                      data-test-subj="preferencesNavigationTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.navControlComponent.preferencesModal.navigationTab"
+                        defaultMessage="Navigation"
+                      />
+                    </EuiTab>
+                  </EuiTabs>
+                </div>
                 <EuiSpacer size="l" />
                 
                 {selectedTabId === 'navigation' && (
@@ -961,7 +1096,12 @@ export const SideNavCollapseButton: FC<Props> = ({
                 )}
                 
                 {selectedTabId === 'appearance' && (
-                  <AppearanceSettingsSection />
+                  <AppearanceSettingsSection
+                    colorMode={localColorMode}
+                    contrastMode={localContrastMode}
+                    onColorModeChange={setLocalColorMode}
+                    onContrastModeChange={setLocalContrastMode}
+                  />
                 )}
               </>
             ) : (
