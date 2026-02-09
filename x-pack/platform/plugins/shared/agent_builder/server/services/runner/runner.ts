@@ -157,7 +157,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const { modelProviderFactory, ...runnerDeps } = deps;
 
-  const createScopedRunnerWithDeps = ({
+  const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
     conversation,
@@ -169,8 +169,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
-  }): ScopedRunner => {
-    const { resultStore, skillsStore, filestore } = createStore({ conversation, runnerDeps });
+  }): Promise<ScopedRunner> => {
+    const skillRegistry = await runnerDeps.skillServiceStart.getRegistry({ request });
+    const { resultStore, skillsStore, filestore } = await createStore({
+      conversation,
+      runnerDeps,
+      skillRegistry,
+    });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -198,20 +203,20 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   };
 
   return {
-    runTool: (runToolParams) => {
+    runTool: async (runToolParams) => {
       const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const runner = await createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runTool(otherParams);
     },
-    runInternalTool: (runToolParams) => {
+    runInternalTool: async (runToolParams) => {
       const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const runner = await createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runInternalTool(otherParams);
     },
-    runAgent: (params) => {
+    runAgent: async (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
-      const runner = createScopedRunnerWithDeps({
+      const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         conversation,

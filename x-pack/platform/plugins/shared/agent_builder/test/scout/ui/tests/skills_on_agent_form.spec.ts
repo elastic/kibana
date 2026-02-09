@@ -9,13 +9,19 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 let connectorId: string;
+const EXPERIMENTAL_FEATURES_SETTING = 'agentBuilder:experimentalFeatures';
 
 // TODO: The agent creation page (/agents/new) currently renders "Unable to load page"
 // in the Scout test environment due to a rendering error in the agent form component.
 // These tests should be re-enabled once the agent form rendering issue is resolved.
 test.describe.skip('Skills tab on agent configuration form', { tag: ['@ess'] }, () => {
-  // Create a mock LLM connector so the Agent Builder app is accessible
+  // Create a mock LLM connector and enable experimental features
   test.beforeAll(async ({ kbnClient }) => {
+    // Enable the experimental features flag so skill routes are accessible
+    await kbnClient.uiSettings.update({
+      [EXPERIMENTAL_FEATURES_SETTING]: true,
+    });
+
     const connectorResponse = await kbnClient.request({
       method: 'POST',
       path: '/api/actions/connector',
