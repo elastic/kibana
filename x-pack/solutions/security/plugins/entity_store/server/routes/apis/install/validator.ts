@@ -20,79 +20,6 @@ export const BodySchema = z.object({
     logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
 });
 
-function validateLogExtractionParams(
-    data: LogExtractionBodyParams | undefined,
-    ctx: z.RefinementCtx
-) {
-    if (!data) {
-        return;
-    }
-    if (data.filter !== undefined && !validateKql(data.filter)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['filter'],
-            message: "must be a valid KQL query",
-        });
-    }
-    if (data.additionalIndexPatterns !== undefined) {
-        data.additionalIndexPatterns.forEach((value, i) => {
-            const errors = validateDataView(value);
-            const illegalChars = errors.ILLEGAL_CHARACTERS ?? [];
-            const hasSpaces = errors.CONTAINS_SPACES;
-            if (illegalChars.length > 0 || hasSpaces) {
-                const parts = illegalChars.length > 0 ? [illegalChars.join(', ')] : [];
-                if (hasSpaces) {
-                    parts.push('(space)');
-                }
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ['additionalIndexPatterns', i],
-                    message: `must be a valid index pattern: cannot contain ${parts.join(', ')}`,
-                });
-            }
-        });
-    }
-    if (data.frequency !== undefined && !validateFrequency(data.frequency)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['frequency'],
-            message: 'must be at least 30 seconds',
-        });
-    }
-    if (data.lookbackPeriod !== undefined || data.delay !== undefined) {
-        if (isDelayGteLookbackPeriod(data.delay, data.lookbackPeriod)) {
-            ctx.addIssue({  
-                code: z.ZodIssueCode.custom,
-                path: ['delay'],
-                message: 'must be less than lookbackPeriod',
-            });
-        }
-    }
-}
-
-function isDelayGteLookbackPeriod(
-    delay?: string,
-    lookbackPeriod?: string
-): boolean {
-    const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
-    const delayValue = delay ?? DELAY_DEFAULT;
-    try {
-        const lookbackPeriodMs = parseDurationToMs(lookbackPeriodValue);
-        const delayMs = parseDurationToMs(delayValue);
-        return delayMs >= lookbackPeriodMs;
-    } catch {
-        return false;
-    }
-}
-
-function validateFrequency(frequency: string): boolean {
-    try {
-        return parseDurationToMs(frequency) >= MIN_FREQUENCY_MS;
-    } catch {
-        return false;
-    }
-}
-
 export function validateKql(kql: string): boolean {
     try {
         if (!kql || kql.trim() === '') {
@@ -113,3 +40,99 @@ export function validateKql(kql: string): boolean {
         return false;
     }
 };
+
+function validateFilter(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
+    if (data.filter === undefined) {
+        return;
+    }
+    if (!validateKql(data.filter)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['filter'],
+            message: 'must be a valid KQL query',
+        });
+    }
+}
+
+function validateFrequencyParam(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
+    if (data.frequency === undefined) {
+        return;
+    }
+    if (parseDurationToMs(data.frequency) < MIN_FREQUENCY_MS) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['frequency'],
+            message: 'must be at least 30 seconds',
+        });
+    }
+}
+
+function validateAdditionalIndexPatterns(
+    data: LogExtractionBodyParams,
+    ctx: z.RefinementCtx
+): void {
+    const patterns = data.additionalIndexPatterns;
+    if (patterns === undefined) {
+        return;
+    }
+    patterns.forEach((value, i) => {
+        const errors = validateDataView(value);
+        const illegalChars = errors.ILLEGAL_CHARACTERS ?? [];
+        const hasSpaces = errors.CONTAINS_SPACES;
+        if (illegalChars.length === 0 && !hasSpaces) return;
+
+        const parts = illegalChars.length > 0 ? [illegalChars.join(', ')] : [];
+        if (hasSpaces) parts.push('(space)');
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['additionalIndexPatterns', i],
+            message: `must be a valid index pattern: cannot contain ${parts.join(', ')}`,
+        });
+    });
+}
+
+function validateDelayVsLookbackPeriod(
+    data: LogExtractionBodyParams,
+    ctx: z.RefinementCtx
+): void {
+    const hasDelay = data.delay !== undefined;
+    const hasLookback = data.lookbackPeriod !== undefined;
+    if (!hasDelay && !hasLookback) {
+        return;
+    }
+
+    if (isDelayGteLookbackPeriod(data.delay, data.lookbackPeriod)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['delay'],
+            message: 'must be less than lookbackPeriod',
+        });
+    }
+}
+
+function validateLogExtractionParams(
+    data: LogExtractionBodyParams | undefined,
+    ctx: z.RefinementCtx
+): void {
+    if (!data) return;
+
+    validateFilter(data, ctx);
+    validateFrequencyParam(data, ctx);
+    validateAdditionalIndexPatterns(data, ctx);
+    validateDelayVsLookbackPeriod(data, ctx);
+}
+
+function isDelayGteLookbackPeriod(
+    delay?: string,
+    lookbackPeriod?: string
+): boolean {
+    const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
+    const delayValue = delay ?? DELAY_DEFAULT;
+    try {
+        const lookbackPeriodMs = parseDurationToMs(lookbackPeriodValue);
+        const delayMs = parseDurationToMs(delayValue);
+        return delayMs >= lookbackPeriodMs;
+    } catch {
+        return false;
+    }
+}

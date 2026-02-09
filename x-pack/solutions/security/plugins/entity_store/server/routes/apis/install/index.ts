@@ -40,15 +40,21 @@ export function registerInstall(router: EntityStorePluginRouter) {
                 const { entityTypes, logExtraction } = req.body;
                 logger.debug('Install api called');
 
+                const { engines } = await assetManager.getStatus();
+                const installedTypes = new Set(engines.map((e) => e.type));
+                const toInstall = entityTypes.filter((type) => !installedTypes.has(type));
+
+                if (!toInstall.length) {
+                    return res.ok({ body: { ok: true } });
+                }
+
                 await Promise.all(
-                    entityTypes.map((type) => assetManager.initEntity(req, type, logExtraction))
+                    toInstall.map((type) =>
+                        assetManager.initEntity(req, type, logExtraction)
+                    )
                 );
 
-                return res.ok({
-                    body: {
-                        ok: true,
-                    },
-                });
+                return res.created({ body: { ok: true } });
             })
         );
 }

@@ -29,7 +29,7 @@ export const LogExtractionState = z.object({
     .string()
     .regex(/[smdh]$/)
     .default(DELAY_DEFAULT),
-  docsLimit: z.number().int().default(10000),
+  docsLimit: z.number().int().positive().default(10000),
   timeout: z
     .string()
     .regex(/[smdh]$/)

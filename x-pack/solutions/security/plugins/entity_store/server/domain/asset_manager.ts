@@ -85,6 +85,7 @@ export class AssetManager {
         logExtractionState: { frequency },
       } = await this.engineDescriptorClient.findOrThrow(type);
 
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
       await scheduleExtractEntityTask({
         logger: this.logger,
         taskManager: this.taskManager,
@@ -93,6 +94,7 @@ export class AssetManager {
         namespace: this.namespace,
         request,
       });
+      
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       throw error;
@@ -107,6 +109,7 @@ export class AssetManager {
         type,
         namespace: this.namespace,
       });
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STOPPED });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
       throw error;
