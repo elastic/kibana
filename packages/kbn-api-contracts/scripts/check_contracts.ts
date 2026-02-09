@@ -16,6 +16,7 @@ import { loadBaseline } from '../src/baseline/load_baseline';
 import { diffOas } from '../src/diff/diff_oas';
 import { filterBreakingChanges } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
+import { checkBaselineGovernance } from '../src/governance/check_baseline_governance';
 
 run(
   async ({ flags, log }) => {
@@ -35,11 +36,17 @@ run(
     log.info(`Checking ${distribution} API contracts...`);
     log.info(`Current spec: ${specPath}`);
 
-    const currentSpec = await loadOas(resolve(process.cwd(), specPath));
-    const normalizedCurrent = normalizeOas(currentSpec);
-
     const baselineSelection = selectBaseline(distribution, version, baselinePath);
     log.info(`Baseline: ${baselineSelection.path}`);
+
+    const governance = checkBaselineGovernance(distribution, baselineSelection.path);
+    if (!governance.allowed) {
+      log.error(governance.reason!);
+      throw new Error('Baseline governance check failed');
+    }
+
+    const currentSpec = await loadOas(resolve(process.cwd(), specPath));
+    const normalizedCurrent = normalizeOas(currentSpec);
 
     const baseline = await loadBaseline(baselineSelection.path);
 
