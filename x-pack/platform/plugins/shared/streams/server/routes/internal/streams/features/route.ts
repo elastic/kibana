@@ -17,6 +17,7 @@ import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
+  getPreviousDiscoveredPatterns,
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
@@ -332,12 +333,7 @@ export const featuresTaskRoute = createServerRoute({
                   logger,
                 });
 
-                // Carry forward non-expired discovered patterns from the previous task run
-                const previousTask = await taskClient.get<FeaturesIdentificationTaskParams>(taskId);
-                const now = Date.now();
-                const validPatterns = (previousTask.task.params.discoveredPatterns ?? []).filter(
-                  (p) => now - p.discoveredAt < 24 * 60 * 60 * 1000 // 24 hours
-                );
+                const validPatterns = await getPreviousDiscoveredPatterns(name, taskClient);
 
                 return {
                   connectorId,

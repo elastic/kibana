@@ -15,7 +15,8 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { discoverMessagePatterns } from '../../../routes/utils/discover_message_patterns';
-import type { TaskContext } from '.';
+import type { StreamsTaskType, TaskContext } from '.';
+import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
@@ -25,6 +26,9 @@ export interface DiscoveredPattern {
   pattern: string;
   discoveredAt: number;
 }
+
+/** Maximum age of a discovered pattern before it expires and can be re-discovered. */
+export const PATTERN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -38,6 +42,27 @@ export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identificatio
 
 export function getFeaturesIdentificationTaskId(streamName: string) {
   return `${FEATURES_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
+/**
+ * Retrieves non-expired discovered patterns from the previous features
+ * identification task for the given stream. Returns an empty array if
+ * no previous task exists.
+ */
+export async function getPreviousDiscoveredPatterns(
+  streamName: string,
+  taskClient: TaskClient<StreamsTaskType>
+): Promise<DiscoveredPattern[]> {
+  try {
+    const taskId = getFeaturesIdentificationTaskId(streamName);
+    const previousTask = await taskClient.get<FeaturesIdentificationTaskParams>(taskId);
+    const now = Date.now();
+    return (previousTask.task.params.discoveredPatterns ?? []).filter(
+      (p) => now - p.discoveredAt < PATTERN_TTL_MS
+    );
+  } catch {
+    return [];
+  }
 }
 
 const MIN_NEW_PATTERNS = 2;

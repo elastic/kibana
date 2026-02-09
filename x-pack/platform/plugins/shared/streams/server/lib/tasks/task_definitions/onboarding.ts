@@ -27,6 +27,7 @@ import type { FeaturesIdentificationTaskParams } from './features_identification
 import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
+  getPreviousDiscoveredPatterns,
 } from './features_identification';
 import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
 import {
@@ -77,12 +78,17 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 for (const step of steps) {
                   switch (step) {
                     case OnboardingStep.FeaturesIdentification:
+                      const previousPatterns = await getPreviousDiscoveredPatterns(
+                        streamName,
+                        taskClient
+                      );
                       const featuresTaskId = await scheduleFeaturesIdentificationTask(
                         {
                           connectorId,
                           start: from,
                           end: to,
                           streamName,
+                          discoveredPatterns: previousPatterns,
                         },
                         taskClient,
                         runContext.fakeRequest
