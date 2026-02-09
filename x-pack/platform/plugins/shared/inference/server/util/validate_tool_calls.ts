@@ -61,12 +61,12 @@ export function validateToolCalls({
     try {
       // ToolSchema is compatible with JsonSchema but TypeScript can't infer
       // the recursive type compatibility, so we assert it as JsonSchema
-      const zodSchema = z.fromJSONSchema(toolSchema);
+      const zodSchema = z.fromJSONSchema(toolSchema as z.core.JSONSchema.JSONSchema);
       zodSchema.parse(serializedArguments);
     } catch (error) {
       const errorMessage =
         error instanceof z.ZodError
-          ? error?.errors?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
           : error instanceof Error
           ? error.message
           : 'Unknown validation error';

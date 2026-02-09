@@ -29,7 +29,7 @@ export const toolDefinitionToInference = (
         schema: tool.schema
           ? isZodSchema(tool.schema)
             ? zodSchemaToInference(tool.schema)
-            : jsonSchemaToInference(tool.schema)
+            : jsonSchemaToInference(tool.schema as z.core.JSONSchema.JSONSchema)
           : undefined,
       };
     } else if (isToolDefinition(tool)) {
@@ -67,6 +67,6 @@ function zodSchemaToInference(schema: z.ZodType): ToolSchema {
   return pick(z.toJSONSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
 }
 
-function jsonSchemaToInference(schema: z.core.ZodStandardJSONSchemaPayload<unknown>): ToolSchema {
+function jsonSchemaToInference(schema: z.core.JSONSchema.JSONSchema): ToolSchema {
   return pick(schema, ['type', 'properties', 'required']) as ToolSchema;
 }
