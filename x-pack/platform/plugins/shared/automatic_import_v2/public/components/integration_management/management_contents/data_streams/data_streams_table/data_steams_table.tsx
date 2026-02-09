@@ -93,8 +93,8 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         name: '',
         actions: [
           {
-            name: 'Expand',
-            description: 'Expand for details about this data stream',
+            name: i18n.TABLE_ACTIONS.expand,
+            description: i18n.TABLE_ACTIONS.expandDescription,
             icon: 'expand',
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
@@ -109,7 +109,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'title',
-        name: 'Title',
+        name: i18n.TABLE_COLUMN_HEADERS.title,
         sortable: true,
         render: (title: DataStreamResponse['title']) => (
           <EuiToolTip
@@ -124,7 +124,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'inputTypes',
-        name: 'Data Collection Methods',
+        name: i18n.TABLE_COLUMN_HEADERS.dataCollectionMethods,
         sortable: true,
         render: (inputTypes: DataStreamResponse['inputTypes']) => (
           <InputTypesBadges inputTypes={inputTypes} />
@@ -135,7 +135,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'status',
-        name: 'Status',
+        name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
           <Status status={status} isDeleting={item.dataStreamId === deletingDataStreamId} />
@@ -143,11 +143,11 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '120px',
       },
       {
-        name: 'Actions',
+        name: i18n.TABLE_COLUMN_HEADERS.actions,
         actions: [
           {
-            name: 'Refresh',
-            description: 'Refresh this data stream',
+            name: i18n.TABLE_ACTIONS.refresh,
+            description: i18n.TABLE_ACTIONS.refreshDescription,
             icon: 'refresh',
             type: 'icon',
             'data-test-subj': 'refreshDataStreamButton',
@@ -160,8 +160,8 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
               item.dataStreamId !== deletingDataStreamId,
           },
           {
-            name: 'Delete',
-            description: 'Delete this data stream',
+            name: i18n.TABLE_ACTIONS.delete,
+            description: i18n.TABLE_ACTIONS.deleteDescription,
             icon: 'trash',
             type: 'icon',
             color: 'danger',
@@ -190,12 +190,12 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       {dataStreamDeleteTarget && (
         <EuiConfirmModal
           aria-labelledby={deleteModalTitleId}
-          title={`Are you sure you want to delete "${dataStreamDeleteTarget.title}"?`}
+          title={i18n.DELETE_MODAL.title(dataStreamDeleteTarget.title)}
           titleProps={{ id: deleteModalTitleId }}
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={i18n.DELETE_MODAL.cancelButton}
+          confirmButtonText={i18n.DELETE_MODAL.confirmButton}
           defaultFocusedButton="confirm"
           buttonColor="danger"
         />

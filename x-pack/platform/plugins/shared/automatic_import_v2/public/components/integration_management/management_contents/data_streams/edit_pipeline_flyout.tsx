@@ -29,6 +29,7 @@ import React, { useState, useMemo } from 'react';
 import type { DataStreamResponse } from '../../../../../common';
 import { useGetDataStreamResults } from '../../../../common';
 import { useUIState } from '../../contexts';
+import * as i18n from './translations';
 
 export const getIconFromType = (type: string | null | undefined): EuiTokenProps['iconType'] => {
   switch (type) {
@@ -129,7 +130,7 @@ export const EditPipelineFlyout = ({
   const columns = [
     {
       field: 'field',
-      name: 'Field',
+      name: i18n.TABLE_COLUMN_HEADERS.field,
       sortable: true,
       searchable: true,
       render: (fieldName: string, item: TableRow) => {
@@ -147,7 +148,7 @@ export const EditPipelineFlyout = ({
     },
     {
       field: 'value',
-      name: 'Value',
+      name: i18n.TABLE_COLUMN_HEADERS.value,
       sortable: true,
       searchable: true,
       truncateText: true,
@@ -157,7 +158,7 @@ export const EditPipelineFlyout = ({
   const search: EuiSearchBarProps = {
     box: {
       incremental: true,
-      placeholder: 'Filter by field, value',
+      placeholder: i18n.EDIT_PIPELINE_FLYOUT.filterPlaceholder,
     },
   };
 
@@ -173,10 +174,10 @@ export const EditPipelineFlyout = ({
         <EuiSpacer size="s" />
 
         <EuiFlexItem grow={false} css={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <EuiText>Documents</EuiText>
+          <EuiText>{i18n.EDIT_PIPELINE_FLYOUT.documents}</EuiText>
           {pageCount > 0 && (
             <EuiPagination
-              aria-label="Edit pipeline pagination"
+              aria-label={i18n.EDIT_PIPELINE_FLYOUT.paginationAriaLabel}
               onPageClick={handlePageClick}
               activePage={activeDocument}
               pageCount={pageCount}
@@ -189,13 +190,13 @@ export const EditPipelineFlyout = ({
             isSelected={selectedPipelineTab === 'table'}
             onClick={() => selectPipelineTab('table')}
           >
-            Table
+            {i18n.EDIT_PIPELINE_FLYOUT.tableTab}
           </EuiTab>
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
             onClick={() => selectPipelineTab('pipeline')}
           >
-            Ingest pipeline
+            {i18n.EDIT_PIPELINE_FLYOUT.pipelineTab}
           </EuiTab>
         </EuiTabs>
       </EuiFlyoutHeader>
@@ -210,8 +211,13 @@ export const EditPipelineFlyout = ({
         )}
 
         {isError && (
-          <EuiCallOut announceOnMount title="Error loading data" color="danger" iconType="error">
-            <p>Failed to load pipeline results. Please try again.</p>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.EDIT_PIPELINE_FLYOUT.errorTitle}
+            color="danger"
+            iconType="error"
+          >
+            <p>{i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
           </EuiCallOut>
         )}
 
