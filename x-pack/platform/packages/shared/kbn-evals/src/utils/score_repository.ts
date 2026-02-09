@@ -81,6 +81,54 @@ export interface EvaluationScoreDocument {
   };
 }
 
+type BuildkiteCiMetadata = NonNullable<NonNullable<EvaluationScoreDocument['ci']>['buildkite']>;
+
+export interface ExportScoresOptions {
+  /**
+   * Optional suite identifier to attach to exported documents.
+   *
+   * Defaults to `process.env.EVAL_SUITE_ID`.
+   */
+  suiteId?: string;
+
+  /**
+   * Optional Buildkite CI metadata to attach to exported documents.
+   *
+   * Defaults to environment-derived Buildkite metadata (if any).
+   */
+  buildkite?: BuildkiteCiMetadata;
+}
+
+function getBuildkiteCiMetadataFromEnv(): BuildkiteCiMetadata | undefined {
+  const pullRequest =
+    process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
+      ? process.env.BUILDKITE_PULL_REQUEST
+      : undefined;
+
+  const hasAnyBuildkiteMetadata =
+    process.env.BUILDKITE_BUILD_ID ||
+    process.env.BUILDKITE_JOB_ID ||
+    process.env.BUILDKITE_BUILD_URL ||
+    process.env.BUILDKITE_PIPELINE_SLUG ||
+    pullRequest ||
+    process.env.BUILDKITE_BRANCH ||
+    process.env.BUILDKITE_COMMIT;
+
+  if (!hasAnyBuildkiteMetadata) {
+    return undefined;
+  }
+
+  return {
+    build_id: process.env.BUILDKITE_BUILD_ID,
+    job_id: process.env.BUILDKITE_JOB_ID,
+    build_url: process.env.BUILDKITE_BUILD_URL,
+    pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
+    pull_request: pullRequest,
+    branch: process.env.BUILDKITE_BRANCH,
+    commit: process.env.BUILDKITE_COMMIT,
+  };
+}
+
 /**
  * Statistics for a single evaluator on a single dataset.
  * This is the core data structure returned by ES aggregations and used throughout the reporting system.
@@ -153,7 +201,6 @@ export class EvaluationScoreRepository {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
             experiment_id: { type: 'keyword' },
-
             suite: {
               type: 'object',
               properties: {
@@ -342,7 +389,10 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async exportScores(documents: EvaluationScoreDocument[]): Promise<void> {
+  async exportScores(
+    documents: EvaluationScoreDocument[],
+    options: ExportScoresOptions = {}
+  ): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
@@ -352,31 +402,8 @@ export class EvaluationScoreRepository {
         return;
       }
 
-      const buildkitePullRequest =
-        process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
-          ? process.env.BUILDKITE_PULL_REQUEST
-          : undefined;
-
-      const buildkite =
-        process.env.BUILDKITE_BUILD_ID ||
-        process.env.BUILDKITE_JOB_ID ||
-        process.env.BUILDKITE_BUILD_URL ||
-        process.env.BUILDKITE_PIPELINE_SLUG ||
-        buildkitePullRequest ||
-        process.env.BUILDKITE_BRANCH ||
-        process.env.BUILDKITE_COMMIT
-          ? {
-              build_id: process.env.BUILDKITE_BUILD_ID,
-              job_id: process.env.BUILDKITE_JOB_ID,
-              build_url: process.env.BUILDKITE_BUILD_URL,
-              pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
-              pull_request: buildkitePullRequest,
-              branch: process.env.BUILDKITE_BRANCH,
-              commit: process.env.BUILDKITE_COMMIT,
-            }
-          : undefined;
-
-      const suiteId = process.env.EVAL_SUITE_ID;
+      const buildkite = options.buildkite ?? getBuildkiteCiMetadataFromEnv();
+      const suiteId = options.suiteId ?? process.env.EVAL_SUITE_ID;
       const enrichedDocuments =
         suiteId || buildkite
           ? documents.map((doc) => ({
@@ -499,10 +526,7 @@ export class EvaluationScoreRepository {
       const runQuery = { bool: { must } };
 
       const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
-        index: EVALUATIONS_DATA_STREAM_WILDCARD,
-        // The evaluations data stream is hidden; wildcard expansion does not include hidden
-        // indices/data streams unless explicitly requested.
-        expand_wildcards: ['open', 'hidden'],
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
         query: runQuery,
         size: 1,
       });
@@ -514,8 +538,7 @@ export class EvaluationScoreRepository {
       }
 
       const aggResponse = await this.esClient.search({
-        index: EVALUATIONS_DATA_STREAM_WILDCARD,
-        expand_wildcards: ['open', 'hidden'],
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
         size: 0,
         query: runQuery,
         aggs: {
@@ -590,8 +613,7 @@ export class EvaluationScoreRepository {
       const query = { bool: { must } };
 
       const response = await this.esClient.search<EvaluationScoreDocument>({
-        index: EVALUATIONS_DATA_STREAM_WILDCARD,
-        expand_wildcards: ['open', 'hidden'],
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
         query,
         sort: [
           { 'example.dataset.name': { order: 'asc' as const } },

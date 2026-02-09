@@ -320,6 +320,47 @@ describe('EvaluationScoreRepository', () => {
         },
       });
     });
+
+    it('should enrich documents with suite/buildkite via exportScores options', async () => {
+      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
+      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 1,
+        failed: 0,
+        successful: 1,
+      } as any);
+
+      await repository.exportScores([createMockScoreDocument()], {
+        suiteId: 'my-suite',
+        buildkite: {
+          build_id: 'bk-build-1',
+          job_id: 'bk-job-1',
+          build_url: 'https://example.test/build/1',
+          pipeline_slug: 'my-pipeline',
+          pull_request: '123',
+          branch: 'feature-branch',
+          commit: 'deadbeef',
+        },
+      });
+
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      expect(bulkCall.datasource).toHaveLength(1);
+      expect(bulkCall.datasource[0].suite).toEqual({ id: 'my-suite' });
+      expect(bulkCall.datasource[0].ci?.buildkite).toMatchObject({
+        build_id: 'bk-build-1',
+        job_id: 'bk-job-1',
+        pipeline_slug: 'my-pipeline',
+        pull_request: '123',
+        branch: 'feature-branch',
+        commit: 'deadbeef',
+      });
+      expect(bulkCall.onDocument(bulkCall.datasource[0])).toEqual({
+        create: {
+          _index: '.kibana-evaluations',
+          _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
+        },
+      });
+    });
   });
 
   describe('getStatsByRunId', () => {
@@ -456,8 +497,7 @@ describe('EvaluationScoreRepository', () => {
       expect(result).toEqual(mockScores);
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.kibana-evaluations*',
-          expand_wildcards: ['open', 'hidden'],
+          index: '.kibana-evaluations',
           query: {
             bool: {
               must: [{ term: { run_id: 'run-123' } }],

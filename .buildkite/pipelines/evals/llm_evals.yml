@@ -109,6 +109,7 @@ steps:
 
       - label: 'Evals: Observability AI Assistant'
         key: kbn-evals-weekly-obs-ai-assistant
+        skip: 'Temporarily disabled (for the sake of cost reduction and low maturity of this eval suite; will be re-enabled in follow-up PR)'
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'

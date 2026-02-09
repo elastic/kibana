@@ -157,4 +157,37 @@ Notes:
 
 ### Evaluation comparisons
 
-The previous reporting Playwright config has been removed. If you need evaluation comparisons again, we can reintroduce them without keeping a permanent suite entry.
+Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluations` data stream) using paired t-tests.
+
+Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
+
+```bash
+# This must point at the cluster where eval scores were exported.
+# (The default Scout test ES is typically http://elastic:changeme@localhost:9220)
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+
+# LLM-as-a-judge connector (required by @kbn/evals)
+export EVALUATION_CONNECTOR_ID=<llm-judge-connector-id>
+
+# Run A
+TEST_RUN_ID=agent-builder-baseline \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
+
+# Run B
+TEST_RUN_ID=agent-builder-change \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
+```
+
+Tip: the run id is also printed at the end of the run in the export message containing `run_id:"..."`.
+
+Then compare:
+
+```bash
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+node scripts/evals compare agent-builder-baseline agent-builder-change
+```
+
+Notes:
+
+- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
+- `compare` reads from `EVALUATIONS_ES_URL` (defaults to `http://elastic:changeme@localhost:9220`).
