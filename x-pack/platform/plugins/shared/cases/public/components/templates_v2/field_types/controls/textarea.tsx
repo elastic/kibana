@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { FieldType } from '../constants';
-
-export const TextareaFieldSchema = z.object({
-  control: z.literal(FieldType.TEXTAREA),
-});
+import type { z } from '@kbn/zod';
+import { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const Textarea = (props: z.infer<typeof TextareaFieldSchema>) => {
   return null;

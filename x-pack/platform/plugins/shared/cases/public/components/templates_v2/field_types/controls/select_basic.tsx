@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { FieldType } from '../constants';
-
-export const SelectBasicFieldSchema = z.object({
-  control: z.literal(FieldType.SELECT_BASIC),
-  metadata: z.object({
-    options: z.array(z.string()),
-  }),
-});
+import type { z } from '@kbn/zod';
+import { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const SelectBasic = (props: z.infer<typeof SelectBasicFieldSchema>) => {
   return null;

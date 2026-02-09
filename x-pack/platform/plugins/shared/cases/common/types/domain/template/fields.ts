@@ -4,3 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { z } from '@kbn/zod';
+
+const BaseFieldSchema = z.object({
+  name: z.string(),
+  label: z.string().optional(),
+  type: z.literal('keyword'),
+  metadata: z.record(z.unknown()),
+});
+
+export const InputTextFieldSchema = BaseFieldSchema.extend({
+  control: z.literal('INPUT_TEXT'),
+});
+
+export const InputNumberFieldSchema = BaseFieldSchema.extend({
+  control: z.literal('INPUT_NUMBER'),
+});
+
+export const SelectBasicFieldSchema = BaseFieldSchema.extend({
+  control: z.literal('SELECT_BASIC'),
+  metadata: z
+    .object({
+      options: z.array(z.string()),
+    })
+    .catchall(z.unknown()),
+});
+
+export const TextareaFieldSchema = BaseFieldSchema.extend({
+  control: z.literal('TEXTAREA'),
+});
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ */
+export const FieldSchema = z.discriminatedUnion('control', [
+  InputTextFieldSchema,
+  InputNumberFieldSchema,
+  SelectBasicFieldSchema,
+  TextareaFieldSchema,
+]);

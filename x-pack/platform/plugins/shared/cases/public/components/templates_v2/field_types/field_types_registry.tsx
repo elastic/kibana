@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import type { z } from '@kbn/zod';
 
 import { FieldType } from './constants';
-import type { FieldSchema } from './schema';
+import type { FieldSchema } from '../../../../common/types/domain/template/fields';
 
 import { InputText } from './controls/input_text';
 import { SelectBasic } from './controls/select_basic';
@@ -21,7 +21,7 @@ export type FieldMap = {
   [K in FieldType]: FC<Extract<z.infer<typeof FieldSchema>, { control: K }>>;
 };
 
-// NOTE: Register ui controls here (remember to update ./schema as well)
+// NOTE: Register ui controls here (remember to update FieldSchema as well)
 export const controlRegistry: FieldMap = {
   [FieldType.INPUT_TEXT]: InputText,
   [FieldType.INPUT_NUMBER]: InputNumber,

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { FieldType } from '../constants';
-
-export const InputNumberFieldSchema = z.object({
-  control: z.literal(FieldType.INPUT_NUMBER),
-});
+import type { z } from '@kbn/zod';
+import { InputNumberFieldSchema } from '../../../../../common/types/domain/template/fields';
 
 export const InputNumber = (props: z.infer<typeof InputNumberFieldSchema>) => {
   return null;
