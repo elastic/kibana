@@ -10,27 +10,24 @@
 /**
  * SCENARIO: Service Topology
  *
- * Story: Generates a multi-hop service topology with various dependency types.
- * Uses linked traces to enable multi-hop upstream/downstream discovery.
+ * Generates a multi-hop service topology with instrumented services and
+ * uninstrumented dependencies (databases, caches, message queues).
  *
  * IMPORTANT: The span.destination.service.resource values intentionally differ from
  * the service.name values (e.g., "checkout-proxy:5050" instead of "checkout-service").
  * This prevents tests from passing if someone reintroduces heuristic matching on
  * span.destination.service.resource. The implementation must rely on resolved
- * target['service.name'] (from linked traces via parent.id → span.id join).
+ * target['service.name'] (from the parent.id → span.id join between instrumented services).
  *
- * Topology (linked traces):
+ * Topology:
+ *
  *   frontend (nodejs)
- *     → checkout-service (java) [linked via trace.id, destination: "checkout-proxy:5050"]
+ *     → checkout-service (java) [destination: "checkout-proxy:5050"]
  *         → postgres (db)
  *         → redis (cache)
  *         → kafka (messaging)
- *
- * Separate traces (for sibling exclusion testing):
- *   frontend (nodejs)
  *     → recommendation-service (python) [destination: "recommendation-lb:8080"]
- *   recommendation-service (python)
- *     → postgres (db)
+ *         → postgres (db)
  *
  * Validate via:
  *
@@ -113,9 +110,8 @@ export function generateTopologyData({
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      // LINKED TRACE: frontend → checkout-service → dependencies
-      // This enables multi-hop upstream discovery: postgres can trace back to checkout-service AND frontend
-      const linkedFrontendTransaction = frontend
+      // frontend → checkout-service → dependencies
+      const frontendToCheckout = frontend
         .transaction('GET /checkout', 'request')
         .timestamp(timestamp)
         .duration(300)
@@ -128,7 +124,6 @@ export function generateTopologyData({
             .duration(180)
             .success()
             .children(
-              // checkout-service transaction linked to frontend's exit span
               checkoutService
                 .transaction('POST /api/checkout', 'request')
                 .timestamp(timestamp + 15)
@@ -161,29 +156,8 @@ export function generateTopologyData({
             )
         );
 
-      // SEPARATE TRACE: recommendation-service (sibling, not linked to frontend→checkout chain)
-      // This enables sibling exclusion testing: when querying downstream from checkout-service,
-      // recommendation-service's postgres calls should NOT appear
-      const separateRecommendationTransaction = recommendationService
-        .transaction('GET /api/recommendations', 'request')
-        .timestamp(timestamp + 50)
-        .duration(80)
-        .success()
-        .children(
-          recommendationService
-            .span(
-              'SELECT FROM products',
-              POSTGRES_DEPENDENCY.spanType,
-              POSTGRES_DEPENDENCY.spanSubtype
-            )
-            .destination(POSTGRES_DEPENDENCY.resource)
-            .timestamp(timestamp + 60)
-            .duration(40)
-            .success()
-        );
-
-      // Also generate frontend calling recommendation-service (separate trace for this path)
-      const separateFrontendToRecommendation = frontend
+      // frontend → recommendation-service → postgres (separate trace for sibling exclusion testing)
+      const frontendToRecommendation = frontend
         .transaction('GET /recommendations', 'request')
         .timestamp(timestamp + 400)
         .duration(150)
@@ -199,13 +173,28 @@ export function generateTopologyData({
             .timestamp(timestamp + 410)
             .duration(90)
             .success()
+            .children(
+              recommendationService
+                .transaction('GET /api/recommendations', 'request')
+                .timestamp(timestamp + 415)
+                .duration(80)
+                .success()
+                .children(
+                  recommendationService
+                    .span(
+                      'SELECT FROM products',
+                      POSTGRES_DEPENDENCY.spanType,
+                      POSTGRES_DEPENDENCY.spanSubtype
+                    )
+                    .destination(POSTGRES_DEPENDENCY.resource)
+                    .timestamp(timestamp + 420)
+                    .duration(40)
+                    .success()
+                )
+            )
         );
 
-      return [
-        linkedFrontendTransaction,
-        separateRecommendationTransaction,
-        separateFrontendToRecommendation,
-      ];
+      return [frontendToCheckout, frontendToRecommendation];
     });
 
   return withClient(apmEsClient, data);

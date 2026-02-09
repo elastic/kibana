@@ -59,7 +59,11 @@ When to use:
 
 When NOT to use:
 - For immediate (single-hop) dependencies only, prefer \`observability.get_downstream_dependencies\` — it is faster and returns the same metrics
-- For service-level metrics without topology, use \`observability.get_trace_metrics\``,
+- For service-level metrics without topology, use \`observability.get_trace_metrics\`
+
+After reviewing topology results, consider:
+- Use \`observability.get_trace_metrics\` with timeseries to check latency/error trends over time
+- Use \`observability.get_correlated_logs\` to find error patterns in failing dependencies`,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],
     availability: {
