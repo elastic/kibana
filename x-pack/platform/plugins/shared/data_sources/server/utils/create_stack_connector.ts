@@ -9,7 +9,6 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/core/server';
 import type { MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
 import type { StackConnectorConfig } from '@kbn/data-catalog-plugin';
 import { connectorsSpecs } from '@kbn/connector-specs';
@@ -102,9 +101,7 @@ export const createStackConnector = async (
   actions: ActionsPluginStart,
   request: KibanaRequest,
   stackConnectorConfig: StackConnectorConfig,
-  name: string,
-  credentials: string,
-  logger: Logger
+  credentials: string
 ) => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connectorType = stackConnectorConfig.type;
@@ -121,7 +118,7 @@ export const createStackConnector = async (
 
   const stackConnector: ActionResult = await actionsClient.create({
     action: {
-      name: `${connectorType} stack connector for data connector '${name}'`,
+      name: `${connectorType}'`,
       actionTypeId: connectorType,
       config: connectorConfig,
       secrets,

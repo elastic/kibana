@@ -20,7 +20,7 @@ import {
   createRequestToEs,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
@@ -35,6 +35,12 @@ const createTestState = () => ({
       },
     },
   },
+  dynamic_tool_ids: [
+    'security.security_labs_search',
+    'platform.core.cases',
+    'security.alert-analysis.get-related-alerts',
+    'security.alerts',
+  ],
 });
 
 describe('conversation model converters', () => {
@@ -150,6 +156,7 @@ describe('conversation model converters', () => {
           },
         },
       ];
+      serialized._source!.state = createTestState();
 
       const deserialized = fromEs(serialized);
 
@@ -185,6 +192,7 @@ describe('conversation model converters', () => {
             },
           },
         ],
+        state: createTestState(),
       });
     });
 
@@ -278,6 +286,7 @@ describe('conversation model converters', () => {
           current_version: 1,
         },
       ];
+      serialized._source!.state = createTestState();
 
       const deserialized = fromEs(serialized);
 
@@ -297,6 +306,7 @@ describe('conversation model converters', () => {
           current_version: 1,
         },
       ]);
+      expect(deserialized.state).toEqual(createTestState());
     });
 
     it('deserializes conversation without attachments (old format)', () => {

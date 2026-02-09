@@ -1,6 +1,6 @@
-## SHOW
+# SHOW
 
-The `SHOW` command provides information about the deployment and its capabilities.
+The SHOW command returns information about the deployment and its capabilities.
 
 ## Syntax
 
@@ -8,13 +8,13 @@ The `SHOW` command provides information about the deployment and its capabilitie
 
 ### Parameters
 
-#### `item`
+#### item
 
-This parameter can only be `INFO`.
+Can only be INFO.
 
 ## Examples
 
-Retrieve the deployment’s version, build date, and hash:
+Returns the deployment’s version, build date, and hash.
 
 ```esql
 SHOW INFO

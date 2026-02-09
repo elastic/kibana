@@ -23,7 +23,10 @@ import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/too
 import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
 import type { ImportedTool } from '@kbn/data-catalog-plugin/common/data_source_spec';
+import { parse } from 'yaml';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { createStackConnector } from '../utils/create_stack_connector';
+
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
@@ -154,9 +157,7 @@ export async function createDataSourceAndRelatedResources(
         actions,
         request,
         stackConnectorConfig,
-        name,
-        credentials,
-        logger
+        credentials
       );
 
       finalStackConnectorId = stackConnector.id;
@@ -164,7 +165,7 @@ export async function createDataSourceAndRelatedResources(
 
     stackConnectorIds[`${connectorType}-stack-connector-id`] = finalStackConnectorId;
 
-    if (stackConnectorConfig.type === '.mcp' && stackConnectorConfig.importedTools) {
+    if (connectorType === 'mcp' && stackConnectorConfig.importedTools) {
       const importedToolIds = await importMcpTools(
         toolRegistry,
         actions,
@@ -183,43 +184,62 @@ export async function createDataSourceAndRelatedResources(
 
   logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
 
-  const workflowInfos = await loadWorkflows(stackConnectorIds, dataSource.workflows, logger);
+  const workflowInfos = await loadWorkflows(stackConnectorIds, dataSource.workflows);
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
-  for (const workflowInfo of workflowInfos) {
-    // Extract the original workflow name from YAML and prefix it with the data source name
-    const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
-    const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
-    const prefixedName = `${slugify(name)}.${originalName}`;
-    const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
+  const workflowAndToolResults = await Promise.all(
+    workflowInfos.map(async (workflowInfo) => {
+      // Extract original workflow name from YAML and prefix it with the data source name
+      const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
+      const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
+      const prefixedName = `${slugify(name)}.${originalName}`;
+      const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 
-    const workflow = await workflowManagement.management.createWorkflow(
-      { yaml: prefixedContent },
-      spaceId,
-      request
-    );
-    logger.debug(`Created workflow '${workflow.name}' with id '${workflow.id}'`);
-    workflowIds.push(workflow.id);
+      const workflow = await workflowManagement.management.createWorkflow(
+        { yaml: prefixedContent },
+        spaceId,
+        request
+      );
+      logger.debug(`Created workflow '${workflow.name}' with id '${workflow.id}'`);
 
-    if (workflowInfo.shouldGenerateABTool) {
-      // e.g., "sources.github.search_issues" -> "search_issues"
-      const workflowBaseName = originalName.split('.').pop() || originalName;
+      let createdToolId: string | undefined;
 
-      // Tool ID structure: type.data_source_name.workflow_base_name
-      const tool = await toolRegistry.create({
-        id: `${type}.${slugify(name)}.${workflowBaseName}`,
-        type: ToolType.workflow,
-        description: `Workflow tool for ${type} data source`,
-        tags: ['data-source', type],
-        configuration: {
-          workflow_id: workflow.id,
-        },
-      });
-      toolIds.push(tool.id);
-      logger.debug(`Created tool for workflow '${workflow.name}' with id '${tool.id}'`);
+      if (workflowInfo.shouldGenerateABTool) {
+        const parsedWorkflow: WorkflowYaml = parse(workflowInfo.content);
+        const workflowDescription =
+          typeof parsedWorkflow?.description === 'string'
+            ? parsedWorkflow.description
+            : `Workflow tool for ${type} data source`;
+
+        // e.g., "sources.github.search_issues" -> "search_issues"
+        const workflowBaseName = originalName.split('.').pop() || originalName;
+
+        // Tool ID structure: type.data_source_name.workflow_base_name
+        const tool = await toolRegistry.create({
+          id: `${type}.${slugify(name)}.${workflowBaseName}`,
+          type: ToolType.workflow,
+          description: workflowDescription,
+          tags: ['data-source', type],
+          configuration: {
+            workflow_id: workflow.id,
+          },
+        });
+
+        createdToolId = tool.id;
+        logger.debug(`Created tool for workflow '${workflow.name}' with id '${tool.id}'`);
+      }
+
+      return { workflowId: workflow.id, toolId: createdToolId };
+    })
+  );
+
+  workflowAndToolResults.forEach((result) => {
+    workflowIds.push(result.workflowId);
+    if (result.toolId) {
+      toolIds.push(result.toolId);
     }
-  }
+  });
 
   // Create the data source saved object
   const now = new Date().toISOString();

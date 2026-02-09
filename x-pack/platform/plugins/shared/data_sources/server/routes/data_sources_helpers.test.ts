@@ -172,7 +172,10 @@ describe('createConnectorAndRelatedResources', () => {
 
     mockLoadWorkflows.mockResolvedValue([
       {
-        content: 'workflow yaml content',
+        content: `name: sources.notion.search
+description: Search Notion content
+tags:
+  - agent-builder-tool`,
         shouldGenerateABTool: true,
       },
     ]);
@@ -207,15 +210,20 @@ describe('createConnectorAndRelatedResources', () => {
       }),
     });
     expect(mockWorkflowManagement.management.createWorkflow).toHaveBeenCalledWith(
-      { yaml: 'workflow yaml content' },
+      expect.any(Object),
       'default',
       mockRequest
     );
+    const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdYaml).toContain('name: my-test-connector.sources.notion.search');
+    expect(createdYaml).toContain('description: Search Notion content');
+    expect(createdYaml).toContain('tags:');
+    expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-test-connector.workflow',
+        id: 'test_type.my-test-connector.search',
         type: 'workflow',
-        description: 'Workflow tool for test_type data source',
+        description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
         configuration: {
           workflow_id: 'workflow-1',
