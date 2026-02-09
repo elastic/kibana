@@ -49,6 +49,7 @@ const mappings: estypes.MappingTypeMapping = {
       properties: {
         id: { type: 'keyword' },
         status: { type: 'keyword' }, // inactive | pending | active | recovering
+        status_count: { type: 'unsigned_long' }, // only set for pending and recovering
       },
     },
   },
@@ -57,6 +58,7 @@ const mappings: estypes.MappingTypeMapping = {
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
 const alertEventTypeSchema = z.enum(['signal', 'alert']);
 const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
+const alertEpisodeStatusCountSchema = z.number().int().optional();
 
 export const alertEventStatus = alertEventStatusSchema.enum;
 export const alertEventType = alertEventTypeSchema.enum;
@@ -78,6 +80,7 @@ export const alertEventSchema = z.object({
     .object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
+      status_count: alertEpisodeStatusCountSchema,
     })
     .optional(),
 });
