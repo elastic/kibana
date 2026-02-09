@@ -14,7 +14,6 @@ import * as esqlHook from '../../../hooks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { DIMENSIONS_COLUMN } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -123,11 +122,12 @@ describe('useChartLayers', () => {
     expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
   });
 
-  it('maps columns correctly to yAxis and uses DIMENSIONS_COLUMN for multiple dimensions', async () => {
+  it('maps columns correctly to yAxis and uses first dimension for multiple dimensions', async () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
-      { name: DIMENSIONS_COLUMN, meta: { type: 'string' }, id: DIMENSIONS_COLUMN },
+      { name: 'service.name', meta: { type: 'string' }, id: 'service.name' },
+      { name: 'host.name', meta: { type: 'string' }, id: 'host.name' },
     ]);
 
     useEsqlQueryInfoMock.mockReturnValue({
@@ -158,7 +158,8 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN); // Multiple dimensions use DIMENSIONS_COLUMN
+    // Lens natively supports multiple dimensions - pass first dimension as breakdown
+    expect(layer.breakdown).toBe('service.name');
   });
 
   it('uses first date column as xAxis', async () => {
