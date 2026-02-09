@@ -11,13 +11,13 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 import globby from 'globby';
+import minimatch from 'minimatch';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { getPackages } from '@kbn/repo-packages';
-import { File } from './file';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
-import { SPECIAL_PATTERNS } from './precommit_hook/ignore';
+import { IGNORE_PATTERNS, KEBAB_CASE_PATTERNS } from './precommit_hook/config';
 
 const RELATIVE_EXCEPTIONS_PATH = 'src/dev/precommit_hook/exceptions.json';
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, RELATIVE_EXCEPTIONS_PATH);
@@ -30,37 +30,8 @@ run(
       cwd: REPO_ROOT,
       onlyFiles: true,
       gitignore: true,
-      ignore: [
-        // the gitignore: true option makes sure that we don't
-        // include files from node_modules in the result, but it still
-        // loads all of the files from node_modules before filtering
-        // so it's still super slow. This prevents loading the files
-        // and still relies on gitignore to final ignores
-        '**/node_modules',
-        '.buildkite/**/*',
-        '.github/**/*',
-        '**/__fixtures__/**/*',
-        '**/__mocks__/**/*',
-        '**/.*',
-        '**/.codeql/**/*',
-        '**/{Dockerfile,docker-compose.yml}',
-        '**/*.codeql/**/*',
-        '**/*.log',
-        '**/*.txt',
-        '**/+([A-Z_]).asciidoc',
-        '**/+([A-Z_]).md',
-        '**/+([A-Z_]).mdx',
-        '**/assets/**/*',
-        '**/bin/**/*',
-        '**/build/**/*',
-        '**/data/**/*',
-        '**/LICENSE',
-        '**/target',
-        ...SPECIAL_PATTERNS,
-      ],
+      ignore: IGNORE_PATTERNS,
     });
-
-    const files = paths.map((path) => new File(path));
 
     const packages = getPackages(REPO_ROOT);
     const packageRootDirs = new Set(
@@ -76,7 +47,25 @@ run(
       Object.keys(teamObject)
     );
 
-    await checkFileCasing(log, files, {
+    /**
+     * Contains the logic that decides what is the expected casing for each Kibana resource (folders, files)
+     * @param relativePath string the relative path to the resource
+     * @returns expected casing (kebab-case | snake_case) for the given resource
+     */
+    const getExpectedCasing = function (relativePath: string) {
+      if (packageRootDirs.has(relativePath)) {
+        // it is a Kibana module of type package (not a plugin)
+        return 'kebab-case';
+      } else if (KEBAB_CASE_PATTERNS.some((pattern) => minimatch(relativePath, pattern))) {
+        // the resource matches one of the KEBAB_CASE_PATTERNS from the config
+        return 'kebab-case';
+      } else {
+        // everything else is snake_case by default
+        return 'snake_case';
+      }
+    };
+
+    await checkFileCasing(log, paths, getExpectedCasing, {
       packageRootDirs,
       exceptions,
       generateExceptions,

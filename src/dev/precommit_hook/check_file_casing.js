@@ -12,12 +12,12 @@ import { basename, join } from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { uniq } from 'lodash';
+import { File } from '../file';
 
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 const CODEOWNERS_PATH = join(REPO_ROOT, '.github/CODEOWNERS');
-
 const NO_OWNER_KEY = '_no_owner';
-
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z _]/;
 
@@ -68,11 +68,6 @@ function listPaths(paths) {
   return paths.map((path) => ` - ${path}`).join('\n');
 }
 
-function isExempt(path, exceptionPaths) {
-  const normalized = normalizePath(path);
-  return exceptionPaths.some((e) => normalized === e || normalized.startsWith(e + '/'));
-}
-
 function getSegmentPaths(relativePath) {
   const normalized = normalizePath(relativePath);
   const parts = normalized.split('/').filter(Boolean);
@@ -83,68 +78,58 @@ function getSegmentPaths(relativePath) {
   return segmentPaths;
 }
 
-export async function checkFileCasing(log, files, options = {}) {
-  const {
-    packageRootDirs = new Set(),
-    exceptions: rawExceptions = [],
-    generateExceptions = false,
-  } = options;
+export async function checkFileCasing(log, paths, getExpectedCasing, options = {}) {
+  const { exceptions = [], generateExceptions = false } = options;
 
-  const packageRootDirsSet = packageRootDirs instanceof Set ? packageRootDirs : new Set();
-  const exceptionsList = exceptionsToArray(rawExceptions);
-  const exceptionPaths = exceptionsList.map((e) => e.path);
+  const violations = [];
 
-  const violationsMap = new Map();
+  const pathsToValidate = uniq(
+    paths
+      .map((path) => new File(path))
+      .map((file) => normalizePath(file.getRelativePath()))
+      .flatMap((path) => getSegmentPaths(path))
+      .filter((path) => generateExceptions || !exceptions.includes(path))
+  );
 
-  for (const file of files) {
-    const relativePath = file.getRelativePath();
-    const path = normalizePath(relativePath);
+  pathsToValidate.forEach((path) => {
+    const resourceName = basename(path);
+    const expectedCasing = getExpectedCasing(path);
 
-    if (isExempt(path, exceptionPaths)) {
-      log.debug('[casing] %j exempt', file);
-      continue;
+    switch (expectedCasing) {
+      case 'kebab-case':
+        if (NON_KEBAB_CASE_RE.test(resourceName)) {
+          violations.push({ path, expected: `'${resourceName}' should be kebab-case` });
+        }
+        break;
+      case 'snake_case':
+        if (NON_SNAKE_CASE_RE.test(resourceName)) {
+          violations.push({ path, expected: `'${resourceName}' should be kebab-case` });
+        }
+        break;
+      default:
+        throw new Error(`Unable to verify '${expectedCasing}' casing`);
     }
-
-    const segmentPaths = getSegmentPaths(path);
-    for (let i = 0; i < segmentPaths.length; i++) {
-      const segmentPath = segmentPaths[i];
-      const segmentName = basename(segmentPath);
-      const isPackageRoot = packageRootDirsSet.has(segmentPath);
-      const expected = isPackageRoot ? 'kebab-case' : 'snake_case';
-      const re = isPackageRoot ? NON_KEBAB_CASE_RE : NON_SNAKE_CASE_RE;
-      const invalid = re.test(segmentName);
-
-      if (invalid) {
-        violationsMap.set(segmentPath, expected);
-      }
-    }
-  }
-
-  let violations = Array.from(violationsMap.entries()).map(([path, expected]) => ({
-    path,
-    expected,
-  }));
-
-  violations = violations.filter((v) => !isExempt(v.path, exceptionPaths));
+  });
 
   if (generateExceptions) {
     const codeownersRules = parseCodeowners();
     const byOwner = {};
-    for (const v of violations) {
-      const owners = findOwnersForPath(v.path, codeownersRules);
+    violations.forEach(({ path, expected }) => {
+      const owners = findOwnersForPath(path, codeownersRules);
       const key = owners.length ? owners[0] : NO_OWNER_KEY;
       if (!byOwner[key]) byOwner[key] = {};
-      byOwner[key][v.path] = v.expected;
-    }
+      byOwner[key][path] = expected;
+    });
 
     const sortedOwnerKeys = Object.keys(byOwner).sort((a, b) => a.localeCompare(b));
     const output = {};
-    for (const k of sortedOwnerKeys) {
+    sortedOwnerKeys.forEach((k) => {
       const pathMap = byOwner[k];
       const sortedPaths = Object.keys(pathMap).sort((a, b) => a.localeCompare(b));
       output[k] = {};
       for (const p of sortedPaths) output[k][p] = pathMap[p];
-    }
+    });
+
     writeFileSync(EXCEPTIONS_JSON_PATH, JSON.stringify(output, null, 2) + '\n', 'utf8');
     log.info(`Wrote ${violations.length} exception(s) to ${EXCEPTIONS_JSON_PATH}`);
     return;
