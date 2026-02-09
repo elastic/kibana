@@ -3299,7 +3299,8 @@
     {
       "groupName": "zod",
       "matchDepNames": [
-        "zod"
+        "zod",
+        "zodv4"
       ],
       "reviewers": [
         "team:security-solution"
