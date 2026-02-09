@@ -12,17 +12,15 @@ import {
   buildMarkdownPanel as buildMarkdownPanelBase,
   getMarkdownPanelHeight as getMarkdownPanelHeightBase,
   normalizePanels as normalizePanelsBase,
+  DEFAULT_PANEL_HEIGHT,
+  SMALL_PANEL_WIDTH,
+  LARGE_PANEL_WIDTH,
+  MARKDOWN_PANEL_WIDTH,
+  MARKDOWN_MIN_HEIGHT,
+  MARKDOWN_MAX_HEIGHT,
+  SMALL_CHART_TYPES,
   type PanelLayoutConfig,
 } from '../../common';
-
-const DEFAULT_PANEL_HEIGHT = 12;
-const SMALL_PANEL_WIDTH = 12;
-const LARGE_PANEL_WIDTH = 24;
-const MARKDOWN_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT;
-const MARKDOWN_MIN_HEIGHT = 4;
-const MARKDOWN_MAX_HEIGHT = 20;
-
-const SMALL_CHART_TYPES = new Set(['metric', 'gauge']);
 
 const panelLayout: PanelLayoutConfig = {
   defaultPanelHeight: DEFAULT_PANEL_HEIGHT,

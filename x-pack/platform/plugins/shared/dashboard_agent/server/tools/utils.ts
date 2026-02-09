@@ -18,8 +18,6 @@ import {
   getMarkdownPanelHeight as getMarkdownPanelHeightBase,
   normalizePanels as normalizePanelsBase,
   type PanelLayoutConfig,
-} from '../../common';
-import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
   LARGE_PANEL_WIDTH,
@@ -27,7 +25,7 @@ import {
   MARKDOWN_MIN_HEIGHT,
   MARKDOWN_MAX_HEIGHT,
   SMALL_CHART_TYPES,
-} from './constants';
+} from '../../common';
 
 /**
  * Shared availability handler for all dashboard tools.
@@ -56,6 +54,17 @@ const getLensPanelWidthFromAttributes = (lensAttributes: LensAttributes): number
   const isSmallChart =
     visType === 'lnsMetric' || visType === 'lnsLegacyMetric' || visType === 'lnsGauge';
   return isSmallChart ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
+};
+
+/**
+ * Calculates panel dimensions based on chart type.
+ * Matches the logic in panel_utils.ts normalizePanels function.
+ */
+export const getPanelDimensions = (chartType: string): { width: number; height: number } => {
+  return {
+    width: SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH,
+    height: DEFAULT_PANEL_HEIGHT,
+  };
 };
 
 /**

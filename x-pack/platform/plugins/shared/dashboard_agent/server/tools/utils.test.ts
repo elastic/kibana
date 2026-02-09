@@ -82,7 +82,7 @@ describe('buildMarkdownPanel', () => {
 describe('getMarkdownPanelHeight', () => {
   it('should return minimum height for short content', () => {
     const height = getMarkdownPanelHeight('Short');
-    expect(height).toBeGreaterThanOrEqual(4); // MARKDOWN_MIN_HEIGHT
+    expect(height).toBeGreaterThanOrEqual(6); // MARKDOWN_MIN_HEIGHT
   });
 
   it('should increase height for multi-line content', () => {
@@ -96,7 +96,7 @@ describe('getMarkdownPanelHeight', () => {
     const veryLongContent = Array(50).fill('Line').join('\n');
     const height = getMarkdownPanelHeight(veryLongContent);
 
-    expect(height).toBeLessThanOrEqual(12); // MARKDOWN_MAX_HEIGHT
+    expect(height).toBeLessThanOrEqual(9); // MARKDOWN_MAX_HEIGHT
   });
 });
 

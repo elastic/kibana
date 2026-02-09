@@ -26,7 +26,11 @@ import {
 } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability, resolveLensConfigFromAttachment } from '../utils';
+import {
+  checkDashboardToolsAvailability,
+  getPanelDimensions,
+  resolveLensConfigFromAttachment,
+} from '../utils';
 
 export { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT };
 
@@ -56,22 +60,6 @@ interface VisualizationFailure {
 /**
  * Panel dimension constants matching panel_utils.ts normalization logic.
  */
-const DEFAULT_PANEL_HEIGHT = 12;
-const SMALL_PANEL_WIDTH = 12;
-const LARGE_PANEL_WIDTH = 24;
-const SMALL_CHART_TYPES = new Set(['metric', 'gauge']);
-
-/**
- * Calculates panel dimensions based on chart type.
- * Matches the logic in panel_utils.ts normalizePanels function.
- */
-const getPanelDimensions = (chartType: string): { width: number; height: number } => {
-  return {
-    width: SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH,
-    height: DEFAULT_PANEL_HEIGHT,
-  };
-};
-
 /**
  * Input for generating a visualization from natural language.
  */
