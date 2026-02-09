@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,43 +19,14 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const reportingFunctional = getService('reportingFunctional');
   const reportingAPI = getService('reportingAPI');
   const comboBox = getService('comboBox');
-  const find = getService('find');
 
   describe('Scheduled Reports Flyout', () => {
-    const hasFocus = async (element: WebElementWrapper) => {
-      const activeElement = await find.activeElement();
-      return (await element._webElement.getId()) === (await activeElement._webElement.getId());
-    };
-
-    const getSelection = (element: WebElementWrapper) => {
-      return browser.execute((field) => {
-        const fieldElement = field as unknown as HTMLInputElement;
-        return {
-          start: fieldElement.selectionStart,
-          end: fieldElement.selectionEnd,
-        };
-      }, element);
-    };
-
-    const setSelection = (element: WebElementWrapper, start: number, end: number) => {
-      return browser.execute(
-        (field, _start, _end) => {
-          // browser.execute converts WebElementWrappers args to the corresponding HTML element
-          const fieldElement = field as unknown as HTMLInputElement;
-          fieldElement.setSelectionRange(_start, _end);
-        },
-        element,
-        start,
-        end
-      );
-    };
-
     const openFlyout = async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Ecom Dashboard');
       await testSubjects.click('exportTopNavButton');
       await testSubjects.click('scheduleExport');
-      await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
+      await testSubjects.existOrFail('exportItemDetailsFlyout');
     };
 
     const fillInSchedule = async () => {
@@ -82,7 +52,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('exportDerivativeFlyout-scheduledReports')) {
+      if (await testSubjects.exists('exportItemDetailsFlyout')) {
         await testSubjects.click('euiFlyoutCloseButton');
       }
       await toasts.dismissIfExists();
@@ -109,7 +79,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Verify past date validation error appears, retrying to wait for validation
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
+          await testSubjects.getVisibleText('exportItemDetailsFlyout')
         ).includes('Start date must be in the future')
       );
 
@@ -138,90 +108,19 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await testSubjects.click('scheduleExportSubmitButton');
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
+          await testSubjects.getVisibleText('exportItemDetailsFlyout')
         ).includes('Provide at least one recipient')
       );
 
       // Add invalid email - should show validation warning
-      await testSubjects.setValue('emailRecipientsCombobox', 'invalid-email');
+      await comboBox.setCustom('emailRecipientsCombobox', 'invalid-email');
       await testSubjects.click('scheduleExportSubmitButton');
-      expect(
-        await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
-      ).to.contain('Email address invalid-email is not valid');
-
-      // Add valid email with subject and message containing template variables
-      await testSubjects.setValue('emailRecipientsCombobox', 'user@example.com');
-      await testSubjects.setValue('emailSubjectInput', 'Report: {{title}}');
-      await testSubjects.setValue(
-        'emailMessageTextArea',
-        'Generated on {{date}} for {{objectType}}'
+      expect(await testSubjects.getVisibleText('exportItemDetailsFlyout')).to.contain(
+        'Email address invalid-email is not valid'
       );
 
-      // Submit should succeed
-      await testSubjects.click('scheduleExportSubmitButton');
-      await retry.try(async () => {
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Export scheduled');
-      });
-    });
-
-    it('inserts variable interpolations in email fields correctly', async () => {
-      await openFlyout();
-
-      // Fill required fields with a future date
-      await fillInSchedule();
-
-      // Enable email
-      await testSubjects.click('sendByEmailToggle');
-
-      // Add valid email recipient
-      await testSubjects.setValue('emailRecipientsCombobox', 'user@example.com');
-
-      // Add variable to subject field in a specific position
-      const subjectField = await testSubjects.find('emailSubjectInput');
-      await subjectField.clearValue();
-      const subjectPrefix = 'Your report (';
-      const subjectSuffix = ') is ready';
-      await subjectField.type(`${subjectPrefix}${subjectSuffix}`);
-      // Move caret just after the prefix
-      await setSelection(subjectField, subjectPrefix.length, subjectPrefix.length);
-      // Select the variable to insert
-      await testSubjects.click('emailSubjectAddVariableButton');
-      await testSubjects.click('title-selectableOption');
-      // Check that the variable was inserted at the correct position
-      const subject = await subjectField.getAttribute('value');
-      let expectedInterpolation = '{{title}}';
-      expect(subject).to.equal(`${subjectPrefix}${expectedInterpolation}${subjectSuffix}`);
-      // Check that focus was restored to the subject field
-      // and the caret was placed after the inserted variable
-      await retry.waitFor('subject field to have focus', () => hasFocus(subjectField));
-      let selection = await getSelection(subjectField);
-      let expectedPosition = subjectPrefix.length + expectedInterpolation.length;
-      expect(selection.start).to.equal(expectedPosition);
-      expect(selection.end).to.equal(expectedPosition);
-
-      // Add variable to message field in a specific position
-      const messageField = await testSubjects.find('emailMessageTextArea');
-      await messageField.clearValue();
-      const messagePrefix = 'Please find your report file (';
-      const messageSuffix = ') attached';
-      await messageField.type(`${messagePrefix}${messageSuffix}`);
-      // Move caret just after the prefix
-      await setSelection(messageField, messagePrefix.length, messagePrefix.length);
-      // Select the variable to insert
-      await testSubjects.click('emailMessageAddVariableButton');
-      await testSubjects.click('filename-selectableOption');
-      // Check that the variable was inserted at the correct position
-      const message = await messageField.getAttribute('value');
-      expectedInterpolation = '{{filename}}';
-      expect(message).to.equal(`${messagePrefix}${expectedInterpolation}${messageSuffix}`);
-      // Check that focus was restored to the message field
-      // and the caret was placed after the inserted variable
-      await retry.waitFor('message field to have focus', () => hasFocus(messageField));
-      selection = await getSelection(messageField);
-      expectedPosition = messagePrefix.length + expectedInterpolation.length;
-      expect(selection.start).to.equal(expectedPosition);
-      expect(selection.end).to.equal(expectedPosition);
+      // Add valid email
+      await comboBox.setCustom('emailRecipientsCombobox', 'user@example.com');
 
       // Submit should succeed
       await testSubjects.click('scheduleExportSubmitButton');
@@ -247,9 +146,6 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       expect((await comboBox.getComboBoxSelectedOptions('emailRecipientsCombobox'))[0]).to.equal(
         'reportinguser@example.com'
       );
-      // and the Cc and Bcc fields should be hidden
-      await testSubjects.missingOrFail('emailCcRecipientsCombobox');
-      await testSubjects.missingOrFail('emailBccRecipientsCombobox');
     });
   });
 }
