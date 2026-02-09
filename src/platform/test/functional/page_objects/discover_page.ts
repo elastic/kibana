@@ -30,13 +30,29 @@ export class DiscoverPageObject extends FtrService {
   private readonly toasts = this.ctx.getService('toasts');
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  public readonly APP_ID = 'discover';
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
+  }
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
     await this.testSubjects.existOrFail('discoverNewButton');
     await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
+  public async isOnDashboardsEditMode() {
+    const [newButton, openButton] = await Promise.all([
+      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
+      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
+    ]);
+
+    return !newButton && !openButton;
   }
 
   public async getChartTimespan() {
@@ -188,6 +204,16 @@ export class DiscoverPageObject extends FtrService {
   public async clickSaveSearchButton() {
     await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
+  }
+
+  public async clickCancelButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('discoverCancelButton');
+    await this.testSubjects.click('discoverCancelButton');
   }
 
   public async clickLoadSavedSearchButton() {
@@ -443,6 +469,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async getSavedSearchDocumentCount() {
     return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
+  }
+
+  public async getAllSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleTextAll('savedSearchTotalDocuments');
   }
 
   public async getDocHeader() {

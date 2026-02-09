@@ -13,12 +13,9 @@ const TEST_VALUES = {
   status: 'active',
   age: 25,
   count: 10,
-  price: 19.99,
   score: 8.5,
   active: true,
   created: '2023-01-01T00:00:00.000Z',
-  config: { timeout: 5000 },
-  tags: [{ name: 'tag1' }, { name: 'tag2' }],
   jane: 'Jane',
   janeAge: 30,
   bob: 'Bob',
@@ -28,8 +25,8 @@ const TEST_VALUES = {
 describe('createSchemaFromParams', () => {
   it('should create schema for string types', () => {
     const params: EsqlToolConfig['params'] = {
-      name: { type: 'text', description: 'User name' },
-      status: { type: 'keyword', description: 'User status' },
+      name: { type: 'string', description: 'User name' },
+      status: { type: 'string', description: 'User status' },
     };
 
     const schema = createSchemaFromParams(params);
@@ -40,24 +37,18 @@ describe('createSchemaFromParams', () => {
 
   it('should create schema for number types', () => {
     const params: EsqlToolConfig['params'] = {
-      age: { type: 'long', description: 'User age' },
       count: { type: 'integer', description: 'Item count' },
-      price: { type: 'double', description: 'Item price' },
       score: { type: 'float', description: 'User score' },
     };
 
     const schema = createSchemaFromParams(params);
     const result = schema.parse({
-      age: TEST_VALUES.age,
       count: TEST_VALUES.count,
-      price: TEST_VALUES.price,
       score: TEST_VALUES.score,
     });
 
     expect(result).toEqual({
-      age: TEST_VALUES.age,
       count: TEST_VALUES.count,
-      price: TEST_VALUES.price,
       score: TEST_VALUES.score,
     });
   });
@@ -80,34 +71,16 @@ describe('createSchemaFromParams', () => {
     });
   });
 
-  it('should create schema for object and nested types', () => {
-    const params: EsqlToolConfig['params'] = {
-      config: { type: 'object', description: 'Configuration object' },
-      tags: { type: 'nested', description: 'Array of tags' },
-    };
-
-    const schema = createSchemaFromParams(params);
-    const result = schema.parse({
-      config: TEST_VALUES.config,
-      tags: TEST_VALUES.tags,
-    });
-
-    expect(result).toEqual({
-      config: TEST_VALUES.config,
-      tags: TEST_VALUES.tags,
-    });
-  });
-
   it('should handle optional parameters with default values', () => {
     const params: EsqlToolConfig['params'] = {
       name: {
-        type: 'text',
+        type: 'string',
         description: 'User name',
         optional: true,
         defaultValue: TEST_VALUES.johnDoe,
       },
       age: {
-        type: 'long',
+        type: 'integer',
         description: 'User age',
         optional: true,
       },
@@ -136,8 +109,8 @@ describe('createSchemaFromParams', () => {
 
   it('should validate required parameters', () => {
     const params: EsqlToolConfig['params'] = {
-      name: { type: 'text', description: 'User name' },
-      age: { type: 'long', description: 'User age' },
+      name: { type: 'string', description: 'User name' },
+      age: { type: 'integer', description: 'User age' },
     };
 
     const schema = createSchemaFromParams(params);

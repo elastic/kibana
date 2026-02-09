@@ -36,7 +36,8 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
-import { fetchData } from './tab_state';
+import { fetchData, updateAttributes } from './tab_state';
+import { initializeAndSync } from './tab_sync';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -94,15 +95,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     if (esqlControls) {
-      tabInitialInternalState = {
-        ...tabInitialInternalState,
-        controlGroupJson: JSON.stringify(esqlControls),
-      };
-
       dispatch(
-        internalStateSlice.actions.setControlGroupState({
+        updateAttributes({
           tabId,
-          controlGroupState: esqlControls,
+          attributes: {
+            controlGroupState: esqlControls,
+          },
         })
       );
 
@@ -244,7 +242,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         ? copySavedSearch(persistedTabSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
-      initialInternalState: tabInitialInternalState,
       appState: initialAppState,
       globalState: initialGlobalState,
       services,
@@ -327,7 +324,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // if this is still the current tab, otherwise mark the
     // tab to fetch when selected
     if (getState().tabs.unsafeCurrentId === tabId) {
-      stateContainer.actions.initializeAndSync();
+      dispatch(initializeAndSync({ tabId }));
       dispatch(fetchData({ tabId, initial: true }));
     } else {
       dispatch(

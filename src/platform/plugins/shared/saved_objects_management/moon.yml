@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
+  - '@kbn/content-management-plugin'
 tags:
   - plugin
   - prod

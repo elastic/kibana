@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { FleetError, FleetNotFoundError, FleetUnauthorizedError } from '../../errors';
+import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -26,7 +26,6 @@ import type {
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
 import { stepCreateAlertingRules } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -162,13 +161,6 @@ export const installRuleAssetsHandler: FleetRequestHandler<
     throw new FleetNotFoundError('Requested version is not installed');
   }
 
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-
-  if (!authorizationHeader) {
-    throw new FleetUnauthorizedError('Authorization header is missing or invalid');
-  }
-
   const { packageInfo } = installedPkgWithAssets;
 
   await stepCreateAlertingRules({
@@ -180,7 +172,7 @@ export const installRuleAssetsHandler: FleetRequestHandler<
       archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
     },
     spaceId,
-    authorizationHeader,
+    request,
   });
 
   return response.ok({ body: { success: true } });

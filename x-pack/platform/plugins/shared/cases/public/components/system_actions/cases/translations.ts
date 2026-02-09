@@ -116,6 +116,12 @@ export const ATTACK_DISCOVERY_TEMPLATE_TOOLTIP = i18n.translate(
   }
 );
 
+export const AUTO_PUSH_CASE_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.autoPushCaseLabel',
+  {
+    defaultMessage: 'Auto-push case to connected external system',
+  }
+);
 export const MAX_CASES_TO_OPEN_LABEL = i18n.translate(
   'xpack.cases.systemActions.casesConnector.maxCasesToOpenLabel',
   {

@@ -571,6 +571,7 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  regenerateApiKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

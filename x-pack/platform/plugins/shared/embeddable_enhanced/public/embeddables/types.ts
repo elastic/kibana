@@ -8,6 +8,7 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { Observable } from 'rxjs';
+import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
 import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export interface EmbeddableDynamicActionsManager {
@@ -20,6 +21,6 @@ export interface EmbeddableDynamicActionsManager {
   startDynamicActions: () => { stopDynamicActions: () => void };
 }
 
-export interface DynamicActionsSerializedState {
+export type DynamicActionsSerializedState = DrilldownsState & {
   enhancements?: { dynamicActions: DynamicActionsState };
-}
+};
