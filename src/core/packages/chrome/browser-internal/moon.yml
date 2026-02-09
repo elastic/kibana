@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/core-chrome-sidebar-internal'
   - '@kbn/core-chrome-sidebar-context'
   - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
   - package
