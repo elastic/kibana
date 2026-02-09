@@ -18,10 +18,6 @@ export const transformCreateBody = (
   });
   return {
     title: createBody.title,
-    duration: createBody.duration,
-    rRule: createBody.r_rule,
-    categoryIds: createBody.category_ids,
-    scopedQuery: createBody.scoped_query,
     schedule: { custom: schedule },
     ...(createBody.scoped_query ? { scope: { alerting: createBody.scoped_query } } : {}),
   };

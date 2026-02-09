@@ -280,8 +280,7 @@ export async function generateEvents({
       // filtering the maintenance windows that have recurring schedule and events
       .filter(
         (maintenanceWindow) =>
-          (maintenanceWindow.rRule.interval !== undefined ||
-            maintenanceWindow.rRule.freq !== undefined) &&
+          maintenanceWindow.schedule.custom.recurring !== undefined &&
           maintenanceWindow.events.length
       )
       .map((filteredMaintenanceWindow) => {

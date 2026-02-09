@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Frequency } from '@kbn/rrule';
 import type { MaintenanceWindowAttributes } from './types/maintenance_window_attributes';
 
 export const getMockMaintenanceWindow = (
@@ -13,14 +12,7 @@ export const getMockMaintenanceWindow = (
 ): MaintenanceWindowAttributes => {
   return {
     title: 'test-title',
-    duration: 60 * 60 * 1000,
     enabled: true,
-    rRule: {
-      tzid: 'UTC',
-      dtstart: '2023-02-26T00:00:00.000Z',
-      freq: Frequency.WEEKLY,
-      count: 2,
-    } as MaintenanceWindowAttributes['rRule'],
     events: [
       {
         gte: '2023-02-26T00:00:00.000Z',

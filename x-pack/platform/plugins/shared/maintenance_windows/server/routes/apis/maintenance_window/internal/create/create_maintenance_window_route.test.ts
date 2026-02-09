@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { Frequency } from '@kbn/rrule';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
@@ -36,7 +37,12 @@ const mockMaintenanceWindow = {
 const createParams = {
   title: 'test-title',
   duration: 1000,
-  r_rule: mockMaintenanceWindow.rRule,
+  r_rule: {
+    tzid: 'UTC',
+    dtstart: '2023-02-26T00:00:00.000Z',
+    freq: Frequency.WEEKLY,
+    count: 2,
+  },
   category_ids: ['observability'],
 } as CreateMaintenanceWindowRequestBody;
 
@@ -136,11 +142,21 @@ describe('createMaintenanceWindowRoute', () => {
   test('should create the maintenance window with hourly frequency', async () => {
     const createParamsV2 = {
       ...createParams,
-      r_rule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+      r_rule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.HOURLY,
+        count: 2,
+      },
     } as CreateMaintenanceWindowRequestBody;
     const mockMaintenanceWindow2 = {
       ...mockMaintenanceWindow,
-      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+      rRule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.HOURLY,
+        count: 2,
+      },
     } as MaintenanceWindow;
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

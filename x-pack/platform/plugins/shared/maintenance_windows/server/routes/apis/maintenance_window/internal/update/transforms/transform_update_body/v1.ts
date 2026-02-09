@@ -12,14 +12,7 @@ import type { UpdateMaintenanceWindowParams } from '../../../../../../../applica
 export const transformUpdateBody = (
   updateBody: UpdateMaintenanceWindowRequestBodyV1
 ): UpdateMaintenanceWindowParams['data'] => {
-  const {
-    title,
-    enabled,
-    duration,
-    r_rule: rRule,
-    category_ids: categoryIds,
-    scoped_query: scopedQuery,
-  } = updateBody;
+  const { title, enabled, duration, r_rule: rRule, scoped_query: scopedQuery } = updateBody;
 
   const schedule =
     rRule && duration
@@ -32,10 +25,6 @@ export const transformUpdateBody = (
   return {
     ...(title !== undefined ? { title } : {}),
     ...(enabled !== undefined ? { enabled } : {}),
-    ...(duration !== undefined ? { duration } : {}),
-    ...(rRule !== undefined ? { rRule } : {}),
-    ...(categoryIds !== undefined ? { categoryIds } : {}),
-    ...(scopedQuery !== undefined ? { scopedQuery } : {}),
     ...(schedule !== undefined ? { schedule: { custom: schedule } } : {}),
     ...(scopedQuery !== undefined ? { scope: { alerting: scopedQuery } } : {}),
   };

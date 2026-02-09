@@ -55,7 +55,19 @@ describe('updateMaintenanceWindowRoute', () => {
 
     updateMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.update.mockResolvedValueOnce(mockMaintenanceWindow);
+    maintenanceWindowClient.update.mockResolvedValueOnce({
+      ...mockMaintenanceWindow,
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '5s',
+          recurring: {
+            every: '1w',
+            occurrences: 10,
+          },
+        },
+      },
+    });
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
@@ -91,7 +103,17 @@ describe('updateMaintenanceWindowRoute', () => {
 
     const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+      body: {
+        ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+        r_rule: {
+          count: 10,
+          dtstart: '2023-03-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
+        duration: 5000,
+      },
     });
   });
 
@@ -156,7 +178,16 @@ describe('updateMaintenanceWindowRoute', () => {
 
     const mockMaintenanceWindow2 = {
       ...mockMaintenanceWindow,
-      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 as const },
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '5s',
+          recurring: {
+            every: '1h',
+            occurrences: 10,
+          },
+        },
+      },
     };
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -201,7 +232,11 @@ describe('updateMaintenanceWindowRoute', () => {
     const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow2; // internal api response doesn't have schedule
 
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+      body: {
+        ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+        r_rule: { ...updateParams2.r_rule, interval: 1, tzid: 'UTC', freq: 4 as const },
+        duration: 5000,
+      },
     });
   });
 });
