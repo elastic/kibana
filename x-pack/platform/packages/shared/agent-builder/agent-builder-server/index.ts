@@ -70,6 +70,7 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   RunAgentOnEventFn,
+  ExperimentalFeatures,
 } from './agents';
 export type {
   AgentBuilderHooks,

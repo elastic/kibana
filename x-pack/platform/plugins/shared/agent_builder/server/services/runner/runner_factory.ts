@@ -26,6 +26,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
     return {
       ...otherDeps,
       savedObjects,
+      uiSettings,
       trackingService,
       hooks,
       modelProviderFactory: createModelProviderFactory({

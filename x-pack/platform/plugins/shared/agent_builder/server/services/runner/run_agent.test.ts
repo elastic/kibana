@@ -75,6 +75,7 @@ describe('runAgent', () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
+      abortSignal: new AbortController().signal,
     };
 
     await runAgent({
