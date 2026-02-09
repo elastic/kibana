@@ -1,4 +1,26 @@
 {
+  "old-type-no-migrations": {
+    "dynamic": false,
+    "properties": {
+      "aTextAttribute": {
+        "type": "text"
+      },
+      "aBooleanAttribute": {
+        "type": "boolean"
+      }
+    }
+  },
+  "old-type-with-migrations": {
+    "dynamic": false,
+    "properties": {
+      "aTextAttribute": {
+        "type": "text"
+      },
+      "textLength": {
+        "type": "integer"
+      }
+    }
+  },
   "person-so-type": {
     "dynamic": false,
     "properties": {

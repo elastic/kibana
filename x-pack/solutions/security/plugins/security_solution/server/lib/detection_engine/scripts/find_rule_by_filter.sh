@@ -34,5 +34,6 @@ FILTER=${1:-'alert.attributes.enabled:%20true'}
 # Example get all non pre-packaged rules and a tag_1
 # ./find_rule_by_filter.sh "alert.attributes.params.immutable:%20false%20AND%20alert.attributes.tags:tag_1"
 curl -s -k \
+ -H 'elastic-api-version: 2023-10-31' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find?filter=$FILTER | jq .

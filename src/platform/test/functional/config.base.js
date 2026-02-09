@@ -42,6 +42,8 @@ export default async function ({ readConfigFile }) {
 
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        // disable tours globally for all tests
+        '--uiSettings.globalOverrides.hideAnnouncements=true',
       ],
     },
 

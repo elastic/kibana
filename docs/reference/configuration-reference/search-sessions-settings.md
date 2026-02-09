@@ -18,11 +18,10 @@ applies_to:
 If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::
 
-:::::{tab-set}
-:group: background search
+:::::{applies-switch}
 
-::::{tab-item} 9.2 and later
-:sync: 92
+::::{applies-item} stack: ga 9.2+
+
 `data.search.sessions.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   `false` by default. Set to `true` to enable background searches.
 
@@ -33,8 +32,8 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 :   How long background search results are stored before they expire and are deleted. When users extend the validity period of the background search, this setting also determines by how long. The default is `7d`.
 ::::
 
-::::{tab-item} 9.1 and earlier
-:sync: 91
+::::{applies-item} stack: ga 9.0-9.1
+
 `data.search.sessions.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Deprecated in 8.15.0. `false` by default. Set to `true` to enable search sessions.
 

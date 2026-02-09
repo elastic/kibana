@@ -8,6 +8,7 @@
 export * from './dissect_patterns';
 export * from './grok_patterns';
 export * from './painless_field_access';
+export * from './painless_encoding';
 
 import type { ZodObject, ZodRawShape } from '@kbn/zod';
 

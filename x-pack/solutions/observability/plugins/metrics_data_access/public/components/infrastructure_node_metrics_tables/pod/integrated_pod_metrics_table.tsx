@@ -11,29 +11,21 @@ import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from
 import { PodMetricsTable } from './pod_metrics_table';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 
-function HookedPodMetricsTable({
-  timerange,
-  filterClauseDsl,
-  metricsClient,
-}: UseNodeMetricsTableOptions) {
-  const podMetricsTableProps = usePodMetricsTable({ timerange, filterClauseDsl, metricsClient });
+function HookedPodMetricsTable({ timerange, kuery, metricsClient }: UseNodeMetricsTableOptions) {
+  const podMetricsTableProps = usePodMetricsTable({ timerange, kuery, metricsClient });
   return <PodMetricsTable {...podMetricsTableProps} />;
 }
 
 function PodMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   metricsClient,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
-      <HookedPodMetricsTable
-        timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
-        metricsClient={metricsClient}
-      />
+      <HookedPodMetricsTable timerange={timerange} kuery={kuery} metricsClient={metricsClient} />
     </CoreProviders>
   );
 }

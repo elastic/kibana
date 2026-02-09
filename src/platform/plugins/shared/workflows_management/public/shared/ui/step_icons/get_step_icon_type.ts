@@ -37,6 +37,9 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'console':
       iconType = 'console';
       break;
+    case 'data.set':
+      iconType = 'tableOfContents';
+      break;
 
     // flow control nodes
     case 'wait':

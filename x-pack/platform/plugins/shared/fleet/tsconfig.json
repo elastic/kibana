@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
+  "exclude": ["target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -14,9 +14,8 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -113,7 +112,6 @@
     "@kbn/reporting-public",
     "@kbn/field-formats-plugin",
     "@kbn/core-security-server",
-    "@kbn/core-http-server-utils",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
     "@kbn/lock-manager",
@@ -128,5 +126,7 @@
     "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs",
+    "@kbn/kql",
+    "@kbn/scout"
   ]
 }

@@ -6,7 +6,7 @@
  */
 
 export interface ShortcutMap {
-  osx: string[];
+  mac: string[];
   windows: string[];
   linux: string[];
   other: string[];

@@ -7,26 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import {
+  DEFAULT_CONTROL_WIDTH,
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
+import type { StoredControlGroupInput } from '../../../dashboard_saved_object';
 import {
   transformControlObjectToArray,
-  transformControlsWidthAuto,
   transformControlProperties,
-  transformControlsSetDefaults,
   transformControlsState,
 } from './transform_controls_state';
 
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
+
 describe('control_state', () => {
   const mockControls = {
-    control1: { type: 'type1', width: 'auto', explicitInput: { foo: 'bar' } },
-    control2: { type: 'type2', width: 'small', explicitInput: { bizz: 'buzz' } },
+    control1: {
+      type: 'optionsListControl',
+      width: 'medium',
+      explicitInput: { foo: 'bar' },
+      order: 0,
+    },
+    control2: {
+      type: 'rangeSliderControl',
+      width: 'small',
+      explicitInput: { bizz: 'buzz' },
+      order: 1,
+    },
     control3: {
-      type: 'type3',
+      type: 'esqlControl',
       grow: true,
       explicitInput: { boo: 'bear' },
       unsupportedProperty: 'unsupported',
+      order: 2,
     },
-  };
+  } as StoredControlGroupInput['panels'];
 
   describe('transformControlObjectToArray', () => {
     it('should transform control object to array', () => {
@@ -38,65 +60,52 @@ describe('control_state', () => {
     });
   });
 
-  describe('transformControlsWidthAuto', () => {
-    it('should transform controls with width auto to default width and grow = true', () => {
-      const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlsWidthAuto(controlsArray);
-      expect(result).toHaveProperty('0.width', DEFAULT_CONTROL_WIDTH);
-      expect(result).toHaveProperty('0.grow', true);
-    });
-  });
-
   describe('transformControlExplicitInput', () => {
     it('should transform controls explicit input', () => {
       const controlsArray = transformControlObjectToArray(mockControls);
       const result = transformControlProperties(controlsArray);
-      expect(result).toHaveProperty('0.controlConfig', { foo: 'bar' });
+
+      expect(result).toHaveProperty('0.config.foo', 'bar');
       expect(result).not.toHaveProperty('0.explicitInput');
 
-      expect(result).toHaveProperty('1.controlConfig', { bizz: 'buzz' });
+      expect(result).toHaveProperty('1.config.bizz', 'buzz');
       expect(result).not.toHaveProperty('1.explicitInput');
 
-      expect(result).toHaveProperty('2.controlConfig', { boo: 'bear' });
+      expect(result).toHaveProperty('2.config.boo', 'bear');
       expect(result).not.toHaveProperty('2.explicitInput');
       expect(result).not.toHaveProperty('2.unsupportedProperty');
-    });
-  });
-
-  describe('transformControlsSetDefaults', () => {
-    it('should set default values for controls', () => {
-      const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlsSetDefaults(controlsArray);
-      expect(result).toHaveProperty('1.grow', DEFAULT_CONTROL_GROW);
-      expect(result).toHaveProperty('2.width', DEFAULT_CONTROL_WIDTH);
+      expect(result).not.toHaveProperty('2.config.unsupportedProperty');
     });
   });
 
   describe('transformControlsState', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = JSON.stringify(mockControls);
-      const result = transformControlsState(serializedControlState);
+      const result = transformControlsState(serializedControlState, []);
       expect(result).toEqual([
         {
-          id: 'control1',
-          type: 'type1',
+          uid: 'control1',
+          type: OPTIONS_LIST_CONTROL,
           width: DEFAULT_CONTROL_WIDTH,
-          grow: true,
-          controlConfig: { foo: 'bar' },
+          config: {
+            foo: 'bar',
+          },
         },
         {
-          id: 'control2',
-          type: 'type2',
+          uid: 'control2',
+          type: RANGE_SLIDER_CONTROL,
           width: 'small',
-          grow: DEFAULT_CONTROL_GROW,
-          controlConfig: { bizz: 'buzz' },
+          config: {
+            bizz: 'buzz',
+          },
         },
         {
-          id: 'control3',
-          type: 'type3',
-          width: DEFAULT_CONTROL_WIDTH,
+          uid: 'control3',
+          type: ESQL_CONTROL,
           grow: true,
-          controlConfig: { boo: 'bear' },
+          config: {
+            boo: 'bear',
+          },
         },
       ]);
     });

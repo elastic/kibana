@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -18,6 +18,7 @@ import { SecurityPageName } from '../../../../../common';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { TableHeader } from '../../../common/components';
+import { InstallDashboardActionBtn } from './install';
 
 interface ActionNameProps {
   shouldDisableActions?: boolean;
@@ -59,11 +60,7 @@ const ActionName = ({
     (migrationDashboard.translation_result === MigrationTranslationResult.FULL ||
       migrationDashboard.translation_result === MigrationTranslationResult.PARTIAL)
   ) {
-    return (
-      <EuiLink disabled={isDisabled} onClick={onInstall} data-test-subj="installDashboard">
-        {i18n.ACTIONS_INSTALL_LABEL}
-      </EuiLink>
-    );
+    return <InstallDashboardActionBtn isDisabled={isDisabled} onInstall={onInstall} />;
   }
 };
 

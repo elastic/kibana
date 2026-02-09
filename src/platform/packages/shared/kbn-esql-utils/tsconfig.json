@@ -19,7 +19,7 @@
     "@kbn/data-views-plugin",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/search-types",
     "@kbn/expressions-plugin",

@@ -5,113 +5,92 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { getComposableTemplate } from '../../../test/fixtures';
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import {
+  DEFAULT_INDEX_PATTERNS_FOR_CLONE,
+  completeStep,
+  renderTemplateClone,
+  templateToClone,
+} from './template_clone.helpers';
 
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './constants';
-import { setup } from './template_clone.helpers';
-import type { TemplateFormTestBed } from './template_form.helpers';
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj="mockComboBox"
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-  };
-});
-
-const templateToClone = getComposableTemplate({
-  name: TEMPLATE_NAME,
-  indexPatterns: ['indexPattern1'],
-  template: {},
-  allowAutoCreate: 'TRUE',
-});
+jest.mock('@kbn/code-editor');
 
 describe('<TemplateClone />', () => {
-  let testBed: TemplateFormTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
     httpRequestsMockHelpers.setLoadTelemetryResponse({});
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone.name, templateToClone);
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(async () => {
-    await act(async () => {
-      testBed = await setup(httpSetup);
+  describe('page title', () => {
+    beforeEach(async () => {
+      renderTemplateClone(httpSetup);
+      await screen.findByTestId('pageTitle');
     });
-    testBed.component.update();
-  });
 
-  test('should set the correct page title', () => {
-    const { exists, find } = testBed;
-
-    expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual(`Clone template '${templateToClone.name}'`);
+    test('should set the correct page title', () => {
+      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('pageTitle')).toHaveTextContent(
+        `Clone template '${templateToClone.name}'`
+      );
+    });
   });
 
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions } = testBed;
+      renderTemplateClone(httpSetup);
+      await screen.findByTestId('pageTitle');
 
       // Logistics
       // Specify index patterns, but do not change name (keep default)
-      await actions.completeStepOne({
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
+      await completeStep.one({
+        indexPatterns: DEFAULT_INDEX_PATTERNS_FOR_CLONE,
       });
       // Component templates
-      await actions.completeStepTwo();
+      await completeStep.two();
       // Index settings
-      await actions.completeStepThree();
+      await completeStep.three();
       // Mappings
-      await actions.completeStepFour();
+      await completeStep.four();
       // Aliases
-      await actions.completeStepFive();
-    });
+      await completeStep.five();
+    }, 20000);
 
     it('should send the correct payload', async () => {
-      const { actions } = testBed;
-
-      await act(async () => {
-        actions.clickNextButton();
+      await waitFor(() => {
+        expect(screen.getByTestId('nextButton')).toBeEnabled();
       });
+      fireEvent.click(screen.getByTestId('nextButton'));
 
       const { template, indexMode, priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
-      expect(httpSetup.post).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/index_templates`,
-        expect.objectContaining({
-          body: JSON.stringify({
-            name: `${templateToClone.name}-copy`,
-            indexPatterns: DEFAULT_INDEX_PATTERNS,
-            priority,
-            version,
-            allowAutoCreate,
-            indexMode,
-            _kbnMeta,
-            template,
-          }),
-        })
-      );
-    });
+      await waitFor(() => {
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/index_templates`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: `${templateToClone.name}-copy`,
+              indexPatterns: DEFAULT_INDEX_PATTERNS_FOR_CLONE,
+              priority,
+              version,
+              allowAutoCreate,
+              indexMode,
+              _kbnMeta,
+              template,
+            }),
+          })
+        );
+      });
+    }, 20000);
   });
 });

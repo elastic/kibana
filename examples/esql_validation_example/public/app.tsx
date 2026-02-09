@@ -24,7 +24,7 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { validateQuery } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-language';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
 

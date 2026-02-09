@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
 export const getExtractFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (state: EmbeddableStateWithType) => {
-    const enhancements = state.enhancements || {};
     const factory = getEmbeddableFactory(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
@@ -30,15 +28,9 @@ export const getExtractFunction = (
       refs.push(...factoryResponse.references);
     }
 
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      const enhancementResult = getEnhancement(key).extract(
-        enhancements[key] as SerializableRecord
-      );
-      refs.push(...enhancementResult.references);
-      updatedInput.enhancements![key] = enhancementResult.state;
-    });
+    const enhancementResult = enhancementsPersistableState.extract(state.enhancements || {});
+    refs.push(...enhancementResult.references);
+    updatedInput.enhancements = enhancementResult.state;
 
     return {
       state: updatedInput,

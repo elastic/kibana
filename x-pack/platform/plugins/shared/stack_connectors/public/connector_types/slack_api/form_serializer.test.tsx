@@ -35,7 +35,7 @@ describe('serializer', () => {
       isDeprecated: false,
       isSystemAction: false,
       actionTypeId: CONNECTOR_ID,
-      config: { allowedChannels: ['#general', '#random'] },
+      config: { allowedChannels: [{ name: 'general' }, { name: '#random' }] },
       secrets: {},
     };
 

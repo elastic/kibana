@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { OrStringRecursive } from '@kbn/utility-types';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
@@ -114,6 +115,12 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
   config: z.infer<TConfig>;
 
   /**
+   * The raw input configuration before template rendering.
+   * Has the same shape as input, but values may contain template strings.
+   */
+  rawInput: OrStringRecursive<z.infer<TInput>>;
+
+  /**
    * Runtime context manager for accessing workflow state, context, and template evaluation
    */
   contextManager: ContextManager;
@@ -160,8 +167,10 @@ export interface ContextManager {
 
   /**
    * Evaluate a template string using the workflow context
+   * @param input - The value to render with template expressions
+   * @param additionalContext - Optional additional context to merge with workflow context
    */
-  renderInputTemplate<T>(input: T): T;
+  renderInputTemplate<T>(input: T, additionalContext?: Record<string, unknown>): T;
 
   /**
    * Returns the fake request

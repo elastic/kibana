@@ -1,0 +1,371 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
+import { createInternalError } from '@kbn/agent-builder-common';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  getLatestVersion,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentFormatContext,
+  AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
+import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import type {
+  AttachmentRepresentation,
+  AttachmentBoundedTool,
+} from '@kbn/agent-builder-server/attachments';
+import {
+  prepareAttachmentPresentation,
+  type AttachmentPresentation,
+} from './attachment_presentation';
+
+export interface ProcessedAttachment {
+  attachment: Attachment;
+  representation: AttachmentRepresentation;
+  tools: AttachmentBoundedTool[];
+}
+
+export interface ProcessedAttachmentType {
+  type: string;
+  description?: string;
+}
+
+export interface ProcessedRoundInput {
+  message: string;
+  attachments: ProcessedAttachment[];
+}
+
+export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
+  input: ProcessedRoundInput;
+};
+
+export interface ProcessedConversation {
+  previousRounds: ProcessedConversationRound[];
+  nextInput: ProcessedRoundInput;
+  attachmentTypes: ProcessedAttachmentType[];
+  attachments: ProcessedAttachment[];
+  attachmentStateManager: AttachmentStateManager;
+  /** Presentation configuration for versioned attachments (inline vs summary mode) */
+  versionedAttachmentPresentation?: AttachmentPresentation;
+}
+
+const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
+  return {
+    request: agentContext.request,
+    spaceId: agentContext.spaceId,
+  };
+};
+
+/**
+ * Promote legacy per-round attachments into conversation-level versioned attachments.
+ **/
+const mergeInputAttachmentsIntoAttachmentState = async (
+  attachmentStateManager: AttachmentStateManager,
+  inputs: AttachmentInput[]
+) => {
+  if (inputs.length === 0) return;
+
+  const existingByContentKey = new Map<string, string>(); // contentKey -> attachmentId
+
+  for (const existing of attachmentStateManager.getAll()) {
+    const latest = getLatestVersion(existing);
+    if (!latest) continue;
+    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
+  }
+
+  for (const input of inputs) {
+    // Prefer stable IDs (if provided)
+    if (input.id) {
+      const existing = attachmentStateManager.getAttachmentRecord(input.id);
+      if (existing) {
+        await attachmentStateManager.update(
+          input.id,
+          {
+            data: input.data,
+            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+          },
+          ATTACHMENT_REF_ACTOR.user
+        );
+        continue;
+      }
+    }
+
+    const contentHash = hashContent(input.data);
+    const contentKey = `${input.type}:${contentHash}`;
+    if (existingByContentKey.has(contentKey)) {
+      // already present (same content), nothing to do
+      continue;
+    }
+
+    const created = await attachmentStateManager.add(
+      {
+        ...(input.id ? { id: input.id } : {}),
+        type: input.type,
+        data: input.data,
+        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+      },
+      ATTACHMENT_REF_ACTOR.user
+    );
+
+    const latest = getLatestVersion(created);
+    if (latest) {
+      existingByContentKey.set(`${created.type}:${latest.content_hash}`, created.id);
+    }
+  }
+};
+
+export const prepareConversation = async ({
+  previousRounds,
+  nextInput,
+  context,
+}: {
+  previousRounds: ConversationRound[];
+  nextInput: ConverseInput;
+  context: AgentHandlerContext;
+}): Promise<ProcessedConversation> => {
+  const { attachments: attachmentsService, attachmentStateManager } = context;
+  const formatContext = createFormatContext(context);
+
+  // Promote any legacy per-round attachments into conversation-level versioned attachments.
+  // We merge both previous rounds and next input, then strip per-round attachments so the LLM
+  // only sees the v2 conversation-level attachments (via attachment presentation/tools).
+  const previousAttachments = previousRounds.flatMap(
+    (round) => round.input.attachments ?? []
+  ) as AttachmentInput[];
+  const nextInputAttachments = (nextInput.attachments ?? []) as AttachmentInput[];
+
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
+  attachmentStateManager.clearAccessTracking();
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
+
+  const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
+  const processedNextInput = await prepareRoundInput({
+    input: strippedNextInput,
+    attachmentsService,
+    formatContext,
+  });
+
+  const processedRounds = await Promise.all(
+    previousRounds.map((round) => {
+      const strippedRound: ConversationRound = {
+        ...round,
+        input: { ...round.input, attachments: [] },
+      };
+      return prepareRound({ round: strippedRound, attachmentsService, formatContext });
+    })
+  );
+
+  const allAttachments = [
+    ...processedNextInput.attachments,
+    ...processedRounds.flatMap((round) => round.input.attachments),
+  ];
+
+  const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
+  const attachmentTypeIds = [
+    ...new Set<string>([
+      ...conversationAttachmentTypes,
+      ...allAttachments.map((attachment) => attachment.attachment.type),
+    ]),
+  ];
+
+  const attachmentTypes = await Promise.all(
+    attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
+      const definition = attachmentsService.getTypeDefinition(type);
+      const description = definition?.getAgentDescription?.() ?? undefined;
+      return {
+        type,
+        description,
+      };
+    })
+  );
+
+  const activeAttachments = attachmentStateManager.getActive();
+  await Promise.all(
+    activeAttachments.map(async (attachment) => {
+      await attachmentStateManager.get(attachment.id, {
+        version: attachment.current_version,
+        context,
+      });
+    })
+  );
+
+  const versionedAttachmentPresentation = await prepareAttachmentPresentation(
+    attachmentStateManager.getAll(),
+    undefined,
+    async (attachment, data) => {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      if (!definition) {
+        return undefined;
+      }
+
+      try {
+        const typeReadonly = definition.isReadonly ?? true;
+        const isReadonly = typeReadonly || attachment.readonly === true;
+        if (!isReadonly) {
+          return undefined;
+        }
+        const formatted = await definition.format(
+          {
+            id: attachment.id,
+            type: attachment.type,
+            data,
+          },
+          formatContext
+        );
+        if (!formatted?.getRepresentation) {
+          return undefined;
+        }
+        const representation = await formatted.getRepresentation();
+        return representation?.type === 'text' ? representation.value : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+  );
+
+  return {
+    nextInput: processedNextInput,
+    previousRounds: processedRounds,
+    attachmentTypes,
+    attachments: allAttachments,
+    attachmentStateManager,
+    versionedAttachmentPresentation,
+  };
+};
+
+const prepareRound = async ({
+  round,
+  attachmentsService,
+  formatContext,
+}: {
+  round: ConversationRound;
+  attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
+}): Promise<ProcessedConversationRound> => {
+  return {
+    ...round,
+    input: await prepareRoundInput({ input: round.input, attachmentsService, formatContext }),
+  };
+};
+
+const prepareRoundInput = async ({
+  input,
+  attachmentsService,
+  formatContext,
+}: {
+  input: RoundInput | ConverseInput;
+  attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
+}): Promise<ProcessedRoundInput> => {
+  let attachments: ProcessedAttachment[] = [];
+  if (input.attachments?.length) {
+    attachments = await Promise.all(
+      input.attachments.map((attachment) => {
+        return prepareAttachment({ attachment, attachmentsService, formatContext });
+      })
+    );
+  }
+  return {
+    message: input.message ?? '',
+    attachments,
+  };
+};
+
+const prepareAttachment = async ({
+  attachment: input,
+  attachmentsService,
+  formatContext,
+}: {
+  attachment: AttachmentInput;
+  attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
+}): Promise<ProcessedAttachment> => {
+  const definition = attachmentsService.getTypeDefinition(input.type);
+  if (!definition) {
+    throw createInternalError(`Found attachment with unknown type: "${input.type}"`);
+  }
+
+  const attachment = inputToFinal(input);
+
+  try {
+    const formatted = await definition.format(attachment, formatContext);
+    const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+    if (!formatted.getRepresentation) {
+      return {
+        attachment,
+        representation: { type: 'text', value: JSON.stringify(attachment.data) },
+        tools,
+      };
+    }
+    const baseRepresentation = await formatted.getRepresentation();
+    const representation = definition.resolve
+      ? withByReferenceNote({ representation: baseRepresentation, attachment })
+      : baseRepresentation;
+
+    return {
+      attachment,
+      representation,
+      tools,
+    };
+  } catch (e) {
+    return {
+      attachment,
+      representation: { type: 'text', value: JSON.stringify(attachment.data) },
+      tools: [],
+    };
+  }
+};
+
+const withByReferenceNote = ({
+  representation,
+  attachment,
+}: {
+  representation: AttachmentRepresentation;
+  attachment: Attachment;
+}): AttachmentRepresentation => {
+  if (representation.type !== 'text') {
+    return representation;
+  }
+
+  const parts: string[] = [];
+  const note =
+    'Note: this attachment is by-reference. Use attachment_read to resolve the full content.';
+
+  const trimmedValue = representation.value?.trim();
+  if (trimmedValue) {
+    parts.push(trimmedValue);
+  }
+
+  try {
+    parts.push(`Attachment data:\n${JSON.stringify(attachment.data, null, 2)}`);
+  } catch (e) {
+    // ignore stringify errors; fallback to whatever was already present
+  }
+
+  // Avoid duplicating the note if the formatter already mentioned attachment_read.
+  if (!representation.value?.includes('attachment_read')) {
+    parts.push(note);
+  }
+
+  return {
+    ...representation,
+    value: parts.filter(Boolean).join('\n\n'),
+  };
+};
+
+const inputToFinal = (input: AttachmentInput): Attachment => {
+  return {
+    ...input,
+    id: input.id ?? getToolResultId(),
+  };
+};

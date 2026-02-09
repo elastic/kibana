@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  Form,
-  useForm,
-} from '../../../public/application/components/mappings_editor/shared_imports';
-import type { SelectInferenceIdProps } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
-import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+  installConsoleTruncationWarningFilter,
+  mockResendRequest,
+  renderSelectInferenceId,
+  setupInferenceEndpointsMocks,
+} from './select_inference_id.helpers';
 
 const mockDispatch = jest.fn();
 const mockNavigateToUrl = jest.fn();
-const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
 
-const createMockLocator = () => ({
-  useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+const mockIsAtLeast = jest.fn((level: string) => {
+  // Default: enterprise license, so all levels return true
+  // Individual tests can override this mock implementation
+  return true;
 });
 
 jest.mock('../../../public/application/app_context', () => ({
@@ -55,6 +56,9 @@ jest.mock('../../../public/application/app_context', () => ({
         url: {
           locators: {
             get: jest.fn((id) => {
+              const { INFERENCE_LOCATOR, createMockLocator } = jest.requireActual(
+                './select_inference_id.helpers'
+              ) as typeof import('./select_inference_id.helpers');
               if (id === INFERENCE_LOCATOR) {
                 return createMockLocator();
               }
@@ -90,178 +94,94 @@ jest.mock('../../../public/application/components/mappings_editor/mappings_state
   useDispatch: () => mockDispatch,
 }));
 
-const mockResendRequest = jest.fn();
+jest.mock('@kbn/inference-endpoint-ui-common', () => {
+  const SERVICE_PROVIDERS = {
+    elastic: { name: 'Elastic' },
+    openai: { name: 'OpenAI' },
+  };
 
-const MockInferenceFlyoutWrapper = ({
-  onFlyoutClose,
-  onSubmitSuccess,
-}: {
-  onFlyoutClose: () => void;
-  onSubmitSuccess: (id: string) => void;
-  http?: unknown;
-  toasts?: unknown;
-  isEdit?: boolean;
-  enforceAdaptiveAllocations?: boolean;
-}) => (
-  <div data-test-subj="inference-flyout-wrapper">
-    <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
-      Close Flyout
-    </button>
-    <button data-test-subj="mock-flyout-submit" onClick={() => onSubmitSuccess('new-endpoint-id')}>
-      Submit
-    </button>
-  </div>
-);
+  const MockInferenceFlyoutWrapper = ({
+    onFlyoutClose,
+    onSubmitSuccess,
+  }: {
+    onFlyoutClose: () => void;
+    onSubmitSuccess: (id: string) => void;
+    http?: unknown;
+    toasts?: unknown;
+    isEdit?: boolean;
+    enforceAdaptiveAllocations?: boolean;
+  }) => (
+    <div data-test-subj="inference-flyout-wrapper">
+      <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
+        Close Flyout
+      </button>
+      <button
+        data-test-subj="mock-flyout-submit"
+        onClick={() => onSubmitSuccess('new-endpoint-id')}
+      >
+        Submit
+      </button>
+    </div>
+  );
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  __esModule: true,
-  default: MockInferenceFlyoutWrapper,
-}));
+  return {
+    __esModule: true,
+    default: MockInferenceFlyoutWrapper,
+    SERVICE_PROVIDERS,
+  };
+});
 
 jest.mock('../../../public/application/services/api', () => ({
   ...jest.requireActual('../../../public/application/services/api'),
   useLoadInferenceEndpoints: jest.fn(),
 }));
 
-const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
-  { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-  { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
-  { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-  { inference_id: 'endpoint-2', task_type: 'sparse_embedding' },
-] as InferenceAPIConfigResponse[];
+jest.mock('../../../public/hooks/use_license', () => ({
+  useLicense: jest.fn(() => ({
+    isLoading: false,
+    isAtLeast: mockIsAtLeast,
+  })),
+}));
 
-function TestFormWrapper({
-  children,
-  initialValue = '.preconfigured-elser',
-}: {
-  children: React.ReactElement;
-  initialValue?: string;
-}) {
-  const { form } = useForm();
+let user: ReturnType<typeof userEvent.setup>;
 
-  React.useEffect(() => {
-    if (initialValue) {
-      form.setFieldValue('inference_id', initialValue);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <Form form={form}>{children}</Form>;
-}
-
-function setupMocks(
-  data: InferenceAPIConfigResponse[] | undefined = DEFAULT_ENDPOINTS,
-  isLoading: boolean = false,
-  error: Error | null = null
-) {
-  const { useLoadInferenceEndpoints } = jest.requireMock(
-    '../../../public/application/services/api'
-  );
-
-  mockResendRequest.mockClear();
-  useLoadInferenceEndpoints.mockReturnValue({
-    data,
-    isLoading,
-    error,
-    resendRequest: mockResendRequest,
-  });
-}
-
-const defaultProps: SelectInferenceIdProps = {
-  'data-test-subj': 'data-inference-endpoint-list',
-};
-
-const flushPendingTimers = async () => {
-  await act(async () => {
-    await jest.runOnlyPendingTimersAsync();
-  });
-};
-
-const actClick = async (element: Element) => {
-  // EUI's popover positioning happens async (via MutationObserver/requestAnimationFrame).
-  // When a test ends, RTL unmounts the component but those async callbacks are
-  // already queued. They still fire after unmount, trying to setState on a
-  // now-dead component, which triggers React's "update not wrapped in
-  // act(...)" warning in the next test's setup. Running a test in isolation
-  // usually doesn't show it because timing works out differently. This helper
-  // clicks, then flushes pending timers so the popover's async work completes
-  // before the test ends.
-  fireEvent.click(element);
-  await flushPendingTimers();
-};
-
-let consoleErrorSpy: jest.SpyInstance;
-let originalConsoleError: typeof console.error;
-
-beforeAll(() => {
-  /* eslint-disable no-console */
-  originalConsoleError = console.error;
-  consoleErrorSpy = jest
-    .spyOn(console, 'error')
-    .mockImplementation((message?: unknown, ...rest: unknown[]) => {
-      if (
-        typeof message === 'string' &&
-        message.includes('The truncation ellipsis is larger than the available width')
-      ) {
-        return;
-      }
-      originalConsoleError(message, ...rest);
-    });
-  /* eslint-enable no-console */
-});
-
-afterAll(() => {
-  consoleErrorSpy.mockRestore();
-});
+let restoreConsoleErrorFilter: () => void;
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  jest.restoreAllMocks();
   jest.clearAllMocks();
-  const { useLoadInferenceEndpoints } = jest.requireMock(
-    '../../../public/application/services/api'
-  );
-  useLoadInferenceEndpoints.mockReset();
+  user = userEvent.setup();
+  restoreConsoleErrorFilter = installConsoleTruncationWarningFilter();
+  // Reset to default: enterprise license (all levels return true)
+  mockIsAtLeast.mockImplementation(() => true);
 });
 
 afterEach(async () => {
-  await flushPendingTimers();
-  jest.useRealTimers();
+  restoreConsoleErrorFilter();
 });
 
 describe('SelectInferenceId', () => {
   describe('WHEN component is rendered', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD display the component with button', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
       expect(await screen.findByTestId('selectInferenceId')).toBeInTheDocument();
       expect(await screen.findByTestId('inferenceIdButton')).toBeInTheDocument();
     });
 
     it('SHOULD display selected endpoint in button', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
       const button = await screen.findByTestId('inferenceIdButton');
       expect(button).toHaveTextContent('.preconfigured-elser');
     });
 
     it('SHOULD prioritize ELSER endpoint as default selection', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
       const button = await screen.findByTestId('inferenceIdButton');
       expect(button).toHaveTextContent('.preconfigured-elser');
@@ -272,17 +192,13 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN popover button is clicked', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD open popover with management buttons', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
 
       expect(await screen.findByTestId('createInferenceEndpointButton')).toBeInTheDocument();
       expect(await screen.findByTestId('manageInferenceEndpointButton')).toBeInTheDocument();
@@ -290,52 +206,44 @@ describe('SelectInferenceId', () => {
 
     describe('AND button is clicked again', () => {
       it('SHOULD close the popover', async () => {
-        render(
-          <TestFormWrapper>
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
+        renderSelectInferenceId();
 
         const toggle = await screen.findByTestId('inferenceIdButton');
 
-        await actClick(toggle);
+        await user.click(toggle);
         expect(await screen.findByTestId('createInferenceEndpointButton')).toBeInTheDocument();
 
-        await actClick(toggle);
-        expect(screen.queryByTestId('createInferenceEndpointButton')).not.toBeInTheDocument();
+        await user.click(toggle);
+        await waitFor(() => {
+          expect(screen.queryByTestId('createInferenceEndpointButton')).not.toBeInTheDocument();
+        });
       });
     });
 
     describe('AND "Add inference endpoint" button is clicked', () => {
       it('SHOULD close popover', async () => {
-        render(
-          <TestFormWrapper>
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
+        renderSelectInferenceId();
 
-        await actClick(await screen.findByTestId('inferenceIdButton'));
+        await user.click(await screen.findByTestId('inferenceIdButton'));
         expect(await screen.findByTestId('createInferenceEndpointButton')).toBeInTheDocument();
 
-        await actClick(await screen.findByTestId('createInferenceEndpointButton'));
-        expect(screen.queryByTestId('createInferenceEndpointButton')).not.toBeInTheDocument();
+        await user.click(await screen.findByTestId('createInferenceEndpointButton'));
+        await waitFor(() => {
+          expect(screen.queryByTestId('createInferenceEndpointButton')).not.toBeInTheDocument();
+        });
       });
     });
   });
 
   describe('WHEN endpoint is created optimistically', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD display newly created endpoint even if not in loaded list', async () => {
-      render(
-        <TestFormWrapper initialValue="newly-created-endpoint">
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId({ initialValue: 'newly-created-endpoint' });
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
 
       const newEndpoint = await screen.findByTestId('custom-inference_newly-created-endpoint');
       expect(newEndpoint).toBeInTheDocument();
@@ -345,35 +253,27 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN flyout is opened', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD show flyout when "Add inference endpoint" is clicked', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
-      await actClick(await screen.findByTestId('createInferenceEndpointButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
 
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
     });
 
     describe('AND flyout close is triggered', () => {
       it('SHOULD close the flyout', async () => {
-        render(
-          <TestFormWrapper>
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
+        renderSelectInferenceId();
 
-        await actClick(await screen.findByTestId('inferenceIdButton'));
-        await actClick(await screen.findByTestId('createInferenceEndpointButton'));
+        await user.click(await screen.findByTestId('inferenceIdButton'));
+        await user.click(await screen.findByTestId('createInferenceEndpointButton'));
         expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
 
-        await actClick(await screen.findByTestId('mock-flyout-close'));
+        await user.click(await screen.findByTestId('mock-flyout-close'));
 
         expect(screen.queryByTestId('inference-flyout-wrapper')).not.toBeInTheDocument();
       });
@@ -381,18 +281,14 @@ describe('SelectInferenceId', () => {
 
     describe('AND endpoint is successfully created', () => {
       it('SHOULD call resendRequest when submitted', async () => {
-        render(
-          <TestFormWrapper>
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
+        renderSelectInferenceId();
 
-        await actClick(await screen.findByTestId('inferenceIdButton'));
-        await actClick(await screen.findByTestId('createInferenceEndpointButton'));
+        await user.click(await screen.findByTestId('inferenceIdButton'));
+        await user.click(await screen.findByTestId('createInferenceEndpointButton'));
 
         expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
 
-        await actClick(await screen.findByTestId('mock-flyout-submit'));
+        await user.click(await screen.findByTestId('mock-flyout-submit'));
 
         expect(mockResendRequest).toHaveBeenCalledTimes(1);
       });
@@ -401,20 +297,16 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN endpoint is selected from list', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD update form value with selected endpoint', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
 
       const endpoint1 = await screen.findByTestId('custom-inference_endpoint-1');
-      await actClick(endpoint1);
+      await user.click(endpoint1);
 
       const button = await screen.findByTestId('inferenceIdButton');
       expect(button).toHaveTextContent('endpoint-1');
@@ -423,17 +315,13 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN user searches for endpoints', () => {
     beforeEach(() => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
     });
 
     it('SHOULD filter endpoints based on search input', async () => {
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
 
       const searchInput = await screen.findByRole('combobox', {
         name: /Existing endpoints/i,
@@ -447,15 +335,11 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN endpoints are loading', () => {
     it('SHOULD display loading spinner', async () => {
-      setupMocks(undefined, true, null);
+      setupInferenceEndpointsMocks({ data: undefined, isLoading: true, error: null });
 
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
       await screen.findByTestId('createInferenceEndpointButton');
 
       const progressBars = screen.getAllByRole('progressbar');
@@ -465,28 +349,18 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN endpoints list is empty', () => {
     it('SHOULD not set default value', async () => {
-      setupMocks([], false, null);
+      setupInferenceEndpointsMocks({ data: [], isLoading: false, error: null });
 
-      render(
-        <TestFormWrapper initialValue="">
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
-
-      await flushPendingTimers();
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
       expect(button).toHaveTextContent('No inference endpoint selected');
     });
 
     it('SHOULD display "No inference endpoint selected" message', () => {
-      setupMocks([], false, null);
+      setupInferenceEndpointsMocks({ data: [], isLoading: false, error: null });
 
-      render(
-        <TestFormWrapper initialValue="">
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
       expect(button).toHaveTextContent('No inference endpoint selected');
@@ -500,17 +374,13 @@ describe('SelectInferenceId', () => {
     ] as InferenceAPIConfigResponse[];
 
     beforeEach(() => {
-      setupMocks(incompatibleEndpoints);
+      setupInferenceEndpointsMocks({ data: incompatibleEndpoints });
     });
 
     it('SHOULD not display incompatible endpoints in list', async () => {
-      render(
-        <TestFormWrapper initialValue="">
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId({ initialValue: '' });
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
       await screen.findByTestId('createInferenceEndpointButton');
 
       expect(screen.queryByTestId('custom-inference_incompatible-1')).not.toBeInTheDocument();
@@ -520,17 +390,20 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN API returns error', () => {
     it('SHOULD handle error gracefully and still render UI', async () => {
-      setupMocks([], false, new Error('Failed to load endpoints'));
+      setupInferenceEndpointsMocks({
+        data: [],
+        isLoading: false,
+        error: {
+          error: 'Failed to load endpoints',
+          message: 'Failed to load endpoints',
+        },
+      });
 
-      render(
-        <TestFormWrapper>
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId();
 
       expect(screen.getByTestId('selectInferenceId')).toBeInTheDocument();
 
-      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('inferenceIdButton'));
       expect(await screen.findByTestId('createInferenceEndpointButton')).toBeInTheDocument();
 
       expect(screen.queryByTestId('custom-inference_endpoint-1')).not.toBeInTheDocument();
@@ -540,38 +413,77 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN component mounts with empty value', () => {
     it('SHOULD automatically select default endpoint', async () => {
-      setupMocks();
+      setupInferenceEndpointsMocks();
 
-      render(
-        <TestFormWrapper initialValue="">
-          <SelectInferenceId {...defaultProps} />
-        </TestFormWrapper>
-      );
+      renderSelectInferenceId({ initialValue: '' });
 
-      await flushPendingTimers();
-
-      const button = screen.getByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.preconfigured-elser');
+      const button = await screen.findByTestId('inferenceIdButton');
+      await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
     });
 
     describe('AND .elser-2-elastic is available', () => {
-      it('SHOULD prioritize .elser-2-elastic over other endpoints', async () => {
-        setupMocks([
-          { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-          { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-          { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-        ] as InferenceAPIConfigResponse[]);
+      it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
+        setupInferenceEndpointsMocks({
+          data: [
+            {
+              inference_id: '.elser-2-elastic',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser-2-elastic' },
+            },
+            {
+              inference_id: '.preconfigured-elser',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser' },
+            },
+            {
+              inference_id: 'endpoint-1',
+              task_type: 'text_embedding',
+              service: 'openai',
+              service_settings: { model_id: 'text-embedding-3-large' },
+            },
+          ] as InferenceAPIConfigResponse[],
+        });
 
-        render(
-          <TestFormWrapper initialValue="">
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
+        renderSelectInferenceId({ initialValue: '' });
 
-        await flushPendingTimers();
+        const button = await screen.findByTestId('inferenceIdButton');
+        await waitFor(() => expect(button).toHaveTextContent('.elser-2-elastic'));
+      });
 
-        const button = screen.getByTestId('inferenceIdButton');
-        expect(button).toHaveTextContent('.elser-2-elastic');
+      it('SHOULD fall back to .preconfigured-elser instead of .elser-2-elastic IF has NO enterprise license', async () => {
+        // Mock license to return false for enterprise
+        mockIsAtLeast.mockImplementation((level: string) => level !== 'enterprise');
+
+        setupInferenceEndpointsMocks({
+          data: [
+            {
+              inference_id: '.elser-2-elastic',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser-2-elastic' },
+            },
+            {
+              inference_id: '.preconfigured-elser',
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser' },
+            },
+            {
+              inference_id: 'endpoint-1',
+              task_type: 'text_embedding',
+              service: 'openai',
+              service_settings: { model_id: 'text-embedding-3-large' },
+            },
+          ] as InferenceAPIConfigResponse[],
+        });
+
+        renderSelectInferenceId({ initialValue: '' });
+
+        const button = await screen.findByTestId('inferenceIdButton');
+        await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
+        expect(button).not.toHaveTextContent('.elser-2-elastic');
       });
     });
   });

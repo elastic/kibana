@@ -7,10 +7,10 @@
 
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { screen, waitFor, act } from '@testing-library/react';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
 import { emptySloDefinitionList, sloDefinitionList } from '../../data/slo/slo';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../hooks/use_kibana';

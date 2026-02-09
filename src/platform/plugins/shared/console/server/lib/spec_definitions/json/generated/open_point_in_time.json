@@ -11,7 +11,7 @@
       ],
       "ignore_unavailable": "__flag__",
       "preference": "",
-      "routing": "",
+      "routing": [],
       "expand_wildcards": [
         "all",
         "open",

@@ -972,6 +972,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "conflict",
             },
             Object {
+              "text": "null",
+              "value": "null",
+            },
+            Object {
               "text": "unknown",
               "value": "unknown",
             },
@@ -1315,6 +1319,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             },
           ]
         }
+        tableCaption="Indices listed by conflicting field type"
       />
       <eui-spacer
         size="m"

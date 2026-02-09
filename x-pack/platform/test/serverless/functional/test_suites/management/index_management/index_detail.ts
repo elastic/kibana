@@ -33,7 +33,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('can view index details', function () {
       it('index with no documents', async () => {
-        await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+        // Open the details page for the index created in this suite rather than relying on
+        // the first row in the indices table (which can vary depending on existing indices).
+        await pageObjects.indexManagement.manageIndex(testIndexName);
+        await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
         await pageObjects.indexManagement.indexDetailsPage.expectTabsExists();
       });

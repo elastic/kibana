@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
@@ -40,15 +40,12 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-            >
+            <EuiHeaderLink color="primary" href={http.basePath.prepend(paths.slosSettings)}>
               {i18n.translate('xpack.slo.headerMenu.settings', {
                 defaultMessage: 'Settings',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
+            <EuiHeaderLink color="primary" href={http.basePath.prepend(paths.slosManagement)}>
               {i18n.translate('xpack.slo.home.manage', {
                 defaultMessage: 'Manage SLOs',
               })}

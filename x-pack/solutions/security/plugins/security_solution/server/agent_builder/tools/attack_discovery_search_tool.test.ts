@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ToolResultType, type TabularDataResult, type ErrorResult } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils';
-import type { ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
+import {
+  ToolResultType,
+  type TabularDataResult,
+  type ErrorResult,
+} from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/onechat-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 
@@ -85,6 +89,20 @@ describe('attackDiscoverySearchTool', () => {
       );
       expect(callArgs.query).toContain('@timestamp >=');
       expect(callArgs.query).toContain('LIMIT 100');
+    });
+
+    it('uses handler context spaceId in ES|QL index pattern', async () => {
+      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler(
+        { alertIds: ['alert-1'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'custom-space' })
+      );
+
+      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query).toContain(
+        'FROM .alerts-security.attack.discovery.alerts-custom-space*'
+      );
     });
 
     it('executes ES|QL query and returns tabular data', async () => {

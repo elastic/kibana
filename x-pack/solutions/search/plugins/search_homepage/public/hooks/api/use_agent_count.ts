@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../use_kibana';
+import { useGetLicenseInfo } from '../use_get_license_info';
 
 export const useAgentCount = () => {
   const {
-    services: { onechat },
+    services: { agentBuilder },
   } = useKibana();
-  const [toolCount, setToolCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
 
-  useEffect(() => {
-    onechat?.tools
-      .list()
-      .then((tools) => {
-        setToolCount(tools.length);
-      })
-      .catch(() => {
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [onechat]);
+  const { hasEnterpriseLicense } = useGetLicenseInfo();
 
-  return { tools: toolCount, agents: 0, isLoading, isError };
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['fetchAgentCount'],
+    queryFn: async () => {
+      const [agents, tools] = await Promise.all([
+        agentBuilder?.agents.list(),
+        agentBuilder?.tools.list(),
+      ]);
+      return {
+        agents: agents?.length ?? 0,
+        tools: tools?.length ?? 0,
+      };
+    },
+    enabled: hasEnterpriseLicense && !!agentBuilder,
+  });
+
+  return {
+    tools: data?.tools ?? 0,
+    agents: data?.agents ?? 0,
+    isLoading: hasEnterpriseLicense ? isLoading : false,
+    isError: isError || !hasEnterpriseLicense,
+  };
 };

@@ -16,6 +16,8 @@
           ") => boolean"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "FeatureFlagsStart"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,6 +56,8 @@
           "LayoutFeatureFlag"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,6 +72,8 @@
               "FeatureFlagsStart"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,6 +97,8 @@
           "\"core.chrome.layoutDebug\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -104,6 +114,8 @@
           "\"core.chrome.layoutType\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -119,6 +131,8 @@
           "\"grid\" | \"legacy-fixed\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

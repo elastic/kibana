@@ -187,6 +187,16 @@ export interface ApiDeclaration {
   path: string;
 
   /**
+   * Source position for easier navigation to the declaration.
+   */
+  lineNumber?: number;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  columnNumber?: number;
+
+  /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
    */
   references?: ApiReference[];
@@ -296,6 +306,16 @@ export interface ApiStats {
    * Number of adoption-tracked APIs that are still not referenced.
    */
   adoptionTrackedAPIsUnreferencedCount: number;
+}
+
+/**
+ * Collections of issues and metadata indexed by plugin ID.
+ * Used by `collectApiStatsForPlugin` to gather stats for a specific plugin.
+ */
+export interface IssuesByPlugin {
+  missingApiItems: MissingApiItemMap;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
 }
 
 export type PluginMetaInfo = ApiStats & {

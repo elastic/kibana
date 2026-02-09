@@ -1,0 +1,21 @@
+{
+  "project.create_many_routing": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_project_routing"
+    ],
+    "documentation": "",
+    "availability": {
+      "stack": false,
+      "serverless": true
+    }
+  }
+}

@@ -33,3 +33,27 @@ export interface ClassConstructorWithStaticProperties {
 export function plugin() {
   return new PluginA();
 }
+
+// Expected issues:
+//   missing comments (9):
+//     line 20 - imAnAny
+//     line 21 - imAnUnknown
+//     line 24 - InterfaceWithIndexSignature
+//     line 25 - [key: string]: { foo: string; }
+//     line 28 - ClassConstructorWithStaticProperties
+//     line 29 - staticProperty1
+//     line 30 - config
+//     line 30 - foo
+//     line 30 - new
+//   any usage (1):
+//     line 20 - imAnAny
+//   no references (9):
+//     line 20 - imAnAny
+//     line 21 - imAnUnknown
+//     line 24 - InterfaceWithIndexSignature
+//     line 25 - [key: string]: { foo: string; }
+//     line 28 - ClassConstructorWithStaticProperties
+//     line 29 - staticProperty1
+//     line 30 - config
+//     line 30 - foo
+//     line 30 - new

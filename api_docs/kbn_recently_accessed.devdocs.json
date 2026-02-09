@@ -26,6 +26,8 @@
         "label": "RecentlyAccessedService",
         "description": [],
         "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,6 +65,8 @@
                   "StartDeps"
                 ],
                 "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+                "lineNumber": 21,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +90,8 @@
           "\n{@link RecentlyAccessed | APIs} for recently accessed history."
         ],
         "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,6 +108,8 @@
               "(link: string, label: string, id: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -116,6 +126,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -133,6 +145,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,6 +164,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -178,6 +194,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -206,6 +224,8 @@
               "[]>"
             ],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -222,6 +242,8 @@
         "label": "RecentlyAccessedHistoryItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,6 +255,8 @@
             "label": "link",
             "description": [],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,6 +268,8 @@
             "label": "label",
             "description": [],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,6 +281,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

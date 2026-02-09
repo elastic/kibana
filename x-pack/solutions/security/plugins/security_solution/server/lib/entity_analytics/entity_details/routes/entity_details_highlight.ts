@@ -15,12 +15,13 @@ import {
 import { getPrompt } from '@kbn/elastic-assistant-plugin/server/lib/prompt/get_prompt';
 import type { EntityDetailsHighlightsResponse } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { EntityDetailsHighlightsRequestBody } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
+import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { entityDetailsHighlightsServiceFactory } from '../entity_details_highlights_service';
 import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
+import { ENTITY_HIGHLIGHTS_USAGE_EVENT } from '../../../telemetry/event_based/events';
 
 export const entityDetailsHighlightsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -31,7 +32,7 @@ export const entityDetailsHighlightsRoute = (
   router.versioned
     .post({
       access: 'internal',
-      path: ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL,
+      path: ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -73,6 +74,12 @@ export const entityDetailsHighlightsRoute = (
             const soClient = coreContext.savedObjects.client;
             const riskEngineClient = securitySolution.getRiskEngineDataClient();
             const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+
+            const telemetry = securitySolution.getAnalytics();
+            telemetry.reportEvent(ENTITY_HIGHLIGHTS_USAGE_EVENT.eventType, {
+              entityType,
+              spaceId,
+            });
 
             const {
               getRiskScoreData,

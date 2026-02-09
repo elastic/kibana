@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/esql-ast-inspector-plugin",
+  "id": "@kbn/esql-language-inspector-plugin",
   "owner": "@elastic/kibana-esql",
   "group": "platform",
   "visibility": "private",

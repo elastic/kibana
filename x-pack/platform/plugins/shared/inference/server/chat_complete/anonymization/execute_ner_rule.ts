@@ -10,12 +10,17 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
 // structured data can end up being a token per character.
 // since the limit is 512 tokens, to avoid truncating, set the max to 512
 const MAX_TOKENS_PER_DOC = 512;
+const NER_DOCS_URL_DOWNLOAD_MODEL =
+  'https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-ner-example';
+const NER_DOCS_URL_DEPLOY_MODEL =
+  'https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-deploy-model';
 
 function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
   const chunks: string[] = [];
@@ -23,6 +28,15 @@ function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
     chunks.push(text.slice(i, i + maxChars));
   }
   return chunks;
+}
+
+function isModelNotDeployedError(error: unknown): boolean {
+  if (!isResponseError(error)) {
+    return false;
+  }
+
+  const reason = error.body?.error?.reason ?? '';
+  return reason.includes('must be deployed') || reason.includes('Please deploy');
 }
 
 const DEFAULT_BATCH_SIZE = 1_000;
@@ -106,6 +120,27 @@ export async function executeNerRule({
             }
           )
         ).catch((error) => {
+          // The model was not found, probably not downloaded.
+          if (isNotFoundError(error)) {
+            throw new Error(
+              `The NER model '${rule.modelId}' was not found. ` +
+                `Please download and deploy the model before enabling anonymization. ` +
+                `For instructions, see: ${NER_DOCS_URL_DOWNLOAD_MODEL}`,
+              { cause: error }
+            );
+          }
+
+          // The model is available but not currently deployed.
+          if (isModelNotDeployedError(error)) {
+            throw new Error(
+              `The NER model '${rule.modelId}' is not deployed. ` +
+                `Please deploy the model before enabling anonymization. ` +
+                `For instructions, see: ${NER_DOCS_URL_DEPLOY_MODEL}`,
+              { cause: error }
+            );
+          }
+
+          // Other error, rethrow.
           const errorMessage = error instanceof Error ? error.message : String(error);
           throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
             cause: error,

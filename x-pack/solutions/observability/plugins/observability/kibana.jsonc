@@ -40,11 +40,12 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams"
+      "streams",
+      "kql"
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
-      "onechat",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
@@ -62,10 +63,10 @@
       "cases",
       "data",
       "discover",
+      "fleet",
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"

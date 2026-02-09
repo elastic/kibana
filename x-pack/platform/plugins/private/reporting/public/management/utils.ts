@@ -49,6 +49,8 @@ export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
       return 'Discover';
+    case 'ai_value_report':
+      return 'Value report';
     default:
       return capitalize(type);
   }

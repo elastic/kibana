@@ -17,7 +17,7 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_TOUR_DISMISS,
+  TOUR_DISMISS,
   EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
   EIS_CLOUD_CONNECT_PROMO_DESCRIPTION,
   EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
@@ -70,15 +70,16 @@ export const EisCloudConnectPromoTour = ({
 }: EisCloudConnectPromoTourProps) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, uiSettings },
+    services: { application, notifications, uiSettings },
   } = useKibana();
+  const userAllowsTours = notifications?.tours?.isEnabled() ?? true;
   // Setting to enable hiding the tour for FTR tests
   const isEISTourEnabled = uiSettings?.get<boolean>(EIS_TOUR_ENABLED_FEATURE_FLAG_ID, true);
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectTour`,
   });
 
-  const dataId = `${promoId}-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-tour`;
 
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
@@ -89,14 +90,14 @@ export const EisCloudConnectPromoTour = ({
     !isReady ||
     !isSelfManaged ||
     !hasCloudConnectPermission ||
-    !isEISTourEnabled
+    !isEISTourEnabled ||
+    !userAllowsTours
   ) {
     return children;
   }
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -110,14 +111,19 @@ export const EisCloudConnectPromoTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisCloudConnectPromoTourCloseBtn" onClick={onDismissTour}>
-          {EIS_TOUR_DISMISS}
+        <EuiButtonEmpty
+          data-test-subj="eisCloudConnectPromoTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissPromo}
+        >
+          {TOUR_DISMISS}
         </EuiButtonEmpty>,
         <EuiButton
           onClick={navigateToApp}
           data-test-subj="eisCloudConnectPromoTourCtaBtn"
+          data-telemetry-id={`${dataId}-connectYourCluster-btn`}
           iconSide="right"
           iconType="popout"
         >

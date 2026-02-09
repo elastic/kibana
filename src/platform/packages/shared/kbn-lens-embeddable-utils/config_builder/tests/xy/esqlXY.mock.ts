@@ -127,5 +127,5 @@ export const esqlChart: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsXY',
-  version: 1,
+  version: 2,
 };

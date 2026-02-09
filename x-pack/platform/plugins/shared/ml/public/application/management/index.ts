@@ -163,6 +163,7 @@ export function registerManagementSections(
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
             spaces: pluginsStart.spaces,
+            kql: pluginsStart.kql,
             ...deps,
           };
 

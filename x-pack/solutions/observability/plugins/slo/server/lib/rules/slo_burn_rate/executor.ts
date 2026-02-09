@@ -37,7 +37,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+} from '../../../../common/burn_rate_rule/field_names';
 import type { Duration, SLODefinition } from '../../../domain/models';
 import { DefaultSLODefinitionRepository } from '../../../services';
 import type { EsSummaryDocument } from '../../../services/summary_transform_generator/helpers/create_temp_summary';

@@ -46,6 +46,7 @@ import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-searc
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Vis, VisualizeEmbeddableContract, VisSavedObject, PersistedState } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
@@ -119,6 +120,7 @@ export interface VisualizeServices extends CoreStart {
   visEditorsRegistry: VisEditorsRegistry;
   listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   contentManagement: ContentManagementPublicStart;

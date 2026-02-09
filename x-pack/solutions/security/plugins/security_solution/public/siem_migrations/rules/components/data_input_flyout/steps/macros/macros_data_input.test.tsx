@@ -42,7 +42,7 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 }));
 jest.mock('../../../../../../common/hooks/use_app_toasts');
 
-jest.mock('../hooks/use_missing_resources', () => ({
+jest.mock('../../../../../common/hooks/use_missing_resources', () => ({
   useMissingResources: jest.fn().mockReturnValue({
     missingResourcesIndexed: {
       macros: ['macro1', 'macro2'],
@@ -50,6 +50,14 @@ jest.mock('../hooks/use_missing_resources', () => ({
     },
     onMissingResourcesFetched: jest.fn(),
   }),
+}));
+
+jest.mock('../../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: () => ({
+      splunkV2DashboardsEnabled: false,
+    }),
+  },
 }));
 
 describe('MacrosDataInput', () => {

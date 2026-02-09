@@ -21,5 +21,6 @@
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/interpreter",
+    "@kbn/lens-common",
   ]
 }

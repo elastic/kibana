@@ -137,9 +137,7 @@ describe('migration actions', () => {
     })();
   });
 
-  afterAll(async () => {
-    await esServer.stop();
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('fetchIndices', () => {
     afterAll(async () => {
@@ -1339,7 +1337,49 @@ describe('migration actions', () => {
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({ pit: { id: pitId } });
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc' } },
+          { type: 'test', value: 1 },
+        ],
+      });
+
+      try {
+        const response = await client.search({ pit: { id: pitId } });
+        expect(response._shards?.failed).toBeGreaterThanOrEqual(1);
+        const failureReason =
+          response._shards?.failures?.[0]?.reason?.reason ??
+          response._shards?.failures?.[0]?.reason?.type ??
+          '';
+        expect(failureReason).toMatch(
+          /No search context found for id|search_context_missing_exception/
+        );
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        expect(message).toContain('search_phase_execution_exception');
+      }
+    });
+
+    it('rejects search with closed PIT when allow_partial_search_results is false', async () => {
+      const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const pitId = pitResponse.right.pitId;
+      await closePit({ client, pitId })();
+
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc-2' } },
+          { type: 'test', value: 2 },
+        ],
+      });
+
+      const searchTask = client.search({
+        pit: { id: pitId },
+        allow_partial_search_results: false,
+      });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });

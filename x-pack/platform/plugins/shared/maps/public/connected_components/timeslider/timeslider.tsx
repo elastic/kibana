@@ -9,15 +9,16 @@ import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs';
 
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
   ControlGroupRenderer,
-  type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
-} from '@kbn/controls-plugin/public';
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 import type { TimeRange } from '@kbn/es-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { Timeslice } from '../../../common/descriptor_types';
+import { getUiActions } from '../../kibana_services';
 
 export interface Props {
   setTimeslice: (timeslice?: Timeslice) => void;
@@ -35,7 +36,7 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
     }
 
     let canceled = false;
-    const subscription = api.timeslice$
+    const subscription = api.appliedTimeslice$
       .pipe(
         tap(() => {
           if (!canceled) setDataLoading(true);
@@ -64,22 +65,21 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
 
   return (
     <div className="mapTimeslider mapTimeslider--animation">
-      <ControlGroupRenderer
-        onApiAvailable={(nextApi: ControlGroupRendererApi) => {
-          setApi(nextApi);
-        }}
-        dataLoading={dataLoading}
-        getCreationOptions={async (
-          initialState: Partial<ControlGroupRuntimeState>,
-          builder: ControlGroupStateBuilder
-        ) => {
-          builder.addTimeSliderControl(initialState);
-          return {
-            initialState,
-          };
-        }}
-        timeRange={timeRange}
-      />
+      <KibanaContextProvider services={{ uiActions: getUiActions() }}>
+        <ControlGroupRenderer
+          onApiAvailable={(nextApi: ControlGroupRendererApi) => {
+            setApi(nextApi);
+          }}
+          dataLoading={dataLoading}
+          getCreationOptions={async (initialState, builder: ControlGroupStateBuilder) => {
+            builder.addTimeSliderControl(initialState);
+            return {
+              initialState,
+            };
+          }}
+          timeRange={timeRange}
+        />
+      </KibanaContextProvider>
     </div>
   );
 }

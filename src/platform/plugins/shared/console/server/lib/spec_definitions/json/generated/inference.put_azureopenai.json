@@ -14,6 +14,7 @@
     "url_components": {
       "task_type": [
         "completion",
+        "chat_completion",
         "text_embedding"
       ]
     },

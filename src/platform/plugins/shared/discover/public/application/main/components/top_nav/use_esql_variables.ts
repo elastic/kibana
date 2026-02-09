@@ -6,22 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import { skip } from 'rxjs';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import {
   extractEsqlVariables,
   internalStateActions,
-  parseControlGroupJson,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
+import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
 /**
  * Custom hook to manage ESQL variables in the control group for Discover.
@@ -32,7 +29,6 @@ import { useSavedSearch } from '../../state_management/discover_state_provider';
  * @param options.isEsqlMode - Indicates if the current application mode is ESQL.
  * @param options.controlGroupApi - The ControlGroupRendererApi instance for interacting with control panels.
  * @param options.currentEsqlVariables - The currently active ESQL variables from the application state.
- * @param options.stateContainer - The DiscoverStateContainer instance for data fetching.
  * @param options.onUpdateESQLQuery - Callback function to update the ESQL query.
  *
  * @returns An object containing handler functions for saving and canceling control changes,
@@ -43,23 +39,22 @@ export const useESQLVariables = ({
   isEsqlMode,
   controlGroupApi,
   currentEsqlVariables,
-  stateContainer,
   onUpdateESQLQuery,
 }: {
   isEsqlMode: boolean;
   controlGroupApi?: ControlGroupRendererApi;
   currentEsqlVariables?: ESQLControlVariable[];
-  stateContainer: DiscoverStateContainer;
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
-  const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
+  const fetchData = useCurrentTabAction(internalStateActions.fetchData);
+  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
   const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
-  const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-  const savedSearchState = useSavedSearch();
+  const currentControlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
+  const previousControlGroupStateRef = useRef(currentControlGroupState);
   const pendingQueryUpdate = useRef<string>();
 
   useEffect(() => {
@@ -69,22 +64,34 @@ export const useESQLVariables = ({
     }
 
     // Handling the reset unsaved changes badge
-    const savedSearchResetSubscription = stateContainer.savedSearchState
-      .getInitial$()
-      .pipe(skip(1)) // Skip the initial emission since it's a BehaviorSubject
-      .subscribe((initialSavedSearch) => {
-        const savedControlGroupState = parseControlGroupJson(initialSavedSearch?.controlGroupJson);
-        controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
-      });
+    if (!isEqual(previousControlGroupStateRef.current, currentControlGroupState)) {
+      previousControlGroupStateRef.current = currentControlGroupState;
+      controlGroupApi.updateInput({ initialChildControlState: currentControlGroupState });
+    }
+  }, [currentControlGroupState, controlGroupApi, isEsqlMode]);
+
+  useEffect(() => {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
+      return;
+    }
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       const controlGroupState =
         input.initialChildControlState as ControlPanelsState<ESQLControlState>;
-
-      stateContainer.savedSearchState.updateControlState({
-        nextControlState: controlGroupState,
-      });
-      dispatch(setControlGroupState({ controlGroupState }));
+      // drop unused keys for BWC
+      const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+      }, {});
+      const nextControlGroupState = transformedState;
+      previousControlGroupStateRef.current = nextControlGroupState;
+      dispatch(
+        updateAttributes({
+          attributes: {
+            controlGroupState: nextControlGroupState,
+          },
+        })
+      );
 
       if (pendingQueryUpdate.current) {
         onUpdateESQLQuery(pendingQueryUpdate.current);
@@ -95,13 +102,12 @@ export const useESQLVariables = ({
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
         dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-        stateContainer.dataState.fetch();
+        dispatch(fetchData({}));
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
-      savedSearchResetSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,
@@ -109,10 +115,9 @@ export const useESQLVariables = ({
     dispatch,
     isEsqlMode,
     onUpdateESQLQuery,
-    setControlGroupState,
+    updateAttributes,
     setEsqlVariables,
-    stateContainer.dataState,
-    stateContainer.savedSearchState,
+    fetchData,
   ]);
 
   const onSaveControl = useCallback(
@@ -130,9 +135,7 @@ export const useESQLVariables = ({
       await controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
-          rawState: {
-            ...controlState,
-          },
+          ...controlState,
         },
       });
     },
@@ -141,11 +144,8 @@ export const useESQLVariables = ({
 
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
-    if (currentControlGroupState && Object.keys(currentControlGroupState).length > 0) {
-      return currentControlGroupState;
-    }
-    return parseControlGroupJson(savedSearchState?.controlGroupJson);
-  }, [currentControlGroupState, savedSearchState?.controlGroupJson]);
+    return getDefinedControlGroupState(currentControlGroupState) || {};
+  }, [currentControlGroupState]);
 
   return {
     onSaveControl,

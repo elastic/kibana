@@ -23,7 +23,7 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const options = request.body;
-      const client = await createSearchClient(requestContext, framework);
+      const client = createSearchClient(requestContext, framework);
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, options.sourceId);
 

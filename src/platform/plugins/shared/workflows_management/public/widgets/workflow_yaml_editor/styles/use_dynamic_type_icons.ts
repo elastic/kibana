@@ -54,6 +54,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait',
   },
   {
+    actionTypeId: 'data.set',
+    displayName: 'Set Variables',
+  },
+  {
     actionTypeId: 'http',
     displayName: 'HTTP',
   },

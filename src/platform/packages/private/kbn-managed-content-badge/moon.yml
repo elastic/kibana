@@ -19,7 +19,7 @@ project:
     sourceRoot: src/platform/packages/private/kbn-managed-content-badge
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/navigation-plugin'
+  - '@kbn/core-chrome-browser'
 tags:
   - shared-browser
   - package

@@ -3,6 +3,11 @@ post:
   operationId: bulkDeleteSavedObjects
   description: >
     WARNING: When you delete a saved object, it cannot be recovered.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    There is currently no alternative API for all use cases supported by this API.
+    Once alternative APIs are provided in a future Elastic version, it will be possible to migrate away from this API.
   deprecated: true
   tags:
     - saved objects

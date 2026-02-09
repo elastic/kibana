@@ -192,7 +192,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
 
-      const client = await createSearchClient(requestContext, framework);
+      const client = createSearchClient(requestContext, framework);
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 

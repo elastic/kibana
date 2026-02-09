@@ -16,17 +16,17 @@ import {
   EuiLink,
   type EuiTextColorProps,
 } from '@elastic/eui';
-import { type AlertStatus } from '@kbn/rule-data-utils';
+import { type PublicAlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_COUNT_FORMAT } from './constants';
 
 interface AlertItemProps {
   label: string | ReactNode;
   count: number;
   color: EuiTextColorProps['color'];
-  alertType?: AlertStatus;
+  alertType?: PublicAlertStatus;
   handleClick?: (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
-    status?: AlertStatus
+    status?: PublicAlertStatus
   ) => void;
   showWarningIcon?: true;
   'data-test-subj'?: string;

@@ -22,6 +22,18 @@ import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
+const createAddContextMock = () => {
+  return jest
+    .fn()
+    .mockImplementation((element) => (
+      <CoreEnvContextProvider value={coreContextMock.create().env}>
+        {element}
+      </CoreEnvContextProvider>
+    ));
+};
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -81,12 +93,17 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
+// Shared state object for reference equality in isEqual comparisons
+const mockFormBasedState = { layers: {} };
+// Different state to simulate changes detected
+const mockFormBasedStateChanged = { layers: { layer1: {} } };
+
 const lensAttributes = {
   title: 'test',
   visualizationType: 'testVis',
   state: {
     datasourceStates: {
-      testDatasource: {},
+      formBased: mockFormBasedStateChanged,
     },
     visualization: {},
     filters: [],
@@ -135,38 +152,43 @@ const visualizationMap = mockVisualizationMap();
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
-    query?: Query | AggregateQuery
+    query?: Query | AggregateQuery,
+    stateOverrides: { hideTextBasedEditor?: boolean } = {}
   ) {
+    const mockCoreStart = coreMock.createStart();
+    mockCoreStart.rendering.addContext = createAddContextMock();
     const { container, ...rest } = renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
-        <LensEditConfigurationFlyout
-          attributes={lensAttributes}
-          updatePanelState={jest.fn()}
-          coreStart={coreMock.createStart()}
-          startDependencies={startDependencies}
-          closeFlyout={jest.fn()}
-          datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
-          onApply={jest.fn()}
-          onCancel={jest.fn()}
-          {...propsOverrides}
-        />
+        {mockCoreStart.rendering.addContext(
+          <LensEditConfigurationFlyout
+            attributes={lensAttributes}
+            updatePanelState={jest.fn()}
+            coreStart={mockCoreStart}
+            startDependencies={startDependencies}
+            closeFlyout={jest.fn()}
+            onApply={jest.fn()}
+            onCancel={jest.fn()}
+            {...propsOverrides}
+          />
+        )}
       </EditorFrameServiceProvider>,
       {},
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: 'state',
+              state: mockFormBasedState,
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           query: query as Query,
           visualization: {
             state: {},
             activeId: 'testVis',
             selectedLayerId: 'layer1',
           },
+          ...stateOverrides,
         },
       }
     );
@@ -256,7 +278,7 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { testDatasource: 'state' },
+        datasourceStates: { formBased: mockFormBasedState },
         visualization: {},
         filters: [],
         query: { esql: 'from index1 | limit 10' },
@@ -267,16 +289,8 @@ describe('LensEditConfigurationFlyout', () => {
     });
   });
 
-  it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
+  it('should not display the editor if query is not text based', async () => {
     await renderConfigFlyout({
-      canEditTextBasedQuery: false,
-    });
-    expect(screen.queryByTestId('ESQLEditor')).toBeNull();
-  });
-
-  it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
-    await renderConfigFlyout({
-      canEditTextBasedQuery: true,
       attributes: {
         ...lensAttributes,
         state: {
@@ -291,18 +305,33 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('ESQLEditor')).toBeNull();
   });
 
-  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
-    await renderConfigFlyout({
-      hidesSuggestions: true,
-    });
+  // This test simulates the Discover editing use case where both the ES|QL editor
+  // and suggestions should be hidden. The hideTextBasedEditor flag is set by the
+  // parent application (e.g., Discover) to control the flyout layout.
+  it('should not display the suggestions if hideTextBasedEditor and hidesSuggestions are both true', async () => {
+    await renderConfigFlyout(
+      {
+        hidesSuggestions: true,
+        attributes: {
+          ...lensAttributes,
+          state: {
+            ...lensAttributes.state,
+            query: {
+              type: 'kql',
+              query: '',
+            } as unknown as Query,
+          },
+        },
+      },
+      undefined,
+      { hideTextBasedEditor: true }
+    );
     expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
-  it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
+  it('should display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
-      {
-        canEditTextBasedQuery: true,
-      },
+      {},
       {
         esql: 'from index1 | limit 10',
       }
@@ -311,10 +340,8 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
-  it('should display the ES|QL results table if canEditTextBasedQuery prop is true', async () => {
-    await renderConfigFlyout({
-      canEditTextBasedQuery: true,
-    });
+  it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
+    await renderConfigFlyout({ hideTextBasedEditor: false }, { esql: 'from index1 | limit 10' });
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
 
@@ -328,9 +355,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
-    // @ts-ignore
-    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    // Set formBased to match the preloaded Redux state so no changes are detected
+    newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
@@ -345,8 +371,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       datasourceMap: {
         ...datasourceMap,
-        testDatasource: {
-          ...datasourceMap.testDatasource,
+        formBased: {
+          ...datasourceMap.formBased,
           toExpression: jest.fn(() => null),
         },
       },

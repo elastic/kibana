@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class FunctionsPage {
   public co2PerKWHField: Locator;
@@ -27,14 +28,24 @@ export class FunctionsPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions`);
-    await this.page.waitForLoadingIndicatorHidden();
+
+    await this.waitForDifferentialTopNFunctionsTab();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}/functions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForDifferentialTopNFunctionsTab();
+  }
+
+  /*
+   * Waits for the Differential TopN functions tab to be visible
+   */
+  private async waitForDifferentialTopNFunctionsTab() {
+    await this.page
+      .getByRole('tab', { name: 'Differential TopN functions' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // TopN Functions methods
@@ -86,13 +97,11 @@ export class FunctionsPage {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.getByTestId('tableSearchInput').fill(`${key}:"${value}"`);
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async clearKqlFilter() {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   // Differential TopN Functions methods

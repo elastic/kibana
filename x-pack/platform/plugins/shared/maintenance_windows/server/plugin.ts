@@ -14,7 +14,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { MaintenanceWindowsConfig } from './config';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { registerSavedObject } from './saved_objects';
 import {
@@ -41,13 +40,11 @@ export class MaintenanceWindowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: MaintenanceWindowsConfig;
   private licenseState: ILicenseState | null = null;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = this.config = initializerContext.config.get();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
   }
 
@@ -86,7 +83,6 @@ export class MaintenanceWindowsPlugin
     defineRoutes({
       router,
       licenseState: this.licenseState,
-      maintenanceWindowsConfig: this.config,
     });
 
     return {};
@@ -111,17 +107,23 @@ export class MaintenanceWindowsPlugin
       return maintenanceWindowClientFactory.createWithAuthorization(request);
     };
 
-    const getMaintenanceWindowClientInternal = (
-      request: KibanaRequest,
-      excludedExtension?: ['spaces']
+    const getMaintenanceWindowClientWithoutAuth = (
+      request: KibanaRequest
     ): MaintenanceWindowClientApi => {
-      return maintenanceWindowClientFactory.create(request, excludedExtension);
+      return maintenanceWindowClientFactory.createWithoutAuthorization(request);
+    };
+
+    const getMaintenanceWindowClientInternal = (
+      request: KibanaRequest
+    ): MaintenanceWindowClientApi => {
+      return maintenanceWindowClientFactory.createInternal(request);
     };
 
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
       getMaintenanceWindowClientWithAuth,
+      getMaintenanceWindowClientWithoutAuth,
       getMaintenanceWindowClientInternal,
     };
   }

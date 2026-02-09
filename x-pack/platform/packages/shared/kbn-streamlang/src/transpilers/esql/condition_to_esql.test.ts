@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter } from '@kbn/esql-ast';
+import { BasicPrettyPrinter } from '@kbn/esql-language';
 import { conditionToESQLAst } from './condition_to_esql';
 import type { Condition } from '../../../types/conditions';
 
@@ -139,6 +139,28 @@ describe('conditionToESQLAst', () => {
       it('should handle endsWith with spaces', () => {
         const condition: Condition = { field: 'message', endsWith: ' failed' };
         expect(prettyPrint(condition)).toBe('ENDS_WITH(message, " failed")');
+      });
+    });
+
+    describe('multivalue contains (includes)', () => {
+      it('should handle includes with string value', () => {
+        const condition: Condition = { field: 'tags', includes: 'error' };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(tags, "error")');
+      });
+
+      it('should handle includes with numeric value', () => {
+        const condition: Condition = { field: 'status_codes', includes: 200 };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(status_codes, 200)');
+      });
+
+      it('should handle includes with boolean value', () => {
+        const condition: Condition = { field: 'flags', includes: true };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(flags, TRUE)');
+      });
+
+      it('should handle includes with nested field name', () => {
+        const condition: Condition = { field: 'user.roles', includes: 'admin' };
+        expect(prettyPrint(condition)).toBe('MV_CONTAINS(`user.roles`, "admin")');
       });
     });
 

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/sse-utils'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-knowledge-team'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/sse-utils'
   description: Moon project for @kbn/sse-utils
   channel: ''
-  owner: '@elastic/obs-knowledge-team'
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-sse-utils
 dependsOn:

@@ -8,21 +8,20 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 
-import type { DefaultDataControlState } from '../../../../../common';
-import type { OptionsListControlState } from '../../../../../common/options_list';
-import type { ControlGroupApi } from '../../../../control_group/types';
-import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
+import { OptionsListControlContext } from '../options_list_context_provider';
+import type { OptionsListComponentApi } from '../types';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
 
 describe('Options list sorting button', () => {
-  const getMockedState = <State extends DefaultDataControlState = DefaultDataControlState>(
+  const getMockedState = <State extends OptionsListControlState = OptionsListControlState>(
     overwrite?: Partial<OptionsListControlState>
   ): State => {
     return {
@@ -33,21 +32,29 @@ describe('Options list sorting button', () => {
   };
 
   const updateState = jest.fn();
+
   const mountComponent = ({
     initialState,
     field,
-    controlGroupApi = getMockedControlGroupApi(),
+    componentApi = {},
   }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'> & {
-    controlGroupApi?: ControlGroupApi;
+    componentApi?: Partial<OptionsListComponentApi>;
   }) => {
+    const { componentApi: mockComponentApiBase, displaySettings } = getOptionsListContextMock();
     const component = render(
-      <OptionsListEditorOptions
-        initialState={initialState}
-        field={field}
-        updateState={updateState}
-        setControlEditorValid={jest.fn()}
-        controlGroupApi={controlGroupApi}
-      />
+      <OptionsListControlContext.Provider
+        value={{
+          componentApi: { ...mockComponentApiBase, ...componentApi },
+          displaySettings,
+        }}
+      >
+        <OptionsListEditorOptions
+          initialState={initialState}
+          field={field}
+          updateState={updateState}
+          setControlEditorValid={jest.fn()}
+        />
+      </OptionsListControlContext.Provider>
     );
     return component;
   };
@@ -92,24 +99,6 @@ describe('Options list sorting button', () => {
   });
 
   describe('custom search options', () => {
-    test('do not show custom search options when `allowExpensiveQueries` is false', async () => {
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
-      const controlGroupApi = getMockedControlGroupApi(undefined, { allowExpensiveQueries$ });
-      const component = mountComponent({
-        initialState: getMockedState(),
-        field: { type: 'string' } as DataViewField,
-        controlGroupApi,
-      });
-      expect(
-        component.queryByTestId('optionsListControl__searchOptionsRadioGroup')
-      ).not.toBeInTheDocument();
-
-      act(() => allowExpensiveQueries$.next(true));
-      expect(
-        component.queryByTestId('optionsListControl__searchOptionsRadioGroup')
-      ).toBeInTheDocument();
-    });
-
     test('string field has three custom search options', async () => {
       const component = mountComponent({
         initialState: getMockedState(),
@@ -165,15 +154,15 @@ describe('Options list sorting button', () => {
     describe('responds to field type changing', () => {
       test('reset back to initial state when valid', async () => {
         const initialState = getMockedState({ searchTechnique: 'exact' });
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'string' } as DataViewField}
-            updateState={updateState}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'string' } as DataViewField}
+              updateState={updateState}
+              setControlEditorValid={jest.fn()}
+            />
+          </OptionsListControlContext.Provider>
         );
 
         /** loads initial state properly */
@@ -183,13 +172,14 @@ describe('Options list sorting button', () => {
 
         /** responds to the field type changing */
         component.rerender(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
-            updateState={jest.fn()}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
+              updateState={jest.fn()}
+              setControlEditorValid={jest.fn()}
+            />
+          </OptionsListControlContext.Provider>
         );
 
         expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
@@ -200,21 +190,21 @@ describe('Options list sorting button', () => {
 
       test('if the current selection is valid, send that to the parent editor state', async () => {
         const initialState = getMockedState();
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'string' } as DataViewField}
-            updateState={updateState}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'string' } as DataViewField}
+              updateState={updateState}
+              setControlEditorValid={jest.fn()}
+            />{' '}
+          </OptionsListControlContext.Provider>
         );
 
         /** loads default compatible search technique properly */
-        expect(component.container.querySelector('input#prefix')).toBeChecked();
+        expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(component.container.querySelector('input#exact')).not.toBeChecked();
-        expect(component.container.querySelector('input#wildcard')).not.toBeChecked();
+        expect(component.container.querySelector('input#wildcard')).toBeChecked();
 
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');
@@ -226,13 +216,14 @@ describe('Options list sorting button', () => {
 
         /** responds to the field type changing */
         component.rerender(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
-            updateState={jest.fn()}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
+              updateState={jest.fn()}
+              setControlEditorValid={jest.fn()}
+            />
+          </OptionsListControlContext.Provider>
         );
 
         expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
@@ -240,15 +231,15 @@ describe('Options list sorting button', () => {
 
       test('if neither the initial or current search technique is valid, revert to the default', async () => {
         const initialState = getMockedState({ searchTechnique: 'wildcard' });
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'string' } as DataViewField}
-            updateState={updateState}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'string' } as DataViewField}
+              updateState={updateState}
+              setControlEditorValid={jest.fn()}
+            />
+          </OptionsListControlContext.Provider>
         );
 
         /** responds to change in search technique */
@@ -258,13 +249,14 @@ describe('Options list sorting button', () => {
 
         /** responds to the field type changing */
         component.rerender(
-          <OptionsListEditorOptions
-            initialState={initialState}
-            field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
-            updateState={jest.fn()}
-            setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
-          />
+          <OptionsListControlContext.Provider value={getOptionsListContextMock()}>
+            <OptionsListEditorOptions
+              initialState={initialState}
+              field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
+              updateState={jest.fn()}
+              setControlEditorValid={jest.fn()}
+            />
+          </OptionsListControlContext.Provider>
         );
 
         expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });

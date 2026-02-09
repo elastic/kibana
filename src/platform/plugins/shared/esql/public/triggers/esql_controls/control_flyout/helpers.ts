@@ -9,7 +9,7 @@
 import type { monaco } from '@kbn/monaco';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
-import { TIME_SPAN_UNITS } from '@kbn/esql-ast';
+import { TIME_SPAN_UNITS } from '@kbn/esql-language';
 import { css } from '@emotion/react';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {

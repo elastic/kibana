@@ -61,6 +61,9 @@ const rulesSchema = schema.object({
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
+  apiKeyType: schema.oneOf([schema.literal('es'), schema.literal('uiam')], {
+    defaultValue: 'es',
+  }),
 });
 
 export const configSchema = schema.object({
@@ -78,9 +81,6 @@ export const configSchema = schema.object({
   rulesSettings: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
-  }),
-  maintenanceWindow: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
   }),
   gapAutoFillScheduler: schema.maybe(
     schema.object({

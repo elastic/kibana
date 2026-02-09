@@ -28,6 +28,7 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/visualizations-common",
+    "@kbn/kql",
   ],
   "exclude": [
     "target/**/*",

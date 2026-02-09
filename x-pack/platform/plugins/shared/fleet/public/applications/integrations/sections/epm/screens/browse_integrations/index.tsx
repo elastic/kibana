@@ -12,7 +12,7 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
-import { PackageGrid } from './components/package_grid';
+import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
@@ -37,8 +37,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
     setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
@@ -46,7 +44,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({
-      searchString: searchTerm,
+      searchString: '',
       categoryId: '',
       subCategoryId: '',
       onlyAgentless: onlyAgentlessFilter,
@@ -80,7 +78,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <SearchAndFiltersBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <SearchAndFiltersBar />
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
@@ -93,7 +91,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             {filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
-              <PackageGrid
+              <ResponsivePackageGrid
                 items={filteredCards}
                 isLoading={
                   isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations

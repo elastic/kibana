@@ -14,10 +14,10 @@ export const deserializer = (data: ConnectorFormSchema): InternalConnectorForm =
   const formattedChannels =
     allowedChannels.map((channel) => {
       if (channel.name.startsWith('#')) {
-        return channel.name;
+        return channel;
       }
 
-      return `#${channel.name}`;
+      return { ...channel, name: `#${channel.name}` };
     }) ?? [];
 
   return {

@@ -30,8 +30,9 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery } from '@kbn/esql-language';
 import useDebounce from 'react-use/lib/useDebounce';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
@@ -112,7 +113,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews } = useTriggerUiActionServices();
+  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -137,7 +138,6 @@ export const EsqlQueryExpression: React.FC<
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
   const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
@@ -213,11 +213,14 @@ export const EsqlQueryExpression: React.FC<
     }
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+
     const table = await getESQLResults({
       esqlQuery: esqlQuery.esql,
       search: data.search.search,
       dropNullColumns: true,
       timeRange,
+      timezone,
       filter: timeFilter,
     });
     if (table.response) {
@@ -255,6 +258,7 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     data.search.search,
+    uiSettings,
     timeField,
     isServerless,
     groupBy,
@@ -287,7 +291,6 @@ export const EsqlQueryExpression: React.FC<
       if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
         clearParam('timeField');
       }
-      setDetectedTimestamp(timestampField);
     },
     [timeField, setParam, clearParam, dataViews, http]
   );
@@ -305,7 +308,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          detectedTimestamp={detectedTimestamp}
           hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}

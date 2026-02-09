@@ -7,9 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { getSnapshotMetadata } from './repository';
-import { loggerMock } from '@kbn/logging-mocks';
+import { ToolingLog } from '@kbn/tooling-log';
 
-const logger = loggerMock.create();
+const log = new ToolingLog({
+  level: 'silent',
+  writeTo: {
+    write: () => {},
+  },
+});
 
 describe('getSnapshotMetadata', () => {
   it('defaults to the latest SUCCESS snapshot (skips FAILED and in-progress snapshots)', async () => {
@@ -36,7 +41,7 @@ describe('getSnapshotMetadata', () => {
       },
     } as unknown as Client;
 
-    const result = await getSnapshotMetadata({ esClient, logger, repoName: 'repo-1' });
+    const result = await getSnapshotMetadata({ esClient, log, repoName: 'repo-1' });
 
     expect(esClient.snapshot.get).toHaveBeenCalledWith({ repository: 'repo-1', snapshot: '*' });
     expect(result.snapshot).toBe('snap-new-success');
@@ -62,7 +67,7 @@ describe('getSnapshotMetadata', () => {
 
     const result = await getSnapshotMetadata({
       esClient,
-      logger,
+      log,
       repoName: 'repo-1',
       snapshotName: 'my-snap',
     });
@@ -82,7 +87,12 @@ describe('getSnapshotMetadata', () => {
     } as unknown as Client;
 
     await expect(
-      getSnapshotMetadata({ esClient, logger, repoName: 'repo-1', snapshotName: 'missing-snap' })
+      getSnapshotMetadata({
+        esClient,
+        log,
+        repoName: 'repo-1',
+        snapshotName: 'missing-snap',
+      })
     ).rejects.toThrow('Snapshot "missing-snap" was not found in repository repo-1');
   });
 
@@ -111,7 +121,7 @@ describe('getSnapshotMetadata', () => {
 
     const result = await getSnapshotMetadata({
       esClient,
-      logger,
+      log,
       repoName: 'repo-1',
       snapshotName: 'match-*',
     });
@@ -135,7 +145,7 @@ describe('getSnapshotMetadata', () => {
       },
     } as unknown as Client;
 
-    await expect(getSnapshotMetadata({ esClient, logger, repoName: 'repo-1' })).rejects.toThrow(
+    await expect(getSnapshotMetadata({ esClient, log, repoName: 'repo-1' })).rejects.toThrow(
       'No restorable snapshots found in repository repo-1'
     );
   });

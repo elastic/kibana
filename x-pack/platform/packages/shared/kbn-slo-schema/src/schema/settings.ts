@@ -15,6 +15,7 @@ const storedSloSettingsSchema = t.intersection([
   // was added later, so it can be missing in some stored settings
   t.partial({
     staleThresholdInHours: t.number,
+    staleInstancesCleanupEnabled: t.boolean,
   }),
 ]);
 
@@ -22,10 +23,12 @@ const sloSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
   staleThresholdInHours: t.number,
+  staleInstancesCleanupEnabled: t.boolean,
 });
 
 const serverlessSloSettingsSchema = t.type({
   staleThresholdInHours: t.number,
+  staleInstancesCleanupEnabled: t.boolean,
 });
 
 export { serverlessSloSettingsSchema, sloSettingsSchema, storedSloSettingsSchema };

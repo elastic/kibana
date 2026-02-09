@@ -42,10 +42,13 @@ const AttachmentSchemaProps = {
 };
 export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
 
+export const emailSchema = z.array(z.string().max(512)).max(100);
+
 export const ParamsSchemaProps = {
-  to: z.array(z.string()).default([]),
-  cc: z.array(z.string()).default([]),
-  bcc: z.array(z.string()).default([]),
+  to: emailSchema.default([]),
+  cc: emailSchema.default([]),
+  bcc: emailSchema.default([]),
+  replyTo: z.array(z.string().max(512)).max(10).optional(),
   subject: z.string(),
   message: z.string(),
   messageHTML: z.string().nullable().default(null),

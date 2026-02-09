@@ -8,10 +8,10 @@
  */
 
 import { stringify, type ToStringOptions } from 'yaml';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getZodTypeName } from '../../../../../common/lib/zod';
-import { isMac } from '../../../../shared/utils/is_mac';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
@@ -48,10 +48,10 @@ export function generateConnectorSnippet(
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
-      connectorIdValue = defaultInstance.name;
+      connectorIdValue = defaultInstance.id; // Use UUID
     } else {
       // No instances configured, add placeholder comment
-      connectorIdValue = '# Enter connector ID here';
+      connectorIdValue = '# Enter connector UUID here';
     }
   }
 
@@ -99,7 +99,7 @@ export function generateConnectorSnippet(
 
     // If there are no required params, add a comment inside the empty with block
     if (requiredParams.length === 0) {
-      const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
+      const shortcut = isMac ? '⌘+I' : 'Ctrl+Space';
       const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
       // Replace the empty with block with comment and cursor positioned for parameters (2 spaces for step context)
       result = result.replace('with: {}', `with:\n  ${comment}\n  $0`);
@@ -115,7 +115,7 @@ export function generateConnectorSnippet(
 
   // If there are no required params, add a comment inside the empty with block
   if (requiredParams.length === 0) {
-    const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
+    const shortcut = isMac ? '⌘+I' : 'Ctrl+Space';
     const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
     // Replace the empty with block with one that has a comment (2 spaces for proper indentation)
     const withComment = yamlString.replace('with: {}', `with:\n  ${comment}\n  $0`);

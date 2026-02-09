@@ -12,6 +12,7 @@ import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 
 export const DELETE_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.deleteMigrationSuccess',
@@ -33,18 +34,19 @@ export const useDeleteMigration = (migrationType: MigrationType) => {
   const { addError, addSuccess } = useAppToasts();
   const { siemMigrations } = useKibana().services;
   const deleteMigration = useCallback(
-    (migrationId: string) => {
+    (migrationStats: MigrationTaskStats) => {
+      const { id: migrationId, vendor } = migrationStats;
       if (migrationType === 'rule') {
-        return siemMigrations.rules.deleteMigration(migrationId);
+        return siemMigrations.rules.deleteMigration({ migrationId, vendor });
       } else {
-        return siemMigrations.dashboards.deleteMigration(migrationId);
+        return siemMigrations.dashboards.deleteMigration({ migrationId, vendor });
       }
     },
     [siemMigrations, migrationType]
   );
 
   return useMutation({
-    mutationFn: (migrationId: string) => deleteMigration(migrationId),
+    mutationFn: (migrationStats: MigrationTaskStats) => deleteMigration(migrationStats),
     onSuccess: () => {
       addSuccess(DELETE_MIGRATION_SUCCESS);
     },

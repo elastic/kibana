@@ -66,6 +66,7 @@ export interface ReindexServiceWrapperConstructorArgs {
   security: SecurityPluginStart;
   version: Version;
   rollupsEnabled: boolean;
+  isServerless: boolean;
 }
 
 export class ReindexServiceWrapper {
@@ -78,6 +79,7 @@ export class ReindexServiceWrapper {
     soClient: SavedObjectsClientContract;
     version: Version;
     rollupsEnabled: boolean;
+    isServerless: boolean;
   };
 
   constructor({
@@ -89,6 +91,7 @@ export class ReindexServiceWrapper {
     security,
     version,
     rollupsEnabled,
+    isServerless,
   }: ReindexServiceWrapperConstructorArgs) {
     this.deps = {
       credentialStore,
@@ -98,6 +101,7 @@ export class ReindexServiceWrapper {
       soClient,
       version,
       rollupsEnabled,
+      isServerless,
     };
 
     this.reindexWorker = ReindexWorker.create(
@@ -107,7 +111,9 @@ export class ReindexServiceWrapper {
       logger,
       licensing,
       security,
-      version
+      version,
+      rollupsEnabled,
+      isServerless
     );
 
     this.reindexWorker.start();
@@ -136,7 +142,8 @@ export class ReindexServiceWrapper {
       reindexActions,
       this.deps.logger,
       this.deps.licensing,
-      this.deps.version
+      this.deps.version,
+      this.deps.isServerless
     );
 
     const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {

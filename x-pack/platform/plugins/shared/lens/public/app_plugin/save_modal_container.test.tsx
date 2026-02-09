@@ -260,12 +260,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: undefined }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                serializedState: expect.objectContaining({ savedObjectId: undefined }),
               }),
             ]),
           })
@@ -295,12 +290,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: '1234' }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                serializedState: expect.objectContaining({ savedObjectId: '1234' }),
               }),
             ]),
           })

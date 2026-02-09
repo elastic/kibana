@@ -32,6 +32,8 @@
           "(score: number) => number"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 152,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,6 +91,8 @@
           " | undefined; } & { fieldName: string; }>[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 202,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +115,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 207,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,6 +146,8 @@
           ") => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 160,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -160,6 +170,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 166,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,6 +201,8 @@
           ") => string | number | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 182,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +225,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 188,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,6 +248,8 @@
           "(score: number) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_formatted_severity_score.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -248,6 +266,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_formatted_severity_score.ts",
+            "lineNumber": 12,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -279,6 +299,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -296,6 +318,8 @@
               "<{}>"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+            "lineNumber": 23,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -326,6 +350,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -342,6 +368,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity.ts",
+            "lineNumber": 17,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -363,6 +391,8 @@
           "(normalizedScore: number) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_color.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -447,6 +477,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_color.ts",
+            "lineNumber": 16,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -475,6 +507,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,6 +525,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -519,6 +555,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,6 +573,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 93,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -558,6 +598,8 @@
           "<{}>) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -574,6 +616,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,6 +636,8 @@
               "<{}>"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -615,6 +661,8 @@
           "<{}>) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -629,6 +677,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -645,6 +695,8 @@
               "<{}>"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -674,6 +726,8 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -696,6 +750,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 83,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -717,6 +773,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -733,6 +791,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -764,6 +824,8 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -786,6 +848,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 114,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -815,6 +879,8 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -837,6 +903,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 263,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -858,6 +926,8 @@
           "(functionDescription: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -874,6 +944,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 245,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -895,6 +967,8 @@
           "(functionDescription: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 249,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -911,6 +985,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 255,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -932,6 +1008,8 @@
           "(normalizedScore: number) => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -948,6 +1026,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts",
+            "lineNumber": 73,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -979,6 +1059,8 @@
           ") => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -993,6 +1075,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1014,6 +1098,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1034,6 +1120,8 @@
           "\nDefinition for a pair of aggregation and field name."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 180,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1047,6 +1135,8 @@
               "\nThe aggregation definition."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,6 +1150,8 @@
               "\nThe field name"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1076,6 +1168,8 @@
               "{ field: string | null; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1092,6 +1186,8 @@
               "{ field: string | null; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 199,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1108,6 +1204,8 @@
               "{ field: string | null; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1124,6 +1222,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1140,6 +1240,8 @@
           "\nDefinition for a pair of aggregation and field."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 141,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1162,6 +1264,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1184,6 +1288,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1208,6 +1314,8 @@
               "; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1232,6 +1340,8 @@
               "; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1256,6 +1366,8 @@
               "; value: string | null; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1272,6 +1384,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1288,6 +1402,8 @@
           "\nAggregation definition."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1310,6 +1426,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1323,6 +1441,8 @@
               "\nThe aggregation title."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1346,6 +1466,8 @@
               " | null"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1369,6 +1491,8 @@
               " | null"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1385,6 +1509,8 @@
               "\"metrics\""
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1401,6 +1527,8 @@
               "{ min: string; max: string; }"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1417,6 +1545,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1440,6 +1570,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1471,6 +1603,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1482,6 +1616,8 @@
             "label": "stop",
             "description": [],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1493,6 +1629,8 @@
             "label": "color",
             "description": [],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_ramp.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1509,6 +1647,8 @@
           "\nField definition"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1522,6 +1662,8 @@
               "\nThe field id"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1535,6 +1677,8 @@
               "\nThe field name"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1557,6 +1701,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1570,6 +1716,8 @@
               "\nFlag whether the field is aggregatable."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1583,6 +1731,8 @@
               "\nFlag for counter."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,6 +1756,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1629,6 +1781,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1646,6 +1800,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1662,6 +1818,8 @@
           "\nAnomaly table record, representing the fields shown in the ML UI anomalies table."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1675,6 +1833,8 @@
               "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 249,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1697,6 +1857,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1710,6 +1872,8 @@
               "\nUnique identifier for the table row."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1723,6 +1887,8 @@
               "\nIdentifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1736,6 +1902,8 @@
               "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1749,6 +1917,8 @@
               "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 276,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1765,6 +1935,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1781,6 +1953,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 288,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,6 +1971,8 @@
               "{ [key: string]: any; }[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1813,6 +1989,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 299,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1829,6 +2007,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 304,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1845,6 +2025,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 310,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1861,6 +2043,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 315,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1877,6 +2061,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 321,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1900,6 +2086,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 327,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1916,6 +2104,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 333,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,6 +2122,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 339,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1948,6 +2140,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 344,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1981,6 +2175,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 350,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1994,6 +2190,8 @@
               "\nThe detector name."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 356,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,6 +2208,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 360,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2026,6 +2226,8 @@
           "\nAnomaly record document for categorizer stats."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 371,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2042,6 +2244,8 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 375,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2055,6 +2259,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 381,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2071,6 +2277,8 @@
               "\"categorizer_stats\""
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 386,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2087,6 +2295,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 391,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2103,6 +2313,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 397,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2116,6 +2328,8 @@
               "\nThe number of documents."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 402,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2129,6 +2343,8 @@
               "\nThe total number of categories."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 407,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2142,6 +2358,8 @@
               "\nThe number of frequent categories."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 412,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2155,6 +2373,8 @@
               "\nThe number of rare categories."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 417,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2168,6 +2388,8 @@
               "\nThe number of dead categories."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 422,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2181,6 +2403,8 @@
               "\nThe number of failed categories."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 427,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2197,6 +2421,8 @@
               "\"ok\" | \"warn\""
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 432,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2210,6 +2436,8 @@
               "\nThe log time."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 437,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2223,6 +2451,8 @@
               "\nThe start time of the bucket for which these results were calculated."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 442,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2239,6 +2469,8 @@
           "\nAnomaly record document. Records contain the detailed analytical results.\nThey describe the anomalous activity that has been identified in the input data based on the detector configuration."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2255,6 +2487,8 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,6 +2502,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2281,6 +2517,8 @@
               "\nThe type of the result document, which is 'record' for record level results."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2294,6 +2532,8 @@
               "\nThe probability of the individual anomaly occurring, in the range 0 to 1.\nThis value can be held to a high precision of over 300 decimal places,\nso the record_score is provided as a human-readable and friendly interpretation of this."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2307,6 +2547,8 @@
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nUnlike initial_record_score, this value will be updated by a re-normalization process as new data is analyzed."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2320,6 +2562,8 @@
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nThis is the initial value that was calculated at the time the bucket was processed."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2333,6 +2577,8 @@
               "\nThe length of the bucket in seconds. This value matches the bucket_span that is specified in the job."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2346,6 +2592,8 @@
               "\nA unique identifier for the detector. This identifier is based on the order of the detectors\nin the analysis configuration, starting at zero."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2359,6 +2607,8 @@
               "\nIf true, this is an interim result. In other words, the results are calculated based on partial input data."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2372,6 +2622,8 @@
               "\nThe start time of the bucket for which these results were calculated."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2388,6 +2640,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2404,6 +2658,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2417,6 +2673,8 @@
               "\nThe function in which the anomaly occurs, as specified in the detector configuration. For example, max."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2430,6 +2688,8 @@
               "\nThe description of the function in which the anomaly occurs, as specified in the detector configuration."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2446,6 +2706,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2462,6 +2724,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2478,6 +2742,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2501,6 +2767,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2517,6 +2785,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2533,6 +2803,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2549,6 +2821,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2565,6 +2839,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2581,6 +2857,8 @@
               "{ function: string; function_description: string; probability: number; actual: number[]; typical: number[]; field_name?: string | undefined; over_field_name?: string | undefined; over_field_value?: string | undefined; by_field_name?: string | undefined; by_field_value?: string | undefined; partition_field_name?: string | undefined; partition_field_value?: string | number | undefined; }[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2597,6 +2875,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 187,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2613,6 +2893,8 @@
               "{ anomaly_type?: \"spike\" | \"dip\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; multimodal_distribution?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2646,6 +2928,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2659,6 +2943,8 @@
               "\nThe `earliest` timestamp."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2672,6 +2958,8 @@
               "\nThe `latest` timestamp."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2688,6 +2976,8 @@
           "\nInfluencers are the entities that have contributed to, or are to blame for, the anomalies.\nInfluencer results are available only if an influencer_field_name is specified in the job configuration."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2701,6 +2991,8 @@
               "\nThe field name of the influencer."
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2717,6 +3009,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2743,6 +3037,8 @@
           " extends BaseUrlConfig"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2759,6 +3055,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2773,6 +3071,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2789,6 +3089,8 @@
           "\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2811,6 +3113,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2824,6 +3128,8 @@
               "\nTranslated ML_ANOMALY_SEVERITY"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2840,6 +3146,8 @@
           "\nJob caps for a new job."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2863,6 +3171,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2886,6 +3196,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2902,6 +3214,8 @@
           "\nJob caps response for a new job."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2925,6 +3239,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2943,6 +3259,8 @@
           "\nEnum for ES aggregatins."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2957,6 +3275,8 @@
           "\nEnum for Kibana aggregations."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2971,6 +3291,8 @@
           "\nLabels displayed in the ML UI to indicate the severity of the anomaly according\nto the normalized anomaly score."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2985,6 +3307,8 @@
           "\nAnomaly score numeric thresholds to indicate the severity of the anomaly."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_threshold.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2999,6 +3323,8 @@
           "\nEnum ML_DETECTOR_RULE_ACTION"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3013,6 +3339,8 @@
           "\nEnum ML_DETECTOR_RULE_APPLIES_TO"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3027,6 +3355,8 @@
           "\nEnum ML_DETECTOR_RULE_FILTER_TYPE"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3041,6 +3371,8 @@
           "\nEnum ML_DETECTOR_RULE_OPERATOR"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3055,6 +3387,8 @@
           "\nEnum of entity field types"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3069,6 +3403,8 @@
           "\nEnum for ML job aggregations."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3088,6 +3424,8 @@
           "\"_doc_count\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3111,6 +3449,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3134,6 +3474,8 @@
           " | undefined; readonly fieldName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 461,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3151,6 +3493,8 @@
           "\"doc_count\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3168,6 +3512,8 @@
           "\"__ml_event_rate_count__\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3185,6 +3531,8 @@
           "string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3200,6 +3548,8 @@
           "{ readonly fieldValue?: any; readonly fieldName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 463,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3217,6 +3567,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/es_client.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3234,6 +3586,8 @@
           "\"metrics\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3251,6 +3605,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3265,6 +3621,8 @@
           "\nEnum ML_DETECTOR_RULE_PARAMS"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3279,6 +3637,8 @@
           "\nEnum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3296,6 +3656,8 @@
           "\"job_id\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3313,6 +3675,8 @@
           "\"partition_field_value\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3336,6 +3700,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3353,6 +3719,8 @@
           "\"record\" | \"bucket\" | \"influencer\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 453,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3370,6 +3738,8 @@
           "\"mlcategory\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3395,6 +3765,8 @@
           " | undefined; readonly fieldName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3412,6 +3784,8 @@
           "\"+\" | \"-\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3429,6 +3803,8 @@
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 448,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3453,6 +3829,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 247,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3477,6 +3855,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 128,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3494,6 +3874,8 @@
           "\"number\" | \"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3511,6 +3893,8 @@
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 366,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3534,6 +3918,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3558,6 +3944,8 @@
           " | BaseUrlConfig"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3575,6 +3963,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3600,6 +3990,8 @@
           ">]; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3664,6 +4056,8 @@
           ".LOW_NON_NULL_SUM"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3688,6 +4082,8 @@
           " | null"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3704,6 +4100,8 @@
           "\nTwo functions for converting aggregation type names.\nML and ES use different names for the same function.\nPossible values for ML aggregation type are (defined in lib/model/CAnomalyDetector.cc):\n   count\n   distinct_count\n   rare\n   info_content\n   mean\n   median\n   min\n   max\n   varp\n   sum\n   lat_long\n   time\nThe input to toES and the output from toML correspond to the value of the\nfunction_description field of anomaly records."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 291,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3720,6 +4118,8 @@
               "(oldAggType: string) => string"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 292,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3736,6 +4136,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+                "lineNumber": 297,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3756,6 +4158,8 @@
               "(oldAggType: string) => string"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+            "lineNumber": 310,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3772,6 +4176,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+                "lineNumber": 315,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3795,6 +4201,8 @@
           "readonly [\"initial_record_score\", \"function\", \"field_name\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3812,6 +4220,8 @@
           "{ readonly PARTITION_FIELD_NAME: \"partition_field_name\"; readonly PARTITION_FIELD_VALUE: \"partition_field_value\"; readonly BY_FIELD_NAME: \"by_field_name\"; readonly BY_FIELD_VALUE: \"by_field_value\"; readonly OVER_FIELD_NAME: \"over_field_name\"; readonly OVER_FIELD_VALUE: \"over_field_value\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3827,6 +4237,8 @@
           "readonly [\"job_id\", \"is_interim\", \"record_score\", \"influencer_score\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3844,6 +4256,8 @@
           "readonly [\"influencer_field_name\", \"influencer_field_value\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3861,6 +4275,8 @@
           "{ readonly BUCKET: \"bucket\"; readonly RECORD: \"record\"; readonly INFLUENCER: \"influencer\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3878,6 +4294,8 @@
           "{ readonly ADD: \"+\"; readonly REMOVE: \"-\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3895,6 +4313,8 @@
           "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly UNKNOWN: \"unknown\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3912,6 +4332,8 @@
           "readonly [\"partition_field\", \"over_field\", \"by_field\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3928,6 +4350,8 @@
           "\nRGB hex codes used to indicate the severity of an anomaly according to its anomaly score."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -3963,6 +4387,8 @@
               "/**\n   * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3976,6 +4402,8 @@
               "/**\n   * Color used in the UI to indicate a major anomaly, with a score greater than or equal to 50 and less than 75 .\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3989,6 +4417,8 @@
               "/**\n   * Color used in the UI to indicate a minor anomaly, with a score greater than or equal to 25 and less than 50.\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4002,6 +4432,8 @@
               "/**\n   * Color used in the UI to indicate a warning anomaly, with a score greater than or equal to 3 and less than 25.\n   * Note in some parts of the UI, warning severity is used when the score is greater than or equal to 0.\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4015,6 +4447,8 @@
               "/**\n   * Color used in some parts of the UI to indicate a low severity anomaly, with a score greater than or equal to 0 and less than 3.\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4028,6 +4462,8 @@
               "/**\n   * Color used in the UI to indicate an anomaly for which the score is unknown.\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4044,6 +4480,8 @@
           "\nDefinition for an ml category."
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "lineNumber": 222,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4057,6 +4495,8 @@
               "/**\n   * id `mlcategory` id\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4070,6 +4510,8 @@
               "/**\n   * name `mlcategory`\n   */"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 227,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4093,6 +4535,8 @@
               ".KEYWORD"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4109,6 +4553,8 @@
               "false"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4125,6 +4571,8 @@
               "false"
             ],
             "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4144,6 +4592,8 @@
           "readonly [\"causes.actual\", \"causes.typical\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4161,6 +4611,8 @@
           "readonly [\"influencers.influencer_field_name\", \"influencers.influencer_field_values\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4226,6 +4678,8 @@
           ".LOW_NON_NULL_SUM]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4243,6 +4697,8 @@
           "readonly [\"actual\", \"typical\"]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/filter_field_constants.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

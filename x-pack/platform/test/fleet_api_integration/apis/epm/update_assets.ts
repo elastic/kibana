@@ -350,6 +350,10 @@ export default function (providerContext: FtrProviderContext) {
                 type: 'alerting_rule_template',
               },
               {
+                id: 'sample_slo_template',
+                type: 'slo_template',
+              },
+              {
                 id: 'sample_dashboard',
                 type: 'dashboard',
               },
@@ -600,6 +604,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               id: 'cc1e3e1d-f27b-5d05-86f6-6e4b9a47c7dc',
               path: 'all_assets-0.2.0/data_stream/test_metrics/manifest.yml',
+              type: 'epm-packages-assets',
+            },
+            {
+              id: 'cf050fd1-4a35-50e7-b98c-4a48dfca5724',
+              path: 'all_assets-0.2.0/kibana/slo_template/nginx-availability.json',
               type: 'epm-packages-assets',
             },
             {

@@ -21,6 +21,7 @@ import type {
   EntityNodeViewModel,
   LabelNodeViewModel,
   GroupNodeViewModel,
+  RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
 
@@ -34,11 +35,29 @@ export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =
 export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
   node.shape === 'label';
 
+export const isRelationshipNode = (node: NodeViewModel): node is RelationshipNodeViewModel =>
+  node.shape === 'relationship';
+
+/**
+ * Returns true if the shape is a connector shape (label or relationship).
+ * Connector shapes act as connectors between entity nodes.
+ */
+export const isConnectorShape = (shape?: string): boolean =>
+  shape === 'label' || shape === 'relationship';
+
+/**
+ * Returns true for nodes that act as connectors between entity nodes (label or relationship nodes).
+ * These nodes share similar layout and sizing behavior.
+ */
+export const isConnectorNode = (
+  node: NodeViewModel
+): node is LabelNodeViewModel | RelationshipNodeViewModel => isConnectorShape(node.shape);
+
 export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
   node.shape === 'group';
 
 export const isStackedLabel = (node: NodeViewModel): boolean =>
-  !(node.shape === 'label' && Boolean(node.parentId));
+  !((node.shape === 'label' || node.shape === 'relationship') && Boolean(node.parentId));
 
 /**
  * Type guard: Returns true if node.documentsData is a non-empty array.
@@ -200,7 +219,10 @@ export const buildGraphFromViewModels = (
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
-    } else if (nodeData.shape === 'label' && nodeData.parentId) {
+    } else if (
+      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      nodeData.parentId
+    ) {
       node.parentId = nodeData.parentId;
       node.extent = 'parent';
       node.expandParent = false;
@@ -213,18 +235,13 @@ export const buildGraphFromViewModels = (
   const edges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const isIn =
-        nodesById[edgeData.source].shape !== 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isInside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape === 'label';
-      const isOut =
-        nodesById[edgeData.source].shape === 'label' &&
-        nodesById[edgeData.target].shape === 'group';
-      const isOutside =
-        nodesById[edgeData.source].shape === 'group' &&
-        nodesById[edgeData.target].shape !== 'label';
+      const sourceShape = nodesById[edgeData.source].shape;
+      const targetShape = nodesById[edgeData.target].shape;
+
+      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
+      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
+      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
+      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
 
       return {
         id: edgeData.id,

@@ -17,6 +17,8 @@
           "\nMocks for the Feature Flags service (browser-side)"
         ],
         "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               ">>"
             ],
             "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -63,6 +67,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -83,6 +89,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/browser-mocks/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

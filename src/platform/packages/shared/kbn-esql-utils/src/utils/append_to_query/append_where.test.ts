@@ -253,4 +253,60 @@ AND MATCH(\`tags.keyword\`, "info") AND MATCH(\`tags.keyword\`, "success")`
 | WHERE \`tags.keyword\` is null`
     );
   });
+
+  it('properly escapes values containing line breaks', () => {
+    const messageWithLineBreaks = `Error occurred at line 10\nStack trace:\n  at function foo()`;
+
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logs-*',
+        'exception.message',
+        messageWithLineBreaks,
+        '+',
+        'string'
+      )
+    ).toBe(
+      `from logs-*
+| WHERE \`exception.message\` == "Error occurred at line 10\\nStack trace:\\n  at function foo()"`
+    );
+  });
+
+  it('properly escapes values containing carriage returns and tabs', () => {
+    const messageWithReturnsAndTabs = 'Error\r\nwith\ttabs';
+
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logs-*',
+        'message',
+        messageWithReturnsAndTabs,
+        '+',
+        'string'
+      )
+    ).toBe(
+      `from logs-*
+| WHERE \`message\` == "Error\\r\\nwith\\ttabs"`
+    );
+  });
+
+  it('properly escapes line breaks in multivalue MATCH clauses', () => {
+    const valuesWithLineBreaks = ['error\nmessage', 'another\nvalue'];
+
+    expect(
+      appendWhereClauseToESQLQuery('from logs-*', 'message', valuesWithLineBreaks, '+', 'string')
+    ).toBe(
+      `from logs-*
+| WHERE MATCH(\`message\`, "error\\nmessage") AND MATCH(\`message\`, "another\\nvalue")`
+    );
+  });
+
+  it('properly escapes all possible special characters in a string value', () => {
+    const complexValue = 'Error: "path\\to\\file"\nStack trace\r\nwith\ttabs';
+
+    expect(
+      appendWhereClauseToESQLQuery('from logs-*', 'message', complexValue, '+', 'string')
+    ).toBe(
+      `from logs-*
+| WHERE \`message\` == "Error: \\"path\\\\to\\\\file\\"\\nStack trace\\r\\nwith\\ttabs"`
+    );
+  });
 });

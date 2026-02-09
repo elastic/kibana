@@ -2,14 +2,14 @@
 
 exports[`install footer should render 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      aria-label="Add Data Set Name"
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      aria-label="Install Data Set Name"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
       data-test-subj="addSampleDataSetdata-set-id"
       type="button"
     >
@@ -17,9 +17,13 @@ exports[`install footer should render 1`] = `
         class="emotion-euiButtonDisplayContent"
       >
         <span
+          color="inherit"
+          data-euiicon-type="download"
+        />
+        <span
           class="eui-textTruncate"
         >
-          Add data
+          Install data
         </span>
       </span>
     </button>

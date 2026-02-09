@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { useKibana } from '../../common/lib/kibana';
 import type { AgentBuilderAddToChatTelemetry } from './use_report_add_to_chat';
 import { useReportAddToChat } from './use_report_add_to_chat';

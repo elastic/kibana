@@ -78,7 +78,13 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import {
+  LENS_CONTENT_TYPE,
+  LENS_ITEM_LATEST_VERSION,
+} from '@kbn/lens-common/content_management/constants';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -125,7 +131,7 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
+
 import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
@@ -161,6 +167,7 @@ export interface LensPluginSetupDependencies {
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
@@ -400,17 +407,16 @@ export class LensPlugin {
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
 
-          embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-            const { getLensTransforms } = await import('./async_services');
-            const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
-            const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+          embeddable.registerLegacyURLTransform(
+            LENS_EMBEDDABLE_TYPE,
+            async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+              const { getTransformOut } = await import('./async_services');
+              const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+              const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-            return getLensTransforms({
-              builder,
-              transformEnhancementsIn: embeddable.transformEnhancementsIn,
-              transformEnhancementsOut: embeddable.transformEnhancementsOut,
-            }).transformOut;
-          });
+              return getTransformOut(builder, transformDrilldownsOut);
+            }
+          );
         })
       );
 
@@ -421,12 +427,12 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                } satisfies LensByRefSerializedState,
-              },
+                savedObjectId: savedObject.id,
+              } satisfies LensByRefSerializedState,
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,

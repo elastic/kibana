@@ -8,7 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import * as i18n from './translations';
 import { robotIconType } from './robot_icon';

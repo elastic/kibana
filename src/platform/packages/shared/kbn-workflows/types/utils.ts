@@ -14,8 +14,9 @@ import type {
   HttpMethod,
   InternalConnectorContract,
 } from './v1';
-import { ExecutionStatus, KNOWN_HTTP_METHODS } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
+  BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
@@ -25,11 +26,12 @@ import type {
   MergeStep,
   ParallelStep,
   Step,
-  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
+import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
+import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -60,14 +62,7 @@ export function isDangerousStatus(status: ExecutionStatus) {
 }
 
 export function isTerminalStatus(status: ExecutionStatus) {
-  const TerminalStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.COMPLETED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.CANCELLED,
-    ExecutionStatus.SKIPPED,
-    ExecutionStatus.TIMED_OUT,
-  ];
-  return TerminalStatus.includes(status);
+  return TerminalExecutionStatuses.includes(status);
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {
@@ -105,3 +100,6 @@ export const isDynamicConnector = (
 
 export const isHttpMethod = (method: string): method is HttpMethod =>
   KNOWN_HTTP_METHODS.includes(method as HttpMethod);
+
+export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
+  BuiltInStepProperties.includes(property as BuiltInStepProperty);

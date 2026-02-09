@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -49,8 +49,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[0]).toStrictEqual(
       expect.objectContaining({ attributes: { status: 'active', is_active: 'yes' } })
     );
-    expect(ingestResult[1].attributes).not.toHaveProperty('is_active');
-    expect(ingestResult[2].attributes).not.toHaveProperty('is_active');
+    expect(ingestResult[1].attributes?.is_active).toBeUndefined();
+    expect(ingestResult[2].attributes?.is_active).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ 'attributes.status': 'active', 'attributes.is_active': 'yes' })
@@ -97,7 +97,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[0]).toStrictEqual(
       expect.objectContaining({ attributes: { status: 'active', not_deleted: 'kept' } })
     );
-    expect(ingestResult[1].attributes).not.toHaveProperty('not_deleted');
+    expect(ingestResult[1].attributes?.not_deleted).toBeUndefined();
     expect(ingestResult[2]).toStrictEqual(
       expect.objectContaining({ attributes: { status: 'inactive', not_deleted: 'kept' } })
     );
@@ -154,8 +154,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1]).toStrictEqual(
       expect.objectContaining({ attributes: { priority: 8, high_priority: 'high' } })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('high_priority');
-    expect(ingestResult[3].attributes).not.toHaveProperty('high_priority');
+    expect(ingestResult[2].attributes?.high_priority).toBeUndefined();
+    expect(ingestResult[3].attributes?.high_priority).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ 'attributes.priority': 10, 'attributes.high_priority': 'high' })
@@ -210,7 +210,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { age: 18, adult: 'yes' } })
       );
-      expect(ingestResult[2].attributes).not.toHaveProperty('adult');
+      expect(ingestResult[2].attributes?.adult).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.age': 25, 'attributes.adult': 'yes' })
@@ -262,8 +262,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1]).toStrictEqual(
       expect.objectContaining({ attributes: { quantity: 8, low_stock: 'low' } })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('low_stock');
-    expect(ingestResult[3].attributes).not.toHaveProperty('low_stock');
+    expect(ingestResult[2].attributes?.low_stock).toBeUndefined();
+    expect(ingestResult[3].attributes?.low_stock).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ 'attributes.quantity': 5, 'attributes.low_stock': 'low' })
@@ -316,7 +316,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1]).toStrictEqual(
       expect.objectContaining({ attributes: { size: 1024, small_file: 'small' } })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('small_file');
+    expect(ingestResult[2].attributes?.small_file).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ 'attributes.size': 512, 'attributes.small_file': 'small' })
@@ -363,7 +363,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[0].attributes).toStrictEqual(
       expect.objectContaining({ user_email: 'test@example.com', has_email: 'yes' })
     );
-    expect(ingestResult[1].attributes).not.toHaveProperty('has_email');
+    expect(ingestResult[1].attributes?.has_email).toBeUndefined();
     expect(ingestResult[2].attributes).toStrictEqual(
       expect.objectContaining({ user_email: 'another@example.com', has_email: 'yes' })
     );
@@ -421,15 +421,15 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     await testBed.ingest('esql-range', [mappingDoc, ...docs]);
     const esqlResult = await esql.queryOnIndex('esql-range', query);
 
-    expect(ingestResult[0].attributes).not.toHaveProperty('in_range');
+    expect(ingestResult[0].attributes?.in_range).toBeUndefined();
     expect(ingestResult[1]).toStrictEqual(
       expect.objectContaining({ attributes: { temperature: 20, in_range: 'optimal' } })
     );
     expect(ingestResult[2]).toStrictEqual(
       expect.objectContaining({ attributes: { temperature: 25, in_range: 'optimal' } })
     );
-    expect(ingestResult[3].attributes).not.toHaveProperty('in_range');
-    expect(ingestResult[4].attributes).not.toHaveProperty('in_range');
+    expect(ingestResult[3].attributes?.in_range).toBeUndefined();
+    expect(ingestResult[4].attributes?.in_range).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ 'attributes.temperature': 15, 'attributes.in_range': null })
@@ -493,8 +493,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         matched: 'matched',
       })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('matched');
-    expect(ingestResult[3].attributes).not.toHaveProperty('matched');
+    expect(ingestResult[2].attributes?.matched).toBeUndefined();
+    expect(ingestResult[3].attributes?.matched).toBeUndefined();
     // Case-insensitive matches
     expect(ingestResult[4].attributes).toStrictEqual(
       expect.objectContaining({ service_name: 'SYNTH-SERVICE-2', matched: 'matched' })
@@ -592,8 +592,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1].attributes).toStrictEqual(
       expect.objectContaining({ message: 'Error: Timeout occurred', is_error: 'error' })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('is_error');
-    expect(ingestResult[3].attributes).not.toHaveProperty('is_error');
+    expect(ingestResult[2].attributes?.is_error).toBeUndefined();
+    expect(ingestResult[3].attributes?.is_error).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -659,8 +659,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1].attributes).toStrictEqual(
       expect.objectContaining({ filename: 'error.log', is_log_file: 'log' })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('is_log_file');
-    expect(ingestResult[3].attributes).not.toHaveProperty('is_log_file');
+    expect(ingestResult[2].attributes?.is_log_file).toBeUndefined();
+    expect(ingestResult[3].attributes?.is_log_file).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -745,8 +745,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[0].attributes).toStrictEqual(
       expect.objectContaining({ service_name: 'prod-api', priority: 'high' })
     );
-    expect(ingestResult[1].attributes).not.toHaveProperty('priority');
-    expect(ingestResult[2].attributes).not.toHaveProperty('priority');
+    expect(ingestResult[1].attributes?.priority).toBeUndefined();
+    expect(ingestResult[2].attributes?.priority).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -802,11 +802,11 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[0].attributes).toStrictEqual(
       expect.objectContaining({ log_level: 'INFO', not_debug: 'production' })
     );
-    expect(ingestResult[1].attributes).not.toHaveProperty('not_debug');
+    expect(ingestResult[1].attributes?.not_debug).toBeUndefined();
     expect(ingestResult[2].attributes).toStrictEqual(
       expect.objectContaining({ log_level: 'ERROR', not_debug: 'production' })
     );
-    expect(ingestResult[3].attributes).not.toHaveProperty('not_debug');
+    expect(ingestResult[3].attributes?.not_debug).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -875,7 +875,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[2].attributes).toStrictEqual(
       expect.objectContaining({ message: 'Kernel panic', important: 'critical' })
     );
-    expect(ingestResult[3].attributes).not.toHaveProperty('important');
+    expect(ingestResult[3].attributes?.important).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -900,6 +900,120 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         'attributes.message': 'Warning: Low disk space',
         'attributes.important': null,
       })
+    );
+  });
+
+  apiTest(
+    'should handle includes filter condition with string array',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.has_error_tag',
+            value: 'yes',
+            where: {
+              field: 'attributes.tags',
+              includes: 'error',
+            },
+          } as SetProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const mappingDoc = { attributes: { tags: [''], has_error_tag: 'null' } };
+      const docs = [
+        { attributes: { tags: ['error', 'warning', 'info'] } },
+        { attributes: { tags: ['warning', 'info'] } },
+        { attributes: { tags: ['error'] } },
+        { attributes: { tags: ['debug', 'trace'] } },
+      ];
+
+      await testBed.ingest('ingest-includes-string', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-includes-string');
+
+      await testBed.ingest('esql-includes-string', [mappingDoc, ...docs]);
+      const esqlResult = await esql.queryOnIndex('esql-includes-string', query);
+
+      // Ingest pipeline results
+      expect(ingestResult[0].attributes).toStrictEqual(
+        expect.objectContaining({ tags: ['error', 'warning', 'info'], has_error_tag: 'yes' })
+      );
+      expect(ingestResult[1].attributes?.has_error_tag).toBeUndefined();
+      expect(ingestResult[2].attributes).toStrictEqual(
+        expect.objectContaining({ tags: ['error'], has_error_tag: 'yes' })
+      );
+      expect(ingestResult[3].attributes?.has_error_tag).toBeUndefined();
+
+      // ESQL results
+      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': 'yes' })
+      );
+      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': null })
+      );
+      expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': 'yes' })
+      );
+      expect(esqlResult.documentsOrdered[4]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': null })
+      );
+    }
+  );
+
+  apiTest('should handle includes with NOT condition', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.no_admin',
+          value: 'regular_user',
+          where: {
+            not: {
+              field: 'attributes.roles',
+              includes: 'admin',
+            },
+          },
+        } as SetProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const mappingDoc = { attributes: { roles: [''], no_admin: 'null' } };
+    const docs = [
+      { attributes: { roles: ['user', 'viewer'] } },
+      { attributes: { roles: ['admin', 'user'] } },
+      { attributes: { roles: ['editor'] } },
+    ];
+
+    await testBed.ingest('ingest-includes-not', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-includes-not');
+
+    await testBed.ingest('esql-includes-not', [mappingDoc, ...docs]);
+    const esqlResult = await esql.queryOnIndex('esql-includes-not', query);
+
+    // Ingest pipeline results
+    expect(ingestResult[0].attributes).toStrictEqual(
+      expect.objectContaining({ roles: ['user', 'viewer'], no_admin: 'regular_user' })
+    );
+    expect(ingestResult[1].attributes?.no_admin).toBeUndefined();
+    expect(ingestResult[2].attributes).toStrictEqual(
+      expect.objectContaining({ roles: ['editor'], no_admin: 'regular_user' })
+    );
+
+    // ESQL results
+    expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': 'regular_user' })
+    );
+    expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': null })
+    );
+    expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': 'regular_user' })
     );
   });
 
@@ -941,8 +1055,8 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     expect(ingestResult[1].attributes).toStrictEqual(
       expect.objectContaining({ url_path: '/api/v1/products/123', is_api_path: 'api_v1' })
     );
-    expect(ingestResult[2].attributes).not.toHaveProperty('is_api_path');
-    expect(ingestResult[3].attributes).not.toHaveProperty('is_api_path');
+    expect(ingestResult[2].attributes?.is_api_path).toBeUndefined();
+    expect(ingestResult[3].attributes?.is_api_path).toBeUndefined();
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -967,6 +1081,59 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         'attributes.url_path': '/admin/users',
         'attributes.is_api_path': null,
       })
+    );
+  });
+
+  apiTest('should handle single-element arrays in filter conditions', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.matched',
+          value: 'yes',
+          where: {
+            field: 'attributes.tag',
+            eq: 'important',
+          },
+        } as SetProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
+    const docs = [
+      { attributes: { tag: ['important'] } }, // single-element array - should match
+      { attributes: { tag: 'important' } }, // regular string - should match
+      { attributes: { tag: ['other'] } }, // single-element array - should NOT match
+      { attributes: { tag: 'other' } }, // regular string - should NOT match
+    ];
+
+    await testBed.ingest('ingest-single-array', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-single-array');
+
+    await testBed.ingest('esql-single-array', [mappingDoc, ...docs]);
+    const esqlResult = await esql.queryOnIndex('esql-single-array', query);
+
+    // Single-element array ['important'] should match like 'important'
+    expect(ingestResult[0].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[1].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[2].attributes?.matched).toBeUndefined();
+    expect(ingestResult[3].attributes?.matched).toBeUndefined();
+
+    // ES|QL should produce the same results
+    expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
+    );
+    expect(esqlResult.documentsOrdered[4]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
     );
   });
 });

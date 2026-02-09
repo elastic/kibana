@@ -22,10 +22,35 @@ import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import searchRocketIcon from '../assets/search-rocket.svg';
 
+/**
+ * Props for the EisUpdateCallout component.
+ *
+ * @property {string} ctaLink
+ *   URL for the call-to-action link to documentation.
+ *
+ * @property {string} promoId
+ *   Unique identifier for this promo instance. Used for localStorage and telemetry.
+ *
+ * @property {boolean} shouldShowEisUpdateCallout
+ *   Controls whether the callout should be displayed. Should only be set to true when the
+ *   environment is cloud-enabled AND (has an enterprise license OR is serverless-enabled).
+ *
+ * @property {() => void} handleOnClick
+ *   Callback function invoked when the call-to-action button is clicked.
+ *
+ * @property {'row' | 'column'} direction
+ *   Layout direction for the callout content. Determines how the icon and text are arranged.
+ *
+ * @property {boolean | undefined} hasUpdatePrivileges
+ *   Indicates whether the user has update privileges. If false, the callout will not be shown.
+ *
+ * @property {'top' | 'bottom'} [addSpacer]
+ *   Optional spacer placement. Adds spacing above or below the callout when specified.
+ */
 export interface EisUpdateCalloutProps {
   ctaLink: string;
   promoId: string;
-  isCloudEnabled: boolean;
+  shouldShowEisUpdateCallout: boolean;
   handleOnClick: () => void;
   direction: 'row' | 'column';
   hasUpdatePrivileges: boolean | undefined;
@@ -35,19 +60,19 @@ export interface EisUpdateCalloutProps {
 export const EisUpdateCallout = ({
   ctaLink,
   promoId,
-  isCloudEnabled,
+  shouldShowEisUpdateCallout,
   handleOnClick,
   direction,
   hasUpdatePrivileges,
   addSpacer,
 }: EisUpdateCalloutProps) => {
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}UpdateCallout`,
   });
 
   const dataId = `${promoId}-eis-update-callout`;
 
-  if (!isPromoVisible || !isCloudEnabled || hasUpdatePrivileges === false) {
+  if (!isPromoVisible || !shouldShowEisUpdateCallout || hasUpdatePrivileges === false) {
     return null;
   }
 
@@ -55,15 +80,13 @@ export const EisUpdateCallout = ({
     <>
       {addSpacer === 'top' && <EuiSpacer size="l" />}
       <EuiCallOut
-        data-telemetry-id={dataId}
         data-test-subj={dataId}
         css={({ euiTheme }) => ({
-          color: euiTheme.colors.primaryText,
           backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
           border: `${euiTheme.border.thin}`,
           borderRadius: `${euiTheme.border.radius.medium}`,
         })}
-        onDismiss={onDismissTour}
+        onDismiss={onDismissPromo}
       >
         <EuiFlexGroup direction={direction} alignItems="flexStart">
           <EuiImage src={searchRocketIcon} alt="" size="original" />
@@ -82,7 +105,7 @@ export const EisUpdateCallout = ({
                 size="s"
                 onClick={handleOnClick}
                 data-test-subj="eisUpdateCalloutCtaBtn"
-                data-telemetry-id={`${dataId}-cta-btn`}
+                data-telemetry-id={`${dataId}-updateToEis-btn`}
               >
                 {i18n.EIS_UPDATE_CALLOUT_CTA}
               </EuiButton>
@@ -91,7 +114,7 @@ export const EisUpdateCallout = ({
                 target="_blank"
                 external
                 color="text"
-                data-telemetry-id={`${dataId}-docs-btn`}
+                data-telemetry-id={`${dataId}-viewEisDocs-btn`}
               >
                 {i18n.EIS_CALLOUT_DOCUMENTATION_BTN}
               </EuiLink>

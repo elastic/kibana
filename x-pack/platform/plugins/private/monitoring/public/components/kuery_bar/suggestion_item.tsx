@@ -11,8 +11,8 @@ import { EuiIcon, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 
-import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/kql/public';
+import { QuerySuggestionTypes } from '@kbn/kql/public';
 
 interface Props {
   isSelected?: boolean;

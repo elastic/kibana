@@ -13,7 +13,7 @@ import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/stre
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { QueryLink } from '../../../common/assets';
+import type { QueryLink } from '../../../common/queries';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -67,7 +67,7 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryLinks = await queryClient.getQueryLinks([
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map((stream) => stream.name),
     ]);
@@ -172,7 +172,7 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryLinks = await queryClient.getQueryLinks([
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map(({ name }) => name),
     ]);

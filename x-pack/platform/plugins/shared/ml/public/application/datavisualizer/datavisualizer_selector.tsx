@@ -84,7 +84,7 @@ export const DatavisualizerSelector: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
-                defaultMessage="Data Visualizer"
+                defaultMessage="Data visualizer"
               />
             }
           />
@@ -102,7 +102,7 @@ export const DatavisualizerSelector: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
-        <DataVisualizerGrid buttonType="full" isEsqlEnabled={isEsqlEnabled} />
+        <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
         {startTrialVisible === true && (
           <Fragment>
             <EuiSpacer size="xxl" />

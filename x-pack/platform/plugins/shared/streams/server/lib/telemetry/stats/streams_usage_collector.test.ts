@@ -80,12 +80,6 @@ describe('Streams Usage Collector (simplified)', () => {
         description: 'Test wired stream',
         ingest: { lifecycle: { inherit: {} }, processing: { steps: [] }, settings: {}, wired: {} },
       },
-      // Group stream should be ignored for current metrics
-      {
-        name: 'group.parent',
-        description: 'A grouped stream',
-        ingest: { lifecycle: { inherit: {} }, processing: { steps: [] }, settings: {}, group: {} },
-      },
     ] as unknown as Streams.all.Definition[];
 
     registerStreamsUsageCollector(usageCollectionMock, mockLogger, makeReader(defs));

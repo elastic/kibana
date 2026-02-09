@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -73,6 +78,7 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentSOAttributes {
@@ -99,6 +105,7 @@ export interface AgentSOAttributes {
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -147,6 +154,7 @@ export interface PackagePolicySOAttributes {
   secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -156,6 +164,7 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
+  inputs_for_versions?: Record<string, PackagePolicyInput[]>;
 }
 
 export interface OutputSoBaseAttributes {
@@ -308,7 +317,6 @@ export interface CloudConnectorSOAttributes {
   cloudProvider: CloudProvider;
   accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
   created_at: string;
   updated_at: string;
 }

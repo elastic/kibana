@@ -39,6 +39,7 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
+import { AgentRollbackModal } from '../components/agent_rollback_modal';
 
 import type { SelectionMode } from './components/types';
 
@@ -94,6 +95,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     undefined
   );
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
+  const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -223,6 +225,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
+        onRollbackClick={() => setAgentToRollback(agent)}
       />
     );
   };
@@ -455,6 +458,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }}
             onSave={() => {
               setAgentToChangePrivilege(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToRollback && (
+        <EuiPortal>
+          <AgentRollbackModal
+            agents={[agentToRollback]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRollback(undefined);
               refreshAgents();
             }}
           />

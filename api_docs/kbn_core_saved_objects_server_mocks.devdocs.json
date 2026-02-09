@@ -23,6 +23,8 @@
         "label": "savedObjectsServiceMock",
         "description": [],
         "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<SavedObjectsServiceContract>"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -93,6 +101,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -110,6 +120,8 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+                "lineNumber": 57,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -130,6 +142,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -147,6 +161,8 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+                "lineNumber": 38,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -165,6 +181,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -180,6 +198,8 @@
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
                 "path": "src/core/packages/saved-objects/migration-server-mocks/src/migration.mocks.ts",
+                "lineNumber": 28,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -198,6 +218,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -216,6 +238,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -234,6 +258,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -252,6 +278,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/server-mocks/src/saved_objects_service.mock.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

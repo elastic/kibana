@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
-import { Parser, isSubQuery } from '@kbn/esql-ast';
+import { Parser, isSubQuery } from '@kbn/esql-language';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 /**

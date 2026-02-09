@@ -380,7 +380,7 @@ export const functions = {
           {
             defaultMessage: `
   ### PERCENTILE OVER TIME
-  Calculates the percentile over time of a numeric field.
+  Calculates the percentile over time of a field.
 
   \`\`\`esql
   TS k8s

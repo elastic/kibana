@@ -10,6 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
+  DataSetStepSchema,
   ForEachStepSchema,
   HttpStepSchema,
   IfStepSchema,
@@ -222,6 +223,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: MergeStepSchema,
       description: 'Merge results from multiple sources',
       icon: monaco.languages.CompletionItemKind.Interface,
+    },
+    {
+      schema: DataSetStepSchema,
+      description: 'Define or compute variables for use in the workflow',
+      icon: monaco.languages.CompletionItemKind.Variable,
     },
     {
       schema: HttpStepSchema,

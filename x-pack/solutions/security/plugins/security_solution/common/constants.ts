@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
+import {
+  RULES_FEATURE_LATEST,
+  SECURITY_FEATURE_ID_V5,
+} from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 
 export {
   SecurityPageName,
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
 } from '@kbn/security-solution-navigation';
+
 /**
  * as const
  *
@@ -30,7 +34,7 @@ export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
-export { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
+export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -116,6 +120,7 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
+export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -262,10 +267,6 @@ export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConne
 /** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
 export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
-export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
-  'securitySolution:enablePrivilegedUserMonitoring' as const;
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -318,6 +319,12 @@ export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
 export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/workflow_status` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/tags` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -473,8 +480,6 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
-  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
-  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
@@ -523,9 +528,10 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
- * Cases external attachment IDs
+ * Cases attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps

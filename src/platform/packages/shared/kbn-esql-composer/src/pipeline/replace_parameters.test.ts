@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, BasicPrettyPrinter, synth, parse } from '@kbn/esql-ast';
+import { Builder, BasicPrettyPrinter, synth, parse } from '@kbn/esql-language';
 import { replaceParameters } from './replace_parameters';
 import type { Query } from '../types';
 import { buildQueryAst } from './build_query_ast';

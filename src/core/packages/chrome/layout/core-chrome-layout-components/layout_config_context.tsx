@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import type { ChromeStyle } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 
 /**
@@ -24,16 +25,14 @@ export type LayoutConfig = Pick<
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
->;
+  | 'applicationMarginBottom'
+  | 'applicationMarginRight'
+> & {
+  chromeStyle?: ChromeStyle;
+};
 
-/**
- * Context interface including both the config and an update function
- * @internal
- */
-interface LayoutConfigContextValue {
-  config: LayoutConfig;
-  updateLayout: (updates: Partial<LayoutConfig>) => void;
-}
+/** Update function type for layout config */
+type LayoutUpdateFn = (updates: Partial<LayoutConfig>) => void;
 
 /**
  * Global registry for ensuring single context instance across bundles
@@ -45,7 +44,8 @@ interface LayoutConfigContextValue {
 const REGISTRY_KEY = '__KIBANA_LAYOUT_CONFIG_CTX__';
 
 interface LayoutConfigRegistry {
-  LayoutConfigContext?: React.Context<LayoutConfigContextValue | undefined>;
+  LayoutConfigContext?: React.Context<LayoutConfig | undefined>;
+  LayoutUpdateContext?: React.Context<LayoutUpdateFn | undefined>;
 }
 
 const getGlobalRegistry = (): LayoutConfigRegistry => {
@@ -59,8 +59,13 @@ const getGlobalRegistry = (): LayoutConfigRegistry => {
 const registry = getGlobalRegistry();
 
 // Reuse if already created, otherwise create and store
+// Split into two contexts to prevent re-renders when only using updateLayout
 const LayoutConfigContext = (registry.LayoutConfigContext ??= createContext<
-  LayoutConfigContextValue | undefined
+  LayoutConfig | undefined
+>(undefined));
+
+const LayoutUpdateContext = (registry.LayoutUpdateContext ??= createContext<
+  LayoutUpdateFn | undefined
 >(undefined));
 
 /**
@@ -80,39 +85,47 @@ export const LayoutConfigProvider = ({
   value: initialValue,
   children,
 }: LayoutConfigProviderProps) => {
-  const [config, setConfig] = useState<LayoutConfig>(initialValue);
+  // Base config from props
+  const [baseConfig, setBaseConfig] = useState<LayoutConfig>(initialValue);
 
-  // Reset state when initialValue changes, but only for fields that have changed
+  // Programmatic overrides from updateLayout()
+  const [overrides, setOverrides] = useState<Partial<LayoutConfig>>({});
+
+  // Update base config when props change
   useEffect(() => {
-    setConfig((prevConfig) => {
-      const changedFields = getChangedFields(prevConfig, initialValue);
+    setBaseConfig((prev) => {
+      // Only update changed fields
+      const changes = getChangedFields(prev, initialValue);
+      if (Object.keys(changes).length === 0) return prev;
 
-      // Only update if there are any changed fields
-      if (Object.keys(changedFields).length > 0) {
-        return { ...prevConfig, ...changedFields };
-      }
+      // Clear overrides for fields that changed in props (props take precedence)
+      setOverrides((prevOverrides) => {
+        const newOverrides = { ...prevOverrides };
+        Object.keys(changes).forEach((key) => {
+          delete newOverrides[key as keyof LayoutConfig];
+        });
+        return newOverrides;
+      });
 
-      return prevConfig;
+      return { ...prev, ...changes };
     });
   }, [initialValue]);
 
   const updateLayout = useCallback((updates: Partial<LayoutConfig>) => {
-    setConfig((prevConfig) => {
-      const changedFields = getChangedFields(prevConfig, updates);
-
-      // Only update if there are any changed fields
-      if (Object.keys(changedFields).length > 0) {
-        return { ...prevConfig, ...changedFields };
-      }
-
-      return prevConfig;
+    setOverrides((prev) => {
+      const changes = getChangedFields(prev, updates);
+      if (Object.keys(changes).length === 0) return prev;
+      return { ...prev, ...changes };
     });
   }, []);
 
+  // Merge base and overrides to create final config
+  const config = { ...baseConfig, ...overrides };
+
   return (
-    <LayoutConfigContext.Provider value={{ config, updateLayout }}>
-      {children}
-    </LayoutConfigContext.Provider>
+    <LayoutUpdateContext.Provider value={updateLayout}>
+      <LayoutConfigContext.Provider value={config}>{children}</LayoutConfigContext.Provider>
+    </LayoutUpdateContext.Provider>
   );
 };
 
@@ -123,25 +136,25 @@ export const LayoutConfigProvider = ({
  * @throws Error if used outside of a LayoutConfigProvider
  */
 export function useLayoutConfig(): LayoutConfig {
-  const context = useContext(LayoutConfigContext);
-  if (!context) {
+  const config = useContext(LayoutConfigContext);
+  if (config === undefined) {
     throw new Error('useLayoutConfig must be used within a LayoutConfigProvider');
   }
-  return context.config;
+  return config;
 }
 
 /**
- * Hook to access and update the layout configuration.
+ * Hook to get the layout update function. Does not cause re-renders when config changes.
  * @public
- * @returns a function to update it
+ * @returns a function to update the layout config
  * @throws Error if used outside of a LayoutConfigProvider
  */
-export function useLayoutUpdate(): (updates: Partial<LayoutConfig>) => void {
-  const context = useContext(LayoutConfigContext);
-  if (!context) {
-    throw new Error('useLayoutConfigUpdate must be used within a LayoutConfigProvider');
+export function useLayoutUpdate(): LayoutUpdateFn {
+  const updateLayout = useContext(LayoutUpdateContext);
+  if (updateLayout === undefined) {
+    throw new Error('useLayoutUpdate must be used within a LayoutConfigProvider');
   }
-  return context.updateLayout;
+  return updateLayout;
 }
 
 /**

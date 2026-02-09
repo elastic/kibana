@@ -14,7 +14,7 @@ export const START_MIGRATION_CARD_TITLE = i18n.translate(
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.rules.startMigration.upload.title',
-  { defaultMessage: 'Export your Splunk® SIEM rules to start translation.' }
+  { defaultMessage: 'Export your SIEM rules to start translation.' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_DESCRIPTION = i18n.translate(

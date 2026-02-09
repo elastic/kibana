@@ -350,3 +350,10 @@ export const IMPORT_TIMELINE = i18n.translate(
     defaultMessage: 'Import…',
   }
 );
+
+export const TIMELINE_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.timelines.components.open.timeline.timelines.table.tableCaption',
+  {
+    defaultMessage: 'Timelines Table',
+  }
+);

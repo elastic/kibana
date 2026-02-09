@@ -105,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
         expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
-        expect(spnegoResponse.text).to.contain('error');
+        expect(spnegoResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {

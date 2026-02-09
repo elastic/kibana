@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ToolResultType, platformCoreTools } from '@kbn/onechat-common';
-import { dashboardElement, visualizationElement } from '@kbn/onechat-common/tools/tool_result';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
+import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  dashboardElement,
+  visualizationElement,
+} from '@kbn/agent-builder-common/tools/tool_result';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { dashboardTools } from '../common';
 
 export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
 
-export function registerDashboardAgent(onechat: OnechatPluginSetup) {
-  onechat.agents.register({
+export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
+  agentBuilder.agents.register({
     id: DASHBOARD_AGENT_ID,
     name: 'Dashboard Agent',
     description:
@@ -39,9 +42,10 @@ When the user asks to create a dashboard:
 2. **Create visualizations based on real data** - Call ${platformCoreTools.createVisualization} for each panel:
    - The \`query\` parameter MUST reference actual index names and field names you discovered
    - Example: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
+   - Pass \`index\` when you know the target index pattern to avoid extra discovery work (improves performance)
    - Pass \`esql\` if you have a pre-generated query (improves performance)
    - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) to skip chart type detection
-   - After ${platformCoreTools.createVisualization} returns, extract \`data.visualization\` - this is the panel configuration you must pass to ${dashboardTools.createDashboard}
+   - After ${platformCoreTools.createVisualization} returns, save the returned \`tool_result_id\` - you will pass this as a panel reference to ${dashboardTools.createDashboard} (preferred to reduce tokens)
      - Example result structure:
        \`\`\`
        {
@@ -59,7 +63,9 @@ When the user asks to create a dashboard:
 3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
    - \`title\`: Dashboard title
    - \`description\`: Dashboard description
-   - \`panels\`: Array of visualization configs (each one extracted from \`data.visualization\`)
+   - \`panels\`: Array of panel definitions, either:
+     - the visualization configs (from \`data.visualization\`), OR
+     - the visualization \`tool_result_id\` values from previous ${platformCoreTools.createVisualization} calls (preferred)
    - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
      - This should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text) to make it readable
@@ -77,7 +83,8 @@ When the user asks to create a dashboard:
 When updating existing dashboards:
 - Use ${dashboardTools.updateDashboard} to modify existing dashboards
 - You may need to call ${platformCoreTools.createVisualization} for new panels to add
-- ALWAYS pass \`panels\` containing the full set of visualization configs you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
+- ALWAYS pass \`panels\` containing the full set of panels you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
+  - Panels can be full visualization configs, or visualization \`tool_result_id\` references from previous ${platformCoreTools.createVisualization} calls (preferred)
 - ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
 `,
       },

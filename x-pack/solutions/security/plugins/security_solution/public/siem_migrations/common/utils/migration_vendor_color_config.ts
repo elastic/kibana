@@ -8,7 +8,7 @@
 import type { SiemMigrationVendor } from '../../../../common/siem_migrations/model/common.gen';
 
 export const MIGRATION_VENDOR_COLOR_CONFIG: Record<SiemMigrationVendor, string> = {
-  // pastel shades
-  splunk: 'primary',
-  qradar: 'accent',
+  // lighter shades as instructed by design
+  splunk: '#D9E8FF', // bgLightPrimary
+  qradar: '#FDDDE9', // bgLightAccent
 };

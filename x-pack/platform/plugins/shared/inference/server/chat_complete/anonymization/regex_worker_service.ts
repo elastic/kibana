@@ -36,6 +36,7 @@ export class RegexWorkerService {
         filename: require.resolve('./regex_worker_wrapper.js'),
         minThreads: this.config.minThreads,
         maxThreads: this.config.maxThreads,
+        maxQueue: this.config.maxQueue,
         idleTimeout: this.config.idleTimeout.asMilliseconds(),
       });
     }

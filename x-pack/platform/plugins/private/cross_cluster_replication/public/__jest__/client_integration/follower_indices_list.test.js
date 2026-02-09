@@ -80,13 +80,13 @@ describe('<FollowerIndicesList />', () => {
 
     test('pagination works', async () => {
       const table = new EuiTableTestHarness('followerIndexListTable');
-      const initialRows = table.rows;
+      const initialRows = table.getRows();
       expect(initialRows.length).toBe(20); // Default page size
 
       const nextButton = screen.getByLabelText('Next page');
       fireEvent.click(nextButton);
 
-      const rowsAfterPagination = table.rows;
+      const rowsAfterPagination = table.getRows();
       expect(rowsAfterPagination.length).toBe(10); // Remaining items on page 2
     });
 
@@ -96,7 +96,7 @@ describe('<FollowerIndicesList />', () => {
       fireEvent.blur(searchBox);
 
       const table = new EuiTableTestHarness('followerIndexListTable');
-      const rows = table.rows;
+      const rows = table.getRows();
       expect(rows.length).toBe(1);
     });
   });
@@ -120,7 +120,7 @@ describe('<FollowerIndicesList />', () => {
       });
 
       table = new EuiTableTestHarness('followerIndexListTable');
-      tableCellsValues = table.cellValues;
+      tableCellsValues = table.getCellValues();
     });
 
     test('should not display the empty prompt', () => {
@@ -150,14 +150,14 @@ describe('<FollowerIndicesList />', () => {
       test('should be visible when a follower index is selected', async () => {
         expect(screen.queryByTestId('contextMenuButton')).not.toBeInTheDocument();
 
-        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
 
         expect(await screen.findByTestId('contextMenuButton')).toBeInTheDocument();
       });
 
       test('should have a "pause", "edit" and "unfollow" action when the follower index is active', async () => {
-        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
 
         const contextMenuButton = await screen.findByTestId('contextMenuButton');
@@ -175,7 +175,7 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should have a "resume", "edit" and "unfollow" action when the follower index is paused', async () => {
-        const secondCheckbox = within(table.rows[1]).getByRole('checkbox');
+        const secondCheckbox = within(table.getRows()[1]).getByRole('checkbox');
         await user.click(secondCheckbox);
 
         const contextMenuButton = await screen.findByTestId('contextMenuButton');
@@ -195,7 +195,7 @@ describe('<FollowerIndicesList />', () => {
       test('should open a confirmation modal when clicking on "pause replication"', async () => {
         expect(screen.queryByTestId('pauseReplicationConfirmation')).not.toBeInTheDocument();
 
-        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
 
         const contextMenuButton = await screen.findByTestId('contextMenuButton');
@@ -211,7 +211,7 @@ describe('<FollowerIndicesList />', () => {
       test('should open a confirmation modal when clicking on "unfollow leader index"', async () => {
         expect(screen.queryByTestId('unfollowLeaderConfirmation')).not.toBeInTheDocument();
 
-        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
 
         const contextMenuButton = await screen.findByTestId('contextMenuButton');
@@ -229,14 +229,18 @@ describe('<FollowerIndicesList />', () => {
       test('should open a context menu when clicking on the button of each row', async () => {
         expect(document.querySelector('.euiContextMenuPanel')).toBeNull();
 
-        const actionButton = within(table.rows[0]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[0]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         expect(document.querySelector('.euiContextMenuPanel')).not.toBeNull();
       });
 
       test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
-        const actionButton = within(table.rows[0]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[0]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         const contextMenuPanel = document.querySelector('.euiContextMenuPanel');
@@ -251,7 +255,9 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should have the "resume", "edit" and "unfollow" options in the row context menu for paused index', async () => {
-        const actionButton = within(table.rows[1]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[1]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         const contextMenuPanel = document.querySelector('.euiContextMenuPanel');
@@ -268,7 +274,9 @@ describe('<FollowerIndicesList />', () => {
       test('should open a confirmation modal when clicking on "pause replication"', async () => {
         expect(screen.queryByTestId('pauseReplicationConfirmation')).not.toBeInTheDocument();
 
-        const actionButton = within(table.rows[0]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[0]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         const pauseButton = await screen.findByTestId('pauseButton');
@@ -280,7 +288,9 @@ describe('<FollowerIndicesList />', () => {
       test('should open a confirmation modal when clicking on "resume"', async () => {
         expect(screen.queryByTestId('resumeReplicationConfirmation')).not.toBeInTheDocument();
 
-        const actionButton = within(table.rows[1]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[1]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         const resumeButton = await screen.findByTestId('resumeButton');
@@ -292,7 +302,9 @@ describe('<FollowerIndicesList />', () => {
       test('should open a confirmation modal when clicking on "unfollow leader index"', async () => {
         expect(screen.queryByTestId('unfollowLeaderConfirmation')).not.toBeInTheDocument();
 
-        const actionButton = within(table.rows[0]).getByTestId('euiCollapsedItemActionsButton');
+        const actionButton = within(table.getRows()[0]).getByTestId(
+          'euiCollapsedItemActionsButton'
+        );
         await user.click(actionButton);
 
         const unfollowButton = await screen.findByTestId('unfollowButton');
@@ -306,7 +318,7 @@ describe('<FollowerIndicesList />', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(screen.queryByTestId('followerIndexDetail')).not.toBeInTheDocument();
 
-        const nameLink = within(table.rows[0]).getByText(index1.name);
+        const nameLink = within(table.getRows()[0]).getByText(index1.name);
         await user.click(nameLink);
 
         expect(await screen.findByTestId('followerIndexDetail')).toBeInTheDocument();

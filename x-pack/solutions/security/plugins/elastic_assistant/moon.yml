@@ -104,8 +104,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/management-settings-ids'
-  - '@kbn/onechat-plugin'
-  - '@kbn/ai-assistant-common'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

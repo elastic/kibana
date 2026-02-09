@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandableSection } from '../../document_details/right/components/expandable_section';
+import { ExpandableSection } from '../../shared/components/expandable_section';
 import { RuleAboutSection } from '../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { RuleScheduleSection } from '../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
 import { RuleDefinitionSection } from '../../../detection_engine/rule_management/components/rule_details/rule_definition_section';

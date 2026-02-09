@@ -20,7 +20,7 @@
       "llmTasks",
       "productDocBase"
     ],
-    "optionalPlugins": ["cloud", "serverless", "usageCollection", "onechat"],
+    "optionalPlugins": ["cloud", "serverless", "usageCollection", "agentBuilder"],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []

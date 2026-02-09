@@ -47,14 +47,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListAddBreakdownField('geo.dest');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['CN', 'IN', 'US', 'Other']);
+      // With top 9 values, we get 9 countries + Other
+      expect(list).to.eql(['CN', 'IN', 'US', 'ID', 'PK', 'BR', 'RU', 'NG', 'JP', 'Other']);
     });
 
     it('should choose breakdown field', async () => {
       await discover.chooseBreakdownField('extension.raw');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['jpg', 'css', 'png', 'Other']);
+      // With top 9 values and only 5 extension types, no Other bucket
+      expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
     });
 
     it('should add filter using histogram legend values', async () => {
@@ -75,7 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.loadSavedSearch('with breakdown');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['jpg', 'css', 'png', 'Other']);
+      // With top 9 values and only 5 extension types, no Other bucket
+      expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
     });
   });
 }

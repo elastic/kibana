@@ -6,8 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiTheme,
+} from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -55,6 +63,150 @@ export interface TableSearchBar<T> {
   placeholder: string;
   onChangeSearchQuery?: (searchQuery: string) => void;
   techPreview?: boolean;
+}
+
+export interface TableActionSubItem<T> {
+  id: string;
+  name: string;
+  onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
+  icon?: string;
+}
+
+export interface TableAction<T> {
+  id: string;
+  name: string;
+  onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
+  icon?: string;
+  items?: Array<TableActionSubItem<T>>;
+}
+
+export interface TableActionGroup<T> {
+  id: string;
+  groupLabel: string;
+  actions: Array<TableAction<T>>;
+}
+
+export type TableActions<T> = Array<TableActionGroup<T>>;
+
+function ActionsCell<T extends object>({
+  item,
+  actions,
+  disabled = false,
+}: {
+  item: T;
+  actions: TableActions<T>;
+  disabled?: boolean;
+}) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [activePanelId, setActivePanelId] = useState(0);
+  const { euiTheme } = useEuiTheme();
+
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => !prev);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+    setActivePanelId(0);
+  }, []);
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const mainPanelItems: EuiContextMenuPanelDescriptor['items'] = [];
+    const subPanels: EuiContextMenuPanelDescriptor[] = [];
+    let subPanelId = 1;
+
+    for (const [groupIndex, group] of actions.entries()) {
+      // Add group header
+      mainPanelItems.push({
+        name: group.groupLabel,
+        disabled: true,
+        css: {
+          fontWeight: 700,
+          color: euiTheme.colors.text,
+          borderBottom: euiTheme.border.thin,
+          marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
+        },
+        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.id}`,
+      });
+
+      // Add action items
+      for (const action of group.actions) {
+        const hasSubItems = action.items && action.items.length > 0;
+
+        if (hasSubItems) {
+          const panelId = subPanelId++;
+
+          mainPanelItems.push({
+            name: action.name,
+            icon: action.icon,
+            panel: panelId,
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
+          });
+
+          subPanels.push({
+            id: panelId,
+            title: action.name,
+            items: action.items!.map((subItem) => ({
+              name: subItem.name,
+              icon: subItem.icon,
+              ...(subItem.href
+                ? { href: subItem.href(item), target: '_self' }
+                : {
+                    onClick: () => {
+                      subItem.onClick?.(item);
+                      closePopover();
+                    },
+                  }),
+              'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.id}`,
+            })),
+          });
+        } else {
+          mainPanelItems.push({
+            name: action.name,
+            icon: action.icon,
+            ...(action.href
+              ? { href: action.href(item), target: '_self' }
+              : {
+                  onClick: action.onClick
+                    ? () => {
+                        action.onClick!(item);
+                        closePopover();
+                      }
+                    : undefined,
+                }),
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
+          });
+        }
+      }
+    }
+
+    return [{ id: 0, items: mainPanelItems }, ...subPanels];
+  }, [actions, item, closePopover, euiTheme]);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          data-test-subj="apmManagedTableActionsCellButton"
+          aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
+            defaultMessage: 'Actions',
+          })}
+          iconType="boxesVertical"
+          onClick={togglePopover}
+          color="text"
+          isDisabled={disabled}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+    >
+      <EuiContextMenu initialPanelId={activePanelId} panels={panels} />
+    </EuiPopover>
+  );
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -105,6 +257,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   saveTableOptionsToUrl?: boolean;
 
   tableCaption?: string;
+
+  actions?: TableActions<T>;
+  isActionsDisabled?: (item: T) => boolean;
+
+  rowProps?: (item: T) => Record<string, unknown>;
+
+  'data-test-subj'?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -146,10 +305,37 @@ function UnoptimizedManagedTable<T extends object>(props: {
       isEnabled: false,
       fieldsToSearch: [],
       maxCountExceeded: false,
-      placeholder: 'Search...',
+      placeholder: i18n.translate('xpack.apm.managedTable.searchPlaceholder', {
+        defaultMessage: 'Search...',
+      }),
       onChangeSearchQuery: () => {},
     },
+    actions,
+    isActionsDisabled,
   } = props;
+
+  const columnsWithActions = useMemo(() => {
+    if (!actions || actions.length === 0) {
+      return columns;
+    }
+
+    const actionsColumn: ITableColumn<T> = {
+      name: i18n.translate('xpack.apm.managedTable.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      width: '80px',
+      align: 'center',
+      render: (item: T) => (
+        <ActionsCell
+          item={item}
+          actions={actions}
+          disabled={isActionsDisabled ? isActionsDisabled(item) : false}
+        />
+      ),
+    };
+
+    return [...columns, actionsColumn];
+  }, [columns, actions, isActionsDisabled]);
 
   const {
     urlParams: {
@@ -300,7 +486,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      data-test-subj={props['data-test-subj']}
+    >
       {tableSearchBar.isEnabled ? (
         <EuiFlexItem>
           <TableSearchBar
@@ -331,11 +522,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
               : noItemsMessage
           }
           items={renderedItems}
-          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
           tableCaption={props.tableCaption}
+          rowProps={props.rowProps}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>
