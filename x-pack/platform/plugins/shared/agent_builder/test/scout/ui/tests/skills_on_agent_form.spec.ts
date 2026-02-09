@@ -96,6 +96,6 @@ test.describe.skip('Skills tab on agent configuration form', { tag: ['@ess'] }, 
 
     // Verify it changed state
     const newState = skillToggle;
-    await expect(newState).toBeChecked({ checked:  });
+    await expect(newState).toBeChecked({ checked: !initialState });
   });
 });

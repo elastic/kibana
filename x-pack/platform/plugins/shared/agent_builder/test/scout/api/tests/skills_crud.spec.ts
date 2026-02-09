@@ -9,27 +9,18 @@ import { expect } from '@kbn/scout';
 import { apiTest } from '../fixtures';
 
 const SKILLS_API_BASE = '/api/agent_builder/skills';
-const API_VERSION_HEADER = { 'elastic-api-version': '2023-10-31' };
+const API_VERSION = '2023-10-31';
 const BUILTIN_SKILL_ID = 'data-exploration';
 
-const skillRequest = (
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-  path: string,
-  body?: Record<string, unknown>
-) => ({
-  method,
-  path,
-  body,
-  headers: API_VERSION_HEADER,
-});
+const versionedHeaders = { 'elastic-api-version': API_VERSION };
 
 apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   const createdSkillIds: string[] = [];
 
-  apiTest.afterEach(async ({ kbnClient }) => {
+  apiTest.afterEach(async ({ apiClient }) => {
     for (const skillId of createdSkillIds) {
       try {
-        await kbnClient.request(skillRequest('DELETE', `${SKILLS_API_BASE}/${skillId}`));
+        await apiClient.delete(`${SKILLS_API_BASE}/${skillId}`, { headers: versionedHeaders });
       } catch {
         // Skill may already be deleted
       }
@@ -39,10 +30,11 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
   apiTest(
     'should list skills including the built-in data-exploration skill',
-    async ({ kbnClient }) => {
-      const response = await kbnClient.request(skillRequest('GET', SKILLS_API_BASE));
+    async ({ apiClient }) => {
+      const response = await apiClient.get(SKILLS_API_BASE, { headers: versionedHeaders });
 
-      const body = response.data as {
+      expect(response.statusCode).toBe(200);
+      const body = response.body as {
         results: Array<{ id: string; readonly: boolean; description: string }>;
       };
       expect(body).toHaveProperty('results');
@@ -56,21 +48,23 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     }
   );
 
-  apiTest('should create a new user-created skill', async ({ kbnClient }) => {
+  apiTest('should create a new user-created skill', async ({ apiClient }) => {
     const skillId = `test-skill-create-${Date.now()}`;
     createdSkillIds.push(skillId);
 
-    const response = await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    const response = await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `test-skill-create-${Date.now()}`,
         description: 'A skill for e2e testing',
         content: 'This is the skill content with instructions.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
-    const body = response.data as {
+    expect(response.statusCode).toBe(200);
+    const body = response.body as {
       id: string;
       name: string;
       description: string;
@@ -83,52 +77,59 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(body).toHaveProperty('readonly', false);
   });
 
-  apiTest('should retrieve a created skill by ID', async ({ kbnClient }) => {
+  apiTest('should retrieve a created skill by ID', async ({ apiClient }) => {
     const skillId = `test-skill-get-${Date.now()}`;
     createdSkillIds.push(skillId);
 
-    await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `retrievable-skill-${Date.now()}`,
         description: 'Should be retrievable by ID',
         content: 'Skill content here.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
-    const response = await kbnClient.request(skillRequest('GET', `${SKILLS_API_BASE}/${skillId}`));
+    const response = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
+      headers: versionedHeaders,
+    });
 
-    const body = response.data as { id: string; name: string; readonly: boolean };
+    expect(response.statusCode).toBe(200);
+    const body = response.body as { id: string; name: string; readonly: boolean };
     expect(body).toHaveProperty('id', skillId);
     expect(body).toHaveProperty('readonly', false);
   });
 
-  apiTest('should update an existing skill', async ({ kbnClient }) => {
+  apiTest('should update an existing skill', async ({ apiClient }) => {
     const skillId = `test-skill-update-${Date.now()}`;
     createdSkillIds.push(skillId);
 
-    await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `original-name-${Date.now()}`,
         description: 'Original description',
         content: 'Original content.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
     const updatedName = `updated-name-${Date.now()}`;
-    const response = await kbnClient.request(
-      skillRequest('PUT', `${SKILLS_API_BASE}/${skillId}`, {
+    const response = await apiClient.put(`${SKILLS_API_BASE}/${skillId}`, {
+      headers: versionedHeaders,
+      body: {
         name: updatedName,
         description: 'Updated description',
         content: 'Updated content.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
-    const body = response.data as {
+    expect(response.statusCode).toBe(200);
+    const body = response.body as {
       name: string;
       description: string;
       content: string;
@@ -138,54 +139,54 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(body).toHaveProperty('content', 'Updated content.');
   });
 
-  apiTest('should delete a user-created skill', async ({ kbnClient }) => {
+  apiTest('should delete a user-created skill', async ({ apiClient }) => {
     const skillId = `test-skill-delete-${Date.now()}`;
 
-    await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `deletable-skill-${Date.now()}`,
         description: 'This skill will be deleted',
         content: 'Content to delete.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
-    const response = await kbnClient.request(
-      skillRequest('DELETE', `${SKILLS_API_BASE}/${skillId}`)
-    );
+    const response = await apiClient.delete(`${SKILLS_API_BASE}/${skillId}`, {
+      headers: versionedHeaders,
+    });
 
-    const body = response.data as { success: boolean };
+    expect(response.statusCode).toBe(200);
+    const body = response.body as { success: boolean };
     expect(body).toHaveProperty('success', true);
 
-    // Verify it's gone - should throw a 404
-    let getError: Error | undefined;
-    try {
-      await kbnClient.request(skillRequest('GET', `${SKILLS_API_BASE}/${skillId}`));
-    } catch (err) {
-      getError = err as Error;
-    }
-
-    expect(getError).toBeDefined();
+    // Verify it's gone - should return 404
+    const getResponse = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
+      headers: versionedHeaders,
+    });
+    expect(getResponse.statusCode).toBe(404);
   });
 
-  apiTest('should include user-created skills in list response', async ({ kbnClient }) => {
+  apiTest('should include user-created skills in list response', async ({ apiClient }) => {
     const skillId = `test-skill-list-${Date.now()}`;
     createdSkillIds.push(skillId);
 
-    await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `listed-skill-${Date.now()}`,
         description: 'This skill should appear in list',
         content: 'Listed skill content.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
-    const response = await kbnClient.request(skillRequest('GET', SKILLS_API_BASE));
+    const response = await apiClient.get(SKILLS_API_BASE, { headers: versionedHeaders });
 
-    const body = response.data as {
+    expect(response.statusCode).toBe(200);
+    const body = response.body as {
       results: Array<{ id: string; readonly: boolean }>;
     };
     const found = body.results.find((skill) => skill.id === skillId);
@@ -193,32 +194,28 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(found!.readonly).toBe(false);
   });
 
-  apiTest('should reject creating a skill with an invalid ID', async ({ kbnClient }) => {
-    let createError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('POST', SKILLS_API_BASE, {
-          id: 'Invalid ID With Spaces',
-          name: 'invalid-skill',
-          description: 'This should fail',
-          content: 'Content.',
-          tool_ids: [],
-        }),
-        retries: 0,
-      });
-    } catch (err) {
-      createError = err as Error;
-    }
+  apiTest('should reject creating a skill with an invalid ID', async ({ apiClient }) => {
+    const response = await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
+        id: 'Invalid ID With Spaces',
+        name: 'invalid-skill',
+        description: 'This should fail',
+        content: 'Content.',
+        tool_ids: [],
+      },
+    });
 
-    expect(createError).toBeDefined();
+    expect(response.statusCode).toBe(400);
   });
 
-  apiTest('should retrieve the built-in skill by ID', async ({ kbnClient }) => {
-    const response = await kbnClient.request(
-      skillRequest('GET', `${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`)
-    );
+  apiTest('should retrieve the built-in skill by ID', async ({ apiClient }) => {
+    const response = await apiClient.get(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
+      headers: versionedHeaders,
+    });
 
-    const body = response.data as {
+    expect(response.statusCode).toBe(200);
+    const body = response.body as {
       id: string;
       name: string;
       description: string;
@@ -230,104 +227,78 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(body.content).toBeTruthy();
   });
 
-  apiTest('should reject deleting a built-in skill', async ({ kbnClient }) => {
-    let deleteError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('DELETE', `${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`),
-        retries: 0,
-      });
-    } catch (err) {
-      deleteError = err as Error;
-    }
+  apiTest('should reject deleting a built-in skill', async ({ apiClient }) => {
+    const response = await apiClient.delete(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
+      headers: versionedHeaders,
+    });
 
-    expect(deleteError).toBeDefined();
+    expect(response.statusCode).not.toBe(200);
   });
 
-  apiTest('should reject updating a built-in skill', async ({ kbnClient }) => {
-    let updateError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('PUT', `${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-          name: 'hacked-name',
-          description: 'Attempted modification',
-          content: 'Should not work.',
-          tool_ids: [],
-        }),
-        retries: 0,
-      });
-    } catch (err) {
-      updateError = err as Error;
-    }
+  apiTest('should reject updating a built-in skill', async ({ apiClient }) => {
+    const response = await apiClient.put(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
+      headers: versionedHeaders,
+      body: {
+        name: 'hacked-name',
+        description: 'Attempted modification',
+        content: 'Should not work.',
+        tool_ids: [],
+      },
+    });
 
-    expect(updateError).toBeDefined();
+    expect(response.statusCode).not.toBe(200);
   });
 
-  apiTest('should reject deleting a non-existent skill', async ({ kbnClient }) => {
-    let deleteError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('DELETE', `${SKILLS_API_BASE}/non-existent-skill-id`),
-        retries: 0,
-      });
-    } catch (err) {
-      deleteError = err as Error;
-    }
+  apiTest('should reject deleting a non-existent skill', async ({ apiClient }) => {
+    const response = await apiClient.delete(`${SKILLS_API_BASE}/non-existent-skill-id`, {
+      headers: versionedHeaders,
+    });
 
-    expect(deleteError).toBeDefined();
+    expect(response.statusCode).toBe(404);
   });
 
-  apiTest('should reject updating a non-existent skill', async ({ kbnClient }) => {
-    let updateError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('PUT', `${SKILLS_API_BASE}/non-existent-skill-id`, {
-          name: 'attempted-update',
-          description: 'Should fail',
-          content: 'Should not work.',
-          tool_ids: [],
-        }),
-        retries: 0,
-      });
-    } catch (err) {
-      updateError = err as Error;
-    }
+  apiTest('should reject updating a non-existent skill', async ({ apiClient }) => {
+    const response = await apiClient.put(`${SKILLS_API_BASE}/non-existent-skill-id`, {
+      headers: versionedHeaders,
+      body: {
+        name: 'attempted-update',
+        description: 'Should fail',
+        content: 'Should not work.',
+        tool_ids: [],
+      },
+    });
 
-    expect(updateError).toBeDefined();
+    expect(response.statusCode).toBe(404);
   });
 
-  apiTest('should reject creating a skill with duplicate ID', async ({ kbnClient }) => {
+  apiTest('should reject creating a skill with duplicate ID', async ({ apiClient }) => {
     const skillId = `test-skill-dup-${Date.now()}`;
     createdSkillIds.push(skillId);
 
     // Create the first skill
-    await kbnClient.request(
-      skillRequest('POST', SKILLS_API_BASE, {
+    await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
         id: skillId,
         name: `first-skill-${Date.now()}`,
         description: 'First skill',
         content: 'First content.',
         tool_ids: [],
-      })
-    );
+      },
+    });
 
     // Try to create a second skill with the same ID
-    let duplicateError: Error | undefined;
-    try {
-      await kbnClient.request({
-        ...skillRequest('POST', SKILLS_API_BASE, {
-          id: skillId,
-          name: `second-skill-${Date.now()}`,
-          description: 'Second skill with duplicate ID',
-          content: 'Second content.',
-          tool_ids: [],
-        }),
-        retries: 0,
-      });
-    } catch (err) {
-      duplicateError = err as Error;
-    }
+    const response = await apiClient.post(SKILLS_API_BASE, {
+      headers: versionedHeaders,
+      body: {
+        id: skillId,
+        name: `second-skill-${Date.now()}`,
+        description: 'Second skill with duplicate ID',
+        content: 'Second content.',
+        tool_ids: [],
+      },
+    });
 
-    expect(duplicateError).toBeDefined();
+    expect(response.statusCode).toBe(409);
   });
 });
