@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 export const jiraDataSource: DataSource = {
   id: 'jira',
-  name: 'Jira',
+  name: 'Jira Cloud',
   description: i18n.translate('xpack.dataSources.jira.description', {
     defaultMessage: 'Connect to Jira to pull data from your project.',
   }),
