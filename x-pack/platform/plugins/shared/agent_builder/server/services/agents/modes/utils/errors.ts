@@ -34,7 +34,7 @@ const parseConnectorStatusCode = (message: string): number | null => {
   if (!message.includes('Error calling connector:')) {
     return null;
   }
-  let match = CONNECTOR_STATUS_CODE_REGEXP.exec(message);
+  const match = CONNECTOR_STATUS_CODE_REGEXP.exec(message);
   if (!match) {
     return null;
   }

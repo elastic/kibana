@@ -61,7 +61,9 @@ describe('errors', () => {
         const converted = convertError(err);
 
         expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
-        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBeUndefined();
+        expect(
+          'statusCode' in converted.meta ? converted.meta.statusCode : undefined
+        ).toBeUndefined();
         expect(converted.message).toBe('Something went wrong');
       });
 
@@ -71,7 +73,9 @@ describe('errors', () => {
         const converted = convertError(err);
 
         expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
-        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBeUndefined();
+        expect(
+          'statusCode' in converted.meta ? converted.meta.statusCode : undefined
+        ).toBeUndefined();
       });
 
       it('returns unknownError when status code is outside 4xx/5xx range', () => {
@@ -80,15 +84,16 @@ describe('errors', () => {
         const converted = convertError(err);
 
         expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
-        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBeUndefined();
+        expect(
+          'statusCode' in converted.meta ? converted.meta.statusCode : undefined
+        ).toBeUndefined();
       });
     });
   });
 
   describe('isRecoverableError', () => {
     it('returns false for connectorError so it is not retried as recoverable', () => {
-      const message =
-        'Error calling connector: Status code: 401. Message: Unauthorized API Error';
+      const message = 'Error calling connector: Status code: 401. Message: Unauthorized API Error';
       const err = new Error(message);
       const converted = convertError(err);
 
