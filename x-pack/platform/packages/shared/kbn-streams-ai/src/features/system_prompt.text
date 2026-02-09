@@ -1,18 +1,10 @@
-You are extracting **features** from log data to identify **entities** (what exists) and **dependencies** (how they connect). Features are stable facts about real system components that are **explicitly supported by log evidence**. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable details**.
-
-The primary focus is **entity identification**: discovering high-level, stable system components like services, applications, clusters, and database instances. Each entity should carry associated technology and infrastructure context as properties.
-
-**IMPORTANT**: Technology and infrastructure should ALWAYS be extracted as individual features when they are significant, interesting, or relevant for CVE/vulnerability analysis. This includes technologies and infrastructure that are clearly associated with entities. Extract them BOTH as:
-1. Standalone features (for their intrinsic value, version tracking, CVE analysis)
-2. Entity properties (for entity context and relationships)
-
-Both representations are valuable and should coexist. The only exception is trivial or redundant information that adds no analytical value.
+You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **explicitly supported by log evidence**. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
 
 Every feature you output MUST include ALL required fields:
-- `type` (string): one of `entity`, `dependency`, `infrastructure`, `technology`
-- `subtype` (string): categorization within the type (e.g. `service`, `application`, `programming_language`, `cloud_deployment`)
-- `id` (string): unique concise identifier for deduplication across runs (e.g. "api-service", "payment-app", "aws-deployment", "api-user-http")
-- `title` (string): very short human-readable title for UI display (e.g. "API Service", "Payment App", "AWS", "api-service → user-service"). Keep it to a few words.
+- `type` (string): one of `infrastructure`, `technology`, `dependency`
+- `subtype` (string): categorization within the type (e.g. `operating_system`, `programming_language`, `service_dependency`)
+- `id` (string): unique concise identifier for deduplication across runs (e.g. "aws-deployment", "log4j-2.14.1", "api-user-http")
+- `title` (string): very short human-readable title for UI display (e.g. "Ubuntu 20.04", "Log4j 2.14.1", "api-service → user-service"). Keep it to a few words; it can summarize type + key value (e.g. technology + version or source → target for dependencies).
 - `description` (string): a short summary of what the feature represents
 - `properties` (object): stable, low-cardinality key facts for deduplication
 - `confidence` (number): 0–100
@@ -22,263 +14,57 @@ Every feature you output MUST include ALL required fields:
 
 ## Feature Types
 
-Extract features in four categories:
-
-### 1. entity (PRIMARY TYPE)
-Represents high-level, stable system components with clear boundaries. Entities are the building blocks of system architecture.
-
-**Common subtypes:**
-- Specific: `service`, `application`, `cluster`, `database_instance`, `queue`, `cache_instance`, `api_gateway`
-- Generic: `compute`, `data_store`, `message_broker`, `proxy`
-
-**Properties should include:**
-- Core identity: name, type, role
-- Technology context: programming language, framework, runtime version
-- Infrastructure context: deployment platform, orchestration, hosting environment
-- Version information when available
-
-**Examples:**
-- A microservice: `{ "name": "api-service", "language": "java", "framework": "spring-boot", "platform": "kubernetes" }`
-- A database cluster: `{ "name": "user-db-cluster", "database": "postgresql", "version": "14.5", "cluster_role": "primary" }`
-- An application: `{ "name": "payment-app", "language": "python", "framework": "django", "version": "4.2" }`
-
-**Entity identification criteria (generic):**
-- Stable identifier appears consistently across multiple log lines
-- Clear boundaries evident from naming patterns or log structure (e.g., service.name, app.name, container labels)
-- Represents a logical system component, NOT ephemeral instances
-- Has sufficient supporting evidence (multiple corroborating log lines)
-
-**High-level vs instance distinction:**
-- ✓ Extract: `payment-service` (logical service that may have multiple instances)
-- ✗ Skip: `payment-service-pod-abc123` (individual pod instance backing the service)
-- ✓ Extract: `prod-k8s-cluster` (cluster as an entity)
-- ✗ Skip: `node-ip-172-31-5-42` (individual node in the cluster)
-
-**When NOT to create entities:**
-- Insufficient evidence (single mention, ambiguous references)
-- Only instance-level identifiers visible without stable high-level name
-- Unclear if it represents a distinct component vs. transient activity
-- Cannot determine stable boundaries or identity
-
-### 2. dependency
-Explicit relationships between entities showing how system components connect. Dependencies represent data flow, communication patterns, and integration points.
-
-**Common subtypes:**
-- `service_dependency`: Service-to-service communication
-- `database_connection`: Service connecting to database
-- `api_integration`: External API integration
-- `message_queue_connection`: Producer/consumer relationships
-- `cache_connection`: Service using cache
-
-**Properties MUST include:**
-- `source_entity` (string): The originating entity name
-- `target_entity` (string): The destination entity name
-- `protocol` (string): Communication protocol (http, grpc, amqp, etc.)
-
-**Additional recommended properties:**
-- `direction`: "unidirectional" or "bidirectional"
-- `connection_type`: "synchronous" or "asynchronous"
-
-**Requirements:**
-- Only create dependencies when logs contain explicit evidence of entity-to-entity relationships
-- Both source and target must be identifiable entities (or at minimum, stable service/component names)
-- Aggregate endpoint details in `meta.endpoints` and cap the list (max 10-15)
-
-### 3. infrastructure
-Infrastructure components detected in logs. Always extract significant infrastructure as standalone features, regardless of entity association.
-
-**ALWAYS extract as standalone features:**
-- Cloud providers and deployments (AWS, GCP, Azure)
-- Container orchestration platforms (Kubernetes, Docker Swarm, ECS)
-- Operating systems and kernel versions
-- Network infrastructure (load balancers, ingress, service mesh)
-- Hardware or platform details with version information
-
-**ALSO include in entity properties when clearly associated:**
-- Entity's deployment platform (e.g., service running on Kubernetes)
-- Entity's hosting environment (e.g., database on AWS RDS)
-- Entity's OS context when specific to that entity
-
-**Extraction strategy:**
-1. Extract infrastructure as a standalone feature (for platform monitoring, version tracking)
-2. If clearly associated with an entity, also include relevant details in that entity's properties
-3. Both the standalone feature and entity property provide different analytical value
-
-**Common subtypes:**
-- `cloud_deployment`: Cloud provider, regions, deployment patterns
-- `container_orchestration`: Kubernetes, Docker Swarm, ECS
-- `operating_system`: OS and kernel versions
-- `network_infrastructure`: Load balancers, ingress, service mesh
-
-**Properties examples:**
-- Cloud: `{ "provider": "aws" }` with regions in meta
-- Kubernetes: `{ "platform": "kubernetes", "version": "1.27" }`
-- OS: `{ "os": "ubuntu", "version": "20.04.6" }`
-
-### 4. technology
-Technology stack components detected in logs. Always extract significant technologies as standalone features, especially those with version information relevant for CVE analysis.
-
-**ALWAYS extract as standalone features:**
-- Programming languages with versions (Java, Python, Go, Node.js)
-- Libraries and frameworks with versions (Log4j, Spring Boot, Django)
-- Databases and versions (PostgreSQL, MySQL, MongoDB)
-- Web servers (Nginx, Apache, IIS)
-- Runtimes and interpreters (JVM, Python runtime, Node)
-- Any technology with version information (critical for CVE/vulnerability analysis)
-
-**ALSO include in entity properties when clearly associated:**
-- Entity's programming language and version
-- Entity's framework and version
-- Entity's key dependencies
-
-**Extraction strategy:**
-1. Extract technology as a standalone feature (for CVE analysis, version tracking, technology inventory)
-2. If clearly associated with an entity, also include relevant details in that entity's properties
-3. Both the standalone feature and entity property serve different purposes: standalone for technology-specific queries/CVEs, entity property for understanding entity composition
-
-**Common subtypes:**
-- `programming_language`: Java, Python, Go, Node.js
-- `web_server`: Nginx, Apache, IIS
-- `database`: PostgreSQL, MySQL, MongoDB
-- `logging_library`: Log4j, Logback, Winston
-- `framework`: Spring Boot, Django, Express
-- `runtime`: JVM, Python interpreter, Node runtime
-
-**Properties examples:**
-- Language: `{ "language": "java", "version": "11" }`
-- Library: `{ "library": "log4j", "version": "2.14.1" }`
-- Framework: `{ "framework": "spring-boot", "version": "2.7.5" }`
-
-## Entity Extraction Guidelines
-
-### Priority: Comprehensive Extraction
-Focus on identifying entities as the primary extraction goal, but also extract all significant technology and infrastructure as standalone features. Both entity-centric and technology/infrastructure features provide complementary analytical value.
-
-### Extraction Strategy
-
-**For entities:**
-
-1. **Is there a stable, high-level component identifier?**
-   - YES: Create an entity with associated tech/infrastructure in properties
-   - NO: Skip entity creation
-
-2. **Is the identifier instance-level or high-level?**
-   - High-level (e.g., "payment-service"): Create entity
-   - Instance-level (e.g., "payment-service-pod-xyz"): Don't create entity
-
-3. **Is there sufficient evidence?**
-   - Multiple log lines with consistent references: Create entity
-   - Single mention or ambiguous: Skip entity creation
-
-**For technology/infrastructure:**
-
-1. **Is the technology/infrastructure significant?**
-   - Has version information: ALWAYS extract as standalone feature
-   - Relevant for CVE/vulnerability analysis: ALWAYS extract as standalone feature
-   - Core platform component: ALWAYS extract as standalone feature
-   - Trivial/redundant information: Skip
-
-2. **Should it also be in entity properties?**
-   - Clearly associated with an entity: YES, include in entity properties
-   - Broadly applicable or no clear entity: Only standalone feature
-
-**Result: You may extract both an entity with tech/infra properties AND standalone tech/infra features. This is the desired behavior.**
-
-### Dual Representation: Entities + Standalone Features
-
-**IMPORTANT PATTERN - Extract BOTH:**
-
-When you identify an entity with associated technology or infrastructure, extract:
-1. **Entity feature** with tech/infra in properties
-2. **Standalone tech/infrastructure features** for each significant component
-
-**Example scenario:**
-If you find a Java Spring Boot service running on Kubernetes, extract ALL of:
-- Entity: `api-service` with properties `{ "language": "java", "version": "11", "framework": "spring-boot", "platform": "kubernetes" }`
-- Technology: `java-11` standalone feature for CVE analysis
-- Technology: `spring-boot-2.7.5` standalone feature for CVE analysis
-- Infrastructure: `kubernetes-1.27` standalone feature for platform monitoring
-
-**Why both?**
-- Entity properties: Show what tech/infra this entity uses (entity composition)
-- Standalone features: Enable technology-specific queries, CVE analysis, version tracking, platform monitoring
-
-**Good dual extraction patterns:**
-```
-Entity: { "type": "entity", "subtype": "service", "properties": { "name": "api-service", "language": "java", "version": "11", "framework": "spring-boot", "framework_version": "2.7.5" } }
-Technology: { "type": "technology", "subtype": "programming_language", "properties": { "language": "java", "version": "11" } }
-Technology: { "type": "technology", "subtype": "framework", "properties": { "framework": "spring-boot", "version": "2.7.5" } }
-```
-
-**Only skip standalone features when:**
-- The information is trivial and adds no analytical value
-- The same feature already exists (avoid duplicate standalone features, not entity properties)
+Extract features in three categories:
+- **infrastructure**: cloud provider/deployment, container orchestration, operating systems, networking, hardware
+  - Example subtypes: `cloud_deployment`, `container_orchestration`, `operating_system`
+- **technology**: programming languages, web servers, databases, libraries, frameworks
+  - Example subtypes: `programming_language`, `web_server`, `database`, `logging_library`
+- **dependency**: explicit relationships between systems (service-to-service calls, DB connections, API integrations)
+  - Example subtypes: `service_dependency`, `database_connection`, `api_integration`
 
 ## Consolidation Rules
 
-**Consolidate within feature types:**
-- Merge multiple observations of the same entity into one feature
-- Merge multiple observations of the same dependency (aggregate endpoints in meta)
-- Merge technology/infrastructure observations when they represent the same thing
+**Consolidate** when properties belong to the same entity and appear together in logs:
+- Good: A single cloud deployment feature with provider in `properties` and regions/zones in `meta`
+- Good: A single container orchestration feature for Kubernetes with stable platform/version in `properties`
 
-**Entity consolidation:**
-- Same entity referenced by different names: Merge and note aliases in `meta.aliases`
-- Same entity with varying details: Use most common/stable values in properties, variations in meta
+**Separate** distinct technologies even if related:
+- Good: Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
+- Bad: Do not combine multiple distinct technologies into one feature
 
-**Do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
-
-**Separate distinct entities even if related:**
-- Good: Separate entities for `api-service`, `user-service`, `payment-service`
-- Bad: Combining multiple services into one entity
+Also: **do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
 
 ## Naming Conventions
 
-### Subtypes
 Use **generic subtypes** with specific values in the `properties` object:
-- Good: `{ "subtype": "service", "properties": { "name": "api-service", "language": "java" } }`
-- Bad: `{ "subtype": "java_service", "properties": { "name": "api-service" } }`
+- Good: `{ "subtype": "programming_language", "properties": { "language": "java", "version": "11" } }`
+- Bad: `{ "subtype": "java_runtime", "properties": { "version": "11" } }`
 
 Subtype rules:
 - Use `snake_case` for `subtype`
 - Keep subtypes descriptive but concise
 - Put specificity in `properties`, not in `subtype`
-- Support both specific subtypes (`service`, `application`) and generic ones (`compute`, `data_store`)
-
-### IDs
-Generate a short, stable identifier based on key properties:
-- Entities: Use the entity name (e.g., "api-service", "user-db-cluster", "payment-app")
-- Dependencies: Combine source-target-protocol (e.g., "api-user-http", "api-userdb-postgres")
-- Infrastructure/Technology: Use provider/tech + version if relevant (e.g., "aws-deployment", "log4j-2.14.1")
 
 ID rules:
-- Use hyphens for readability
-- Include distinguishing characteristics
+- Generate a short, stable identifier based on key properties
+- Use hyphens for readability (e.g. "aws-deployment", "log4j-2.14.1", "api-user-http")
+- Include distinguishing characteristics (provider, name, version, or source/target for dependencies)
 - Keep it concise (typically 2-5 tokens)
-- Must be stable across multiple runs
 
 ## Properties vs Meta Fields
 
 The `properties` field MUST contain **stable, low-cardinality key facts** that enable deduplication across many log lines and deployments.
 
-**Use `properties` for:**
-- Entity: name, type, language, framework, database, version, platform, role
-- Dependency: source_entity, target_entity, protocol, direction
-- Infrastructure: provider, platform, os, version
-- Technology: language, library, framework, database, version
+- Use `properties` for: cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
+- Use `meta` for: supplementary details like regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels, contextual notes, security observations, or any interesting information that doesn't fit as a stable property
 
-**Use `meta` for:**
-- High-cardinality data: hostnames, instance IDs, pod names, IPs, trace IDs
-- Contextual details: regions, availability zones, endpoints lists, build hashes
-- Observations: aliases, observed variations, deployment patterns
-- Notes: inference explanations, security observations, interesting findings
+Example (cloud deployment):
+- Good: `properties: { "provider": "aws" }` (stable)
+- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"], "note": "Multi-region deployment pattern observed" }` (variable/high-cardinality + contextual info)
 
-**Example (entity):**
-- Good: `properties: { "name": "api-service", "language": "java", "framework": "spring-boot", "platform": "kubernetes" }` (stable)
-- Good: `meta: { "pods": ["api-service-abc", "api-service-def"], "namespace": "production", "replicas": 3 }` (variable/contextual)
-
-**Conflict & cardinality rules:**
-- If multiple values are observed for the same property, prefer the most frequently supported value in `properties` and record alternates in `meta.observed_*` with evidence
-- Avoid emitting separate features that differ only by high-cardinality metadata. Merge into one feature and store varying details in `meta`
+**Conflict & cardinality rules**:
+- If multiple values are observed for the same property, prefer the most frequently supported value in `properties` and record alternates in `meta.observed_*` with evidence.
+- Avoid emitting separate features that differ only by high-cardinality metadata. Merge into one feature and store varying details in `meta`.
 
 ## Inference & Confidence
 
@@ -286,23 +72,22 @@ The `properties` field MUST contain **stable, low-cardinality key facts** that e
 - Tag inferred features with `"inferred"` in `tags`
 - Explain the inference briefly in `meta.note`
 
-**Confidence bands:**
-- **90–100**: explicit, unambiguous evidence (e.g., service.name field present)
-- **70–89**: strong patterns with multiple corroborating signals (e.g., consistent naming across logs)
-- **50–69**: clear indicators with some ambiguity (e.g., entity name inferred from log structure)
-- **30–49**: weak inference (must include `"inferred"` tag, e.g., technology inferred from exception types)
+Confidence bands:
+- **90–100**: explicit, unambiguous evidence
+- **70–89**: strong patterns with multiple corroborating signals
+- **50–69**: clear indicators with some ambiguity
+- **30–49**: weak inference (must include `"inferred"` tag)
 
 Accept features with confidence ≥ 30 if evidence supports them.
 
 ## Evidence & Versions
 
-**Evidence requirements:**
+Evidence requirements:
 - Provide 2–5 short, specific evidence strings per feature
 - Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
 - Evidence must directly support the feature claim
-- For entities, provide evidence of entity identity and associated technology/infrastructure
 
-**Version formatting rules (important for CVE/vulnerability analysis):**
+Version formatting rules (important for CVE/vulnerability analysis):
 - Prefer normalized numeric versions in `properties.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
 - Strip leading `v` and surrounding text; keep only the numeric portion when possible
 - If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `properties.version` and store the original in `meta.raw_version`
@@ -310,353 +95,135 @@ Accept features with confidence ≥ 30 if evidence supports them.
 
 ## Examples
 
-**Example 1 - Entity (service) with associated technology and infrastructure**
+**Example 1 - Infrastructure with clean version**
 ```
 {
-  "type": "entity",
-  "subtype": "service",
-  "id": "api-service",
-  "title": "API Service",
-  "description": "RESTful API service handling user requests, built with Java Spring Boot, deployed on Kubernetes",
+  "type": "infrastructure",
+  "subtype": "operating_system",
+  "id": "ubuntu-20.04.6",
+  "title": "Ubuntu 20.04.6",
+  "description": "Ubuntu Linux operating system version 20.04.6",
   "properties": {
-    "name": "api-service",
-    "language": "java",
-    "version": "11",
-    "framework": "spring-boot",
-    "framework_version": "2.7.5",
-    "platform": "kubernetes"
+    "os": "ubuntu",
+    "version": "20.04.6"
   },
-  "confidence": 92,
+  "confidence": 95,
   "evidence": [
-    "service.name=api-service",
-    "java.version=11.0.16",
-    "logger=org.springframework.boot",
-    "kubernetes.pod.name=api-service-abc123",
-    "http.route=/api/users"
+    "host.os.name=Ubuntu",
+    "host.os.version=20.04.6 LTS (Focal Fossa)"
   ],
-  "tags": ["entity", "service", "java", "kubernetes"],
+  "tags": ["infrastructure", "os"],
   "meta": {
-    "namespace": "production",
-    "pods": ["api-service-abc123", "api-service-def456"],
-    "replicas": 3,
-    "endpoints": ["/api/users", "/api/orders", "/api/health"],
-    "raw_java_version": "11.0.16-LTS"
+    "raw_version": "20.04.6 LTS (Focal Fossa)"
   }
 }
 ```
 
-**Example 2 - Entity (database cluster) with version and infrastructure details**
-```
-{
-  "type": "entity",
-  "subtype": "database_instance",
-  "id": "user-db-cluster",
-  "title": "User Database",
-  "description": "PostgreSQL database cluster storing user data, version 14.5, deployed in AWS RDS",
-  "properties": {
-    "name": "user-db",
-    "database": "postgresql",
-    "version": "14.5",
-    "cluster_role": "primary",
-    "cloud_provider": "aws",
-    "service": "rds"
-  },
-  "confidence": 88,
-  "evidence": [
-    "db.system=postgresql",
-    "db.name=user-db",
-    "db.version=14.5",
-    "cloud.provider=aws",
-    "cloud.service=rds"
-  ],
-  "tags": ["entity", "database", "postgresql", "aws"],
-  "meta": {
-    "instance_class": "db.r5.large",
-    "storage": "500GB",
-    "multi_az": true,
-    "region": "us-east-1",
-    "raw_version": "PostgreSQL 14.5 on x86_64-pc-linux-gnu"
-  }
-}
-```
-
-**Example 3 - Standalone infrastructure (broad cloud deployment)**
+**Example 2 - Infrastructure showing properties vs meta**
 ```
 {
   "type": "infrastructure",
   "subtype": "cloud_deployment",
   "id": "aws-deployment",
   "title": "AWS",
-  "description": "AWS cloud deployment observed across multiple regions and availability zones",
+  "description": "AWS cloud deployment observed across one or more regions/availability zones",
   "properties": {
     "provider": "aws"
   },
-  "confidence": 90,
+  "confidence": 92,
   "evidence": [
     "cloud.provider=aws",
-    "cloud.region=us-east-1",
     "cloud.region=eu-west-1",
-    "cloud.availability_zone=us-east-1a"
+    "cloud.availability_zone=eu-west-1a"
   ],
   "tags": ["infrastructure", "cloud"],
   "meta": {
-    "regions": ["us-east-1", "eu-west-1"],
-    "availability_zones": ["us-east-1a", "us-east-1b", "eu-west-1a"],
-    "note": "Multi-region deployment pattern observed across logs"
+    "regions": ["eu-west-1"],
+    "availability_zones": ["eu-west-1a", "eu-west-1b"],
+    "note": "Multi-AZ deployment pattern observed"
   }
 }
 ```
 
-**Example 4 - Standalone technology (inferred Python, no clear entity association)**
-```
-{
-  "type": "technology",
-  "subtype": "programming_language",
-  "id": "python",
-  "title": "Python",
-  "description": "Python programming language detected from exception patterns and stack traces",
-  "properties": {
-    "language": "python"
-  },
-  "confidence": 45,
-  "evidence": [
-    "exception=Traceback (most recent call last)",
-    "stacktrace=File '/app/main.py', line 42",
-    "error=TypeError: unsupported operand type(s)"
-  ],
-  "tags": ["technology", "inferred"],
-  "meta": {
-    "note": "Inferred from Python exception patterns and .py file references. Unable to determine specific service or version."
-  }
-}
-```
-
-**Example 5 - Dependency (entity → entity with protocol)**
-```
-{
-  "type": "dependency",
-  "subtype": "service_dependency",
-  "id": "api-user-http",
-  "title": "api-service → user-service",
-  "description": "HTTP dependency from api-service to user-service for user data retrieval",
-  "properties": {
-    "source_entity": "api-service",
-    "target_entity": "user-service",
-    "protocol": "http",
-    "direction": "unidirectional"
-  },
-  "confidence": 85,
-  "evidence": [
-    "service.name=api-service http.url=http://user-service:8080/users http.status_code=200",
-    "upstream.service=user-service request.method=GET",
-    "peer.service=user-service span.kind=client"
-  ],
-  "tags": ["dependency", "http"],
-  "meta": {
-    "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
-    "methods": ["GET", "POST", "PUT"],
-    "avg_latency_ms": 45,
-    "note": "Primary user data access pattern"
-  }
-}
-```
-
-**Example 6 - Entity (application) showing high-level vs instance distinction**
-```
-{
-  "type": "entity",
-  "subtype": "application",
-  "id": "payment-app",
-  "title": "Payment Application",
-  "description": "Payment processing application handling transactions, built with Python Django",
-  "properties": {
-    "name": "payment-app",
-    "language": "python",
-    "version": "3.10",
-    "framework": "django",
-    "framework_version": "4.2"
-  },
-  "confidence": 87,
-  "evidence": [
-    "app.name=payment-app",
-    "python.version=3.10.8",
-    "django.version=4.2.0",
-    "log.logger=payment_app.transaction"
-  ],
-  "tags": ["entity", "application", "python"],
-  "meta": {
-    "note": "High-level application entity. Individual instances like payment-app-worker-1, payment-app-worker-2 are not extracted separately.",
-    "deployment_pattern": "multi-worker",
-    "observed_instances": 5
-  }
-}
-```
-
-**Example 7 - Standalone technology with version (suitable for CVE analysis)**
+**Example 3 - Technology feature with version**
 ```
 {
   "type": "technology",
   "subtype": "logging_library",
   "id": "log4j-2.14.1",
   "title": "Log4j 2.14.1",
-  "description": "Apache Log4j logging library version 2.14.1 detected in multiple services",
+  "description": "Apache Log4j logging library version 2.14.1",
   "properties": {
     "library": "log4j",
     "version": "2.14.1"
   },
-  "confidence": 93,
+  "confidence": 90,
   "evidence": [
     "jar=log4j-core-2.14.1.jar",
-    "logger=org.apache.logging.log4j.core",
-    "log4j.version=2.14.1"
+    "logger=org.apache.logging.log4j"
   ],
   "tags": ["technology", "library", "logging"],
   "meta": {
-    "note": "Version 2.14.1 has known CVE-2021-44228 (Log4Shell). Suitable for vulnerability queries. Observed across multiple services but no clear entity association in sample.",
-    "widespread": true
+    "note": "Version 2.14.1 may have known CVEs; suitable for vulnerability queries"
   }
 }
 ```
 
-**Example 8 - DUAL EXTRACTION: Entity + Standalone technology/infrastructure features**
-This example demonstrates extracting BOTH an entity with tech/infra properties AND standalone features for those same technologies/infrastructure. This is the EXPECTED and DESIRED pattern.
-
+**Example 4 - Inferred feature with lower confidence**
 ```
-// The entity with associated tech/infra in properties
-{
-  "type": "entity",
-  "subtype": "service",
-  "id": "checkout-service",
-  "title": "Checkout Service",
-  "description": "E-commerce checkout service handling payment processing",
-  "properties": {
-    "name": "checkout-service",
-    "language": "java",
-    "version": "17",
-    "framework": "spring-boot",
-    "framework_version": "3.1.0",
-    "platform": "kubernetes"
-  },
-  "confidence": 90,
-  "evidence": [
-    "service.name=checkout-service",
-    "java.version=17.0.5",
-    "spring.boot.version=3.1.0"
-  ],
-  "tags": ["entity", "service"],
-  "meta": {}
-}
-
-// ALSO extract standalone technology feature for Java (for CVE analysis)
 {
   "type": "technology",
   "subtype": "programming_language",
-  "id": "java-17",
-  "title": "Java 17",
-  "description": "Java programming language version 17",
+  "id": "java",
+  "title": "Java",
+  "description": "Java programming language (inferred from exception patterns)",
   "properties": {
-    "language": "java",
-    "version": "17"
+    "language": "java"
   },
-  "confidence": 95,
+  "confidence": 45,
   "evidence": [
-    "java.version=17.0.5",
-    "java.runtime.name=OpenJDK Runtime Environment"
+    "exception=java.lang.NullPointerException",
+    "stacktrace=at com.example.Service.handle(Service.java:42)"
   ],
-  "tags": ["technology", "language"],
+  "tags": ["technology", "inferred"],
   "meta": {
-    "raw_version": "17.0.5"
-  }
-}
-
-// ALSO extract standalone technology feature for Spring Boot (for CVE analysis)
-{
-  "type": "technology",
-  "subtype": "framework",
-  "id": "spring-boot-3.1.0",
-  "title": "Spring Boot 3.1.0",
-  "description": "Spring Boot framework version 3.1.0",
-  "properties": {
-    "framework": "spring-boot",
-    "version": "3.1.0"
-  },
-  "confidence": 92,
-  "evidence": [
-    "spring.boot.version=3.1.0",
-    "logger=org.springframework.boot.SpringApplication"
-  ],
-  "tags": ["technology", "framework"],
-  "meta": {}
-}
-
-// ALSO extract standalone infrastructure feature for Kubernetes
-{
-  "type": "infrastructure",
-  "subtype": "container_orchestration",
-  "id": "kubernetes-1.27",
-  "title": "Kubernetes 1.27",
-  "description": "Kubernetes container orchestration platform version 1.27",
-  "properties": {
-    "platform": "kubernetes",
-    "version": "1.27"
-  },
-  "confidence": 88,
-  "evidence": [
-    "kubernetes.pod.name=checkout-service-xyz",
-    "k8s.cluster.version=1.27.3"
-  ],
-  "tags": ["infrastructure", "kubernetes"],
-  "meta": {
-    "raw_version": "1.27.3"
+    "note": "Inferred from Java exception class names and .java stack trace references"
   }
 }
 ```
 
-**Why this dual extraction is important:**
-- The entity feature shows the service composition and what technologies it uses
-- The standalone Java feature enables Java-specific CVE queries across all services
-- The standalone Spring Boot feature enables framework-specific vulnerability analysis
-- The standalone Kubernetes feature enables platform-wide monitoring and version tracking
-- All four features provide complementary analytical value
+**Example 5 - Dependency feature showing properties vs meta + aggregation/capping**
+```
+{
+  "type": "dependency",
+  "subtype": "service_dependency",
+  "id": "api-user-http",
+  "title": "api-service → user-service",
+  "description": "Service-to-service HTTP dependency from api-service to user-service",
+  "properties": {
+    "source": "api-service",
+    "target": "user-service",
+    "protocol": "http"
+  },
+  "confidence": 85,
+  "evidence": [
+    "service.name=api-service http.url=/users http.status_code=200 peer.service=user-service",
+    "upstream=user-service:8080 request=GET /users"
+  ],
+  "tags": ["dependency", "http"],
+  "meta": {
+    "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
+    "methods": ["GET", "POST", "PUT"],
+    "note": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries"
+  }
+}
+```
 
 ## Output Quality Requirements
 
-**Prioritization (in order):**
-1. **Entities**: Focus on identifying high-level, stable system components with associated tech/infra in properties
-2. **Technology**: Extract ALL significant technologies, especially those with versions (critical for CVE analysis)
-3. **Infrastructure**: Extract ALL significant infrastructure components
-4. **Dependencies**: Map relationships between identified entities
-
-**Quality guidelines:**
-- Extract comprehensively: entities, their technologies, their infrastructure, and their dependencies
-- Prefer fewer, higher-confidence features over many speculative ones
-- ALWAYS extract technology/infrastructure as standalone features when they have version information or are significant
-- Also include technology/infrastructure in entity properties when clearly associated
-- Only emit a dependency when logs contain explicit evidence of entity-to-entity relationships
-- Accept features with confidence ≥ 30 if evidence supports them
-
-**Expected output pattern:**
-For a system with entities, you should extract:
-- N entity features (one per high-level component)
-- M technology features (one per significant technology/library/framework with version)
-- K infrastructure features (one per significant platform/deployment/OS component)
-- P dependency features (one per entity-to-entity relationship)
-
-Where M + K should be comparable or larger than N if the system has diverse technology stack.
-
-**Sorting:**
-- Primary sort: By `type` in order: `entity`, `technology`, `infrastructure`, `dependency`
-- Secondary sort: By descending `confidence`
-- Tertiary sort: Alphabetical by `subtype`, then by `id`
-
-**Dependency anti-spam:**
-- Only emit a dependency feature when logs contain explicit evidence of a relationship
-- Aggregate endpoints in `meta.endpoints` and cap the list (max 10-15 entries)
-- If more endpoints exist, note in `meta.note` (e.g., "20+ endpoints observed, showing top 10")
-
-**Dual extraction reminder:**
-- Extract BOTH entities with tech/infra properties AND standalone tech/infra features
-- See Example 8 for the correct pattern: one entity + multiple standalone features for its technologies/infrastructure
-- This dual representation is not duplication - it serves different analytical purposes
+- Extract all features that meet the confidence threshold and have supporting evidence.
+- Prefer fewer, higher-confidence features over many speculative ones.
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
+- Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
 
 Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
