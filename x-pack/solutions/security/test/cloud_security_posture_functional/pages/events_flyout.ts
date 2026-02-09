@@ -519,7 +519,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 35,
+            expectedCount: 36,
           });
         });
 
@@ -675,8 +675,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // - Each of those 3 entities communicates_with 2 entities of the same type (grouped)
             // - Identity-1 is also supervised_by a supervisor entity (different type: User)
             // - Root user performs an action (event) targeting host-1 and identity-1
+            // - Identity-1 performs 2 different actions targeting supervisor-1 (these get stacked)
+            // - External-caller has Communicates_with relationship targeting identity-1
 
-            // Navigate to the event
+            // Navigate to the event - include all 3 events
             await networkEventsPage.navigateToNetworkEventsPage(
               `${networkEventsPage.getAbsoluteTimerangeFilter(
                 '2024-09-01T00:00:00.000Z',
@@ -695,7 +697,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // - 1 actor node: root user
             // - 1 label node: for the event action (google.iam.admin.v1.UpdatePolicy)
             // - 2 target nodes: host-1 and identity-1
-            // Total: 14 nodes
+            // Total: 4 nodes
             const expectedTotalNodes = 4;
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedTotalNodes);
 
@@ -727,27 +729,35 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             const ownsRelationshipNodeId = 'rel(rel-hierarchy-root-user-Owns)';
             await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
+            await expandedFlyoutGraph.showEntityRelationships(hostNodeId);
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-host-1');
+            await expandedFlyoutGraph.showEntityRelationships(serviceNodeId);
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-service-1');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-            const expectedNodesWithMultipleRelationships = 14;
+            // Expected nodes with multiple relationships:
+            // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 supervisor + 1 external-caller
+            // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervised_by + 1 Depends_on
+            // - 1 label node: UpdatePolicy (not stacked)
+            // - 1 group node: for stacking Supervised_by and Depends_on (same source-target pair)
+            const expectedNodesWithMultipleRelationships = 18;
             await expandedFlyoutGraph.assertGraphNodesNumber(
               expectedNodesWithMultipleRelationships
             );
 
             // rel-hierarchy-identity-1 entity has the following relationships:
             // - Supervised_by: rel-hierarchy-supervisor-1
+            // - Depends_on: rel-hierarchy-supervisor-1
             // - Communicates_with: rel-hierarchy-network-1, rel-hierarchy-network-2
-            // we should have two relationship nodes for each relationship and two target nodes for each relationship
-            // single entity target node connected to Supervised_by relationships and another grouped target node connected to Communicates_with relationships
+            // Supervised_by and Depends_on share the same target (supervisor-1), so they are stacked in a group
             const supervisedByIdRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Supervised_by)';
             await expandedFlyoutGraph.assertNodeExists(supervisedByIdRelationshipNodeId);
+
+            const dependsOnRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Depends_on)';
+            await expandedFlyoutGraph.assertNodeExists(dependsOnRelationshipNodeId);
 
             const communicatesWithRelationshipNodeId =
               'rel(rel-hierarchy-identity-1-Communicates_with)';
@@ -789,16 +799,46 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'rel(rel-hierarchy-service-1-Communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithStorageRelationshipNodeId);
 
+            // Verify external-caller entity and its relationship
+            const externalCallerNodeId = 'rel-hierarchy-external-caller';
+            await expandedFlyoutGraph.assertNodeEntityTag(externalCallerNodeId, 'Service');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              externalCallerNodeId,
+              'Hierarchy External Caller'
+            );
+
+            const externalCallerRelationshipNodeId =
+              'rel(rel-hierarchy-external-caller-Communicates_with)';
+            await expandedFlyoutGraph.assertNodeExists(externalCallerRelationshipNodeId);
+            // Show actions by identity-1 to see the two new events (AuditLog and UserOperation)
+            await expandedFlyoutGraph.showActionsByEntity(hostNodeId);
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            // Expected nodes after showing entity's actions:
+            // Previous 18 nodes + 2 new label nodes (join existing relationship group) = 20
+            const expectedNodesAfterShowingActions = 20;
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesAfterShowingActions);
+
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              supervisedByIdRelationshipTargetNodeId,
+              'User'
+            );
+
             await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
+            // Verify the group node exists that contains 2 label and 2 relationship nodes
+            // (stacked together because they share the same source-target pair: identity-1 → supervisor-1)
+            const stackedGroupNodeId =
+              'grp(59d95e647275605ca691ba7c885dbfeb3e2638ea12aef38f03695760fe4334bd)';
+            await expandedFlyoutGraph.assertNodeExists(stackedGroupNodeId);
+
             // hide entity relationships
             await expandedFlyoutGraph.assertNodeDoesNotExist(supervisedByIdRelationshipNodeId);
+            await expandedFlyoutGraph.assertNodeDoesNotExist(dependsOnRelationshipNodeId);
             await expandedFlyoutGraph.assertNodeDoesNotExist(communicatesWithRelationshipNodeId);
 
-            await expandedFlyoutGraph.assertNodeDoesNotExist(
-              supervisedByIdRelationshipTargetNodeId
-            );
+            await expandedFlyoutGraph.assertNodeExists(supervisedByIdRelationshipTargetNodeId);
             await expandedFlyoutGraph.assertNodeDoesNotExist(
               communicatesWithIdRelationshipTargetNodeId
             );

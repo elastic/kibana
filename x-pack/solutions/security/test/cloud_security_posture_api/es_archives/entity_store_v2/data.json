@@ -1064,7 +1064,8 @@
         "type": "Identity",
         "relationships": {
           "Communicates_with": ["rel-hierarchy-network-1", "rel-hierarchy-network-2"],
-          "Supervised_by": ["rel-hierarchy-supervisor-1"]
+          "Supervised_by": ["rel-hierarchy-supervisor-1"],
+          "Depends_on": ["rel-hierarchy-supervisor-1"]
         }
       },
       "event": {

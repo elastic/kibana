@@ -1109,7 +1109,8 @@
         "type": "Identity",
         "relationships": {
           "Communicates_with": ["rel-hierarchy-network-1", "rel-hierarchy-network-2"],
-          "Supervised_by": ["rel-hierarchy-supervisor-1"]
+          "Supervised_by": ["rel-hierarchy-supervisor-1"],
+          "Depends_on": ["rel-hierarchy-supervisor-1"]
         }
       },
       "event": {
@@ -1367,6 +1368,48 @@
       "user": {
         "id": "rel-hierarchy-supervisor-1",
         "name": "Hierarchy Supervisor Admin"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "rel-hierarchy-external-caller",
+    "index": ".entities.v2.latest.security_generic_default",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-west-2",
+        "service": {
+          "name": "AWS Lambda"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "generic"
+        },
+        "id": "rel-hierarchy-external-caller",
+        "name": "Hierarchy External Caller",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-service_aws_lambda-default-2025.07.16-000005",
+        "sub_type": "AWS Lambda Function",
+        "type": "Service",
+        "relationships": {
+          "Communicates_with": ["rel-hierarchy-identity-1"]
+        }
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "service": {
+        "id": "rel-hierarchy-external-caller",
+        "name": "Hierarchy External Caller"
       }
     }
   }
