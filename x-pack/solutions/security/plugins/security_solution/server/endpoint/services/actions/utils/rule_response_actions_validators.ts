@@ -115,7 +115,7 @@ export const validateRuleResponseActions = async <
     } else {
       logger.debug(
         () =>
-          `Skipping validation of response action - not an action type id not '.endpoint': ${stringify(
+          `Skipping validation of response action - action type id not '.endpoint': ${stringify(
             actionData
           )}`
       );
@@ -177,12 +177,9 @@ export const validateRuleImportResponseActions = async <
         response.valid.push(rule);
       } catch (error) {
         response.errors.push({
-          id: (rule as unknown as RuleToImport).id ?? '',
-          rule_id: (rule as unknown as RuleToImport).rule_id ?? '',
-          error: {
-            message: error.message,
-            status_code: error.statusCode,
-          },
+          id: rule.id ?? '',
+          rule_id: rule.rule_id ?? '',
+          error: { message: error.message, status_code: error.statusCode },
         });
       }
     },
