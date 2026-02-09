@@ -18,7 +18,8 @@ import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  createBody: DashboardCreateRequestBody
+  createBody: DashboardCreateRequestBody,
+  legacyMode: boolean = false
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody.data;
@@ -27,7 +28,7 @@ export async function create(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData);
+  } = transformDashboardIn(restOfData, legacyMode);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }

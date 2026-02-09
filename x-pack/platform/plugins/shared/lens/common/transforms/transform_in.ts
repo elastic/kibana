@@ -23,7 +23,8 @@ import type { LensSerializedState } from '../../public';
  */
 export const getTransformIn = (
   builder: LensConfigBuilder,
-  transformDrilldownsIn: DrilldownTransforms['transformIn']
+  transformDrilldownsIn: DrilldownTransforms['transformIn'],
+  legacyMode: boolean
 ): LensTransformIn => {
   return function transformIn(config) {
     const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
@@ -43,16 +44,18 @@ export const getTransformIn = (
       } satisfies LensByRefTransformInResult;
     }
 
-    const chartType = builder.getType(config.attributes);
-
-    if (!builder.isSupported(chartType)) {
+    if (legacyMode) {
       const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
-      // TODO: remove this once all formats are supported
-      // when not supported, no transform is needed
       return {
         state,
         references: [...references, ...drilldownReferences],
       } satisfies LensByValueTransformInResult;
+    }
+
+    const chartType = builder.getType(config.attributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
     if (!config.attributes) {

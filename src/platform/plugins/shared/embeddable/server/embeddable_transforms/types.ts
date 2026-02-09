@@ -48,7 +48,8 @@ export type EmbeddableTransformsSetup<
   EmbeddableState extends object = object
 > = {
   getTransforms?: (
-    drilldownTransforms: DrilldownTransforms
+    drilldownTransforms: DrilldownTransforms,
+    legacyMode: boolean
   ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
@@ -58,7 +59,10 @@ export type EmbeddableTransformsSetup<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
+  getSchema?: (
+    getDrilldownsSchema: GetDrilldownsSchemaFnType,
+    legacyMode: boolean
+  ) => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */

@@ -37,13 +37,15 @@ export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search'
+  operation: 'create' | 'read' | 'update' | 'search',
+  legacyMode: boolean = false
 ) {
   let dashboardState: DashboardState;
   try {
     dashboardState = transformDashboardOut(
       savedObject.attributes,
-      savedObject.references
+      savedObject.references,
+      legacyMode
     ) as DashboardState;
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);

@@ -19,10 +19,10 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
   }
 
   function isMappedPanelType(panel: DashboardPanel) {
-    const transforms = embeddableService?.getTransforms(panel.type);
+    const transforms = embeddableService?.getTransforms(panel.type, false);
     if (transforms?.throwOnUnmappedPanel) {
       try {
-        transforms.throwOnUnmappedPanel(panel.config);
+        transforms.throwOnUnmappedPanel(panel.config, false);
       } catch (e) {
         warnings.push(
           `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
@@ -84,7 +84,7 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
   }
 
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
-    const transforms = embeddableService?.getTransforms(panel.type);
+    const transforms = embeddableService?.getTransforms(panel.type, false);
     const panelSchema = transforms?.schema;
 
     if (!panelSchema) {

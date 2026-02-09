@@ -53,7 +53,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
         if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
 
-        const result = await update(ctx, req.params.id, req.body);
+        const result = await update(ctx, req.params.id, req.body, allowUnmappedKeys);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

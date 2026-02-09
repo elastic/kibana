@@ -24,13 +24,13 @@ export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDr
     },
     getAllEmbeddableSchemas: () =>
       Object.values(transformsRegistry)
-        .map((transformsSetup) => transformsSetup?.getSchema?.(drilldownRegistry.getSchema))
+        .map((transformsSetup) => transformsSetup?.getSchema?.(drilldownRegistry.getSchema, false))
         .filter((schema) => Boolean(schema)) as ObjectType[],
-    getEmbeddableTransforms: (type: string) => {
+    getEmbeddableTransforms: (type: string, legacyMode: boolean) => {
       const { getTransforms, getSchema, throwOnUnmappedPanel } = transformsRegistry[type] ?? {};
       return {
-        ...getTransforms?.(drilldownRegistry.transforms),
-        ...(getSchema ? { schema: getSchema(drilldownRegistry.getSchema) } : {}),
+        ...getTransforms?.(drilldownRegistry.transforms, legacyMode),
+        ...(getSchema ? { schema: getSchema(drilldownRegistry.getSchema, legacyMode) } : {}),
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
     },

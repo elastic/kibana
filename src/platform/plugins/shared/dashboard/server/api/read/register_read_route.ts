@@ -51,8 +51,8 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(ctx, req.params.id);
         const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        const result = await read(ctx, req.params.id, allowUnmappedKeys);
         const { data, warnings } = !allowUnmappedKeys
           ? stripUnmappedKeys(result.data)
           : { data: result.data, warnings: [] };

@@ -12,7 +12,6 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { schema } from '@kbn/config-schema';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { isByRefLensConfig } from '../common/transforms/utils';
-import { lensItemDataSchemaV2 } from './content_management';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
@@ -22,12 +21,12 @@ export function registerLensEmbeddableTransforms(
   builder: LensConfigBuilder
 ) {
   embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
-    getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
-      transformIn: getTransformIn(builder, drilldownTransforms.transformIn),
-      transformOut: getTransformOut(builder, drilldownTransforms.transformOut),
+    getTransforms: (drilldownTransforms: DrilldownTransforms, legacyMode: boolean) => ({
+      transformIn: getTransformIn(builder, drilldownTransforms.transformIn, legacyMode),
+      transformOut: getTransformOut(builder, drilldownTransforms.transformOut, legacyMode),
     }),
     getSchema: () => {
-      return builder.isEnabled ? lensPanelSchema : undefined;
+      return lensPanelSchema;
     },
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
@@ -41,17 +40,10 @@ export function registerLensEmbeddableTransforms(
   });
 }
 
-const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
-  // Why are these added to the panel attributes?
-  // See https://github.com/elastic/kibana/issues/250115
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.literal('lens')),
-});
-
 const lensByValuePanelSchema = schema.object(
   {
     // TODO: add missing config properties
-    attributes: schema.oneOf([lensApiStateSchema, legacyPanelAttributesSchema]),
+    attributes: lensApiStateSchema,
   },
   { unknowns: 'allow' }
 );

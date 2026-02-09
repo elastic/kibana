@@ -60,7 +60,7 @@ export class LensClient {
 
     const chartType = this.builder?.getType(data);
 
-    if (this.builder?.isSupported(chartType)) {
+    if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
       const config = data as LensApiState;
       return {
         item: {
@@ -95,7 +95,7 @@ export class LensClient {
       throw new Error('Missing visualization type');
     }
 
-    const useApiFormat = this.builder?.isSupported(visualizationType);
+    const useApiFormat = this.builder?.isEnabled && this.builder?.isSupported(visualizationType);
     const body: LensCreateRequestBody =
       useApiFormat && this.builder
         ? this.builder.toAPIFormat({
@@ -160,7 +160,7 @@ export class LensClient {
       throw new Error('Missing visualization type');
     }
 
-    const useApiFormat = this.builder?.isSupported(visualizationType);
+    const useApiFormat = this.builder?.isEnabled && this.builder?.isSupported(visualizationType);
     const body: LensUpdateRequestBody =
       useApiFormat && this.builder
         ? this.builder.toAPIFormat({
@@ -246,7 +246,7 @@ export class LensClient {
     return result.data.map(({ id, data }) => {
       const chartType = this.builder?.getType(data);
 
-      if (this.builder?.isSupported(chartType)) {
+      if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
         const config = data as LensApiState;
         return {
           id,

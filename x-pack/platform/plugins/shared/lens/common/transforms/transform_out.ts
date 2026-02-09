@@ -28,7 +28,8 @@ import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/ut
  */
 export const getTransformOut = (
   builder: LensConfigBuilder,
-  transformDrilldownsOut: DrilldownTransforms['transformOut']
+  transformDrilldownsOut: DrilldownTransforms['transformOut'],
+  legacyMode: boolean
 ): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
     const transformsFlow = flow(
@@ -55,11 +56,14 @@ export const getTransformOut = (
       panelReferences
     );
 
-    const chartType = builder.getType(migratedAttributes);
-
-    if (!builder.isSupported(chartType)) {
-      // TODO: remove this once all formats are supported
+    if (legacyMode) {
       return injectedState as LensByValueTransformOutResult;
+    }
+
+    const chartType = builder.getType(migratedAttributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
     const apiConfig = builder.toAPIFormat({

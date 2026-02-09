@@ -75,7 +75,7 @@ export function getLensInternalResponseItem<M extends Record<string, string | bo
 ): ExtendedLensResponseItem<M> {
   const { id, references, attributes } = item;
   const meta = getLensInternalResponseItemMeta<M>(item, extraMeta);
-  const useApiFormat = builder.isSupported(attributes.visualizationType);
+  const useApiFormat = builder.isEnabled && builder.isSupported(attributes.visualizationType);
 
   if (useApiFormat) {
     const data = builder.toAPIFormat({

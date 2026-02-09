@@ -18,7 +18,8 @@ import { transformPanelsOut } from './transform_panels_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[]
+  references?: SavedObjectReference[],
+  legacyMode: boolean = false
 ): DashboardState | Partial<DashboardState> {
   const {
     controlGroupInput,
@@ -64,7 +65,7 @@ export function transformDashboardOut(
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
     ...((panelsJSON || sections) && {
-      panels: transformPanelsOut(panelsJSON, sections, references),
+      panels: transformPanelsOut(panelsJSON, sections, references, legacyMode),
     }),
 
     ...(pinnedControlsOut && { pinned_panels: pinnedControlsOut }),
