@@ -18,9 +18,13 @@ export { kbnTransformDiskCachePlugins } from './src/transform_disk_cache_plugin.
 // ViteModuleLoader - module loader for use in Kibana core
 export { ViteModuleLoader, createViteModuleLoader } from './src/vite_module_loader.ts';
 
+// Utilities
+export { createViteLogger } from './src/types.ts';
+
 // Type exports
 export type {
   ViteServerOptions,
+  ViteServerLog,
   ViteModuleRunner,
   ModuleExecuteResult,
   HmrContext,

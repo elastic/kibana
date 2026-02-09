@@ -9,6 +9,7 @@
 
 import { createViteServerRuntime } from './vite_server.ts';
 import type { ViteServer } from './vite_server.ts';
+import { createViteLogger, type ViteServerLog } from './types.ts';
 
 /**
  * Interface for module loaders - matches @kbn/core-plugins-server-internal ModuleLoader
@@ -65,6 +66,10 @@ export interface ViteModuleLoaderOptions {
    * bootstrap runtime (from scripts/kibana.mts) is already running.
    */
   existingRuntime?: ViteServer;
+  /**
+   * Optional structured logger for module loader messages.
+   */
+  log?: ViteServerLog;
 }
 
 /**
@@ -84,9 +89,11 @@ export class ViteModuleLoader implements ModuleLoader {
   private hmrCallbacks: PluginHmrCallback[] = [];
   private unsubscribeHmr?: () => void;
   private readonly options: ViteModuleLoaderOptions;
+  private readonly log: ViteServerLog;
 
   constructor(options: ViteModuleLoaderOptions) {
     this.options = options;
+    this.log = options.log ?? createViteLogger('vite-module-loader');
     this.onModuleInvalidated = options.onModuleInvalidated;
     if (options.onPluginHmrUpdate) {
       this.hmrCallbacks.push(options.onPluginHmrUpdate);
@@ -107,8 +114,7 @@ export class ViteModuleLoader implements ModuleLoader {
       // scripts/kibana.mts. This avoids the cost of creating a second
       // Vite dev server (~4-5s startup, ~50-100MB RAM, extra file watcher).
       this.viteServer = this.options.existingRuntime;
-      // eslint-disable-next-line no-console
-      console.log('[vite-module-loader] Reusing existing Vite server runtime');
+      this.log.info('Reusing existing Vite server runtime');
     } else {
       this.viteServer = await createViteServerRuntime({
         repoRoot: this.options.repoRoot,
@@ -220,7 +226,7 @@ export class ViteModuleLoader implements ModuleLoader {
       try {
         await callback(event);
       } catch (error) {
-        console.error('[ViteModuleLoader] Error in HMR callback:', error);
+        this.log.error(`Error in HMR callback: ${error}`);
       }
     }
   }

@@ -12,6 +12,8 @@ import Fs from 'fs';
 import FsPromises from 'fs/promises';
 import type { Plugin } from 'vite';
 
+import { createViteLogger, type ViteServerLog } from './types.ts';
+
 // Prevent duplicate log messages when multiple Vite instances run in
 // the same process (parent runtime, optimizer, child runtime).
 let hasLoggedStartup = false;
@@ -21,6 +23,15 @@ interface ModuleResolverOptions {
   repoRoot: string;
   /** Whether to enable verbose logging */
   verbose?: boolean;
+  /** Optional structured logger */
+  log?: ViteServerLog;
+  /**
+   * Whether to pre-warm the resolution cache at startup.
+   * The parent process only resolves ~20–30 modules, so the cost of
+   * restoring 700+ cached resolutions and stat-checking 7,500 file
+   * candidates is wasted. Set to false to skip cache warming.
+   */
+  warmCache?: boolean;
 }
 
 /**
@@ -77,7 +88,8 @@ function isFile(filePath: string): boolean {
  * Note: Transform caching is handled separately by kbnTransformDiskCachePlugins.
  */
 export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
-  const { repoRoot, verbose = false } = options;
+  const { repoRoot, verbose = false, warmCache = true } = options;
+  const log = options.log ?? createViteLogger('module-resolver');
 
   const cacheDir = Path.resolve(repoRoot, '.vite-server-cache');
   const resolveCachePath = Path.join(cacheDir, 'resolve-cache.json');
@@ -100,7 +112,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
       const entries: Array<[string, string]> = JSON.parse(content);
       return new Map(entries);
     } catch (error) {
-      console.warn('[kbn-module-resolver] Failed to load package map:', error);
+      log.warn(`Failed to load package map: ${error}`);
       return new Map();
     }
   }
@@ -153,8 +165,8 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
       }
 
       if (!hasLoggedStartup) {
-        console.log(
-          `[kbn-module-resolver] Restored ${restored} cached resolutions` +
+        log.info(
+          `Restored ${restored} cached resolutions` +
             (pruned > 0 ? ` (pruned ${pruned} stale)` : '')
         );
       }
@@ -226,9 +238,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
       fileExistsCache.set(checks[i].path, results[i]);
     }
 
-    console.log(
-      `[kbn-module-resolver] Pre-warmed file cache with ${checks.length} entries`
-    );
+    log.info(`Pre-warmed file cache with ${checks.length} entries`);
   }
 
   return {
@@ -237,11 +247,17 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
 
     async buildStart() {
       packageMap = loadPackageMap();
-      loadResolveCache();
-      await prewarmFileExistsCache(packageMap);
-      if (!hasLoggedStartup) {
-        console.log(`[kbn-module-resolver] Loaded package map with ${packageMap.size} packages`);
-        hasLoggedStartup = true;
+
+      if (warmCache) {
+        // Child process resolves 800+ modules — the cache saves thousands of
+        // stat() calls.  The parent only resolves ~20–30 so this is skipped.
+        loadResolveCache();
+        await prewarmFileExistsCache(packageMap);
+
+        if (!hasLoggedStartup) {
+          log.info(`Loaded package map with ${packageMap.size} packages`);
+          hasLoggedStartup = true;
+        }
       }
     },
 
@@ -256,8 +272,8 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
           !source.startsWith('\0') &&
           !source.startsWith('@kbn/')
         ) {
-          console.log(
-            `[kbn-module-resolver] resolveId non-kbn: source=${source}, importer=${importer?.substring(
+          log.info(
+            `resolveId non-kbn: source=${source}, importer=${importer?.substring(
               Math.max(0, importer.length - 60)
             )}`
           );
@@ -304,7 +320,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
           }
 
           if (verbose) {
-            console.log(`[kbn-module-resolver] Externalizing: ${source}`);
+            log.info(`Externalizing: ${source}`);
           }
           return { id: source, external: true };
         }
@@ -317,7 +333,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
         // Build infrastructure packages must NOT be resolved to source by this plugin.
         if (KBN_PACKAGES_LOAD_FROM_TARGET.includes(packageId)) {
           if (verbose) {
-            console.log(`[kbn-module-resolver] Infrastructure package (skip): ${source}`);
+            log.info(`Infrastructure package (skip): ${source}`);
           }
           return null; // Let Vite's default SSR externalization handle it
         }
@@ -325,7 +341,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
         // Check if this is a known CommonJS @kbn package
         if (COMMONJS_KBN_PACKAGES.includes(packageId)) {
           if (verbose) {
-            console.log(`[kbn-module-resolver] CommonJS @kbn package: ${source}`);
+            log.info(`CommonJS @kbn package: ${source}`);
           }
           return `\0cjs-external:${source}`;
         }
@@ -369,9 +385,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
             for (const candidate of candidates) {
               if (isFile(candidate)) {
                 if (verbose) {
-                  console.log(
-                    `[kbn-module-resolver] ${source} -> ${Path.relative(repoRoot, candidate)}`
-                  );
+                  log.info(`${source} -> ${Path.relative(repoRoot, candidate)}`);
                 }
                 sourceResolveCache.set(source, candidate);
                 return candidate;
@@ -381,7 +395,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
         }
 
         if (verbose) {
-          console.log(`[kbn-module-resolver] No source found for ${source}`);
+          log.info(`No source found for ${source}`);
         }
         sourceResolveCache.set(source, null);
         return null;
@@ -400,7 +414,7 @@ export function kbnCacheResolverPlugin(options: ModuleResolverOptions): Plugin {
 
       const moduleName = id.slice('\0cjs-external:'.length);
       if (verbose) {
-        console.log(`[kbn-module-resolver] Loading CJS external: ${moduleName}`);
+        log.info(`Loading CJS external: ${moduleName}`);
       }
 
       // For CommonJS @kbn/* modules, generate an ESM wrapper that uses
@@ -428,7 +442,7 @@ ${exportNames.map((name) => `export const ${name} = _mod['${name}'];`).join('\n'
 `;
         return code;
       } catch (error) {
-        console.error(`[kbn-module-resolver] Failed to load CJS module ${moduleName}:`, error);
+        log.error(`Failed to load CJS module ${moduleName}: ${error}`);
         return null;
       }
     },

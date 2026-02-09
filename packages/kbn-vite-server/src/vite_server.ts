@@ -9,7 +9,7 @@
 
 import { createServer as createViteServer, type ViteDevServer, type InlineConfig } from 'vite';
 
-import type { ViteServerOptions, ViteModuleRunner, KbnViteDevServer } from './types.ts';
+import { createViteLogger, type ViteServerOptions, type ViteModuleRunner, type KbnViteDevServer } from './types.ts';
 import { createModuleRunner, resolveModulePath } from './module_runner.ts';
 import { createServerRuntimeConfig } from './server_config.ts';
 import type { HmrHandler } from './hmr_handler.ts';
@@ -37,8 +37,11 @@ export class ViteServer {
   private options: ViteServerOptions;
   private isClosing = false;
 
+  private log;
+
   constructor(options: ViteServerOptions) {
     this.options = options;
+    this.log = options.log ?? createViteLogger('vite-server');
   }
 
   /**
@@ -79,8 +82,7 @@ export class ViteServer {
     // may be created (parent, optimizer, child) and this message is redundant.
     if (!(globalThis as any).__kbnViteServerLogged) {
       (globalThis as any).__kbnViteServerLogged = true;
-      // eslint-disable-next-line no-console
-      console.log('[vite-server] Started Vite server runtime');
+      this.log.info('Started Vite server runtime');
     }
   }
 
@@ -224,8 +226,7 @@ export class ViteServer {
         this.viteServer = null;
       }
 
-      // eslint-disable-next-line no-console
-      console.log('[vite-server] Stopped Vite server runtime');
+      this.log.info('Stopped Vite server runtime');
     } finally {
       this.isClosing = false;
     }

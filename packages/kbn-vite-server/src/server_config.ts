@@ -37,7 +37,7 @@ import { kbnTypescriptTransformPlugin } from './kbn_typescript_transform_plugin.
  * - SSR noExternal: Transform @kbn/* packages
  */
 export function createServerRuntimeConfig(options: ViteServerOptions): InlineConfig {
-  const { repoRoot, hmr = true } = options;
+  const { repoRoot, hmr = true, log } = options;
   const isVerbose = process.env.KBN_VITE_DEBUG === 'true';
 
   // Automatic disk-backed transform cache — persists transform results to disk
@@ -49,6 +49,7 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
     kbnTransformDiskCachePlugins({
       repoRoot,
       verbose: isVerbose,
+      log,
     });
 
   return {
@@ -71,6 +72,8 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       kbnCacheResolverPlugin({
         repoRoot,
         verbose: isVerbose,
+        log,
+        warmCache: hmr, // Only pre-warm for the child process (800+ modules)
       }) as PluginOption,
       // CJS interop plugin - must run before transforms
       cjsInteropPlugin(),
@@ -198,7 +201,7 @@ export function createServerRuntimeConfig(options: ViteServerOptions): InlineCon
       ssr: true,
 
       // Rollup options for module handling
-      rollupOptions: {
+      rolldownOptions: {
         // Preserve modules for better debugging
         output: {
           preserveModules: true,

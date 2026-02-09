@@ -13,6 +13,8 @@ import FsPromises from 'fs/promises';
 import Path from 'path';
 import type { Plugin } from 'vite';
 
+import { createViteLogger, type ViteServerLog } from './types.ts';
+
 interface TransformDiskCacheOptions {
   /** Path to the repository root */
   repoRoot: string;
@@ -20,6 +22,8 @@ interface TransformDiskCacheOptions {
   cacheDir?: string;
   /** Log cache hit/miss stats on shutdown */
   verbose?: boolean;
+  /** Optional structured logger */
+  log?: ViteServerLog;
 }
 
 /**
@@ -66,6 +70,7 @@ function pathToKey(filePath: string): string {
  */
 export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions): Plugin[] {
   const { repoRoot, verbose = false } = options;
+  const log = options.log ?? createViteLogger('transform-cache');
   const cacheDir = options.cacheDir || Path.resolve(repoRoot, '.vite-server-cache', 'transforms');
 
   // When source maps are disabled (the default), we suppress map objects entirely.
@@ -347,8 +352,8 @@ export function kbnTransformDiskCachePlugins(options: TransformDiskCacheOptions)
     buildEnd() {
       const total = hitCount + missCount;
       if (total > 0) {
-        console.log(
-          `[transform-cache] ${hitCount} cache hits, ${missCount} misses` +
+        log.info(
+          `${hitCount} cache hits, ${missCount} misses` +
             ` (${total > 0 ? Math.round((hitCount / total) * 100) : 0}% hit rate)`
         );
       }

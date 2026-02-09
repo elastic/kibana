@@ -8,6 +8,50 @@
  */
 
 import type { ViteDevServer } from 'vite';
+// picocolors ships with Vite and is always available at runtime
+import pc from 'picocolors';
+
+/**
+ * Simple structured logger for Vite server messages.
+ * Callers can provide their own implementation to integrate with
+ * ToolingLog, Kibana core Logger, or any other logging framework.
+ */
+export interface ViteServerLog {
+  info(msg: string): void;
+  warn(msg: string): void;
+  error(msg: string): void;
+}
+
+/**
+ * Create a default ViteServerLog that formats messages with a timestamp
+ * and context name, matching the kbn tooling log style with colors.
+ *
+ * Output format:  ` np bld    log   [HH:mm:ss.SSS] [level][@kbn/name] message`
+ */
+export function createViteLogger(name: string): ViteServerLog {
+  const time = () => {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    const ms = String(d.getMilliseconds()).padStart(3, '0');
+    return `${hh}:${mm}:${ss}.${ms}`;
+  };
+
+  const prefix = ` np bld    log   `;
+  const coloredName = pc.magentaBright(`@kbn/${name}`);
+  return {
+    info: (msg) =>
+      // eslint-disable-next-line no-console
+      console.log(`${prefix}[${time()}] [${pc.green('info')}][${coloredName}] ${msg}`),
+    warn: (msg) =>
+      // eslint-disable-next-line no-console
+      console.log(`${prefix}[${time()}] [${pc.yellow('warning')}][${coloredName}] ${msg}`),
+    error: (msg) =>
+      // eslint-disable-next-line no-console
+      console.error(`${prefix}[${time()}] [${pc.red('error')}][${coloredName}] ${msg}`),
+  };
+}
 
 /**
  * Configuration options for the Vite Server Runtime
@@ -37,6 +81,12 @@ export interface ViteServerOptions {
    * Additional Vite configuration overrides
    */
   viteConfig?: Record<string, unknown>;
+
+  /**
+   * Optional structured logger. When not provided, a default logger
+   * is created that writes formatted messages to stdout.
+   */
+  log?: ViteServerLog;
 }
 
 /**
