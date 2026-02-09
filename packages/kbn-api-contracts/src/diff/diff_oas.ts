@@ -9,6 +9,12 @@
 
 import equal from 'fast-deep-equal';
 import type { NormalizedSpec } from '../input/normalize_oas';
+import {
+  diffParameters,
+  diffRequestBodySchemas,
+  diffResponseSchemas,
+  type SchemaDiffResult,
+} from './schema_diff';
 
 export type DiffType = 'added' | 'removed' | 'modified';
 
@@ -33,6 +39,7 @@ export interface OperationChange {
   type: 'parameters' | 'requestBody' | 'responses';
   change: 'added' | 'removed' | 'modified';
   details?: unknown;
+  schemaDiff?: SchemaDiffResult;
 }
 
 export interface OasDiff {
@@ -94,21 +101,24 @@ export function diffOas(baseline: NormalizedSpec, current: NormalizedSpec): OasD
         const hasBaseline = baselineOp.parameters !== undefined;
         const hasCurrent = currentOp.parameters !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';
-        changes.push({ type: 'parameters', change, details: currentOp.parameters });
+        const schemaDiff = diffParameters(baselineOp.parameters, currentOp.parameters);
+        changes.push({ type: 'parameters', change, details: currentOp.parameters, schemaDiff });
       }
 
       if (!equal(baselineOp.requestBody, currentOp.requestBody)) {
         const hasBaseline = baselineOp.requestBody !== undefined;
         const hasCurrent = currentOp.requestBody !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';
-        changes.push({ type: 'requestBody', change, details: currentOp.requestBody });
+        const schemaDiff = diffRequestBodySchemas(baselineOp.requestBody, currentOp.requestBody);
+        changes.push({ type: 'requestBody', change, details: currentOp.requestBody, schemaDiff });
       }
 
       if (!equal(baselineOp.responses, currentOp.responses)) {
         const hasBaseline = baselineOp.responses !== undefined;
         const hasCurrent = currentOp.responses !== undefined;
         const change = !hasBaseline ? 'added' : !hasCurrent ? 'removed' : 'modified';
-        changes.push({ type: 'responses', change, details: currentOp.responses });
+        const schemaDiff = diffResponseSchemas(baselineOp.responses, currentOp.responses);
+        changes.push({ type: 'responses', change, details: currentOp.responses, schemaDiff });
       }
 
       if (changes.length > 0) {
