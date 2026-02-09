@@ -28,7 +28,6 @@ import * as i18n from '../translations';
 export interface UseAlertTagsActionsProps {
   closePopover: () => void;
   ecsRowData: Ecs;
-  refetch?: () => void;
 }
 
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
@@ -154,14 +153,13 @@ export const AlertWorkflowsPanel = ({ closePopover, ecsRowData }: AlertWorkflows
 export const useRunAlertWorkflowPanel = ({
   closePopover,
   ecsRowData,
-  refetch,
 }: UseAlertTagsActionsProps) => {
   const {
     services: { uiSettings, application },
   } = useKibana<{ application: ApplicationStart }>();
 
   const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
-  const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
+  const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
   const { hasIndexWrite } = useAlertsPrivileges();
 
   const runWorkflowMenuItem: AlertTableContextMenuItem[] = useMemo(
@@ -180,23 +178,21 @@ export const useRunAlertWorkflowPanel = ({
   );
 
   const runAlertWorkflowPanel: EuiContextMenuPanelDescriptor[] = useMemo(
-    () =>
-      hasIndexWrite
-        ? [
-            {
-              id: RUN_WORKFLOW_PANEL_ID,
-              title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
-              'data-test-subj': 'alert-workflow-context-menu-panel',
-              content: <AlertWorkflowsPanel closePopover={closePopover} ecsRowData={ecsRowData} />,
-            },
-          ]
-        : [],
-    [hasIndexWrite, closePopover, ecsRowData]
+    () => [
+      {
+        id: RUN_WORKFLOW_PANEL_ID,
+        title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
+        'data-test-subj': 'alert-workflow-context-menu-panel',
+        content: <AlertWorkflowsPanel closePopover={closePopover} ecsRowData={ecsRowData} />,
+      },
+    ],
+    [closePopover, ecsRowData]
   );
 
   return {
     runWorkflowMenuItem:
       hasIndexWrite && workflowUIEnabled && canExecuteWorkflow ? runWorkflowMenuItem : [],
-    runAlertWorkflowPanel,
+    runAlertWorkflowPanel:
+      hasIndexWrite && workflowUIEnabled && canExecuteWorkflow ? runAlertWorkflowPanel : [],
   };
 };
