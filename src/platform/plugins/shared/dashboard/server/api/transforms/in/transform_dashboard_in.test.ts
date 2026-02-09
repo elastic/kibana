@@ -75,7 +75,7 @@ describe('transformDashboardIn', () => {
           "pinned_panels": Object {
             "panels": Object {
               "foo": Object {
-                "explicitInput": Object {
+                "config": Object {
                   "anyKey": "some value",
                 },
                 "grow": false,
