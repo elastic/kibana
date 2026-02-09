@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -110,6 +110,37 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
         internalStateSlice.actions.setGlobalState({
           tabId: payload.tabId,
           globalState: mergedGlobalState,
+        })
+      );
+    }
+  };
+
+type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
+
+const mergeAttributes = (
+  currentState: DiscoverInternalState,
+  { tabId, attributes }: AttributesPayload
+) => {
+  const currentAttributes = selectTab(currentState, tabId).attributes;
+  const mergedAttributes = { ...currentAttributes, ...attributes };
+  return {
+    mergedAttributes,
+    hasStateChanges: !isEqual(currentAttributes, mergedAttributes),
+  };
+};
+
+/**
+ * Partially update the tab attributes, merging with existing state
+ */
+export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayload]> = (payload) =>
+  function updateAttributesThunkFn(dispatch, getState) {
+    const { mergedAttributes, hasStateChanges } = mergeAttributes(getState(), payload);
+
+    if (hasStateChanges) {
+      dispatch(
+        internalStateSlice.actions.setAttributes({
+          tabId: payload.tabId,
+          attributes: mergedAttributes,
         })
       );
     }
