@@ -18,6 +18,7 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById } from '../../../../common';
+import { DataStreamsTable } from './data_streams_table/data_steams_table';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { isCreateDataStreamFlyoutOpen, openCreateDataStreamFlyout, closeCreateDataStreamFlyout } =
@@ -65,7 +66,6 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
             {i18n.ZERO_STATE_DESCRIPTION}
           </EuiText>
           <EuiFlexItem grow={false}>
-            {' '}
             <EuiButton
               iconType="plusInCircle"
               onClick={openCreateDataStreamFlyout}
@@ -75,6 +75,10 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+      )}
+
+      {hasDataStreams && integration?.dataStreams && integrationId && (
+        <DataStreamsTable integrationId={integrationId} items={integration.dataStreams} />
       )}
 
       {isCreateDataStreamFlyoutOpen && (
