@@ -258,6 +258,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         <EndpointStats endpoints={tableData} />
         <EuiFlexItem>
           <EuiInMemoryTable
+            allowNeutralSort={false}
             columns={tableColumns}
             itemId="inference_id"
             items={tableData}
