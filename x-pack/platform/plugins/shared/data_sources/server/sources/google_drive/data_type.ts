@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 
 export const googleDriveDataSource: DataSource = {
   id: 'google_drive',
@@ -16,13 +15,6 @@ export const googleDriveDataSource: DataSource = {
     defaultMessage: 'Connect to Google Drive to access files and folders.',
   }),
   iconType: '.google_drive',
-
-  oauthConfiguration: {
-    provider: EARSSupportedOAuthProvider.GOOGLE,
-    initiatePath: '/oauth/start/google_drive',
-    fetchSecretsPath: '/oauth/fetch_request_secrets',
-    oauthBaseUrl: 'https://localhost:8052', // update once EARS deploys to QA
-  },
 
   stackConnector: {
     type: '.google_drive',

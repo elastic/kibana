@@ -40,7 +40,7 @@ function throwGoogleDriveError(error: unknown): void {
   };
   const googleError = axiosError.response?.data?.error;
   if (googleError) {
-    throw new Error(`Google Drive API error: ${googleError.message}`);
+    throw new Error(`Google Drive API error (${googleError.code})`);
   }
 }
 

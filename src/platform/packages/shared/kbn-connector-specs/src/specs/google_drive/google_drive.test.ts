@@ -143,7 +143,7 @@ describe('GoogleDriveConnector', () => {
           query: 'bad query',
           pageSize: 250,
         })
-      ).rejects.toThrow('Google Drive API error: Invalid query');
+      ).rejects.toThrow('Google Drive API error (400)');
     });
 
     it('should rethrow non-Google errors', async () => {
@@ -315,7 +315,7 @@ describe('GoogleDriveConnector', () => {
           pageSize: 250,
           includeTrashed: false,
         })
-      ).rejects.toThrow('Google Drive API error: Folder not found');
+      ).rejects.toThrow('Google Drive API error (404)');
     });
   });
 
@@ -455,7 +455,7 @@ describe('GoogleDriveConnector', () => {
         GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
           fileId: 'nonexistent',
         })
-      ).rejects.toThrow('Google Drive API error: File not found');
+      ).rejects.toThrow('Google Drive API error (404)');
     });
   });
 
@@ -546,7 +546,7 @@ describe('GoogleDriveConnector', () => {
         GoogleDriveConnector.actions.getFileMetadata.handler(mockContext, {
           fileIds: ['nonexistent'],
         })
-      ).rejects.toThrow('Google Drive API error: File not found');
+      ).rejects.toThrow('Google Drive API error (404)');
     });
 
     it('should fail if any file in the batch fails', async () => {
@@ -567,7 +567,7 @@ describe('GoogleDriveConnector', () => {
         GoogleDriveConnector.actions.getFileMetadata.handler(mockContext, {
           fileIds: ['file-1', 'file-2'],
         })
-      ).rejects.toThrow('Google Drive API error: Permission denied');
+      ).rejects.toThrow('Google Drive API error (403)');
     });
   });
 
