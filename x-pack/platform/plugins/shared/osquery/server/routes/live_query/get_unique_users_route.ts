@@ -70,7 +70,7 @@ export const getUniqueUsersRoute = (
             aggs: {
               unique_users: {
                 terms: {
-                  field: 'user_profile_uid',
+                  field: 'user_profile_uid.keyword',
                   size: 100,
                 },
               },
