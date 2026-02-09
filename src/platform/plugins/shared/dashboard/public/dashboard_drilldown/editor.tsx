@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSkeletonText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { DrilldownEditorProps } from '@kbn/embeddable-plugin/public';
@@ -44,7 +44,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
 
     findService
       .search({
-        search: searchString ?? '',
+        search: debouncedSearchString ?? '',
         per_page: 100,
       })
       .then((results) => {
@@ -117,7 +117,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
 
     const hasInitialDashboard = options.some(({ value }) => value === initialDashboardOption.value);
     return hasInitialDashboard ? options : [initialDashboardOption, ...options];
-  }, [initialDashboardOption, options, props]);
+  }, [initialDashboardOption, options, props.state]);
 
   const selectedOptions = useMemo(() => {
     if (!props.state.dashboard_id) {
@@ -135,7 +135,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
   }, [props.state]);
 
   return (
-    <>
+    <EuiSkeletonText isLoading={isLoadingInitialDashboard}>
       <EuiFormRow
         label={i18n.translate(
           'dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard',
@@ -158,7 +158,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
             }
           }}
           onSearchChange={setSearchString}
-          isLoading={isLoadingOptions || isLoadingInitialDashboard}
+          isLoading={isLoadingOptions}
           singleSelection={{ asPlainText: true }}
           fullWidth
           data-test-subj={'dashboardDrilldownSelectDashboard'}
@@ -174,18 +174,6 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
           });
         }}
       />
-    </>
+    </EuiSkeletonText>
   );
 };
-
-async function getOptions(searchString?: string) {
-  const results = await findService.search({
-    search: searchString ?? '',
-    per_page: 100,
-  });
-
-  const options = results.dashboards.map(({ id, data }) => ({
-    value: id,
-    label: data.title,
-  }));
-}

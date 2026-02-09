@@ -8,7 +8,10 @@
  */
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS, DASHBOARD_DRILLDOWN_TYPE } from '../../common/page_bundle_constants';
+import {
+  DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
+  DASHBOARD_DRILLDOWN_TYPE,
+} from '../../common/page_bundle_constants';
 import { transformIn, transformOut } from './transforms';
 import { dashboardDrilldownSchema } from './schemas';
 import type { DashboardDrilldownState, StoredDashboardDrilldownState } from './types';
