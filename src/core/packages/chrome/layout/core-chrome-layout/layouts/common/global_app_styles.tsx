@@ -43,6 +43,13 @@ export const CommonGlobalAppStyles = () => {
     <Global
       styles={css`
         ${hackGlobalFieldFormattersPluginStyles(euiTheme)}
+        
+        /* Hide React Query DevTools in all versions */
+        aside.ReactQueryDevtool,
+        aside[class*='ReactQueryDevtool'],
+        [class*='react-query-devtools'] {
+          display: none !important;
+        }
       `}
     />
   );
