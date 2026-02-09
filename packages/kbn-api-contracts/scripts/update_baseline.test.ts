@@ -13,11 +13,11 @@ import { existsSync } from 'fs';
 import { dump, load } from 'js-yaml';
 import { selectBaseline } from '../src/baseline/select_baseline';
 import { normalizeOas } from '../src/input/normalize_oas';
-import type { NormalizedSpec } from '../src/input/normalize_oas';
+import type { OpenAPISpec } from '../src/input/load_oas';
 
 const TMP_DIR = resolve(__dirname, '../target/test-tmp-update');
 
-const createSpec = (overrides: Partial<NormalizedSpec> = {}): NormalizedSpec => ({
+const createOpenApiSpec = (overrides: Partial<OpenAPISpec> = {}): OpenAPISpec => ({
   openapi: '3.0.0',
   info: { title: 'Test', version: '1.0.0' },
   paths: {
@@ -51,19 +51,22 @@ describe('update_baseline integration', () => {
       expect(selection.path).toContain('serverless/current.yaml');
     });
 
-    it('selects stack baseline path with major.minor version', () => {
+    it('selects stack baseline path using previous minor version', () => {
       const selection = selectBaseline('stack', '9.2.5');
-      expect(selection.path).toContain('9.2.yaml');
+      // Compares against previous minor: 9.2.x → 9.1.yaml
+      expect(selection.path).toContain('9.1.yaml');
     });
 
-    it('extracts major.minor from full semver', () => {
+    it('extracts previous minor from full semver', () => {
       const selection = selectBaseline('stack', '8.19.3');
-      expect(selection.path).toContain('8.19.yaml');
+      // 8.19.x → 8.18.yaml
+      expect(selection.path).toContain('8.18.yaml');
     });
 
     it('handles SNAPSHOT suffix', () => {
       const selection = selectBaseline('stack', '9.3.0-SNAPSHOT');
-      expect(selection.path).toContain('9.3.yaml');
+      // 9.3.x → 9.2.yaml
+      expect(selection.path).toContain('9.2.yaml');
     });
 
     it('requires version for stack distribution', () => {
@@ -77,7 +80,7 @@ describe('update_baseline integration', () => {
 
   describe('normalization workflow', () => {
     it('normalizes spec by removing descriptions', () => {
-      const spec = createSpec({
+      const spec = createOpenApiSpec({
         info: {
           title: 'Test API',
           version: '1.0.0',
@@ -107,7 +110,7 @@ describe('update_baseline integration', () => {
 
     it('writes normalized baseline to file', async () => {
       const outputPath = resolve(TMP_DIR, 'baseline.yaml');
-      const spec = createSpec({
+      const spec = createOpenApiSpec({
         info: {
           title: 'Test',
           version: '1.0.0',
@@ -132,7 +135,7 @@ describe('update_baseline integration', () => {
 
     it('creates directory structure if needed', async () => {
       const outputPath = resolve(TMP_DIR, 'nested/deep/baseline.yaml');
-      const spec = createSpec();
+      const spec = createOpenApiSpec();
       const normalized = normalizeOas(spec);
 
       await mkdir(resolve(outputPath, '..'), { recursive: true });
@@ -143,12 +146,12 @@ describe('update_baseline integration', () => {
   });
 
   describe('version extraction logic', () => {
-    it('extracts minor version correctly', () => {
+    it('selects previous minor version for baseline comparison', () => {
       const testCases = [
-        { input: '9.2.0', expected: '9.2' },
-        { input: '9.2.5', expected: '9.2' },
-        { input: '8.19.0', expected: '8.19' },
-        { input: '10.0.1', expected: '10.0' },
+        { input: '9.2.0', expected: '9.1' },
+        { input: '9.2.5', expected: '9.1' },
+        { input: '8.19.0', expected: '8.18' },
+        { input: '10.1.0', expected: '10.0' },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -157,12 +160,13 @@ describe('update_baseline integration', () => {
       });
     });
 
-    it('handles pre-release versions', () => {
+    it('handles pre-release versions (uses previous minor)', () => {
       const testCases = ['9.2.0-SNAPSHOT', '9.2.0-alpha.1', '9.2.0-beta.2', '9.2.0-rc.1'];
 
       testCases.forEach((version) => {
         const selection = selectBaseline('stack', version);
-        expect(selection.path).toContain('9.2.yaml');
+        // 9.2.x → 9.1.yaml
+        expect(selection.path).toContain('9.1.yaml');
       });
     });
   });

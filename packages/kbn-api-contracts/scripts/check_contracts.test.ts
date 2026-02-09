@@ -18,13 +18,16 @@ import { diffOas } from '../src/diff/diff_oas';
 import { filterBreakingChanges } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
 import type { NormalizedSpec } from '../src/input/normalize_oas';
+import type { OpenAPISpec } from '../src/input/load_oas';
 
 const TMP_DIR = resolve(__dirname, '../target/test-tmp');
 
-const createSpec = (overrides: Partial<NormalizedSpec> = {}): NormalizedSpec => ({
+const createOpenApiSpec = (
+  pathsOverride?: Record<string, Record<string, unknown>>
+): OpenAPISpec => ({
   openapi: '3.0.0',
   info: { title: 'Test', version: '1.0.0' },
-  paths: {
+  paths: pathsOverride ?? {
     '/api/test': {
       get: {
         operationId: 'test',
@@ -32,7 +35,18 @@ const createSpec = (overrides: Partial<NormalizedSpec> = {}): NormalizedSpec => 
       },
     },
   },
-  ...overrides,
+});
+
+const createNormalizedSpec = (
+  pathsOverride?: Record<string, Record<string, { responses?: Record<string, unknown> }>>
+): NormalizedSpec => ({
+  paths: pathsOverride ?? {
+    '/api/test': {
+      get: {
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+  },
 });
 
 const writeSpecFile = async (path: string, spec: NormalizedSpec) => {
@@ -55,10 +69,11 @@ describe('check_contracts integration', () => {
   });
 
   describe('baseline selection', () => {
-    it('selects stack baseline with minor version', () => {
+    it('selects stack baseline using previous minor version', () => {
       const selection = selectBaseline('stack', '9.2.5');
       expect(selection.distribution).toBe('stack');
-      expect(selection.path).toContain('9.2.yaml');
+      // Compares against previous minor: 9.2.x → 9.1.yaml
+      expect(selection.path).toContain('9.1.yaml');
     });
 
     it('selects serverless baseline', () => {
@@ -85,13 +100,14 @@ describe('check_contracts integration', () => {
   describe('full workflow', () => {
     it('detects no breaking changes when specs match', async () => {
       const baselinePath = resolve(TMP_DIR, 'baseline-match.yaml');
-      const spec = createSpec();
-      await writeSpecFile(baselinePath, spec);
+      const normalizedSpec = createNormalizedSpec();
+      await writeSpecFile(baselinePath, normalizedSpec);
 
       const baseline = await loadBaseline(baselinePath);
       expect(baseline).not.toBeNull();
 
-      const currentNormalized = normalizeOas(spec);
+      const openApiSpec = createOpenApiSpec();
+      const currentNormalized = normalizeOas(openApiSpec);
       const diff = diffOas(baseline!, currentNormalized);
       const breakingChanges = filterBreakingChanges(diff);
 
@@ -100,20 +116,17 @@ describe('check_contracts integration', () => {
 
     it('detects breaking changes when path removed', async () => {
       const baselinePath = resolve(TMP_DIR, 'baseline-removed.yaml');
-      const baselineSpec = createSpec({
-        paths: {
-          '/api/removed': {
-            get: {
-              operationId: 'removed',
-              responses: { '200': { description: 'OK' } },
-            },
+      const baselineSpec = createNormalizedSpec({
+        '/api/removed': {
+          get: {
+            responses: { '200': { description: 'OK' } },
           },
         },
       });
       await writeSpecFile(baselinePath, baselineSpec);
 
       const baseline = await loadBaseline(baselinePath);
-      const currentSpec = createSpec();
+      const currentSpec = createOpenApiSpec();
       const currentNormalized = normalizeOas(currentSpec);
 
       const diff = diffOas(baseline!, currentNormalized);
@@ -125,24 +138,20 @@ describe('check_contracts integration', () => {
 
     it('formats breaking changes correctly', async () => {
       const baselinePath = resolve(TMP_DIR, 'baseline-format.yaml');
-      const baselineSpec = createSpec({
-        paths: {
-          '/api/test': {
-            get: {
-              operationId: 'test',
-              responses: { '200': { description: 'OK' } },
-            },
-            delete: {
-              operationId: 'delete',
-              responses: { '204': { description: 'Deleted' } },
-            },
+      const baselineSpec = createNormalizedSpec({
+        '/api/test': {
+          get: {
+            responses: { '200': { description: 'OK' } },
+          },
+          delete: {
+            responses: { '204': { description: 'Deleted' } },
           },
         },
       });
       await writeSpecFile(baselinePath, baselineSpec);
 
       const baseline = await loadBaseline(baselinePath);
-      const currentSpec = createSpec(); // Only has GET, missing DELETE
+      const currentSpec = createOpenApiSpec(); // Only has GET, missing DELETE
 
       const diff = diffOas(baseline!, normalizeOas(currentSpec));
       const breakingChanges = filterBreakingChanges(diff);
@@ -156,23 +165,19 @@ describe('check_contracts integration', () => {
 
     it('allows non-breaking additions', async () => {
       const baselinePath = resolve(TMP_DIR, 'baseline-addition.yaml');
-      const baselineSpec = createSpec();
+      const baselineSpec = createNormalizedSpec();
       await writeSpecFile(baselinePath, baselineSpec);
 
       const baseline = await loadBaseline(baselinePath);
-      const currentSpec = createSpec({
-        paths: {
-          '/api/test': {
-            get: {
-              operationId: 'test',
-              responses: { '200': { description: 'OK' } },
-            },
+      const currentSpec = createOpenApiSpec({
+        '/api/test': {
+          get: {
+            responses: { '200': { description: 'OK' } },
           },
-          '/api/new': {
-            post: {
-              operationId: 'newOp',
-              responses: { '201': { description: 'Created' } },
-            },
+        },
+        '/api/new': {
+          post: {
+            responses: { '201': { description: 'Created' } },
           },
         },
       });
