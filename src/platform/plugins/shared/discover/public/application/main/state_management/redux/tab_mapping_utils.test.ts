@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
@@ -45,6 +46,7 @@ const tab2 = getTabStateMock({
   attributes: {
     visContext: { bar: 'foo' },
     controlGroupState: undefined,
+    timeRestore: true,
   },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
@@ -87,7 +89,7 @@ describe('tab mapping utils', () => {
           },
           "attributes": Object {
             "controlGroupState": undefined,
-            "timeRestore": false,
+            "timeRestore": true,
             "visContext": Object {
               "bar": "foo",
             },
@@ -108,11 +110,11 @@ describe('tab mapping utils', () => {
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
-              "pause": true,
-              "value": 500,
+              "pause": false,
+              "value": 1000,
             },
             "timeRange": Object {
-              "from": "now-7d",
+              "from": "now-15m",
               "to": "now",
             },
           },
@@ -395,7 +397,7 @@ describe('tab mapping utils', () => {
   });
 
   describe('fromSavedSearchToSavedObjectTab', () => {
-    it('should map saved search to saved object tab', () => {
+    it('should map saved search to saved object tab considering tab attributes', () => {
       const savedObjectTab = fromSavedSearchToSavedObjectTab({
         tab: tab1,
         savedSearch: { ...savedSearchMock, visContext: { foo: 'bar' } },
@@ -432,6 +434,144 @@ describe('tab mapping utils', () => {
           "visContext": Object {
             "foo": "bar",
           },
+        }
+      `);
+
+      const savedObjectTab2 = fromSavedSearchToSavedObjectTab({
+        tab: tab2,
+        savedSearch: savedSearchMock,
+        services,
+      });
+      expect(savedObjectTab2).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": undefined,
+          "chartInterval": undefined,
+          "columns": Array [
+            "default_column",
+          ],
+          "controlGroupJson": undefined,
+          "density": undefined,
+          "grid": Object {},
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": false,
+          "id": "2",
+          "isTextBasedQuery": false,
+          "label": "Tab 2",
+          "refreshInterval": Object {
+            "pause": false,
+            "value": 1000,
+          },
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "serializedSearchSource": Object {
+            "index": "the-data-view-id",
+          },
+          "sort": Array [],
+          "timeRange": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+          "timeRestore": true,
+          "usesAdHocDataView": undefined,
+          "viewMode": undefined,
+          "visContext": Object {
+            "bar": "foo",
+          },
+        }
+      `);
+    });
+
+    it('should map saved search to saved object tab without tab attributes', () => {
+      const savedSearch = {
+        ...savedSearchMock,
+        timeRange: { from: 'now-15m', to: 'now' },
+        refreshInterval: { pause: false, value: 1000 },
+      };
+      const savedObjectTab = fromSavedSearchToSavedObjectTab({
+        tab: omit(tab1, 'attributes'),
+        savedSearch: { ...savedSearch, timeRestore: false },
+        services,
+      });
+      expect(savedObjectTab).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": undefined,
+          "chartInterval": undefined,
+          "columns": Array [
+            "default_column",
+          ],
+          "controlGroupJson": undefined,
+          "density": undefined,
+          "grid": Object {},
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": false,
+          "id": "1",
+          "isTextBasedQuery": false,
+          "label": "Tab 1",
+          "refreshInterval": Object {
+            "pause": false,
+            "value": 1000,
+          },
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "serializedSearchSource": Object {
+            "index": "the-data-view-id",
+          },
+          "sort": Array [],
+          "timeRange": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+          "timeRestore": false,
+          "usesAdHocDataView": undefined,
+          "viewMode": undefined,
+          "visContext": undefined,
+        }
+      `);
+
+      const savedObjectTab2 = fromSavedSearchToSavedObjectTab({
+        tab: omit(tab2, 'attributes'),
+        savedSearch: { ...savedSearch, timeRestore: true },
+        services,
+      });
+      expect(savedObjectTab2).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": undefined,
+          "chartInterval": undefined,
+          "columns": Array [
+            "default_column",
+          ],
+          "controlGroupJson": undefined,
+          "density": undefined,
+          "grid": Object {},
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": false,
+          "id": "2",
+          "isTextBasedQuery": false,
+          "label": "Tab 2",
+          "refreshInterval": Object {
+            "pause": false,
+            "value": 1000,
+          },
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "serializedSearchSource": Object {
+            "index": "the-data-view-id",
+          },
+          "sort": Array [],
+          "timeRange": Object {
+            "from": "now-15m",
+            "to": "now",
+          },
+          "timeRestore": true,
+          "usesAdHocDataView": undefined,
+          "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });
