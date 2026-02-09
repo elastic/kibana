@@ -57,9 +57,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const copyContent = useCallback(
     (inferenceId: string) => {
+      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
       navigator.clipboard.writeText(inferenceId).then(() => {
         toasts?.addSuccess({
-          title: i18n.ENDPOINT_COPY_SUCCESS(inferenceId),
+          title: message,
+          'aria-label': message,
         });
       });
     },
@@ -94,8 +96,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowInferenceFlyout(true);
   }, []);
 
   const onCloseInferenceFlyout = useCallback(() => {
@@ -269,7 +271,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
-            itemId="id"
+            itemId="inference_id"
             items={paginatedSortedTableData}
             onChange={handleTableChange}
             pagination={pagination}
