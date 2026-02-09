@@ -189,15 +189,22 @@ export function kbnBundleRemotesPlugin(options: KbnBundleRemotesPluginOptions): 
 
     resolveId: {
       order: 'pre',
-      async handler(source, importer, resolveOptions) {
-        // Skip non-@kbn imports
-        const parsed = parseKbnImportReq(source);
-        if (!parsed) {
+      // Synchronous handler — this plugin does only Map lookups and string
+      // comparisons. Keeping it sync avoids Promise allocation overhead on
+      // every import (thousands per plugin build).
+      handler(source) {
+        // Fast path: skip anything that isn't @kbn/
+        if (!source.startsWith('@kbn/')) {
           return null;
         }
 
         // Skip raw file imports
         if (source.endsWith('.json') || source.endsWith('?raw')) {
+          return null;
+        }
+
+        const parsed = parseKbnImportReq(source);
+        if (!parsed) {
           return null;
         }
 

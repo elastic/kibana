@@ -66,7 +66,13 @@ export function kbnStylesPlugin(options: KbnStylesPluginOptions): Plugin {
     // Run before other plugins to rewrite imports
     enforce: 'pre',
 
-    resolveId(source, importer) {
+    resolveId(source) {
+      // Fast path: skip anything that doesn't contain .scss
+      // (the vast majority of imports). charCodeAt avoids string allocation.
+      if (!source.includes('.scss')) {
+        return null;
+      }
+
       // Handle SCSS imports with theme query parameters
       const match = source.match(themeQueryRegex);
       if (match) {

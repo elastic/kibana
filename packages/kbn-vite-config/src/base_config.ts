@@ -8,13 +8,9 @@
  */
 
 import Path from 'path';
-import type { UserConfig, PluginOption } from 'vite';
-import {
-  kbnResolverPlugin,
-  kbnLegacyImportsPlugin,
-  kbnSpecialModulesPlugin,
-  generateKbnAliases,
-} from './kbn_resolver_plugin';
+import Fs from 'fs';
+import type { UserConfig, PluginOption, Plugin } from 'vite';
+import { generateKbnAliases } from './kbn_resolver_plugin.js';
 
 export interface KbnViteConfigOptions {
   /**
@@ -118,10 +114,13 @@ export function createKbnViteConfig(options: KbnViteConfigOptions): UserConfig {
     },
 
     plugins: [
-      // Kibana-specific resolver plugins
-      kbnResolverPlugin({ repoRoot, additionalAliases: aliases }),
-      kbnLegacyImportsPlugin({ repoRoot }),
-      kbnSpecialModulesPlugin({ repoRoot }),
+      // Single combined build resolver — handles legacy imports, special
+      // modules, and misc edge cases in ONE plugin hook instead of 3-4
+      // separate plugins. This minimises Rust→JS boundary crossings.
+      //
+      // @kbn/* package resolution is NOT in this plugin — it's handled
+      // entirely by resolve.alias (Rolldown native, zero JS overhead).
+      kbnBuildResolverPlugin({ repoRoot }),
       // User-provided plugins
       ...plugins,
     ],
@@ -129,12 +128,17 @@ export function createKbnViteConfig(options: KbnViteConfigOptions): UserConfig {
     // Build configuration
     build: {
       outDir: Path.resolve(packageRoot, outDir),
+      // Explicitly allow cleaning the outDir even when it's outside root.
+      // During `yarn build` the outDir points into build/kibana/… which is
+      // outside the plugin's source root. Without this Vite prints a noisy
+      // "(!) outDir is not inside project root" warning for every plugin.
+      emptyOutDir: true,
       sourcemap: !isProduction,
-      minify: isProduction ? 'esbuild' : false,
+      minify: isProduction ? 'oxc' : false,
       target: isBrowser ? 'es2020' : 'node18',
 
-      // Rollup options
-      rollupOptions: {
+      // Rollup/Rolldown options
+      rolldownOptions: {
         external: [
           // Node.js built-ins for server builds
           ...(isBrowser ? [] : ['node:*', /^node:/]),
@@ -146,6 +150,19 @@ export function createKbnViteConfig(options: KbnViteConfigOptions): UserConfig {
           preserveModules: !isProduction,
           preserveModulesRoot: packageRoot,
         },
+        // Tell Rolldown that .js files may contain JSX syntax.
+        // Many Kibana plugins use JSX in plain .js files (not .jsx).
+        // Without this, Rolldown's OXC parser rejects JSX in .js files.
+        moduleTypes: {
+          '.js': 'jsx',
+        },
+        // Some npm packages (e.g. @elastic/ems-client) have barrel files
+        // that re-export TypeScript types which were erased during
+        // compilation. The compiled .js files don't contain those exports.
+        // Webpack silently treated missing exports as `undefined`; Rolldown
+        // is strict and errors by default. This option creates `undefined`
+        // shims for missing exports, matching webpack's behaviour.
+        shimMissingExports: true,
       },
 
       // Library mode for packages
@@ -161,16 +178,15 @@ export function createKbnViteConfig(options: KbnViteConfigOptions): UserConfig {
         : undefined,
     },
 
-    // esbuild options for TypeScript
-    esbuild: {
-      // Preserve names for better debugging and error messages
-      keepNames: true,
-      // Target modern browsers/Node
-      target: isBrowser ? 'es2020' : 'node18',
-      // Support JSX
-      jsx: react ? 'automatic' : undefined,
-      jsxImportSource: react ? 'react' : undefined,
-    },
+    // OXC transform options (Vite 8 uses OXC instead of esbuild for transforms).
+    // Note: JSX runtime is intentionally left to the OXC default / tsconfig.
+    // The root tsconfig.base.json has "jsx": "react" (classic runtime), so
+    // OXC will use React.createElement(). Do NOT set `importSource` here as
+    // it conflicts with the classic runtime.
+    //
+    // Note: Do NOT set `esbuild: false` — Vite 8 has removed the esbuild
+    // transpile path entirely and setting it to false just triggers a warning.
+    oxc: {},
 
     // Optimize dependencies
     optimizeDeps: {
@@ -217,4 +233,148 @@ export function createKbnNodeConfig(options: Omit<KbnViteConfigOptions, 'isBrows
     isBrowser: false,
     react: false,
   });
+}
+
+/**
+ * Combined build resolver plugin — merges legacy-imports, special-modules,
+ * and other edge-case resolution into a SINGLE synchronous resolveId hook.
+ *
+ * Why one plugin instead of three?
+ * Each JS plugin hook means a Rust→JS→Rust boundary crossing in Rolldown.
+ * With thousands of imports per plugin build, 3 separate plugins = 3x the
+ * crossing overhead. A single plugin with a fast early-return for the
+ * common case (non-matching imports) cuts this to 1x.
+ *
+ * Note: @kbn/* package resolution is handled by resolve.alias (Rolldown
+ * native), NOT by this plugin. This plugin only handles:
+ * - Legacy paths: kibana/public, kibana/server, src/*, x-pack/*
+ * - Special modules: @modelcontextprotocol/sdk, zod, vega-lite, vega-tooltip
+ * - @elastic/eui rewrites
+ */
+function kbnBuildResolverPlugin(options: { repoRoot: string }): Plugin {
+  const { repoRoot } = options;
+
+  // Pre-resolve special module paths once
+  const SPECIAL_MODULES: Array<{
+    test: (source: string) => boolean;
+    resolve: (source: string) => string | null;
+  }> = [
+    // @modelcontextprotocol/sdk → dist/esm
+    {
+      test: (s) => s.startsWith('@modelcontextprotocol/sdk'),
+      resolve: (s) => {
+        const relPath = s.split('@modelcontextprotocol/sdk')[1] || '';
+        const target = Path.resolve(
+          repoRoot,
+          `node_modules/@modelcontextprotocol/sdk/dist/esm${relPath}`
+        );
+        return resolveFileDirect(target);
+      },
+    },
+    // @elastic/eui → optimize/es (build uses optimized bundle, not test-env)
+    // Note: the dev server uses test-env via kbnSpecialModulesPlugin; for
+    // build the alias in createKbnViteConfig already handles the base case.
+    // This handles deep subpath imports.
+    {
+      test: (s) => s.startsWith('@elastic/eui/lib/'),
+      resolve: (s) => {
+        const subPath = s.replace('@elastic/eui/lib/', '');
+        return resolveFileDirect(
+          Path.resolve(repoRoot, `node_modules/@elastic/eui/optimize/es/${subPath}`)
+        );
+      },
+    },
+    // zod v3/v4
+    {
+      test: (s) => s === 'zod' || s.startsWith('zod/'),
+      resolve: (s) => {
+        if (s.startsWith('zod/v4')) {
+          return Path.resolve(repoRoot, 'node_modules/zod/v4/index.cjs');
+        }
+        return Path.resolve(repoRoot, 'node_modules/zod/v3/index.cjs');
+      },
+    },
+    // vega-lite → build
+    {
+      test: (s) => s.startsWith('vega-lite'),
+      resolve: (s) => resolveFileDirect(Path.resolve(repoRoot, 'node_modules/vega-lite/build')),
+    },
+    // vega-tooltip → build
+    {
+      test: (s) => s.startsWith('vega-tooltip'),
+      resolve: (s) => resolveFileDirect(Path.resolve(repoRoot, 'node_modules/vega-tooltip/build')),
+    },
+  ];
+
+  return {
+    name: 'kbn-build-resolver',
+
+    resolveId: {
+      order: 'pre',
+      handler(source) {
+        // ---- Fast path: skip relative/absolute/virtual imports ----
+        // These make up 60-80% of all imports and can be rejected immediately.
+        const c = source.charCodeAt(0);
+        // '.' = 46, '/' = 47, '\0' = 0  (virtual modules)
+        if (c === 46 || c === 47 || c === 0) {
+          return null;
+        }
+
+        // ---- Legacy root-relative imports ----
+        if (
+          source.startsWith('src/') ||
+          source.startsWith('x-pack/') ||
+          source.startsWith('examples/') ||
+          source.startsWith('test/')
+        ) {
+          return resolveFileDirect(Path.resolve(repoRoot, source));
+        }
+
+        // ---- Legacy kibana/* imports ----
+        if (source === 'kibana/public') {
+          return resolveFileDirect(Path.resolve(repoRoot, 'src/core/public'));
+        }
+        if (source === 'kibana/server') {
+          return resolveFileDirect(Path.resolve(repoRoot, 'src/core/server'));
+        }
+
+        // ---- Special modules ----
+        for (const mod of SPECIAL_MODULES) {
+          if (mod.test(source)) {
+            const resolved = mod.resolve(source);
+            return resolved ? { id: resolved } : null;
+          }
+        }
+
+        return null;
+      },
+    },
+  };
+}
+
+const EXTS = ['.ts', '.tsx', '.js', '.jsx', '.json'];
+
+/** Resolve a path to a file, trying extensions and index files. Synchronous. */
+function resolveFileDirect(targetPath: string): string | null {
+  try {
+    if (Fs.statSync(targetPath).isFile()) return targetPath;
+  } catch {
+    // not a file
+  }
+  for (const ext of EXTS) {
+    try {
+      if (Fs.statSync(targetPath + ext).isFile()) return targetPath + ext;
+    } catch {
+      // continue
+    }
+  }
+  for (const ext of EXTS) {
+    const idx = Path.join(targetPath, `index${ext}`);
+    try {
+      if (Fs.statSync(idx).isFile()) return idx;
+    } catch {
+      // continue
+    }
+  }
+  return null;
 }

@@ -13,7 +13,7 @@ export {
   createKbnBrowserConfig,
   createKbnNodeConfig,
   type KbnViteConfigOptions,
-} from './src/base_config';
+} from './src/base_config.js';
 
 // Resolver plugins
 export {
@@ -23,7 +23,7 @@ export {
   readPackageMap,
   generateKbnAliases,
   type KbnResolverPluginOptions,
-} from './src/kbn_resolver_plugin';
+} from './src/kbn_resolver_plugin.js';
 
 // Externals and bundle remotes
 export {
@@ -32,7 +32,7 @@ export {
   DEFAULT_SHARED_EXTERNALS,
   type SharedDepsConfig,
   type BundleRemotesConfig,
-} from './src/kbn_externals_plugin';
+} from './src/kbn_externals_plugin.js';
 
 // Advanced bundle remotes (full implementation)
 export {
@@ -42,7 +42,7 @@ export {
   createBundleRemotesMap,
   type BundleRemote,
   type KbnBundleRemotesPluginOptions,
-} from './src/kbn_bundle_remotes_plugin';
+} from './src/kbn_bundle_remotes_plugin.js';
 
 // Style and asset handling
 export {
@@ -52,4 +52,4 @@ export {
   kbnRawPlugin,
   DEFAULT_THEME_TAGS,
   type KbnStylesPluginOptions,
-} from './src/kbn_styles_plugin';
+} from './src/kbn_styles_plugin.js';

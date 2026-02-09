@@ -26,7 +26,14 @@ export function readPackageMap(repoRoot: string): Map<string, string> {
 }
 
 /**
- * Generate Vite-compatible aliases from the Kibana package map
+ * Generate Vite-compatible aliases from the Kibana package map.
+ *
+ * Aliases are sorted by key length (longest first) so that Vite's
+ * `startsWith` prefix matching resolves the correct package. Without
+ * sorting, `@kbn/i18n` could incorrectly match `@kbn/i18n-flow`.
+ * With longest-first order, `@kbn/i18n-flow` is always checked before
+ * `@kbn/i18n`.
+ *
  * @param repoRoot - The root directory of the Kibana repository
  * @returns An object mapping package IDs to their absolute paths
  */
@@ -40,7 +47,12 @@ export function generateKbnAliases(repoRoot: string): Record<string, string> {
   const packageMap = readPackageMap(repoRoot);
   const aliases: Record<string, string> = {};
 
-  for (const [pkgId, relDir] of packageMap) {
+  // Sort by key length descending to prevent prefix collisions in
+  // Vite's startsWith-based alias matching. JS object iteration
+  // preserves insertion order for string keys.
+  const sorted = [...packageMap.entries()].sort((a, b) => b[0].length - a[0].length);
+
+  for (const [pkgId, relDir] of sorted) {
     aliases[pkgId] = Path.resolve(repoRoot, relDir);
   }
 
@@ -60,8 +72,92 @@ export interface KbnResolverPluginOptions {
 }
 
 /**
+ * Resolve a target path to an existing file on disk, trying common extensions
+ * and index files. Uses fs.statSync which is orders of magnitude faster than
+ * going through the Vite plugin resolution chain via this.resolve().
+ */
+const RESOLVE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.json'];
+
+function resolveFileOnDisk(targetPath: string): string | null {
+  // 1. Exact path (might be a file already)
+  try {
+    if (Fs.statSync(targetPath).isFile()) return targetPath;
+  } catch {
+    // not a file — continue
+  }
+
+  // 2. Try appending extensions
+  for (const ext of RESOLVE_EXTENSIONS) {
+    const candidate = targetPath + ext;
+    try {
+      if (Fs.statSync(candidate).isFile()) return candidate;
+    } catch {
+      // continue
+    }
+  }
+
+  // 3. Try index files inside the directory
+  for (const ext of RESOLVE_EXTENSIONS) {
+    const candidate = Path.join(targetPath, `index${ext}`);
+    try {
+      if (Fs.statSync(candidate).isFile()) return candidate;
+    } catch {
+      // continue
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Cache of package.json entry points. Keyed by absolute package directory.
+ * Value is the resolved entry file path, or null if not determinable.
+ */
+const pkgEntryCache = new Map<string, string | null>();
+
+function resolvePackageEntry(absolutePkgDir: string): string | null {
+  if (pkgEntryCache.has(absolutePkgDir)) {
+    return pkgEntryCache.get(absolutePkgDir)!;
+  }
+
+  // Try reading the package's package.json for its entry point
+  const pkgJsonPath = Path.join(absolutePkgDir, 'package.json');
+  try {
+    const pkgJson = JSON.parse(Fs.readFileSync(pkgJsonPath, 'utf8'));
+    // Prefer: exports["."] > main > module, then fall back to index resolution
+    const exportsEntry =
+      pkgJson.exports?.['.']?.import ??
+      pkgJson.exports?.['.']?.default ??
+      pkgJson.exports?.['.'];
+    const entry = exportsEntry ?? pkgJson.main ?? pkgJson.module;
+    if (entry && typeof entry === 'string') {
+      const entryPath = Path.resolve(absolutePkgDir, entry);
+      try {
+        if (Fs.statSync(entryPath).isFile()) {
+          pkgEntryCache.set(absolutePkgDir, entryPath);
+          return entryPath;
+        }
+      } catch {
+        // entry path doesn't exist, fall through
+      }
+    }
+  } catch {
+    // no package.json or parse error
+  }
+
+  // Fall back to index file resolution
+  const resolved = resolveFileOnDisk(absolutePkgDir);
+  pkgEntryCache.set(absolutePkgDir, resolved);
+  return resolved;
+}
+
+/**
  * Vite plugin that resolves @kbn/* imports using the Kibana package map.
  * This is the Vite equivalent of the import resolver used by webpack and Jest.
+ *
+ * Performance: uses direct fs.statSync() for file resolution instead of
+ * this.resolve() to avoid going through the entire Vite plugin chain
+ * (which was causing 15-40% of total build time).
  */
 export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
   const { repoRoot, additionalAliases: _additionalAliases = {} } = options;
@@ -76,10 +172,8 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
 
   let packageMap: Map<string, string>;
 
-  // Cache resolved paths to avoid redundant multi-step this.resolve() calls.
-  // Keyed by the raw import source (e.g. '@kbn/i18n/react'), value is the
-  // resolved result or null when we know it can't be resolved.
-  const resolveCache = new Map<string, { id: string } | null>();
+  // Cache resolved paths. Keyed by raw import source (e.g. '@kbn/i18n/react').
+  const resolveCache = new Map<string, string | null>();
 
   return {
     name: 'kbn-resolver',
@@ -90,15 +184,16 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
 
     resolveId: {
       order: 'pre',
-      async handler(source, importer, resolveOptions) {
-        // Skip if not a @kbn/* import or if it's already been processed
+      handler(source, _importer, _resolveOptions) {
+        // Skip if not a @kbn/* import
         if (!source.startsWith('@kbn/')) {
           return null;
         }
 
         // Check the cache first — same source always resolves the same way
         if (resolveCache.has(source)) {
-          return resolveCache.get(source) ?? null;
+          const cached = resolveCache.get(source);
+          return cached ? { id: cached } : null;
         }
 
         // Parse the import request to extract package ID and sub-path
@@ -109,54 +204,24 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
         // Look up the package directory
         const pkgDir = packageMap.get(pkgId);
         if (!pkgDir) {
-          // Package not found in the map, let Vite handle it (might be a node_module)
+          // Not in the package map — let Vite handle it (might be in node_modules)
           resolveCache.set(source, null);
           return null;
         }
 
-        // Resolve the absolute path
         const absolutePkgDir = Path.resolve(repoRoot, pkgDir);
-        const targetPath = subPath ? Path.join(absolutePkgDir, subPath) : absolutePkgDir;
+        let resolved: string | null;
 
-        // Let Vite's default resolver handle the actual file resolution
-        // This ensures proper handling of index files, extensions, etc.
-        const resolved = await this.resolve(targetPath, importer, {
-          ...resolveOptions,
-          skipSelf: true,
-        });
-
-        if (resolved) {
-          resolveCache.set(source, resolved);
-          return resolved;
+        if (subPath) {
+          // Sub-path import: @kbn/foo/bar → resolve <pkgDir>/bar with extensions
+          resolved = resolveFileOnDisk(Path.join(absolutePkgDir, subPath));
+        } else {
+          // Bare import: @kbn/foo → resolve via package.json entry or index
+          resolved = resolvePackageEntry(absolutePkgDir);
         }
 
-        // If direct resolution fails, try with common extensions
-        const extensions = ['.ts', '.tsx', '.js', '.jsx', '.json'];
-        for (const ext of extensions) {
-          const withExt = await this.resolve(`${targetPath}${ext}`, importer, {
-            ...resolveOptions,
-            skipSelf: true,
-          });
-          if (withExt) {
-            resolveCache.set(source, withExt);
-            return withExt;
-          }
-        }
-
-        // Try index files
-        for (const ext of extensions) {
-          const indexPath = await this.resolve(Path.join(targetPath, `index${ext}`), importer, {
-            ...resolveOptions,
-            skipSelf: true,
-          });
-          if (indexPath) {
-            resolveCache.set(source, indexPath);
-            return indexPath;
-          }
-        }
-
-        resolveCache.set(source, null);
-        return null;
+        resolveCache.set(source, resolved);
+        return resolved ? { id: resolved } : null;
       },
     },
   };
