@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod
