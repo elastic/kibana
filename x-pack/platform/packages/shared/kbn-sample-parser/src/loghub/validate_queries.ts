@@ -40,7 +40,7 @@ export interface LoghubQuery {
   query: DslQuery;
 }
 
-export const querySchema: z.ZodSchema<LoghubQuery, z.ZodTypeDef, any> = z.object({
+export const querySchema: z.ZodSchema<LoghubQuery, any> = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
