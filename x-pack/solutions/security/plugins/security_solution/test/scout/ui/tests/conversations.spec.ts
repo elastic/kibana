@@ -60,68 +60,60 @@ test.describe(
   }
 );
 
-test.describe(
-  'AI Assistant Conversations - Switching',
-  { tag: ['@ess', '@svlSecurity'] },
-  () => {
-    test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
-      await deleteConnectors(kbnClient);
-      await deleteConversations(esClient);
-      await deleteAlertsAndRules(kbnClient);
-      await createConversation(kbnClient, mockConvo1);
-      await createConversation(kbnClient, mockConvo2);
-      await createAzureConnector(kbnClient);
-      await createBedrockConnector(kbnClient);
-      await browserAuth.loginAsAdmin();
-    });
+test.describe('AI Assistant Conversations - Switching', { tag: ['@ess', '@svlSecurity'] }, () => {
+  test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
+    await deleteConnectors(kbnClient);
+    await deleteConversations(esClient);
+    await deleteAlertsAndRules(kbnClient);
+    await createConversation(kbnClient, mockConvo1);
+    await createConversation(kbnClient, mockConvo2);
+    await createAzureConnector(kbnClient);
+    await createBedrockConnector(kbnClient);
+    await browserAuth.loginAsAdmin();
+  });
 
-    test('Properly switches back and forth between conversations', async ({
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      test.setTimeout(180_000);
-      await page.goto(kbnUrl.get('/app/security/get_started'));
-      await waitForPageReady(page);
-      await pageObjects.assistant.openAssistant();
+  test('Properly switches back and forth between conversations', async ({
+    page,
+    pageObjects,
+    kbnUrl,
+  }) => {
+    test.setTimeout(180_000);
+    await page.goto(kbnUrl.get('/app/security/get_started'));
+    await waitForPageReady(page);
+    await pageObjects.assistant.openAssistant();
 
-      // Select first conversation and send message
-      await pageObjects.assistant.selectConversation(mockConvo1.title);
-      await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
-      await pageObjects.assistant.typeAndSendMessage('hello');
-      await pageObjects.assistant.assertMessageSent('hello');
-      await pageObjects.assistant.assertErrorResponse();
+    // Select first conversation and send message
+    await pageObjects.assistant.selectConversation(mockConvo1.title);
+    await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
+    await pageObjects.assistant.typeAndSendMessage('hello');
+    await pageObjects.assistant.assertMessageSent('hello');
+    await pageObjects.assistant.assertErrorResponse();
 
-      // Select second conversation and send message
-      await pageObjects.assistant.selectConversation(mockConvo2.title);
-      await pageObjects.assistant.selectConnector(bedrockConnectorPayload.name);
-      await pageObjects.assistant.typeAndSendMessage('goodbye');
-      await pageObjects.assistant.assertMessageSent('goodbye');
-      await pageObjects.assistant.assertErrorResponse();
+    // Select second conversation and send message
+    await pageObjects.assistant.selectConversation(mockConvo2.title);
+    await pageObjects.assistant.selectConnector(bedrockConnectorPayload.name);
+    await pageObjects.assistant.typeAndSendMessage('goodbye');
+    await pageObjects.assistant.assertMessageSent('goodbye');
+    await pageObjects.assistant.assertErrorResponse();
 
-      // Switch back and verify persistence
-      await pageObjects.assistant.selectConversation(mockConvo1.title);
-      await pageObjects.assistant.assertConnectorSelected(azureConnectorPayload.name);
-      await pageObjects.assistant.assertMessageSent('hello');
+    // Switch back and verify persistence
+    await pageObjects.assistant.selectConversation(mockConvo1.title);
+    await pageObjects.assistant.assertConnectorSelected(azureConnectorPayload.name);
+    await pageObjects.assistant.assertMessageSent('hello');
 
-      await pageObjects.assistant.selectConversation(mockConvo2.title);
-      await pageObjects.assistant.assertConnectorSelected(bedrockConnectorPayload.name);
-      await pageObjects.assistant.assertMessageSent('goodbye');
-    });
+    await pageObjects.assistant.selectConversation(mockConvo2.title);
+    await pageObjects.assistant.assertConnectorSelected(bedrockConnectorPayload.name);
+    await pageObjects.assistant.assertMessageSent('goodbye');
+  });
 
-    test('Correctly creates and titles new conversations', async ({
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      test.setTimeout(180_000);
-      await page.goto(kbnUrl.get('/app/security/get_started'));
-      await waitForPageReady(page);
-      await pageObjects.assistant.openAssistant();
-      await pageObjects.assistant.createAndTitleConversation(
-        'Something else',
-        azureConnectorPayload.name
-      );
-    });
-  }
-);
+  test('Correctly creates and titles new conversations', async ({ page, pageObjects, kbnUrl }) => {
+    test.setTimeout(180_000);
+    await page.goto(kbnUrl.get('/app/security/get_started'));
+    await waitForPageReady(page);
+    await pageObjects.assistant.openAssistant();
+    await pageObjects.assistant.createAndTitleConversation(
+      'Something else',
+      azureConnectorPayload.name
+    );
+  });
+});
