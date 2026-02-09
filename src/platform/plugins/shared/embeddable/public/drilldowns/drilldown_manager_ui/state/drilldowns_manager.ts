@@ -97,14 +97,6 @@ export class DrilldownsManager {
       ({ isLicenseCompatible }) => !isLicenseCompatible
     );
 
-    /* this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
-      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
-    );
-
-    deps.dynamicActionManager.state.state$
-      .pipe(map((state) => state.events.map(this.mapEventToDrilldownItem)))
-      .subscribe(this.events$);*/
-
     let { initialRoute = '' } = deps;
     if (!initialRoute) initialRoute = 'manage';
     else if (initialRoute[0] === '/') initialRoute = initialRoute.substr(1);
@@ -166,7 +158,10 @@ export class DrilldownsManager {
       const drilldown = new DrilldownManager({
         factory: nextFactory,
         triggers: this.deps.triggers,
-        initialState: nextFactory.getInitialState(),
+        initialState: {
+          ...nextFactory.getInitialState(),
+          label: nextFactory.displayName,
+        },
         // placeContext: this.deps.placeContext || {},
       });
       this.drilldownManagers.set(nextFactory.type, drilldown);

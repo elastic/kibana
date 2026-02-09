@@ -151,7 +151,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
           async
           selectedOptions={selectedOptions}
           options={mergedOptions}
-          onChange={(nextSelectedOptions) => () => {
+          onChange={(nextSelectedOptions) => {
             props.onChange({ ...props.state, dashboard_id: nextSelectedOptions?.[0]?.value });
             if (error) {
               setError(undefined);
