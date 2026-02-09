@@ -7,8 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { resolve, parse, dirname } = require('path');
-const { readFileSync, realpathSync } = require('fs');
+import { resolve, parse, dirname } from 'path';
+import { readFileSync, realpathSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+/**
+ * Get the current directory, working in both ESM and CJS contexts.
+ * - ESM: uses import.meta.url + fileURLToPath
+ * - CJS: uses __dirname (provided by Node.js or shimmed by Vite's CJS interop)
+ * - Vite Module Runner: uses import.meta.url (shimmed by Vite)
+ */
+function getCurrentDir(): string {
+  // Try ESM approach first (works in ESM and Vite Module Runner)
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.url) {
+      return dirname(fileURLToPath(import.meta.url));
+    }
+  } catch {
+    // import.meta.url not available in CJS
+  }
+
+  // Fallback to CJS __dirname
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
+  }
+
+  // Last resort: use createRequire to get the directory
+  throw new Error('Unable to determine current directory: neither import.meta.url nor __dirname available');
+}
 
 /**
  * Attempts to read and parse a package.json file as a Kibana package.json
@@ -35,7 +62,7 @@ const findKibanaPackageJson = (): { kibanaDir: string; kibanaPkgJson: any } => {
   // Search for the kibana directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
-  const startDir = __dirname;
+  const startDir = getCurrentDir();
   const { root: rootDir } = parse(startDir);
   let cursor = startDir;
 
