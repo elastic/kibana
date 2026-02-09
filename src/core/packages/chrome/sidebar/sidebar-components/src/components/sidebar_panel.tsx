@@ -8,7 +8,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiShadow } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
@@ -87,7 +87,7 @@ const useFocusRescue = (
 ) => {
   const asideRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = asideRef.current;
     return () => {
       if (el?.contains(document.activeElement)) {
