@@ -123,9 +123,9 @@ export const createFilter = async (
     aggConfig.params.otherBucket
   ) {
     const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
-    filter = aggConfig.createFilter(String(value), { terms });
+    filter = aggConfig.createFilter(value as string, { terms });
   } else {
-    filter = aggConfig.createFilter(String(value));
+    filter = aggConfig.createFilter(value as string);
   }
 
   if (!filter) {

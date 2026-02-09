@@ -625,7 +625,8 @@ export class SearchSource {
     // Resolve function values (e.g. filter field can be a function).
     // TypeScript can't narrow generic type parameters across switch cases,
     // so we work with the resolved value typed as unknown.
-    const resolved: unknown = typeof val === 'function' ? (val as () => unknown)() : val;
+    const resolved: unknown =
+      typeof val === 'function' ? (val as (ss: SearchSource) => unknown)(this) : val;
     if (resolved == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
@@ -669,9 +670,8 @@ export class SearchSource {
         return addToBody('fields', resolved);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [
-          ...new Set((data.fieldsFromSource || []).concat(resolved as estypes.Fields)),
-        ];
+        const resolvedFields = resolved as string | string[];
+        const fields = [...new Set((data.fieldsFromSource || []).concat(resolvedFields))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -1156,7 +1156,6 @@ export class SearchSource {
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      highlight: searchSourceFields.highlight as SerializedSearchSourceFields['highlight'],
     };
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
