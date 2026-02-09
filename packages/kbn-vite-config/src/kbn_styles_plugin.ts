@@ -352,51 +352,63 @@ $kbnThemeVersion: 'borealislight';
 /**
  * Plugin that handles .peggy grammar files (Peggy parser generator).
  * This is the Vite equivalent of @kbn/peggy-loader.
+ *
+ * Uses transform.filter so the filename check runs in Rust (Rolldown)
+ * and only .peggy files cross the Rust→JS boundary. Without the filter,
+ * every module in the build triggers a boundary crossing just to
+ * return null — which showed up as ~13% of total build time.
  */
 export function kbnPeggyPlugin(): Plugin {
+  // Cache the peggy module after first import so we don't re-resolve
+  // the dynamic import on every .peggy file.
+  let peggyPromise: Promise<any> | undefined;
+
   return {
     name: 'kbn-peggy',
 
-    async transform(code, id) {
-      if (!id.endsWith('.peggy')) {
-        return null;
-      }
+    transform: {
+      // Rust-side filter: only .peggy files enter JS. This eliminates
+      // thousands of no-op Rust→JS→Rust round-trips per build.
+      filter: {
+        id: /\.peggy$/,
+      },
 
-      // Dynamic import to avoid bundling peggy in the plugin
-      const peggyModule = await import('peggy');
-      // Handle ES module default export
-      const peggy = (peggyModule as any).default || peggyModule;
-
-      // Try to load config from .peggy.config.json file
-      let peggyOptions: Record<string, unknown> = {};
-      const configPath = `${id}.config.json`;
-      try {
-        const fsModule = await import('fs');
-        const fs = fsModule.default || fsModule;
-        if (fs.existsSync(configPath)) {
-          const configContent = fs.readFileSync(configPath, 'utf-8');
-          peggyOptions = JSON.parse(configContent);
+      async handler(code, id) {
+        // Lazy-load peggy once and reuse across all .peggy files
+        if (!peggyPromise) {
+          peggyPromise = import('peggy').then((m) => (m as any).default || m);
         }
-      } catch {
-        // Config file is optional, ignore errors
-      }
+        const peggy = await peggyPromise;
 
-      try {
-        // Generate parser code with merged options
-        const parserSource = peggy.generate(code, {
-          output: 'source',
-          format: 'es',
-          ...peggyOptions,
-        });
+        // Try to load config from .peggy.config.json file
+        let peggyOptions: Record<string, unknown> = {};
+        const configPath = `${id}.config.json`;
+        try {
+          if (Fs.existsSync(configPath)) {
+            const configContent = Fs.readFileSync(configPath, 'utf-8');
+            peggyOptions = JSON.parse(configContent);
+          }
+        } catch {
+          // Config file is optional, ignore errors
+        }
 
-        return {
-          code: parserSource,
-          map: null,
-        };
-      } catch (error) {
-        this.error(`Failed to compile Peggy grammar ${id}: ${error}`);
-        return null;
-      }
+        try {
+          // Generate parser code with merged options
+          const parserSource = peggy.generate(code, {
+            output: 'source',
+            format: 'es',
+            ...peggyOptions,
+          });
+
+          return {
+            code: parserSource,
+            map: null,
+          };
+        } catch (error) {
+          this.error(`Failed to compile Peggy grammar ${id}: ${error}`);
+          return null;
+        }
+      },
     },
   };
 }
@@ -404,51 +416,50 @@ export function kbnPeggyPlugin(): Plugin {
 /**
  * Plugin that handles .text files (raw text imports).
  * This is the Vite equivalent of @kbn/dot-text-loader.
+ *
+ * Uses transform.filter so only .text files cross the Rust→JS boundary.
  */
 export function kbnDotTextPlugin(): Plugin {
   return {
     name: 'kbn-dot-text',
 
-    transform(code, id) {
-      if (!id.endsWith('.text')) {
-        return null;
-      }
+    transform: {
+      filter: {
+        id: /\.text$/,
+      },
 
-      // Export the text content as a default export
-      return {
-        code: `export default ${JSON.stringify(code)};`,
-        map: null,
-      };
+      handler(code) {
+        // Export the text content as a default export
+        return {
+          code: `export default ${JSON.stringify(code)};`,
+          map: null,
+        };
+      },
     },
   };
 }
 
 /**
- * Plugin that handles raw file imports via ?raw query parameter.
- * This is similar to webpack's raw-loader.
+ * Plugin that handles raw file imports via ?raw query parameter
+ * and common text file extensions. Similar to webpack's raw-loader.
+ *
+ * Uses transform.filter so only matching files cross the Rust→JS boundary.
  */
 export function kbnRawPlugin(): Plugin {
   return {
     name: 'kbn-raw',
 
-    transform(code, id) {
-      // Handle ?raw query parameter
-      if (id.includes('?raw')) {
+    transform: {
+      filter: {
+        id: /(\?raw|\.(html|md|txt|tmpl)$)/,
+      },
+
+      handler(code) {
         return {
           code: `export default ${JSON.stringify(code)};`,
           map: null,
         };
-      }
-
-      // Handle common text file extensions
-      if (/\.(html|md|txt|tmpl)$/.test(id)) {
-        return {
-          code: `export default ${JSON.stringify(code)};`,
-          map: null,
-        };
-      }
-
-      return null;
+      },
     },
   };
 }
