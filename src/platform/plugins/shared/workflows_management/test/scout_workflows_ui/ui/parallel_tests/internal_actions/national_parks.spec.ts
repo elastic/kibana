@@ -45,10 +45,12 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     const processItemSteps = await processItemsLocator.all();
 
     for (let i = 0; i < processItemSteps.length; i++) {
-      const processItemLocator = processItemSteps[i];
-      await processItemLocator.click();
-      const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-      await expect(stepDetails.getByTestId('jsonDataTable')).toContainText(requiredOutputs[i]);
+      await pageObjects.workflowEditor
+        .getStep(`loop_over_results > ${i} > process-item`)
+        .then((locator) => locator.click());
+
+      const stepOutput = await pageObjects.workflowEditor.getStepOutputJson<string>();
+      expect(stepOutput).toBe(requiredOutputs[i]);
     }
   });
 });
