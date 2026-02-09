@@ -9,6 +9,7 @@
 
 export type { RefreshInterval } from '@kbn/data-service-server';
 export {
+  APPLY_FILTER_TRIGGER,
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -234,6 +235,7 @@ export type {
   SearchSessionRequestInfo,
   SearchSessionRequestStatus,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
   SearchSessionsFindResponse,
   EqlRequestParams,
   EqlSearchStrategyRequest,
