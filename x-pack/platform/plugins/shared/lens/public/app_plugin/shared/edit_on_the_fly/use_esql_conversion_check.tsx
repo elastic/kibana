@@ -216,6 +216,7 @@ export const useEsqlConversionCheck = (
     showConvertToEsqlButton,
     startDependencies.data.nowProvider,
     visualization,
+    persistedDoc,
   ]);
 };
 
