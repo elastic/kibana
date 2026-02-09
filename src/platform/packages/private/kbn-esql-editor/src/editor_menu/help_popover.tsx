@@ -51,6 +51,17 @@ export const HelpPopover: React.FC = () => {
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [adHocDataview, setAdHocDataview] = useState<DataView | undefined>(undefined);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.dispatchEvent(
+      new CustomEvent('esqlDocsFlyoutVisibilityChange', {
+        detail: { isOpen: isLanguageComponentOpen },
+      })
+    );
+  }, [isLanguageComponentOpen]);
+
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]
   >([]);

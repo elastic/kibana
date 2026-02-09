@@ -9,7 +9,7 @@
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
-import { prepareDataViewForEditing } from '@kbn/discover-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor, prepareDataViewForEditing } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import {
@@ -149,6 +149,18 @@ export const DiscoverTopNav = ({
         closeFieldEditor.current();
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const { detail } = event as CustomEvent<{ isOpen?: boolean }>;
+      if (detail?.isOpen) {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+      }
+    };
+
+    window.addEventListener('esqlDocsFlyoutVisibilityChange', handler);
+    return () => window.removeEventListener('esqlDocsFlyoutVisibilityChange', handler);
   }, []);
 
   const canEditDataView =
