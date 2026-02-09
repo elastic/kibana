@@ -10,6 +10,7 @@
 import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import type { FieldFormatsGetConfigFn } from '../types';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('BytesFormat', () => {
   const config: { [key: string]: string } = {
@@ -28,5 +29,18 @@ describe('BytesFormat', () => {
     const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
 
     expect(formatter.convert('5150000')).toBe('5MB');
+  });
+
+  test('missing value', () => {
+    const formatter = new BytesFormat({}, getConfig);
+
+    expect(formatter.convert(null)).toBe('(null)');
+    expect(formatter.convert(undefined)).toBe('(null)');
+    expect(formatter.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(formatter.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 });
