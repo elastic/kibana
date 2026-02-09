@@ -233,7 +233,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedRules.body.data[0].name).to.eql('updated title');
         expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
       });
-
     });
 
     it('deletes an existing query and the associated rule successfully', async () => {
@@ -355,6 +354,5 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
       );
     });
-
   });
 }
