@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { ALWAYS_CONDITION, convertUIStepsToDSL } from '@kbn/streamlang';
 import type { Streams } from '@kbn/streams-schema';
@@ -42,11 +42,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -72,11 +71,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -105,11 +103,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -138,11 +135,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
   });
