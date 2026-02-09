@@ -151,7 +151,7 @@ describe('DispatcherService integration tests', () => {
     });
   });
 
-  describe('when there are alert events without prior fire-events', () => {
+  describe('when there are alert events without prior "fire" actions', () => {
     it('should dispatch all unique episodes', async () => {
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
@@ -178,7 +178,7 @@ describe('DispatcherService integration tests', () => {
           group_hash: 'rule-1-series-1',
           rule_id: 'rule-1',
           actor: 'system',
-          action_type: 'fire-event',
+          action_type: 'fire',
           source: 'internal',
         });
       });
@@ -193,7 +193,7 @@ describe('DispatcherService integration tests', () => {
     });
   });
 
-  describe('when some episodes already have fire-events', () => {
+  describe('when some episodes already have fires', () => {
     it('should only dispatch the new events', async () => {
       await seedAlertEvents(esClient, ALERT_EVENTS_TEST_DATA);
 
@@ -228,7 +228,7 @@ describe('DispatcherService integration tests', () => {
         query: {
           bool: {
             must: [
-              { term: { action_type: 'fire-event' } },
+              { term: { action_type: 'fire' } },
               { range: { last_series_event_timestamp: { gte: '2026-01-22T07:55:00.000Z' } } },
             ],
           },
