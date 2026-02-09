@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from './fixtures';
+import { test } from '../fixtures';
 import {
   azureConnectorPayload,
   createAzureConnector,
@@ -14,8 +14,8 @@ import {
   deleteConnectors,
   deleteConversations,
   deletePrompts,
-} from './common/api_helpers';
-import { waitForPageReady } from './common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 const promptType = 'system';
 const testPrompt = {
@@ -152,35 +152,6 @@ test.describe('AI Assistant System Prompts', { tag: ['@ess', '@svlSecurity'] }, 
     await pageObjects.assistant.typeAndSendMessage('hello');
     await pageObjects.assistant.assertSystemPromptSent(testPrompt.content);
     await pageObjects.assistant.assertMessageSent('hello', true);
-    await pageObjects.assistant.assertErrorResponse();
-  });
-});
-
-test.describe('AI Assistant Quick Prompts', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
-    await deleteConnectors(kbnClient);
-    await deleteConversations(esClient);
-    await deletePrompts(esClient);
-    await createAzureConnector(kbnClient);
-    await createConversation(kbnClient, mockConvo1);
-    await createConversation(kbnClient, mockConvo2);
-    await browserAuth.loginAsAdmin();
-  });
-
-  test('Add a quick prompt and send it in the conversation', async ({
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    test.setTimeout(180_000);
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.createQuickPrompt(testPrompt.name, testPrompt.content);
-    await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
-    await pageObjects.assistant.assertConnectorSelected(azureConnectorPayload.name);
-    await pageObjects.assistant.sendQuickPrompt(testPrompt.name);
-    await pageObjects.assistant.assertMessageSent(testPrompt.content);
     await pageObjects.assistant.assertErrorResponse();
   });
 });

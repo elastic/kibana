@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from './fixtures';
+import { test } from '../fixtures';
 import {
   azureConnectorPayload,
   bedrockConnectorPayload,
@@ -15,69 +15,59 @@ import {
   deleteConnectors,
   deleteConversations,
   deleteAlertsAndRules,
-} from './common/api_helpers';
-import { waitForPageReady } from './common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 const mockConvo1 = { id: 'spooky', title: 'Spooky convo', messages: [] };
 const mockConvo2 = { id: 'silly', title: 'Silly convo', messages: [] };
 
-test.describe(
-  'AI Assistant Conversations - Welcome Setup',
-  { tag: ['@ess', '@svlSecurity'] },
-  () => {
-    test.beforeEach(async ({ kbnClient, esClient }) => {
-      await deleteConnectors(kbnClient);
-      await deleteConversations(esClient);
-      await deleteAlertsAndRules(kbnClient);
-    });
-
-    test('Shows welcome setup when no connectors or conversations exist', async ({
-      browserAuth,
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await page.goto(kbnUrl.get('/app/security/get_started'));
-      await waitForPageReady(page);
-      await pageObjects.assistant.openAssistant();
-      await pageObjects.assistant.assertNewConversation(true, 'New chat');
-    });
-
-    test('Creating a new connector from welcome setup automatically sets the connector', async ({
-      browserAuth,
-      page,
-      pageObjects,
-      kbnUrl,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await page.goto(kbnUrl.get('/app/security/get_started'));
-      await waitForPageReady(page);
-      await pageObjects.assistant.openAssistant();
-      await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
-      await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
-    });
-  }
-);
-
-test.describe('AI Assistant Conversations - Switching', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
+test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
+  test.beforeEach(async ({ kbnClient, esClient }) => {
     await deleteConnectors(kbnClient);
     await deleteConversations(esClient);
     await deleteAlertsAndRules(kbnClient);
-    await createConversation(kbnClient, mockConvo1);
-    await createConversation(kbnClient, mockConvo2);
-    await createAzureConnector(kbnClient);
-    await createBedrockConnector(kbnClient);
+  });
+
+  test('Shows welcome setup when no connectors or conversations exist', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    kbnUrl,
+  }) => {
     await browserAuth.loginAsAdmin();
+    await page.goto(kbnUrl.get('/app/security/get_started'));
+    await waitForPageReady(page);
+    await pageObjects.assistant.openAssistant();
+    await pageObjects.assistant.assertNewConversation(true, 'New chat');
+  });
+
+  test('Creating a new connector from welcome setup automatically sets the connector', async ({
+    browserAuth,
+    page,
+    pageObjects,
+    kbnUrl,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await page.goto(kbnUrl.get('/app/security/get_started'));
+    await waitForPageReady(page);
+    await pageObjects.assistant.openAssistant();
+    await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
+    await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
   });
 
   test('Properly switches back and forth between conversations', async ({
+    browserAuth,
+    kbnClient,
     page,
     pageObjects,
     kbnUrl,
   }) => {
     test.setTimeout(180_000);
+    await createConversation(kbnClient, mockConvo1);
+    await createConversation(kbnClient, mockConvo2);
+    await createAzureConnector(kbnClient);
+    await createBedrockConnector(kbnClient);
+    await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.get('/app/security/get_started'));
     await waitForPageReady(page);
     await pageObjects.assistant.openAssistant();
@@ -106,8 +96,16 @@ test.describe('AI Assistant Conversations - Switching', { tag: ['@ess', '@svlSec
     await pageObjects.assistant.assertMessageSent('goodbye');
   });
 
-  test('Correctly creates and titles new conversations', async ({ page, pageObjects, kbnUrl }) => {
+  test('Correctly creates and titles new conversations', async ({
+    browserAuth,
+    kbnClient,
+    page,
+    pageObjects,
+    kbnUrl,
+  }) => {
     test.setTimeout(180_000);
+    await createAzureConnector(kbnClient);
+    await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.get('/app/security/get_started'));
     await waitForPageReady(page);
     await pageObjects.assistant.openAssistant();

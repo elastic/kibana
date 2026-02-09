@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { test } from './fixtures';
-import { waitForPageReady } from './common/constants';
+import { test } from '../fixtures';
+import { waitForPageReady } from '../common/constants';
 
 // NOTE: This test requires serverless mode with Security Essentials product tier.
 // TODO: Enable when serverless Scout testing is configured.

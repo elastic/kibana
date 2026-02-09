@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KbnClient, EsClient } from '@kbn/scout-security';
+
 // ── Connector payloads ──────────────────────────────────────────────────────
 
 export const azureConnectorPayload = {
@@ -28,7 +30,7 @@ export const bedrockConnectorPayload = {
 // ── Connector CRUD ──────────────────────────────────────────────────────────
 
 export async function createConnector(
-  kbnClient: any,
+  kbnClient: KbnClient,
   payload: typeof azureConnectorPayload | typeof bedrockConnectorPayload
 ): Promise<{ id: string }> {
   const resp = await kbnClient.request({
@@ -36,24 +38,24 @@ export async function createConnector(
     path: '/api/actions/connector',
     body: payload,
   });
-  return resp.data;
+  return resp.data as { id: string };
 }
 
-export async function createAzureConnector(kbnClient: any): Promise<{ id: string }> {
+export async function createAzureConnector(kbnClient: KbnClient): Promise<{ id: string }> {
   return createConnector(kbnClient, azureConnectorPayload);
 }
 
-export async function createBedrockConnector(kbnClient: any): Promise<{ id: string }> {
+export async function createBedrockConnector(kbnClient: KbnClient): Promise<{ id: string }> {
   return createConnector(kbnClient, bedrockConnectorPayload);
 }
 
-export async function deleteConnectors(kbnClient: any): Promise<void> {
+export async function deleteConnectors(kbnClient: KbnClient): Promise<void> {
   try {
     const resp = await kbnClient.request({
       method: 'GET',
       path: '/api/actions/connectors',
     });
-    const connectors: Array<{ id: string }> = resp.data ?? [];
+    const connectors = (resp.data ?? []) as Array<{ id: string }>;
     for (const connector of connectors) {
       await kbnClient.request({
         method: 'DELETE',
@@ -89,19 +91,19 @@ export function getMockConversation(overrides?: Record<string, unknown>): Record
 // ── Conversation CRUD ───────────────────────────────────────────────────────
 
 export async function createConversation(
-  kbnClient: any,
+  kbnClient: KbnClient,
   overrides?: Record<string, unknown>
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const body = getMockConversation(overrides);
   const resp = await kbnClient.request({
     method: 'POST',
     path: '/api/security_ai_assistant/current_user/conversations',
     body,
   });
-  return resp.data;
+  return resp.data as Record<string, unknown>;
 }
 
-export async function deleteConversations(esClient: any): Promise<void> {
+export async function deleteConversations(esClient: EsClient): Promise<void> {
   try {
     await esClient.deleteByQuery({
       index: '.kibana-elastic-ai-assistant-conversations-*',
@@ -129,7 +131,7 @@ export function getMockCreatePrompt(overrides?: Record<string, unknown>): Record
 // ── Prompt CRUD ─────────────────────────────────────────────────────────────
 
 export async function createPromptsBulk(
-  kbnClient: any,
+  kbnClient: KbnClient,
   prompts: Array<Record<string, unknown>>
 ): Promise<void> {
   const body = {
@@ -142,7 +144,7 @@ export async function createPromptsBulk(
   });
 }
 
-export async function deletePrompts(esClient: any): Promise<void> {
+export async function deletePrompts(esClient: EsClient): Promise<void> {
   try {
     await esClient.deleteByQuery({
       index: '.kibana-elastic-ai-assistant-prompts-*',
@@ -157,14 +159,15 @@ export async function deletePrompts(esClient: any): Promise<void> {
 
 // ── Alerts & Rules ──────────────────────────────────────────────────────────
 
-export async function deleteAlertsAndRules(kbnClient: any): Promise<void> {
+export async function deleteAlertsAndRules(kbnClient: KbnClient): Promise<void> {
   try {
     const rulesResp = await kbnClient.request({
       method: 'GET',
       path: '/api/detection_engine/rules/_find',
       query: { per_page: 100 },
     });
-    const rules: Array<{ id: string }> = rulesResp.data?.data ?? [];
+    const data = rulesResp.data as { data?: Array<{ id: string }> };
+    const rules = data?.data ?? [];
     for (const rule of rules) {
       await kbnClient.request({
         method: 'DELETE',
@@ -178,7 +181,7 @@ export async function deleteAlertsAndRules(kbnClient: any): Promise<void> {
 }
 
 export async function createRule(
-  kbnClient: any,
+  kbnClient: KbnClient,
   rule: Record<string, unknown>
 ): Promise<{ id: string; name: string }> {
   const resp = await kbnClient.request({
@@ -186,12 +189,12 @@ export async function createRule(
     path: '/api/detection_engine/rules',
     body: rule,
   });
-  return resp.data;
+  return resp.data as { id: string; name: string };
 }
 
 // ── License ─────────────────────────────────────────────────────────────────
 
-export async function startBasicLicense(kbnClient: any): Promise<void> {
+export async function startBasicLicense(kbnClient: KbnClient): Promise<void> {
   await kbnClient.request({
     method: 'POST',
     path: '/_license/start_basic?acknowledge=true',

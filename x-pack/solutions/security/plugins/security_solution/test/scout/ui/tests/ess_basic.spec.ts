@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { test } from './fixtures';
-import { waitForPageReady } from './common/constants';
+import { test } from '../fixtures';
+import { waitForPageReady } from '../common/constants';
 
 // NOTE: This test requires ability to downgrade to Basic license in Scout.
 // The startBasicLicense API call may not work in all Scout environments.
