@@ -54,7 +54,7 @@ export function StepExecutionTreeItemLabel({
           isInactiveStatus && styles.inactiveStepName,
         ]}
       >
-        {stepId}
+        <span data-test-subj="stepName">{stepId}</span>
         {status === ExecutionStatus.SKIPPED && (
           <>
             {' '}
