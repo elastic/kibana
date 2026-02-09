@@ -298,6 +298,7 @@ export function createSearchBar({
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
             prependFilterBar={props.prependFilterBar}
+            onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             hasDirtyState={props.hasDirtyState}
