@@ -246,14 +246,16 @@ export class AssistantPage {
   }
 
   async assertMessageSent(message: string, isPrompt: boolean = false) {
-    const messageElements = this.page.testSubj.locator('messageText');
     const idx = isPrompt ? 1 : 0;
-    await expect(messageElements.nth(idx)).toContainText(message);
+    await expect(
+      this.page.testSubj.locator('messageText').locator(`nth=${idx}`)
+    ).toContainText(message);
   }
 
   async assertSystemPromptSent(message: string) {
-    const messageElements = this.page.testSubj.locator('messageText');
-    await expect(messageElements.first()).toContainText(message);
+    await expect(
+      this.page.testSubj.locator('messageText').locator('nth=0')
+    ).toContainText(message);
   }
 
   async assertErrorResponse() {

@@ -55,7 +55,7 @@ test.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => 
     pageObjects,
     kbnUrl,
   }) => {
-    test.slow();
+    test.setTimeout(180_000);
 
     // From get_started page - Send to Timeline should be disabled
     await page.goto(kbnUrl.get('/app/security/get_started'));

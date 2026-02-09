@@ -8,7 +8,7 @@
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
-  testDir: './ai_assistant_tests/',
+  testDir: './tests/',
   // Sequential: AI Assistant tests share connector + conversation state
   workers: 1,
   runGlobalSetup: false,
