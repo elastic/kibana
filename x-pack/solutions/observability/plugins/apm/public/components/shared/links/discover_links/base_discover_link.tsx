@@ -45,7 +45,7 @@ export function BaseDiscoverLink({
     },
   });
 
-  const isDisabled = !esqlQuery || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+  const isDisabled = !esqlQuery || !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
 
   if (isDisabled) {
     return (
