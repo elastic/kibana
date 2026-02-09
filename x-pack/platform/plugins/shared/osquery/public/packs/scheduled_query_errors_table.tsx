@@ -147,6 +147,9 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
       items={lastErrorsData?.hits ?? []}
       columns={columns}
       pagination={true}
+      tableCaption={i18n.translate('xpack.osquery.scheduledQueryErrorsTable.caption', {
+        defaultMessage: 'Scheduled query errors',
+      })}
     />
   );
 };

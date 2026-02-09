@@ -7,12 +7,14 @@
 
 import { ValidateRuleStep } from './validate_rule_step';
 import { createRuleResponse, createRulePipelineState } from '../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('ValidateRuleStep', () => {
   let step: ValidateRuleStep;
 
   beforeEach(() => {
-    step = new ValidateRuleStep();
+    const { loggerService } = createLoggerService();
+    step = new ValidateRuleStep(loggerService);
   });
 
   it('continues when rule is enabled', async () => {

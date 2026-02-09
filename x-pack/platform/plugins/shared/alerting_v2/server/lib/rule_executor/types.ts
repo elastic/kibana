@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
@@ -26,8 +26,8 @@ export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
-  readonly esqlResponse?: ESQLSearchResponse;
-  readonly alertEvents?: Array<{ id: string; doc: AlertEvent }>;
+  readonly esqlResponse?: EsqlQueryResponse;
+  readonly alertEvents?: AlertEvent[];
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

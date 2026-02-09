@@ -26,8 +26,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       // Create alert events for two different group hashes
-      const alertEvent1 = createAlertEvent({ group_hash: 'group-1', episode_id: 'episode-1' });
-      const alertEvent2 = createAlertEvent({ group_hash: 'group-2', episode_id: 'episode-2' });
+      const alertEvent1 = createAlertEvent({
+        group_hash: 'group-1',
+        episode: { id: 'episode-1', status: 'active' },
+      });
+      const alertEvent2 = createAlertEvent({
+        group_hash: 'group-2',
+        episode: { id: 'episode-2', status: 'active' },
+      });
 
       await Promise.all([
         esClient.index({

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { RulesClient } from '../lib/rules_client';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import {
+  QueryServiceInternalToken,
+  QueryServiceScopedToken,
+} from '../lib/services/query_service/tokens';
 import { AlertingRetryService } from '../lib/services/retry_service';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
@@ -25,23 +25,29 @@ import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { DirectorService } from '../lib/director/director';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import { UserService } from '../lib/services/user_service/user_service';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
-import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(NotificationPolicyClient).toSelf().inRequestScope();
+  bind(UserService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
   bind(ResourceManager).toSelf().inSingletonScope();
-  bind(DispatcherService).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
     .toDynamicValue(({ get }) => {
@@ -57,23 +63,31 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return elasticsearch.client.asScoped(request).asCurrentUser;
     })
     .inRequestScope();
+
   bind(TaskRunnerFactoryToken).toFactory((context) =>
     createTaskRunnerFactory({
       getInjection: () => context.get(CoreStart('injection')),
     })
   );
+
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
 
-  bind(QueryService)
+  bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const data = get(PluginStart<AlertingServerStartDependencies['data']>('data'));
       const loggerService = get(LoggerServiceToken);
-      const searchClient = data.search.asScoped(request);
-      return new QueryService(searchClient, loggerService);
+      const esClient = get(EsServiceScopedToken);
+      return new QueryService(esClient, loggerService);
     })
     .inRequestScope();
+
+  bind(QueryServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      const esClient = get(EsServiceInternalToken);
+      return new QueryService(esClient, loggerService);
+    })
+    .inSingletonScope();
 
   bind(StorageServiceScopedToken)
     .toDynamicValue(({ get }) => {
@@ -90,4 +104,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new StorageService(esClient, loggerService);
     })
     .inSingletonScope();
+
+  bind(DispatcherService).toSelf().inSingletonScope();
+
+  bind(DirectorService).toSelf().inSingletonScope();
+  bind(TransitionStrategyFactory).toSelf().inSingletonScope();
+  bind(BasicTransitionStrategy).toSelf().inSingletonScope();
 }

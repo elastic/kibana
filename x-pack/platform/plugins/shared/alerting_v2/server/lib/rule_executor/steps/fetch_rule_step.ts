@@ -24,21 +24,28 @@ export class FetchRuleStep implements RuleExecutionStep {
   ) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { ruleId } = state.input;
+    const { input } = state;
+    const { ruleId } = input;
+
+    this.logger.debug({
+      message: `[${this.name}] Starting step for rule ${ruleId}`,
+    });
 
     try {
       const rule = await this.rulesClient.getRule({ id: ruleId });
 
       this.logger.debug({
-        message: () => `Rule saved object attributes: ${JSON.stringify(rule, null, 2)}`,
+        message: () => `[${this.name}] Fetched rule ${ruleId}`,
       });
 
       return { type: 'continue', data: { rule } };
     } catch (error) {
       if (Boom.isBoom(error) && error.output.statusCode === 404) {
+        this.logger.debug({ message: `[${this.name}] Rule ${ruleId} not found, halting` });
         return { type: 'halt', reason: 'rule_deleted' };
       }
 
+      this.logger.debug({ message: `[${this.name}] Failed to fetch rule ${ruleId}` });
       throw error;
     }
   }

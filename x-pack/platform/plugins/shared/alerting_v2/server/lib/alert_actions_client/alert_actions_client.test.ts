@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { of } from 'rxjs';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { UserService } from '../services/user_service/user_service';
 import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
+import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
   getBulkAlertEventsESQLResponse,
@@ -20,16 +20,17 @@ import {
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
-  const request = httpServerMock.createKibanaRequest();
-  const { queryService, mockSearchClient: queryServiceSearchClient } = createQueryService();
+  const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
-  const security = securityMock.createStart();
+  let userService: UserService;
+  let userProfile: jest.Mocked<UserProfileServiceStart>;
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    security.authc.getCurrentUser = jest.fn().mockReturnValue({ username: 'test-user' });
+    ({ userService, userProfile } = createUserService());
+    userProfile.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
-    client = new AlertActionsClient(request, queryService, storageService, security);
+    client = new AlertActionsClient(queryService, storageService, userService);
   });
 
   afterEach(() => {
@@ -43,9 +44,7 @@ describe('AlertActionsClient', () => {
     };
 
     it('should successfully create an action', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse() })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
       await client.createAction({
         groupHash: 'test-group-hash',
@@ -65,15 +64,13 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-1',
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
-        actor: 'test-user',
+        actor: 'test-uid',
       });
       expect(docs[0]).toHaveProperty('@timestamp');
     });
 
     it('should throw when alert event is not found', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getEmptyESQLResponse() })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
 
       await expect(
         client.createAction({
@@ -93,8 +90,8 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-2',
       };
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse({ episode_id: 'episode-2' }) })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse({ episode_id: 'episode-2' })
       );
 
       await client.createAction({
@@ -109,16 +106,14 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toMatchObject({ episode_id: 'episode-2' });
     });
 
-    it('should handle null username when security is not available', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse() })
-      );
+    it('should handle null profile uid when security is not available', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
+      userProfile.getCurrent.mockResolvedValueOnce(null);
       const clientWithoutSecurity = new AlertActionsClient(
-        request,
         queryService,
         storageService,
-        undefined
+        userService
       );
 
       await clientWithoutSecurity.createAction({
@@ -141,13 +136,11 @@ describe('AlertActionsClient', () => {
         { group_hash: 'group-hash-2', action_type: 'snooze' as const },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({
-          rawResponse: getBulkAlertEventsESQLResponse([
-            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
-            { group_hash: 'group-hash-2', episode_id: 'episode-2' },
-          ]),
-        })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkAlertEventsESQLResponse([
+          { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+          { group_hash: 'group-hash-2', episode_id: 'episode-2' },
+        ])
       );
 
       const result = await client.createBulkActions(actions);
@@ -166,12 +159,8 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-group-hash', action_type: 'ack' as const, episode_id: 'episode-1' },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({
-          rawResponse: getBulkAlertEventsESQLResponse([
-            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
-          ]),
-        })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkAlertEventsESQLResponse([{ group_hash: 'group-hash-1', episode_id: 'episode-1' }])
       );
 
       const result = await client.createBulkActions(actions);
@@ -190,9 +179,7 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-2', action_type: 'snooze' as const },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getBulkAlertEventsESQLResponse([]) })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getBulkAlertEventsESQLResponse([]));
 
       const result = await client.createBulkActions(actions);
 

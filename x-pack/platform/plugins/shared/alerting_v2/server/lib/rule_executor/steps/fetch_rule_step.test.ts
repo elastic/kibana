@@ -24,6 +24,7 @@ describe('FetchRuleStep', () => {
     overrides: Partial<RuleSavedObjectAttributes> = {}
   ): RuleSavedObjectAttributes => ({
     name: 'test-rule',
+    kind: 'alert',
     tags: [],
     schedule: { custom: '1m' },
     enabled: true,
@@ -31,9 +32,9 @@ describe('FetchRuleStep', () => {
     timeField: '@timestamp',
     lookbackWindow: '1m',
     groupingKey: [],
-    createdBy: 'elastic',
+    createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic',
+    updatedBy: 'elastic_profile_uid',
     updatedAt: '2025-01-01T00:00:00.000Z',
     ...overrides,
   });

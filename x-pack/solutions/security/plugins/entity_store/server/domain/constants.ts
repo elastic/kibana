@@ -6,6 +6,7 @@
  */
 
 import type { EngineStatus } from './definitions/saved_objects';
+import type { EntityStoreStatus } from './types';
 
 export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_UPDATES = 'updates' as const;
@@ -22,30 +23,36 @@ type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES;
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;
   schemaVersion: SchemaVersion;
-  definitionId: string;
+  namespace: string;
 }
 
 interface AliasPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;
-  type: string;
 }
 
 export const getEntityIndexPattern = <TDataset extends Dataset>({
   schemaVersion,
   dataset,
-  definitionId,
+  namespace,
 }: IndexPatternOptions<TDataset>) =>
-  `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
+  `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.security_${namespace}` as const;
 
 export const getEntitiesAliasPattern = <TDataset extends Dataset>({
-  type,
   dataset,
-}: AliasPatternOptions<TDataset>) => `${ENTITY_BASE_PREFIX}-${type}-${dataset}` as const;
+}: AliasPatternOptions<TDataset>) => `${ENTITY_BASE_PREFIX}-${dataset}` as const;
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
   STOPPED: 'stopped',
   UPDATING: 'updating',
+  ERROR: 'error',
+};
+
+export const ENTITY_STORE_STATUS: Record<Uppercase<EntityStoreStatus>, EntityStoreStatus> = {
+  RUNNING: 'running',
+  STOPPED: 'stopped',
+  INSTALLING: 'installing',
+  NOT_INSTALLED: 'not_installed',
   ERROR: 'error',
 };

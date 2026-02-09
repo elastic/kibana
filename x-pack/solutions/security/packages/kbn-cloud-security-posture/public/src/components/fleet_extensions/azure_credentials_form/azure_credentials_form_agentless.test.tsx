@@ -27,9 +27,10 @@ jest.mock('../hooks/use_cloud_setup_context');
 jest.mock('../utils');
 jest.mock('./get_azure_credentials_form_options');
 
-// Mock CloudConnectorSetup component
-jest.mock('../cloud_connector/cloud_connector_setup', () => ({
-  CloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+// Mock CloudConnectorSetup component (lazy loaded from Fleet)
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/public'),
+  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
 }));
 
 // Mock the utilities

@@ -6,12 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { PluginStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { esql } from '@kbn/esql-language';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
@@ -23,22 +19,23 @@ import { queryResponseToRecords } from '../services/query_service/query_response
 import { QueryService, type QueryServiceContract } from '../services/query_service/query_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
+import type { UserServiceContract } from '../services/user_service/user_service';
+import { UserService } from '../services/user_service/user_service';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
-    @inject(Request) private readonly request: KibanaRequest,
     @inject(QueryService) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
+    @inject(UserService) private readonly userService: UserServiceContract
   ) {}
 
   public async createAction(params: {
     groupHash: string;
     action: CreateAlertActionBody;
   }): Promise<void> {
-    const [username, alertEvent] = await Promise.all([
-      this.getUserName(),
+    const [userProfileUid, alertEvent] = await Promise.all([
+      this.getUserProfileUid(),
       this.findLastAlertEventRecordOrThrow({
         groupHash: params.groupHash,
         episodeId: 'episode_id' in params.action ? params.action.episode_id : undefined,
@@ -51,7 +48,7 @@ export class AlertActionsClient {
         this.buildAlertActionDocument({
           action: params.action,
           alertEvent,
-          username,
+          userProfileUid,
         }),
       ],
     });
@@ -60,8 +57,8 @@ export class AlertActionsClient {
   public async createBulkActions(
     actions: BulkCreateAlertActionItemBody[]
   ): Promise<{ processed: number; total: number }> {
-    const [username, records] = await Promise.all([
-      this.getUserName(),
+    const [userProfileUid, records] = await Promise.all([
+      this.getUserProfileUid(),
       this.fetchLastAlertEventRecordsForActions(actions),
     ]);
 
@@ -82,7 +79,7 @@ export class AlertActionsClient {
           return this.buildAlertActionDocument({
             action,
             alertEvent: matchingAlertEventRecord,
-            username,
+            userProfileUid,
           });
         }
       })
@@ -115,28 +112,28 @@ export class AlertActionsClient {
         BY group_hash
       | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
       | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
-    `;
+    `.toRequest();
 
     return queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.print() })
+      await this.queryService.executeQuery({ query: query.query })
     );
   }
 
-  private async getUserName(): Promise<string | null> {
-    return this.security?.authc.getCurrentUser(this.request)?.username ?? null;
+  private async getUserProfileUid(): Promise<string | null> {
+    return this.userService.getCurrentUserProfileUid();
   }
 
   private buildAlertActionDocument(params: {
     action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
-    username: string | null;
+    userProfileUid: string | null;
   }): AlertAction {
-    const { action, alertEvent, username } = params;
+    const { action, alertEvent, userProfileUid } = params;
     const actionData = omit(action, ['episode_id', 'action_type']);
 
     return {
       '@timestamp': new Date().toISOString(),
-      actor: username,
+      actor: userProfileUid,
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,
@@ -159,10 +156,10 @@ export class AlertActionsClient {
       | SORT @timestamp DESC
       | RENAME rule.id AS rule_id
       | KEEP @timestamp, group_hash, episode_id, rule_id
-      | LIMIT 1`;
+      | LIMIT 1`.toRequest();
 
     const result = queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.print() })
+      await this.queryService.executeQuery({ query: query.query })
     );
 
     if (result.length === 0) {

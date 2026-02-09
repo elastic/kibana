@@ -8,12 +8,13 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleKind } from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 export interface RuleListItem {
   id: string;
   name: string;
+  kind: RuleKind;
   enabled?: boolean;
   query?: string;
   schedule?: { custom?: string };

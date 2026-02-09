@@ -5,40 +5,50 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { EsServiceScopedToken } from '../services/es_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode } from './types';
+import type { AlertEpisode, DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
 export interface DispatcherServiceContract {
-  run({ previousStartedAt }: { previousStartedAt?: Date }): Promise<{ startedAt: Date }>;
+  run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
 }
 
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
   constructor(
-    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient,
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async run({ previousStartedAt = new Date() }: { previousStartedAt?: Date } = {}) {
+  public async run({
+    previousStartedAt = new Date(),
+    abortController,
+  }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    const lookback = moment(previousStartedAt)
+      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+      .toISOString();
+
+    this.logger.debug({
+      message: () => `Dispatcher started. Looking for alert episodes since ${lookback}`,
+    });
+
     const { query } = getDispatchableAlertEventsQuery();
 
-    // TODO: Use QueryService as soon as it uses esClient instead of data plugin client
-    const result = await this.esClient.esql.query({
+    const result = await this.queryService.executeQuery({
       query,
       filter: {
         range: {

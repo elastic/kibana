@@ -45,21 +45,22 @@ const mappings: estypes.MappingTypeMapping = {
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
-
-    // Alert specific fields (not applicable for signal type)
-    episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' }, // inactive | pending | active | recovering
-    episode_status_count: { type: 'long' }, // Only set for pending and recovering episode_status
+    episode: {
+      properties: {
+        id: { type: 'keyword' },
+        status: { type: 'keyword' }, // inactive | pending | active | recovering
+      },
+    },
   },
 };
 
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
 const alertEventTypeSchema = z.enum(['signal', 'alert']);
-const episodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
+const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
 
 export const alertEventStatus = alertEventStatusSchema.enum;
 export const alertEventType = alertEventTypeSchema.enum;
-export const episodeStatus = episodeStatusSchema.enum;
+export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
@@ -73,17 +74,18 @@ export const alertEventSchema = z.object({
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
-
-  // Alert specific fields (not applicable for signal type)
-  episode_id: z.string().optional(),
-  episode_status: episodeStatusSchema.optional(),
-  episode_status_count: z.number().optional(),
+  episode: z
+    .object({
+      id: z.string(),
+      status: alertEpisodeStatusSchema,
+    })
+    .optional(),
 });
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
 export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
 export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
-export type EpisodeStatus = z.infer<typeof episodeStatusSchema>;
+export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,

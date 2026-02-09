@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import { createMockSearchClient } from '../../test_utils';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { QueryService } from './query_service';
+import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
 export function createQueryService(): {
   queryService: QueryService;
-  mockSearchClient: jest.Mocked<IScopedSearchClient>;
+  mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   mockLogger: jest.Mocked<Logger>;
 } {
-  const mockSearchClient = createMockSearchClient();
+  const mockEsClient = createMockEsClient();
   const { loggerService, mockLogger } = createLoggerService();
-  const queryService = new QueryService(mockSearchClient, loggerService);
-  return { queryService, mockSearchClient, mockLogger };
+  const queryService = new QueryService(mockEsClient, loggerService);
+  return { queryService, mockEsClient, mockLogger };
 }
