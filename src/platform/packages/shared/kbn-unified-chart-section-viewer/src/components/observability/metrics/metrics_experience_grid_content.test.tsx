@@ -21,6 +21,7 @@ import type { MetricField, Dimension } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
+import { getMetricKey } from '../../../common/utils/fields';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
@@ -57,12 +58,14 @@ const allFields: MetricField[] = [
     dimensions: [dimensions[0]],
     index: 'metrics-*',
     type: ES_FIELD_TYPES.LONG,
+    uniqueKey: getMetricKey('metrics-*', 'field1'),
   },
   {
     name: 'field2',
     dimensions: [dimensions[1]],
     index: 'metrics-*',
     type: ES_FIELD_TYPES.LONG,
+    uniqueKey: getMetricKey('metrics-*', 'field2'),
   },
 ];
 
@@ -149,12 +152,16 @@ describe('MetricsExperienceGridContent', () => {
 
   it('filters fields by search term and respects page size', () => {
     // 20 fields, 10 with "cpu" in the name
-    const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
-      name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
-      dimensions: [dimensions[0]],
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.LONG,
-    }));
+    const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => {
+      const name = i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`;
+      return {
+        name,
+        dimensions: [dimensions[0]],
+        index: 'metrics-*',
+        type: ES_FIELD_TYPES.LONG,
+        uniqueKey: getMetricKey('metrics-*', name),
+      };
+    });
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
