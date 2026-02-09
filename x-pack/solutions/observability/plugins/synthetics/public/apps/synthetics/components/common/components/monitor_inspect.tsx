@@ -25,7 +25,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
@@ -174,7 +174,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return yaml.dump(data);
+    return stringify(data);
   }
 
   return JSON.stringify(data, null, 2);
