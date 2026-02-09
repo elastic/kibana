@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
@@ -62,9 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
       await esql.openQuickReferenceFlyout();
-      await retry.try(async () => {
-        expect(await dataGrid.isShowingDocViewer()).to.be(false);
-      });
+      expect(await dataGrid.isShowingDocViewer()).to.be(false);
       expect(await esql.isOpenQuickReferenceFlyout()).to.be(true);
     });
 
