@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -23,14 +24,20 @@ import {
   getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
+  getCreateTemplatePath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
+import type { CreateTemplatePageProps } from '../templates_v2/create_template/page';
 
-const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+
+const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
+  () => import('../templates_v2/create_template/page')
+);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
@@ -79,6 +86,12 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
           )}
+        </Route>
+
+        <Route exact path={getCreateTemplatePath(basePath)}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <CreateTemplateLazy />
+          </Suspense>
         </Route>
 
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
