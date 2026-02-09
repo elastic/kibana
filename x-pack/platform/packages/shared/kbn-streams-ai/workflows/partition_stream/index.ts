@@ -8,8 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import type { Feature, Streams } from '@kbn/streams-schema';
+import { isEqual, omit } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
@@ -27,6 +27,7 @@ export async function partitionStream({
   end,
   maxSteps,
   signal,
+  features,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -36,6 +37,7 @@ export async function partitionStream({
   end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
+  features: Feature[];
 }): Promise<Array<{ name: string; condition: Condition }>> {
   const initialClusters = await clusterLogs({
     esClient,
@@ -64,6 +66,11 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
+      features: JSON.stringify(
+        features.map((feature) =>
+          omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+        )
+      ),
     },
     maxSteps,
     toolCallbacks: {

@@ -20,6 +20,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     fields_schema: z.string(),
     parsing_processor: z.string().optional(),
     initial_dataset_analysis: z.string(),
+    features: z.string(),
   }),
 })
   .version({

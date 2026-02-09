@@ -7,13 +7,14 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
+import type { Streams, ProcessingSimulationResponse, Feature } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
 
@@ -27,6 +28,7 @@ export async function suggestProcessingPipeline({
   documents,
   fieldsMetadataClient,
   esClient,
+  features,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -37,6 +39,7 @@ export async function suggestProcessingPipeline({
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
   esClient: ElasticsearchClient;
+  features: Feature[];
 }): Promise<StreamlangDSL | null> {
   // No need to involve reasoning if there are no sample documents
   if (documents.length === 0) {
@@ -68,6 +71,11 @@ export async function suggestProcessingPipeline({
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
     initial_dataset_analysis: JSON.stringify(simulationMetrics),
     parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
+    features: JSON.stringify(
+      features.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
+    ),
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline

@@ -47,6 +47,9 @@ Create an ingest pipeline for this data stream. Use an **iterative eval/dev loop
 
 {{{stream.description}}}
 
+## Features
+{{{features}}}
+
 ---
 
 ## Dataset Analysis
