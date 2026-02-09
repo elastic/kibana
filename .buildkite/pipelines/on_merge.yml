@@ -36,11 +36,10 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-16
+      machineType: n4d-standard-8
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
-      diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
     retry:

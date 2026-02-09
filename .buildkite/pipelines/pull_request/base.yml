@@ -22,7 +22,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: n4d-standard-16
+      machineType: n4d-standard-8
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
