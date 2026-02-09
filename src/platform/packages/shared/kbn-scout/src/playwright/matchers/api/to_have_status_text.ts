@@ -17,7 +17,12 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
-export function toHaveStatusText(obj: unknown, expected: string, isNegated = false): void {
+export function toHaveStatusText(
+  obj: unknown,
+  expected: string,
+  isNegated = false,
+  message?: string
+): void {
   if (
     typeof obj !== 'object' ||
     obj === null ||
@@ -30,6 +35,7 @@ export function toHaveStatusText(obj: unknown, expected: string, isNegated = fal
       matcherName: 'toHaveStatusText',
       received: obj,
       isNegated,
+      message,
     });
   }
 
@@ -46,6 +52,7 @@ export function toHaveStatusText(obj: unknown, expected: string, isNegated = fal
       matcherName: 'toHaveStatusText',
       received: actual,
       isNegated,
+      message,
     });
   }
 }

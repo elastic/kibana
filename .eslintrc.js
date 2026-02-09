@@ -2716,14 +2716,8 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
-        '@kbn/eslint/require_include_in_check_a11y': 'warn',
-      },
-    },
-    {
-      // Ensure correct expect import path in solutions scout API tests
-      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
-      rules: {
         '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
