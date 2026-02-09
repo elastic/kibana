@@ -16,9 +16,9 @@ import { useLayoutConfig } from '@kbn/core-chrome-layout-components';
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { PanelResizeHandle } from './panel_resize_handle';
 import type { SidebarPanelContextValue } from '@kbn/core-chrome-sidebar-context';
 import { SidebarPanelContext } from '@kbn/core-chrome-sidebar-context';
+import { PanelResizeHandle } from './panel_resize_handle';
 
 const sidebarWrapperStyles = (theme: UseEuiTheme) => css`
   display: flex;
@@ -58,9 +58,7 @@ const focusMainContent = () => {
 };
 
 /** Rescues focus to main content (or custom callback) when the panel unmounts with focus inside. */
-const useFocusRescue = (
-  onFocusRescueRef: React.RefObject<(() => void) | undefined>
-) => {
+const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefined>) => {
   const asideRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
