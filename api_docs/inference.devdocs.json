@@ -2088,9 +2088,9 @@
           },
           "<string, ",
           "AugmentedRequired",
-          "<{ [x: string]: string | number | boolean | ",
+          "<{ [x: string]: string | number | boolean | unknown[] | ",
           "AugmentedRequired",
-          "<any, never> | FromToolSchemaArray<ToolSchemaTypeArray> | undefined; }, never> | undefined>> | ",
+          "<any, never> | undefined; }, never> | undefined>> | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

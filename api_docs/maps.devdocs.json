@@ -3380,9 +3380,9 @@
           "; } | undefined) => void; dynamicActionsState$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
+            "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ dynamicActions: ",
@@ -3396,9 +3396,9 @@
           "; } | undefined>; }> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasEditCapabilities",
+            "section": "def-common.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
           "> & ",
@@ -3412,57 +3412,57 @@
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasSupportedTriggers",
+            "section": "def-common.HasSupportedTriggers",
             "text": "HasSupportedTriggers"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDataLoading",
+            "section": "def-common.PublishesDataLoading",
             "text": "PublishesDataLoading"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDataViews",
+            "section": "def-common.PublishesDataViews",
             "text": "PublishesDataViews"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesProjectRoutingOverrides",
+            "section": "def-common.PublishesProjectRoutingOverrides",
             "text": "PublishesProjectRoutingOverrides"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTimeRange",
+            "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesFilters",
+            "section": "def-common.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
+            "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -3484,9 +3484,9 @@
           " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasLibraryTransforms",
+            "section": "def-common.HasLibraryTransforms",
             "text": "HasLibraryTransforms"
           },
           "<",
@@ -4376,7 +4376,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5423,7 +5423,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6385,7 +6385,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7386,7 +7386,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8393,7 +8393,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9355,7 +9355,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10373,7 +10373,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11499,7 +11499,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12595,7 +12595,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -15723,7 +15723,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20188,9 +20188,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTimeRange",
+            "section": "def-common.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
           " & ",
@@ -20201,7 +20201,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & Partial<",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hide_title?: boolean | undefined; } & {}>> & Partial<",
           {
             "pluginId": "embeddableEnhanced",
             "scope": "public",
@@ -20240,9 +20240,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTimeRange",
+            "section": "def-common.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
           " & ",
@@ -20253,7 +20253,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & Partial<",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hide_title?: boolean | undefined; } & {}>> & Partial<",
           {
             "pluginId": "embeddableEnhanced",
             "scope": "public",
@@ -20281,7 +20281,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { radius: number; label: string; svg: string; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",

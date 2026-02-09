@@ -350,7 +350,7 @@
         "void"
       ],
       "path": "src/platform/plugins/private/event_annotation_listing/public/plugin.ts",
-      "lineNumber": 41,
+      "lineNumber": 46,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
