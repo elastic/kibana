@@ -112,7 +112,7 @@ run(
       }
 
       if (models.length === 0) {
-        log.warning('No EIS chat completion models discovered');
+        throw new Error('No EIS chat completion models discovered after all retries');
       }
 
       // Write output
