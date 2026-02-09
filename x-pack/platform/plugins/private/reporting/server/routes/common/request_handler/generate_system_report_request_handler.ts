@@ -39,9 +39,9 @@ export interface InternalReportParams {
 }
 
 export interface GenerateSystemReportRequestParams<
-  P extends typeof ParamsValidation,
-  Q extends typeof QueryValidation,
-  B extends typeof BodyValidation
+  P extends typeof ParamsValidation = typeof ParamsValidation,
+  Q extends typeof QueryValidation = typeof QueryValidation,
+  B extends typeof BodyValidation = typeof BodyValidation
 > {
   reportParams: InternalReportParams;
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>;
