@@ -10,14 +10,20 @@ import { test } from '../fixtures';
 
 const SKILL_ID_PREFIX = 'e2e-test-skill';
 const API_VERSION_HEADER = { 'elastic-api-version': '2023-10-31' };
+const EXPERIMENTAL_FEATURES_SETTING = 'agentBuilder:experimentalFeatures';
 
 let connectorId: string;
 
 test.describe('Skills CRUD - UI flows', { tag: ['@ess'] }, () => {
   let uniqueSkillId: string;
 
-  // Create a mock LLM connector so the Agent Builder app is accessible
+  // Create a mock LLM connector and enable experimental features
   test.beforeAll(async ({ kbnClient }) => {
+    // Enable the experimental features flag so skill routes are accessible
+    await kbnClient.uiSettings.update({
+      [EXPERIMENTAL_FEATURES_SETTING]: true,
+    });
+
     const response = await kbnClient.request({
       method: 'POST',
       path: '/api/actions/connector',

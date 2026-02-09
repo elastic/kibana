@@ -218,6 +218,45 @@ describe('CompositeSkillRegistry', () => {
         })
       ).rejects.toThrow('Invalid tool IDs: invalid-tool');
     });
+
+    it('should throw when more than 5 tool IDs are provided', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
+      const registry = createCompositeSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await expect(
+        registry.create({
+          id: 'new-skill',
+          name: 'New Skill',
+          description: 'Description',
+          content: 'Content',
+          tool_ids: toolIds,
+        })
+      ).rejects.toThrow('A skill can reference at most 5 tools, but 6 were provided');
+    });
+
+    it('should allow exactly 5 tool IDs', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'];
+      const persistedProvider = createMockPersistedProvider([]);
+      const registry = createCompositeSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await registry.create({
+        id: 'new-skill',
+        name: 'New Skill',
+        description: 'Description',
+        content: 'Content',
+        tool_ids: toolIds,
+      });
+
+      expect(persistedProvider.create).toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -246,6 +285,19 @@ describe('CompositeSkillRegistry', () => {
       await expect(registry.update('builtin-skill-1', { name: 'Updated' })).rejects.toThrow(
         "Skill 'builtin-skill-1' is read-only"
       );
+    });
+
+    it('should throw when updating with more than 5 tool IDs', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
+      const registry = createCompositeSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await expect(
+        registry.update('custom-skill-1', { tool_ids: toolIds })
+      ).rejects.toThrow('A skill can reference at most 5 tools, but 6 were provided');
     });
   });
 

@@ -205,12 +205,21 @@ class CompositeSkillRegistryImpl implements CompositeSkillRegistry {
     return result;
   }
 
+  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
+
   /**
-   * Validates that all tool IDs exist in the tool registry.
+   * Validates that all tool IDs exist in the tool registry
+   * and enforces a maximum of 5 tools per skill.
    */
   private async validateToolIds(toolIds: string[]): Promise<void> {
     if (!toolIds || toolIds.length === 0) {
       return;
+    }
+
+    if (toolIds.length > CompositeSkillRegistryImpl.MAX_TOOL_IDS_PER_SKILL) {
+      throw createBadRequestError(
+        `A skill can reference at most ${CompositeSkillRegistryImpl.MAX_TOOL_IDS_PER_SKILL} tools, but ${toolIds.length} were provided.`
+      );
     }
 
     const invalidIds: string[] = [];
