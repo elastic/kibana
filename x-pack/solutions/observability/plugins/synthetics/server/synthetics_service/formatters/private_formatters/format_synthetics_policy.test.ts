@@ -454,7 +454,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 timeout: {
                   type: 'text',
-                  value: '16s',
+                  value: '30s',
                 },
                 type: {
                   type: 'text',
