@@ -101,8 +101,6 @@ describe('rulePageShowRequestModal', () => {
     `);
   });
 
-  // maybe add another test for display only create body for new rules
-
   test('renders update request correctly for existing rule', async () => {
     useRuleFormState.mockReturnValue({
       formData,

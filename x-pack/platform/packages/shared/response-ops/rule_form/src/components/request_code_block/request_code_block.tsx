@@ -55,8 +55,6 @@ export const RequestCodeBlock = (props: RequestCodeBlockProps) => {
     });
   }, [formData, multiConsumerSelection, activeTab]);
 
-  // const formattedId = id ? id : '${rule_id}';
-
   return (
     <EuiCodeBlock language="json" isCopyable data-test-subj={dataTestSubj}>
       {`${activeTab === 'update' ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
