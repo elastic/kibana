@@ -19,11 +19,11 @@ import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hoo
  * NOTE: this test uses a mock template definition to try and render the controls
  * as per their definitions stored in the controlRegistry
  */
-const exampleCaseTemplate = `
+const mockTemplateDefinition = `
 fields:
   - name: severity
     control: SELECT_BASIC
-    label: Field label
+    label: Select label
     type: keyword
     metadata:
       options:
@@ -31,6 +31,10 @@ fields:
         - moderate
         - high
         - critical
+  - name: name
+    control: INPUT_TEXT
+    label: Input text label
+    type: keyword
 `;
 
 const TestTemplatedFormRenderer = ({
@@ -57,7 +61,7 @@ const TestTemplatedFormRenderer = ({
   });
 
   if (!parseResult.success) {
-    return <>{`Invalid templateDefinition`}</>;
+    return <>{`Invalid templateDefinition: ${parseResult.error}`}</>;
   }
 
   const {
@@ -82,10 +86,11 @@ describe('controlRegistry', () => {
   it('should render all the controls specified in the template', () => {
     render(
       <TestTemplatedFormRenderer
-        templateDefinition={exampleCaseTemplate}
+        templateDefinition={mockTemplateDefinition}
         values={{ severity: 'low' }}
       />
     );
     expect(screen.getByTestId('select')).toBeInTheDocument();
+    expect(screen.getByTestId('input')).toBeInTheDocument();
   });
 });
