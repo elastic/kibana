@@ -44,8 +44,7 @@ import { ServerlessRoleName } from '../../support/roles';
 describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
-  // TODO: TC - something off with adding integration view
-  describe.skip(
+  describe(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
     { tags: ['@ess'] },
     () => {
@@ -234,15 +233,15 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('Create agent policy').click();
         cy.getBySel('createAgentPolicyNameField').type(agentPolicy);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
-        cy.contains(`Agent policy '${agentPolicy}' created`).click();
+        cy.contains(`Agent policy '${agentPolicy}' created`);
         closeToastIfVisible();
-        cy.contains(agentPolicy).click();
+        cy.getBySel('agentPolicyNameLink').contains(agentPolicy).click();
         closeFleetTourIfVisible();
-        cy.contains('Add integration').click();
-        cy.getBySel('epmList.searchBar').type('osquery');
-        cy.contains(integration).click();
-        addIntegration(agentPolicy);
-        cy.contains('Add Elastic Agent later').click();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        closeModalIfVisible();
         cy.contains('osquery_manager-');
         request<{ items: PackagePolicy[] }>({
           url: '/internal/osquery/fleet_wrapper/package_policies',

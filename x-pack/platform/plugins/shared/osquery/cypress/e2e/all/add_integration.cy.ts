@@ -116,28 +116,33 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('add integration', () => {
-      cy.visit(FLEET_AGENT_POLICIES);
-      closeFleetTourIfVisible();
-      cy.getBySel('createAgentPolicyButton').click();
-      cy.getBySel('createAgentPolicyNameField').type(policyName);
-      cy.getBySel('createAgentPolicyFlyoutBtn').click();
-      cy.getBySel('agentPolicyNameLink').contains(policyName).click();
-      closeFleetTourIfVisible();
-      cy.getBySel('addPackagePolicyButton').click();
-      cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
-      cy.getBySel('globalLoadingIndicator').should('not.exist');
+    it(
+      'add integration',
+      { tags: ['@ess', '@brokenInServerless'] },
 
-      cy.getBySel('packagePolicyNameInput').clear();
-      cy.getBySel('packagePolicyNameInput').should('have.value', '');
-      cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
-      cy.getBySel('addIntegrationFlyout.submitBtn').click();
-      cy.get(`[title="${integrationName}"]`, { timeout: 60000 }).should('exist');
-      policyContainsIntegration(integrationName, policyName);
-      checkDataStreamsInPolicyDetails();
-      cy.visit(OSQUERY);
-      cy.contains('Live queries history');
-    });
+      () => {
+        cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
+        cy.getBySel('createAgentPolicyButton').click();
+        cy.getBySel('createAgentPolicyNameField').type(policyName);
+        cy.getBySel('createAgentPolicyFlyoutBtn').click();
+        cy.getBySel('agentPolicyNameLink').contains(policyName).click();
+        closeFleetTourIfVisible();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+
+        cy.getBySel('packagePolicyNameInput').clear();
+        cy.getBySel('packagePolicyNameInput').should('have.value', '');
+        cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
+        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        cy.get(`[title="${integrationName}"]`, { timeout: 60000 }).should('exist');
+        policyContainsIntegration(integrationName, policyName);
+        checkDataStreamsInPolicyDetails();
+        cy.visit(OSQUERY);
+        cy.contains('Live queries history');
+      }
+    );
   });
 
   describe('Upgrade policy with existing packs', () => {

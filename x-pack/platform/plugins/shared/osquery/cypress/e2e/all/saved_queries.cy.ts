@@ -202,10 +202,10 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('shows ID must be unique error', () => {
-      cy.contains('Saved queries').click();
       cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
-      cy.contains('Add saved query').click();
+      cy.contains('Saved queries').click();
       cy.wait('@savedQueriesLoaded');
+      cy.contains('Add saved query').click();
       cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
 
       cy.contains('ID must be unique').should('not.exist');
@@ -317,7 +317,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       });
       cy.contains('Unique identifier of the us').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Save').click();
+      cy.getBySel('query-flyout-save-button').click();
+      cy.get(`[aria-labelledby="flyoutTitle"]`).should('not.exist');
 
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
 
