@@ -34,7 +34,7 @@ const ACCOUNT_TYPE_OPTIONS = [
   {
     id: SINGLE_ACCOUNT,
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.singleAccountLabel', {
-      defaultMessage: 'Single Account',
+      defaultMessage: 'Single account',
     }),
     'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT,
   },
