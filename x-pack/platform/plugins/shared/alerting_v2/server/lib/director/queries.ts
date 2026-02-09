@@ -18,6 +18,8 @@ export interface LatestAlertEventState {
   last_status: AlertEventStatus;
   last_episode_id: string | null;
   last_episode_status: AlertEpisodeStatus | null;
+  last_episode_status_count: number | null;
+  last_episode_timestamp: string | null;
   group_hash: string;
 }
 
@@ -32,10 +34,19 @@ export const getLatestAlertEventStateQuery = ({
   query = query.pipe`STATS 
       last_status = LAST(status, @timestamp), 
       last_episode_id = LAST(episode.id, @timestamp), 
-      last_episode_status = LAST(episode.status, @timestamp) 
+      last_episode_status = LAST(episode.status, @timestamp),
+      last_episode_status_count = LAST(episode.status_count, @timestamp),
+      last_episode_timestamp = LAST(@timestamp, @timestamp)
     BY group_hash`;
 
-  query = query.keep('last_status', 'last_episode_id', 'last_episode_status', 'group_hash');
+  query = query.keep(
+    'last_status',
+    'last_episode_id',
+    'last_episode_status',
+    'last_episode_status_count',
+    'last_episode_timestamp',
+    'group_hash'
+  );
 
   return query;
 };

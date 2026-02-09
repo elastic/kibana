@@ -9,7 +9,7 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
@@ -105,7 +105,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
+
   // Strategies are registered via TransitionStrategyToken for multi-injection.
   // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
+  bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 }
