@@ -398,10 +398,6 @@ export interface ValidationErrors {
     message: string;
     type: { fn: string; required: string };
   };
-  promqlInvalidDurationValue: {
-    message: string;
-    type: { value: string };
-  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };

@@ -336,14 +336,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlInvalidDurationValue':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDurationValue', {
-          defaultMessage: '[PROMQL] Invalid duration value "{value}"',
-          values: { value: out.value },
-        }),
-        type: 'error',
-      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(
