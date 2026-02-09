@@ -12,29 +12,31 @@ import { transformSync } from 'rolldown/experimental';
 import type { Plugin } from 'vite';
 
 /**
- * TypeScript transform plugin that replaces Vite's built-in OXC transform.
+ * OXC-based transform plugin that replaces both Vite's built-in OXC (`vite:oxc`)
+ * and esbuild (`vite:esbuild`) plugins.
  *
- * Vite's OXC plugin calls `loadTsconfigJsonForFile` → `tsconfck.parse()` for
- * every TypeScript file, which runs `replaceTokens` (JSON.stringify → replaceAll
- * → JSON.parse) on potentially large tsconfig objects. In Kibana's monorepo with
- * 1256+ packages and large `paths` sections, this costs ~25% of startup CPU.
+ * Handles all source file types: .ts, .tsx, .js, .jsx, .mts, .cts
+ *
+ * Vite's built-in OXC plugin calls `loadTsconfigJsonForFile` → `tsconfck.parse()`
+ * for every TypeScript file, which runs `replaceTokens` (JSON.stringify →
+ * replaceAll → JSON.parse) on potentially large tsconfig objects. In Kibana's
+ * monorepo with 1256+ packages and large `paths` sections, this costs ~25% of
+ * startup CPU.
  *
  * This plugin bypasses tsconfig resolution entirely by providing pre-configured
- * compiler options directly to Rolldown's OXC transform. The transform options
- * match Kibana's common TypeScript settings:
- *   - JSX: automatic runtime with React import source
+ * compiler options directly to Rolldown's OXC transform:
+ *   - JSX: automatic runtime with React import source (respects @jsxRuntime pragmas)
  *   - Target: ES2022 (Node 18+)
  *   - Source maps: disabled by default for faster startup
  *
- * This plugin should be used together with `oxc: false` in the Vite config
- * to disable the built-in OXC transform.
+ * Use together with `oxc: false` and `esbuild: false` in the Vite config.
  */
 export function kbnTypescriptTransformPlugin(): Plugin {
   const sourceMapsEnabled = process.env.KBN_VITE_SOURCEMAPS === 'true';
 
-  // Pre-built regex for matching TypeScript files
-  const tsRE = /\.(ts|tsx|mts|cts)$/;
-  // Match JSX files that need React transform
+  // Match all source file types that need transformation
+  const sourceRE = /\.(ts|tsx|js|jsx|mts|cts)$/;
+  // Match files that can contain JSX syntax
   const jsxRE = /\.(tsx|jsx)$/;
 
   return {
@@ -43,13 +45,15 @@ export function kbnTypescriptTransformPlugin(): Plugin {
     // This means it runs after 'pre' plugins (like our cache reader) and
     // before 'post' plugins (like our cache writer)
 
-    // Forcibly remove the built-in vite:oxc plugin after config is resolved.
-    // Setting `oxc: false` in the config should do this, but in practice the
-    // built-in plugin still runs. This hook guarantees it's removed.
+    // Forcibly remove the built-in vite:oxc and vite:esbuild plugins after
+    // config is resolved. Setting `oxc: false` and `esbuild: false` in the
+    // config should do this, but in practice the built-in plugins may still
+    // run. This hook guarantees they're removed.
     configResolved(resolvedConfig: any) {
       const plugins = (resolvedConfig as any).plugins as { name: string }[];
       for (let i = plugins.length - 1; i >= 0; i--) {
-        if (plugins[i].name === 'vite:oxc') {
+        const name = plugins[i].name;
+        if (name === 'vite:oxc' || name === 'vite:esbuild') {
           plugins.splice(i, 1);
         }
       }
@@ -64,19 +68,48 @@ export function kbnTypescriptTransformPlugin(): Plugin {
         return null;
       }
 
-      // Only transform TypeScript files
-      if (!tsRE.test(id)) {
+      // Only transform source files
+      if (!sourceRE.test(id)) {
         return null;
       }
 
-      // Determine the language from the file extension
+      // Determine the OXC language from the file extension
       const ext = Path.extname(id).slice(1);
-      let lang: 'ts' | 'tsx';
-      if (ext === 'tsx') {
-        lang = 'tsx';
-      } else {
-        // ts, mts, cts all use 'ts' lang
-        lang = 'ts';
+      let lang: 'ts' | 'tsx' | 'js' | 'jsx';
+      switch (ext) {
+        case 'tsx':
+          lang = 'tsx';
+          break;
+        case 'jsx':
+          lang = 'jsx';
+          break;
+        case 'js':
+          // .js files that contain JSX syntax need the 'jsx' lang so OXC
+          // parses angle brackets as JSX elements rather than comparisons.
+          // We detect this by looking for closing tags (`</`) which are
+          // unambiguous JSX markers that can't appear in regular JS.
+          lang = code.includes('</') ? 'jsx' : 'js';
+          break;
+        default:
+          // ts, mts, cts
+          lang = 'ts';
+          break;
+      }
+
+      // Determine JSX configuration.
+      // Some files use `/** @jsxRuntime classic */` (e.g. for Emotion's css prop)
+      // which requires `runtime: 'classic'` and must NOT have `importSource`.
+      // Detect the pragma and configure accordingly.
+      const needsJsx = jsxRE.test(id) || lang === 'jsx';
+      let jsx:
+        | { runtime: 'automatic' | 'classic'; importSource?: string; development: boolean }
+        | undefined;
+      if (needsJsx) {
+        if (code.includes('@jsxRuntime classic')) {
+          jsx = { runtime: 'classic', development: true };
+        } else {
+          jsx = { runtime: 'automatic', importSource: 'react', development: true };
+        }
       }
 
       const result = transformSync(id, code, {
@@ -84,13 +117,8 @@ export function kbnTypescriptTransformPlugin(): Plugin {
         sourcemap: sourceMapsEnabled,
 
         // JSX settings — matches Kibana's tsconfig jsx: "react-jsx"
-        jsx: jsxRE.test(id)
-          ? {
-              runtime: 'automatic',
-              importSource: 'react',
-              development: true,
-            }
-          : undefined,
+        // Respects @jsxRuntime classic pragma for Emotion css prop usage
+        jsx,
 
         // TypeScript settings — matches ES2022+ defaults
         // useDefineForClassFields: true (default for ES2022+), so
@@ -106,7 +134,7 @@ export function kbnTypescriptTransformPlugin(): Plugin {
 
       if (result.errors.length > 0) {
         const firstError = result.errors[0];
-        throw new Error(`TypeScript transform error in ${id}: ${firstError.message}`);
+        throw new Error(`OXC transform error in ${id}: ${firstError.message}`);
       }
 
       return {

@@ -14,6 +14,7 @@ export { createServerRuntimeConfig } from './src/server_config.ts';
 export { HmrHandler, createHmrHandler } from './src/hmr_handler.ts';
 export { kbnCacheResolverPlugin } from './src/cache_resolver_plugin.ts';
 export { kbnTransformDiskCachePlugins } from './src/transform_disk_cache_plugin.ts';
+export { kbnTypescriptTransformPlugin } from './src/kbn_typescript_transform_plugin.ts';
 
 // ViteModuleLoader - module loader for use in Kibana core
 export { ViteModuleLoader, createViteModuleLoader } from './src/vite_module_loader.ts';

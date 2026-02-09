@@ -17,7 +17,9 @@ export { RESOURCE_ECS_FIELDS as RESOURCE_FIELDS, prefixOTelField } from './resou
 
 // Export processing functionality
 export { processSemconvYaml } from './lib/generate_semconv';
-export { cli } from './cli';
+// CLI is not exported from the main entry point to avoid pulling in Node.js-only
+// code (fs, path, __dirname) into browser/test bundles.  Import directly from
+// './cli' when you need the CLI runner.
 
 // Export processing types
 export type {

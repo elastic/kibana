@@ -15,11 +15,17 @@ import {
 import type { InteractiveModeSnapshot } from './state_management/interactive_mode_machine';
 import type { SimulationActorSnapshot } from './state_management/simulation_state_machine';
 
-// Mock the EUI functions
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(() => true),
-}));
+// Mock the EUI functions — explicitly set `default` because vitest 4.x
+// requires it when the original module has a default export, and spreading
+// a module namespace doesn't always copy non-enumerable properties.
+vi.mock('@elastic/eui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@elastic/eui')>();
+  return {
+    default: actual,
+    ...actual,
+    copyToClipboard: vi.fn(() => true),
+  };
+});
 
 describe('dev_console_helpers', () => {
   // Suppress console logs during tests
