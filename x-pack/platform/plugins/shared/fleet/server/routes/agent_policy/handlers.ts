@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { isEmpty, uniq } from 'lodash';
 
@@ -852,7 +852,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, stringify);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -894,7 +894,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, stringify);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,

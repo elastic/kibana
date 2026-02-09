@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
@@ -322,7 +322,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   shipper:
     enabled: false
   */
-  const configJs = output?.config_yaml ? load(output?.config_yaml) : {};
+  const configJs = output?.config_yaml ? parse(output?.config_yaml) : {};
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
   const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);

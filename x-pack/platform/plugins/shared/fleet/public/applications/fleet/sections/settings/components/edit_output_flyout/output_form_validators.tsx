@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -219,7 +219,7 @@ export function validateLogstashHosts(value: string[]) {
 
 export function validateYamlConfig(value: string) {
   try {
-    load(value);
+    parse(value);
     return;
   } catch (error) {
     return [

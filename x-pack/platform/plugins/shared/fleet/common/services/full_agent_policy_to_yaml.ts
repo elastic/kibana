@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { dump } from 'js-yaml';
+import type { Pair, stringify } from 'yaml';
+import { Document, isScalar } from 'yaml';
 
 import type { FullAgentPolicy } from '../types';
 
@@ -30,13 +31,11 @@ const POLICY_KEYS_ORDER = [
 
 export const fullAgentPolicyToYaml = (
   policy: FullAgentPolicy,
-  toYaml: typeof dump,
+  toYaml: typeof stringify,
   apiKey?: string
 ): string => {
-  const yaml = toYaml(policy, {
-    skipInvalid: true,
-    sortKeys: _sortYamlKeys,
-  });
+  const doc = new Document(policy, { sortMapEntries: _sortYamlKeys, strict: false });
+  const yaml = doc.toString();
   const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;
 
   if (!policy?.secret_references?.length) return formattedYml;
@@ -44,7 +43,15 @@ export const fullAgentPolicyToYaml = (
   return _formatSecrets(policy.secret_references, formattedYml);
 };
 
-export function _sortYamlKeys(keyA: string, keyB: string) {
+export function _sortYamlKeys(a: Pair, b: Pair): number {
+  if (!isScalar(a.key) || !isScalar(b.key)) {
+    return 0;
+  }
+  const keyA = a.key.value;
+  const keyB = b.key.value;
+  if (typeof keyA !== 'string' || typeof keyB !== 'string') {
+    return 0;
+  }
   const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
   const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
   if (indexA >= 0 && indexB < 0) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
@@ -30,7 +30,7 @@ export const zodStringWithDurationValidation = z
 export const zodStringWithYamlValidation = z.string().refine(
   (val) => {
     try {
-      load(val);
+      parse(val);
       return true;
     } catch (error) {
       return false;

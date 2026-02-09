@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { omit, pick } from 'lodash';
 
@@ -120,7 +120,7 @@ export function usePackagePolicyWithRelatedData(
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load
+          parse
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -316,7 +316,7 @@ export function usePackagePolicyWithRelatedData(
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
                 packageData.item,
-                load
+                parse
               );
               setValidationResults(newValidationResults);
 
