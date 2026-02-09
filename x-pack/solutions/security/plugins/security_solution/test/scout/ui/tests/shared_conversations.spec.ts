@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from './fixtures';
+import { test } from '../fixtures';
 
 // TODO: Skipped due to https://github.com/elastic/kibana/issues/235416
 // The entire shared_conversations suite is skipped in Cypress as well.

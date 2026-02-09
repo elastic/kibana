@@ -6,15 +6,15 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { test } from './fixtures';
+import { test } from '../fixtures';
 import {
   createAzureConnector,
   createConversation,
   deleteConnectors,
   deleteConversations,
   deletePrompts,
-} from './common/api_helpers';
-import { waitForPageReady } from './common/constants';
+} from '../common/api_helpers';
+import { waitForPageReady } from '../common/constants';
 
 const mockTimelineQuery = 'host.risk.keyword: "high"';
 

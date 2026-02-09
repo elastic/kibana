@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { test } from './fixtures';
-import { waitForPageReady } from './common/constants';
+import { test } from '../fixtures';
+import { waitForPageReady } from '../common/constants';
 
 test.describe('App Features for Security Complete', { tag: ['@svlSecurity'] }, () => {
   test('should have AI Assistant available', async ({ browserAuth, page, pageObjects, kbnUrl }) => {
