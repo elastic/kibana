@@ -132,7 +132,7 @@ export const navigateToRule = (ruleName: string) => {
 export const loadRuleAlerts = (ruleName: string) => {
   navigateToRule(ruleName);
   cy.getBySel('ruleSwitch')
-    .should('have.attr', 'aria-checked')
+    .invoke('attr', 'aria-checked')
     .then((ariaChecked) => {
       if (ariaChecked === 'true') {
         // Rule is on - turn off first, then back on to refresh

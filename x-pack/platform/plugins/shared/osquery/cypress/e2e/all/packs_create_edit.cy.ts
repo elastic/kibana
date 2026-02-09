@@ -51,8 +51,6 @@ describe(
     let multipleMappingsSavedQueryId: string;
     let multipleMappingsSavedQueryName: string;
 
-    const PACK_NAME = 'Pack-name' + generateRandomStringName(1)[0];
-
     before(() => {
       loadSavedQuery().then((data) => {
         savedQueryId = data.saved_object_id;

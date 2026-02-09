@@ -291,7 +291,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       deleteAndConfirm('query');
     });
 
-    it.only('user can edit prebuilt saved query under pack', () => {
+    it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
       cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
