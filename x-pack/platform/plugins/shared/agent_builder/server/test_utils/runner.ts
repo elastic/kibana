@@ -144,6 +144,7 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
     getSkillDefinition: jest.fn(),
     listSkills: jest.fn(),
+    getRegistry: jest.fn(),
   };
 };
 
