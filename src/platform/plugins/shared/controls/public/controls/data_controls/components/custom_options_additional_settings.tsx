@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
-import { ControlSettingTooltipLabel } from '../../../control_group/components/control_setting_tooltip_label';
+import { ControlSettingTooltipLabel } from '../../../control_group/control_setting_tooltip_label';
 import { DataControlEditorStrings } from '../data_control_constants';
 
 import type { CustomOptionsComponentProps } from '../types';

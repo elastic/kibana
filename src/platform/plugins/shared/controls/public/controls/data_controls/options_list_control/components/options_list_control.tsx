@@ -27,7 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import { ConditionalLabelWrapper } from '../../../components';
+import { ConditionalLabelWrapper } from '../../../control_labels';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';

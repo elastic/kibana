@@ -15,11 +15,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiCanPinPanels, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import {
-  type PublishingSubject,
-  initializeStateManager,
-  titleComparators,
-} from '@kbn/presentation-publishing';
+import { type PublishingSubject, initializeStateManager } from '@kbn/presentation-publishing';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
@@ -29,13 +25,14 @@ import type { OptionsListComponentApi } from '../data_controls/options_list_cont
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { VariableControlsStrings } from './constants';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
 export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
-      const label$ = new BehaviorSubject<string | undefined>(initialState.title);
+      const labelManager = initializeLabelManager(initialState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
@@ -56,20 +53,17 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getComparators: () => {
           return {
             ...selectionComparators,
-            label: titleComparators.title,
+            ...defaultControlLabelComparators,
           };
         },
         onReset: (lastSaved) => {
           selections.reinitializeState(lastSaved);
-          label$.next(lastSaved?.title);
+          labelManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
-        label$,
-        setLabel: (label: string | undefined) => {
-          label$.next(label);
-        },
+        ...labelManager.api,
         ...unsavedChangesApi,
         ...selections.api,
         dataLoading$,
@@ -89,14 +83,14 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         onEdit: async () => {
           const nextState = {
             ...selections.getLatestState(),
-            title: label$.getValue(),
+            ...labelManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
           const onSaveControl = async (updatedState: ESQLControlState) => {
             selections.reinitializeState(updatedState);
-            label$.next(updatedState.title);
+            labelManager.reinitializeState(updatedState);
           };
           try {
             await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({

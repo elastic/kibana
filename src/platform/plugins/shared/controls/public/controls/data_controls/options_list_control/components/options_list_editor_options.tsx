@@ -14,7 +14,7 @@ import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
-import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
+import { ControlSettingTooltipLabel } from '../../../../control_group/control_setting_tooltip_label';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListStrings } from '../options_list_strings';
 import { CustomOptionsAdditionalSettings } from '../../components';

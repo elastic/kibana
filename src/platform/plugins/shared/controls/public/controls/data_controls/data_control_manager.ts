@@ -8,23 +8,24 @@
  */
 
 import { omit } from 'lodash';
-import { BehaviorSubject, combineLatest, merge, switchMap, tap, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
 
 import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { titleComparators, type StateComparators } from '@kbn/presentation-publishing';
+import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
-  title: titleComparators.title,
+  ...defaultControlLabelComparators,
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => (a ?? true) === (b ?? true),
@@ -66,10 +67,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const label$ = new BehaviorSubject<string | undefined>(state.title);
+  const labelManager = initializeLabelManager(state);
 
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
-    omit(state, 'title'), // we use the term `label` and manage it ourselves to prevent default title handling
+    omit(state, 'title'), // this is handled via the label manager
     defaultDataControlState,
     defaultDataControlComparators
   );
@@ -170,7 +171,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     // open the editor to get the new state
     openDataControlEditor<DataControlState & EditorState>({
       initialState: {
-        title: label$.getValue(),
+        ...labelManager.getLatestState(),
         ...dataControlStateManager.getLatestState(),
         ...editorStateManager.getLatestState(),
       },
@@ -179,7 +180,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       initialDefaultPanelTitle: defaultTitle$.getValue(),
       parentApi,
       onUpdate: (newState) => {
-        label$.next(newState.title);
+        labelManager.reinitializeState(newState);
         dataControlStateManager.reinitializeState(newState);
         editorStateManager.reinitializeState(newState);
       },
@@ -203,10 +204,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   return {
     api: {
       ...dataControlStateManager.api,
-      label$,
-      setLabel: (newLabel: string | undefined) => {
-        label$.next(newLabel);
-      },
+      ...labelManager.api,
       dataLoading$,
       blockingError$,
       setBlockingError,
@@ -237,17 +235,14 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(false);
       },
     },
-    anyStateChange$: merge(
-      dataControlStateManager.anyStateChange$,
-      label$.pipe(map(() => undefined))
-    ),
+    anyStateChange$: merge(dataControlStateManager.anyStateChange$, labelManager.anyStateChange$),
     getLatestState: () => ({
+      ...labelManager.getLatestState(),
       ...dataControlStateManager.getLatestState(),
-      title: label$.getValue(),
     }),
     reinitializeState: (newState) => {
       dataControlStateManager.reinitializeState(newState);
-      label$.next(newState?.title);
+      labelManager.reinitializeState(newState);
     },
   };
 };

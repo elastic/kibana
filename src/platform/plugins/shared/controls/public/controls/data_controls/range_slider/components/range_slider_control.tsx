@@ -16,7 +16,7 @@ import type { RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
-import { ConditionalLabelWrapper } from '../../../components';
+import { ConditionalLabelWrapper } from '../../../control_labels';
 
 export interface Props {
   compressed: boolean;

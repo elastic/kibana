@@ -33,10 +33,7 @@ import {
   apiHasSections,
   initializeUnsavedChanges,
 } from '@kbn/presentation-containers';
-import {
-  useStateFromPublishingSubject,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { type PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
