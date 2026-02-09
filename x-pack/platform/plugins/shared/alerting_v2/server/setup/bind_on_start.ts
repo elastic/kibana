@@ -5,22 +5,35 @@
  * 2.0.
  */
 
+import { Logger, OnStart, PluginStart } from '@kbn/core-di';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Logger, OnStart } from '@kbn/core-di';
+import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
-import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import type { AlertingServerStartDependencies } from '../types';
+import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
-  bind(OnStart).toConstantValue((container) => {
+  bind(OnStart).toConstantValue(async (container) => {
     const resourceManager = container.get(ResourceManager);
     const logger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
+    const taskManager = container.get(
+      PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
+    );
 
     initializeResources({
       logger,
       resourceManager,
       esClient,
+    });
+
+    scheduleDispatcherTask({ taskManager }).catch((error) => {
+      logger.error({
+        error,
+        code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
+        type: 'DispatcherTask',
+      });
     });
   });
 }

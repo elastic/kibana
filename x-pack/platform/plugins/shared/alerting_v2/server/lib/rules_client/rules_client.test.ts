@@ -5,19 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuthenticatedUser } from '@kbn/core/server';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
+import type { CreateRuleParams, UpdateRuleData } from './types';
+import type { UserService } from '../services/user_service/user_service';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
-
-import type { CreateRuleParams, UpdateRuleData } from './types';
+import { createUserService } from '../services/user_service/user_service.mock';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -37,11 +35,12 @@ describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
-  const security = securityMock.createStart();
+  let userService: UserService;
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
 
   const baseCreateData: CreateRuleParams['data'] = {
     name: 'rule-1',
+    kind: 'alert',
     tags: [],
     schedule: { custom: '1m' },
     enabled: true,
@@ -60,13 +59,7 @@ describe('RulesClient', () => {
 
     // Default space
     http.basePath.get.mockReturnValue('/s/space-1');
-
-    const user: AuthenticatedUser = mockAuthenticatedUser({
-      username: 'elastic',
-      profile_uid: 'elastic_profile_uid',
-    });
-    security.authc.getCurrentUser.mockReturnValue(user);
-
+    ({ userService } = createUserService());
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
       type: RULE_SAVED_OBJECT_TYPE,
@@ -99,7 +92,7 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
-    return new RulesClient(request, http, rulesSavedObjectService, taskManager, security);
+    return new RulesClient(request, http, rulesSavedObjectService, taskManager, userService);
   }
 
   describe('createRule', () => {
@@ -122,7 +115,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           name: 'rule-1',
           enabled: false,
-          createdBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
         }),
         { id: 'rule-id-1', overwrite: false }
       );
@@ -134,8 +127,8 @@ describe('RulesClient', () => {
         expect.objectContaining({
           id: 'rule-id-1',
           enabled: false,
-          createdBy: 'elastic',
-          updatedBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
+          updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -246,9 +239,9 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseCreateData,
         enabled: true,
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -283,9 +276,9 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseCreateData,
         enabled: false,
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -316,9 +309,9 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseCreateData,
         enabled: false,
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -348,9 +341,9 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseCreateData,
         enabled: true,
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -396,9 +389,9 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseCreateData,
         enabled: true,
-        createdBy: 'elastic',
+        createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: 'elastic',
+        updatedBy: 'elastic_profile_uid',
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
@@ -451,9 +444,9 @@ describe('RulesClient', () => {
           ...baseCreateData,
           name: 'rule-1',
           enabled: true,
-          createdBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
-          updatedBy: 'elastic',
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
       };
@@ -466,9 +459,9 @@ describe('RulesClient', () => {
           ...baseCreateData,
           name: 'rule-2',
           enabled: false,
-          createdBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
-          updatedBy: 'elastic',
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
       };

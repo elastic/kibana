@@ -36,7 +36,6 @@
     "@kbn/esql-types",
     "@kbn/yaml-rule-editor",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
@@ -50,7 +49,10 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/test",
     "@kbn/esql-language",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-user-profile-server"
   ],
   "exclude": ["target/**/*"]
 }
