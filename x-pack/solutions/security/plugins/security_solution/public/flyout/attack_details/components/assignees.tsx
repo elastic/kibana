@@ -122,16 +122,14 @@ export const Assignees = memo(() => {
   );
 
   if (!showAssignees) {
-    return (
-      <div data-test-subj="attack-details-flyout-header-assignees-empty">{getEmptyTagValue()}</div>
-    );
+    return <div data-test-subj="attackDetailsFlyoutHeaderAssigneesEmpty">{getEmptyTagValue()}</div>;
   }
 
   return (
     <EuiFlexGroup
       gutterSize="none"
       responsive={false}
-      data-test-subj="attack-details-flyout-header-assignees"
+      data-test-subj="attackDetailsFlyoutHeaderAssignees"
     >
       {assignedUsers && assignedUsers.length > 0 && (
         <EuiFlexItem grow={false}>
