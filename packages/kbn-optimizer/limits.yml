@@ -26,11 +26,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-<<<<<<< HEAD
-  core: 556319
-=======
   core: 556473
->>>>>>> 300eb84919d2a4a7a1331deadd6a9635bd36f6fb
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
