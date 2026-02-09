@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - console
+    - dashboard
     - cloud_security_posture
     - data_views
     - discover_enhanced
@@ -25,6 +26,7 @@ plugins:
     - streams
     - streams_app
     - transform
+    - dashboard
     - workflows_extensions
   disabled:
 
