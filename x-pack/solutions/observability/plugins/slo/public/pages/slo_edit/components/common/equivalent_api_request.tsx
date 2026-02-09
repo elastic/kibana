@@ -57,7 +57,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         ownFocus
         onClose={() => setIsFlyoutVisible(false)}
         session="start"
-        size="s"
+        size={620}
         resizable
       >
         <EuiFlyoutHeader hasBorder>

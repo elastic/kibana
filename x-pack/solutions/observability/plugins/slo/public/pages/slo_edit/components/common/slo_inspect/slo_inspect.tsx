@@ -97,7 +97,7 @@ export function SLOInspect({ slo, disabled }: Props) {
         onClose={closeFlyout}
         aria-labelledby="flyoutTitle"
         session="start"
-        size="s"
+        size={620}
         resizable
       >
         <EuiFlyoutHeader hasBorder>

@@ -222,7 +222,7 @@ export default function CreateSLOFormFlyout({
       <EuiFlyout
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        size="m"
+        size={620}
         resizable
         ownFocus
         session="start"
