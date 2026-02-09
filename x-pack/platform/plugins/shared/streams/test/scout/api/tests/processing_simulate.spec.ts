@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
@@ -54,7 +54,7 @@ apiTest.describe(
         );
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('documents');
+        expect(body.documents).toBeDefined();
         expect(Array.isArray(body.documents)).toBe(true);
         expect(body.documents).toHaveLength(2);
       }
@@ -160,7 +160,7 @@ apiTest.describe(
 
         // Should return 200 even if pattern doesn't match (processor reports failure)
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('documents');
+        expect(body.documents).toBeDefined();
       }
     );
 

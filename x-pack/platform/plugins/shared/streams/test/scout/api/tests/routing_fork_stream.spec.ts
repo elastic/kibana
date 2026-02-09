@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
@@ -42,7 +42,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
 
         // Verify the stream was created
         const { statusCode: getStatus, body: getBody } = await apiClient.get(
@@ -54,7 +54,7 @@ apiTest.describe(
         );
 
         expect(getStatus).toBe(200);
-        expect(getBody.stream).toHaveProperty('name', childStreamName);
+        expect(getBody.stream.name).toBe(childStreamName);
       }
     );
 
@@ -73,7 +73,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest(
@@ -93,7 +93,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -114,7 +114,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -135,7 +135,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -156,7 +156,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -385,7 +385,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support OR condition', async ({ apiClient, samlAuth }) => {
@@ -408,7 +408,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support NOT condition', async ({ apiClient, samlAuth }) => {
@@ -428,7 +428,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support nested AND/OR conditions', async ({ apiClient, samlAuth }) => {
@@ -456,7 +456,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support always condition', async ({ apiClient, samlAuth }) => {
@@ -474,7 +474,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support never condition (auto-disables)', async ({ apiClient, samlAuth }) => {
@@ -524,7 +524,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     // Error handling

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
@@ -108,8 +108,8 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       const getResult = await getStream(apiClient, cookieHeader, testStream);
       expect(getResult.success, getResult.error).toBe(true);
 
-      expect(getResult.stream!.stream.ingest).toHaveProperty('lifecycle');
-      expect(getResult.stream!.stream.ingest.lifecycle).toHaveProperty('inherit');
+      expect(getResult.stream!.stream.ingest.lifecycle).toBeDefined();
+      expect(getResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
     }
   );
 
@@ -129,8 +129,8 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       const getResult = await getStream(apiClient, cookieHeader, testStream);
       expect(getResult.success, getResult.error).toBe(true);
 
-      expect(getResult.stream).toHaveProperty('effective_lifecycle');
-      expect(getResult.stream!.effective_lifecycle).toHaveProperty('from');
+      expect(getResult.stream!.effective_lifecycle).toBeDefined();
+      expect(getResult.stream!.effective_lifecycle.from).toBeDefined();
     }
   );
 
@@ -163,12 +163,12 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse).toHaveStatusCode(200);
 
     const verifyResult = await getStream(apiClient, cookieHeader, testStream);
     expect(verifyResult.success, verifyResult.error).toBe(true);
 
-    expect(verifyResult.stream!.stream.ingest.lifecycle).toHaveProperty('dsl');
+    expect(verifyResult.stream!.stream.ingest.lifecycle.dsl).toBeDefined();
     expect(verifyResult.stream!.stream.ingest.lifecycle.dsl.data_retention).toBe('7d');
   });
 
@@ -201,7 +201,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse).toHaveStatusCode(200);
 
     const verifyResult = await getStream(apiClient, cookieHeader, testStream);
     expect(verifyResult.success, verifyResult.error).toBe(true);
@@ -237,7 +237,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse).toHaveStatusCode(200);
   });
 
   // Test: Update stream with DSL retention using hours unit
@@ -271,7 +271,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
         responseType: 'json',
       });
 
-      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse).toHaveStatusCode(200);
     }
   );
 
@@ -288,7 +288,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
 
     const initialResult = await getStream(apiClient, cookieHeader, testStream);
     expect(initialResult.success, initialResult.error).toBe(true);
-    expect(initialResult.stream!.stream.ingest.lifecycle).toHaveProperty('inherit');
+    expect(initialResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
 
     const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
       headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
@@ -305,13 +305,13 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse).toHaveStatusCode(200);
 
     const verifyResult = await getStream(apiClient, cookieHeader, testStream);
     expect(verifyResult.success, verifyResult.error).toBe(true);
 
-    expect(verifyResult.stream!.stream.ingest.lifecycle).toHaveProperty('dsl');
-    expect(verifyResult.stream!.stream.ingest.lifecycle).not.toHaveProperty('inherit');
+    expect(verifyResult.stream!.stream.ingest.lifecycle.dsl).toBeDefined();
+    expect(verifyResult.stream!.stream.ingest.lifecycle.inherit).toBeUndefined();
   });
 
   // Test: Switch from DSL back to inherited lifecycle
@@ -343,7 +343,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       },
       responseType: 'json',
     });
-    expect(dslUpdateResponse.statusCode).toBe(200);
+    expect(dslUpdateResponse).toHaveStatusCode(200);
 
     const dslResult = await getStream(apiClient, cookieHeader, testStream);
     expect(dslResult.success, dslResult.error).toBe(true);
@@ -362,13 +362,13 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(inheritUpdateResponse.statusCode).toBe(200);
+    expect(inheritUpdateResponse).toHaveStatusCode(200);
 
     const verifyResult = await getStream(apiClient, cookieHeader, testStream);
     expect(verifyResult.success, verifyResult.error).toBe(true);
 
-    expect(verifyResult.stream!.stream.ingest.lifecycle).toHaveProperty('inherit');
-    expect(verifyResult.stream!.stream.ingest.lifecycle).not.toHaveProperty('dsl');
+    expect(verifyResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
+    expect(verifyResult.stream!.stream.ingest.lifecycle.dsl).toBeUndefined();
   });
 
   // Test: Modify existing DSL retention value
@@ -400,7 +400,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       },
       responseType: 'json',
     });
-    expect(initialUpdateResponse.statusCode).toBe(200);
+    expect(initialUpdateResponse).toHaveStatusCode(200);
 
     const stream7dResult = await getStream(apiClient, cookieHeader, testStream);
     expect(stream7dResult.success, stream7dResult.error).toBe(true);
@@ -422,7 +422,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       responseType: 'json',
     });
 
-    expect(modifyUpdateResponse.statusCode).toBe(200);
+    expect(modifyUpdateResponse).toHaveStatusCode(200);
 
     const verifyResult = await getStream(apiClient, cookieHeader, testStream);
     expect(verifyResult.success, verifyResult.error).toBe(true);
@@ -446,10 +446,10 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
     });
 
     expect(statusCode).toBe(200);
-    expect(body).toHaveProperty('ingest');
-    expect(body.ingest).toHaveProperty('lifecycle');
-    expect(body.ingest).toHaveProperty('processing');
-    expect(body.ingest).toHaveProperty('wired');
+    expect(body.ingest).toBeDefined();
+    expect(body.ingest.lifecycle).toBeDefined();
+    expect(body.ingest.processing).toBeDefined();
+    expect(body.ingest.wired).toBeDefined();
   });
 
   // Test: Update only lifecycle without affecting other ingest settings
@@ -484,7 +484,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
         },
         responseType: 'json',
       });
-      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse).toHaveStatusCode(200);
 
       const verifyResult = await getStream(apiClient, cookieHeader, testStream);
       expect(verifyResult.success, verifyResult.error).toBe(true);
@@ -604,7 +604,7 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       },
       responseType: 'json',
     });
-    expect(updateParentResponse.statusCode).toBe(200);
+    expect(updateParentResponse).toHaveStatusCode(200);
 
     // Create child stream (forked from parent)
     const forkChildResponse = await apiClient.post(`api/streams/${parentStream}/_fork`, {
@@ -616,12 +616,12 @@ apiTest.describe('Stream lifecycle - retention API', { tag: ['@ess', '@svlOblt']
       },
       responseType: 'json',
     });
-    expect(forkChildResponse.statusCode).toBe(200);
+    expect(forkChildResponse).toHaveStatusCode(200);
 
     const childResult = await getStream(apiClient, cookieHeader, childStream);
     expect(childResult.success, childResult.error).toBe(true);
 
-    expect(childResult.stream!.stream.ingest.lifecycle).toHaveProperty('inherit');
+    expect(childResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
     expect(childResult.stream!.effective_lifecycle.from).toBe(parentStream);
   });
 });
