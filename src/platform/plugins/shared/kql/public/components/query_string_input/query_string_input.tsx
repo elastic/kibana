@@ -107,7 +107,7 @@ export interface QueryStringInputProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
-  persistedLog?: PersistedLog;
+  persistedLog?: PersistedLog<Query['query']>;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
   disableLanguageSwitcher?: boolean;
@@ -200,7 +200,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
 
   public inputRef: HTMLTextAreaElement | null = null;
 
-  private persistedLog: PersistedLog | undefined;
+  private persistedLog: PersistedLog<Query['query']> | undefined;
   private abortController?: AbortController;
   private fetchIndexPatternsAbortController?: AbortController;
 
@@ -317,6 +317,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     }
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
+      if (recentQuery == null) return false;
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
       return recentQueryString !== '' && recentQueryString.includes(query);
     });

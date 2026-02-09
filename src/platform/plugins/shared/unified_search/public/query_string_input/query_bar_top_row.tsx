@@ -355,7 +355,7 @@ export const QueryBarTopRow = React.memo(
     const queryRef = useRef<Query | QT | undefined>(props.query);
     queryRef.current = props.query;
 
-    const persistedLog: PersistedLog | undefined = React.useMemo(
+    const persistedLog: PersistedLog<Query['query']> | undefined = React.useMemo(
       () =>
         queryLanguage && uiSettings && storage && appName
           ? getQueryLog(uiSettings!, storage, appName, queryLanguage)

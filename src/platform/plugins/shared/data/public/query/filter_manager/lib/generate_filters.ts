@@ -29,11 +29,11 @@ import type { FilterManager } from '../filter_manager';
 function getExistingFilter(
   appFilters: Filter[],
   fieldName: string,
-  value: any
+  value: unknown
 ): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  return _.find(appFilters, function (filter) {
-    if (!filter) return;
+  return _.find(appFilters, function (filter): boolean {
+    if (!filter) return false;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
       return filter.query.exists!.field === value;
@@ -54,7 +54,9 @@ function getExistingFilter(
         getFilterField(filter) === fieldName && _.isEqual(filter.query.range[fieldName], value)
       );
     }
-  }) as any;
+
+    return false;
+  });
 }
 
 function updateExistingFilter(existingFilter: Filter, negate: boolean) {
@@ -70,7 +72,7 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
  *
  * @param {FilterManager} filterManager - The active filter manager to lookup for existing filters
  * @param {Field | string} field - The field for which filters should be generated
- * @param {any} values - One or more values to filter for.
+ * @param {unknown} values - One or more values to filter for.
  * @param {string} operation - "-" to create a negated filter
  * @param {string} index - Index string to generate filters for
  *
@@ -79,11 +81,11 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
 export function generateFilters(
   filterManager: FilterManager,
   field: DataViewFieldBase | string,
-  values: any,
+  values: unknown,
   operation: string,
   index: DataViewBase
 ): Filter[] {
-  values = Array.isArray(values) ? _.uniq(values) : [values];
+  const valuesArr = Array.isArray(values) ? _.uniq(values) : [values];
 
   const fieldObj = (_.isObject(field) ? field : { name: field }) as DataViewFieldBase;
   const fieldName = fieldObj.name;
@@ -148,7 +150,7 @@ export function generateFilters(
     return value;
   }
 
-  return _.chain(values)
+  return _.chain(valuesArr)
     .map(castValue)
     .map((value) => {
       const existing = getExistingFilter(appFilters, fieldName, value);

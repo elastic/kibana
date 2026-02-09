@@ -36,7 +36,7 @@ export interface ValueClickDataContext {
     table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
     column: number;
     row: number;
-    value: any;
+    value: unknown;
   }>;
   timeFieldName?: string;
   negate?: boolean;
@@ -67,7 +67,7 @@ const getOtherBucketFilterTerms = (
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms: any[] = rows.map((row) => row[table.columns[columnIndex].id]);
+  const terms: unknown[] = rows.map((row) => row[table.columns[columnIndex].id]);
 
   return [
     ...new Set(
@@ -107,14 +107,14 @@ export const createFilter = async (
   }
   const column = table.columns[columnIndex];
   const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
-    .sourceParams as any;
+    .sourceParams as Record<string, unknown>;
   const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
-    await getIndexPatterns().get(indexPatternId),
+    await getIndexPatterns().get(indexPatternId as string),
     [aggConfigParams as AggConfigSerialized]
   );
   const aggConfig = aggConfigsInstance.aggs[0];
   let filter: Filter[] = [];
-  const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+  const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -123,9 +123,9 @@ export const createFilter = async (
     aggConfig.params.otherBucket
   ) {
     const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
-    filter = aggConfig.createFilter(value, { terms });
+    filter = aggConfig.createFilter(String(value), { terms });
   } else {
-    filter = aggConfig.createFilter(value);
+    filter = aggConfig.createFilter(String(value));
   }
 
   if (!filter) {

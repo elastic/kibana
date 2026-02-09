@@ -76,7 +76,7 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -622,8 +622,11 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val(this) : val;
-    if (val == null || !key) return;
+    // Resolve function values (e.g. filter field can be a function).
+    // TypeScript can't narrow generic type parameters across switch cases,
+    // so we work with the resolved value typed as unknown.
+    const resolved: unknown = typeof val === 'function' ? (val as () => unknown)() : val;
+    if (resolved == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
       data[rootKey] = value;
@@ -645,12 +648,17 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(
+            resolved as Filter | Filter[]
+          )
         );
       case 'nonHighlightingFilters':
-        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
+        return addToRoot(
+          'nonHighlightingFilters',
+          (data.nonHighlightingFilters ?? []).concat(resolved as Filter[])
+        );
       case 'query':
-        return addToRoot(key, (data.query ?? []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(resolved as Query | AggregateQuery));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -658,40 +666,42 @@ export class SearchSource {
         // the fields API will return all fields, and all scripted fields will be returned.
         // NOTE: While the fields API supports wildcards within names, e.g. `user.*`
         //       scripted fields won't be considered for this.
-        return addToBody('fields', val);
+        return addToBody('fields', resolved);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
+        const fields = [
+          ...new Set((data.fieldsFromSource || []).concat(resolved as estypes.Fields)),
+        ];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
       case 'highlightAll':
-        return key && data[key] == null && addToRoot(key, val);
+        return key && data[key] == null && addToRoot(key, resolved);
       case 'searchAfter':
-        return addToBody('search_after', val);
+        return addToBody('search_after', resolved);
       case 'trackTotalHits':
-        return addToBody('track_total_hits', val);
+        return addToBody('track_total_hits', resolved);
       case 'source':
-        return addToBody('_source', val);
+        return addToBody('_source', resolved);
       case 'sort':
         const sort = normalizeSortRequest(
-          val,
+          resolved as EsQuerySortValue | EsQuerySortValue[],
           this.getField('index'),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       case 'pit':
-        return addToRoot(key, val);
+        return addToRoot(key, resolved);
       case 'aggs':
-        if ((val as unknown) instanceof AggConfigs) {
-          return addToBody('aggs', val.toDsl());
+        if (resolved instanceof AggConfigs) {
+          return addToBody('aggs', resolved.toDsl());
         } else {
-          return addToBody('aggs', val);
+          return addToBody('aggs', resolved);
         }
       case 'timezone':
-        return addToRoot(key, val);
+        return addToRoot(key, resolved);
       default:
-        return addToBody(key, val);
+        return addToBody(key, resolved);
     }
   }
 
@@ -1146,6 +1156,7 @@ export class SearchSource {
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
+      highlight: searchSourceFields.highlight as SerializedSearchSourceFields['highlight'],
     };
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
