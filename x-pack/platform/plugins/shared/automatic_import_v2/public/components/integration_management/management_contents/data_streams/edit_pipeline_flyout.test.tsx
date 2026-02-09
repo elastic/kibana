@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EditPipelineFlyout, getIconFromType } from './edit_pipeline_flyout';
+import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import type { DataStreamResponse } from '../../../../../common';
 import type { GetDataStreamResultsResponse } from '../../../../common/lib/api';
 
@@ -331,63 +331,5 @@ describe('EditPipelineFlyout', () => {
 
       expect(tokenIcons.length).toBeGreaterThan(0);
     });
-  });
-});
-
-describe('getIconFromType', () => {
-  it('should return tokenString for string type', () => {
-    expect(getIconFromType('string')).toBe('tokenString');
-  });
-
-  it('should return tokenKeyword for keyword type', () => {
-    expect(getIconFromType('keyword')).toBe('tokenKeyword');
-  });
-
-  it('should return tokenNumber for number type', () => {
-    expect(getIconFromType('number')).toBe('tokenNumber');
-  });
-
-  it('should return tokenNumber for long type', () => {
-    expect(getIconFromType('long')).toBe('tokenNumber');
-  });
-
-  it('should return tokenNumber for float type', () => {
-    expect(getIconFromType('float')).toBe('tokenNumber');
-  });
-
-  it('should return tokenDate for date type', () => {
-    expect(getIconFromType('date')).toBe('tokenDate');
-  });
-
-  it('should return tokenGeo for ip type', () => {
-    expect(getIconFromType('ip')).toBe('tokenGeo');
-  });
-
-  it('should return tokenGeo for geo_point type', () => {
-    expect(getIconFromType('geo_point')).toBe('tokenGeo');
-  });
-
-  it('should return tokenQuestion for object type', () => {
-    expect(getIconFromType('object')).toBe('tokenQuestion');
-  });
-
-  it('should return tokenNested for nested type', () => {
-    expect(getIconFromType('nested')).toBe('tokenNested');
-  });
-
-  it('should return tokenBoolean for boolean type', () => {
-    expect(getIconFromType('boolean')).toBe('tokenBoolean');
-  });
-
-  it('should return tokenQuestion for undefined type', () => {
-    expect(getIconFromType(undefined)).toBe('tokenQuestion');
-  });
-
-  it('should return tokenQuestion for null type', () => {
-    expect(getIconFromType(null)).toBe('tokenQuestion');
-  });
-
-  it('should return tokenQuestion for unknown type', () => {
-    expect(getIconFromType('unknown')).toBe('tokenQuestion');
   });
 });

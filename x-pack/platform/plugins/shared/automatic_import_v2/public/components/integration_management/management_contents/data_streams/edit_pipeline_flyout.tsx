@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps, EuiTokenProps } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -30,6 +30,7 @@ import type { DataStreamResponse } from '../../../../../common';
 import { useGetDataStreamResults } from '../../../../common';
 import { useUIState } from '../../contexts';
 import * as i18n from './translations';
+import { getIconFromType, flattenPipelineObject } from './utils';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
@@ -42,66 +43,6 @@ interface TableRow {
   value: string;
   type: string;
 }
-
-export const getIconFromType = (type: string | null | undefined): EuiTokenProps['iconType'] => {
-  switch (type) {
-    case 'string':
-      return 'tokenString';
-    case 'keyword':
-      return 'tokenKeyword';
-    case 'number':
-    case 'long':
-      return 'tokenNumber';
-    case 'date':
-      return 'tokenDate';
-    case 'ip':
-    case 'geo_point':
-      return 'tokenGeo';
-    case 'object':
-      return 'tokenQuestion';
-    case 'float':
-      return 'tokenNumber';
-    case 'nested':
-      return 'tokenNested';
-    case 'boolean':
-      return 'tokenBoolean';
-    default:
-      return 'tokenQuestion';
-  }
-};
-
-const getFieldType = (value: unknown): string => {
-  if (value === null || value === undefined) return 'null';
-  if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
-  if (typeof value === 'boolean') return 'boolean';
-  if (Array.isArray(value)) return 'nested';
-  if (typeof value === 'object') return 'object';
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
-  return 'string';
-};
-
-const flattenPipelineObject = (
-  obj: Record<string, unknown>,
-  parentKey = ''
-): Array<{ field: string; value: string; type: string }> => {
-  const result: Array<{ field: string; value: string; type: string }> = [];
-
-  for (const [key, value] of Object.entries(obj)) {
-    const fieldName = parentKey ? `${parentKey}.${key}` : key;
-
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      result.push(...flattenPipelineObject(value as Record<string, unknown>, fieldName));
-    } else {
-      result.push({
-        field: fieldName,
-        value: Array.isArray(value) ? JSON.stringify(value) : String(value ?? ''),
-        type: getFieldType(value),
-      });
-    }
-  }
-
-  return result;
-};
 
 export const EditPipelineFlyout = ({
   integrationId,
