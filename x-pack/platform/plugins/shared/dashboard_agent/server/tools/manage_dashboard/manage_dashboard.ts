@@ -394,7 +394,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
                 version: attachment?.current_version ?? 1,
                 dashboardAttachment: {
                   id: attachment?.id,
-                  data: {
+                  content: {
                     title: input.data.title,
                     description: input.data.description,
                     markdownContent: input.data.markdownContent ?? '',

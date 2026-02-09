@@ -37,22 +37,28 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
 export type DashboardResult = ToolResultMixin<
   ToolResultType.dashboard,
   {
-    /** Dashboard attachment ID for future modifications */
-    dashboardAttachmentId: string;
     /** Current version of the dashboard attachment */
     version: number;
-    /** Dashboard URL */
-    url: string;
-    /** Dashboard title */
-    title: string;
-    /** Dashboard description */
-    description: string;
-    /** Markdown content for the summary panel */
-    markdownContent: string;
-    /** Number of panels in the dashboard */
-    panelCount: number;
-    /** Array of visualization attachment IDs */
-    visualizationIds: string[];
+    /** Dashboard attachment data */
+    dashboardAttachment: {
+      id?: string;
+      content: {
+        title?: string;
+        description?: string;
+        markdownContent: string;
+        panels: Array<{
+          type: string;
+          panelId: string;
+          title?: string;
+        }>;
+      };
+    };
+    /** Failures encountered during dashboard creation/update */
+    failures?: Array<{
+      type: string;
+      identifier: string;
+      error: string;
+    }>;
   }
 >;
 
