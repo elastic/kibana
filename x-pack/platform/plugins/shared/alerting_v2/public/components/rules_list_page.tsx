@@ -193,7 +193,11 @@ export const RulesListPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-rule" onClick={() => history.push('/create')}>
+          <EuiButton
+            key="create-rule"
+            data-test-subj="createRuleButton"
+            onClick={() => history.push('/create')}
+          >
             <FormattedMessage
               id="xpack.alertingV2.rulesList.createRuleButton"
               defaultMessage="Create rule"

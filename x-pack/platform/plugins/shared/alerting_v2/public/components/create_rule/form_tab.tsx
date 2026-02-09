@@ -21,12 +21,12 @@ import { QueryEditor } from './query_editor';
 import { RuleFooter } from './rule_footer';
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
-  name: 'Example rule',
+  name: '',
   tags: [],
-  schedule: { custom: '1m' },
+  schedule: { custom: '5m' },
   enabled: true,
-  query: 'FROM logs-* | LIMIT 1',
-  timeField: '@timestamp',
+  query: '',
+  timeField: '',
   lookbackWindow: '5m',
   groupingKey: [],
 };
@@ -35,7 +35,9 @@ interface FormTabProps {
   ruleId?: string;
   isEditing: boolean;
   onCancel: () => void;
-  onSaveSuccess: () => void;
+  saveRule: (formValues: any) => Promise<void>;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   services: {
     http: HttpStart;
     data: DataPublicPluginStart;
@@ -56,19 +58,20 @@ export const FormTab: React.FC<FormTabProps> = ({
   ruleId,
   isEditing,
   onCancel,
-  onSaveSuccess,
+  saveRule,
+  isSubmitting,
+  setIsSubmitting,
   services,
 }) => {
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
     setValue,
     watch,
-    handleSubmit,
+    handleSubmit: handleSubmitForm,
     formState: { errors },
     reset,
   } = useForm<FormValues>({
@@ -156,14 +159,7 @@ export const FormTab: React.FC<FormTabProps> = ({
         return;
       }
 
-      // Save rule
-      if (isEditing && ruleId) {
-        await services.rulesApi.updateRule(ruleId, validated.data);
-      } else {
-        await services.rulesApi.createRule(validated.data);
-      }
-
-      onSaveSuccess();
+      await saveRule(validated.data);
     } catch (err) {
       setErrorTitle(
         <FormattedMessage
@@ -172,7 +168,6 @@ export const FormTab: React.FC<FormTabProps> = ({
         />
       );
       setError(getErrorMessage(err));
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -196,6 +191,7 @@ export const FormTab: React.FC<FormTabProps> = ({
             color="danger"
             iconType="error"
             announceOnMount
+            data-test-subj="createRuleErrorCallout"
           >
             {error}
           </EuiCallOut>
@@ -247,7 +243,7 @@ export const FormTab: React.FC<FormTabProps> = ({
       <EuiSpacer />
 
       <RuleFooter
-        onSave={handleSubmit(onSubmit)}
+        onSave={handleSubmitForm(onSubmit)}
         onCancel={onCancel}
         isSubmitting={isSubmitting}
         isEditing={isEditing}

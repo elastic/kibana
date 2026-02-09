@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { EuiForm, EuiPageHeader, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
@@ -29,7 +29,52 @@ export const CreateRulePage = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
 
-  const [selectedTabId, setSelectedTabId] = useState<'yaml' | 'form'>('yaml');
+  const [selectedTabId, setSelectedTabId] = useState<'yaml' | 'form'>('form');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const saveRule = useCallback(
+    async (formValues: any) => {
+      setIsSubmitting(true);
+      if (isEditing && ruleId) {
+        try {
+          await rulesApi.updateRule(ruleId, formValues);
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.alertingV2.createRule.editSuccessToast', {
+              defaultMessage: 'Rule successfully updated',
+            })
+          );
+          history.push('/');
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.alertingV2.createRule.editErrorToast', {
+              defaultMessage: 'Error updating rule',
+            }),
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      } else {
+        try {
+          await rulesApi.createRule(formValues);
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.alertingV2.createRule.createSuccessToast', {
+              defaultMessage: 'Rule successfully created',
+            })
+          );
+          history.push('/');
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.alertingV2.createRule.createErrorToast', {
+              defaultMessage: 'Error creating rule',
+            }),
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    },
+    [setIsSubmitting, isEditing, ruleId, rulesApi, notifications, history]
+  );
 
   // Set breadcrumbs
   useEffect(() => {
@@ -67,7 +112,9 @@ export const CreateRulePage = () => {
             ruleId={ruleId}
             isEditing={isEditing}
             onCancel={() => history.push('/')}
-            onSaveSuccess={() => history.push('/')}
+            saveRule={saveRule}
+            isSubmitting={isSubmitting}
+            setIsSubmitting={setIsSubmitting}
             services={{ http, rulesApi }}
           />
         ),
@@ -85,13 +132,27 @@ export const CreateRulePage = () => {
             ruleId={ruleId}
             isEditing={isEditing}
             onCancel={() => history.push('/')}
-            onSaveSuccess={() => history.push('/')}
+            saveRule={saveRule}
+            isSubmitting={isSubmitting}
+            setIsSubmitting={setIsSubmitting}
             services={{ http, data, dataViews, notifications, rulesApi }}
           />
         ),
       },
     ],
-    [ruleId, isEditing, history, http, rulesApi, data, dataViews, notifications]
+    [
+      saveRule,
+      isSubmitting,
+      setIsSubmitting,
+      ruleId,
+      isEditing,
+      history,
+      http,
+      rulesApi,
+      data,
+      dataViews,
+      notifications,
+    ]
   );
 
   return (

@@ -45,11 +45,13 @@ interface YamlTabProps {
   ruleId?: string;
   isEditing: boolean;
   onCancel: () => void;
-  onSaveSuccess: () => void;
   services: {
     http: HttpStart;
     rulesApi: RulesApi;
   };
+  saveRule: (formValues: any) => Promise<void>;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const getErrorMessage = (error: unknown): string => {
@@ -75,7 +77,9 @@ export const YamlTab: React.FC<YamlTabProps> = ({
   ruleId,
   isEditing,
   onCancel,
-  onSaveSuccess,
+  saveRule,
+  isSubmitting,
+  setIsSubmitting,
   services,
 }) => {
   const http = useService(CoreStart('http'));
@@ -85,7 +89,6 @@ export const YamlTab: React.FC<YamlTabProps> = ({
   const [yaml, setYaml] = useState(DEFAULT_RULE_YAML);
   const [error, setError] = useState<React.ReactNode | null>(null);
   const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const esqlCallbacks = useMemo<ESQLCallbacks>(
@@ -194,14 +197,7 @@ export const YamlTab: React.FC<YamlTabProps> = ({
         return;
       }
 
-      // Save rule
-      if (isEditing && ruleId) {
-        await services.rulesApi.updateRule(ruleId, validated.data);
-      } else {
-        await services.rulesApi.createRule(validated.data);
-      }
-
-      onSaveSuccess();
+      await saveRule(validated.data);
     } catch (err) {
       setErrorTitle(
         <FormattedMessage
@@ -210,7 +206,6 @@ export const YamlTab: React.FC<YamlTabProps> = ({
         />
       );
       setError(getErrorMessage(err));
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -234,6 +229,7 @@ export const YamlTab: React.FC<YamlTabProps> = ({
             color="danger"
             iconType="error"
             announceOnMount
+            data-test-subj="createRuleErrorCallout"
           >
             {error}
           </EuiCallOut>
