@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -68,7 +68,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
       await testBed.ingest('esql-dissect-append', docs);
       const esqlResult = await esql.queryOnIndex('esql-dissect-append', query);
 
-      expect(ingestResult[0]).toHaveProperty('field1', 'value1,value2');
+      expect(ingestResult[0]?.field1).toBe('value1,value2');
       expect(esqlResult.documentsWithoutKeywords[0]).toStrictEqual(
         expect.objectContaining({ field1: 'value1,value2' })
       );
@@ -152,11 +152,8 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
       await testBed.ingest('esql-dissect-source', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-dissect-source', query);
 
-      expect(ingestResult[0]).toHaveProperty('message', docs[0].message);
-      expect(esqlResult.documentsWithoutKeywordsOrdered[1]).toHaveProperty(
-        'message',
-        docs[0].message
-      );
+      expect(ingestResult[0]?.message).toBe(docs[0].message);
+      expect(esqlResult.documentsWithoutKeywordsOrdered[1]?.message).toBe(docs[0].message);
 
       const { order_id: _ingestOrderId, ...ingestDoc } = ingestResult[0];
       const { order_id: _esqlOrderId, ...esqlDoc } = esqlResult.documentsWithoutKeywordsOrdered[1];
