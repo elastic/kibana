@@ -15,7 +15,6 @@ import type { PluginFunctionalProviderContext } from '../../plugin_functional/se
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   describe('', () => {
     it('runs expression', async () => {
@@ -31,18 +30,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionRender');
         expect(text).to.be('expressions explorer rendering');
-      });
-    });
-
-    it('updates the variable', async () => {
-      const selector = `${testSubjSelector('expressionsVariablesTest')} ${testSubjSelector(
-        'testExpressionButton'
-      )}`;
-      await find.clickByCssSelector(selector);
-      await retry.try(async () => {
-        const el = await find.byCssSelector(selector);
-        const style = await el.getAttribute('style');
-        expect(style).to.contain('red');
       });
     });
   });

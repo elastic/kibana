@@ -15,11 +15,13 @@ import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
 export const getButtonRenderer = (core: CoreSetup) => {
+  console.log('GET BUTTON RENDERER');
   const buttonRenderer: ExpressionRenderDefinition<any> = {
     name: 'button',
     displayName: 'Button',
     reuseDomNode: true,
     async render(domNode, config, handlers) {
+      console.log('RENDER BUTTON');
       const [startServices] = await core.getStartServices();
       const buttonClick = () => {
         handlers.event({
