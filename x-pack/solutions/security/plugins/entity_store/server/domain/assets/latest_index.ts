@@ -16,5 +16,3 @@ export const getLatestEntitiesIndexName = (namespace: string) =>
     dataset: ENTITY_LATEST,
     namespace,
   });
-
-export const getEntityDefinitionId = (type: string, space: string) => `security_${type}_${space}`;
