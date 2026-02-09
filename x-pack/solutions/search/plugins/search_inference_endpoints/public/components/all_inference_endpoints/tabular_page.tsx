@@ -22,7 +22,7 @@ import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import * as i18n from '../../../common/translations';
 
-import { useFilteredTableData } from '../../hooks/use_filtered_table_data';
+import { useTableData } from '../../hooks/use_table_data';
 import type { FilterOptions } from './types';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
@@ -124,7 +124,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [setFilterOptions]
   );
 
-  const filteredTableData = useFilteredTableData(inferenceEndpoints, filterOptions, searchKey);
+  const tableData = useTableData(inferenceEndpoints, filterOptions, searchKey);
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
@@ -265,7 +265,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           <EuiInMemoryTable
             columns={tableColumns}
             itemId="inference_id"
-            items={filteredTableData}
+            items={tableData}
             pagination={{
               pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
             }}

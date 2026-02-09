@@ -16,7 +16,7 @@ import { getModelId } from '../utils/get_model_id';
  * Hook that filters inference endpoints based on provider, type, and search criteria.
  * Sorting and pagination are handled by EuiInMemoryTable.
  */
-export const useFilteredTableData = (
+export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   filterOptions: FilterOptions,
   searchKey: string
