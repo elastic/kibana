@@ -109,13 +109,6 @@ describe('PROMQL Validation', () => {
         ['Unknown index "unknown_*"']
       );
     });
-
-    test('unknown index and invalid duration are cumulative', () => {
-      promqlExpectErrors(
-        'PROMQL index=unknown_xyz step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5j]))',
-        ['Unknown index "unknown_xyz"', '[PROMQL] Invalid duration value "5j"']
-      );
-    });
   });
 
   describe('query semantics', () => {
@@ -172,28 +165,6 @@ describe('PROMQL Validation', () => {
 
     test('nested function return type is normalized for signature matching', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (quantile(0.5, vector(1)))', []);
-    });
-
-    test.each([
-      [
-        'invalid selector duration',
-        'PROMQL step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5j]))',
-        ['[PROMQL] Invalid duration value "5j"'],
-      ],
-      [
-        'invalid subquery range duration',
-        'PROMQL step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m])[5j:1m])',
-        ['[PROMQL] Invalid duration value "5j"'],
-      ],
-    ])('%s', (_title, query, expected) => {
-      promqlExpectErrors(query, expected);
-    });
-
-    test('invalid duration creates phantom selector with unknown column error', () => {
-      promqlExpectErrors(
-        'PROMQL step=5m start=?_tstart end=?_tend (rate(counterIntegerField[abc]) + rate(abc[5m]))',
-        ['[PROMQL] Invalid duration value "abc"', 'Unknown column "abc"', 'Unknown column "abc"']
-      );
     });
   });
 });
