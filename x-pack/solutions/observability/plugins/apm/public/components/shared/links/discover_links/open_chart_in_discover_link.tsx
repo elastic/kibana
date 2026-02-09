@@ -21,6 +21,7 @@ export function OpenChartInDiscoverLink({ dataTestSubj }: { dataTestSubj: string
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/transactions/view',
+    '/services/{serviceName}/errors',
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
     '/mobile-services/{serviceName}/transactions/view'
