@@ -11,7 +11,7 @@ import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
-  BaseOptionalFields,
+  RuleResponse,
   EndpointResponseAction,
   OsqueryResponseAction,
   ProcessesParams,
@@ -30,7 +30,7 @@ import {
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
-type RuleResponseActions = Pick<BaseOptionalFields, 'response_actions'>;
+type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
 
 export interface ValidateRuleResponseActionsOptions<
   T extends RuleResponseActions = RuleResponseActions
