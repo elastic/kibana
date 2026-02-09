@@ -84,7 +84,7 @@ const strings = {
 
 export interface MarkdownFooterProps {
   onCancel: () => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   isPreview?: boolean;
   cancelButtonRef: React.RefObject<HTMLButtonElement>;
   isSaveable?: boolean;
@@ -156,7 +156,7 @@ const SaveButton = ({
   disabled,
   isLoading,
 }: {
-  onSave: () => void;
+  onSave: () => Promise<void>;
   disabled?: boolean;
   isLoading?: boolean;
 }) => {
