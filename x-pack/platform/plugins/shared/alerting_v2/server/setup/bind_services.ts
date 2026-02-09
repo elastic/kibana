@@ -8,29 +8,31 @@
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
-import { DirectorService } from '../lib/director/director';
-import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
-import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { RulesClient } from '../lib/rules_client';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
 } from '../lib/services/query_service/tokens';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { DirectorService } from '../lib/director/director';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
+import { UserService } from '../lib/services/user_service/user_service';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
@@ -39,6 +41,7 @@ import {
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(UserService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 

@@ -11,7 +11,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
@@ -22,6 +21,8 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import type { UserServiceContract } from '../services/user_service/user_service';
+import { UserService } from '../services/user_service/user_service';
 import type {
   CreateRuleParams,
   FindRulesParams,
@@ -38,7 +39,7 @@ export class RulesClient {
     @inject(RulesSavedObjectService)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(PluginStart('security')) private readonly security: SecurityPluginStart
+    @inject(UserService) private readonly userService: UserServiceContract
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -46,10 +47,6 @@ export class RulesClient {
     const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
     const spaceId = space?.spaceId || 'default';
     return { spaceId };
-  }
-
-  private async getUserName(): Promise<string | null> {
-    return this.security.authc.getCurrentUser(this.request)?.username ?? null;
   }
 
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
@@ -62,7 +59,7 @@ export class RulesClient {
       );
     }
 
-    const username = await this.getUserName();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     const ruleAttributes: RuleSavedObjectAttributes = {
@@ -76,9 +73,9 @@ export class RulesClient {
       lookbackWindow: parsed.data.lookbackWindow,
       groupingKey: parsed.data.groupingKey,
       stateTransition: parsed.data.stateTransition,
-      createdBy: username,
+      createdBy: userProfileUid,
       createdAt: nowIso,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
@@ -133,7 +130,7 @@ export class RulesClient {
       );
     }
 
-    const username = await this.getUserName();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;
@@ -160,7 +157,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       ...parsed.data,
-      updatedBy: username,
+      updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
