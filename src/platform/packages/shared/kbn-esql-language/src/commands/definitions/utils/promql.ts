@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ISuggestionItem } from '../../registry/types';
-import type { ESQLAstPromqlCommand, ESQLMapEntry, ESQLParens } from '../../../types';
+import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
 import { EDITOR_MARKER } from '../constants';
 import {
   PromQLFunctionDefinitionTypes,
@@ -179,37 +179,4 @@ export function getIndexFromPromQLParams({
 
   // same stuffs of getSourcesFromCommands for the other sources
   return indexMatch?.[1]?.includes(EDITOR_MARKER) ? undefined : indexMatch?.[1];
-}
-
-/**
- * Returns the location of the inner PromQL query expression, stripping
- * outer parens and assignment prefix.
- *
- * - `(rate(...))` → location of `rate(...)`
- * - `rate(...)` → location as-is
- * - `col0 = (rate(...))` → location of `rate(...)` inside rhs parens
- */
-export function getPromqlQueryLocation(
-  query: ESQLAstPromqlCommand['query']
-): { min: number; max: number } | undefined {
-  if (!query?.location) {
-    return undefined;
-  }
-
-  // Direct parens: (query) → inner child location
-  if (query.type === 'parens' && 'child' in query) {
-    return (query as ESQLParens).child?.location;
-  }
-
-  // Named assignment: col0 = (query) → inner rhs child location
-  if ('subtype' in query && query.subtype === 'binary-expression' && 'args' in query) {
-    const [, rhs] = Array.isArray(query.args) ? query.args : [];
-
-    if (rhs && !Array.isArray(rhs) && rhs.type === 'parens' && 'child' in rhs) {
-      return (rhs as ESQLParens).child?.location;
-    }
-  }
-
-  // Raw expression: location directly
-  return query.location;
 }

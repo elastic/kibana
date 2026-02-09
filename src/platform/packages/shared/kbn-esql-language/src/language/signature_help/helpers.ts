@@ -8,13 +8,7 @@
  */
 
 import { within } from '../../ast';
-import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
-import type { PromQLAstExpression, PromQLAstNode, PromQLFunction } from '../../promql/types';
-import { childrenOfPromqlNode } from '../../promql/traversal';
-import {
-  getPromqlFunctionDefinition,
-  getPromqlQueryLocation,
-} from '../../commands/definitions/utils/promql';
+import type { ESQLAstBaseItem, ESQLFunction } from '../../types';
 
 /**
  * Extracts the parameter list from a formatted function signature.
@@ -54,7 +48,7 @@ export function getParameterList(formattedSignature: string) {
  */
 export function getArgumentToHighlightIndex(
   innerText: string,
-  fnNode: ESQLFunction,
+  fnNode: ESQLFunction | { args: Array<Pick<ESQLAstBaseItem, 'location'>> },
   offset: number
 ): number {
   // If cursor is right after opening parenthesis, highlight first parameter
@@ -97,176 +91,30 @@ export function getArgumentToHighlightIndex(
   return Math.max(fnNode.args.length - 1, 0);
 }
 
-// ============================================================================
-// PromQL Helpers
-// ============================================================================
-
-/** Extracts the PromQL expression text and its starting offset, for passing to PromQLParser.parse(). */
-export function extractPromqlText(
-  query: ESQLAstPromqlCommand['query'],
-  fullText: string
-): { text: string; start: number } | undefined {
-  const loc = getPromqlQueryLocation(query);
-  if (!loc) return undefined;
-
-  const { min, max } = loc;
-
-  return { text: fullText.substring(min, max + 1), start: min };
-}
-
-/**
- * Finds the innermost PromQL function at cursor position.
- * Falls back to text-based search when AST has empty args due to incomplete syntax.
- */
-export function findPromqlFunctionAtOffset(
-  expression: PromQLAstExpression,
-  offset: number,
-  fullText?: string
-): PromQLFunction | undefined {
-  const astMatch = findPromqlFunctionInAst(expression, offset);
-
-  if (!astMatch?.incomplete || !fullText) {
-    return astMatch;
-  }
-
-  // Text fallback: nested functions may not be in AST due to parser limitations
-  const lastArg = astMatch.args.at(-1);
-  const cursorAfterArgs = !lastArg || offset > lastArg.location.max;
-
-  if (!cursorAfterArgs) {
-    return astMatch;
-  }
-
-  return findPromqlFunctionFromText(fullText, astMatch.location.min, offset) ?? astMatch;
-}
-
-/** Traverses AST to find innermost function containing cursor. */
-function findPromqlFunctionInAst(
-  expression: PromQLAstExpression,
-  offset: number
-): PromQLFunction | undefined {
-  let match: PromQLFunction | undefined;
-
-  const visit = (node: PromQLAstNode) => {
-    const isIncomplete = 'incomplete' in node && node.incomplete;
-    if (!within(offset, node) && !isIncomplete) return;
-
-    if (node.type === 'function') {
-      match = node as PromQLFunction;
-    }
-
-    for (const child of childrenOfPromqlNode(node)) {
-      visit(child);
-    }
+export function buildSignatureHelpItem(
+  formattedSignature: string,
+  fnDefinition: {
+    description?: string;
+    signatures?: Array<{ params: Array<{ name: string; description?: string }> }>;
+  },
+  parameters: string[],
+  currentArgIndex: number
+) {
+  return {
+    signatures: [
+      {
+        label: formattedSignature,
+        documentation: fnDefinition.description,
+        parameters: parameters.map((param) => ({
+          label: param,
+          documentation:
+            fnDefinition.signatures
+              ?.flatMap((sig) => sig.params)
+              .find((p) => param.startsWith(p.name))?.description ?? '',
+        })),
+      },
+    ],
+    activeSignature: 0,
+    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
   };
-
-  visit(expression);
-
-  return match;
-}
-
-/**
- * Text-based fallback to find the innermost function when AST parsing fails.
- * Scans backwards for first unclosed '(' preceded by a PromQL function name.
- */
-function findPromqlFunctionFromText(
-  fullText: string,
-  startOffset: number,
-  cursorOffset: number
-): PromQLFunction | undefined {
-  const text = fullText.substring(startOffset, cursorOffset);
-  let parenDepth = 0;
-
-  for (let i = text.length - 1; i >= 0; i--) {
-    const char = text[i];
-
-    if (char === ')') {
-      parenDepth++;
-      continue;
-    }
-
-    if (char === '(') {
-      if (parenDepth > 0) {
-        parenDepth--;
-        continue;
-      }
-
-      // Found unclosed '(' - check if preceded by a PromQL function name
-      const textBeforeParen = text.substring(0, i).trimEnd();
-      const nameMatch = textBeforeParen.match(/([a-zA-Z_]\w*)$/);
-
-      if (nameMatch && getPromqlFunctionDefinition(nameMatch[1])) {
-        const name = nameMatch[1];
-        const fnStart = startOffset + textBeforeParen.length - name.length;
-
-        return {
-          name,
-          location: { min: fnStart, max: cursorOffset },
-        } as PromQLFunction;
-      }
-    }
-  }
-
-  return undefined;
-}
-
-/**
- * Counts commas at depth zero to determine which function argument the cursor is in.
- * Text-based because PromQL parser returns empty args for incomplete syntax.
- */
-export function calculatePromqlArgIndex(
-  fullText: string,
-  functionNode: PromQLFunction,
-  offset: number
-): number {
-  const { min, max } = functionNode.location;
-  const fnText = fullText.substring(min, max);
-  const parenIndex = fnText.indexOf('(');
-
-  if (parenIndex === -1) return 0;
-
-  const argsText = fullText.substring(min + parenIndex + 1, offset);
-
-  return countTopLevelCommas(argsText);
-}
-
-/** Counts commas at depth zero, ignoring those inside parens, brackets, or strings. */
-function countTopLevelCommas(text: string): number {
-  let count = 0;
-  let parenDepth = 0;
-  let bracketDepth = 0;
-  let stringDelimiter: string | null = null;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const prevChar = text[i - 1];
-
-    // Toggle string state on unescaped quotes
-    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
-      stringDelimiter = stringDelimiter === char ? null : stringDelimiter ?? char;
-      continue;
-    }
-
-    if (stringDelimiter) continue;
-
-    switch (char) {
-      case '(':
-        parenDepth++;
-        break;
-      case ')':
-        parenDepth--;
-        break;
-      case '[':
-        bracketDepth++;
-        break;
-      case ']':
-        bracketDepth--;
-        break;
-      case ',':
-        if (parenDepth === 0 && bracketDepth === 0) count++;
-        break;
-    }
-  }
-
-  return count;
 }

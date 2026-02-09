@@ -11,24 +11,18 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Parser } from '../../parser';
 import { within, Walker } from '../../ast';
 import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
+import type { PromQLFunction } from '../../promql/types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
 } from '../../commands/definitions/utils';
 import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
 import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
-import { PromQLParser } from '../../promql/parser/parser';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
-import {
-  calculatePromqlArgIndex,
-  extractPromqlText,
-  findPromqlFunctionAtOffset,
-  getArgumentToHighlightIndex,
-  getParameterList,
-} from './helpers';
+import { buildSignatureHelpItem, getArgumentToHighlightIndex, getParameterList } from './helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
@@ -63,7 +57,7 @@ export async function getSignatureHelp(
   );
 
   if (promqlCommand) {
-    return getPromqlSignatureHelp(promqlCommand, fullText, offset);
+    return getPromqlSignatureHelp(root, fullText, offset);
   }
 
   // Find the function node that contains the cursor
@@ -120,48 +114,26 @@ export async function getSignatureHelp(
   );
   const parameters: string[] = getParameterList(formattedSignature);
 
-  const signature = {
-    label: formattedSignature,
-    parameters:
-      parameters.map((param) => {
-        const paramDefinition = fnDefinition.signatures
-          ?.flatMap((sig) => sig.params)
-          .find((p) => param.startsWith(p.name));
-        return {
-          label: param,
-          documentation: paramDefinition?.description ? paramDefinition?.description : '',
-        };
-      }) || [],
-  };
-
-  return {
-    signatures: [signature],
-    activeSignature: 0,
-    // Math.min for the variadic functions, that can have more arguments than the defined parameters
-    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
-  };
+  return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
 }
 
 function getPromqlSignatureHelp(
-  command: ESQLAstPromqlCommand,
+  root: Parameters<typeof Walker.walk>[0],
   fullText: string,
   offset: number
 ): SignatureHelpItem | undefined {
-  const extracted = extractPromqlText(command.query, fullText);
-  if (!extracted) {
-    return undefined;
-  }
+  let functionNode: PromQLFunction | undefined;
 
-  const { text, start } = extracted;
-  if (offset < start || offset > start + text.length) {
-    return undefined;
-  }
-
-  const { root } = PromQLParser.parse(text, { offset: start });
-
-  const functionNode = root.expression
-    ? findPromqlFunctionAtOffset(root.expression, offset, fullText)
-    : undefined;
+  Walker.walk(root, {
+    promql: {
+      visitPromqlFunction: (fn) => {
+        const leftParen = fullText.indexOf('(', fn.location.min);
+        if (leftParen < offset && (within(offset - 1, fn) || fn.incomplete)) {
+          functionNode = fn;
+        }
+      },
+    },
+  });
 
   if (!functionNode) {
     return undefined;
@@ -172,25 +144,10 @@ function getPromqlSignatureHelp(
     return undefined;
   }
 
-  const currentArgIndex = calculatePromqlArgIndex(fullText, functionNode, offset);
+  const innerText = fullText.substring(0, offset);
+  const currentArgIndex = getArgumentToHighlightIndex(innerText, functionNode, offset);
   const formattedSignature = getFormattedPromqlFunctionSignature(fnDefinition);
   const parameters = getParameterList(formattedSignature);
 
-  return {
-    signatures: [
-      {
-        label: formattedSignature,
-        documentation: fnDefinition.description,
-        parameters: parameters.map((param) => ({
-          label: param,
-          documentation:
-            fnDefinition.signatures
-              ?.flatMap((sig) => sig.params)
-              .find((p) => param.startsWith(p.name))?.description ?? '',
-        })),
-      },
-    ],
-    activeSignature: 0,
-    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
-  };
+  return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
 }
