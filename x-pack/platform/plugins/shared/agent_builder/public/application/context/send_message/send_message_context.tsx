@@ -24,8 +24,8 @@ interface SendMessageState {
   cleanConversation: () => void;
   resumeRound: (opts: { promptId: string; confirm: boolean }) => void;
   isResuming: boolean;
-  resend: () => void;
-  isResending: boolean;
+  regenerate: () => void;
+  isRegenerating: boolean;
   connectorSelection: {
     selectedConnector: string | undefined;
     selectConnector: (connectorId: string) => void;
@@ -49,8 +49,8 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     canCancel,
     cancel,
     cleanConversation,
-    resend,
-    isResending,
+    regenerate,
+    isRegenerating,
   } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
   const {
@@ -68,7 +68,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     <SendMessageContext.Provider
       value={{
         sendMessage,
-        isResponseLoading: isResponseLoading || isResuming || isResending,
+        isResponseLoading: isResponseLoading || isResuming || isRegenerating,
         pendingMessage,
         error,
         errorSteps,
@@ -79,8 +79,8 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         cleanConversation,
         resumeRound,
         isResuming,
-        resend,
-        isResending,
+        regenerate,
+        isRegenerating,
         connectorSelection: {
           selectedConnector: connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,

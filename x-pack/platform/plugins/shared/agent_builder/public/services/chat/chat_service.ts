@@ -80,14 +80,14 @@ export class ChatService {
     });
   }
 
-  resend(params: ResendParams): Observable<ChatEvent> {
+  regenerate(params: ResendParams): Observable<ChatEvent> {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       browser_api_tools: params.browserApiTools ?? [],
-      resend: true,
+      action: 'regenerate',
     });
   }
 

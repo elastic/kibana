@@ -34,7 +34,7 @@ interface UseSendMessageMutationProps {
 
 interface SendMessageParams {
   message?: string;
-  resend?: boolean;
+  action?: 'regenerate';
 }
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -113,7 +113,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const conversationId = useConversationId();
   const { conversation } = useConversation();
   const isMutatingNewConversationRef = useRef(false);
-  const isResendingRef = useRef(false);
+  const isRegeneratingRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
 
@@ -153,18 +153,19 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message, resend = false }: SendMessageParams) => {
+  const sendMessage = async ({ message, action }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
+    const isRegenerate = action === 'regenerate';
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
     }
 
-    if (resend) {
+    if (isRegenerate) {
       if (!conversationId) {
         return Promise.reject(new Error('Conversation ID is required to resend'));
       }
 
-      const events$ = chatService.resend({
+      const events$ = chatService.regenerate({
         signal,
         conversationId,
         agentId,
@@ -201,12 +202,13 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message, resend = false }) => {
+    onMutate: ({ message, action }) => {
+      const isRegenerate = action === 'regenerate';
       removeError();
       messageControllerRef.current = new AbortController();
-      isResendingRef.current = resend;
+      isRegeneratingRef.current = isRegenerate;
 
-      if (resend) {
+      if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state
         // This must happen before setIsResponseLoading triggers the streaming UI
         conversationActions.clearLastRoundResponse();
@@ -236,10 +238,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (isResponseLoading) {
         setIsResponseLoading(false);
       }
-      isResendingRef.current = false;
+      isRegeneratingRef.current = false;
     },
     onSuccess: () => {
-      if (isResendingRef.current) return;
+      if (isRegeneratingRef.current) return;
       removePendingMessage();
       resetAttachments?.();
       if (isMutatingNewConversationRef.current) {
@@ -252,7 +254,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (steps) {
         setErrorSteps(steps);
       }
-      if (isResendingRef.current) return;
+      if (isRegeneratingRef.current) return;
       // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
       // Otherwise, the error round and the optimistic round will be visible together.
       conversationActions.removeOptimisticRound();
@@ -306,10 +308,10 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
     },
     /**
-     * Resend the last conversation round.
-     * Uses the same mutation flow but with resend=true.
+     * Regenerate the last conversation round.
+     * Uses the same mutation flow but with action=regenerate.
      */
-    resend: () => mutate({ resend: true }),
-    isResending: isLoading && isResendingRef.current,
+    regenerate: () => mutate({ action: 'regenerate' }),
+    isRegenerating: isLoading && isRegeneratingRef.current,
   };
 };

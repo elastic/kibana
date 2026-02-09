@@ -20,8 +20,8 @@ const labels = {
   copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
     defaultMessage: 'Response copied to clipboard',
   }),
-  resend: i18n.translate('xpack.agentBuilder.roundResponseActions.resend', {
-    defaultMessage: 'Resend response',
+  regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
+    defaultMessage: 'Regenerate response',
   }),
 };
 
@@ -37,7 +37,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isLastRound,
 }) => {
   const { addSuccessToast } = useToasts();
-  const { resend, isResending, isResponseLoading } = useSendMessage();
+  const { regenerate, isRegenerating, isResponseLoading } = useSendMessage();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -47,11 +47,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   }, [content, addSuccessToast]);
 
   const handleResend = useCallback(() => {
-    resend();
-  }, [resend]);
+    regenerate();
+  }, [regenerate]);
 
-  // Disable resend button while any response is loading
-  const isResendDisabled = isResending || isResponseLoading;
+  // Disable regenerate button while any response is loading
+  const isRegenerateDisabled = isRegenerating || isResponseLoading;
 
   return (
     <EuiFlexGroup
@@ -76,12 +76,12 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="refresh"
-            aria-label={labels.resend}
+            aria-label={labels.regenerate}
             onClick={handleResend}
             color="text"
-            isDisabled={isResendDisabled}
-            isLoading={isResending}
-            data-test-subj="roundResponseResendButton"
+            isDisabled={isRegenerateDisabled}
+            isLoading={isRegenerating}
+            data-test-subj="roundResponseRegenerateButton"
           />
         </EuiFlexItem>
       )}
