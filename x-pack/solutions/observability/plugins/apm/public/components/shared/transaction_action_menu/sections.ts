@@ -70,7 +70,6 @@ export const getSections = ({
   dataViewId?: string;
   assetDetailsLocator?: AssetDetailsLocator;
   discoverLocator?: LocatorPublic<SerializableRecord>;
-  /** Metrics data view title (e.g. from metricsDataAccess.metricsClient.metricsIndices()). */
   metricsIndices?: string;
 }) => {
   if (!transaction) return [];
