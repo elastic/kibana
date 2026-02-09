@@ -82,9 +82,7 @@ const usePanelApi = (resetKey?: string) => {
 };
 
 /** Rescues focus to main content (or custom callback) when the panel unmounts with focus inside. */
-const useFocusRescue = (
-  onFocusRescueRef: React.RefObject<(() => void) | undefined>
-) => {
+const useFocusRescue = (onFocusRescueRef: React.RefObject<(() => void) | undefined>) => {
   const asideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
