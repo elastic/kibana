@@ -9,10 +9,12 @@ import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { jiraDataSource } from './jira-cloud';
+import { jiraDataCenterDataSource } from './jira-data-center';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(jiraDataCenterDataSource);
 }
