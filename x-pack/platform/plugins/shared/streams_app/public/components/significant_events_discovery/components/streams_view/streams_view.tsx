@@ -19,7 +19,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
-import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
   ONBOARDING_FAILURE_TITLE,
@@ -28,6 +27,7 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -49,7 +49,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   } = useKibana();
   const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
-  const streamsListFetch = useDiscoveryStreams();
+  const streamsListFetch = useFetchStreams({
+    select: (result) => {
+      return {
+        ...result,
+        /**
+         * Significant events discovery for now only works with logs streams.
+         */
+        streams: result.streams.filter((stream) => stream.stream.name.startsWith('logs')),
+      };
+    },
+  });
 
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
