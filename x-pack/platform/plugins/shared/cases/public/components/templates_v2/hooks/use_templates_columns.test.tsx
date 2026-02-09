@@ -38,8 +38,8 @@ describe('useTemplatesColumns', () => {
   it('returns expected number of columns', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    // Expected columns: name, description, solution, fields, tags, lastUpdate, lastTimeUsed, usage, actions
-    expect(result.current.columns.length).toBeGreaterThanOrEqual(9);
+    // Expected columns: name, description, fieldCount, tags, author, lastUsedAt, usageCount, actions
+    expect(result.current.columns.length).toBeGreaterThanOrEqual(8);
   });
 
   it('includes name column', () => {
@@ -60,24 +60,24 @@ describe('useTemplatesColumns', () => {
     expect(descriptionColumn).toHaveProperty('sortable', false);
   });
 
-  it('includes solution column', () => {
+  it('includes fieldCount column', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    const solutionColumn = result.current.columns.find(
-      (col) => 'field' in col && col.field === 'solution'
+    const fieldCountColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'fieldCount'
     );
-    expect(solutionColumn).toBeDefined();
-    expect(solutionColumn).toHaveProperty('sortable', true);
+    expect(fieldCountColumn).toBeDefined();
+    expect(fieldCountColumn).toHaveProperty('sortable', true);
   });
 
-  it('includes fields column', () => {
+  it('includes author column', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    const fieldsColumn = result.current.columns.find(
-      (col) => 'field' in col && col.field === 'fields'
+    const authorColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'author'
     );
-    expect(fieldsColumn).toBeDefined();
-    expect(fieldsColumn).toHaveProperty('sortable', true);
+    expect(authorColumn).toBeDefined();
+    expect(authorColumn).toHaveProperty('sortable', true);
   });
 
   it('includes tags column', () => {
@@ -88,34 +88,24 @@ describe('useTemplatesColumns', () => {
     expect(tagsColumn).toHaveProperty('sortable', false);
   });
 
-  it('includes lastUpdate column', () => {
+  it('includes lastUsedAt column', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    const lastUpdateColumn = result.current.columns.find(
-      (col) => 'field' in col && col.field === 'lastUpdate'
+    const lastUsedAtColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'lastUsedAt'
     );
-    expect(lastUpdateColumn).toBeDefined();
-    expect(lastUpdateColumn).toHaveProperty('sortable', true);
+    expect(lastUsedAtColumn).toBeDefined();
+    expect(lastUsedAtColumn).toHaveProperty('sortable', true);
   });
 
-  it('includes lastTimeUsed column', () => {
+  it('includes usageCount column', () => {
     const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
 
-    const lastTimeUsedColumn = result.current.columns.find(
-      (col) => 'field' in col && col.field === 'lastTimeUsed'
+    const usageCountColumn = result.current.columns.find(
+      (col) => 'field' in col && col.field === 'usageCount'
     );
-    expect(lastTimeUsedColumn).toBeDefined();
-    expect(lastTimeUsedColumn).toHaveProperty('sortable', true);
-  });
-
-  it('includes usage column', () => {
-    const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
-
-    const usageColumn = result.current.columns.find(
-      (col) => 'field' in col && col.field === 'usage'
-    );
-    expect(usageColumn).toBeDefined();
-    expect(usageColumn).toHaveProperty('sortable', true);
+    expect(usageCountColumn).toBeDefined();
+    expect(usageCountColumn).toHaveProperty('sortable', true);
   });
 
   it('includes actions column', () => {

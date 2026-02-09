@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { MOCK_TEMPLATES } from './sample_data';
 import type {
-  Template,
   TemplatesFindResponse,
   TemplateRequest,
   TemplateUpdateRequest,
@@ -50,7 +50,7 @@ export const getTemplates = async ({
     ? MOCK_TEMPLATES.filter(
         (template) =>
           template.name.toLowerCase().includes(search.toLowerCase()) ||
-          template.description.toLowerCase().includes(search.toLowerCase())
+          template?.description?.toLowerCase().includes(search.toLowerCase())
       )
     : MOCK_TEMPLATES;
 
@@ -103,10 +103,11 @@ export const postTemplate = async ({
   // Return mock data
   const newTemplate: Template = {
     ...template,
-    key: `template-${Date.now()}`,
-    lastUpdate: new Date().toISOString(),
-    lastTimeUsed: new Date().toISOString(),
-    usage: 0,
+    templateId: `template-${Date.now()}`,
+    templateVersion: 1,
+    deletedAt: null,
+    usageCount: 0,
+    lastUsedAt: new Date().toISOString(),
   };
 
   return newTemplate;
@@ -129,7 +130,7 @@ export const patchTemplate = async ({
   // return response;
 
   // Return mock data
-  const existingTemplate = MOCK_TEMPLATES.find((t) => t.key === templateId);
+  const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
 
   if (!existingTemplate) {
     throw new Error(`Template with id ${templateId} not found`);
@@ -138,7 +139,7 @@ export const patchTemplate = async ({
   const updatedTemplate: Template = {
     ...existingTemplate,
     ...template,
-    lastUpdate: new Date().toISOString(),
+    templateVersion: existingTemplate.templateVersion + 1,
   };
 
   return updatedTemplate;
@@ -161,7 +162,7 @@ export const deleteTemplate = async ({
   // return response;
 
   // Return mock data
-  const existingTemplate = MOCK_TEMPLATES.find((t) => t.key === templateId);
+  const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
 
   if (!existingTemplate) {
     throw new Error(`Template with id ${templateId} not found`);
@@ -201,7 +202,7 @@ export const exportTemplate = async ({
   // return { filename, content: '' };
 
   // ---- MOCK IMPLEMENTATION - Remove when API is available ----
-  const existingTemplate = MOCK_TEMPLATES.find((t) => t.key === templateId);
+  const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
 
   if (!existingTemplate) {
     throw new Error(`Template with id ${templateId} not found`);
@@ -212,17 +213,15 @@ export const exportTemplate = async ({
     `# Template: ${existingTemplate.name}`,
     `# Exported: ${new Date().toISOString()}`,
     '',
-    `key: ${existingTemplate.key}`,
+    `templateId: ${existingTemplate.templateId}`,
     `name: ${existingTemplate.name}`,
-    `description: ${existingTemplate.description}`,
-    `solution: ${existingTemplate.solution}`,
-    `fields: ${existingTemplate.fields}`,
+    `description: ${existingTemplate.description ?? ''}`,
+    `fieldCount: ${existingTemplate.fieldCount ?? 0}`,
     `tags:`,
-    ...existingTemplate.tags.map((tag) => `  - ${tag}`),
-    `lastUpdate: ${existingTemplate.lastUpdate}`,
-    `lastTimeUsed: ${existingTemplate.lastTimeUsed}`,
-    `usage: ${existingTemplate.usage}`,
-    `isDefault: ${existingTemplate.isDefault}`,
+    ...(existingTemplate.tags ?? []).map((tag) => `  - ${tag}`),
+    `lastUsedAt: ${existingTemplate.lastUsedAt ?? ''}`,
+    `usageCount: ${existingTemplate.usageCount ?? 0}`,
+    `isDefault: ${existingTemplate.isDefault ?? false}`,
   ];
   const yamlContent = yamlLines.join('\n');
   const filename = `${existingTemplate.name.toLowerCase().replace(/\s+/g, '-')}-template.yaml`;
@@ -267,7 +266,7 @@ export const bulkDeleteTemplates = async ({
   const errors: Array<{ id: string; error: string }> = [];
 
   for (const templateId of templateIds) {
-    const existingTemplate = MOCK_TEMPLATES.find((t) => t.key === templateId);
+    const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
 
     if (!existingTemplate) {
       errors.push({ id: templateId, error: `Template with id ${templateId} not found` });
@@ -316,7 +315,7 @@ export const bulkExportTemplates = async ({
   // return { filename, content: '' };
 
   // ---- MOCK IMPLEMENTATION - Remove when API is available ----
-  const templatesToExport = MOCK_TEMPLATES.filter((t) => templateIds.includes(t.key));
+  const templatesToExport = MOCK_TEMPLATES.filter((t) => templateIds.includes(t.templateId));
 
   if (templatesToExport.length === 0) {
     throw new Error('No templates found for the provided IDs');
@@ -332,17 +331,15 @@ export const bulkExportTemplates = async ({
   for (const template of templatesToExport) {
     yamlSections.push(
       '---',
-      `key: ${template.key}`,
+      `templateId: ${template.templateId}`,
       `name: ${template.name}`,
-      `description: ${template.description}`,
-      `solution: ${template.solution}`,
-      `fields: ${template.fields}`,
+      `description: ${template.description ?? ''}`,
+      `fieldCount: ${template.fieldCount ?? 0}`,
       `tags:`,
-      ...template.tags.map((tag) => `  - ${tag}`),
-      `lastUpdate: ${template.lastUpdate}`,
-      `lastTimeUsed: ${template.lastTimeUsed}`,
-      `usage: ${template.usage}`,
-      `isDefault: ${template.isDefault}`,
+      ...(template.tags ?? []).map((tag) => `  - ${tag}`),
+      `lastUsedAt: ${template.lastUsedAt ?? ''}`,
+      `usageCount: ${template.usageCount ?? 0}`,
+      `isDefault: ${template.isDefault ?? false}`,
       ''
     );
   }
@@ -388,7 +385,7 @@ export const getTemplateTags = async ({
   const allTags = MOCK_TEMPLATES.flatMap((template) => template.tags);
   const uniqueTags = [...new Set(allTags)].sort();
   // ---- END MOCK IMPLEMENTATION ----
-  return uniqueTags;
+  return uniqueTags as string[];
 };
 
 export const getTemplateCreators = async ({
@@ -408,7 +405,7 @@ export const getTemplateCreators = async ({
 
   // ---- MOCK IMPLEMENTATION - Remove when API is available ----
   // Extract unique creators from all templates
-  const allCreators = MOCK_TEMPLATES.map((template) => template.createdBy);
+  const allCreators = MOCK_TEMPLATES.map((template) => template.author).filter(Boolean) as string[];
   const uniqueCreators = [...new Set(allCreators)].sort();
   // ---- END MOCK IMPLEMENTATION ----
 

@@ -56,9 +56,9 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
     [onQueryParamsChange]
   );
 
-  const onCreatedByChange = useCallback(
+  const onAuthorChange = useCallback(
     ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
-      onQueryParamsChange({ createdBy: selectedOptionKeys, page: 1 });
+      onQueryParamsChange({ author: selectedOptionKeys, page: 1 });
     },
     [onQueryParamsChange]
   );
@@ -96,11 +96,11 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
             isLoading={isLoadingTags}
           />
           <MultiSelectFilter
-            id="createdBy"
+            id="author"
             buttonLabel={i18n.CREATED_BY}
             options={mapToMultiSelectOption(availableCreatedBy)}
-            selectedOptionKeys={queryParams.createdBy}
-            onChange={onCreatedByChange}
+            selectedOptionKeys={queryParams.author}
+            onChange={onAuthorChange}
             isLoading={isLoadingCreators}
           />
         </EuiFilterGroup>

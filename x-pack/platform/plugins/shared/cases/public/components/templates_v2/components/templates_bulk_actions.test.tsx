@@ -8,10 +8,9 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
-
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { TemplatesBulkActions } from './templates_bulk_actions';
 import { renderWithTestingProviders } from '../../../common/mock';
-import type { Template } from '../types';
 import * as api from '../api/api';
 
 jest.mock('../api/api');
@@ -25,29 +24,33 @@ describe('TemplatesBulkActions', () => {
 
   const mockTemplates: Template[] = [
     {
-      key: 'template-1',
+      templateId: 'template-1',
       name: 'Template 1',
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: field1\n    type: keyword',
+      templateVersion: 1,
+      deletedAt: null,
       description: 'Description 1',
-      solution: 'security',
-      fields: 5,
+      fieldCount: 5,
       tags: ['tag1'],
-      createdBy: 'user1',
-      lastUpdate: '2024-01-01T00:00:00.000Z',
-      lastTimeUsed: '2024-01-01T00:00:00.000Z',
-      usage: 10,
+      author: 'user1',
+      lastUsedAt: '2024-01-01T00:00:00.000Z',
+      usageCount: 10,
       isDefault: false,
     },
     {
-      key: 'template-2',
+      templateId: 'template-2',
       name: 'Template 2',
+      owner: 'observability',
+      definition: 'fields:\n  - name: field2\n    type: keyword',
+      templateVersion: 1,
+      deletedAt: null,
       description: 'Description 2',
-      solution: 'observability',
-      fields: 3,
+      fieldCount: 3,
       tags: ['tag2'],
-      createdBy: 'user2',
-      lastUpdate: '2024-01-02T00:00:00.000Z',
-      lastTimeUsed: '2024-01-02T00:00:00.000Z',
-      usage: 5,
+      author: 'user2',
+      lastUsedAt: '2024-01-02T00:00:00.000Z',
+      usageCount: 5,
       isDefault: false,
     },
   ];

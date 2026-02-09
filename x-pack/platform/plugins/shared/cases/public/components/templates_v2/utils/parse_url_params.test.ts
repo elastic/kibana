@@ -51,7 +51,7 @@ describe('parseUrlParams', () => {
       sortOrder: 'desc',
       search: 'test',
       tags: ['tag1', 'tag2'],
-      createdBy: ['user1'],
+      author: ['user1'],
     };
     const encoded = encode(state);
     const urlParams = new URLSearchParams(`${TEMPLATES_STATE_URL_KEY}=${encoded}`);

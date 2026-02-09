@@ -20,17 +20,16 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
 import * as i18n from '../../templates/translations';
-import type { Template } from '../types';
-import { LINE_CLAMP, SOLUTION_LABELS, SOLUTION_ICONS } from '../constants';
+import { LINE_CLAMP } from '../constants';
 
 type TemplatesColumns =
   | EuiTableActionsColumnType<Template>
@@ -103,25 +102,25 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             name: i18n.EDIT_TEMPLATE,
             icon: 'pencil',
             onClick: handleEdit,
-            'data-test-subj': `template-action-edit-${template.key}`,
+            'data-test-subj': `template-action-edit-${template.templateId}`,
           },
           {
             name: i18n.CLONE_TEMPLATE,
             icon: 'copy',
             onClick: handleClone,
-            'data-test-subj': `template-action-clone-${template.key}`,
+            'data-test-subj': `template-action-clone-${template.templateId}`,
           },
           {
             name: i18n.SET_AS_DEFAULT_TEMPLATE,
             icon: 'check',
             onClick: handleSetAsDefault,
-            'data-test-subj': `template-action-set-default-${template.key}`,
+            'data-test-subj': `template-action-set-default-${template.templateId}`,
           },
           {
             name: i18n.EXPORT_TEMPLATE,
             icon: 'exportAction',
             onClick: handleExport,
-            'data-test-subj': `template-action-export-${template.key}`,
+            'data-test-subj': `template-action-export-${template.templateId}`,
           },
           {
             isSeparator: true,
@@ -130,24 +129,24 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             name: i18n.DELETE_TEMPLATE,
             icon: 'trash',
             onClick: handleDelete,
-            'data-test-subj': `template-action-delete-${template.key}`,
+            'data-test-subj': `template-action-delete-${template.templateId}`,
           },
         ],
       },
     ],
-    [handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete, template.key]
+    [handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete, template.templateId]
   );
 
   return (
     <EuiPopover
-      id={`template-action-popover-${template.key}`}
+      id={`template-action-popover-${template.templateId}`}
       button={
         <EuiButtonIcon
           onClick={togglePopover}
           iconType="boxesHorizontal"
           aria-label={i18n.ACTIONS}
           color="text"
-          data-test-subj={`template-action-popover-button-${template.key}`}
+          data-test-subj={`template-action-popover-button-${template.templateId}`}
           disabled={disableActions}
         />
       }
@@ -159,7 +158,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
       <EuiContextMenu
         initialPanelId={0}
         panels={panels}
-        data-test-subj={`template-action-menu-${template.key}`}
+        data-test-subj={`template-action-menu-${template.templateId}`}
       />
     </EuiPopover>
   );
@@ -203,14 +202,21 @@ export const useTemplatesColumns = ({
               </EuiFlexItem>
               {template.isDefault && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="template-column-default-badge">{i18n.DEFAULT}</EuiBadge>
+                  <EuiBadge
+                    css={css`
+                      border-radius: ${euiTheme.border.radius.small};
+                    `}
+                    data-test-subj="template-column-default-badge"
+                  >
+                    {i18n.DEFAULT}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
           ) : (
             getEmptyCellValue()
           ),
-        width: '15%',
+        width: '16%',
       },
       {
         field: 'description',
@@ -230,41 +236,41 @@ export const useTemplatesColumns = ({
           ) : (
             getEmptyCellValue()
           ),
-        width: '22%',
+        width: '24%',
       },
       {
-        field: 'solution',
-        name: i18n.COLUMN_SOLUTION,
-        sortable: true,
-        render: (solution: Template['solution']) =>
-          solution ? (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              responsive={false}
-              data-test-subj="template-column-solution"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={SOLUTION_ICONS[solution]} size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{SOLUTION_LABELS[solution]}</EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            getEmptyCellValue()
-          ),
-        width: '12%',
-      },
-      {
-        field: 'fields',
+        field: 'fieldCount',
         name: i18n.COLUMN_FIELDS,
         sortable: true,
-        render: (fields: number) =>
-          fields != null ? (
-            <span data-test-subj="template-column-fields">{fields}</span>
-          ) : (
-            getEmptyCellValue()
-          ),
-        width: '5%',
+        align: 'right',
+        render: (fieldCount: number | undefined, template: Template) => {
+          if (fieldCount == null) {
+            return getEmptyCellValue();
+          }
+
+          const fieldNames = template.fieldNames;
+          const content = <span data-test-subj="template-column-fields">{fieldCount}</span>;
+
+          if (fieldNames && fieldNames.length > 0) {
+            return (
+              <EuiToolTip
+                position="top"
+                content={
+                  <div data-test-subj="template-column-fields-tooltip">
+                    {fieldNames.map((name, idx) => (
+                      <div key={`${name}-${idx}`}>{name}</div>
+                    ))}
+                  </div>
+                }
+              >
+                {content}
+              </EuiToolTip>
+            );
+          }
+
+          return content;
+        },
+        width: '6%',
       },
       {
         field: 'tags',
@@ -283,6 +289,7 @@ export const useTemplatesColumns = ({
                     css={css`
                       max-width: 100px;
                       margin-right: ${euiTheme.size.xs};
+                      border-radius: ${euiTheme.border.radius.small};
                     `}
                     color="hollow"
                     key={`${tag}-${i}`}
@@ -297,7 +304,13 @@ export const useTemplatesColumns = ({
             const unclampedBadges = (
               <EuiBadgeGroup data-test-subj="template-column-tags-tooltip-content" gutterSize="xs">
                 {tags.map((tag: string, i: number) => (
-                  <EuiBadge color="hollow" key={`${tag}-${i}`}>
+                  <EuiBadge
+                    css={css`
+                      border-radius: ${euiTheme.border.radius.small};
+                    `}
+                    color="hollow"
+                    key={`${tag}-${i}`}
+                  >
                     {tag}
                   </EuiBadge>
                 ))}
@@ -315,46 +328,44 @@ export const useTemplatesColumns = ({
         width: '16%',
       },
       {
-        field: 'lastUpdate',
-        name: i18n.COLUMN_LAST_UPDATE,
+        field: 'author',
+        name: i18n.COLUMN_AUTHOR,
         sortable: true,
-        render: (lastUpdate: string) =>
-          lastUpdate ? (
-            <span data-test-subj="template-column-lastUpdate">
-              <FormattedRelativePreferenceDate value={lastUpdate} />
-            </span>
+        render: (author: string | undefined) =>
+          author ? (
+            <span data-test-subj="template-column-author">{author}</span>
           ) : (
             getEmptyCellValue()
           ),
-        width: '11%',
+        width: '10%',
       },
       {
-        field: 'lastTimeUsed',
+        field: 'lastUsedAt',
         name: i18n.COLUMN_LAST_TIME_USED,
         sortable: true,
-        render: (lastTimeUsed: string) =>
-          lastTimeUsed ? (
-            <span data-test-subj="template-column-lastTimeUsed">
-              <FormattedRelativePreferenceDate value={lastTimeUsed} />
+        render: (lastUsedAt: string | undefined) =>
+          lastUsedAt ? (
+            <span data-test-subj="template-column-lastUsedAt">
+              <FormattedRelativePreferenceDate value={lastUsedAt} />
             </span>
           ) : (
             getEmptyCellValue()
           ),
-        width: '11%',
+        width: '10%',
       },
       {
-        field: 'usage',
+        field: 'usageCount',
         name: i18n.COLUMN_USAGE,
         sortable: true,
-        render: (usage: number) =>
-          usage != null ? (
+        render: (usageCount: number | undefined) =>
+          usageCount != null ? (
             <span data-test-subj="template-column-usage">
-              {usage} {usage === 1 ? i18n.CASE : i18n.CASES}
+              {usageCount} {usageCount === 1 ? i18n.CASE : i18n.CASES}
             </span>
           ) : (
             getEmptyCellValue()
           ),
-        width: '6%',
+        width: '8%',
       },
       {
         name: i18n.ACTIONS,
@@ -373,7 +384,16 @@ export const useTemplatesColumns = ({
         width: '80px',
       },
     ],
-    [onEdit, euiTheme.size.xs, onClone, onSetAsDefault, onExport, onDelete, disableActions]
+    [
+      onEdit,
+      euiTheme.size.xs,
+      euiTheme.border.radius.small,
+      onClone,
+      onSetAsDefault,
+      onExport,
+      onDelete,
+      disableActions,
+    ]
   );
 
   return { columns };

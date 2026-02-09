@@ -25,7 +25,7 @@ describe('useTemplatesPagination', () => {
     sortOrder: 'asc',
     search: '',
     tags: [],
-    createdBy: [],
+    author: [],
   };
 
   const setQueryParams = jest.fn();
@@ -119,7 +119,7 @@ describe('useTemplatesPagination', () => {
 
     act(() => {
       result.current.onTableChange({
-        sort: { field: 'lastUpdate', direction: 'desc' },
+        sort: { field: 'lastUsedAt', direction: 'desc' },
         page: { index: 0, size: 10 },
       });
     });
@@ -127,7 +127,7 @@ describe('useTemplatesPagination', () => {
     expect(setQueryParams).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      sortField: 'lastUpdate',
+      sortField: 'lastUsedAt',
       sortOrder: 'desc',
     });
   });
@@ -146,14 +146,14 @@ describe('useTemplatesPagination', () => {
     act(() => {
       result.current.onTableChange({
         page: { index: 1, size: 50 },
-        sort: { field: 'usage', direction: 'asc' },
+        sort: { field: 'usageCount', direction: 'asc' },
       });
     });
 
     expect(setQueryParams).toHaveBeenCalledWith({
       page: 2,
       perPage: 50,
-      sortField: 'usage',
+      sortField: 'usageCount',
       sortOrder: 'asc',
     });
   });

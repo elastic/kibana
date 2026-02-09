@@ -32,12 +32,13 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
-import { AllTemplatesPage } from '../templates_v2/pages/all_templates_page';
 import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
-
+const AllCasesTemplatesLazy: React.FC = lazy(
+  () => import('../templates_v2/pages/all_templates_page')
+);
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
   ruleDetailsNavigation,
@@ -92,7 +93,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesTemplatesPath(basePath)}>
-            <AllTemplatesPage />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <AllCasesTemplatesLazy />
+            </Suspense>
           </Route>
         )}
         {isTemplatesEnabled && (

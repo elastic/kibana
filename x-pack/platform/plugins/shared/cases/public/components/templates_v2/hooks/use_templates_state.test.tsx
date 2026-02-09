@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesState } from './use_templates_state';
-import type { Template } from '../types';
 
 describe('useTemplatesState', () => {
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
@@ -31,7 +30,7 @@ describe('useTemplatesState', () => {
       sortOrder: 'asc',
       search: '',
       tags: [],
-      createdBy: [],
+      author: [],
     });
   });
 
@@ -74,7 +73,7 @@ describe('useTemplatesState', () => {
       sortOrder: 'asc',
       search: '',
       tags: [],
-      createdBy: [],
+      author: [],
     });
   });
 
@@ -92,14 +91,14 @@ describe('useTemplatesState', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
     act(() => {
-      result.current.setQueryParams({ sortField: 'lastUpdate', sortOrder: 'desc' });
+      result.current.setQueryParams({ sortField: 'lastUsedAt', sortOrder: 'desc' });
     });
 
-    expect(result.current.queryParams.sortField).toBe('lastUpdate');
+    expect(result.current.queryParams.sortField).toBe('lastUsedAt');
     expect(result.current.queryParams.sortOrder).toBe('desc');
     expect(result.current.sorting).toEqual({
       sort: {
-        field: 'lastUpdate',
+        field: 'lastUsedAt',
         direction: 'desc',
       },
     });
@@ -109,16 +108,18 @@ describe('useTemplatesState', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
     const mockTemplate: Template = {
-      key: 'template-1',
+      templateId: 'template-1',
       name: 'Template 1',
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: field1\n    type: keyword',
+      templateVersion: 1,
+      deletedAt: null,
       description: 'Description',
-      solution: 'security',
-      fields: 5,
+      fieldCount: 5,
       tags: ['tag1'],
-      createdBy: 'user1',
-      lastUpdate: '2024-01-01T00:00:00.000Z',
-      lastTimeUsed: '2024-01-01T00:00:00.000Z',
-      usage: 10,
+      author: 'user1',
+      lastUsedAt: '2024-01-01T00:00:00.000Z',
+      usageCount: 10,
       isDefault: false,
     };
 
@@ -141,16 +142,18 @@ describe('useTemplatesState', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
     const mockTemplate: Template = {
-      key: 'template-1',
+      templateId: 'template-1',
       name: 'Template 1',
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: field1\n    type: keyword',
+      templateVersion: 1,
+      deletedAt: null,
       description: 'Description',
-      solution: 'security',
-      fields: 5,
+      fieldCount: 5,
       tags: ['tag1'],
-      createdBy: 'user1',
-      lastUpdate: '2024-01-01T00:00:00.000Z',
-      lastTimeUsed: '2024-01-01T00:00:00.000Z',
-      usage: 10,
+      author: 'user1',
+      lastUsedAt: '2024-01-01T00:00:00.000Z',
+      usageCount: 10,
       isDefault: false,
     };
 
@@ -185,7 +188,7 @@ describe('useTemplatesState', () => {
       sortOrder: 'asc',
       search: 'test',
       tags: [],
-      createdBy: [],
+      author: [],
     });
   });
 });

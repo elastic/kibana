@@ -55,22 +55,22 @@ describe('sanitizeState', () => {
     expect(sanitizeState({ tags: 'not-an-array' })).toEqual({ tags: [] });
   });
 
-  it('sanitizes createdBy to filter out falsy values', () => {
+  it('sanitizes author to filter out falsy values', () => {
     // @ts-expect-error: testing invalid values
-    expect(sanitizeState({ createdBy: ['user1', '', null, 'user2'] })).toEqual({
-      createdBy: ['user1', 'user2'],
+    expect(sanitizeState({ author: ['user1', '', null, 'user2'] })).toEqual({
+      author: ['user1', 'user2'],
     });
   });
 
-  it('keeps valid createdBy array', () => {
-    expect(sanitizeState({ createdBy: ['user1', 'user2'] })).toEqual({
-      createdBy: ['user1', 'user2'],
+  it('keeps valid author array', () => {
+    expect(sanitizeState({ author: ['user1', 'user2'] })).toEqual({
+      author: ['user1', 'user2'],
     });
   });
 
-  it('converts non-array createdBy to empty array', () => {
+  it('converts non-array author to empty array', () => {
     // @ts-expect-error: testing invalid value
-    expect(sanitizeState({ createdBy: 'not-an-array' })).toEqual({ createdBy: [] });
+    expect(sanitizeState({ author: 'not-an-array' })).toEqual({ author: [] });
   });
 
   it('preserves other valid fields', () => {

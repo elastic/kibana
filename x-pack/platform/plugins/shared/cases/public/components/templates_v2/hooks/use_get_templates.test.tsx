@@ -21,16 +21,18 @@ describe('useGetTemplates', () => {
   const mockTemplatesResponse = {
     templates: [
       {
-        key: 'template-1',
+        templateId: 'template-1',
         name: 'Template 1',
+        owner: 'securitySolution',
+        definition: 'fields:\n  - name: field1\n    type: keyword',
+        templateVersion: 1,
+        deletedAt: null,
         description: 'Description 1',
-        solution: 'security' as const,
-        fields: 5,
+        fieldCount: 5,
         tags: ['tag1'],
-        createdBy: 'user1',
-        lastUpdate: '2024-01-01T00:00:00.000Z',
-        lastTimeUsed: '2024-01-01T00:00:00.000Z',
-        usage: 10,
+        author: 'user1',
+        lastUsedAt: '2024-01-01T00:00:00.000Z',
+        usageCount: 10,
         isDefault: false,
       },
     ],
@@ -82,7 +84,7 @@ describe('useGetTemplates', () => {
         sortOrder: 'asc',
         search: '',
         tags: [],
-        createdBy: [],
+        author: [],
       },
     });
   });
@@ -97,7 +99,7 @@ describe('useGetTemplates', () => {
             page: 2,
             perPage: 25,
             search: 'test',
-            sortField: 'lastUpdate',
+            sortField: 'lastUsedAt',
             sortOrder: 'desc',
           },
         }),
@@ -118,10 +120,10 @@ describe('useGetTemplates', () => {
         page: 2,
         perPage: 25,
         search: 'test',
-        sortField: 'lastUpdate',
+        sortField: 'lastUsedAt',
         sortOrder: 'desc',
         tags: [],
-        createdBy: [],
+        author: [],
       },
     });
   });
@@ -156,7 +158,7 @@ describe('useGetTemplates', () => {
         sortOrder: 'asc',
         search: 'partial search',
         tags: [],
-        createdBy: [],
+        author: [],
       },
     });
   });

@@ -7,8 +7,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
-
-import type { QueryParams, Template } from '../types';
+import type { Template } from '../../../../common/types/domain/template/v1';
+import type { QueryParams } from '../types';
 import { useSyncedQueryParams } from './use_synced_query_params';
 
 interface UseTemplatesStateReturn {

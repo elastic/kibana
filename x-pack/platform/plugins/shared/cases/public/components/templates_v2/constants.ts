@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryParams, Template } from './types';
+import type { QueryParams } from './types';
 
 export const PAGE_SIZE_OPTIONS: number[] = [10, 25, 50, 100];
 
@@ -20,19 +20,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: 'asc',
   search: '',
   tags: [],
-  createdBy: [],
+  author: [],
 };
 
 export const LINE_CLAMP = 3;
-
-export const SOLUTION_LABELS: Record<Template['solution'], string> = {
-  security: 'Security',
-  observability: 'Observability',
-  other: 'Other',
-};
-
-export const SOLUTION_ICONS: Record<Template['solution'], string> = {
-  security: 'logoSecurity',
-  observability: 'logoObservability',
-  other: 'logoKibana',
-};

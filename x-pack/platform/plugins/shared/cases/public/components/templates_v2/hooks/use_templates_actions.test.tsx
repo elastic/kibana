@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
-import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
 import { useUpdateTemplate } from './use_update_template';
@@ -42,16 +41,18 @@ describe('useTemplatesActions', () => {
   );
 
   const mockTemplate: Template = {
-    key: 'template-1',
+    templateId: 'template-1',
     name: 'Template 1',
+    owner: 'securitySolution',
+    definition: 'fields:\n  - name: field1\n    type: keyword',
+    templateVersion: 1,
+    deletedAt: null,
     description: 'Description',
-    solution: 'security',
-    fields: 5,
+    fieldCount: 5,
     tags: ['tag1'],
-    createdBy: 'user1',
-    lastUpdate: '2024-01-01T00:00:00.000Z',
-    lastTimeUsed: '2024-01-01T00:00:00.000Z',
-    usage: 10,
+    author: 'user1',
+    lastUsedAt: '2024-01-01T00:00:00.000Z',
+    usageCount: 10,
     isDefault: false,
   };
 
@@ -123,7 +124,7 @@ describe('useTemplatesActions', () => {
     });
 
     expect(navigateToCasesEditTemplateMock).toHaveBeenCalledWith({
-      templateId: mockTemplate.key,
+      templateId: mockTemplate.templateId,
     });
   });
 
@@ -140,11 +141,13 @@ describe('useTemplatesActions', () => {
       {
         template: {
           name: expect.stringContaining(mockTemplate.name),
+          owner: mockTemplate.owner,
+          definition: mockTemplate.definition,
           description: mockTemplate.description,
-          solution: mockTemplate.solution,
-          fields: mockTemplate.fields,
+          fieldCount: mockTemplate.fieldCount,
+          fieldNames: mockTemplate.fieldNames,
           tags: mockTemplate.tags,
-          createdBy: mockTemplate.createdBy,
+          author: mockTemplate.author,
           isDefault: false,
         },
       },
@@ -190,7 +193,7 @@ describe('useTemplatesActions', () => {
     });
 
     expect(setDefaultTemplateMock).toHaveBeenCalledWith({
-      templateId: mockTemplate.key,
+      templateId: mockTemplate.templateId,
       template: { isDefault: true },
     });
   });
@@ -227,7 +230,7 @@ describe('useTemplatesActions', () => {
       result.current.handleExport(mockTemplate);
     });
 
-    expect(exportTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.key });
+    expect(exportTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
   });
 
   it('handleDelete sets templateToDelete', () => {
@@ -255,7 +258,7 @@ describe('useTemplatesActions', () => {
       result.current.confirmDelete();
     });
 
-    expect(deleteTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.key });
+    expect(deleteTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
     expect(result.current.templateToDelete).toBeNull();
   });
 

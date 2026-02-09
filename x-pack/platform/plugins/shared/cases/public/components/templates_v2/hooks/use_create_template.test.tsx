@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
-
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import { useCreateTemplate } from './use_create_template';
 import * as api from '../api/api';
-import type { TemplateRequest, Template } from '../types';
+import type { TemplateRequest } from '../types';
 
 jest.mock('../api/api');
 
@@ -20,20 +20,22 @@ const apiMock = api as jest.Mocked<typeof api>;
 describe('useCreateTemplate', () => {
   const mockTemplateRequest: TemplateRequest = {
     name: 'New Template',
+    owner: 'securitySolution',
+    definition: 'fields:\n  - name: test_field\n    type: keyword',
     description: 'New Description',
-    solution: 'security',
-    fields: 5,
+    fieldCount: 5,
     tags: ['tag1'],
-    createdBy: 'user1',
+    author: 'user1',
     isDefault: false,
+    usageCount: 0,
+    lastUsedAt: '2024-01-01T00:00:00.000Z',
   };
 
   const mockTemplateResponse: Template = {
     ...mockTemplateRequest,
-    key: 'template-new',
-    lastUpdate: '2024-01-01T00:00:00.000Z',
-    lastTimeUsed: '2024-01-01T00:00:00.000Z',
-    usage: 0,
+    templateId: 'template-new',
+    templateVersion: 1,
+    deletedAt: null,
   };
 
   beforeEach(() => {

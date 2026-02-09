@@ -56,22 +56,22 @@ describe('templatesUrlStateSerializer', () => {
     expect(result.tags).toEqual(['tag1', 'tag2']);
   });
 
-  it('filters out empty createdBy array', () => {
+  it('filters out empty author array', () => {
     const result = templatesUrlStateSerializer({
       ...DEFAULT_QUERY_PARAMS,
-      createdBy: [],
+      author: [],
     });
 
-    expect(result.createdBy).toBeUndefined();
+    expect(result.author).toBeUndefined();
   });
 
-  it('includes non-empty createdBy array', () => {
+  it('includes non-empty author array', () => {
     const result = templatesUrlStateSerializer({
       ...DEFAULT_QUERY_PARAMS,
-      createdBy: ['user1', 'user2'],
+      author: ['user1', 'user2'],
     });
 
-    expect(result.createdBy).toEqual(['user1', 'user2']);
+    expect(result.author).toEqual(['user1', 'user2']);
   });
 
   it('preserves numeric values', () => {

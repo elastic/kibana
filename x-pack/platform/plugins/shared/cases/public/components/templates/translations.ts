@@ -309,6 +309,10 @@ export const COLUMN_TAGS = i18n.translate('xpack.cases.templates.column.tags', {
   defaultMessage: 'Tags',
 });
 
+export const COLUMN_AUTHOR = i18n.translate('xpack.cases.templates.column.author', {
+  defaultMessage: 'Author',
+});
+
 export const COLUMN_LAST_UPDATE = i18n.translate('xpack.cases.templates.column.lastUpdate', {
   defaultMessage: 'Last update',
 });

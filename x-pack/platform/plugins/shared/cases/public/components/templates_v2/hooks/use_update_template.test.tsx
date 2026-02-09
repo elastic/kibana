@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
-
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import { useUpdateTemplate } from './use_update_template';
 import * as api from '../api/api';
-import type { Template, TemplateUpdateRequest } from '../types';
+import type { TemplateUpdateRequest } from '../types';
 
 jest.mock('../api/api');
 
@@ -24,16 +24,18 @@ describe('useUpdateTemplate', () => {
   };
 
   const mockTemplateResponse: Template = {
-    key: 'template-1',
+    templateId: 'template-1',
     name: 'Updated Template',
+    owner: 'securitySolution',
+    definition: 'fields:\n  - name: field1\n    type: keyword',
+    templateVersion: 1,
+    deletedAt: null,
     description: 'Updated Description',
-    solution: 'security',
-    fields: 5,
+    fieldCount: 5,
     tags: ['tag1'],
-    createdBy: 'user1',
-    lastUpdate: '2024-01-02T00:00:00.000Z',
-    lastTimeUsed: '2024-01-01T00:00:00.000Z',
-    usage: 10,
+    author: 'user1',
+    lastUsedAt: '2024-01-01T00:00:00.000Z',
+    usageCount: 10,
     isDefault: false,
   };
 

@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-export interface Template {
-  key: string;
-  name: string;
-  description: string;
-  solution: 'security' | 'observability' | 'other';
-  fields: number;
-  tags: string[];
-  createdBy: string;
-  lastUpdate: string;
-  lastTimeUsed: string;
-  usage: number;
-  isDefault: boolean;
-}
+import type {
+  Template,
+  CreateTemplateInput,
+  PatchTemplateInput,
+} from '../../../common/types/domain/template/v1';
 
 export interface TemplatesFindResponse {
   templates: Template[];
@@ -26,9 +18,9 @@ export interface TemplatesFindResponse {
   total: number;
 }
 
-export type TemplateRequest = Omit<Template, 'key' | 'lastUpdate' | 'lastTimeUsed' | 'usage'>;
+export type TemplateRequest = CreateTemplateInput;
 
-export type TemplateUpdateRequest = Partial<TemplateRequest>;
+export type TemplateUpdateRequest = PatchTemplateInput;
 
 export interface DeleteTemplateResponse {
   success: boolean;
@@ -60,7 +52,7 @@ export interface QueryParams {
   sortOrder: SortOrder;
   search: string;
   tags: string[];
-  createdBy: string[];
+  author: string[];
 }
 
 export type TemplatesURLQueryParams = Partial<QueryParams>;

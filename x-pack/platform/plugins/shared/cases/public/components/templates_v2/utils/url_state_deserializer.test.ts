@@ -49,16 +49,16 @@ describe('templatesUrlStateDeserializer', () => {
     expect(result.tags).toEqual(['tag1', 'tag2']);
   });
 
-  it('preserves createdBy array', () => {
-    const result = templatesUrlStateDeserializer({ createdBy: ['user1', 'user2'] });
+  it('preserves author array', () => {
+    const result = templatesUrlStateDeserializer({ author: ['user1', 'user2'] });
 
-    expect(result.createdBy).toEqual(['user1', 'user2']);
+    expect(result.author).toEqual(['user1', 'user2']);
   });
 
   it('preserves sortField', () => {
-    const result = templatesUrlStateDeserializer({ sortField: 'lastUpdate' });
+    const result = templatesUrlStateDeserializer({ sortField: 'lastUsedAt' });
 
-    expect(result.sortField).toBe('lastUpdate');
+    expect(result.sortField).toBe('lastUsedAt');
   });
 
   it('sanitizes invalid sortOrder', () => {

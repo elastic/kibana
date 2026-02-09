@@ -16,9 +16,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
 import * as i18n from '../../templates/translations';
-import type { Template } from '../types';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
@@ -81,7 +81,7 @@ export const AllTemplatesPage: React.FC = () => {
 
   const tableRowProps = useCallback(
     (template: Template) => ({
-      'data-test-subj': `templates-table-row-${template.key}`,
+      'data-test-subj': `templates-table-row-${template.templateId}`,
     }),
     []
   );
@@ -90,12 +90,10 @@ export const AllTemplatesPage: React.FC = () => {
   const isInitialLoading = isLoading && isDataEmpty;
 
   const hasFilters =
-    queryParams.search.length > 0 ||
-    queryParams.tags.length > 0 ||
-    queryParams.createdBy.length > 0;
+    queryParams.search.length > 0 || queryParams.tags.length > 0 || queryParams.author.length > 0;
 
   const handleClearFilters = useCallback(() => {
-    setQueryParams({ search: '', tags: [], createdBy: [], page: 1 });
+    setQueryParams({ search: '', tags: [], author: [], page: 1 });
   }, [setQueryParams]);
 
   const totalTemplates = pagination.totalItemCount;
@@ -204,3 +202,6 @@ export const AllTemplatesPage: React.FC = () => {
   );
 };
 AllTemplatesPage.displayName = 'AllTemplatesPage';
+
+// eslint-disable-next-line import/no-default-export
+export { AllTemplatesPage as default };

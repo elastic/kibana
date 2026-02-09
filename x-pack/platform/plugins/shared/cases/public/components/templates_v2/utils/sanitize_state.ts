@@ -9,7 +9,7 @@ import { PAGE_SIZE_OPTIONS, SORT_ORDER_VALUES, DEFAULT_QUERY_PARAMS } from '../c
 import type { QueryParams } from '../types';
 
 export const sanitizeState = (state: Partial<QueryParams> = {}): Partial<QueryParams> => {
-  const { perPage, sortOrder, tags, createdBy, ...rest } = state;
+  const { perPage, sortOrder, tags, author, ...rest } = state;
 
   const sanitized: Partial<QueryParams> = { ...rest };
 
@@ -28,9 +28,9 @@ export const sanitizeState = (state: Partial<QueryParams> = {}): Partial<QueryPa
     sanitized.tags = Array.isArray(tags) ? tags.filter(Boolean) : [];
   }
 
-  // Ensure createdBy is an array of strings
-  if (createdBy !== undefined) {
-    sanitized.createdBy = Array.isArray(createdBy) ? createdBy.filter(Boolean) : [];
+  // Ensure author is an array of strings
+  if (author !== undefined) {
+    sanitized.author = Array.isArray(author) ? author.filter(Boolean) : [];
   }
 
   return sanitized;
