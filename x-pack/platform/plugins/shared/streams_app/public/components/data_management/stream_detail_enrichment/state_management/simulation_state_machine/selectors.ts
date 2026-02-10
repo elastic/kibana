@@ -68,37 +68,6 @@ export const selectOriginalPreviewRecords = createSelector(
   }
 );
 
-/**
- * Selects an subset of samples be sent
- * for a simulation taking into account the currently
- * selected condition filter.
- *
- * If no condition is selected, all samples are returned.
- *
- * If a condition is selected, samples are filtered to include
- * only those that correspond to documents processed by
- * the processors which are direct descendants of the selected
- * condition.
- */
-export const selectSamplesForSimulation = createSelector(
-  [
-    (context: SimulationContext) => context.samples,
-    (context: SimulationContext) => context.baseSimulation?.documents,
-    (context: SimulationContext) => context.steps,
-    (context: SimulationContext) => context.selectedConditionId,
-  ],
-  (samples, baseSimulationDocuments = [], steps, selectedConditionId) => {
-    // Always simulate on the full sample set.
-    //
-    // Filtering by condition is applied to the preview selectors using the condition-noop tag in `processed_by`.
-    // This avoids biasing condition match rates to 100% by simulating only the already-matching docs.
-    void baseSimulationDocuments;
-    void steps;
-    void selectedConditionId;
-    return samples;
-  }
-);
-
 export const selectHasSimulatedRecords = createSelector(
   [(context: SimulationContext) => context.simulation?.documents],
   (documents) => {
