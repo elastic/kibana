@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -101,7 +101,7 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnSchema.extends(tagcloudStateTagsByOptionsSchema),
+    tag_by: esqlColumnOperationWithLabelAndFormatSchema.extends(tagcloudStateTagsByOptionsSchema),
   },
   { meta: { id: 'tagcloudESQL' } }
 );
