@@ -38,6 +38,7 @@ describe('ScriptsLibraryTable', () => {
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
+
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
 
@@ -83,7 +84,9 @@ describe('ScriptsLibraryTable', () => {
     it('renders record range label', () => {
       act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
-      expect(renderResult.getByTestId('test-record-range-label')).toBeInTheDocument();
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId('test-record-range-label')).toBeInTheDocument();
     });
 
     it('renders scripts table', () => {
@@ -317,12 +320,13 @@ describe('ScriptsLibraryTable', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const actionsButton = getByTestId('test-row-actions-script-1');
+      const actionsButton = getByTestId('test-row-actions-script-1-button');
 
       await fireEvent.click(actionsButton);
 
-      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      const actionPanel = getByTestId('test-row-actions-script-1-contextMenuPanel');
       expect(actionPanel).toBeInTheDocument();
+
       const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
       expect(actionItems).toHaveLength(3);
       const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
@@ -341,17 +345,15 @@ describe('ScriptsLibraryTable', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const actionsButton = getByTestId('test-row-actions-script-1');
-
+      const actionsButton = getByTestId('test-row-actions-script-1-button');
       await fireEvent.click(actionsButton);
 
-      const actionPanel = getByTestId('test-row-actions-script-1-panel');
+      const actionPanel = getByTestId('test-row-actions-script-1-contextMenuPanel');
       expect(actionPanel).toBeInTheDocument();
       const actionItems = actionPanel.querySelectorAll('.euiContextMenuItem');
       expect(actionItems).toHaveLength(2);
       const actionItemLabels = Array.from(actionItems).map((item) => item.textContent);
       expect(actionItemLabels).toEqual(['View details', 'Download script']);
     });
-    //
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import {
   createAppRootMockRenderer,
@@ -170,9 +170,10 @@ describe('ScriptsLibrary', () => {
       );
     });
 
-    it('should show details flyout when clicked on row action item', async () => {
-      const scriptsList = scriptsGenerator.generateListOfScripts(Array.from({ length: 1 }));
-      setupScriptsList(scriptsList);
+    it('should show details flyout when clicked on row action `View details` item', async () => {
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      setupScriptsList([script]);
 
       act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
@@ -181,19 +182,21 @@ describe('ScriptsLibrary', () => {
       const range = getByTestId('test-table-record-range-label');
       expect(range).toHaveTextContent(`Showing 1-1 of 1 script`);
 
-      const firstScriptId = scriptsList[0].id;
-      const actionsButton = getByTestId(`test-table-row-actions-${firstScriptId}`);
+      const actionsButton = getByTestId(`test-table-row-actions-${scriptId}`);
       expect(actionsButton).toBeInTheDocument();
       await fireEvent.click(actionsButton);
-      const actionPanel = getByTestId(`test-table-row-actions-${firstScriptId}-panel`);
-      expect(actionPanel).toBeInTheDocument();
 
-      const detailsButton = getByTestId('actionDetails');
-      expect(detailsButton).toBeInTheDocument();
-      await fireEvent.click(detailsButton);
+      waitFor(() => {
+        const actionsPanel = getByTestId(`test-table-row-actions-${scriptId}-contextMenuPanel`);
+        expect(actionsPanel).toBeInTheDocument();
+      });
 
-      const flyout = getByTestId('test-endpointScriptFlyout-details');
-      expect(flyout).toBeInTheDocument();
+      waitFor(async () => {
+        const detailsButton = getByTestId('actionDetails');
+        expect(detailsButton).toBeInTheDocument();
+        await fireEvent.click(detailsButton);
+        expect(getByTestId('test-endpointScriptFlyout-details')).toBeInTheDocument();
+      });
     });
   });
 });
