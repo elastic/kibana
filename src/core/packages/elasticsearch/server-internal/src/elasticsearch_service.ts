@@ -24,7 +24,11 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  ClusterClient,
+  AgentManager,
+  type OnRequestHandler,
+} from '@kbn/core-elasticsearch-client-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
@@ -55,6 +59,7 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
+  private readonly isServerless: boolean;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -64,12 +69,12 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
-  // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
+    this.isServerless = coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
@@ -238,6 +243,7 @@ export class ElasticsearchService
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      onRequest: this.getOnRequestHandler(),
     });
   }
 
@@ -248,5 +254,30 @@ export class ElasticsearchService
       });
     }
     return this.agentManager;
+  }
+
+  private getOnRequestHandler(): OnRequestHandler | undefined {
+    if (!this.isServerless) return undefined;
+
+    return ({ scoped }, params, options) => {
+      if (!scoped) return;
+      if (!this.cpsEnabled) return;
+
+      const acceptedParams = params.meta?.acceptedParams;
+      if (!acceptedParams?.includes('project_routing')) return;
+
+      const querystring = options?.querystring as Record<string, unknown> | undefined;
+      if (querystring?.project_routing != null) return;
+
+      const body = params.body as Record<string, unknown> | undefined;
+      if (body?.pit != null) return;
+
+      if (options) {
+        options.querystring = {
+          ...querystring,
+          project_routing: '_tag._alias:_local',
+        };
+      }
+    };
   }
 }
