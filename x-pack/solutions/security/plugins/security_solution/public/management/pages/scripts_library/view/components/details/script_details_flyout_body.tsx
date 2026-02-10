@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useFormatBytes } from '../../../../../../common/components/formatted_bytes';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import { EndpointScriptDetailItem } from './script_detail_item';
@@ -29,6 +30,7 @@ interface EndpointScriptDetailsFlyoutBodyProps {
 }
 export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutBodyProps>(
   ({ scriptItem, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const formatBytes = useFormatBytes();
     const orderedScriptDetails: Record<KeyType, boolean | string | number | string[]> =
       useMemo(() => {
@@ -71,7 +73,7 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
     );
 
     return (
-      <EuiFlyoutBody data-test-subj={dataTestSubj}>
+      <EuiFlyoutBody data-test-subj={getTestId()}>
         <EuiFlexGroup direction="column" gutterSize="m">
           {Object.entries(orderedScriptDetails ?? {}).map(([key, value]) => {
             const label = i18nFlyoutDetailsLabels[key as KeyType].label;
@@ -84,7 +86,7 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
             }
             return (
               label && (
-                <EuiFlexItem key={key} data-test-subj={`${dataTestSubj}-detail-${key}`}>
+                <EuiFlexItem key={key} data-test-subj={getTestId(`detail-${key}`)}>
                   <EndpointScriptDetailItem label={label} appendToLabel={appendToLabel} key={key}>
                     {renderScriptDetails(key as KeyType, value)}
                   </EndpointScriptDetailItem>

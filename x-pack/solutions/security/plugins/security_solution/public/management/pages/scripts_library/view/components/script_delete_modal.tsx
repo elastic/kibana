@@ -63,7 +63,7 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
     return (
       <EuiModal
         onClose={onClickCancel}
-        data-test-subj={dataTestSubj}
+        data-test-subj={getTestId()}
         aria-labelledby={modalTitleId}
         role="alertdialog"
       >
