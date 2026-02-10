@@ -25,7 +25,22 @@ export const JiraDataCenter: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
   auth: {
-    types: ['basic'],
+    types: [
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          meta: {
+            token: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.jiraDataCenter.auth.token.label',
+                { defaultMessage: 'Personal Access Token' }
+              ),
+            },
+          },
+        },
+      },
+    ],
   },
   schema: z.object({
     url: z
