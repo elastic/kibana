@@ -11,6 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { hasChangedRetention, hasProcessingSteps, hasFieldOverrides } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
+import { getErrorMessage } from '../../streams/errors/get_error_message';
 
 // Reader abstraction to hide storage/client specifics from the collector
 export interface StreamsUsageReader {
@@ -33,9 +34,7 @@ function createFetchFunction(logger: Logger, getReader: () => Promise<StreamsUsa
       };
     } catch (error) {
       logger.error(
-        `Failed to collect Streams telemetry data: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+        `Failed to collect Streams telemetry data: ${getErrorMessage(error)}`
       );
       throw error;
     }
