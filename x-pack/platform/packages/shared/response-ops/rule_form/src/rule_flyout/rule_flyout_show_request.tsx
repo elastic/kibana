@@ -16,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTabs,
-  EuiTab,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
@@ -25,10 +23,8 @@ import {
   SHOW_REQUEST_MODAL_TITLE,
   RULE_FLYOUT_FOOTER_BACK_TEXT,
   RULE_FLYOUT_HEADER_BACK_TEXT,
-  SHOW_REQUEST_MODAL_CREATE_TAB,
-  SHOW_REQUEST_MODAL_UPDATE_TAB,
 } from '../translations';
-import { RequestCodeBlock } from '../components';
+import { RequestCodeBlock, ShowRequestTabs } from '../components';
 import type { ShowRequestActivePage } from '../types';
 import { useRuleFormState } from '../hooks';
 
@@ -65,26 +61,7 @@ export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) =
         </p>
         <EuiSpacer />
 
-        <EuiFlexItem>
-          <EuiTabs>
-            <EuiTab
-              isSelected={activeTab === 'create'}
-              onClick={() => setActiveTab('create')}
-              data-test-subj="showRequestCreateTab"
-            >
-              {SHOW_REQUEST_MODAL_CREATE_TAB}
-            </EuiTab>
-            {id && (
-              <EuiTab
-                isSelected={activeTab === 'update'}
-                onClick={() => setActiveTab('update')}
-                data-test-subj="showRequestCreateTab"
-              >
-                {SHOW_REQUEST_MODAL_UPDATE_TAB}
-              </EuiTab>
-            )}
-          </EuiTabs>
-        </EuiFlexItem>
+        {id && <ShowRequestTabs activeTab={activeTab} onTabChange={setActiveTab} />}
 
         <RequestCodeBlock data-test-subj="flyoutRequestCodeBlock" activeTab={activeTab} />
       </EuiFlyoutBody>

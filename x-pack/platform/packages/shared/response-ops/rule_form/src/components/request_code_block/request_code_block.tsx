@@ -28,7 +28,7 @@ const stringifyBodyRequest = ({
 }): string => {
   try {
     const request =
-      activeTab === 'create'
+      activeTab === 'update'
         ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
         : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
