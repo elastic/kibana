@@ -18,8 +18,13 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
  */
 export const getViews = cacheParametrizedAsyncFunction(
   async (http: HttpStart) => {
-    const result = await http.get<EsqlViewsResult>('/internal/esql/views');
-    return result ?? { views: [] };
+    try {
+      const result = await http.get<EsqlViewsResult>('/internal/esql/views');
+      return result ?? { views: [] };
+    } catch {
+      // API may be unavailable (e.g. 404 in FTR when ES plugin route is not registered)
+      return { views: [] };
+    }
   },
   (http: HttpStart) => 'views',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
