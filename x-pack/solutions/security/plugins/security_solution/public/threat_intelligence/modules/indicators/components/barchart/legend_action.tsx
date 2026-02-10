@@ -65,6 +65,8 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       key={TIMELINE_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
+      showPopover={setPopover}
       data-test-subj={TIMELINE_BUTTON_TEST_ID}
     />,
     <CopyToClipboardContextMenu
