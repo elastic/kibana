@@ -8,8 +8,8 @@
 import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { getFieldsFromSchema, renderField } from './field_builder';
-import { type MetaFunctions, type GetMetaFn, type AddMetaFn } from './meta_types';
-import { getMeta as defaultGetMeta, addMeta as defaultAddMeta } from './schema_connector_metadata';
+import { type MetaFunctions, type GetMetaFn, type SetMetaFn } from './meta_types';
+import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from './schema_connector_metadata';
 
 export interface FormConfig {
   disabled?: boolean;
@@ -26,7 +26,7 @@ export interface GenerateFormFieldsParams<TSchema extends z.ZodObject<z.ZodRawSh
    *
    * This is useful when your schema was created using a different Zod instance
    * than the form generator uses internally (e.g., due to webpack module duplication).
-   * By passing the same getMeta/setMeta/addMeta functions that were used when
+   * By passing the same getMeta/setMeta functions that were used when
    * creating the schema, you ensure metadata is correctly retrieved.
    *
    * @example
@@ -35,7 +35,7 @@ export interface GenerateFormFieldsParams<TSchema extends z.ZodObject<z.ZodRawSh
    * const zodSchema = fromConnectorSpecSchema(jsonSchema);
    * generateFormFields({
    *   schema: zodSchema,
-   *   metaFunctions: { getMeta, setMeta, addMeta },
+   *   metaFunctions: { getMeta, setMeta },
    * });
    */
   metaFunctions?: Partial<MetaFunctions>;
@@ -47,7 +47,7 @@ export interface GenerateFormFieldsParams<TSchema extends z.ZodObject<z.ZodRawSh
  */
 export interface ResolvedMetaFunctions {
   getMeta: GetMetaFn;
-  addMeta: AddMetaFn;
+  setMeta: SetMetaFn;
 }
 
 /*
@@ -70,7 +70,7 @@ export function generateFormFields<TSchema extends z.ZodObject<z.ZodRawShape>>({
 }: GenerateFormFieldsParams<TSchema>) {
   const resolvedMeta: ResolvedMetaFunctions = {
     getMeta: metaFunctions?.getMeta ?? defaultGetMeta,
-    addMeta: metaFunctions?.addMeta ?? defaultAddMeta,
+    setMeta: metaFunctions?.setMeta ?? defaultSetMeta,
   };
 
   const fields = getFieldsFromSchema({ schema, formConfig, meta: resolvedMeta });

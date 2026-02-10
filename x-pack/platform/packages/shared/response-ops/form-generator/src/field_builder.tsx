@@ -14,7 +14,7 @@ import { EuiText } from '@elastic/eui';
 import type { FormConfig, ResolvedMetaFunctions } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
-import { addMeta as defaultAddMeta, getMeta as defaultGetMeta } from './schema_connector_metadata';
+import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from './schema_connector_metadata';
 
 const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
   defaultMessage: 'Optional',
@@ -43,14 +43,16 @@ interface GetFieldFromSchemaProps {
   schema: z.ZodType;
   path: string;
   formConfig: FormConfig;
+  meta: ResolvedMetaFunctions;
 }
 export const getFieldFromSchema = ({
   schema: outerSchema,
   path,
   formConfig,
+  meta,
 }: GetFieldFromSchemaProps) => {
   // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema. Because we might unwrap default values, we also extract the default value here.
-  const { schema, defaultValue, isOptional } = extractSchemaCore(outerSchema);
+  const { schema, defaultValue, isOptional } = extractSchemaCore(outerSchema, meta);
 
   return {
     path,
@@ -85,18 +87,23 @@ export const getFieldFromSchema = ({
   };
 };
 
+const defaultMeta: ResolvedMetaFunctions = {
+  getMeta: defaultGetMeta,
+  setMeta: defaultSetMeta,
+};
+
 export const getFieldsFromSchema = <T extends z.ZodRawShape>({
   schema,
   rootPath,
   formConfig,
-  meta = { getMeta: defaultGetMeta, addMeta: defaultAddMeta },
+  meta = defaultMeta,
 }: {
   schema: z.ZodObject<T>;
   rootPath?: string;
   formConfig: FormConfig;
   meta?: ResolvedMetaFunctions;
 }) => {
-  const { getMeta, addMeta } = meta;
+  const { getMeta, setMeta } = meta;
   const fields: FieldDefinition[] = [];
   const isFormOrParentDisabled = formConfig.disabled || getMeta(schema).disabled;
 
@@ -107,13 +114,14 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
 
     // If the form or parent schema is disabled, propagate that to the field schema
     if (isFormOrParentDisabled && fieldMeta.disabled !== false) {
-      addMeta(fieldSchema, { disabled: true });
+      setMeta(fieldSchema, { ...fieldMeta, disabled: true });
     }
 
     const field = getFieldFromSchema({
       schema: fieldSchema,
       path,
       formConfig,
+      meta,
     });
 
     fields.push(field);
@@ -126,14 +134,11 @@ interface RenderFieldProps {
   field: FieldDefinition;
   meta?: ResolvedMetaFunctions;
 }
-export const renderField = ({
-  field,
-  meta = { getMeta: defaultGetMeta, addMeta: defaultAddMeta },
-}: RenderFieldProps) => {
-  const { getMeta, addMeta } = meta;
+export const renderField = ({ field, meta = defaultMeta }: RenderFieldProps) => {
+  const { getMeta, setMeta } = meta;
   const { schema, validate, path, formConfig, defaultValue, isOptional } = field;
 
-  const WidgetComponent = getWidgetComponent(schema, { getMeta, addMeta });
+  const WidgetComponent = getWidgetComponent(schema, { getMeta, setMeta });
 
   // getWidgetComponent might update meta information, therefore we get the meta after calling it
   const { label, helpText, disabled, placeholder } = getMeta(schema);

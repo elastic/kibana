@@ -29,7 +29,7 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   formConfig,
   meta,
 }) => {
-  const { getMeta, addMeta } = meta;
+  const { getMeta, setMeta } = meta;
   const optionSchema = options[0];
 
   if (!optionSchema) {
@@ -38,7 +38,9 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
 
   // Hide the discriminator field since its value is implied by the selected option
   // E.g., if the option is { type: z.literal('basic'), token: z.string() }, then the 'type' field should be hidden
-  addMeta(optionSchema.shape[discriminatorKey] as z.ZodType, {
+  const discriminatorField = optionSchema.shape[discriminatorKey] as z.ZodType;
+  setMeta(discriminatorField, {
+    ...getMeta(discriminatorField),
     hidden: true,
     disabled: true,
   });
@@ -46,7 +48,7 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   // If the parent discriminated union is disabled, propagate that to the option schema
   const isParentDisabled = formConfig.disabled || getMeta(schema).disabled;
   if (isParentDisabled && getMeta(optionSchema).disabled !== false) {
-    addMeta(optionSchema, { disabled: true });
+    setMeta(optionSchema, { ...getMeta(optionSchema), disabled: true });
   }
 
   const fields = getFieldsFromSchema({
