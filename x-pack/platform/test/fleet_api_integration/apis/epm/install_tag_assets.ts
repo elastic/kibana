@@ -195,5 +195,45 @@ export default function (providerContext: FtrProviderContext) {
         expect(pkgTag2).equal(undefined);
       });
     });
+
+    describe('Handles concurrent installs of the same package', () => {
+      before(async () => {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
+
+        // Ensure the install requests must create tags (tags are not cleaned up on uninstall)
+        await uninstallPackage(pkgName, pkgVersion);
+        await deleteTag('fleet-managed-default');
+        await deleteTag(`fleet-pkg-${pkgName}-default`);
+      });
+
+      after(async () => {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
+
+        await uninstallPackage(pkgName, pkgVersion);
+      });
+
+      it('should not fail (no 500) when the same package is installed concurrently', async () => {
+        const [res1, res2] = await Promise.all([
+          supertest
+            .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true }),
+          supertest
+            .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true }),
+        ]);
+
+        // Both concurrent installs should succeed. This specifically covers tag SO conflict-retry.
+        expect(res1.status).to.be(200);
+        expect(res2.status).to.be(200);
+
+        const managedTag = await getTag('fleet-managed-default');
+        expect(managedTag).not.equal(undefined);
+
+        const pkgTag = await getTag(`fleet-pkg-${pkgName}-default`);
+        expect(pkgTag).not.equal(undefined);
+      });
+    });
   });
 }
