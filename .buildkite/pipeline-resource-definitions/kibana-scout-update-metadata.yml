@@ -22,7 +22,8 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main
+      # Schedules set BUILDKITE_BRANCH; the step uses it as the PR base. Add a schedule per target branch.
+      branch_configuration: main 9.3 9.2 9.1 8.19
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
@@ -44,9 +45,25 @@ spec:
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
-        Daily build:
+        Daily (main):
           cronline: 0 0 * * * America/New_York
-          message: Daily build
+          message: Daily Scout metadata update
           branch: main
+        Daily (9.3):
+          cronline: 0 0 * * * America/New_York
+          message: Daily Scout metadata update
+          branch: '9.3'
+        Daily (9.2):
+          cronline: 0 0 * * * America/New_York
+          message: Daily Scout metadata update
+          branch: '9.2'
+        Daily (9.1):
+          cronline: 0 0 * * * America/New_York
+          message: Daily Scout metadata update
+          branch: '9.1'
+        Daily (8.19):
+          cronline: 0 0 * * * America/New_York
+          message: Daily Scout metadata update
+          branch: '8.19'
       tags:
         - kibana
