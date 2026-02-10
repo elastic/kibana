@@ -104,7 +104,9 @@ export const UriPartsProcessorForm = () => {
           fullWidth
           helpText={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsRemoveIfSuccessfulHelpText',
-            { defaultMessage: 'When enabled, the source field is removed after a successful parse.' }
+            {
+              defaultMessage: 'When enabled, the source field is removed after a successful parse.',
+            }
           )}
         >
           <EuiSwitch
@@ -128,4 +130,3 @@ export const UriPartsProcessorForm = () => {
     </>
   );
 };
-
