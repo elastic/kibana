@@ -441,7 +441,18 @@ export class StreamsClient {
    */
   async getStream(name: string): Promise<Streams.all.Definition> {
     try {
-      const response = await this.dependencies.storageClient.get({ id: name });
+      const response = await this.dependencies.storageClient.get({
+        id: name,
+        query: {
+          bool: {
+            must: {
+              exists: {
+                field: 'ingest',
+              },
+            },
+          },
+        },
+      });
 
       const streamDefinition = this.getStreamDefinitionFromSource(response._source);
 
@@ -473,9 +484,22 @@ export class StreamsClient {
 
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
     return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
-        return this.getStreamDefinitionFromSource(response._source);
-      }),
+      this.dependencies.storageClient
+        .get({
+          id: name,
+          query: {
+            bool: {
+              must: {
+                exists: {
+                  field: 'ingest',
+                },
+              },
+            },
+          },
+        })
+        .then((response) => {
+          return this.getStreamDefinitionFromSource(response._source);
+        }),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
@@ -647,7 +671,17 @@ export class StreamsClient {
     Array<{ stream: Streams.all.Definition; exists: boolean }>
   > {
     const [managedStreams, unmanagedStreams] = await Promise.all([
-      this.getManagedStreams(),
+      this.getManagedStreams({
+        query: {
+          bool: {
+            must: {
+              exists: {
+                field: 'ingest',
+              },
+            },
+          },
+        },
+      }),
       this.getUnmanagedDataStreams(),
     ]);
 
@@ -785,6 +819,11 @@ export class StreamsClient {
       query: {
         bool: {
           filter: [{ terms: { name: ancestorIds } }],
+          must: {
+            exists: {
+              field: 'ingest',
+            },
+          },
         },
       },
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
@@ -794,6 +833,11 @@ export class StreamsClient {
     return this.getManagedStreams({
       query: {
         bool: {
+          must: {
+            exists: {
+              field: 'ingest',
+            },
+          },
           filter: [
             {
               prefix: {

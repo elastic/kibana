@@ -55,7 +55,15 @@ export class StatsTelemetryService {
             from,
             size: pageSize,
             track_total_hits: false,
-            query: { match_all: {} },
+            query: {
+              bool: {
+                must: {
+                  exists: {
+                    field: 'ingest',
+                  },
+                },
+              },
+            },
           });
 
           const hits = resp.hits.hits.filter(
