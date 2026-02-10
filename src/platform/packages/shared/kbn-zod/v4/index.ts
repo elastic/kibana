@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
+// Re-export z namespace explicitly — tsgo has trouble following the chained
+// `export *` through .js extension imports in zod's declaration files.
+export { z } from 'zod/v4';
+export type * from 'zod/v4';

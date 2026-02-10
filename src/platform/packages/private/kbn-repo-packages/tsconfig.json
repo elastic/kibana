@@ -3,19 +3,9 @@
   "compilerOptions": {
     "checkJs": true,
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-  ],
-  "exclude": [
-    "target/**/*",
-  ],
-  "kbn_references": [
-    "@kbn/projects-solutions-groups",
-  ]
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/projects-solutions-groups", "@kbn/repo-info"]
 }

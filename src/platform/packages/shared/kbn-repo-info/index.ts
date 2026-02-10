@@ -10,7 +10,6 @@
 import { resolve, parse, dirname } from 'path';
 import { readFileSync, realpathSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 
 /**
  * Get the current directory, working in both ESM and CJS contexts.
@@ -34,7 +33,9 @@ function getCurrentDir(): string {
   }
 
   // Last resort: use createRequire to get the directory
-  throw new Error('Unable to determine current directory: neither import.meta.url nor __dirname available');
+  throw new Error(
+    'Unable to determine current directory: neither import.meta.url nor __dirname available'
+  );
 }
 
 /**

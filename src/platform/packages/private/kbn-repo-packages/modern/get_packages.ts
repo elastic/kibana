@@ -88,7 +88,7 @@ function updatePackageMap(repoRoot: string, manifestPaths: string[]): boolean {
 
     const list = Array.from(dirsById)
       .filter((e) => e[1].length > 1)
-      .flatMap(([pkgId, paths]) => [`${pkgId}:`, ...paths.map((p) => `  - ${p}`)])
+      .flatMap(([pkgId, paths]) => [`${pkgId}:`, ...paths.map((p: string) => `  - ${p}`)])
       .join('\n');
 
     throw new Error(`Multiple packages found using the same id:\n${list}`);

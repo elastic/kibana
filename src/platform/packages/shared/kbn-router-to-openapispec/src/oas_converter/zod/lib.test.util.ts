@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
-export function createLargeSchema() {
+export function createLargeSchema(): z.ZodObject<Record<string, z.ZodTypeAny>> {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),

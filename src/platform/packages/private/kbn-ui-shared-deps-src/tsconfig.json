@@ -2,20 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-    ]
+    "esModuleInterop": true,
+    "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js",
-  ],
-  "exclude": [
-    "src/entry.js",
-    "**/*.config.js",
-    "target/**/*",
-  ],
-  "kbn_references": [
-    "@kbn/repo-info",
-  ]
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["src/entry.js", "**/*.config.js", "target/**/*"],
+  "kbn_references": ["@kbn/repo-info", "@kbn/vite-config"]
 }

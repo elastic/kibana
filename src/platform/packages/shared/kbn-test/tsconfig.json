@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "stripInternal": true,
+    "esModuleInterop": true,
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts", "**/*.js", "src/jest/jest_flags.json"],

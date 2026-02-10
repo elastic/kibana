@@ -30,6 +30,29 @@ const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai'];
  * @class
  */
 class Package {
+  /** Absolute path to this package directory */
+  readonly directory: string;
+  /** repo relative path to the root of the package */
+  readonly normalizedRepoRelativeDir: string;
+  /**
+   * copy of the parsed kibana.jsonc manifest of the package
+   * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
+   */
+  readonly manifest: any;
+  /**
+   * copy of the parsed package.json file in the package
+   * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
+   */
+  readonly pkg: any;
+  /** the name/import id of the package */
+  readonly name: string;
+  /** the name/import id of the package */
+  readonly id: string;
+  /** the group to which this package belongs */
+  readonly group: any;
+  /** the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group */
+  readonly visibility: any;
+
   /**
    * Create a Package object from a package directory. Reads some files from the package and returns
    * a Promise for a Package instance.
@@ -77,65 +100,15 @@ class Package {
      */
     pkg: any
   ) {
-    /**
-     * Absolute path to this package directory
-     * @type {string}
-     * @readonly
-     */
     this.directory = dir;
-
-    /**
-     * repo relative path to the root of the package
-     * @type {string}
-     * @readonly
-     */
     this.normalizedRepoRelativeDir = normalize(Path.relative(repoRoot, dir));
-
-    /**
-     * copy of the parsed kibana.jsonc manifest of the package
-     *
-     * @type {import('./types').KibanaPackageManifest}
-     * @readonly
-     * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
-     */
     this.manifest = manifest;
-
-    /**
-     * copy of the parsed package.json file in the package
-     * @type {import('./types').ParsedPackageJson | undefined}
-     * @readonly
-     * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
-     */
     this.pkg = pkg;
-
-    /**
-     * the name/import id of the package
-     * @type {string}
-     * @readonly
-     */
     this.name = manifest.id;
-
-    /**
-     * the name/import id of the package
-     * @type {string}
-     * @readonly
-     */
     this.id = manifest.id;
 
     const { group, visibility } = this.determineGroupAndVisibility();
-
-    /**
-     * the group to which this package belongs
-     * @type {import('@kbn/projects-solutions-groups').ModuleGroup}
-     * @readonly
-     */
-
     this.group = group;
-    /**
-     * the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group
-     * @type {import('@kbn/projects-solutions-groups').ModuleVisibility}
-     * @readonly
-     */
     this.visibility = visibility;
   }
 

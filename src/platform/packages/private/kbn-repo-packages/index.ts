@@ -24,3 +24,4 @@ export { getRepoRels, getRepoRelsSync } from './modern/get_repo_rels';
 export { default as Jsonc } from './utils/jsonc';
 export { getPluginPackagesFilter, getPluginSearchPaths } from './modern/plugins';
 export { readPackageJson } from './modern/parse_package_json';
+export type { PluginPackageManifest } from './modern/types';

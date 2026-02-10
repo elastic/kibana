@@ -3,19 +3,9 @@
   "compilerOptions": {
     "outDir": "target/types",
     "checkJs": true,
-    "types": [
-      "node",
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js",
-  ],
-  "exclude": [
-    "**/*.config.js",
-    "target/**/*",
-  ],
-  "kbn_references": [
-    "@kbn/repo-info"
-  ]
+  "include": ["**/*.ts", "**/*.js"],
+  "exclude": ["**/*.config.js", "**/*.config.ts", "target/**/*"],
+  "kbn_references": ["@kbn/repo-info"]
 }

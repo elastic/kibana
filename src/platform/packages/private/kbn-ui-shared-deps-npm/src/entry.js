@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-nocheck — bundle entry point that re-exports npm dependencies; type checking adds no value here
+
 /**
  * Entry point for the @kbn/ui-shared-deps-npm bundle.
  * This replaces the webpack DLL entry array.

@@ -2,6 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "module": "esnext",
     "types": ["jest", "node"]
   },
   "include": ["index.ts", "types.ts"],
