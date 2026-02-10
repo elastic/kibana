@@ -15,13 +15,18 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
+  EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import { validateSkillId } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -63,6 +68,10 @@ interface SkillFormViewProps extends SkillFormBaseProps {
 
 export type SkillFormProps = SkillFormCreateProps | SkillFormEditProps | SkillFormViewProps;
 
+const formFlexColumnStyles = css`
+  min-width: 0;
+`;
+
 export const SkillForm: React.FC<SkillFormProps> = ({
   mode,
   skill,
@@ -70,7 +79,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
   isSubmitting,
   onSave,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { tools } = useTools();
 
@@ -206,7 +214,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
   }, [mode, skill]);
 
   return (
-    <KibanaPageTemplate data-test-subj="agentBuilderSkillFormPage">
+    <KibanaPageTemplate panelled bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
       <KibanaPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -246,10 +254,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
               ]
         }
         rightSideGroupProps={{ gutterSize: 's' }}
-        css={css`
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-block-end: none;
-        `}
       />
       <KibanaPageTemplate.Section>
         {isLoading ? (
@@ -261,99 +265,254 @@ export const SkillForm: React.FC<SkillFormProps> = ({
             component="form"
             onSubmit={handleSubmit}
             data-test-subj="agentBuilderSkillForm"
-            css={css`
-              max-width: 640px;
-            `}
           >
-            {isCreateMode && (
-              <EuiFormRow
-                label={labels.skills.skillIdLabel}
-                isInvalid={!!idError}
-                error={idError}
-                fullWidth
-              >
-                <EuiFieldText
-                  value={id}
-                  onChange={(e) => setId(e.target.value)}
-                  isInvalid={!!idError}
-                  disabled={isViewMode}
-                  fullWidth
-                  data-test-subj="agentBuilderSkillFormIdInput"
-                />
-              </EuiFormRow>
-            )}
-
-            <EuiFormRow
-              label={labels.skills.nameLabel}
-              isInvalid={!!nameError}
-              error={nameError}
-              fullWidth
+            {/* Section: Skill identity */}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="xl"
+              alignItems="flexStart"
+              aria-labelledby="skill-identity-section-title"
             >
-              <EuiFieldText
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                isInvalid={!!nameError}
-                disabled={isViewMode}
-                fullWidth
-                data-test-subj="agentBuilderSkillFormNameInput"
-              />
-            </EuiFormRow>
+              <EuiFlexItem grow={1}>
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    <EuiIcon type="bullseye" />
+                    <EuiTitle size="xs">
+                      <h2 id="skill-identity-section-title">
+                        {i18n.translate(
+                          'xpack.agentBuilder.skills.form.identityTitle',
+                          { defaultMessage: 'Skill identity' }
+                        )}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexGroup>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.agentBuilder.skills.form.identityDescription',
+                      {
+                        defaultMessage:
+                          'Define the skill\'s unique identifier and display name. The ID is used to reference the skill in configurations.',
+                      }
+                    )}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
+                    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                      {isCreateMode && (
+                        <>
+                          <EuiTitle size="xxs">
+                            <span>
+                              {i18n.translate('xpack.agentBuilder.skills.form.skillIdHint', {
+                                defaultMessage: 'Skill ID',
+                              })}
+                            </span>
+                          </EuiTitle>
+                          <EuiText size="s" color="subdued">
+                            {i18n.translate(
+                              'xpack.agentBuilder.skills.form.skillIdHintDescription',
+                              {
+                                defaultMessage:
+                                  'A unique identifier for the skill, used in code and configurations. Cannot be changed after creation.',
+                              }
+                            )}
+                          </EuiText>
+                          <EuiSpacer size="s" />
+                        </>
+                      )}
+                      <EuiTitle size="xxs">
+                        <span>
+                          {i18n.translate('xpack.agentBuilder.skills.form.nameHint', {
+                            defaultMessage: 'Name',
+                          })}
+                        </span>
+                      </EuiTitle>
+                      <EuiText size="s" color="subdued">
+                        {i18n.translate('xpack.agentBuilder.skills.form.nameHintDescription', {
+                          defaultMessage:
+                            'A human-friendly display name for the skill, visible to users.',
+                        })}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            <EuiFormRow
-              label={labels.skills.descriptionLabel}
-              isInvalid={!!descriptionError}
-              error={descriptionError}
-              fullWidth
-            >
-              <EuiTextArea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                isInvalid={!!descriptionError}
-                disabled={isViewMode}
-                fullWidth
-                rows={3}
-                data-test-subj="agentBuilderSkillFormDescriptionInput"
-              />
-            </EuiFormRow>
+              <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+                {isCreateMode && (
+                  <EuiFormRow
+                    label={labels.skills.skillIdLabel}
+                    isInvalid={!!idError}
+                    error={idError}
+                  >
+                    <EuiFieldText
+                      value={id}
+                      onChange={(e) => setId(e.target.value)}
+                      isInvalid={!!idError}
+                      disabled={isViewMode}
+                      data-test-subj="agentBuilderSkillFormIdInput"
+                      placeholder={i18n.translate(
+                        'xpack.agentBuilder.skills.form.idPlaceholder',
+                        { defaultMessage: 'Enter skill ID' }
+                      )}
+                    />
+                  </EuiFormRow>
+                )}
 
-            <EuiFormRow
-              label={labels.skills.contentLabel}
-              isInvalid={!!contentError}
-              error={contentError}
-              fullWidth
-              helpText="Markdown instructions that define what this skill does and how agents should use it."
-            >
-              <EuiTextArea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                isInvalid={!!contentError}
-                disabled={isViewMode}
-                fullWidth
-                rows={12}
-                data-test-subj="agentBuilderSkillFormContentInput"
-              />
-            </EuiFormRow>
+                <EuiFormRow
+                  label={labels.skills.nameLabel}
+                  isInvalid={!!nameError}
+                  error={nameError}
+                >
+                  <EuiFieldText
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    isInvalid={!!nameError}
+                    disabled={isViewMode}
+                    data-test-subj="agentBuilderSkillFormNameInput"
+                    placeholder={i18n.translate(
+                      'xpack.agentBuilder.skills.form.namePlaceholder',
+                      { defaultMessage: 'Enter skill name' }
+                    )}
+                  />
+                </EuiFormRow>
 
-            <EuiFormRow
-              label={labels.skills.toolIdsLabel}
-              helpText={labels.skills.toolIdsHelpText}
-              fullWidth
+                <EuiFormRow
+                  label={labels.skills.descriptionLabel}
+                  isInvalid={!!descriptionError}
+                  error={descriptionError}
+                >
+                  <EuiTextArea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    isInvalid={!!descriptionError}
+                    disabled={isViewMode}
+                    rows={3}
+                    data-test-subj="agentBuilderSkillFormDescriptionInput"
+                    placeholder={i18n.translate(
+                      'xpack.agentBuilder.skills.form.descriptionPlaceholder',
+                      { defaultMessage: 'Brief description of what this skill does' }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            {/* Section: Instructions */}
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="xl"
+              alignItems="flexStart"
+              aria-labelledby="skill-instructions-section-title"
             >
-              <EuiComboBox
-                options={toolOptions}
-                selectedOptions={selectedToolOptions}
-                onChange={(selected) =>
-                  setSelectedToolIds(selected.map((opt) => opt.value as string))
-                }
-                isDisabled={isViewMode}
-                fullWidth
-                data-test-subj="agentBuilderSkillFormToolIdsInput"
-              />
-            </EuiFormRow>
+              <EuiFlexItem grow={1}>
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    <EuiIcon type="document" />
+                    <EuiTitle size="xs">
+                      <h2 id="skill-instructions-section-title">
+                        {i18n.translate(
+                          'xpack.agentBuilder.skills.form.instructionsTitle',
+                          { defaultMessage: 'Instructions' }
+                        )}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexGroup>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.agentBuilder.skills.form.instructionsDescription',
+                      {
+                        defaultMessage:
+                          'Write the markdown instructions that define what this skill does and how agents should use it. This is the core content of the skill.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+                <EuiFormRow
+                  label={labels.skills.contentLabel}
+                  isInvalid={!!contentError}
+                  error={contentError}
+                >
+                  <EuiTextArea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    isInvalid={!!contentError}
+                    disabled={isViewMode}
+                    rows={16}
+                    data-test-subj="agentBuilderSkillFormContentInput"
+                    placeholder={i18n.translate(
+                      'xpack.agentBuilder.skills.form.contentPlaceholder',
+                      {
+                        defaultMessage:
+                          'Write markdown instructions for the skill...',
+                      }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            {/* Section: Associated tools */}
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="xl"
+              alignItems="flexStart"
+              aria-labelledby="skill-tools-section-title"
+            >
+              <EuiFlexItem grow={1}>
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    <EuiIcon type="wrench" />
+                    <EuiTitle size="xs">
+                      <h2 id="skill-tools-section-title">
+                        {i18n.translate(
+                          'xpack.agentBuilder.skills.form.toolsTitle',
+                          { defaultMessage: 'Associated tools' }
+                        )}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexGroup>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.agentBuilder.skills.form.toolsDescription',
+                      {
+                        defaultMessage:
+                          'Select tools that this skill requires. When an agent uses this skill, these tools will be available to it. A maximum of 5 tools can be associated with a skill.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+                <EuiFormRow label={labels.skills.toolIdsLabel}>
+                  <EuiComboBox
+                    options={toolOptions}
+                    selectedOptions={selectedToolOptions}
+                    onChange={(selected) =>
+                      setSelectedToolIds(selected.map((opt) => opt.value as string))
+                    }
+                    isDisabled={isViewMode}
+                    data-test-subj="agentBuilderSkillFormToolIdsInput"
+                    placeholder={i18n.translate(
+                      'xpack.agentBuilder.skills.form.toolsPlaceholder',
+                      { defaultMessage: 'Select tools' }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
             {!isViewMode && (
               <>
-                <EuiSpacer size="xl" />
+                <EuiSpacer size="xxl" />
                 <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty

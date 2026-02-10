@@ -28,7 +28,7 @@ export async function loadSkillTools({
   toolManager: ToolManager;
   logger: Logger;
 }) {
-  const skill = skillsService.getSkillDefinition(entry.metadata.skill_id);
+  const skill = await skillsService.getSkillDefinition(entry.metadata.skill_id);
   if (skill) {
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));

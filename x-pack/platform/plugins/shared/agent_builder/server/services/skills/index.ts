@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export { createSkillRegistry, type SkillRegistry } from './skill_registry';
-export { type SkillService, createSkillService, type SkillServiceStartDeps } from './skill_service';
-export type { SkillServiceSetup, SkillServiceStart } from './types';
-export type { CompositeSkillRegistry } from './composite_skill_registry';
-export type { ReadonlySkillProvider, WritableSkillProvider, SkillProvider } from './skill_provider';
+export {
+  type SkillService,
+  type SkillServiceStartDeps,
+  type SkillServiceSetup,
+  type SkillServiceStart,
+  type SkillRegistry,
+  type SkillProvider,
+  createSkillService,
+} from './skill_service';

@@ -178,10 +178,6 @@ export class VirtualFileSystem implements IVirtualFileSystem {
     this.mountedVolumes.length = 0;
   }
 
-  // ============================================================================
-  // Private helpers
-  // ============================================================================
-
   /**
    * Sort volumes by priority (lower = higher priority), then by mount order.
    */

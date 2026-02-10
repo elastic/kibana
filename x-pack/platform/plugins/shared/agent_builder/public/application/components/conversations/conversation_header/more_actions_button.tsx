@@ -31,6 +31,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { RobotIcon } from '../../common/icons/robot';
 
 const fullscreenLabels = {
@@ -131,6 +132,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     services: { application },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -223,15 +225,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="skills"
-      icon="sparkles"
-      onClick={closePopover}
-      href={createAgentBuilderUrl(appPaths.skills.list)}
-      data-test-subj="agentBuilderActionsSkills"
-    >
-      {fullscreenLabels.skills}
-    </EuiContextMenuItem>,
+    ...(isExperimentalFeaturesEnabled
+      ? [
+          <EuiContextMenuItem
+            key="skills"
+            icon="sparkles"
+            onClick={closePopover}
+            href={createAgentBuilderUrl(appPaths.skills.list)}
+            data-test-subj="agentBuilderActionsSkills"
+          >
+            {fullscreenLabels.skills}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(hasAccessToGenAiSettings
       ? [
           <EuiContextMenuItem

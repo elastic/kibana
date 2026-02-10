@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiLoadingSpinner,
@@ -79,6 +80,8 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [sortField, setSortField] = useState<keyof PublicSkillDefinition>('id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const isAllSelected = hasSkillSelectionWildcard(selectedSkills);
 
@@ -234,9 +237,15 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         itemId="id"
         sorting={{
           sort: {
-            field: 'id',
-            direction: 'asc',
+            field: sortField,
+            direction: sortDirection,
           },
+        }}
+        onChange={({ sort }: CriteriaWithPagination<PublicSkillDefinition>) => {
+          if (sort) {
+            setSortField(sort.field);
+            setSortDirection(sort.direction);
+          }
         }}
         noItemsMessage={
           skills.length > 0 ? labels.skills.noSkillsMatchMessage : labels.skills.noSkillsMessage
