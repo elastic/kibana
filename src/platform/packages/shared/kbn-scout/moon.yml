@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/streamlang'
   - '@kbn/axe-config'
   - '@kbn/peggy'
-  - '@kbn/spaces-plugin'
 tags:
   - test-helper
   - package

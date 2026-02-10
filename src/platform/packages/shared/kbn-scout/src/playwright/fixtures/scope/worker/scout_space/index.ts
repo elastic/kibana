@@ -8,16 +8,13 @@
  */
 
 import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 /**
  * Solution view types for Kibana spaces.
- * - 'es' (Elasticsearch/Search)
- * - 'oblt' (Observability)
- * - 'security' (Security)
- * - 'classic' (Classic/default)
+ * Should match: 'oblt' | 'security' | 'es' | 'classic'
+ * (excludes 'workplaceai' from the full SolutionView type)
  */
-export type SpaceSolutionView = Exclude<SolutionView, 'workplaceai'>;
+export type SpaceSolutionView = 'oblt' | 'security' | 'es' | 'classic';
 
 export interface ImportSavedObjects {
   type: string;
