@@ -15,6 +15,7 @@ import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
+import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
@@ -49,6 +50,13 @@ function isElasticCloudEsUrl(esUrl: string): boolean {
  */
 
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
+  kbnClient: [
+    async ({ kbnClient, log }, use) => {
+      // Centralize request retries for evals so suites don't need to wrap calls.
+      await use(wrapKbnClientWithRetries({ kbnClient, log }));
+    },
+    { scope: 'worker' },
+  ],
   fetch: [
     async ({ kbnClient, log }, use) => {
       // add a HttpHandler as a fixture, so consumers can use

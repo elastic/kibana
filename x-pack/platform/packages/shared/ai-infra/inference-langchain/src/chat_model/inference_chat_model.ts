@@ -184,13 +184,19 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // Some providers (notably Anthropic via OpenAI-compatible gateways) reject `tool_choice`
+      // and/or empty tools lists. Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      toolChoice:
+        hasTools && options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },

@@ -26,6 +26,7 @@ export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correc
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,
   extractAllStrings,
