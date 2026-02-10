@@ -13,29 +13,15 @@ import React, { useEffect, useState } from 'react';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import type { Duration } from 'moment';
 import type { GenericIndexPatternColumn, FormBasedLayer, IndexPattern } from '@kbn/lens-common';
-import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
+import { operationDefinitionMap } from '../operations';
 import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 
 export function setReducedTimeRange(
   columnId: string,
   layer: FormBasedLayer,
-  reducedTimeRange: string | undefined,
-  skipLabelUpdate?: boolean
+  reducedTimeRange: string | undefined
 ) {
   const trimmedReducedTimeRange = reducedTimeRange?.trim();
-  const currentColumn = layer.columns[columnId];
-  const label =
-    currentColumn.label || skipLabelUpdate
-      ? currentColumn.label
-      : adjustTimeScaleLabelSuffix(
-          currentColumn.label,
-          currentColumn.timeScale,
-          currentColumn.timeScale,
-          currentColumn.timeShift,
-          currentColumn.timeShift,
-          currentColumn.reducedTimeRange,
-          trimmedReducedTimeRange
-        );
   return {
     ...layer,
     columns: {
@@ -43,7 +29,6 @@ export function setReducedTimeRange(
       [columnId]: {
         ...layer.columns[columnId],
         reducedTimeRange: trimmedReducedTimeRange,
-        label,
       },
     },
   };
@@ -60,7 +45,6 @@ export function ReducedTimeRange({
   updateLayer,
   indexPattern,
   helpMessage,
-  skipLabelUpdate,
 }: {
   selectedColumn: GenericIndexPatternColumn;
   columnId: string;
@@ -68,7 +52,6 @@ export function ReducedTimeRange({
   updateLayer: (newLayer: FormBasedLayer) => void;
   indexPattern: IndexPattern;
   helpMessage: string | null;
-  skipLabelUpdate?: boolean;
 }) {
   const [localValue, setLocalValue] = useState(selectedColumn.reducedTimeRange);
   useEffect(() => {
@@ -164,14 +147,14 @@ export function ReducedTimeRange({
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setReducedTimeRange(columnId, layer, val, skipLabelUpdate));
+                  updateLayer(setReducedTimeRange(columnId, layer, val));
                 } else {
                   setLocalValue(val);
                 }
               }}
               onChange={(choices) => {
                 if (choices.length === 0) {
-                  updateLayer(setReducedTimeRange(columnId, layer, '', skipLabelUpdate));
+                  updateLayer(setReducedTimeRange(columnId, layer, ''));
                   setLocalValue('');
                   return;
                 }
@@ -179,7 +162,7 @@ export function ReducedTimeRange({
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
                 if (!isInvalid(parsedVal)) {
-                  updateLayer(setReducedTimeRange(columnId, layer, choice, skipLabelUpdate));
+                  updateLayer(setReducedTimeRange(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);
                 }

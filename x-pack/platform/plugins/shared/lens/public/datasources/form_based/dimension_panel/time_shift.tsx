@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import type { GenericIndexPatternColumn, FormBasedLayer, IndexPattern } from '@kbn/lens-common';
-import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
+import { operationDefinitionMap } from '../operations';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
@@ -26,25 +26,12 @@ export function setTimeShift(
   timeShift: string | undefined
 ) {
   const trimmedTimeShift = timeShift?.trim();
-  const currentColumn = layer.columns[columnId];
-  const label = currentColumn.label
-    ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
-        currentColumn.timeScale,
-        currentColumn.timeShift,
-        trimmedTimeShift,
-        currentColumn.reducedTimeRange,
-        currentColumn.reducedTimeRange
-      );
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
-        label,
         timeShift: trimmedTimeShift,
       },
     },

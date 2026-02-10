@@ -1132,7 +1132,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   indexPattern={currentIndexPattern}
                   layer={state.layers[layerId]}
                   updateLayer={updateAdvancedOption}
-                  skipLabelUpdate={hasFormula}
                   helpMessage={getHelpMessage(selectedOperationDefinition.canReduceTimeRange)}
                 />
               ) : null,
