@@ -86,7 +86,7 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
+    const { featureFlags } = renderCoreDeps;
     const debugLayout = getLayoutDebugFlag(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
