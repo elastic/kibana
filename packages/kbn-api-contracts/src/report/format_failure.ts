@@ -8,9 +8,13 @@
  */
 
 import type { BreakingChange } from '../diff/breaking_rules';
+import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
 import { DOCS_LINK, ESCALATION_LINK } from './links';
 
-export function formatFailure(breakingChanges: BreakingChange[]): string {
+export function formatFailure(
+  breakingChanges: BreakingChange[],
+  terraformImpact?: TerraformImpactResult
+): string {
   const lines: string[] = [];
 
   lines.push('╔════════════════════════════════════════════════════════════════════════════╗');
@@ -33,6 +37,26 @@ export function formatFailure(breakingChanges: BreakingChange[]): string {
     }
     lines.push('');
   });
+
+  if (terraformImpact?.hasImpact) {
+    lines.push('╔════════════════════════════════════════════════════════════════════════════╗');
+    lines.push('║                        TERRAFORM PROVIDER IMPACT                           ║');
+    lines.push('╚════════════════════════════════════════════════════════════════════════════╝');
+    lines.push('');
+    lines.push('⚠️  The following breaking changes affect Terraform Provider APIs:');
+    lines.push('');
+
+    terraformImpact.impactedChanges.forEach((impact) => {
+      const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
+      lines.push(`• ${impact.change.path}${method}`);
+      lines.push(`  Terraform Resource: ${impact.terraformResource}`);
+      lines.push(`  Reason: ${impact.change.reason}`);
+      lines.push('');
+    });
+
+    lines.push('Coordinate with @elastic/terraform-provider before merging.');
+    lines.push('');
+  }
 
   lines.push('────────────────────────────────────────────────────────────────────────────');
   lines.push('');

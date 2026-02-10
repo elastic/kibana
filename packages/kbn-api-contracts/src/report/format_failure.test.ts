@@ -9,6 +9,7 @@
 
 import { formatFailure } from './format_failure';
 import type { BreakingChange } from '../diff/breaking_rules';
+import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
 
 const pathRemovedBreaking = (path: string, reason = 'Endpoint removed'): BreakingChange => ({
   type: 'path_removed',
@@ -89,5 +90,58 @@ describe('formatFailure', () => {
 
     expect(output).toContain('Documentation:');
     expect(output).toContain('Need help?');
+  });
+
+  describe('terraform impact', () => {
+    it('does not show terraform section when no impact', () => {
+      const changes = [pathRemovedBreaking('/api/test')];
+      const terraformImpact: TerraformImpactResult = {
+        hasImpact: false,
+        impactedChanges: [],
+      };
+
+      const output = formatFailure(changes, terraformImpact);
+
+      expect(output).not.toContain('TERRAFORM PROVIDER IMPACT');
+    });
+
+    it('shows terraform section when there is impact', () => {
+      const changes = [pathRemovedBreaking('/api/spaces/space')];
+      const terraformImpact: TerraformImpactResult = {
+        hasImpact: true,
+        impactedChanges: [
+          {
+            change: changes[0],
+            terraformResource: 'elasticstack_kibana_space',
+          },
+        ],
+      };
+
+      const output = formatFailure(changes, terraformImpact);
+
+      expect(output).toContain('TERRAFORM PROVIDER IMPACT');
+      expect(output).toContain('elasticstack_kibana_space');
+      expect(output).toContain('/api/spaces/space');
+      expect(output).toContain('Coordinate with @elastic/terraform-provider');
+    });
+
+    it('shows multiple terraform impacts', () => {
+      const changes = [
+        pathRemovedBreaking('/api/spaces/space'),
+        methodRemovedBreaking('/api/fleet/agent_policies', 'POST'),
+      ];
+      const terraformImpact: TerraformImpactResult = {
+        hasImpact: true,
+        impactedChanges: [
+          { change: changes[0], terraformResource: 'elasticstack_kibana_space' },
+          { change: changes[1], terraformResource: 'elasticstack_fleet_agent_policy' },
+        ],
+      };
+
+      const output = formatFailure(changes, terraformImpact);
+
+      expect(output).toContain('elasticstack_kibana_space');
+      expect(output).toContain('elasticstack_fleet_agent_policy');
+    });
   });
 });

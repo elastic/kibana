@@ -19,6 +19,7 @@ import { formatFailure } from '../src/report/format_failure';
 import { checkBaselineGovernance } from '../src/governance/check_baseline_governance';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { filterSpecPaths } from '../src/filter/filter_paths';
+import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 
 const parseArrayFlag = (value: string | string[] | undefined): string[] | undefined => {
   if (!value) return undefined;
@@ -94,7 +95,10 @@ run(
       return;
     }
 
-    const report = formatFailure(breakingChanges);
+    const terraformApisPath = flags.terraformApisPath as string | undefined;
+    const terraformImpact = checkTerraformImpact(breakingChanges, terraformApisPath);
+
+    const report = formatFailure(breakingChanges, terraformImpact);
     log.error(report);
     throw new Error(`Found ${breakingChanges.length} breaking change(s)`);
   },
@@ -108,15 +112,17 @@ run(
         'allowlistPath',
         'include',
         'exclude',
+        'terraformApisPath',
       ],
       help: `
-        --distribution     Required. Either "stack" or "serverless"
-        --specPath         Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
-        --version          Semver version for stack baseline selection
-        --baselinePath     Override baseline path for testing
-        --allowlistPath    Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
-        --include          Glob pattern(s) to include paths (comma-separated or multiple flags)
-        --exclude          Glob pattern(s) to exclude paths (comma-separated or multiple flags)
+        --distribution       Required. Either "stack" or "serverless"
+        --specPath           Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
+        --version            Semver version for stack baseline selection
+        --baselinePath       Override baseline path for testing
+        --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
+        --include            Glob pattern(s) to include paths (comma-separated or multiple flags)
+        --exclude            Glob pattern(s) to exclude paths (comma-separated or multiple flags)
+        --terraformApisPath  Override Terraform provider APIs config path
 
         Examples:
           # Check serverless contracts against baseline
