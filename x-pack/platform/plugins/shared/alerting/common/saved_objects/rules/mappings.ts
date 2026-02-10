@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
-import { UiamAPIKeys } from '@kbn/security-plugin/server/authentication/api_keys/uiam';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
