@@ -57,7 +57,6 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
-      // Extract the keys of the params that were added for granular filtering
       const modifiedParamKeys = savedObjectsData.map((obj) => obj.attributes.key);
 
       await asyncGlobalParamsPropagation({

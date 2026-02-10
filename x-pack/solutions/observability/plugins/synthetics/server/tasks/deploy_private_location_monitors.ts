@@ -184,8 +184,6 @@ export class DeployPrivateLocationMonitors {
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-    /** Optional array of specific param keys that were modified. When provided, only monitors
-     *  that reference these params will be synced. */
     modifiedParamKeys?: string[];
   }) {
     if (allPrivateLocations.length === 0) {
@@ -286,8 +284,6 @@ export class DeployPrivateLocationMonitors {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     spaceId?: string;
-    /** Optional array of specific param keys that were modified. When provided, only monitors
-     *  that reference these params will be included. */
     modifiedParamKeys?: string[];
     privateLocationId?: string;
   }) {
@@ -346,7 +342,6 @@ export class DeployPrivateLocationMonitors {
 
       const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
 
-      // When syncing for global params changes, skip monitors that don't use the modified parameters
       if (modifiedParamKeys && !monitorUsesGlobalParams(normalizedMonitor, modifiedParamKeys)) {
         skippedMonitorsCount++;
         continue;

@@ -116,7 +116,6 @@ export const asyncGlobalParamsPropagation = async ({
 }: {
   server: SyntheticsServerSetup;
   paramsSpacesToSync: string[];
-  /** Optional array of specific param keys that were modified. Used for granular filtering. */
   modifiedParamKeys?: string[];
 }) => {
   const {

@@ -85,22 +85,15 @@ export const monitorUsesGlobalParams = (
   monitor: SyntheticsMonitor,
   modifiedParamKeys?: string[]
 ): boolean => {
-  // Browser monitors access params via JavaScript (params.paramName), not ${paramName} syntax.
-  // We cannot reliably parse JavaScript to detect param usage, so we always include
-  // browser monitors in global params sync to ensure they receive updated param values.
   if (monitor.type === MonitorTypeEnum.BROWSER) {
     return true;
   }
 
-  // For lightweight monitors (HTTP, TCP, ICMP), check for ${paramName} syntax in fields.
-  // When modifiedParamKeys is provided, only check if the monitor uses those specific params;
-  // otherwise, check if the monitor uses any global params at all.
   const modifiedSet =
     modifiedParamKeys && modifiedParamKeys.length > 0 ? new Set(modifiedParamKeys) : undefined;
   const keysToCheck = Object.keys(monitor) as Array<keyof SyntheticsMonitor>;
 
   for (const key of keysToCheck) {
-    // Skip fields that don't support parameter substitution
     if (PARAMS_KEYS_TO_SKIP.includes(key as ConfigKey)) {
       continue;
     }
@@ -117,12 +110,10 @@ export const monitorUsesGlobalParams = (
       continue;
     }
 
-    // No specific params to filter by — any param reference means it uses global params
     if (!modifiedSet) {
       return true;
     }
 
-    // Short-circuit: return true as soon as any extracted param matches a modified one
     if (params.some((p) => modifiedSet.has(p))) {
       return true;
     }
