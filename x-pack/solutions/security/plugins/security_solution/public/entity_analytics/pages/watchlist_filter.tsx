@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
@@ -115,7 +116,7 @@ export const WatchlistFilter = ({
         setSelected(defaultSelection);
         navigateToWatchlist(defaultSelectedId);
       }
-    } 
+    }
   }, [defaultSelectedId, getItemById, selectedIdFromUrl]);
 
   const navigateToWatchlist = useCallback(
@@ -135,9 +136,9 @@ export const WatchlistFilter = ({
 
   const onChangeComboBox = useCallback(
     (nextOptions: EuiComboBoxOptionOption<WatchlistOption>[]) => {
-      const newlySelected = nextOptions.find(
-        (o) => o && !o.isGroupLabelOption
-      ) as WatchlistItem | undefined;
+      const newlySelected = nextOptions.find((o) => o && !o.isGroupLabelOption) as
+        | WatchlistItem
+        | undefined;
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
