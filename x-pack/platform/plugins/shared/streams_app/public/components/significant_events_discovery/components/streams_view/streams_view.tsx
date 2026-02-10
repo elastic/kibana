@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -73,6 +73,7 @@ export function StreamsView({
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [discoverInsightsPopoverOpen, setDiscoverInsightsPopoverOpen] = useState(false);
   const streamsListFetch = useDiscoveryStreams();
+  const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const significantEventsFetch = useStreamsAppFetch(
     async ({ signal }) =>
       streamsRepositoryClient.fetch('GET /internal/streams/_significant_events', {
@@ -87,14 +88,27 @@ export function StreamsView({
       }),
     [streamsRepositoryClient]
   );
-  const totalSignificantEvents =
-    significantEventsFetch.value?.aggregated_occurrences.reduce(
-      (acc, current) => acc + current.count,
-      0
-    ) ?? 0;
-  const hasSignificantEvents = totalSignificantEvents > 0;
+
+  const streamNameToEventCount = useMemo(() => {
+    const value = significantEventsFetch.value;
+    if (!value?.significant_events) return new Map<string, number>();
+    const map = new Map<string, number>();
+    for (const event of value.significant_events) {
+      const total = event.occurrences.reduce((acc, o) => acc + o.count, 0);
+      map.set(event.stream_name, (map.get(event.stream_name) ?? 0) + total);
+    }
+    return map;
+  }, [significantEventsFetch.value]);
+
+  const hasSignificantEvents = useMemo(() => {
+    const countByStream = streamNameToEventCount;
+    const total =
+      selectedStreams.length === 0
+        ? [...countByStream.values()].reduce((acc, count) => acc + count, 0)
+        : selectedStreams.reduce((acc, row) => acc + (countByStream.get(row.stream.name) ?? 0), 0);
+    return total > 0;
+  }, [streamNameToEventCount, selectedStreams]);
   const isInitialStatusUpdateDone = useRef(false);
-  const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
   >({});
@@ -198,12 +212,12 @@ export function StreamsView({
     cancelOnboardingTask(streamName);
   };
 
-  const isDiscoverInsightsDisabled =
-    !hasSignificantEvents || selectedStreams.length === 0 || isInsightsTaskRunning;
+  const isDiscoverInsightsDisabled = !hasSignificantEvents || isInsightsTaskRunning;
 
   const onBulkDiscoverInsightsClick = async () => {
     if (isDiscoverInsightsDisabled) return;
-    const streamNames = selectedStreams.map((row) => row.stream.name);
+    const streamNames =
+      selectedStreams.length > 0 ? selectedStreams.map((row) => row.stream.name) : undefined;
 
     try {
       await scheduleInsightsDiscoveryTask(streamNames);
@@ -212,7 +226,7 @@ export function StreamsView({
     } catch (error) {
       toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.streamsApp.insightsDiscoverySchedulingFailureTitle',
+          'xpack.streams.significantEventsDiscovery.streamsTree.insightsDiscoverySchedulingFailureTitle',
           {
             defaultMessage: 'Failed to schedule insights discovery',
           }
@@ -264,7 +278,7 @@ export function StreamsView({
           {hasSignificantEvents ? (
             <EuiButtonEmpty
               iconType="crosshairs"
-              disabled={selectedStreams.length === 0 || isInsightsTaskRunning}
+              disabled={isDiscoverInsightsDisabled}
               isLoading={isInsightsTaskRunning}
               onClick={onBulkDiscoverInsightsClick}
             >
@@ -285,6 +299,8 @@ export function StreamsView({
                       setDiscoverInsightsPopoverOpen((open) => !open);
                     }
                   }}
+                  onMouseEnter={() => setDiscoverInsightsPopoverOpen(true)}
+                  onMouseLeave={() => setDiscoverInsightsPopoverOpen(false)}
                   role="button"
                   tabIndex={0}
                   aria-label={DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE}
@@ -296,6 +312,10 @@ export function StreamsView({
                   </EuiButtonEmpty>
                 </span>
               }
+              panelProps={{
+                onMouseEnter: () => setDiscoverInsightsPopoverOpen(true),
+                onMouseLeave: () => setDiscoverInsightsPopoverOpen(false),
+              }}
             >
               <EuiFlexGroup direction="column" gutterSize="s" css={{ maxWidth: 320 }}>
                 <EuiFlexItem>
