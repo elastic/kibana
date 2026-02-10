@@ -17,8 +17,10 @@ import {
   type ChatEvent,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  createBadRequestError,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -37,12 +39,14 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import type { AttachmentServiceStart } from '../attachments';
 
 interface ChatServiceDeps {
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
+  attachmentsService: AttachmentServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
@@ -67,6 +71,26 @@ class ChatServiceImpl implements ChatService {
     this.dependencies = deps;
   }
 
+  private async validateAttachmentsIfProvided(
+    attachments: AttachmentInput[] | undefined
+  ): Promise<AttachmentInput[] | undefined> {
+    if (!attachments || attachments.length === 0) {
+      return undefined;
+    }
+
+    const validated: AttachmentInput[] = [];
+    for (const attachment of attachments) {
+      const result = await this.dependencies.attachmentsService.validate(attachment);
+      if (!result.valid) {
+        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
+      }
+      // Note: result.attachment has a generated id + validated data, and is compatible with AttachmentInput
+      validated.push(result.attachment);
+    }
+
+    return validated;
+  }
+
   converse({
     agentId = agentBuilderDefaultAgentId,
     conversationId,
@@ -88,6 +112,13 @@ class ChatServiceImpl implements ChatService {
     return withConverseSpan({ agentId, conversationId }, (span) => {
       // Resolve scoped services
       return defer(async () => {
+        const validatedAttachments = await this.validateAttachmentsIfProvided(
+          nextInput.attachments
+        );
+        const validatedNextInput = validatedAttachments
+          ? { ...nextInput, attachments: validatedAttachments }
+          : nextInput;
+
         const services = await resolveServices({
           agentId,
           connectorId,
@@ -113,9 +144,9 @@ class ChatServiceImpl implements ChatService {
           selectedConnectorId: services.selectedConnectorId,
         };
 
-        return context;
+        return { context, validatedNextInput };
       }).pipe(
-        switchMap((context) => {
+        switchMap(({ context, validatedNextInput }) => {
           // Emit conversation ID for new conversations (only when persisting)
           const conversationIdEvent$ =
             storeConversation && context.conversation.operation === 'CREATE'
@@ -126,7 +157,7 @@ class ChatServiceImpl implements ChatService {
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            nextInput,
+            nextInput: validatedNextInput,
             capabilities,
             structuredOutput,
             outputSchema,
@@ -144,7 +175,7 @@ class ChatServiceImpl implements ChatService {
               ? generateTitle({
                   chatModel: context.chatModel,
                   conversation: context.conversation,
-                  nextInput,
+                  nextInput: validatedNextInput,
                 })
               : of(context.conversation.title);
 

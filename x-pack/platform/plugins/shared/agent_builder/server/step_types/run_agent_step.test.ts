@@ -303,4 +303,63 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.error).toBeInstanceOf(Error);
     expect(res.error?.message).toContain('aborted');
   });
+
+  it('propagates attachments to chatService.converse', async () => {
+    const attachments = [
+      {
+        id: 'attachment-1',
+        type: 'security.alert',
+        data: { alertId: 'alert-123', severity: 'high' },
+      },
+      {
+        type: 'document',
+        data: { content: 'test content' },
+        hidden: true,
+      },
+    ];
+
+    const chat = {
+      converse: jest.fn().mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'r-1',
+              response: { message: 'ok' },
+            },
+          },
+        })
+      ),
+    };
+    const runner = { runAgent: jest.fn() };
+
+    const serviceManager = {
+      internalStart: {
+        runnerFactory: { getRunner: () => runner },
+        chat,
+      },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+          attachments,
+        },
+      })
+    );
+
+    expect(chat.converse).toHaveBeenCalledTimes(1);
+    expect(chat.converse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nextInput: {
+          message: 'hello',
+          attachments,
+        },
+      })
+    );
+    expect(runner.runAgent).not.toHaveBeenCalled();
+    expect(res.output?.message).toBe('ok');
+  });
 });
