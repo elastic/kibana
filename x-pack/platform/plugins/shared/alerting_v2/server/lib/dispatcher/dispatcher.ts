@@ -62,8 +62,8 @@ export class DispatcherService implements DispatcherServiceContract {
       this.storageService.bulkIndexDocs<AlertAction>({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: [
-          ...suppressed.map((episode) => this.toAction({ episode, isSuppressed: true, now })),
-          ...active.map((episode) => this.toAction({ episode, isSuppressed: false, now })),
+          ...suppressed.map((episode) => this.toAction({ episode, actionType: 'suppress', now })),
+          ...active.map((episode) => this.toAction({ episode, actionType: 'fire', now })),
         ],
       })
     );
@@ -107,11 +107,11 @@ export class DispatcherService implements DispatcherServiceContract {
 
   private toAction({
     episode,
-    isSuppressed,
+    actionType,
     now,
   }: {
     episode: AlertEpisode;
-    isSuppressed: boolean;
+    actionType: 'suppress' | 'fire';
     now: Date;
   }): AlertAction {
     return {
@@ -119,7 +119,7 @@ export class DispatcherService implements DispatcherServiceContract {
       group_hash: episode.group_hash,
       last_series_event_timestamp: episode.last_event_timestamp,
       actor: 'system',
-      action_type: isSuppressed ? 'suppress' : 'fire',
+      action_type: actionType,
       rule_id: episode.rule_id,
       source: 'internal',
     };

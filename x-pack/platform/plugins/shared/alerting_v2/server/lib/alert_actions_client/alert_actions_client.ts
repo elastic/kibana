@@ -99,7 +99,7 @@ export class AlertActionsClient {
     let whereClause = esql.exp`TRUE`;
     for (const action of actions) {
       whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`true`
+        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`TRUE`
       })`;
     }
 
