@@ -229,9 +229,10 @@ describe('Parameter extraction', () => {
     const hiProp = paramObj!.children!.find((c) => c.label === 'hi');
     expect(hiProp).toBeDefined();
     expect(hiProp!.type).toBe(TypeKind.StringKind);
+    expect(hiProp!.description?.[0]).toContain('Greeting');
 
-    // Second parameter: { fn1, fn2 }: { fn1: Function, fn2: Function }
-    const paramFn = def.children!.find((c) => c.label === '{ fn1, fn2 }');
+    // Second parameter: fns: { fn1: Function, fn2: Function }
+    const paramFn = def.children!.find((c) => c.label === 'fns');
     expect(paramFn).toBeDefined();
     expect(paramFn!.children).toBeDefined();
     expect(paramFn!.children!.length).toBe(2);
@@ -239,16 +240,23 @@ describe('Parameter extraction', () => {
     const fn1 = paramFn!.children!.find((c) => c.label === 'fn1');
     expect(fn1).toBeDefined();
     expect(fn1!.type).toBe(TypeKind.FunctionKind);
+    const fn1Desc = fn1?.description?.[0] ?? '';
+    expect(fn1Desc).toContain('first function');
 
     const fn2 = paramFn!.children!.find((c) => c.label === 'fn2');
     expect(fn2).toBeDefined();
     expect(fn2!.type).toBe(TypeKind.FunctionKind);
+    const fn2Desc = fn2?.description?.[0] ?? '';
+    expect(fn2Desc).toContain('second function');
 
-    // Third parameter: { str }: { str: string }
-    const paramStr = def.children!.find((c) => c.label === '{ str }');
+    // Third parameter: strObj: { str: string }
+    const paramStr = def.children!.find((c) => c.label === 'strObj');
     expect(paramStr).toBeDefined();
     expect(paramStr!.children).toBeDefined();
     expect(paramStr!.children!.length).toBe(1);
+
+    const strProp = paramStr!.children!.find((c) => c.label === 'str');
+    expect(strProp?.description?.[0]).toContain('string property');
   });
 
   it('extracts nested destructured parameters', () => {
@@ -262,8 +270,8 @@ describe('Parameter extraction', () => {
       captureReferences: false,
     });
 
-    // Check nested structure: { fn1, fn2 }.fn1.foo.param
-    const paramFn = def.children!.find((c) => c.label === '{ fn1, fn2 }');
+    // Check nested structure: fns.fn1.foo.param
+    const paramFn = def.children!.find((c) => c.label === 'fns');
     expect(paramFn).toBeDefined();
 
     const fn1 = paramFn!.children!.find((c) => c.label === 'fn1');
@@ -425,19 +433,12 @@ describe('Parameter extraction', () => {
     // First parameter has @param obj comment
     const paramObj = def.children!.find((c) => c.label === 'obj');
     expect(paramObj).toBeDefined();
-    // Current behavior: parent parameter comments are NOT extracted for TypeLiteral parameters
-    // This is a known limitation - when a parameter has a TypeLiteral type (destructured params),
-    // buildApiDeclaration is called directly without extracting the JSDoc comment for the parameter name.
-    // This will be fixed in Phase 4.1
     expect(paramObj!.description).toBeDefined();
-    // Currently, the description is empty for destructured parameters
-    // After Phase 4.1, this should contain the @param obj comment
-    expect(paramObj!.description!.length).toBe(0);
+    expect(paramObj!.description!.length).toBeGreaterThan(0);
+    expect(paramObj!.description![0]).toContain('crazy parameter');
   });
 
-  it('does not extract property-level JSDoc comments (current limitation)', () => {
-    // This test documents current behavior: property-level @param tags like @param obj.hi
-    // are not currently extracted. This will be fixed in Phase 4.1.
+  it('extracts property-level JSDoc comments for destructured parameters', () => {
     const node = nodes.find((n) => getNodeName(n) === 'crazyFunction');
     expect(node).toBeDefined();
     const def = buildApiDeclarationTopNode(node!, {
@@ -453,11 +454,9 @@ describe('Parameter extraction', () => {
 
     const hiProp = paramObj!.children!.find((c) => c.label === 'hi');
     expect(hiProp).toBeDefined();
-    // Current behavior: property-level comments are not extracted
-    // Even if @param obj.hi existed, it wouldn't be found
-    // This is a known limitation that will be addressed in Phase 4.1
     expect(hiProp!.description).toBeDefined();
-    expect(hiProp!.description!.length).toBe(0);
+    expect(hiProp!.description!.length).toBeGreaterThan(0);
+    expect(hiProp!.description![0]).toContain('Greeting');
   });
 });
 
