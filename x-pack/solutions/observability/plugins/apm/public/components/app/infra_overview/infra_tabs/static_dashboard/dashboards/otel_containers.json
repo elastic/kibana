@@ -34,7 +34,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 }
               ],
@@ -330,12 +330,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -581,7 +581,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -604,10 +604,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -648,12 +648,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -820,7 +820,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -843,10 +843,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -897,7 +897,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 }
               ],
@@ -1331,17 +1331,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -1668,12 +1668,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -1948,7 +1948,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -1971,10 +1971,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -2016,17 +2016,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -2311,77 +2311,77 @@
   ],
   "references": [
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "42127512-f52b-433a-828d-280939046bc4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "a723f891-fab9-4284-804f-0cac35e0871d:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "954c6c25-84c1-45bf-a245-6a85d0cf1983:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "954c6c25-84c1-45bf-a245-6a85d0cf1983:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "954c6c25-84c1-45bf-a245-6a85d0cf1983:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "02fa5761-bcb4-4bca-9d78-a563dcdbbb47:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "02fa5761-bcb4-4bca-9d78-a563dcdbbb47:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "2a630f1f-a895-4ac7-b68d-c7f656a50333:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "2a630f1f-a895-4ac7-b68d-c7f656a50333:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "2a630f1f-a895-4ac7-b68d-c7f656a50333:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "31d62d82-ab91-4238-9baa-d53deb91257d:optionsListDataView",
       "type": "index-pattern"
     }

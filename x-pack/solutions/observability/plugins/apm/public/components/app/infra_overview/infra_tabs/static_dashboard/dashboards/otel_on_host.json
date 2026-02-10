@@ -35,12 +35,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -315,7 +315,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -338,10 +338,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -383,17 +383,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -720,17 +720,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -1036,7 +1036,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 }
               ],
@@ -1448,62 +1448,62 @@
   ],
   "references": [
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "1cafd1b7-6bbf-477d-9a3b-372e6c0ae8ec:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "1cafd1b7-6bbf-477d-9a3b-372e6c0ae8ec:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "2b305549-9a44-41d5-88d1-1a3a886b2c24:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "2b305549-9a44-41d5-88d1-1a3a886b2c24:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "2b305549-9a44-41d5-88d1-1a3a886b2c24:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "8547467f-ca9b-41ef-a0c6-0d942d8e20ba:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "adcd19c1-82da-4054-94af-03af204bda98:optionsListDataView",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
       "type": "index-pattern"
     }

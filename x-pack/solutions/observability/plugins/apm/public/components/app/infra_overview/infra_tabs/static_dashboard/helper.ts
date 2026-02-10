@@ -6,27 +6,29 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { get } from 'lodash';
-import type { AggregateQuery, Filter } from '@kbn/es-query';
-import { BooleanRelation, buildCombinedFilter, buildPhraseFilter } from '@kbn/es-query';
-import type { TextBasedLayer } from '@kbn/lens-common';
+import type { Filter } from '@kbn/es-query';
+import {
+  BooleanRelation,
+  buildCombinedFilter,
+  buildPhraseFilter,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type {
-  DashboardPanel,
-  DashboardSection,
-  DashboardState,
-} from '@kbn/dashboard-plugin/server';
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  TextBasedPersistedState,
+  TextBasedPrivateState,
+  TypedLensSerializedState,
+  XYState,
+} from '@kbn/lens-common';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
 import {
   existingDashboardFileNames,
   loadDashboardFile,
   type InfrastructureDashboardType,
 } from './dashboards/dashboard_catalog';
-
-/**
- * Placeholder used in the dashboard JSON POJOs for the index pattern.
- * All occurrences are replaced with the actual index pattern at load time.
- */
-const INDEX_PATTERN_PLACEHOLDER = '{{indexPattern}}';
 
 export interface DashboardDefinition {
   panels: DashboardState['panels'];
@@ -47,78 +49,108 @@ export function hasDashboard(dashboardType: InfrastructureDashboardType): boolea
   return existingDashboardFileNames.has(dashboardType);
 }
 
-/**
- * Replace placeholder index pattern in a single ES|QL query string.
- */
-function replaceEsqlPlaceholder(esql: string, indexPattern: string): string {
-  return esql.replaceAll(INDEX_PATTERN_PLACEHOLDER, indexPattern);
+function isTextBasedPrivateState(
+  state: TextBasedPersistedState | undefined
+): state is TextBasedPrivateState {
+  return !!state && 'indexPatternRefs' in state;
+}
+
+function isFormBasedPrivateState(
+  state: FormBasedPersistedState | undefined
+): state is FormBasedPrivateState {
+  return !!state && 'currentIndexPatternId' in state;
+}
+
+function isXYVisualization(visualization: unknown): visualization is XYState {
+  return (
+    typeof visualization === 'object' &&
+    visualization !== null &&
+    'layers' in visualization &&
+    Array.isArray((visualization as { layers: unknown }).layers)
+  );
+}
+
+function isLensTypedState(state: unknown): state is TypedLensSerializedState {
+  if (typeof state !== 'object' || state === null || !('attributes' in state)) {
+    return false;
+  }
+  const { attributes } = state as { attributes: unknown };
+  return typeof attributes === 'object' && attributes !== null && 'state' in attributes;
 }
 
 /**
- * Inject the real index pattern and data view ID into a single Lens panel config.
- * Each location where the placeholder can appear is handled explicitly.
+ * Replace the FROM source in an ES|QL query with the given index pattern
+ * using the ES|QL AST, so no placeholder strings are needed in the query text.
+ */
+function replaceESQLIndexPattern(esql: string, indexPattern: string): string {
+  const currentPattern = getIndexPatternFromESQLQuery(esql);
+  if (!currentPattern || currentPattern === indexPattern) {
+    return esql;
+  }
+  return replaceESQLQueryIndexPattern(esql, { [currentPattern]: indexPattern });
+}
+
+/**
+ * Unconditionally set all data-view-related structural fields
+ * (IDs, titles, refs) in a Lens panel config to the real values.
+ *
+ * The dashboard JSONs contain runtime Lens state (TextBasedPrivateState,
+ * FormBasedPrivateState) rather than pure persisted state, which is why
+ * the private-state types are used for narrowing.
  */
 function injectDataViewIntoConfig(
-  config: Record<string, unknown>,
+  config: TypedLensSerializedState,
   indexPattern: string,
   dataViewId: string
 ): void {
-  // 1. Top-level embeddable query (config.query.esql)
-  const query = config.query as AggregateQuery | undefined;
-  if (query?.esql) {
-    query.esql = replaceEsqlPlaceholder(query.esql, indexPattern);
+  // ES|QL queries — replace the FROM source at the embeddable and state level
+  if (isOfAggregateQueryType(config.query)) {
+    config.query.esql = replaceESQLIndexPattern(config.query.esql, indexPattern);
   }
 
-  const state = get(config, 'attributes.state') as Record<string, unknown> | undefined;
+  const state = config.attributes?.state;
   if (!state) return;
 
-  // 2. Lens state-level query (attributes.state.query.esql)
-  const stateQuery = state.query as AggregateQuery | undefined;
-  if (stateQuery?.esql) {
-    stateQuery.esql = replaceEsqlPlaceholder(stateQuery.esql, indexPattern);
+  if (isOfAggregateQueryType(state.query)) {
+    state.query.esql = replaceESQLIndexPattern(state.query.esql, indexPattern);
   }
 
-  // 3. Text-based (ES|QL) layer queries
-  const textBasedLayers = get(state, 'datasourceStates.textBased.layers') as
-    | Record<string, TextBasedLayer>
-    | undefined;
-  for (const layer of Object.values(textBasedLayers ?? {})) {
-    if (layer.query?.esql) {
-      layer.query.esql = replaceEsqlPlaceholder(layer.query.esql, indexPattern);
+  const { datasourceStates } = state;
+
+  // Text-based datasource — layer queries and indexPatternRefs
+  if (isTextBasedPrivateState(datasourceStates.textBased)) {
+    for (const layer of Object.values(datasourceStates.textBased.layers)) {
+      if (isOfAggregateQueryType(layer.query)) {
+        layer.query.esql = replaceESQLIndexPattern(layer.query.esql, indexPattern);
+      }
+    }
+    for (const ref of datasourceStates.textBased.indexPatternRefs) {
+      ref.id = dataViewId;
+      ref.title = indexPattern;
     }
   }
 
-  // 4. Text-based indexPatternRefs (title shown in Lens editor)
-  const indexPatternRefs = get(state, 'datasourceStates.textBased.indexPatternRefs') as
-    | Array<{ id?: string; title?: string }>
-    | undefined;
-  for (const ref of indexPatternRefs ?? []) {
-    if (ref.title === INDEX_PATTERN_PLACEHOLDER) ref.title = indexPattern;
+  // Ad-hoc data views
+  for (const dv of Object.values(state.adHocDataViews ?? {})) {
+    dv.title = indexPattern;
+    dv.name = indexPattern;
   }
 
-  // 5. Ad-hoc data views (title and name)
-  const adHocDataViews = get(state, 'adHocDataViews') as
-    | Record<string, { title?: string; name?: string }>
-    | undefined;
-  for (const dv of Object.values(adHocDataViews ?? {})) {
-    if (dv.title === INDEX_PATTERN_PLACEHOLDER) dv.title = indexPattern;
-    if (dv.name === INDEX_PATTERN_PLACEHOLDER) dv.name = indexPattern;
+  // Form-based datasource — layer indexPatternId and currentIndexPatternId
+  if (isFormBasedPrivateState(datasourceStates.formBased)) {
+    for (const layer of Object.values(datasourceStates.formBased.layers)) {
+      layer.indexPatternId = dataViewId;
+    }
+    datasourceStates.formBased.currentIndexPatternId = dataViewId;
   }
 
-  // 6. Form-based layers (indexPatternId → data view ID)
-  const formBasedLayers = get(state, 'datasourceStates.formBased.layers') as
-    | Record<string, { indexPatternId?: string }>
-    | undefined;
-  for (const layer of Object.values(formBasedLayers ?? {})) {
-    if (layer.indexPatternId === INDEX_PATTERN_PLACEHOLDER) layer.indexPatternId = dataViewId;
-  }
-
-  // 7. Form-based currentIndexPatternId
-  const formBased = get(state, 'datasourceStates.formBased') as
-    | { currentIndexPatternId?: string }
-    | undefined;
-  if (formBased?.currentIndexPatternId === INDEX_PATTERN_PLACEHOLDER) {
-    formBased.currentIndexPatternId = dataViewId;
+  // XY annotation layers carry their own indexPatternId in state.visualization
+  if (isXYVisualization(state.visualization)) {
+    for (const layer of state.visualization.layers) {
+      if ('indexPatternId' in layer) {
+        layer.indexPatternId = dataViewId;
+      }
+    }
   }
 }
 
@@ -133,14 +165,14 @@ function injectDataViewIntoPanels(
   if (!panels) return;
   for (const item of panels) {
     if ('panels' in item) {
-      const section = item as DashboardSection;
-      if (section.panels) {
-        injectDataViewIntoPanels(section.panels, indexPattern, dataViewId);
+      const { panels: sectionPanels } = item;
+      if (sectionPanels) {
+        injectDataViewIntoPanels(sectionPanels, indexPattern, dataViewId);
       }
     } else {
-      const panel = item as DashboardPanel;
-      if (panel.config) {
-        injectDataViewIntoConfig(panel.config as Record<string, unknown>, indexPattern, dataViewId);
+      const { config } = item;
+      if (config && isLensTypedState(config)) {
+        injectDataViewIntoConfig(config, indexPattern, dataViewId);
       }
     }
   }
@@ -149,8 +181,8 @@ function injectDataViewIntoPanels(
 /**
  * Load a dashboard definition and inject the data view.
  *
- * Dashboard JSON files are POJOs with `{{indexPattern}}` as a placeholder.
- * Each known config location is updated explicitly.
+ * All data-view-related structural fields (reference IDs, indexPatternId,
+ * titles, etc.) are set unconditionally after loading.
  */
 export async function loadDashboardDefinition(
   props: InfrastructureDashboardProps
@@ -171,7 +203,7 @@ export async function loadDashboardDefinition(
   }
 
   // Deep clone so we don't mutate the imported module
-  const { panels, references } = JSON.parse(JSON.stringify(raw)) as DashboardDefinition;
+  const { panels, references } = structuredClone(raw);
 
   const indexPattern = props.dataView.getIndexPattern();
   const dataViewId = props.dataView.id ?? '';
@@ -179,11 +211,9 @@ export async function loadDashboardDefinition(
   // Inject into all panel configs
   injectDataViewIntoPanels(panels, indexPattern, dataViewId);
 
-  // Patch reference IDs
+  // Unconditionally set all index-pattern reference IDs
   const updatedReferences = references.map((ref) =>
-    ref.type === 'index-pattern' && ref.id === INDEX_PATTERN_PLACEHOLDER
-      ? { ...ref, id: dataViewId }
-      : ref
+    ref.type === 'index-pattern' ? { ...ref, id: dataViewId } : ref
   );
 
   return { panels, references: updatedReferences };

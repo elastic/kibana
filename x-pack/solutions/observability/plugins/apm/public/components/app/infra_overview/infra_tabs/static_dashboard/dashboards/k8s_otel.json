@@ -33,7 +33,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-61a07ee2-9b1c-48a0-84eb-7890461fbddf"
                 }
               ],
@@ -214,21 +214,21 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -271,7 +271,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9"
                 }
               ],
@@ -649,21 +649,21 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -717,17 +717,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "xy-visualization-layer-f31eeb97-67de-453c-98d4-e7e7d24f9c49"
                 }
               ],
@@ -983,12 +983,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -1463,17 +1463,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-ca3e2009-1aac-46f5-a1e7-4ded505330a6"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-52fc88c5-2149-40e8-9d5f-51b12e53450b"
                 }
               ],
@@ -1661,7 +1661,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "ca3e2009-1aac-46f5-a1e7-4ded505330a6": {
                         "columns": {
@@ -1818,7 +1818,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "52fc88c5-2149-40e8-9d5f-51b12e53450b": {
                         "columns": {
@@ -2092,21 +2092,21 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -2150,7 +2150,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-61a07ee2-9b1c-48a0-84eb-7890461fbddf"
                 }
               ],
@@ -2354,21 +2354,21 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -2412,7 +2412,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
             },
             "attributes": {
               "title": "Table Pod & Namespace & Phase & last_seen & last_seen_ts",
@@ -2424,7 +2424,7 @@
                       "b2c10711-736b-42a6-b54a-9451067a469e": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                         },
                         "columns": [
                           {
@@ -2467,7 +2467,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -2539,7 +2539,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -2596,7 +2596,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -2604,7 +2604,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 2\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                 },
                 "visualization": {
                   "layerId": "b2c10711-736b-42a6-b54a-9451067a469e",
@@ -2757,14 +2757,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -2797,7 +2797,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
             },
             "attributes": {
               "title": "Table Pod & Namespace & Phase & last_seen & last_seen_ts",
@@ -2809,7 +2809,7 @@
                       "b2c10711-736b-42a6-b54a-9451067a469e": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                         },
                         "columns": [
                           {
@@ -2852,7 +2852,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -2924,7 +2924,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -2981,7 +2981,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -2989,7 +2989,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 1 OR latest_phase == 4\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                 },
                 "visualization": {
                   "layerId": "b2c10711-736b-42a6-b54a-9451067a469e",
@@ -3142,14 +3142,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -3182,7 +3182,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
             },
             "attributes": {
               "title": "Table Pod & Namespace & Phase & last_seen & last_seen_ts",
@@ -3194,7 +3194,7 @@
                       "b2c10711-736b-42a6-b54a-9451067a469e": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                         },
                         "columns": [
                           {
@@ -3226,7 +3226,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -3340,7 +3340,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Node"
                               },
                               "params": {
@@ -3364,7 +3364,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -3372,7 +3372,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    latest_phase = MAX(k8s.pod.phase) BY k8s.pod.name, k8s.namespace.name, k8s.node.name\n| WHERE latest_phase == 3\n| EVAL phase_name = CASE(\n    latest_phase == 1, \"pending\",\n    latest_phase == 2, \"running\",\n    latest_phase == 3, \"succeeded\",\n    latest_phase == 4, \"failed\",\n    \"unknown\"\n  ), last_seen = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| EVAL Pod=k8s.pod.name, Namespace=k8s.namespace.name, Phase=phase_name, last_seen_ts, Node=k8s.node.name\n| KEEP Pod, Namespace, Node,Phase, last_seen, last_seen_ts\n| SORT last_seen ASC"
                 },
                 "visualization": {
                   "layerId": "b2c10711-736b-42a6-b54a-9451067a469e",
@@ -3523,14 +3523,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -3573,7 +3573,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9"
                 }
               ],
@@ -3816,10 +3816,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -3850,7 +3850,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
             },
             "attributes": {
               "title": "Table podCount & pod_names",
@@ -3862,7 +3862,7 @@
                       "a9c8c0fb-7682-431d-aacb-418c88cd81e4": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
                         },
                         "columns": [
                           {
@@ -3883,7 +3883,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "phase_name"
                               },
                               "params": {
@@ -3901,7 +3901,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "phase_name"
                               },
                               "params": {
@@ -3946,7 +3946,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -3954,7 +3954,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.pod.phase IS NOT NULL AND k8s.namespace.name IS NOT NULL\n| STATS \n    last_seen_ts = MAX(@timestamp) \n    BY k8s.pod.name, k8s.pod.phase\n| EVAL phase_name = CASE(\n    k8s.pod.phase == 1, \"Pending\",\n    k8s.pod.phase == 2, \"Running\",\n    k8s.pod.phase == 3, \"Succeeded\",\n    k8s.pod.phase == 4, \"Failed\",\n    \"Unknown\"\n  )\n| STATS \n    podCount = COUNT_DISTINCT(k8s.pod.name),\n    pod_names = VALUES(k8s.pod.name)\n    BY phase_name\n| SORT phase_name"
                 },
                 "visualization": {
                   "shape": "donut",
@@ -4051,14 +4051,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -4111,7 +4111,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 }
               ],
@@ -4632,10 +4632,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -4694,17 +4694,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -4814,7 +4814,7 @@
                       ],
                       "ignoreGlobalFilters": true,
                       "persistanceType": "byValue",
-                      "indexPatternId": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0"
+                      "indexPatternId": ""
                     }
                   ],
                   "emphasizeFitting": true
@@ -4892,7 +4892,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -4915,10 +4915,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -4959,12 +4959,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -5207,10 +5207,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
-                        "indexPatternId": "{{indexPattern}}",
+                        "indexPatternId": "",
                         "linkToLayers": [],
                         "columns": {
                           "659fe489-2bb0-4d7a-a282-409882abbf0f": {
@@ -5233,18 +5233,18 @@
                         "incompleteColumns": {}
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -5288,12 +5288,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -5457,7 +5457,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -5480,10 +5480,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -5524,17 +5524,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -5795,7 +5795,7 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 }
               ],
@@ -5989,12 +5989,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -6225,12 +6225,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 }
               ],
@@ -6397,7 +6397,7 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "d6d3b5cd-6ed2-4795-8087-6faa122a3ba3": {
                         "linkToLayers": [],
@@ -6420,10 +6420,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   }
                 },
                 "internalReferences": [],
@@ -6464,7 +6464,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
             },
             "attributes": {
               "title": "Bar vertical stacked",
@@ -6476,7 +6476,7 @@
                       "8a3ab66f-1ce5-46c8-86a3-872efa3c06d2": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
                         },
                         "columns": [
                           {
@@ -6507,7 +6507,7 @@
                               "type": "number",
                               "esType": "integer",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "last_update"
                               },
                               "params": {
@@ -6533,7 +6533,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -6541,7 +6541,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
                 },
                 "visualization": {
                   "layerId": "8a3ab66f-1ce5-46c8-86a3-872efa3c06d2",
@@ -6565,14 +6565,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -6605,7 +6605,7 @@
             "syncTooltips": false,
             "filters": [],
             "query": {
-              "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
             },
             "attributes": {
               "title": "Bar vertical stacked",
@@ -6617,7 +6617,7 @@
                       "8a3ab66f-1ce5-46c8-86a3-872efa3c06d2": {
                         "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
                         "query": {
-                          "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
                         },
                         "columns": [
                           {
@@ -6648,7 +6648,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Pod"
                               },
                               "params": {
@@ -6667,7 +6667,7 @@
                               "type": "string",
                               "esType": "keyword",
                               "sourceParams": {
-                                "indexPattern": "{{indexPattern}}",
+                                "indexPattern": "",
                                 "sourceField": "Pod"
                               },
                               "params": {
@@ -6730,7 +6730,7 @@
                     "indexPatternRefs": [
                       {
                         "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                        "title": "{{indexPattern}}",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -6738,7 +6738,7 @@
                 },
                 "filters": [],
                 "query": {
-                  "esql": "FROM {{indexPattern}}\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name,Pod=k8s.pod.name    \n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, Pod,podCount,last_update\n| SORT podCount DESC"
                 },
                 "visualization": {
                   "shape": "treemap",
@@ -6765,14 +6765,14 @@
                 "adHocDataViews": {
                   "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
                     "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
-                    "title": "{{indexPattern}}",
+                    "title": "",
                     "timeFieldName": "@timestamp",
                     "sourceFilters": [],
                     "type": "esql",
                     "fieldFormats": {},
                     "runtimeFieldMap": {},
                     "allowNoIndex": false,
-                    "name": "{{indexPattern}}",
+                    "name": "",
                     "allowHidden": false,
                     "managed": false
                   }
@@ -6815,12 +6815,12 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-86a019c1-473c-4536-837f-51e793b52534"
                 }
               ],
@@ -6982,10 +6982,10 @@
                         "sampling": 1,
                         "ignoreGlobalFilters": false,
                         "incompleteColumns": {},
-                        "indexPatternId": "{{indexPattern}}"
+                        "indexPatternId": ""
                       },
                       "86a019c1-473c-4536-837f-51e793b52534": {
-                        "indexPatternId": "{{indexPattern}}",
+                        "indexPatternId": "",
                         "linkToLayers": [],
                         "columns": {
                           "24fb321d-625a-4f79-bede-27f16a636cbc": {
@@ -7027,18 +7027,18 @@
                         "incompleteColumns": {}
                       }
                     },
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "indexpattern": {
                     "layers": {},
-                    "currentIndexPatternId": "{{indexPattern}}"
+                    "currentIndexPatternId": ""
                   },
                   "textBased": {
                     "layers": {},
                     "indexPatternRefs": [
                       {
-                        "id": "{{indexPattern}}",
-                        "title": "{{indexPattern}}",
+                        "id": "",
+                        "title": "",
                         "timeField": "@timestamp"
                       }
                     ]
@@ -7111,17 +7111,17 @@
               "references": [
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "{{indexPattern}}",
+                  "id": "",
                   "name": "indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3"
                 },
                 {
                   "type": "index-pattern",
-                  "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+                  "id": "",
                   "name": "xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0"
                 }
               ],
@@ -7352,177 +7352,177 @@
   ],
   "references": [
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "53346c32-b967-4adb-b90a-6ddffdc02dcf:indexpattern-datasource-layer-61a07ee2-9b1c-48a0-84eb-7890461fbddf",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "1bef9a3c-2873-42c2-b073-929b71872833:indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "3bf027e6-824c-42e0-88d0-1324fae960d3:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "3bf027e6-824c-42e0-88d0-1324fae960d3:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "3bf027e6-824c-42e0-88d0-1324fae960d3:xy-visualization-layer-f31eeb97-67de-453c-98d4-e7e7d24f9c49",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "02878b71-6279-4270-bd22-41ce4b1c50e7:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "02878b71-6279-4270-bd22-41ce4b1c50e7:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "eaa4f612-e699-4d44-8a97-4fafcfeae8f6:indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "eaa4f612-e699-4d44-8a97-4fafcfeae8f6:indexpattern-datasource-layer-ca3e2009-1aac-46f5-a1e7-4ded505330a6",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "eaa4f612-e699-4d44-8a97-4fafcfeae8f6:indexpattern-datasource-layer-52fc88c5-2149-40e8-9d5f-51b12e53450b",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "7218b1a8-2cce-4887-9ad7-de1e355924c7:indexpattern-datasource-layer-61a07ee2-9b1c-48a0-84eb-7890461fbddf",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "909cac19-26bf-456a-82c9-31f6d96b9eec:indexpattern-datasource-layer-0da794ff-a80a-4462-9bca-c61b9d4010c9",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "86e7070f-d444-45fb-a439-d42b03afb93f:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "7ab338e5-86df-4e0f-b7fd-9b1390f13424:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "7ab338e5-86df-4e0f-b7fd-9b1390f13424:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "7ab338e5-86df-4e0f-b7fd-9b1390f13424:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "eba59b59-ee43-4684-8398-5255a7642bbc:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "eba59b59-ee43-4684-8398-5255a7642bbc:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "599527ce-1767-4a5e-beb6-cf64c390eeb4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "599527ce-1767-4a5e-beb6-cf64c390eeb4:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "8d833fa3-423d-4408-8ba0-8bc56220648e:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "8d833fa3-423d-4408-8ba0-8bc56220648e:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "8d833fa3-423d-4408-8ba0-8bc56220648e:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "42127512-f52b-433a-828d-280939046bc4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "166c7fea-3b68-41c2-a462-532cece970b4:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "43f02183-8a60-4402-ba2c-2305f3a97927:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "300d3c60-1ef1-4108-9541-eec5d1efce71:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "300d3c60-1ef1-4108-9541-eec5d1efce71:indexpattern-datasource-layer-86a019c1-473c-4536-837f-51e793b52534",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:indexpattern-datasource-layer-d6d3b5cd-6ed2-4795-8087-6faa122a3ba3",
       "type": "index-pattern"
     },
     {
-      "id": "3b7d5ebb-ee81-4abd-a784-1aad8ec4fdd0",
+      "id": "",
       "name": "fe65633d-8a43-4b13-9580-7c694573e611:xy-visualization-layer-8025da01-8c48-4c5b-be42-647bb9c164f0",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "149587b4-2aac-4286-b661-b5f5b98d84f8:optionsListDataView",
       "type": "index-pattern"
     },
     {
-      "id": "{{indexPattern}}",
+      "id": "",
       "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
       "type": "index-pattern"
     }
