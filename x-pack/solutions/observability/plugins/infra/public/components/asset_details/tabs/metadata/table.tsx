@@ -181,7 +181,10 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       search={searchBar}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
-      message={
+      tableCaption={i18n.translate('xpack.infra.metadataEmbeddable.metadataCaption', {
+        defaultMessage: 'Metadata entries',
+      })}
+      message=={
         loading ? (
           <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (
