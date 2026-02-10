@@ -72,9 +72,7 @@ const EntityAnalyticsComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-              <HeaderPage
-                title={ENTITY_ANALYTICS}              
-              />
+            <HeaderPage title={ENTITY_ANALYTICS} />
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (

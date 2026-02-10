@@ -118,7 +118,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   // watchlistFilter behind entityThreatHunting due to filter being on new threat hunting page and NOT entity analytics page.
-  const watchlistFilterFlag =useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+  const watchlistFilterFlag = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -328,7 +328,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                     defaultMessage="Manage data sources"
                   />
                 </EuiButtonEmpty>,
-                ...(watchlistFilterFlag ? [<WatchlistFilter />] : [])
+                ...(watchlistFilterFlag ? [<WatchlistFilter />] : []),
               ]}
             />
             <EuiFlexGroup direction="column">

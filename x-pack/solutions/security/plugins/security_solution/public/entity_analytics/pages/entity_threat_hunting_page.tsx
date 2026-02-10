@@ -73,9 +73,7 @@ export const EntityThreatHuntingPage = () => {
               defaultMessage="Entity Threat Hunting"
             />
           }
-          rightSideItems={[
-            <WatchlistFilter />,
-          ]}
+          rightSideItems={[<WatchlistFilter />]}
         />
 
         {isSourcererLoading ? (

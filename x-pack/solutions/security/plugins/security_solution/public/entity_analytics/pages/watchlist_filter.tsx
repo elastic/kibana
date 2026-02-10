@@ -1,61 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import {
-  EuiIcon,
-
-  EuiComboBox,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
 import { useNavigation } from '../../common/lib/kibana';
-import { ENTITY_ANALYTICS_THREAT_HUNTING_PATH, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
+import {
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+} from '../../../common/constants';
 
-type WatchlistGroupLabel = {
+interface WatchlistGroupLabel {
   id: string;
   label: string;
   isGroupLabelOption: true;
   groupicon: string;
   prepend?: React.ReactNode;
   checked?: never;
-};
+}
 
-type WatchlistItem = {
+interface WatchlistItem {
   id: string;
   label: string;
   isGroupLabelOption?: false;
   checked?: 'on' | 'off';
   groupicon?: never;
   prepend?: React.ReactNode;
-};
+}
 
 type WatchlistOption = WatchlistGroupLabel | WatchlistItem;
 
-type WatchlistFilterProps = {
+interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
-};
+}
 
 const WATCHLIST_QUERY_PARAM = 'watchlist_id';
 
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
-  
-  { prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }} />, id: 'group-prebuilt', label: 'Prebuilt', isGroupLabelOption: true, groupicon: 'pin' },
+  {
+    prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }} />,
+    id: 'group-prebuilt',
+    label: 'Prebuilt',
+    isGroupLabelOption: true,
+    groupicon: 'pin',
+  },
   { id: 'prebuilt-priv', label: 'Privileged users' },
   { id: 'prebuilt-llm', label: 'Unauthorized LLM access' },
   { id: 'prebuilt-depart', label: 'Departing employees' },
 
-  { prepend: <EuiIcon type="gear" aria-label="gear" style={{ marginRight: 8 }} />, id: 'group-custom', label: 'Custom', isGroupLabelOption: true, groupicon: 'gear' },
+  {
+    prepend: <EuiIcon type="gear" aria-label="gear" style={{ marginRight: 8 }} />,
+    id: 'group-custom',
+    label: 'Custom',
+    isGroupLabelOption: true,
+    groupicon: 'gear',
+  },
   { id: 'custom-clevel', label: 'C-level users' },
   { id: 'custom-highrisk', label: 'High-risk users' },
   { id: 'custom-3', label: 'Custom watchlist #3' },
 ];
 
 export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
-
   // hook this up to real data
   const options = WATCHLIST_OPTIONS;
   const [selected, setSelected] = useState<WatchlistItem | null>(null);
@@ -106,9 +118,9 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
   const onChangeComboBox = useCallback(
     (nextOptions: any[]) => {
-      const newlySelected = nextOptions.find(
-        (o) => o && !o.isGroupLabelOption
-      ) as WatchlistItem | undefined;
+      const newlySelected = nextOptions.find((o) => o && !o.isGroupLabelOption) as
+        | WatchlistItem
+        | undefined;
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
@@ -123,12 +135,12 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row" >
+    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
       <EuiFlexItem>
         <EuiComboBox
           data-test-subj="watchlistFilterComboBox"
           prepend="Watchlist"
-          placeholder='Select watchlist'
+          placeholder="Select watchlist"
           singleSelection={{ asPlainText: true }}
           options={options}
           selectedOptions={selected ? [selected] : []}
@@ -146,5 +158,5 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  )
+  );
 };
