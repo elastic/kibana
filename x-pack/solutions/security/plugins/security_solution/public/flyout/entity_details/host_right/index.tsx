@@ -27,6 +27,7 @@ import { HostPanelHeader } from './header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
+import { useObservedHost } from './hooks/use_observed_host';
 import { useObservedHostHeaderLastSeen } from './hooks/use_observed_host_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -134,6 +135,7 @@ export const HostPanel = ({
   );
 
   const lastSeenDate = useObservedHostHeaderLastSeen(hostName, scopeId);
+  const observedHost = useObservedHost(hostName, scopeId);
 
   return (
     <>
@@ -151,6 +153,7 @@ export const HostPanel = ({
       <HostPanelHeader hostName={hostName} lastSeenDate={lastSeenDate} />
       <HostPanelContent
         hostName={hostName}
+        observedHost={observedHost}
         riskScoreState={riskScoreState}
         contextID={contextID}
         scopeId={scopeId}

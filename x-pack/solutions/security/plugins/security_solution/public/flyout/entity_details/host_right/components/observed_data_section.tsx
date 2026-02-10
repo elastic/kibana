@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiLoadingSpinner,
+  EuiTitle,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 
-import type { Dispatch, ReactElement, SetStateAction } from 'react';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
@@ -17,39 +22,29 @@ import { useInstalledSecurityJobNameById } from '../../../../common/components/m
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
 import { ObservedEntity } from '../../shared/components/observed_entity';
-import { useObservedHost } from '../hooks/use_observed_host';
 import { useObservedHostFields } from '../hooks/use_observed_host_fields';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 
-const CLOSED = 'closed' as const;
-const OPEN = 'open' as const;
+type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 export const ObservedDataSection = memo(
   ({
     hostName,
+    observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
     hostName: string;
+    observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
     queryId: string;
   }) => {
     const { euiTheme } = useEuiTheme();
-
-    const [expandedState, setExpandedState] = useState<typeof CLOSED | typeof OPEN>(CLOSED);
-    const renderContent = expandedState === OPEN;
-    const onToggle = useCallback(
-      (isOpen: boolean) => setExpandedState(isOpen ? OPEN : CLOSED),
-      [setExpandedState]
-    );
-
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [extraAction, setExtraAction] = useState<ReactElement | null | undefined>(null);
 
     const buttonContent = (
       <EuiTitle size="xs">
@@ -65,9 +60,7 @@ export const ObservedDataSection = memo(
     return (
       <InspectButtonContainer>
         <EuiAccordion
-          onToggle={onToggle}
-          initialIsOpen={false}
-          isLoading={isLoading}
+          initialIsOpen={true}
           id="observedEntity-accordion"
           data-test-subj="observedEntity-accordion"
           buttonProps={{
@@ -77,21 +70,21 @@ export const ObservedDataSection = memo(
             `,
           }}
           buttonContent={buttonContent}
-          extraAction={extraAction}
           css={css`
             .euiAccordion__optionalAction {
               margin-left: auto;
             }
           `}
         >
-          {renderContent && (
+          {observedHost.isLoading ? (
+            <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
+          ) : (
             <ObservedDataSectionContent
               hostName={hostName}
+              observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
               queryId={queryId}
-              setIsLoading={setIsLoading}
-              setExtraAction={setExtraAction}
             />
           )}
         </EuiAccordion>
@@ -104,22 +97,20 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 const ObservedDataSectionContent = memo(
   ({
     hostName,
+    observedHost,
     contextID,
     scopeId,
     queryId,
-    setIsLoading,
-    setExtraAction,
   }: {
     hostName: string;
+    observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
     queryId: string;
-    setIsLoading: Dispatch<SetStateAction<boolean>>;
-    setExtraAction: Dispatch<SetStateAction<ReactElement | null | undefined>>;
   }) => {
     const { to, from, isInitializing } = useGlobalTime();
-
-    const observedHost = useObservedHost(hostName, scopeId);
+    const { euiTheme } = useEuiTheme();
+    const xsFontSize = useEuiFontSize('xxs').fontSize;
 
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
@@ -132,22 +123,25 @@ const ObservedDataSectionContent = memo(
       aggregationInterval: 'auto',
     });
 
-    setIsLoading(isLoadingAnomaliesData);
-
-    const observedHostWithAnomalies: ObservedEntityData<HostItem> = {
-      ...observedHost,
-      anomalies: {
-        isLoading: isLoadingAnomaliesData,
-        anomalies: anomaliesData,
+    const observedHostWithAnomalies = useMemo(
+      (): ObservedEntityData<HostItem> => ({
+        ...observedHost,
+        anomalies: {
+          isLoading: isLoadingAnomaliesData,
+          anomalies: anomaliesData,
+          jobNameById,
+        },
+      }),
+      [
+        observedHost,
+        isLoadingAnomaliesData,
+        anomaliesData,
         jobNameById,
-      },
-    };
+      ]
+    );
     const observedFields = useObservedHostFields(observedHostWithAnomalies);
 
-    const { euiTheme } = useEuiTheme();
-    const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-    setExtraAction(
+    const extraAction = (
       <>
         <span
           css={css`
@@ -189,12 +183,23 @@ const ObservedDataSectionContent = memo(
     );
 
     return (
-      <ObservedEntity
-        observedData={observedHostWithAnomalies}
-        contextID={contextID}
-        scopeId={scopeId}
-        observedFields={observedFields}
-      />
+      <>
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+            margin-bottom: ${euiTheme.size.s};
+          `}
+        >
+          {extraAction}
+        </div>
+        <ObservedEntity
+          observedData={observedHostWithAnomalies}
+          contextID={contextID}
+          scopeId={scopeId}
+          observedFields={observedFields}
+        />
+      </>
     );
   }
 );

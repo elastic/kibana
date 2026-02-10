@@ -18,13 +18,18 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { HostItem } from '../../../../common/search_strategy';
+
+type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 interface HostPanelContentProps {
+  hostName: string;
+  observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
@@ -32,6 +37,7 @@ interface HostPanelContentProps {
 
 export const HostPanelContent = ({
   hostName,
+  observedHost,
   riskScoreState,
   recalculatingScore,
   contextID,
@@ -74,6 +80,7 @@ export const HostPanelContent = ({
       />
       <ObservedDataSection
         hostName={hostName}
+        observedHost={observedHost}
         contextID={contextID}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}

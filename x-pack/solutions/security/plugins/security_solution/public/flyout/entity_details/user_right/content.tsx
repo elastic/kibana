@@ -19,9 +19,14 @@ import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { UserItem } from '../../../../common/search_strategy';
+
+type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 
 interface UserPanelContentProps {
   userName: string;
+  observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
@@ -33,6 +38,7 @@ interface UserPanelContentProps {
 
 export const UserPanelContent = ({
   userName,
+  observedUser,
   riskScoreState,
   recalculatingScore,
   contextID,
@@ -75,6 +81,7 @@ export const UserPanelContent = ({
       />
       <ObservedDataSection
         userName={userName}
+        observedUser={observedUser}
         contextID={contextID}
         scopeId={scopeId}
         queryId={OBSERVED_USER_QUERY_ID}

@@ -28,6 +28,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { useObservedUser } from './hooks/use_observed_user';
 import { useObservedUserHeaderLastSeen } from './hooks/use_observed_user_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -77,6 +78,7 @@ export const UserPanel = ({
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
   const lastSeenDate = useObservedUserHeaderLastSeen(userName, scopeId);
+  const observedUser = useObservedUser(userName, scopeId);
 
   const managedUser = useManagedUser();
 
@@ -151,6 +153,7 @@ export const UserPanel = ({
       <UserPanelHeader userName={userName} lastSeenDate={lastSeenDate} managedUser={managedUser} />
       <UserPanelContent
         userName={userName}
+        observedUser={observedUser}
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
