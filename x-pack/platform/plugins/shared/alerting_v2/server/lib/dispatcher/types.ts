@@ -6,12 +6,8 @@
  */
 
 export type RuleId = string;
-
-export interface Policy {
-  id: string;
-  name: string;
-  // other policy fields as needed
-}
+export type NotificationPolicyId = string;
+export type WorkflowId = string;
 
 export interface AlertEpisode {
   last_event_timestamp: string;
@@ -39,4 +35,43 @@ export interface DispatcherExecutionResult {
 
 export interface DispatcherTaskState {
   previousStartedAt?: string;
+}
+
+export interface Rule {
+  id: RuleId;
+  name: string;
+  description: string;
+  notificationPolicyIds: NotificationPolicyId[];
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationPolicy {
+  id: NotificationPolicyId;
+  name: string;
+  /** CEL expression evaluated against the alert episode context.
+   *  An empty string matches all episodes (catch-all). */
+  matcher: string; // e.g. 'data.severity == "critical" && data.env != "dev"'
+  /** data.* fields used to group episodes into a single notification */
+  groupBy: string[];
+  /** Minimum interval between notifications for the same group */
+  throttle: {
+    interval: string; // e.g. '1h', '30m', '5m'
+  };
+  /** Target workflow to dispatch matched episodes to */
+  workflowId: WorkflowId;
+}
+
+export interface MatchedPair {
+  episode: AlertEpisode;
+  policy: NotificationPolicy;
+}
+
+export interface NotificationGroup {
+  ruleId: RuleId;
+  policyId: NotificationPolicyId;
+  workflowId: WorkflowId;
+  groupKey: Record<string, unknown>;
+  episodes: AlertEpisode[];
 }

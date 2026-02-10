@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import Boom from '@hapi/boom';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { inject, injectable } from 'inversify';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';

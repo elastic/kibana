@@ -6,7 +6,9 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { get } from 'lodash';
 import moment from 'moment';
+import objectHash from 'object-hash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import {
   LoggerServiceToken,
@@ -18,12 +20,19 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
+import { getFakeNotificationPoliciesByIds, getFakeRulesByIds } from './faker_service';
 import { getAlertEpisodeSuppressionsQuery, getDispatchableAlertEventsQuery } from './queries';
 import type {
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatcherExecutionParams,
   DispatcherExecutionResult,
+  MatchedPair,
+  NotificationGroup,
+  NotificationPolicy,
+  NotificationPolicyId,
+  Rule,
+  RuleId,
 } from './types';
 import { withDispatcherSpan } from './with_dispatcher_span';
 
@@ -53,6 +62,15 @@ export class DispatcherService implements DispatcherServiceContract {
 
     const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
 
+    const uniqueRuleIds = [...new Set(active.map((ep) => ep.rule_id))];
+    const rules = await getFakeRulesByIds(uniqueRuleIds);
+
+    const uniquePolicyIds = [...new Set(rules.values().flatMap((r) => r.notificationPolicyIds))];
+    const policies = await getFakeNotificationPoliciesByIds(uniquePolicyIds);
+
+    const matched = this.evaluateMatchers(active, rules, policies);
+    const notificationGroups = this.buildNotificationGroups(matched);
+
     this.logger.debug({
       message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressed.length} suppressed, ${active.length} not suppressed`,
     });
@@ -69,6 +87,79 @@ export class DispatcherService implements DispatcherServiceContract {
     );
 
     return { startedAt };
+  }
+
+  private buildNotificationGroups(matched: MatchedPair[]): NotificationGroup[] {
+    const groupMap = new Map<string, NotificationGroup>();
+
+    for (const { episode, policy } of matched) {
+      let groupKey: Record<string, unknown> = {};
+      if (policy.groupBy.length === 0) {
+        // No grouping: each episode dispatches individually.
+        // Use the episode's identity as the group key for throttle tracking.
+        groupKey = {
+          groupHash: episode.group_hash,
+          episodeId: episode.episode_id,
+        };
+      } else {
+        for (const field of policy.groupBy) {
+          // TODO: replace {} with episode.data when ESQL flattened support is added
+          groupKey[field] = get({}, field);
+        }
+      }
+
+      const compositeKey = objectHash({
+        ruleId: episode.rule_id,
+        policyId: policy.id,
+        groupKey,
+      });
+
+      if (!groupMap.has(compositeKey)) {
+        groupMap.set(compositeKey, {
+          ruleId: episode.rule_id,
+          policyId: policy.id,
+          workflowId: policy.workflowId,
+          groupKey,
+          episodes: [],
+        });
+      }
+
+      groupMap.get(compositeKey)!.episodes.push(episode);
+    }
+
+    return [...groupMap.values()];
+  }
+
+  private evaluateMatchers(
+    activeEpisodes: AlertEpisode[],
+    rules: Map<RuleId, Rule>,
+    policies: Map<NotificationPolicyId, NotificationPolicy>
+  ): MatchedPair[] {
+    const matched: MatchedPair[] = [];
+
+    for (const episode of activeEpisodes) {
+      const rule = rules.get(episode.rule_id);
+      if (!rule) continue;
+
+      for (const policyId of rule.notificationPolicyIds) {
+        const policy = policies.get(policyId);
+        if (!policy) continue;
+
+        // Empty matcher = catch-all, always matches
+        if (!policy.matcher) {
+          this.logger.debug({
+            message: `Episode ${episode.episode_id} matches policy ${policyId} (catch-all)`,
+          });
+          matched.push({ episode, policy });
+          continue;
+        }
+
+        // TODO: Handle matcher evaluation here
+        // matched.push({ episode, policy });
+      }
+    }
+
+    return matched;
   }
 
   private applySuppression(
