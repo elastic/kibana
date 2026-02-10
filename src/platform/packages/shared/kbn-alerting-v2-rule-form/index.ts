@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Flyout component (lazy loaded)
+// Flyout components
 export { ESQLRuleFormFlyout } from './flyout';
+export { RecoveryQueryFlyout } from './flyout/recovery_query_flyout';
 
-// Form components (lazy loaded)
+// Form components
 export { RuleFields } from './form';
+
+// Reusable field components (for use in pages without flyouts)
+export { RecoveryQueryFields } from './form/fields/recovery_query_fields';
 
 // Types
 export type { FormValues } from './form';
+export type { RecoveryOption } from './form/fields/recovery_select';
+export type { RecoveryQueryFieldsProps } from './form/fields/recovery_query_fields';
+export type { RecoveryQueryFlyoutProps } from './flyout/recovery_query_flyout';

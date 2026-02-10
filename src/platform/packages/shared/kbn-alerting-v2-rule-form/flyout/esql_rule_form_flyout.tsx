@@ -6,11 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, NotificationsStart } from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -40,6 +44,11 @@ export interface ESQLRuleFormFlyoutProps {
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
     notifications: NotificationsStart;
+    core: CoreStart;
+    storage: Storage;
+    uiActions: UiActionsStart;
+    fieldsMetadata?: FieldsMetadataPublicStart;
+    usageCollection?: UsageCollectionStart;
   };
   query: string;
   defaultTimeField?: string;
@@ -74,9 +83,17 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
       timeField: defaultTimeField,
       enabled: true,
       groupingKey: [],
+      recovery_policy: {
+        type: 'no_breach',
+        query: {
+          base: '',
+          condition: '',
+        },
+      },
     },
   });
-  const { http, data, dataViews, notifications } = services;
+  const { http, notifications } = services;
+
   const flyoutTitleId = 'ruleV2FormFlyoutTitle';
   const formId = 'ruleV2Form';
 
@@ -110,6 +127,11 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   return (
     <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
       <EuiFlyout
+        session="start"
+        flyoutMenuProps={{
+          title: 'Create Alert Rule',
+          hideTitle: true,
+        }}
         type={push ? 'push' : 'overlay'}
         onClose={handleClose}
         aria-labelledby={flyoutTitleId}
@@ -138,7 +160,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
             errors={errors}
             setValue={setValue}
             query={query}
-            services={{ http, data, dataViews }}
+            services={services}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RecoveryPolicyType } from './fields/recovery_select';
+
 export interface FormValues {
   name: string;
   description: string;
@@ -19,4 +21,11 @@ export interface FormValues {
   timeField: string;
   lookbackWindow: string;
   groupingKey: string[];
+  recovery_policy: {
+    type: RecoveryPolicyType;
+    query: {
+      base: string;
+      condition: string;
+    };
+  };
 }

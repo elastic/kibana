@@ -23,8 +23,18 @@
     "@kbn/data-views-plugin",
     "@kbn/esql-utils",
     "@kbn/esql-language",
+    "@kbn/esql-editor",
+    "@kbn/es-query",
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/code-editor",
+    "@kbn/monaco",
+    "@kbn/esql-types",
   ]
 }

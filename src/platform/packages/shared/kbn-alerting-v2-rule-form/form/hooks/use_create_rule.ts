@@ -30,6 +30,7 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
         timeField: formValues.timeField,
         lookbackWindow: formValues.lookbackWindow,
         groupingKey: formValues.groupingKey,
+        recovery_policy: formValues.recovery_policy,
       };
       return http.post<RuleResponse>('/internal/alerting/v2/rule', {
         body: JSON.stringify(ruleData),
