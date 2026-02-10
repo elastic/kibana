@@ -38,10 +38,7 @@ export function useTransactionActions({
 
     return [
       {
-        id: 'explore',
-        groupLabel: i18n.translate('xpack.apm.transactionsTable.actionsGroupLabel', {
-          defaultMessage: 'Explore',
-        }),
+        id: 'discover',
         actions: [
           {
             id: 'openInDiscover',
