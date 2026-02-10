@@ -111,7 +111,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   const datasetName = getDatasetName(packagePolicy.inputs);
 
-  // For OTel packages with dynamic_signal_types, we need to create index templates for signal types defined in the pipelines
+  // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
   const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
   const signalTypes: string[] = isDynamicSignalTypes
     ? ['logs', 'metrics', 'traces']

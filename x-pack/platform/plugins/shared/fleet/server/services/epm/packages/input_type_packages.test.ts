@@ -124,11 +124,6 @@ describe('installAssetsForInputPackagePolicy', () => {
       paths: [],
     } as any);
 
-    jest.mocked(getInstallation).mockResolvedValue({
-      name: 'test',
-      version: '1.0.0',
-    } as any);
-
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({
@@ -177,35 +172,6 @@ describe('installAssetsForInputPackagePolicy', () => {
           dynamic_signal_types: true,
         },
       ],
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'otel.logs',
-          title: 'OTel Logs',
-          release: 'ga',
-          package: 'otel',
-          path: 'logs',
-          streams: [],
-        },
-        {
-          type: 'metrics',
-          dataset: 'otel.metrics',
-          title: 'OTel Metrics',
-          release: 'ga',
-          package: 'otel',
-          path: 'metrics',
-          streams: [],
-        },
-        {
-          type: 'traces',
-          dataset: 'otel.traces',
-          title: 'OTel Traces',
-          release: 'ga',
-          package: 'otel',
-          path: 'traces',
-          streams: [],
-        },
-      ],
     };
 
     const OTEL_PKG_INFO_NO_DYNAMIC_SIGNAL_TYPES = {
@@ -239,10 +205,6 @@ describe('installAssetsForInputPackagePolicy', () => {
       jest.mocked(installIndexTemplatesAndPipelines).mockReset();
       jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
       jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
-      jest.mocked(getInstallation).mockResolvedValue({
-        name: 'otel',
-        version: '1.0.0',
-      } as any);
     });
 
     it('should install index templates for all signal types when dynamic_signal_types is true', async () => {
@@ -448,13 +410,6 @@ describe('installAssetsForInputPackagePolicy', () => {
                   vars: {
                     'data_stream.dataset': { value: 'otel.custom' },
                     'data_stream.type': { value: 'traces' },
-                  },
-                  service: {
-                    pipelines: {
-                      'logs/otlp': { receivers: ['otlp'] },
-                      'metrics/otlp': { receivers: ['otlp'] },
-                      'traces/otlp': { receivers: ['otlp'] },
-                    },
                   },
                 },
               ],
