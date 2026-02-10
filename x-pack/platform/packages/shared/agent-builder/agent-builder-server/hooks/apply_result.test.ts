@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import {
   applyBeforeAgentResult,
-  applyAfterAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
 } from './apply_result';
 import type {
   BeforeAgentHookContext,
-  AfterAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
 } from './types';
@@ -44,39 +40,6 @@ describe('apply_result', () => {
       const result = applyBeforeAgentResult(baseContext, { nextInput: newInput });
       expect(result).not.toBe(baseContext);
       expect(result.nextInput).toEqual(newInput);
-    });
-  });
-
-  describe('applyAfterAgentResult', () => {
-    const baseContext: AfterAgentHookContext = {
-      request: createMockRequest(),
-      conversation: { id: 'conv-1', rounds: [] } as unknown as Conversation,
-      round: {
-        id: 'round-1',
-        status: ConversationRoundStatus.inProgress,
-        input: { message: 'hi' },
-        steps: [],
-      } as unknown as ConversationRound,
-    };
-
-    it('returns context unchanged when result is undefined', () => {
-      expect(applyAfterAgentResult(baseContext, undefined)).toBe(baseContext);
-    });
-
-    it('returns context unchanged when result object has no round', () => {
-      expect(applyAfterAgentResult(baseContext, {})).toBe(baseContext);
-    });
-
-    it('returns new context with round when result has round', () => {
-      const newRound = {
-        id: 'round-2',
-        status: ConversationRoundStatus.completed,
-        input: { message: 'hi' },
-        steps: [],
-      } as unknown as ConversationRound;
-      const result = applyAfterAgentResult(baseContext, { round: newRound });
-      expect(result).not.toBe(baseContext);
-      expect(result.round).toEqual(newRound);
     });
   });
 

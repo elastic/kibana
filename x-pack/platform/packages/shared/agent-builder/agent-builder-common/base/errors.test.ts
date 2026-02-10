@@ -241,14 +241,14 @@ describe('AgentBuilder errors', () => {
       const meta = { foo: 'bar' };
       const error = createHooksExecutionError(
         'hook failed',
-        HookLifecycle.afterAgent,
+        HookLifecycle.afterToolCall,
         'my-hook',
         HookExecutionMode.nonBlocking,
         meta
       );
       expect(error.meta).toEqual({
         foo: 'bar',
-        hookLifecycle: HookLifecycle.afterAgent,
+        hookLifecycle: HookLifecycle.afterToolCall,
         hookId: 'my-hook',
         hookMode: HookExecutionMode.nonBlocking,
       });

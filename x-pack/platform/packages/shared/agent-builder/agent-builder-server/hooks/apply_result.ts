@@ -9,7 +9,6 @@ import type { HookContextByLifecycle } from './types';
 import {
   HookLifecycle,
   type BeforeAgentHookContext,
-  type AfterAgentHookContext,
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
   type HookHandlerResult,
@@ -27,14 +26,6 @@ export function applyBeforeAgentResult(
 ): BeforeAgentHookContext {
   if (!isResultObject(result) || result.nextInput === undefined) return context;
   return { ...context, nextInput: result.nextInput };
-}
-
-export function applyAfterAgentResult(
-  context: AfterAgentHookContext,
-  result: void | HookHandlerResult<HookLifecycle.afterAgent>
-): AfterAgentHookContext {
-  if (!isResultObject(result) || result.round === undefined) return context;
-  return { ...context, round: result.round };
 }
 
 export function applyBeforeToolCallResult(
@@ -65,7 +56,6 @@ export type ApplyHookResultByLifecycle = {
 
 export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
-  [HookLifecycle.afterAgent]: applyAfterAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
 };

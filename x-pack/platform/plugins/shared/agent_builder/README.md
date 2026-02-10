@@ -141,7 +141,6 @@ A **conversation round** is one turn in the chat: the user sends a message and t
 | 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
 | 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
 | 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
-| 5 | `afterAgent` | Agent | When the round is complete, before it is persisted/emitted | `round` (round summary) |
 
 Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
 
@@ -167,12 +166,6 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
                 : undefined,
             },
           };
-        },
-      },
-      [HookLifecycle.afterAgent]: {
-        mode: HookExecutionMode.blocking,
-        handler: (context) => {
-          console.log('afterAgent');
         },
       },
       [HookLifecycle.beforeToolCall]: {
@@ -221,11 +214,7 @@ After hooks run in reverse order:
 
     hook_3 afterToolCall
     hook_2 afterToolCall
-    hook_1.afterToolCall
-
-    hook_3 afterAgent
-    hook_2 afterAgent
-    hook_1.afterAgent
+    hook_1 afterToolCall
 ```
 
 ## MCP Server

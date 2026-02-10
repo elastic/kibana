@@ -9,13 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type {
-  BrowserApiToolMetadata,
-  ChatAgentEvent,
-  Conversation,
-  ConversationRound,
-  RoundInput,
-} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -259,16 +253,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-  const afterHookResult = await context.hooks.run(HookLifecycle.afterAgent, {
-    request,
-    abortSignal,
-    conversation,
-    round,
-  });
-
-  return {
-    round: afterHookResult.round ?? round,
-  };
+  return { round };
 };
 
 const getConversationState = ({

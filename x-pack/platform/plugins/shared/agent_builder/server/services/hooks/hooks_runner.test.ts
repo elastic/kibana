@@ -6,7 +6,6 @@
  */
 
 import { isHooksExecutionError, ToolResultType } from '@kbn/agent-builder-common';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createHooksRunner } from './hooks_runner';
 import type { CreateHooksRunnerDeps } from './hooks_runner';
@@ -15,7 +14,6 @@ import type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
-  AfterAgentHookContext,
   HookContext,
   HookRegistration,
 } from '@kbn/agent-builder-server';
@@ -465,41 +463,6 @@ describe('createHooksRunner', () => {
     expect(hookCalls).toEqual(['priority-1', 'undefined-priority']);
   });
 
-  it('applies afterAgent mutation and returns modified round', async () => {
-    const baseRound = { id: 'round-1' } as unknown as ConversationRound;
-    const baseAfterRoundContext: AfterAgentHookContext = {
-      request: baseContext.request,
-      conversation: {
-        id: 'c1',
-        agent_id: 'a1',
-        user: { id: 'u1', username: 'u' },
-        title: 't',
-        created_at: '',
-        updated_at: '',
-        rounds: [baseRound],
-      },
-      round: baseRound,
-    };
-
-    const run = createRunner({
-      getHooksForLifecycle: (): HookRegistration<HookLifecycle>[] => [
-        {
-          id: 'round-mutator',
-          mode: HookExecutionMode.blocking,
-          handler: async (ctx: AfterAgentHookContext) => ({
-            round: {
-              ...ctx.round,
-              response: { message: 'modified-by-hook' },
-            },
-          }),
-        } as HookRegistration<HookLifecycle>,
-      ],
-    }).run;
-
-    const result = await run(HookLifecycle.afterAgent, baseAfterRoundContext);
-    expect(result.round.response).toEqual({ message: 'modified-by-hook' });
-  });
-
   it('applies afterToolCall mutation and returns modified toolReturn', async () => {
     const originalToolReturn = {
       results: [{ tool_result_id: 'res-1', type: ToolResultType.other as const, data: { a: 1 } }],
@@ -527,20 +490,7 @@ describe('createHooksRunner', () => {
   });
 
   it('run() returns context unchanged when no hooks are registered for that lifecycle', async () => {
-    const roundR1 = { id: 'r1' } as unknown as ConversationRound;
-    const contextForAfterRound: AfterAgentHookContext = {
-      request: baseContext.request,
-      conversation: {
-        id: 'c1',
-        agent_id: 'a1',
-        user: { id: 'u1', username: 'u' },
-        title: 't',
-        created_at: '',
-        updated_at: '',
-        rounds: [roundR1],
-      },
-      round: roundR1,
-    };
+    const afterContext = createAfterToolCallContext();
 
     const run = createRunner({
       getHooksForLifecycle: (lifecycle) =>
@@ -555,8 +505,8 @@ describe('createHooksRunner', () => {
           : [],
     }).run;
 
-    const result = await run(HookLifecycle.afterAgent, contextForAfterRound);
-    expect(result).toBe(contextForAfterRound);
+    const result = await run(HookLifecycle.afterToolCall, afterContext);
+    expect(result).toBe(afterContext);
   });
 
   it('forwards abortSignal from context to handler', async () => {

@@ -83,7 +83,6 @@ export type {
   HooksServiceSetup,
   HooksServiceStart,
   BeforeAgentHookContext,
-  AfterAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
   ProcessedRoundInput,
@@ -92,7 +91,6 @@ export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
   applyHookResultByLifecycle,
   applyBeforeAgentResult,
-  applyAfterAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
 } from './hooks/apply_result';

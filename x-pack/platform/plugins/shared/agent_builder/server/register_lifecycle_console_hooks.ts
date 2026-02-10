@@ -11,7 +11,7 @@ import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 
 /**
  * Registers one hook per lifecycle that logs the hook name to the console.
- * Useful when running the app to see when each lifecycle runs (beforeAgent, afterAgent, beforeToolCall, afterToolCall).
+ * Useful when running the app to see when each lifecycle runs (beforeAgent, beforeToolCall, afterToolCall).
  */
 export const registerLifecycleConsoleHooks = (hooksSetup: HooksServiceSetup): void => {
   hooksSetup.register({
@@ -23,12 +23,6 @@ export const registerLifecycleConsoleHooks = (hooksSetup: HooksServiceSetup): vo
           console.log('[Agent Builder] hook:', HookLifecycle.beforeAgent);
         },
       },
-      [HookLifecycle.afterAgent]: {
-        mode: HookExecutionMode.blocking,
-        handler: async () => {
-          console.log('[Agent Builder] hook:', HookLifecycle.afterAgent);
-        },
-      },
       [HookLifecycle.beforeToolCall]: {
         mode: HookExecutionMode.blocking,
         handler: async () => {
@@ -37,7 +31,7 @@ export const registerLifecycleConsoleHooks = (hooksSetup: HooksServiceSetup): vo
       },
       [HookLifecycle.afterToolCall]: {
         mode: HookExecutionMode.blocking,
-        handler: async () => {
+        handler: async (context) => {
           console.log('[Agent Builder] hook:', HookLifecycle.afterToolCall);
         },
       },

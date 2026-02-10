@@ -7,8 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
-  type Conversation,
-  type ConversationRound,
   type ProcessedRoundInput,
   HookLifecycle,
   HookExecutionMode,
@@ -28,11 +26,6 @@ export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
 }
 
-export interface AfterAgentHookContext extends AgentHookContextBase {
-  round: ConversationRound;
-  conversation?: Conversation;
-}
-
 interface ToolCallHookContextBase extends AgentHookContextBase {
   toolId: string;
   toolCallId: string;
@@ -47,7 +40,6 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
 
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
-  [HookLifecycle.afterAgent]: AfterAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
 }
@@ -60,9 +52,6 @@ export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextBy
 export interface HookHandlerResultByLifecycle {
   [HookLifecycle.beforeAgent]: {
     nextInput?: ProcessedRoundInput;
-  };
-  [HookLifecycle.afterAgent]: {
-    round?: ConversationRound;
   };
   [HookLifecycle.beforeToolCall]: {
     toolParams?: Record<string, unknown>;

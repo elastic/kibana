@@ -87,7 +87,7 @@ describe('createHookRegistry', () => {
     registry.register({
       id: 'same',
       hooks: {
-        [HookLifecycle.afterAgent]: {
+        [HookLifecycle.afterToolCall]: {
           mode: HookExecutionMode.blocking,
           handler: async (ctx) => ctx,
         },
@@ -95,6 +95,6 @@ describe('createHookRegistry', () => {
     });
 
     expect(registry.getHooksForLifecycle(HookLifecycle.beforeAgent)).toHaveLength(1);
-    expect(registry.getHooksForLifecycle(HookLifecycle.afterAgent)).toHaveLength(1);
+    expect(registry.getHooksForLifecycle(HookLifecycle.afterToolCall)).toHaveLength(1);
   });
 });

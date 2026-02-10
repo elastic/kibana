@@ -12,7 +12,6 @@
  */
 export enum HookLifecycle {
   beforeAgent = 'beforeAgent',
-  afterAgent = 'afterAgent',
   beforeToolCall = 'beforeToolCall',
   afterToolCall = 'afterToolCall',
 }
