@@ -28,6 +28,7 @@ const packageMatcher = makeMatcher([
  */
 const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
 const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
+const OPTIMIZER_RESTART_DEBOUNCE_MS = 1000;
 
 export interface Options {
   enabled: boolean;
@@ -54,6 +55,8 @@ export class Watcher {
   }
 
   run$ = new Rx.Observable((subscriber) => {
+    const optimizerRestartSignal$ = new Rx.Subject<string>();
+
     if (!this.enabled) {
       this.restart$.complete();
       subscriber.complete();
@@ -66,9 +69,21 @@ export class Watcher {
     };
 
     const fireOptimizer = (repoRel: string) => {
-      this.log.warn(`restarting optimizer`, `due to changes in ${repoRel}`);
-      this.restartOptimizer$.next();
+      optimizerRestartSignal$.next(repoRel);
     };
+
+    subscriber.add(
+      optimizerRestartSignal$
+        .pipe(Rx.debounceTime(OPTIMIZER_RESTART_DEBOUNCE_MS))
+        .subscribe((repoRel) => {
+          this.log.warn(`restarting optimizer`, `due to changes in ${repoRel}`);
+          this.restartOptimizer$.next();
+        })
+    );
+
+    subscriber.add(() => {
+      optimizerRestartSignal$.complete();
+    });
 
     Pw.subscribe(
       this.repoRoot,
