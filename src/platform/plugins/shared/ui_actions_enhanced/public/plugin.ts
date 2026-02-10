@@ -26,17 +26,14 @@ export interface StartDependencies {
   licensing?: LicensingPluginStart;
 }
 
-export interface SetupContract
-  extends UiActionsSetup,
-    Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
+export type SetupContract = UiActionsSetup;
 
 export interface StartContract
   extends UiActionsStart,
     Pick<
       UiActionsServiceEnhancements,
       'getActionFactory' | 'hasActionFactory' | 'getActionFactories'
-    > {
-}
+    > {}
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
