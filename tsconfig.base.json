@@ -1242,8 +1242,6 @@
       "@kbn/global-search-plugin/*": ["x-pack/platform/plugins/shared/global_search/*"],
       "@kbn/global-search-providers-plugin": ["x-pack/platform/plugins/private/global_search_providers"],
       "@kbn/global-search-providers-plugin/*": ["x-pack/platform/plugins/private/global_search_providers/*"],
-      "@kbn/global-search-test-plugin": ["x-pack/platform/test/plugin_functional/plugins/global_search_test"],
-      "@kbn/global-search-test-plugin/*": ["x-pack/platform/test/plugin_functional/plugins/global_search_test/*"],
       "@kbn/graph-plugin": ["x-pack/platform/plugins/private/graph"],
       "@kbn/graph-plugin/*": ["x-pack/platform/plugins/private/graph/*"],
       "@kbn/grid-example-plugin": ["examples/grid_example"],

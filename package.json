@@ -661,7 +661,6 @@
     "@kbn/global-search-bar-plugin": "link:x-pack/platform/plugins/private/global_search_bar",
     "@kbn/global-search-plugin": "link:x-pack/platform/plugins/shared/global_search",
     "@kbn/global-search-providers-plugin": "link:x-pack/platform/plugins/private/global_search_providers",
-    "@kbn/global-search-test-plugin": "link:x-pack/platform/test/plugin_functional/plugins/global_search_test",
     "@kbn/graph-plugin": "link:x-pack/platform/plugins/private/graph",
     "@kbn/grid-example-plugin": "link:examples/grid_example",
     "@kbn/grid-layout": "link:src/platform/packages/private/kbn-grid-layout",
