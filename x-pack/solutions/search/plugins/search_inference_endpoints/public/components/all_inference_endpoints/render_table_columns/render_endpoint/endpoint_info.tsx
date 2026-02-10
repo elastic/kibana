@@ -117,7 +117,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
           <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
             {taskType && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.TASK_TYPE_TOOLTIP}>
+                <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
                   <EuiBadge data-test-subj={`table-column-task-type-${taskType}`} color="hollow">
                     {taskType}
                   </EuiBadge>

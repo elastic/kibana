@@ -36,12 +36,38 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
   }
 );
 
-export const TASK_TYPE_TOOLTIP = i18n.translate(
-  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip',
-  {
-    defaultMessage: 'The task type of this inference endpoint',
-  }
-);
+export const TASK_TYPE_TOOLTIPS: Record<string, string> = {
+  text_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.textEmbedding',
+    {
+      defaultMessage: 'Converts text into dense vector representations for semantic search',
+    }
+  ),
+  sparse_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.sparseEmbedding',
+    {
+      defaultMessage: 'Converts text into sparse vector representations for semantic search',
+    }
+  ),
+  rerank: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.rerank',
+    {
+      defaultMessage: 'Re-ranks search results by relevance',
+    }
+  ),
+  completion: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.completion',
+    {
+      defaultMessage: 'Generates text completions from a given input',
+    }
+  ),
+  chat_completion: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.chatCompletion',
+    {
+      defaultMessage: 'Generates conversational responses from a chat input',
+    }
+  ),
+};
 
 export const COPY_ID_TO_CLIPBOARD = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',
