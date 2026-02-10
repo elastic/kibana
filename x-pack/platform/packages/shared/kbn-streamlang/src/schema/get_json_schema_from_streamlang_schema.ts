@@ -9,7 +9,7 @@
 // to that found in src/platform/packages/shared/kbn-workflows/spec/lib/get_json_schema_from_yaml_schema.ts
 // from Workflows. We may be able to align / share these utilities in the future once both projects aren't
 // in flux.
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
@@ -44,7 +44,7 @@ export function getJsonSchemaFromStreamlangSchema(
   streamType?: StreamType
 ): StreamlangJsonSchema {
   // Generate the json schema from zod schema
-  const jsonSchema = z.toJSONSchema(streamlangSchema, {
+  const jsonSchema = streamlangSchema.toJSONSchema({
     target: 'draft-7',
     unrepresentable: 'any',
     reused: 'ref',

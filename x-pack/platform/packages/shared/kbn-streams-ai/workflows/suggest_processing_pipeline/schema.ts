@@ -6,7 +6,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import {
   // NonEmptyString,
   // conditionSchema,
@@ -54,7 +54,7 @@ export const pipelineDefinitionSchema = z
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 
 export function getPipelineDefinitionJsonSchema(schema: z.ZodSchema) {
-  return z.toJSONSchema(schema.meta({ title: 'PipelineDefinition' }), {
+  return schema.meta({ title: 'PipelineDefinition' }).toJSONSchema({
     target: 'openapi-3.0',
     cycles: 'ref',
     reused: 'ref',

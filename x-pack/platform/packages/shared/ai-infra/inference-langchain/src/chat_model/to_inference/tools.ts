@@ -6,7 +6,8 @@
  */
 
 import { pick } from 'lodash';
-import { z, isZod as isZodSchema } from '@kbn/zod';
+import type { z } from '@kbn/zod';
+import { isZod as isZodSchema } from '@kbn/zod';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
 import type { ToolDefinition } from '@langchain/core/language_models/base';
 import { isLangChainTool } from '@langchain/core/utils/function_calling';
@@ -64,7 +65,7 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
 }
 
 function zodSchemaToInference(schema: z.ZodType): ToolSchema {
-  return pick(z.toJSONSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
+  return pick(schema.toJSONSchema(), ['type', 'properties', 'required']) as ToolSchema;
 }
 
 function jsonSchemaToInference(schema: z.core.JSONSchema.JSONSchema): ToolSchema {
