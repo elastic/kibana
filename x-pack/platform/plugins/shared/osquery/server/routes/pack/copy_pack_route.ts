@@ -73,7 +73,9 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ...restAttributes
         } = sourceAttributes;
 
-        const newPackSO = await client.create<Omit<PackSavedObject, 'saved_object_id' | 'references'>>(
+        const newPackSO = await client.create<
+          Omit<PackSavedObject, 'saved_object_id' | 'references'>
+        >(
           packSavedObjectType,
           {
             ...restAttributes,

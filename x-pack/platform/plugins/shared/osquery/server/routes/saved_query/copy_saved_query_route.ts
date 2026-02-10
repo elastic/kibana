@@ -71,17 +71,14 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           ...restAttributes
         } = sourceAttributes;
 
-        const newSavedQuerySO = await client.create(
-          savedQuerySavedObjectType,
-          {
-            ...restAttributes,
-            id: newName,
-            created_by: username,
-            created_at: now,
-            updated_by: username,
-            updated_at: now,
-          }
-        );
+        const newSavedQuerySO = await client.create(savedQuerySavedObjectType, {
+          ...restAttributes,
+          id: newName,
+          created_by: username,
+          created_at: now,
+          updated_by: username,
+          updated_at: now,
+        });
 
         const { attributes } = newSavedQuerySO;
 

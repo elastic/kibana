@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';

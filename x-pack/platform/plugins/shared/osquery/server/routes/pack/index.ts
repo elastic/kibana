@@ -20,6 +20,7 @@ export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   if (context.experimentalFeatures.queryHistoryRework) {
     copyPackRoute(router, context);
   }
+
   deletePackRoute(router, context);
   findPackRoute(router, context);
   readPackRoute(router, context);

@@ -53,19 +53,17 @@ describe('useCopySavedQuery', () => {
       data: { saved_object_id: 'new-sq-id', id: 'my-query_copy' },
     });
 
-    const { result } = renderHook(
-      () => useCopySavedQuery({ savedQueryId: 'source-sq-id' }),
-      { wrapper: createWrapper(queryClient) }
-    );
+    const { result } = renderHook(() => useCopySavedQuery({ savedQueryId: 'source-sq-id' }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await act(async () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockHttp.post).toHaveBeenCalledWith(
-      '/api/osquery/saved_queries/source-sq-id/copy',
-      { version: '2023-10-31' }
-    );
+    expect(mockHttp.post).toHaveBeenCalledWith('/api/osquery/saved_queries/source-sq-id/copy', {
+      version: '2023-10-31',
+    });
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('osquery', {
       path: '/saved_queries/new-sq-id',
@@ -81,10 +79,9 @@ describe('useCopySavedQuery', () => {
 
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const { result } = renderHook(
-      () => useCopySavedQuery({ savedQueryId: 'source-sq-id' }),
-      { wrapper: createWrapper(queryClient) }
-    );
+    const { result } = renderHook(() => useCopySavedQuery({ savedQueryId: 'source-sq-id' }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await act(async () => {
       await result.current.mutateAsync();
@@ -97,10 +94,9 @@ describe('useCopySavedQuery', () => {
     const error = { body: { error: 'Not Found', message: 'Saved query not found' } };
     mockHttp.post.mockRejectedValue(error);
 
-    const { result } = renderHook(
-      () => useCopySavedQuery({ savedQueryId: 'bad-id' }),
-      { wrapper: createWrapper(queryClient) }
-    );
+    const { result } = renderHook(() => useCopySavedQuery({ savedQueryId: 'bad-id' }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await act(async () => {
       try {
