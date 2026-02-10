@@ -32,7 +32,7 @@ import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import type { RuleParams } from '../../../../rule_schema';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import { patchReadAuthEditRuleFields } from './rbac_methods/patch_rule_with_read_privileges';
+import { updateReadAuthEditRuleFields } from './rbac_methods/update_rule_with_read_privileges';
 
 interface PatchRuleOptions {
   actionsClient: ActionsClient;
@@ -81,7 +81,7 @@ export const patchRule = async ({
    * given they have crud permissions for the specific fields they're modifying.
    *
    * If the user does not have permission to edit rules but all fields in the PATCH request (besides id/rule_id) are
-   * included in the `ValidReadAuthEditFields` type, we check if the user has read authz privileges for the fields
+   * included in the `ReadAuthRuleUpdateProps` type, we check if the user has read authz privileges for the fields
    * and use the `bulkEditRuleParamsWithReadAuth` method provided by the alerting rules client to update the rule fields
    * individually. Otherwise the user will need `all` privileges for rules.
    */
@@ -92,17 +92,16 @@ export const patchRule = async ({
   ) {
     validateFieldWritePermissions(rulePatch, rulesAuthz);
 
-    // We remove the `enabled` field from the `patchReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
+    // We remove the `enabled` field from the `updateReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
     // `enabled` is modified later if it exists in the PATCH object
     const { enabled: unusedField, ...fieldsToPatch } = rulePatchObjWithoutIds;
 
-    const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchReadAuthEditRuleFields(
-      {
+    const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
+      await updateReadAuthEditRuleFields({
         rulesClient,
-        rulePatch: { ...fieldsToPatch, rule_source: patchedRule.rule_source },
+        ruleUpdate: { ...fieldsToPatch, rule_source: patchedRule.rule_source },
         existingRule,
-      }
-    );
+      });
 
     const patchErrors = formatBulkEditResultErrors(appliedPatchWithReadPrivs);
     if (patchErrors) {
