@@ -362,7 +362,7 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
 
       storageEsClient.bulk.mockResolvedValue({
-        items: Array.from({ length: 9 }, (_, i) => ({
+        items: Array.from({ length: 10 }, (_, i) => ({
           create: { _id: String(i + 1), status: 201 },
         })),
         errors: false,
