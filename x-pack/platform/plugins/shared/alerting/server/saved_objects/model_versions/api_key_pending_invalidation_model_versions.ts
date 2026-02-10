@@ -26,7 +26,7 @@ export const apiKeyPendingInvalidationModelVersions: SavedObjectsModelVersionMap
         type: 'mappings_addition',
         addedMappings: {
           uiamApiKey: {
-            type: 'text',
+            type: 'binary',
           },
         },
       },

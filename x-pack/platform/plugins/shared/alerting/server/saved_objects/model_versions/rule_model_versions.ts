@@ -111,7 +111,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
         type: 'mappings_addition',
         addedMappings: {
           uiamApiKey: {
-            type: 'text',
+            type: 'binary',
           },
         },
       },

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import { UiamAPIKeys } from '@kbn/security-plugin/server/authentication/api_keys/uiam';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
@@ -116,6 +117,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
+    uiamApiKey: {
+      type: 'binary',
+    },
+    // NO NEED TO BE INDEXED
     // NEED TO CHECK WITH KIBANA SECURITY
     // apiKey: {
     //   type: 'binary',

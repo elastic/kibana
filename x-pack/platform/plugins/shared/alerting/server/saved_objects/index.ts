@@ -148,7 +148,7 @@ export function setupSavedObjects(
           type: 'date',
         },
         uiamApiKey: {
-          type: 'text',
+          type: 'binary',
         },
       },
     },
