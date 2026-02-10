@@ -278,7 +278,7 @@ const defaultUriPartsProcessorFormState = (sampleDocs: FlattenRecord[]): UriPart
     'uri',
     'url',
   ]),
-  to: '',
+  to: 'url',
   keep_original: true,
   remove_if_successful: false,
   ignore_missing: false,
