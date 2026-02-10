@@ -4849,6 +4849,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-external-alerts-schema@link:src/platform/packages/shared/kbn-alerting-v2-external-alerts-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-plugin@link:x-pack/platform/plugins/shared/alerting_v2":
   version "0.0.0"
   uid ""

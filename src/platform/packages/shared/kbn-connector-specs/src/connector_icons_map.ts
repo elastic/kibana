@@ -73,4 +73,8 @@ export const ConnectorIconsMap: Map<
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
+  [
+    '.datadog',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
+  ],
 ]);

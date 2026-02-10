@@ -84,6 +84,8 @@
       "@kbn/alerting-state-types/*": ["x-pack/platform/packages/private/kbn-alerting-state-types/*"],
       "@kbn/alerting-types": ["src/platform/packages/shared/kbn-alerting-types"],
       "@kbn/alerting-types/*": ["src/platform/packages/shared/kbn-alerting-types/*"],
+      "@kbn/alerting-v2-external-alerts-schema": ["src/platform/packages/shared/kbn-alerting-v2-external-alerts-schema"],
+      "@kbn/alerting-v2-external-alerts-schema/*": ["src/platform/packages/shared/kbn-alerting-v2-external-alerts-schema/*"],
       "@kbn/alerting-v2-plugin": ["x-pack/platform/plugins/shared/alerting_v2"],
       "@kbn/alerting-v2-plugin/*": ["x-pack/platform/plugins/shared/alerting_v2/*"],
       "@kbn/alerting-v2-schemas": ["x-pack/platform/packages/shared/response-ops/alerting-v2-schemas"],

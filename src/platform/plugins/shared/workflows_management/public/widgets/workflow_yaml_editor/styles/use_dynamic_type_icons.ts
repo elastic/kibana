@@ -83,14 +83,16 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
     if (!connectorsData?.connectorTypes) {
       return;
     }
-    const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => {
-      const actionType = actionTypeRegistry.get(connector.actionTypeId);
-      return {
-        actionTypeId: connector.actionTypeId,
-        displayName: connector.displayName,
-        icon: actionType.iconClass,
-      };
-    });
+    const connectorTypes = Object.values(connectorsData.connectorTypes)
+      .filter((connector) => actionTypeRegistry.has(connector.actionTypeId))
+      .map((connector) => {
+        const actionType = actionTypeRegistry.get(connector.actionTypeId);
+        return {
+          actionTypeId: connector.actionTypeId,
+          displayName: connector.displayName,
+          icon: actionType.iconClass,
+        };
+      });
 
     const registeredTypes = workflowsExtensions.getAllStepDefinitions().map((step) => ({
       actionTypeId: step.id,

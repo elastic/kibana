@@ -4,25 +4,17 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react",
-      "@kbn/ambient-ui-types",
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/logging",
-    "@kbn/licensing-types",
-    "@kbn/actions-utils",
-    "@kbn/i18n",
-    "@kbn/alerting-v2-external-alerts-schema",
-    "@kbn/datemath",
   ]
 }
