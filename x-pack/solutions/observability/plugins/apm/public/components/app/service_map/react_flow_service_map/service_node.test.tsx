@@ -11,6 +11,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceNodeData } from '../../../../../common/service_map/react_flow_types';
+import { MOCK_EUI_THEME, MOCK_DEFAULT_COLOR } from './constants';
 
 // Mock EUI theme
 jest.mock('@elastic/eui', () => {
@@ -20,17 +21,17 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({
       euiTheme: {
         colors: {
-          emptyShade: '#fff',
-          mediumShade: '#98A2B3',
-          primary: '#0077CC',
-          primaryText: '#0077CC',
-          textPrimary: '#0077CC',
-          textParagraph: '#343741',
-          text: '#343741',
-          backgroundBasePlain: '#fff',
-          success: '#00BFB3',
-          warning: '#FEC514',
-          danger: '#BD271E',
+          emptyShade: MOCK_EUI_THEME.colors.emptyShade,
+          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
+          primary: MOCK_EUI_THEME.colors.primary,
+          primaryText: MOCK_EUI_THEME.colors.primaryText,
+          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
+          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
+          text: MOCK_EUI_THEME.colors.text,
+          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
+          success: MOCK_EUI_THEME.colors.success,
+          warning: MOCK_EUI_THEME.colors.warning,
+          danger: MOCK_EUI_THEME.colors.danger,
         },
         size: {
           xs: '4px',
@@ -68,16 +69,16 @@ jest.mock('@kbn/custom-icons', () => ({
 // Mock getServiceHealthStatusColor
 jest.mock('../../../../../common/service_health_status', () => ({
   ...jest.requireActual('../../../../../common/service_health_status'),
-  getServiceHealthStatusColor: jest.fn((theme, status) => {
+  getServiceHealthStatusColor: jest.fn((_theme, status) => {
     switch (status) {
       case 'critical':
-        return '#BD271E';
+        return MOCK_EUI_THEME.colors.danger;
       case 'warning':
-        return '#FEC514';
+        return MOCK_EUI_THEME.colors.warning;
       case 'healthy':
-        return '#00BFB3';
+        return MOCK_EUI_THEME.colors.success;
       default:
-        return '#98A2B3';
+        return MOCK_DEFAULT_COLOR;
     }
   }),
 }));

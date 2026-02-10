@@ -31,12 +31,12 @@ export function cancellableTask(
         taskContext.logger.debug('Starting cancellable task check loop');
         intervalId = setInterval(async () => {
           const task = await taskClient.get(runContext.taskInstance.id);
+
           taskContext.logger.trace(
             `Cancellable task check loop for task ${runContext.taskInstance.id}: status is ${task.status}`
           );
+
           if (task.status === TaskStatus.BeingCanceled) {
-            runContext.abortController.abort();
-            await taskClient.markCanceled(task);
             resolve('canceled' as const);
           }
         }, 5000);
@@ -45,8 +45,24 @@ export function cancellableTask(
       taskContext.logger.debug(
         `Running task ${runContext.taskInstance.id} with cancellation support (race)`
       );
-      const result = await Promise.race([run(), cancellationPromise]).finally(() => {
+
+      const result = await Promise.race([run(), cancellationPromise]).finally(async () => {
         clearInterval(intervalId);
+
+        const task = await taskClient.get(runContext.taskInstance.id);
+
+        /**
+         * Here the task can be in BeingCanceled state in two scenarios:
+         * 1. cancellationPromise was resolved
+         * 2. run() exited early in response to cancellation. This might
+         * happen for multi-step tasks, like onboarding, in order to prevent
+         * scheduling the next sub-task while the parent task was already
+         * canceled.
+         */
+        if (task.status === TaskStatus.BeingCanceled) {
+          runContext.abortController.abort();
+          await taskClient.markCanceled(task);
+        }
       });
 
       if (result === 'canceled') {

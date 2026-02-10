@@ -60,37 +60,37 @@ describe('SET Validation', () => {
 
       setExpectErrors('set Project_Routing = "value"', ['Unknown setting Project_Routing']);
 
-      setExpectErrors('set Approximate = "value"', ['Unknown setting Approximate']);
+      setExpectErrors('set Approximation = "value"', ['Unknown setting Approximation']);
 
-      setExpectErrors('set APPROXIMATE = "value"', ['Unknown setting APPROXIMATE']);
+      setExpectErrors('set APPROXIMATION = "value"', ['Unknown setting APPROXIMATION']);
     });
   });
 
-  describe('Setting: approximate', () => {
-    test('no errors on approximate setting with boolean value', () => {
-      setExpectErrors('set approximate = true', []);
-      setExpectErrors('set approximate = false', []);
+  describe('Setting: approximation', () => {
+    test('no errors on approximation setting with boolean value', () => {
+      setExpectErrors('set approximation = true', []);
+      setExpectErrors('set approximation = false', []);
     });
 
-    test('no errors on approximate setting with map_param value and valid parameters', () => {
-      setExpectErrors('set approximate = { "num_rows": 1000, "confidence_level": 0.95 }', []);
+    test('no errors on approximation setting with map_param value and valid parameters', () => {
+      setExpectErrors('set approximation = { "num_rows": 1000, "confidence_level": 0.95 }', []);
     });
 
-    test('errors on approximate setting with map_param value and invalid parameter name', () => {
-      setExpectErrors('set approximate = { "invalid_param": 1000 }', [
+    test('errors on approximation setting with map_param value and invalid parameter name', () => {
+      setExpectErrors('set approximation = { "invalid_param": 1000 }', [
         'Unknown parameter "invalid_param".',
       ]);
     });
 
-    test('errors on approximate setting with map_param value and invalid parameter type', () => {
-      setExpectErrors('set approximate = { "num_rows": "not_an_integer" }', [
+    test('errors on approximation setting with map_param value and invalid parameter type', () => {
+      setExpectErrors('set approximation = { "num_rows": "not_an_integer" }', [
         'Invalid type for parameter "num_rows". Expected type: integer. Received: keyword.',
       ]);
     });
 
-    test('errors on approximate setting with invalid value type', () => {
-      setExpectErrors('set approximate = "not_a_boolean_or_map"', [
-        'Invalid value "not_a_boolean_or_map" for setting "approximate".',
+    test('errors on approximation setting with invalid value type', () => {
+      setExpectErrors('set approximation = "not_a_boolean_or_map"', [
+        'Invalid value "not_a_boolean_or_map" for setting "approximation".',
       ]);
     });
   });

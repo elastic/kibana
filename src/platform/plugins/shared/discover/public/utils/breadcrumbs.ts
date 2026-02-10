@@ -21,20 +21,21 @@ function getRootBreadcrumbs({
   breadcrumb?: string;
   embeddable: EmbeddableEditorService;
 }): ChromeBreadcrumb[] {
-  const href = embeddable.isEmbeddedEditor() ? undefined : breadcrumb || rootPath;
+  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
+  const href = isEmbeddedEditor ? undefined : breadcrumb || rootPath;
 
   return [
     {
-      text: embeddable.isEmbeddedEditor()
+      text: isEmbeddedEditor
         ? i18n.translate('discover.rootDashboardsEditorBreadcrumb', {
             defaultMessage: 'Dashboards',
           })
         : i18n.translate('discover.rootBreadcrumb', {
             defaultMessage: 'Discover',
           }),
-      deepLinkId: embeddable.isEmbeddedEditor() ? 'dashboards' : 'discover',
+      deepLinkId: isEmbeddedEditor ? 'dashboards' : 'discover',
       href,
-      onClick: embeddable.isEmbeddedEditor() ? embeddable.transferBackToEditor : undefined,
+      onClick: isEmbeddedEditor ? () => embeddable.transferBackToEditor() : undefined,
     },
   ];
 }
@@ -53,8 +54,11 @@ export function setBreadcrumbs({
   services: DiscoverServices;
 }) {
   const embeddable = services.embeddableEditor;
+  const byValueTitle = embeddable.getByValueInput()?.label;
 
-  if (titleBreadcrumbText) {
+  const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
+
+  if (breadcrumbTitle) {
     const rootBreadcrumbs = getRootBreadcrumbs({
       breadcrumb: rootBreadcrumbPath,
       embeddable,
@@ -66,9 +70,9 @@ export function setBreadcrumbs({
         text: embeddable.isEmbeddedEditor()
           ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
               defaultMessage: 'Editing {title}',
-              values: { title: titleBreadcrumbText },
+              values: { title: breadcrumbTitle },
             })
-          : titleBreadcrumbText,
+          : breadcrumbTitle,
       },
     ]);
   } else {

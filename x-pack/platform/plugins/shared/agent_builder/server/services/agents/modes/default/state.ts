@@ -6,17 +6,11 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { BaseMessageLike } from '@langchain/core/messages';
-import { messagesStateReducer } from '@langchain/langgraph';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AnswerAgentAction, ResearchAgentAction } from './actions';
 
 export const StateAnnotation = Annotation.Root({
   // inputs
-  initialMessages: Annotation<BaseMessageLike[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
   cycleLimit: Annotation<number>({
     reducer: (a, b) => b,
     default: () => 10,
