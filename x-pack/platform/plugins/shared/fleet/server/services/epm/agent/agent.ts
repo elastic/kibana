@@ -108,21 +108,27 @@ export function compileTemplate(
 }
 
 function handleYamlError(err: any, yaml: string): string {
-  if (err?.reason === 'duplicated mapping key') {
-    let position = err.mark?.position;
+  // Handle duplicated key errors from yaml package
+  // The yaml package error message format: "Map keys must be unique at line X, column Y:..."
+  if (err?.message && err.message.includes('Map keys must be unique')) {
     let key = 'unknown';
-    // Read key if position is available
-    if (position) {
-      key = '';
-      while (position < yaml.length && yaml.charAt(position) !== ':') {
-        key += yaml.charAt(position);
-        position++;
+    // Try to extract the key from the error message or position
+    if (err.linePos && err.linePos[0]) {
+      const line = err.linePos[0].line - 1; // Convert to 0-based index
+      const lines = yaml.split('\n');
+      if (line >= 0 && line < lines.length) {
+        const lineContent = lines[line];
+        // Extract key from the line (everything before the colon)
+        const colonIndex = lineContent.indexOf(':');
+        if (colonIndex > 0) {
+          key = lineContent.substring(0, colonIndex).trim();
+        }
       }
     }
     return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
   }
 
-  return err.message;
+  return err?.message || String(err);
 }
 
 function isValidKey(key: string) {
@@ -209,24 +215,31 @@ function containsHelper(this: any, item: string, check: string | string[], optio
 handlebars.registerHelper('contains', containsHelper);
 
 // escapeStringHelper will wrap the provided string with single quotes.
-// Single quoted strings in yaml need to escape single quotes by doubling them
-// and to respect any incoming newline we also need to double them, otherwise
-// they will be replaced with a space.
+// Single quoted strings in yaml need to escape single quotes by doubling them.
+// If the string contains newlines, use double quotes with escaped newlines since the yaml package
+// doesn't allow literal newlines in single-quoted strings.
 function escapeStringHelper(str: string) {
   if (!str) return undefined;
-  return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
+  if (str.includes('\n')) {
+    // Use double quotes with escaped newlines for strings with newlines
+    return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+  }
+  return "'" + str.replace(/\'/g, "''") + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
 
 /**
- * escapeMultilineStringHelper will escape a multiline string by doubling the newlines
- * and escaping single quotes.
+ * escapeMultilineStringHelper will escape a multiline string by escaping single quotes
+ * and escaping newlines as \n for use inside double quotes.
  * This is useful when the string is multiline and needs to be escaped in a yaml file
  * without wrapping it in single quotes.
+ * Note: Removes spaces immediately following newlines to match js-yaml behavior.
  */
 function escapeMultilineStringHelper(str: string) {
   if (!str) return undefined;
-  return str.replace(/\'/g, "''").replace(/\n/g, '\n\n');
+  // Remove spaces immediately after newlines to match js-yaml behavior
+  // then escape single quotes and newlines for use inside double quotes
+  return str.replace(/\n /g, '\n').replace(/\'/g, "''").replace(/\n/g, '\\n');
 }
 handlebars.registerHelper('escape_multiline_string', escapeMultilineStringHelper);
 

@@ -38,6 +38,7 @@ import {
   RegistryDataStreamKeys,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
+import { getErrorMessage } from '../../../errors/utils';
 import { pkgToPkgKey } from '../registry';
 
 import { traverseArchiveEntries } from '.';
@@ -238,10 +239,17 @@ export function parseAndVerifyArchive(
   let manifest: ArchivePackage;
   try {
     logger.debug(`Verifying archive - loading yaml`);
-    manifest = parse(manifestBuffer.toString());
+    const parsed = parse(manifestBuffer.toString());
+    // Validate that the parsed result is an object (not a primitive like string, number, etc.)
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('Manifest must be a valid YAML object');
+    }
+    manifest = parsed;
   } catch (error) {
     throw new PackageInvalidArchiveError(
-      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
+      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${getErrorMessage(
+        error
+      )}`
     );
   }
 
@@ -324,7 +332,9 @@ export function parseAndVerifyArchive(
         parsed.asset_tags = tags;
       }
     } catch (error) {
-      throw new PackageInvalidArchiveError(`Could not parse tags file kibana/tags.yml: ${error}.`);
+      throw new PackageInvalidArchiveError(
+        `Could not parse tags file kibana/tags.yml: ${getErrorMessage(error)}.`
+      );
     }
   }
 
@@ -376,10 +386,17 @@ export function parseAndVerifyDataStreams(opts: {
 
     let manifest;
     try {
-      manifest = parse(manifestBuffer.toString());
+      const parsed = parse(manifestBuffer.toString());
+      // Validate that the parsed result is an object (not a primitive like string, number, etc.)
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('Manifest must be a valid YAML object');
+      }
+      manifest = parsed;
     } catch (error) {
       throw new PackageInvalidArchiveError(
-        `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
+        `Could not parse package manifest for data stream '${dataStreamPath}': ${getErrorMessage(
+          error
+        )}.`
       );
     }
 
@@ -392,7 +409,9 @@ export function parseAndVerifyDataStreams(opts: {
         dataStreamRoutingRules = parse(routingRulesBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
-          `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
+          `Could not parse routing rules for data stream '${dataStreamPath}': ${getErrorMessage(
+            error
+          )}.`
         );
       }
     }
@@ -405,7 +424,9 @@ export function parseAndVerifyDataStreams(opts: {
         dataStreamLifecyle = parse(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
-          `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
+          `Could not parse lifecycle for data stream '${dataStreamPath}': ${getErrorMessage(
+            error
+          )}.`
         );
       }
     }
