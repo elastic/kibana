@@ -176,9 +176,7 @@ export async function createBulkDataStreams(
 
   // 2. Create data streams in parallel batches
   const BATCH_SIZE = 50;
-  const names = Array.from({ length: count }, (_, i) =>
-    `${prefix}-${String(i).padStart(5, '0')}`
-  );
+  const names = Array.from({ length: count }, (_, i) => `${prefix}-${String(i).padStart(5, '0')}`);
 
   let created = 0;
   for (let i = 0; i < names.length; i += BATCH_SIZE) {
