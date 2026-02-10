@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { createGetUpdateCase } from '../../fixtures/workflows';
 
