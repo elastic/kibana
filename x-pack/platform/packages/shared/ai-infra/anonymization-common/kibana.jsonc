@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/anonymization-common",
+  "owner": ["@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared"
+}
