@@ -92,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Intelligence] support multiple values in IOC flyout table tab'
+title: support multiple values in IOC flyout table tab

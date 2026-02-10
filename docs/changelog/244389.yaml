@@ -88,4 +88,4 @@ type: enhancement
 products:
 - product: kibana
   target: 9.3.0
-title: '[Discover] Add span links badge to Unified trace waterfall #244051 Open'
+title: 'Add span links badge to Unified trace waterfall #244051 Open'

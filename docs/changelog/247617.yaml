@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Notes]: disable delete for read-only users and improve error message'
+title: disable delete for read-only users and improve error message

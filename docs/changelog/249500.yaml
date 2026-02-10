@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Entity Analytics][PrivMon] Removes the Technical preview badge for privileged access detection package'
+title: Removes the Technical preview badge for privileged access detection package

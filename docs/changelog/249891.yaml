@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Attack Discovery][Bug] Schedules fail to run due to internal Elastic Managed LLM connector changes'
+title: Schedules fail to run due to internal Elastic Managed LLM connector changes

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Discover
-title: '[Discover] Applies the breakdown first and then the date_histogram'
+title: Applies the breakdown first and then the date_histogram

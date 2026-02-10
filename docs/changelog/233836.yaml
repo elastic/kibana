@@ -86,4 +86,4 @@ type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-title: '[Infra] Fix Metadata filtering is confusing/broken when typing "OR" in host view'
+title: Fix Metadata filtering is confusing/broken when typing "OR" in host view

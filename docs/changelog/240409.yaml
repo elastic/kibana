@@ -86,4 +86,4 @@ type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-title: '[APM] Update the "Open in Discover" query in the related Logs section of the Overview tab'
+title: Update the "Open in Discover" query in the related Logs section of the Overview tab

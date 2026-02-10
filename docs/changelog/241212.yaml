@@ -88,4 +88,4 @@ products:
   target: 9.3.0
 areas:
 - Machine learning
-title: '[Inference Endpoints] Anthropic endpoint creation: ensures max tokens parameter is passed as expected'
+title: 'Anthropic endpoint creation: ensures max tokens parameter is passed as expected'

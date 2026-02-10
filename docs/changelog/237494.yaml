@@ -88,4 +88,4 @@ products:
   target: 9.3.0
 - product: observability
   target: 9.3.0
-title: '[Fix] Add Background Search nav item to ECH o11y nav'
+title: Add Background Search nav item to ECH o11y nav

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Trusted apps] UI and API changes for process descendants in trusted apps'
+title: UI and API changes for process descendants in trusted apps

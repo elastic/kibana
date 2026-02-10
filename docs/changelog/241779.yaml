@@ -88,4 +88,4 @@ products:
   target: 9.3.0
 areas:
 - Machine learning
-title: '[Inference UI] Improve layout for custom inference endpoint'
+title: Improve layout for custom inference endpoint

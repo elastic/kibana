@@ -88,4 +88,4 @@ type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-title: '[Metrics] Add check to ensure ESQL is valid before matching Metrics profile'
+title: Add check to ensure ESQL is valid before matching Metrics profile

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Privmon] Enable privileged user monitoring advanced setting by default'
+title: Enable privileged user monitoring advanced setting by default

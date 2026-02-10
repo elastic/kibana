@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Trusted apps][Process Descendants] Enable process descendants for trusted apps feature flag'
+title: Enable process descendants for trusted apps feature flag

@@ -92,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Bug] Timeline: ESQL query editor showing on fullScreen mode'
+title: 'Timeline: ESQL query editor showing on fullScreen mode'

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Alert details] save selected threat intelligence time to local storage'
+title: save selected threat intelligence time to local storage

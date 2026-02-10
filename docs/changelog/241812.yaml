@@ -88,4 +88,4 @@ type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-title: '[Discover] Fix the "Values" dropdown visualizing incorrectly on smaller screens'
+title: Fix the "Values" dropdown visualizing incorrectly on smaller screens

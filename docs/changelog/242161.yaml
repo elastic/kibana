@@ -92,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Management
-title: '[Streamlang] Add Drop processor'
+title: Add Drop processor

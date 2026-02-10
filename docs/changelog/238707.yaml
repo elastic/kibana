@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Alerts] Fix threshold source event'
+title: Fix threshold source event

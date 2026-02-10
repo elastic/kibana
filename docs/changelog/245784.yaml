@@ -88,4 +88,4 @@ type: enhancement
 products:
 - product: kibana
   target: 9.3.0
-title: "[Infra] Add dashboard suggestions for 'ECS' K8s and OTel Dashboards when selecting 'pods' in Infra Inventory UI"
+title: Add dashboard suggestions for 'ECS' K8s and OTel Dashboards when selecting 'pods' in Infra Inventory UI

@@ -88,5 +88,5 @@ products:
   target: 9.3.0
 areas:
 - Search
-title: '[Accessibility] Show error text when fields are invalid'
+title: Show error text when fields are invalid
 description: Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues.

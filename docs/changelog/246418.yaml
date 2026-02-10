@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Endpoint] Add server configuration setting for disabling the auto install of endpoint rule on policy create'
+title: Add server configuration setting for disabling the auto install of endpoint rule on policy create

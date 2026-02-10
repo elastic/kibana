@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Analyzer] ensure we render analyzer only when the dataView is ready'
+title: ensure we render analyzer only when the dataView is ready

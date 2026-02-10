@@ -92,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Alerts] Fix alerts page controls'
+title: Fix alerts page controls

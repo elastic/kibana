@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Machine learning
-title: '[AI Connector] Adds support for headers in the OpenAI integration'
+title: Adds support for headers in the OpenAI integration

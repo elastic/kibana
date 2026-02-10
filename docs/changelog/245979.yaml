@@ -88,5 +88,5 @@ products:
   target: 9.3.0
 areas:
 - Dashboards and Visualizations
-title: '[Metric] Improve Primary Metric editor by removing "Supporting visualization" title'
+title: Improve Primary Metric editor by removing "Supporting visualization" title
 description: Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".

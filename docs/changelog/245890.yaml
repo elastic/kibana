@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Discover
-title: '[ES|QL] Show multi-fields in the DocViewer by default'
+title: Show multi-fields in the DocViewer by default

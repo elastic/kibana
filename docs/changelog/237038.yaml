@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Privileged User Monitoring] Populate  the `entity.attributes.Privileged` field in the Entity store for users'
+title: Populate  the `entity.attributes.Privileged` field in the Entity store for users

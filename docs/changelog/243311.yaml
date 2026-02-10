@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Entity Analytics][Threat Hunting][UI]Changes for threat hunting UI'
+title: Changes for threat hunting UI

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Analyzer] use same dataview in analyzer preview as was selected in analyzer component'
+title: use same dataview in analyzer preview as was selected in analyzer component

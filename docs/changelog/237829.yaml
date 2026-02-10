@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Risk Score] Enable the risk score reset feature'
+title: Enable the risk score reset feature
