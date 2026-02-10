@@ -63,6 +63,10 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering saved objects type');
     core.savedObjects.registerType(EngineDescriptorType);
+
+    return {
+      registerEntityMaintainer: (_config) => {},
+    };
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
