@@ -8,7 +8,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { addMeta, getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
   type DiscriminatedUnionWidgetProps,
@@ -79,7 +78,9 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
   fieldConfig,
   fieldProps,
   formConfig,
+  meta,
 }) => {
+  const { getMeta, addMeta } = meta;
   const [selectedOption, setSelectedOption] = useState(() => {
     const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
     return getDiscriminatorFieldValue(defaultOption, discriminatorKey);
@@ -150,6 +151,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
                   fieldConfig={fieldConfig}
                   fieldProps={fieldProps}
                   formConfig={formConfig}
+                  meta={meta}
                 />
               )}
             </EuiCheckableCard>

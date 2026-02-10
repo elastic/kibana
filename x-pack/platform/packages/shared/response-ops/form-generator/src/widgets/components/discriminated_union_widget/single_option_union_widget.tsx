@@ -7,7 +7,6 @@
 
 import type React from 'react';
 import type { z } from '@kbn/zod/v4';
-import { addMeta, getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { type DiscriminatedUnionWidgetProps } from './discriminated_union_widget';
 import { getFieldsFromSchema, renderField } from '../../../field_builder';
 
@@ -28,7 +27,9 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   fieldConfig,
   fieldProps,
   formConfig,
+  meta,
 }) => {
+  const { getMeta, addMeta } = meta;
   const optionSchema = options[0];
 
   if (!optionSchema) {
@@ -52,7 +53,8 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
     schema: optionSchema,
     rootPath,
     formConfig,
+    meta,
   });
 
-  return fields.map((field) => renderField({ field }));
+  return fields.map((field) => renderField({ field, meta }));
 };
