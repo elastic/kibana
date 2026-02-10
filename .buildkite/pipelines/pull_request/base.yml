@@ -3,7 +3,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       machineType: c3d-standard-16-lssd
-      zones: northamerica-northeast2-b,us-central1-c,us-central1-a
+      zones: us-central1-f,us-central1-c,us-central1-a
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
