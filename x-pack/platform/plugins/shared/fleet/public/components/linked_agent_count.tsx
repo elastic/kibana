@@ -39,10 +39,9 @@ export const LinkedAgentCount = memo<
   ) : (
     count
   );
-  // Use range for version-specific policies so UUIDs (with hyphens) stay quoted and parse correctly.
-  // policy_id >= "id#" and policy_id < "id#:" matches "id#8.19", "id#9.3", etc. (":" is ASCII after "9").
-  const versionPrefix = `${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}`;
-  const policyKuery = `(${AGENTS_PREFIX}.policy_id : "${agentPolicyId}" or (${AGENTS_PREFIX}.policy_id >= "${versionPrefix}" and ${AGENTS_PREFIX}.policy_id < "${versionPrefix}:"))`;
+  // Same as server: exact parent policy or wildcard for version-specific (policy_id: id#*).
+  // encodeURIComponent below ensures # in kuery doesn't break the URL.
+  const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" or ${AGENTS_PREFIX}.policy_id:${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
   const kuery = `${policyKuery}${
     privilegeMode
       ? ` and ${

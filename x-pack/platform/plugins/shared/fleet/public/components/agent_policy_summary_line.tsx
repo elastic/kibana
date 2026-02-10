@@ -72,7 +72,7 @@ export const AgentPolicySummaryLine = memo<{
                       content={
                         <FormattedMessage
                           id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
-                          defaultMessage="This agent uses a version-specific policy derived from the parent policy."
+                          defaultMessage="This agent uses a version-specific policy because some integrations include agent version conditions."
                         />
                       }
                     />
