@@ -53,7 +53,7 @@ export const CopyLegacySource: Task = {
     ];
 
     const piscina = new Piscina({
-      filename: resolve(__dirname, 'copy_source_worker.js'),
+      filename: resolve(__dirname, 'copy_source_worker.ts'),
     });
 
     const globbyOptions = { cwd: config.resolveFromRepo('.') };
