@@ -392,7 +392,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON}
             >
               <FormattedMessage
-                id="xpack.fleet.cloudConnector.cloudConnectorPoliciesFlyout.closeButton"               defaultMessage="Close"
+                id="xpack.fleet.cloudConnector.cloudConnectorPoliciesFlyout.closeButton"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -451,12 +452,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
       {isDeleteModalVisible && (
         <EuiConfirmModal
-          title={i18n.translate(
-            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalTitle',
-            {
-              defaultMessage: "You're about to delete a connector",
-            }
-          )}
+          title={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.deleteModalTitle', {
+            defaultMessage: "You're about to delete a connector",
+          })}
           aria-labelledby={deleteModalTitleId}
           titleProps={{ id: deleteModalTitleId }}
           onCancel={handleCancelDelete}
