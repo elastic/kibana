@@ -90,18 +90,8 @@ const getSampleDocuments = async ({
     excludePatterns: excludePatterns.map((p) => p.pattern),
   });
 
-  const now = Date.now();
-
-  const existingPatternSet = new Set(excludePatterns.map((p) => p.pattern));
-  const newPatterns: DiscoveredPattern[] = categories
-    .filter((c) => !existingPatternSet.has(c.pattern))
-    .map((c) => ({
-      pattern: c.pattern,
-      discoveredAt: now,
-    }));
-
   // If we didn't find enough new patterns, try again without excluding patterns
-  if (newPatterns.length < MIN_NEW_PATTERNS) {
+  if (categories.length < MIN_NEW_PATTERNS) {
     resetPatterns = true;
     categories = await discoverMessagePatterns({
       esClient,
@@ -110,6 +100,13 @@ const getSampleDocuments = async ({
       end,
     });
   }
+
+  const now = Date.now();
+
+  const newPatterns: DiscoveredPattern[] = categories.map((c) => ({
+    pattern: c.pattern,
+    discoveredAt: now,
+  }));
 
   const updatedPatterns = [
     ...(excludePatterns && !resetPatterns ? excludePatterns : []),

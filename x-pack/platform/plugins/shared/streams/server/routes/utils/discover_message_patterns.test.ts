@@ -5,77 +5,69 @@
  * 2.0.
  */
 
-import { stripPlaceholderTokensWithCount, isMeaningfulPattern } from './discover_message_patterns';
+import { stripPlaceholderTokens, isMeaningfulPattern } from './discover_message_patterns';
 
-describe('stripPlaceholderTokensWithCount', () => {
-  it('returns the original pattern and zero count when no placeholders are present', () => {
-    const result = stripPlaceholderTokensWithCount('GET request completed successfully');
-    expect(result).toEqual({ cleaned: 'GET request completed successfully', placeholderCount: 0 });
+describe('stripPlaceholderTokens', () => {
+  it('returns the original pattern when no placeholders are present', () => {
+    expect(stripPlaceholderTokens('GET request completed successfully')).toBe(
+      'GET request completed successfully'
+    );
   });
 
-  it('strips __URL__ placeholder and counts it', () => {
-    const result = stripPlaceholderTokensWithCount('GET __URL__ HTTP completed');
-    expect(result).toEqual({ cleaned: 'GET HTTP completed', placeholderCount: 1 });
+  it('strips __URL__ placeholder', () => {
+    expect(stripPlaceholderTokens('GET __URL__ HTTP completed')).toBe('GET HTTP completed');
   });
 
   it('strips URL__ form (leading underscores stripped by tokenizer)', () => {
-    const result = stripPlaceholderTokensWithCount('GET URL__ HTTP completed');
-    expect(result).toEqual({ cleaned: 'GET HTTP completed', placeholderCount: 1 });
+    expect(stripPlaceholderTokens('GET URL__ HTTP completed')).toBe('GET HTTP completed');
   });
 
   it('strips __URL form (trailing underscores stripped by tokenizer)', () => {
-    const result = stripPlaceholderTokensWithCount('GET __URL HTTP completed');
-    expect(result).toEqual({ cleaned: 'GET HTTP completed', placeholderCount: 1 });
+    expect(stripPlaceholderTokens('GET __URL HTTP completed')).toBe('GET HTTP completed');
   });
 
   it('strips bare URL form (all underscores stripped by tokenizer)', () => {
-    const result = stripPlaceholderTokensWithCount('GET URL HTTP completed');
-    expect(result).toEqual({ cleaned: 'GET HTTP completed', placeholderCount: 1 });
+    expect(stripPlaceholderTokens('GET URL HTTP completed')).toBe('GET HTTP completed');
   });
 
-  it('strips multiple different placeholders and counts each', () => {
-    const result = stripPlaceholderTokensWithCount('GET __URL__ HTTP __NUM__ __IP__ response');
-    expect(result).toEqual({ cleaned: 'GET HTTP response', placeholderCount: 3 });
+  it('strips multiple different placeholders', () => {
+    expect(stripPlaceholderTokens('GET __URL__ HTTP __NUM__ __IP__ response')).toBe(
+      'GET HTTP response'
+    );
   });
 
   it('strips consecutive placeholders', () => {
-    const result = stripPlaceholderTokensWithCount('__UUID__ __TIMESTAMP__ started');
-    expect(result).toEqual({ cleaned: 'started', placeholderCount: 2 });
+    expect(stripPlaceholderTokens('__UUID__ __TIMESTAMP__ started')).toBe('started');
   });
 
-  it('strips __HTTPMETHOD__ placeholder and counts it', () => {
-    const result = stripPlaceholderTokensWithCount('__HTTPMETHOD__ /api/status HTTP completed');
-    expect(result).toEqual({
-      cleaned: '/api/status HTTP completed',
-      placeholderCount: 1,
-    });
+  it('strips __HTTPMETHOD__ placeholder', () => {
+    expect(stripPlaceholderTokens('__HTTPMETHOD__ /api/status HTTP completed')).toBe(
+      '/api/status HTTP completed'
+    );
   });
 
   it('strips all placeholder types', () => {
-    const result = stripPlaceholderTokensWithCount(
-      '__URL__ __ID__ __IP__ __UUID__ __EMAIL__ __TIMESTAMP__ __NUM__ __HTTPMETHOD__'
-    );
-    expect(result).toEqual({ cleaned: '', placeholderCount: 8 });
+    expect(
+      stripPlaceholderTokens(
+        '__URL__ __ID__ __IP__ __UUID__ __EMAIL__ __TIMESTAMP__ __NUM__ __HTTPMETHOD__'
+      )
+    ).toBe('');
   });
 
   it('collapses multiple spaces after stripping', () => {
-    const result = stripPlaceholderTokensWithCount('start  __URL__  __NUM__  end');
-    expect(result).toEqual({ cleaned: 'start end', placeholderCount: 2 });
+    expect(stripPlaceholderTokens('start  __URL__  __NUM__  end')).toBe('start end');
   });
 
   it('trims leading and trailing whitespace', () => {
-    const result = stripPlaceholderTokensWithCount('  __URL__ some pattern __NUM__  ');
-    expect(result).toEqual({ cleaned: 'some pattern', placeholderCount: 2 });
+    expect(stripPlaceholderTokens('  __URL__ some pattern __NUM__  ')).toBe('some pattern');
   });
 
   it('handles an empty string', () => {
-    const result = stripPlaceholderTokensWithCount('');
-    expect(result).toEqual({ cleaned: '', placeholderCount: 0 });
+    expect(stripPlaceholderTokens('')).toBe('');
   });
 
   it('handles patterns that are only whitespace', () => {
-    const result = stripPlaceholderTokensWithCount('   ');
-    expect(result).toEqual({ cleaned: '', placeholderCount: 0 });
+    expect(stripPlaceholderTokens('   ')).toBe('');
   });
 });
 

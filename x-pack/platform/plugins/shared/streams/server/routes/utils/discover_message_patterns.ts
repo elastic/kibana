@@ -63,36 +63,32 @@ const PLACEHOLDER_CHAR_FILTERS = PLACEHOLDER_REPLACEMENTS.map(
 );
 
 /**
- * Base slop added to every `match_phrase` exclusion query to tolerate minor
- * tokenization differences between `ml_standard` (categorization) and
- * `standard` (index-time analyzer).
+ * Minimum-should-match spec for the `match` exclusion queries.
+ *
+ * `categorize_text` groups documents by fuzzy token similarity (controlled by
+ * `SIMILARITY_THRESHOLD`), so a positional `match_phrase` is too strict —
+ * category members can differ by up to 30 % of their tokens and still be
+ * grouped together, and the `standard` index-time analyzer produces extra
+ * tokens (short words, split punctuation) that `ml_standard` discards.
+ *
+ * A bag-of-words `match` query with `minimum_should_match` mirrors the
+ * categorization semantics much more closely:
+ *   • ≤ 3 query terms → all must appear (avoids over-excluding on tiny patterns)
+ *   • > 3 query terms → 75 % must appear (slightly above the 70 % similarity
+ *     threshold to reduce false positives)
  */
-const BASE_SLOP = 2;
+const EXCLUSION_MINIMUM_SHOULD_MATCH = '3<75%';
 
 /**
- * Additional slop per stripped placeholder. Each placeholder can represent
- * multiple tokens in the original document (e.g. a URL may be many tokens),
- * so we allow extra positional slack for each one removed.
+ * Removes categorization placeholder tokens from a pattern and returns the
+ * cleaned string. Used to build exclusion queries from the meaningful
+ * (non-variable) parts of a categorize_text pattern.
  */
-const SLOP_PER_PLACEHOLDER = 3;
-
-/**
- * Removes categorization placeholder tokens from a pattern, returning the
- * cleaned string and a count of removed placeholders. The count is used to
- * compute a dynamic `slop` value for `match_phrase` exclusion queries.
- */
-export const stripPlaceholderTokensWithCount = (
-  pattern: string
-): { cleaned: string; placeholderCount: number } => {
-  let placeholderCount = 0;
-  const cleaned = pattern
-    .replace(PLACEHOLDER_PATTERN, () => {
-      placeholderCount++;
-      return '';
-    })
+export const stripPlaceholderTokens = (pattern: string): string => {
+  return pattern
+    .replace(PLACEHOLDER_PATTERN, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
-  return { cleaned, placeholderCount };
 };
 
 /**
@@ -125,7 +121,7 @@ const SAMPLE_DOCS_PER_CATEGORY = 2;
  * short-token removal) to be reliably used for exclusion in subsequent iterations.
  */
 export const isMeaningfulPattern = (pattern: string): boolean => {
-  const { cleaned } = stripPlaceholderTokensWithCount(pattern);
+  const cleaned = stripPlaceholderTokens(pattern);
   return cleaned.split(/\s+/).filter((token) => token.length > 0).length >= MIN_EXCLUSION_TOKENS;
 };
 
@@ -147,13 +143,13 @@ export const discoverMessagePatterns = async ({
   excludePatterns?: string[];
 }): Promise<MessageCategory[]> => {
   const mustNot: QueryDslQueryContainer[] = (excludePatterns ?? [])
-    .map(stripPlaceholderTokensWithCount)
-    .filter(({ cleaned }) => cleaned.length > 0)
-    .map(({ cleaned, placeholderCount }) => ({
-      match_phrase: {
+    .map(stripPlaceholderTokens)
+    .filter((cleaned) => cleaned.length > 0)
+    .map((cleaned) => ({
+      match: {
         message: {
           query: cleaned,
-          slop: BASE_SLOP + placeholderCount * SLOP_PER_PLACEHOLDER,
+          minimum_should_match: EXCLUSION_MINIMUM_SHOULD_MATCH,
         },
       },
     }));
