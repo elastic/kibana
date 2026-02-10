@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Pair, stringify } from 'yaml';
+import type { Pair } from 'yaml';
 import { Document, isScalar } from 'yaml';
 
 import type { FullAgentPolicy } from '../types';
@@ -29,11 +29,7 @@ const POLICY_KEYS_ORDER = [
   'signed',
 ];
 
-export const fullAgentPolicyToYaml = (
-  policy: FullAgentPolicy,
-  toYaml: typeof stringify,
-  apiKey?: string
-): string => {
+export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, apiKey?: string): string => {
   const doc = new Document(policy, { sortMapEntries: _sortYamlKeys, strict: false });
   const yaml = doc.toString();
   const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;

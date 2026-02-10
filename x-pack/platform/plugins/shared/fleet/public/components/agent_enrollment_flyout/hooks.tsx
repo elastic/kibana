@@ -9,8 +9,6 @@ import crypto from 'crypto';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { stringify } from 'yaml';
-
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import {
   sendGetOneAgentPolicy,
@@ -297,7 +295,7 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
       if (typeof fullAgentPolicy === 'string') {
         return;
       }
-      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, stringify, apiKey));
+      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, apiKey));
     }
   }, [apiKey, fullAgentPolicy, isK8s]);
 
