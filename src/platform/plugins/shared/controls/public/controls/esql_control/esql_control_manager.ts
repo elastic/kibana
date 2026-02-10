@@ -93,7 +93,6 @@ export function initializeESQLControlManager(
   );
   const controlType$ = new BehaviorSubject<EsqlControlType>(initialState.controlType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
-  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
   const totalCardinality$ = new BehaviorSubject<number>(initialState.availableOptions?.length ?? 0);
 
   const searchString$ = new BehaviorSubject<string>('');
@@ -283,8 +282,7 @@ export function initializeESQLControlManager(
       singleSelect$,
       variableType$,
       controlType$,
-      esqlQuery$,
-      title$
+      esqlQuery$
     ).pipe(map(() => undefined)),
     reinitializeState: (lastSaved?: ESQLControlState) => {
       setSelectedOptions(lastSaved?.selectedOptions ?? []);
@@ -294,7 +292,6 @@ export function initializeESQLControlManager(
       variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
-      title$.next(lastSaved?.title);
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
       previousTimeRange = undefined;
@@ -311,14 +308,12 @@ export function initializeESQLControlManager(
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
         esqlQuery: esqlQuery$.getValue() ?? '',
-        title: title$.getValue() ?? '',
       };
     },
     internalApi: {
       selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
-      title$,
       setSelectedOptions,
       setSearchString,
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),

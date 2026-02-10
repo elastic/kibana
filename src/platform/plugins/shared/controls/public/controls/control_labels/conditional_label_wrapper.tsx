@@ -26,7 +26,7 @@ export const ConditionalLabelWrapper = ({
     <EuiFlexGroup
       direction="column"
       css={css`
-        gap: 2px;
+        gap: 1px;
         padding: 4px 8px 1px 8px;
         overflow: hidden;
       `}
@@ -40,7 +40,7 @@ export const ConditionalLabelWrapper = ({
           size="s"
           color="subdued"
           css={css`
-            line-height: 1rem;
+            line-height: 1.2rem;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
