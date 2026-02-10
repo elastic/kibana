@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alerts-actions';
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 1;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alerts-actions-*';
 export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alerts-actions-ilm-policy';
 
@@ -28,7 +29,7 @@ export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
   },
 };
 
-const mappings: estypes.MappingTypeMapping = {
+const mappings: MappingsDefinition = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
@@ -62,6 +63,7 @@ export type AlertAction = z.infer<typeof alertActionSchema>;
 export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_ACTIONS_DATA_STREAM}`,
   dataStreamName: ALERT_ACTIONS_DATA_STREAM,
+  version: ALERT_ACTIONS_DATA_STREAM_VERSION,
   mappings,
   ilmPolicy: { name: ALERT_ACTIONS_ILM_POLICY_NAME, policy: ALERT_ACTIONS_ILM_POLICY },
 });
