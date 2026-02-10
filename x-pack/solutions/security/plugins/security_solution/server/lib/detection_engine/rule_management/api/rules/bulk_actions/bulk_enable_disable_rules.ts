@@ -11,7 +11,10 @@ import { invariant } from '../../../../../../../common/utils/invariant';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { validateBulkEnableRule } from '../../../logic/bulk_actions/validations';
+import {
+  validateBulkDisableRule,
+  validateBulkEnableRule,
+} from '../../../logic/bulk_actions/validations';
 
 interface BulkEnableDisableRulesArgs {
   rules: RuleAlertType[];
@@ -42,7 +45,11 @@ export const bulkEnableDisableRules = async ({
   await Promise.all(
     rules.map(async (rule) => {
       try {
-        await validateBulkEnableRule({ mlAuthz, rule, rulesAuthz });
+        if (operation === 'enable') {
+          await validateBulkEnableRule({ mlAuthz, rule, rulesAuthz });
+        } else {
+          await validateBulkDisableRule({ mlAuthz, rule, rulesAuthz });
+        }
         validatedRules.push(rule);
       } catch (error) {
         errors.push({ item: rule, error });

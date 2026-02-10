@@ -35,6 +35,11 @@ export enum ROLES {
   notes_none = 'notes_none',
   rules_read_exceptions_all = 'rules_read_exceptions_all',
   rules_read_exceptions_read = 'rules_read_exceptions_read',
+  // Rules subfeature roles (V4)
+  rules_read_investigation_guide_all = 'rules_read_investigation_guide_all',
+  rules_read_custom_highlighted_fields_all = 'rules_read_custom_highlighted_fields_all',
+  rules_read_enable_disable_all = 'rules_read_enable_disable_all',
+  rules_read_subfeatures_all = 'rules_read_subfeatures_all',
 }
 
 /**
