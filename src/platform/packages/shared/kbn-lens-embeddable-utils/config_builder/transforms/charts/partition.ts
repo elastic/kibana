@@ -527,6 +527,7 @@ function convertLensStateToAPIGrouping(
         stripUndefined({
           ...getValueApiColumn(id, layer),
           color: index === groupIndexForColorMapping ? colorMapping : undefined,
+          collapse_by: vizLayer.collapseFns?.[id] || undefined, // handle gracefully empty strings
         }) as NonNullable<
           Extract<PartitionStateESQL, 'group_breakdown_by'>['group_breakdown_by']
         >[0]
@@ -553,9 +554,7 @@ function fromLensStateToAPIGroups(
   const vizLayer = visualization.layers[0];
 
   const groupByAccessors = getGroups(vizLayer);
-  const groupIndexForColorMapping = groupByAccessors.findIndex(
-    (id) => vizLayer.collapseFns?.[id] == null
-  );
+  const groupIndexForColorMapping = groupByAccessors.findIndex((id) => !vizLayer.collapseFns?.[id]);
   const groups = convertLensStateToAPIGrouping(
     vizLayer,
     layer,
