@@ -18,6 +18,7 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
 import type { Correlation, TraceSequence } from './types';
+import { getTotalHits } from '../../utils/get_total_hits';
 
 export async function getDocuments({
   esClient,
@@ -40,7 +41,7 @@ export async function getDocuments({
 
   const searchResult = await search({
     index,
-    track_total_hits: true,
+    track_total_hits: size + 1, // +1 to determine if results are truncated
     size,
     sort: [{ '@timestamp': { order: 'asc' } }],
     _source: false,
@@ -54,7 +55,10 @@ export async function getDocuments({
       },
     },
   });
-  return searchResult.hits.hits;
+  return {
+    traces: searchResult.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
+    isTruncated: getTotalHits(searchResult) > size,
+  };
 }
 
 export async function getToolHandler({
@@ -105,19 +109,15 @@ export async function getToolHandler({
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
   const sequences: TraceSequence[] = await Promise.all(
     correlationIdentifiers.map(async (correlation) => {
-      const traces = await getDocuments({
+      return await getDocuments({
         esClient,
         correlationIdentifier: correlation.identifier,
         index: indices,
         startTime: correlation.start,
         endTime: correlation.end,
-        size: maxTraceSize,
+        size: maxTraces,
         fields,
       });
-
-      return {
-        traces: traces.map((hit) => unwrapEsFields(hit.fields)),
-      };
     })
   );
 
