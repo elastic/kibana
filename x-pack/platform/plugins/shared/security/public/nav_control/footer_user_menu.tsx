@@ -376,7 +376,7 @@ export const FooterUserMenu: FunctionComponent<FooterUserMenuProps> = ({
   return (
     <>
       <div css={wrapperStyles}>
-        {navigationPreferencesButton}
+        {version !== '1' && navigationPreferencesButton}
         {version === '1' && <div css={dividerStyles} data-test-subj="footerUserMenuDivider" />}
         <EuiPopover
           id="footerUserMenu"
