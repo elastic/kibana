@@ -40,6 +40,46 @@ export const TemplateSchema = z.object({
    * Deletion date, used to indicate soft-deletion. Elastic uses strings, but will narrow it some more to actual dates here.
    */
   deletedAt: z.string().datetime().nullable(),
+
+  /**
+   * Template description
+   */
+  description: z.string().optional(),
+
+  /**
+   * Tags for categorization
+   */
+  tags: z.array(z.string()).optional(),
+
+  /**
+   * Template author
+   */
+  author: z.string().optional(),
+
+  /**
+   * Number of times this template has been used
+   */
+  usageCount: z.number().optional(),
+
+  /**
+   * Number of fields in the template
+   */
+  fieldCount: z.number().optional(),
+
+  /**
+   * Array of field names to display in a tooltip
+   */
+  fieldNames: z.array(z.string()).optional(),
+
+  /**
+   * Last time this template was used
+   */
+  lastUsedAt: z.string().datetime().optional(),
+
+  /**
+   * Whether this is the default template
+   */
+  isDefault: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
