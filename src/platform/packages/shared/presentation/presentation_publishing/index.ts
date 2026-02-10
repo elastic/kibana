@@ -189,7 +189,7 @@ export { SAVED_OBJECT_REF_NAME } from './constants';
 export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
 
 // =============================================
-// Container interfaces (merged from @kbn/presentation-containers)
+// Container interfaces (merged from removed @kbn/presentation-containers package, to avoid circular dependencies between packages)
 // =============================================
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/containers/can_add_new_panel';

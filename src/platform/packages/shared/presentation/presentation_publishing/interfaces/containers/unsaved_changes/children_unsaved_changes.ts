@@ -8,12 +8,11 @@
  */
 
 import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
+import { type HasUniqueId, apiHasUniqueId } from '../../has_uuid';
 import {
-  type HasUniqueId,
   type PublishesUnsavedChanges,
-  apiHasUniqueId,
   apiPublishesUnsavedChanges,
-} from '../../..';
+} from '../../publishes_unsaved_changes';
 import type { PublishingSubject } from '../../../publishing_subject';
 
 export const DEBOUNCE_TIME = 100;
