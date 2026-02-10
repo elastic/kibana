@@ -108,6 +108,17 @@ const esqlColumn = {
       description: 'Column to use',
     },
   }),
+  /**
+   * Data type category of the column.
+   */
+  data_type: schema.maybe(
+    schema.oneOf([schema.literal('number'), schema.literal('string'), schema.literal('date')], {
+      meta: {
+        description:
+          'Data type category of the column. Defaults to "number" for metrics, "string" for groupings.',
+      },
+    })
+  ),
 };
 
 export const esqlColumnSchema = schema.object(esqlColumn);
@@ -191,6 +202,14 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
       meta: { description: 'Handle array values' },
       defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
     }),
+    /**
+     * Data type category of the field.
+     */
+    data_type: schema.maybe(
+      schema.oneOf([schema.literal('number'), schema.literal('string'), schema.literal('date')], {
+        meta: { description: 'Data type category of the field' },
+      })
+    ),
   },
   { meta: { id: 'lastValueOperation' } }
 );

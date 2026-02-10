@@ -125,9 +125,29 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
 
 function getValueColumns(layer: HeatmapStateESQL) {
   return [
-    getValueColumn(getAccessorName('value'), layer.metric.column, 'number'),
-    ...(layer.xAxis ? [getValueColumn(getAccessorName('x'), layer.xAxis.column)] : []),
-    ...(layer.yAxis ? [getValueColumn(getAccessorName('y'), layer.yAxis.column)] : []),
+    getValueColumn(
+      getAccessorName('value'),
+      layer.metric.column,
+      layer.metric.data_type ?? 'number'
+    ),
+    ...(layer.xAxis
+      ? [
+          getValueColumn(
+            getAccessorName('x'),
+            layer.xAxis.column,
+            layer.xAxis.data_type ?? 'string'
+          ),
+        ]
+      : []),
+    ...(layer.yAxis
+      ? [
+          getValueColumn(
+            getAccessorName('y'),
+            layer.yAxis.column,
+            layer.yAxis.data_type ?? 'string'
+          ),
+        ]
+      : []),
   ];
 }
 

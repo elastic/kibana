@@ -8,12 +8,16 @@
  */
 
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { ApiDatatypeCategory } from './utils';
+import { toApiDatatypeCategory } from './utils';
 
+/**
+ * Creates a TextBasedLayerColumn from API config.
+ */
 export const getValueColumn = (
   id: string,
   fieldName?: string,
-  fieldType: DatatableColumnType = 'string'
+  fieldType?: ApiDatatypeCategory
 ): TextBasedLayerColumn => {
   return {
     columnId: id,
@@ -22,9 +26,17 @@ export const getValueColumn = (
   };
 };
 
+/**
+ * Converts a TextBasedLayerColumn back to API config.
+ */
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
+  const column = layer.columns.find((c) => c.columnId === accessor);
+  const columnType = column?.meta?.type;
+  const apiDatatype = toApiDatatypeCategory(columnType);
+
   return {
     operation: 'value' as const,
-    column: layer.columns.find((c) => c.columnId === accessor)!.fieldName,
+    column: column!.fieldName,
+    datatype: apiDatatype,
   };
 };

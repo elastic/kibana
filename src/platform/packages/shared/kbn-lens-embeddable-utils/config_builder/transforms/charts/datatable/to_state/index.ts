@@ -74,21 +74,27 @@ export function buildFormBasedLayer(
 
 export function getValueColumns(config: DatatableStateESQL) {
   return [
-    ...(config.rows ?? []).map((row, index) => ({
-      ...getValueColumn(getAccessorName(ROW_ACCESSOR_PREFIX, index), row.column),
-      meta: {
-        type: 'unknown' as const,
-      },
-    })),
-    ...(config.split_metrics_by ?? []).map((splitBy, index) =>
-      getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy.column)
+    ...(config.rows ?? []).map((row, index) =>
+      getValueColumn(
+        getAccessorName(ROW_ACCESSOR_PREFIX, index),
+        row.column,
+        row.data_type ?? 'string'
+      )
     ),
-    ...config.metrics.map((metric, index) => ({
-      ...getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column),
-      meta: {
-        type: 'unknown' as const,
-      },
-    })),
+    ...(config.split_metrics_by ?? []).map((splitBy, index) =>
+      getValueColumn(
+        getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index),
+        splitBy.column,
+        splitBy.data_type ?? 'string'
+      )
+    ),
+    ...config.metrics.map((metric, index) =>
+      getValueColumn(
+        getAccessorName(METRIC_ACCESSOR_PREFIX, index),
+        metric.column,
+        metric.data_type ?? 'number'
+      )
+    ),
   ];
 }
 
