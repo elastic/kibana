@@ -632,8 +632,42 @@ steps:
     const executionItems = page.testSubj.locator('workflowExecutionListItem');
     await expect(executionItems).toHaveCount(2, { timeout: 60000 });
 
-    // TODO: validate the output is matching the alerts, first execution should show the last alert and the second execution should show the first alert
+    // Validate the single-alert workflow executions
+    // Each execution receives one alert (summaryMode: false)
+    // The first execution in the list (most recent) should have the last alert (suspicious_data_transfer)
+    // The second execution (oldest) should have the first alert (bruteforce_login_attempt)
+    const expectedSingleAlertDescriptions = [
+      'suspicious_data_transfer',
+      'bruteforce_login_attempt',
+    ];
 
+    for (let i = 0; i < 2; i++) {
+      // eslint-disable-next-line playwright/no-nth-methods -- iterating over execution list items by index
+      await executionItems.nth(i).click();
+
+      const executionPanel = page.testSubj.locator('workflowExecutionPanel');
+      await expect(executionPanel).toBeVisible();
+
+      await pageObjects.workflowEditor.expandStepsTree();
+
+      // Verify log_each_alert has exactly 1 iteration (single alert per execution)
+      // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
+      const logEachAlertButtons = executionPanel.getByRole('button', {
+        name: /^log_each_alert/,
+      });
+      await expect(logEachAlertButtons).toHaveCount(1);
+      // eslint-disable-next-line playwright/no-nth-methods
+      await logEachAlertButtons.first().click();
+
+      const stepOutput = await pageObjects.workflowEditor.getStepResultJson<unknown>('output');
+      expect(JSON.stringify(stepOutput)).toContain(expectedSingleAlertDescriptions[i]);
+
+      // Navigate back to the executions list
+      await page.testSubj.click('backToExecutionsLink');
+      await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+    }
+
+    // Navigate to the multiple-alerts workflow
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
@@ -648,6 +682,31 @@ steps:
     const executionItems2 = page.testSubj.locator('workflowExecutionListItem');
     await expect(executionItems2).toHaveCount(1, { timeout: 60000 });
 
-    // TODO: validate the output show both alerts
+    // Validate the multiple-alerts workflow execution
+    // This execution receives all alerts at once (summaryMode: true)
+    // eslint-disable-next-line playwright/no-nth-methods
+    await executionItems2.first().click();
+
+    const executionPanel2 = page.testSubj.locator('workflowExecutionPanel');
+    await expect(executionPanel2).toBeVisible();
+
+    await pageObjects.workflowEditor.expandStepsTree();
+
+    // Verify log_each_alert has 2 iterations (both alerts in single execution)
+    // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
+    const logEachAlertButtons2 = executionPanel2.getByRole('button', {
+      name: /^log_each_alert/,
+    });
+    await expect(logEachAlertButtons2).toHaveCount(2);
+
+    const expectedAlertIds = ['bruteforce_login_attempt', 'suspicious_data_transfer'];
+
+    for (let i = 0; i < expectedAlertIds.length; i++) {
+      // eslint-disable-next-line playwright/no-nth-methods -- iterating over foreach iterations by index
+      await logEachAlertButtons2.nth(i).click();
+
+      const alertOutput = await pageObjects.workflowEditor.getStepResultJson<unknown>('output');
+      expect(JSON.stringify(alertOutput)).toContain(expectedAlertIds[i]);
+    }
   });
 });
