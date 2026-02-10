@@ -28,7 +28,7 @@ import {
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
-import { createDefaultPersistedTab } from '../__mocks__/test_helpers';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
 
 const setup = async () => {
@@ -43,7 +43,8 @@ const setup = async () => {
     ],
   });
 
-  const persistedTab = createDefaultPersistedTab({
+  const persistedTab = getPersistedTabMock({
+    dataView: dataViewMockWithTimeField,
     services,
     appStateOverrides: {
       query: { language: 'kuery', query: 'test' },

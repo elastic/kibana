@@ -13,7 +13,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { selectTabRuntimeState } from '..';
 import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
-import { createDefaultPersistedTab } from '../__mocks__/test_helpers';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabSyncApi from './tab_sync';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
@@ -25,7 +25,10 @@ const setup = async () => {
     persistedDataViews: [dataViewMockWithTimeField],
   });
 
-  const persistedTab = createDefaultPersistedTab({ services });
+  const persistedTab = getPersistedTabMock({
+    dataView: dataViewMockWithTimeField,
+    services,
+  });
   const persistedDiscoverSession = createDiscoverSessionMock({
     id: 'test-session',
     tabs: [persistedTab],

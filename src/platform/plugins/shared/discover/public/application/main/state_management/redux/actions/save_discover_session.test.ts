@@ -23,7 +23,7 @@ import type { SaveDiscoverSessionThunkParams } from './save_discover_session';
 import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
-import { createDefaultPersistedTab } from '../__mocks__/test_helpers';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
 
@@ -65,10 +65,9 @@ const setup = async ({
     persistedDataViews: [dataViewMock, dataViewMockWithTimeField],
   });
 
-  const defaultTab = createDefaultPersistedTab({
+  const defaultTab = getPersistedTabMock({
     tabId: 'default-tab',
     dataView: dataViewMock,
-    appStateOverrides: { columns: [] },
     services,
   });
 

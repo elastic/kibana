@@ -14,7 +14,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
-import { createDefaultPersistedTab } from '../__mocks__/test_helpers';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -23,13 +23,13 @@ const setup = async () => {
     persistedDataViews: [dataViewMockWithTimeField],
   });
 
-  const persistedTab = createDefaultPersistedTab({
+  const persistedTab = getPersistedTabMock({
+    dataView: dataViewMockWithTimeField,
     services,
     appStateOverrides: {
       query: { esql: 'FROM test-index' },
       dataSource: { type: DataSourceType.Esql },
       columns: ['field1', 'field2'],
-      sort: [['@timestamp', 'desc']],
     },
   });
 

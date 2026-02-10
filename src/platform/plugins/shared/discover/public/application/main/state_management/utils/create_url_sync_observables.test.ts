@@ -13,7 +13,7 @@ import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDefaultPersistedTab } from '../redux/__mocks__/test_helpers';
+import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createUrlSyncObservables } from './create_url_sync_observables';
 import { selectTab } from '../redux/selectors';
 import type { DiscoverAppState } from '../redux/types';
@@ -26,7 +26,10 @@ describe('createUrlSyncObservables', () => {
       persistedDataViews: [dataViewMockWithTimeField],
     });
 
-    const persistedTab = createDefaultPersistedTab({ services });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+    });
     await toolkit.initializeTabs({
       persistedDiscoverSession: createDiscoverSessionMock({
         id: 'test-session',
