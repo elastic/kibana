@@ -122,8 +122,8 @@ steps:
     timeout_in_minutes: 20
     depends_on:
       - build
-      - check_types
     env:
+      SCOUT_CONFIGS_DEPS: 'check_types,build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
