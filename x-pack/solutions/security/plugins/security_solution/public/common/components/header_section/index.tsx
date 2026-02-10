@@ -117,7 +117,6 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleAriaLabel,
 }) => {
   const styles = useStyles(border, height);
-  const { euiTheme } = useEuiTheme();
   const toggle = useCallback(() => {
     if (toggleQuery) {
       toggleQuery(!toggleStatus);
@@ -147,11 +146,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             <EuiFlexItem grow={growLeftSplit} className={toggleStatus ? '' : 'no-margin'}>
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
                 <EuiFlexItem>
-                  <EuiFlexGroup
-                    responsive={false}
-                    gutterSize={'none'}
-                    className="header-section-titles"
-                  >
+                  <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                     {toggleQuery && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
@@ -168,26 +163,23 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                         />
                       </EuiFlexItem>
                     )}
-                    <EuiFlexItem>
-                      <EuiTitle size={titleSize}>
-                        <h2 data-test-subj="header-section-title">
-                          <span className="eui-textBreakNormal">{title}</span>
-                          {tooltip && (
-                            <EuiIconTip
-                              color="subdued"
-                              title={tooltipTitle}
-                              content={tooltip}
-                              iconProps={{
-                                ...tooltipIconProps,
-                                style: { marginInlineStart: euiTheme.size.xs },
-                              }}
-                              size="m"
-                              type="info"
-                            />
-                          )}
-                        </h2>
+                    <EuiFlexItem grow={false} className="eui-textBreakNormal">
+                      <EuiTitle>
+                        <h2 data-test-subj="header-section-title">{title}</h2>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {tooltip && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          color="subdued"
+                          title={tooltipTitle}
+                          content={tooltip}
+                          iconProps={tooltipIconProps}
+                          size="m"
+                          type="info"
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
