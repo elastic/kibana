@@ -11,6 +11,7 @@ import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
 import { Walker } from '../../../ast/walker';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { PromqlParamName } from './utils';
 
 export const columnsAfter = async (
@@ -20,7 +21,7 @@ export const columnsAfter = async (
   { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const pipeIndex = query.indexOf('|', promqlCommand.location.max);
+  const pipeIndex = findPipeOutsideQuotes(query, promqlCommand.location.min);
   const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
   const stepColumn = getStepColumn(promqlCommand);

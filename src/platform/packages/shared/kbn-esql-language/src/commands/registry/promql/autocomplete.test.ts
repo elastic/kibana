@@ -754,6 +754,15 @@ describe('label selector suggestions', () => {
     expect(labels).not.toContain(promqlLabelSelectorItem.label);
   });
 
+  test('does not treat pipe in label value as command delimiter', async () => {
+    const query = 'PROMQL rate(bytes{event.dataset="|"} ';
+    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
+    const labels = results.map((suggestion) => suggestion.label);
+
+    expect(labels).toContain(promqlRangeSelectorItem.label);
+    expect(labels).not.toContain(promqlLabelSelectorItem.label);
+  });
+
   test('suggests range selector in nested function after label selector', async () => {
     const query = 'PROMQL sum(rate(bytes_counter { agent !=""}  ';
     const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);

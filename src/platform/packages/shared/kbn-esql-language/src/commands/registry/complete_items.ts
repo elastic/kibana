@@ -19,7 +19,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
-import { getPromqlParamDefinitions } from './promql/utils';
+import { PROMQL_PARAMS } from './promql/utils';
 
 function buildCharCompleteItem(
   label: string,
@@ -173,7 +173,7 @@ export function buildMapValueCompleteItem(value: string): ISuggestionItem {
 }
 
 export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
-  return getPromqlParamDefinitions().map(({ name, description }) =>
+  return PROMQL_PARAMS.map(({ name, description }) =>
     withAutoSuggest({
       label: name,
       text: `${name} = `,

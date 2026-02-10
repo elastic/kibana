@@ -108,6 +108,41 @@ export function pipePrecedesCurrentWord(text: string) {
   return characterPrecedesCurrentWord(text, '|');
 }
 
+export function findPipeOutsideQuotes(text: string, start: number = 0): number {
+  let inString = false;
+  let stringChar = '';
+
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+
+    if (inString) {
+      if (char === '\\' && i + 1 < text.length) {
+        i++;
+        continue;
+      }
+
+      if (char === stringChar) {
+        inString = false;
+        stringChar = '';
+      }
+
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      continue;
+    }
+
+    if (char === '|') {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 /**
  * Are we after a comma? i.e. STATS fieldA, <here>
  */
