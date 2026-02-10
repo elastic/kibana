@@ -171,6 +171,7 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/alerting-v2-plugin'
   - '@kbn/ftr-llm-proxy'
+  - '@kbn/dev-cli-runner'
 tags:
   - test-helper
   - package
