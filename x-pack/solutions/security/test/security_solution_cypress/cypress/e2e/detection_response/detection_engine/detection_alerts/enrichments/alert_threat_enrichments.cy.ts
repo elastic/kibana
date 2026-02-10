@@ -102,8 +102,12 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
       '"indicator.file.type":["elf"]',
       '"indicator.file.hash.md5":["9b6c3518a91d23ed77504b5416bfb5b3"]',
       '"indicator.file.hash.sha256":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]',
+      '"indicator.file.hash.tlsh":["6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE"]',
+      '"indicator.file.hash.ssdeep":["1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL"]',
       '"indicator.type":["file"]',
+      '"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]',
       '"matched.field":["myhash.mysha256"]',
+      '"matched.id":["84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f"]',
       '"matched.index":["logs-ti_abusech.malware"]',
       '"matched.type":["indicator_match_rule"]',
     ];
