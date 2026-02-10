@@ -8,9 +8,13 @@
  */
 
 import { test as base } from '@playwright/test';
-import { tags } from '../../../../tags';
+import { testTargets } from '@kbn/scout-info';
+import { tags } from '../../../..';
 
-const supportedTags = [...tags.deploymentAgnostic, ...tags.performance];
+const supportedTags = [
+  ...testTargets.all.map((target) => target.playwrightTag),
+  ...tags.performance,
+];
 
 export const validateTagsFixture = base.extend<{ validateTags: void }>({
   validateTags: [
