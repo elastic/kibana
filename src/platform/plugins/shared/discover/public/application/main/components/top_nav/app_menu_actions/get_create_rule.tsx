@@ -11,7 +11,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ESQLRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { type Observable, type BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
@@ -103,17 +103,14 @@ export const getCreateRuleMenuItem = ({
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }): DiscoverAppMenuItemType => {
-  return {
-    id: AppMenuActionId.createRule,
-    order: 3,
-    label: i18n.translate('discover.localMenu.ruleTitle', {
-      defaultMessage: 'Create Rule',
+  const alertingRuleItem: DiscoverAppMenuPopoverItem = {
+    id: 'alerting-rule',
+    order: 1,
+    label: i18n.translate('discover.localMenu.alertingRuleTitle', {
+      defaultMessage: 'Alerting rule',
     }),
     iconType: 'bell',
-    testId: 'discoverESQLRuleButton',
-    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
-      defaultMessage: 'Create an ES|QL alerting rule',
-    }),
+    testId: 'discoverAlertingRuleButton',
     run: ({ context: { onFinishAction } }) => {
       return (
         <CreateESQLRuleFlyout
@@ -124,6 +121,42 @@ export const getCreateRuleMenuItem = ({
         />
       );
     },
+  };
+
+  const detectionRuleItem: DiscoverAppMenuPopoverItem = {
+    id: 'detection-rule',
+    order: 2,
+    label: i18n.translate('discover.localMenu.detectionRuleTitle', {
+      defaultMessage: 'Detection rule',
+    }),
+    iconType: 'securitySignal',
+    testId: 'discoverDetectionRuleButton',
+    run: ({ context: { onFinishAction } }) => {
+      // TODO: Replace with Security solution's detection rule creation
+      return (
+        <CreateESQLRuleFlyout
+          discoverParams={discoverParams}
+          services={services}
+          stateContainer={stateContainer}
+          onClose={onFinishAction}
+        />
+      );
+    },
+  };
+
+  return {
+    id: AppMenuActionId.createRule,
+    order: 3,
+    label: i18n.translate('discover.localMenu.ruleTitle', {
+      defaultMessage: 'Create Rule',
+    }),
+    iconType: 'bell',
+    testId: 'discoverCreateRuleButton',
+    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
+      defaultMessage: 'Create an alerting or detection rule from this query',
+    }),
+    items: [alertingRuleItem, detectionRuleItem],
+    popoverTestId: 'discoverCreateRulePopover',
   };
 };
 
