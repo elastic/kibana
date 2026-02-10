@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
+import { ALERT_PROPAGATION_TIMEOUT, EXECUTION_TIMEOUT } from '../fixtures/constants';
 import {
   getCreateAlertRuleWorkflowYaml,
   getIterationLoopWorkflowYaml,
@@ -36,32 +37,20 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
-    // Step 1-3: Go to workflows page and create a new workflow
     await pageObjects.workflowEditor.gotoNewWorkflow();
-
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
 
-    // Step 4: Don't save - the workflow remains unsaved
-
-    // Step 5: Hit run (play) button from the header
+    // Run without saving -- should prompt for unsaved changes confirmation
     await pageObjects.workflowEditor.runWorkflowWithUnsavedChanges();
-
-    // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
-
-    // Click the execute button
     await page.testSubj.click('executeWorkflowButton');
 
-    // Step 6.1: Verify redirected to workflow execution
     await page.waitForURL('**/workflows/*?executionId=*');
 
-    // Step 6.2: Verify Test Workflow execution started
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // Step 6.3: Verify hello_world_step step outputs "Test run: true"
     await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
-
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
   });
@@ -72,33 +61,20 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
-    // Create and save a workflow
     await pageObjects.workflowEditor.gotoNewWorkflow();
-
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
-
-    // Step 7: Save the workflow
     await pageObjects.workflowEditor.saveWorkflow();
 
-    // Step 8: Hit run (play) button from the header
     await pageObjects.workflowEditor.clickRunButton();
-
-    // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
-
-    // Click the execute button
     await page.testSubj.click('executeWorkflowButton');
 
-    // Step 9.1: Verify redirected to workflow execution
     await page.waitForURL('**/workflows/*?executionId=*');
 
-    // Step 9.2: Verify Test Workflow execution started
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // Step 9.3: Verify hello_world_step step outputs "Test run: true"
     await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
-
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
   });
@@ -109,60 +85,40 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   }) => {
     const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
 
-    // Step 1: Create workflow with enabled: false
     await pageObjects.workflowEditor.gotoNewWorkflow();
-
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
-
-    // Save the workflow
     await pageObjects.workflowEditor.saveWorkflow();
 
-    // Step 2: Go to workflows list
+    // Navigate to list and verify the workflow is disabled
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
-    // Step 3: Find Test Workflow
     const workflowRow = page.testSubj
       .locator('workflowListTable')
       .getByRole('row', { name: workflowName });
     await expect(workflowRow).toBeVisible();
 
-    // Step 4: Verify that Test Workflow is disabled
-    // The switch should be unchecked (not checked)
     const toggleSwitch = workflowRow.locator('[data-test-subj^="workflowToggleSwitch-"]');
     await expect(toggleSwitch).not.toBeChecked();
 
-    // Step 4.2: Verify Run button is not enabled for Test Workflow
-    // The Run action button should be disabled (has 'euiButtonIcon-isDisabled' class)
     const runButton = workflowRow.getByRole('button', { name: 'Run' });
     await expect(runButton).toBeDisabled();
 
-    // Step 5 & 7: Enable the workflow via the toggle
+    // Enable the workflow via toggle and verify Run becomes available
     await toggleSwitch.click();
-
-    // Wait for the toggle to become checked (workflow is now enabled)
     await expect(toggleSwitch).toBeChecked();
 
-    // Step 8: Hit run (play) button
     await runButton.click();
-
-    // Wait for execute modal to appear
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
-
-    // Click the execute button
     await page.testSubj.click('executeWorkflowButton');
 
-    // Step 9.1: Verify redirected to workflow execution
     await page.waitForURL('**/workflows/*?executionId=*');
 
-    // Step 9.2: Verify Test Workflow execution started
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // Step 9.3: Verify hello_world_step step outputs "Test run: false"
+    // Not a test run since we ran from the list (enabled workflow), so isTestRun: false
     await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
-
-    // Wait for step execution details to be visible and contain the expected output
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
   });
@@ -170,46 +126,35 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test('should run individual step with custom context override', async ({ pageObjects, page }) => {
     const workflowName = `Test Workflow with loop ${Math.floor(Math.random() * 10000)}`;
 
-    // Step 1: Create workflow with loop
     await pageObjects.workflowEditor.gotoNewWorkflow();
-
     await pageObjects.workflowEditor.setYamlEditorValue(getWorkflowWithLoopYaml(workflowName));
 
-    // focus editor
+    // Navigate to the nested hello_world_step in the editor
     await page.getByText('enabled: false').click();
-    // Step 2: Put cursor on hello_world_step step
-    // The step is nested inside the foreach loop, need to scroll to it first
     await page.keyboard.press('PageDown');
     await page.getByText('name: hello_world_step').click();
     await page.getByText('name: hello_world_step').click();
     await page.keyboard.press('End');
 
-    // Step 3: Observe play button and hit it
-    // Wait for the run step button to appear
+    // Click the inline "run step" button
     const runStepButton = page.testSubj.locator('runStep');
     await expect(runStepButton).toBeVisible();
     await runStepButton.click();
 
-    // Step 4: Verify "Test step" modal is open and set inputs
+    // Set custom context in the test step modal and execute
     await pageObjects.workflowEditor.setTestStepInputs({ execution: { isTestRun: false } });
-
-    // Step 6: Click "Run" button in the modal
     await page.testSubj.click('submit-step-run');
 
-    // Step 7.1: Verify redirected to workflow execution
     await page.waitForURL('**/workflows/*?executionId=*');
 
-    // Step 7.2: Verify only one hello_world_step step is executed
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // There should be only one hello_world_step (not 4 from the loop)
+    // Only one hello_world_step should run (not 4 from the loop)
     const helloWorldSteps = executionPanel.getByRole('button', { name: 'hello_world_step' });
     await expect(helloWorldSteps).toHaveCount(1);
 
-    // Step 7.3: Step output is "Test run: false"
     await helloWorldSteps.click();
-
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
   });
@@ -222,82 +167,54 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getIterationLoopWorkflowYaml(workflowName));
-
-    // Save the workflow first to avoid unsaved changes dialog
     await pageObjects.workflowEditor.saveWorkflow();
 
-    // Step 2: Observe play button and hit it
+    // Run with custom input
     await pageObjects.workflowEditor.clickRunButton();
-
-    // Step 3: In "Test workflow" modal, update "message" input with some value
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await pageObjects.workflowEditor.setExecuteModalInputs({ message: 'test message' });
-
-    // Click the execute button
     await page.testSubj.click('executeWorkflowButton');
 
-    // Step 4.1: Verify workflow execution is started
     await page.waitForURL('**/workflows/*?executionId=*');
 
-    // Step 4.2: Verify the user is redirected to the execution
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // Step 5: Wait for the execution to finish
-    // Wait for the execution to complete by checking the status badge
-    const statusBadge = page.testSubj.locator('workflowExecutionStatus');
-    await expect(statusBadge).toContainText(/success|completed/i, { timeout: 30000 });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    // Reloading page to see all step executions expanded
-    await page.reload();
-
-    // Step 6.1: Verify Workflow execution section contains Overview
+    // Verify overview section
     const overviewSection = page.testSubj.locator('workflowExecutionOverview');
     await expect(overviewSection).toBeVisible();
-
-    // Step 6.1.1: Verify when workflow started
     await expect(overviewSection.getByText('Execution started')).toBeVisible();
-
-    // Step 6.1.2: Verify when workflow ended
     await expect(overviewSection.getByText('Execution ended')).toBeVisible();
 
-    // Step 6.2.1: Verify Manual run
-    await executionPanel.getByText('Manual').click();
+    await pageObjects.workflowExecution.expandStepsTree();
 
-    // Step 6.2: Verify Trigger section
+    // Verify trigger section shows the manual input
+    await executionPanel.getByText('Manual').click();
     const triggerSection = page.testSubj.locator('workflowExecutionTrigger');
     await expect(triggerSection).toBeVisible();
-
-    // Step 6.2.2: Verify displays the inputs entered through "Test workflow" modal
     await expect(triggerSection.getByText('test message')).toBeVisible();
 
-    // Step 6.3: Verify Steps execution tree
-    // Step 6.3.1: Verify 1 execution of first_step
+    // Verify execution tree structure
     const firstStepButton = executionPanel.getByRole('button', { name: 'first_step' });
     await expect(firstStepButton).toHaveCount(1);
 
-    // Step 6.3.2: Verify 1 execution of "loop" step
     const loopStepButton = executionPanel.getByRole('button', { name: 'loop' });
     await loopStepButton.click();
     await expect(loopStepButton).toHaveCount(1);
 
-    // Step 6.3.3: Verify 2 executions of log_iteration step
+    // Verify foreach produced 2 iterations
     const logIterationButtons = executionPanel.getByRole('button', { name: 'log_iteration' });
     await expect(logIterationButtons).toHaveCount(2);
 
-    // Step 7: Click each log_iteration step
-    // Step 8: Verify each log_iteration step outputs the corresponding iteration
     // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-    const firstIteration = logIterationButtons.first();
-    await firstIteration.click();
-
+    await logIterationButtons.first().click();
     let stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Iteration is 0');
 
     // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-    const secondIteration = logIterationButtons.last();
-    await secondIteration.click();
-
+    await logIterationButtons.last().click();
     stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Iteration is 1');
   });
@@ -312,50 +229,38 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await pageObjects.workflowEditor.setYamlEditorValue(
       getManyIterationsWorkflowYaml(workflowName)
     );
-
-    // Save the workflow first to avoid unsaved changes dialog
     await pageObjects.workflowEditor.saveWorkflow();
 
-    // Step 2: Run workflow
     await pageObjects.workflowEditor.clickRunButton();
-
     await page.waitForURL('**/workflows/*?executionId=*');
 
     const executionPanel = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel).toBeVisible();
 
-    // Wait for execution to complete
-    const statusBadge = page.testSubj.locator('workflowExecutionStatus');
-    await expect(statusBadge).toContainText(/success|completed/i, { timeout: 60000 });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    // Reloading page to see all step executions expanded
-    await page.reload();
+    await pageObjects.workflowExecution.expandStepsTree();
 
-    // Verify we have 50 step executions (the foreach array has 50 items)
-    // Use negative lookahead to exclude the parent foreach step
+    // Verify 50 leaf step executions (exclude the parent foreach step)
     const stepButtons = executionPanel.getByRole('button', {
       name: /^(?!foreach_).*hello_world_step/,
     });
     await expect(stepButtons).toHaveCount(50);
 
-    // Verify the container is scrollable by checking if not all items are visible at once
-    // Get the first and last step execution buttons
     // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
     const firstStep = stepButtons.first();
     // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
     const lastStep = stepButtons.last();
 
-    // First step should be visible
     await expect(firstStep).toBeVisible();
 
-    // Last step might not be visible initially (need to scroll)
-    // Scroll the execution panel to see the last step
+    // Scroll to the last step to verify scrollability
     await lastStep.scrollIntoViewIfNeeded();
     await expect(lastStep).toBeVisible();
   });
 
   test('should trigger workflow from alert', async ({ pageObjects, page, browserAuth }) => {
-    // we need admin privileges to write to the test index
+    // Admin privileges needed to write to the test index and create detection rules
     await browserAuth.loginAsAdmin();
 
     const singleWorkflowName = `Handle single alert ${Math.floor(Math.random() * 10000)}`;
@@ -382,39 +287,37 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
         timestamp: '2023-11-15T09:17:32Z',
       },
     ];
-    // Step 1: Create workflow with alert trigger
+
+    // Create single-alert target workflow (summaryMode: false)
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
       getPrintAlertsWorkflowYaml(singleWorkflowName)
     );
     await pageObjects.workflowEditor.saveWorkflow();
-
     const singleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
 
-    // Step 2: Create workflow with alert trigger, which print all alerts in context for multiple setting
+    // Create multiple-alerts target workflow (summaryMode: true)
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
       getPrintAlertsWorkflowYaml(multipleWorkflowName)
     );
     await pageObjects.workflowEditor.saveWorkflow();
-
     const multipleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
 
+    // Create and run the alert rule creation workflow
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
       getCreateAlertRuleWorkflowYaml(createAlertRuleWorkflowName)
     );
     await pageObjects.workflowEditor.saveWorkflow();
-    // Run the workflow to create the alert rule, specifying the workflow IDs to trigger
     await pageObjects.workflowEditor.executeWorkflowWithInputs({
       wf_single_alert: singleWorkflowId,
       wf_multiple_alerts: multipleWorkflowId,
     });
 
-    // Wait for execution to complete
-    const statusBadge = page.testSubj.locator('workflowExecutionStatus');
-    await expect(statusBadge).toContainText(/success|completed/i, { timeout: 60000 });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
+    // Create and run the alert trigger workflow (indexes docs that fire the rule)
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
       getTriggerAlertWorkflowYaml(triggerAlertWorkflowName)
@@ -422,29 +325,22 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await pageObjects.workflowEditor.saveWorkflow();
     await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
 
-    // Wait for execution to complete
-    const statusBadge2 = page.testSubj.locator('workflowExecutionStatus');
-    await expect(statusBadge2).toContainText(/success|completed/i, { timeout: 60000 });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    // Step 2: Go to workflows list
+    // Validate single-alert workflow executions (one alert per execution)
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-
     await page.testSubj
       .locator('workflowListTable')
       .getByRole('link', { name: singleWorkflowName })
       .click();
     await page.getByRole('button', { name: 'Executions' }).click();
-
     await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
 
     const executionItems = page.testSubj.locator('workflowExecutionListItem');
-    await expect(executionItems).toHaveCount(2, { timeout: 60000 });
+    await expect(executionItems).toHaveCount(2, { timeout: ALERT_PROPAGATION_TIMEOUT });
 
-    // Validate the single-alert workflow executions
-    // Each execution receives one alert (summaryMode: false)
-    // The first execution in the list (most recent) should have the last alert (suspicious_data_transfer)
-    // The second execution (oldest) should have the first alert (bruteforce_login_attempt)
+    // Most recent execution first -> last alert first
     const expectedSingleAlertDescriptions = [
       'suspicious_data_transfer',
       'bruteforce_login_attempt',
@@ -456,12 +352,10 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
 
       const executionPanel = page.testSubj.locator('workflowExecutionPanel');
       await expect(executionPanel).toBeVisible();
-      await pageObjects.workflowExecution.waitForExecutionStatus('completed', 30000);
-
+      await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
       await pageObjects.workflowExecution.expandStepsTree();
 
-      // Verify log_each_alert has exactly 1 iteration (single alert per execution)
-      // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
+      // Only 1 iteration per execution (single-alert mode)
       const logEachAlertButtons = executionPanel.getByRole('button', {
         name: /^log_each_alert/,
       });
@@ -472,39 +366,32 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       const stepOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
       expect(JSON.stringify(stepOutput)).toContain(expectedSingleAlertDescriptions[i]);
 
-      // Navigate back to the executions list
       await page.testSubj.click('backToExecutionsLink');
       await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
     }
 
-    // Navigate to the multiple-alerts workflow
+    // Validate multiple-alerts workflow execution (all alerts in one execution)
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-
     await page.testSubj
       .locator('workflowListTable')
       .getByRole('link', { name: multipleWorkflowName })
       .click();
     await page.getByRole('button', { name: 'Executions' }).click();
-
     await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
 
     const executionItems2 = page.testSubj.locator('workflowExecutionListItem');
-    await expect(executionItems2).toHaveCount(1, { timeout: 60000 });
+    await expect(executionItems2).toHaveCount(1, { timeout: ALERT_PROPAGATION_TIMEOUT });
 
-    // Validate the multiple-alerts workflow execution
-    // This execution receives all alerts at once (summaryMode: true)
     // eslint-disable-next-line playwright/no-nth-methods
     await executionItems2.first().click();
 
     const executionPanel2 = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel2).toBeVisible();
-    await pageObjects.workflowExecution.waitForExecutionStatus('completed', 30000);
-
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
     await pageObjects.workflowExecution.expandStepsTree();
 
-    // Verify log_each_alert has 2 iterations (both alerts in single execution)
-    // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
+    // 2 iterations (both alerts in single execution)
     const logEachAlertButtons2 = executionPanel2.getByRole('button', {
       name: /^log_each_alert/,
     });

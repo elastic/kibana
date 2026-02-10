@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
+import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { createGetUpdateCase } from '../../fixtures/workflows';
 
 test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
@@ -57,7 +58,7 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     // Execute the workflow
     await page.testSubj.click('executeWorkflowButton');
 
-    await pageObjects.workflowExecution.waitForExecutionStatus('completed', 20000);
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
     // Expand all steps in the tree
     await pageObjects.workflowExecution.expandStepsTree();

@@ -8,7 +8,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 /**
  * Page object for the workflow execution detail view.
@@ -112,12 +111,29 @@ export class WorkflowExecutionPage {
     const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
 
     await workflowStepExecutionDetails.locator(`button[data-test-subj="${type}"]`).click();
-
     await workflowStepExecutionDetails.locator('button[data-test-subj="json"]').click();
-    const jsonEditorNthIndex = 1; // step output json editor index is 1, magic number, but this is the only way
-    const stringValue = await new KibanaCodeEditorWrapper(this.page).getCodeEditorValue(
-      jsonEditorNthIndex
-    );
+
+    const jsonEditor = this.page.testSubj.locator('stepResultJsonEditor');
+    await jsonEditor.waitFor({ state: 'visible' });
+
+    const uri = await jsonEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Step result JSON editor data-uri not found');
+    }
+
+    const stringValue = await this.page.evaluate((modelUri) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const model = monacoEnv.monaco.editor.getModel(modelUri);
+      if (!model) {
+        throw new Error('Step result JSON editor model not found');
+      }
+      return model.getValue();
+    }, uri);
+
     return JSON.parse(stringValue);
   }
 }
