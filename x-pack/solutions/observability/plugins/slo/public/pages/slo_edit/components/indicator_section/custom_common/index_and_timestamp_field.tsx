@@ -12,14 +12,15 @@ import { useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
+import { useSloFormContext } from '../../slo_form_context';
 
 interface Props {
   dataView?: DataView;
   isLoading: boolean;
-  isFlyout?: boolean;
 }
 
-export function IndexAndTimestampField({ dataView, isLoading, isFlyout = false }: Props) {
+export function IndexAndTimestampField({ dataView, isLoading }: Props) {
+  const { isFlyout } = useSloFormContext();
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 

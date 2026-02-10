@@ -29,6 +29,7 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
+import { useSloFormContext } from '../../slo_form_context';
 
 const LABELS = {
   serviceName: i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName', {
@@ -287,12 +288,7 @@ function ApmLatencyFullPage() {
   );
 }
 
-export interface ApmLatencyIndicatorTypeFormProps {
-  isFlyout?: boolean;
-}
-
-export function ApmLatencyIndicatorTypeForm({
-  isFlyout = false,
-}: ApmLatencyIndicatorTypeFormProps) {
+export function ApmLatencyIndicatorTypeForm() {
+  const { isFlyout } = useSloFormContext();
   return isFlyout ? <ApmLatencyFlyout /> : <ApmLatencyFullPage />;
 }

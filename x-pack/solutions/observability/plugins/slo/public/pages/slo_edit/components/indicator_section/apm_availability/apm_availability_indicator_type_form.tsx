@@ -22,6 +22,7 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
+import { useSloFormContext } from '../../slo_form_context';
 
 const LABELS = {
   serviceName: i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
@@ -233,12 +234,7 @@ function ApmAvailabilityFullPage() {
   );
 }
 
-export interface ApmAvailabilityIndicatorTypeFormProps {
-  isFlyout?: boolean;
-}
-
-export function ApmAvailabilityIndicatorTypeForm({
-  isFlyout = false,
-}: ApmAvailabilityIndicatorTypeFormProps) {
+export function ApmAvailabilityIndicatorTypeForm() {
+  const { isFlyout } = useSloFormContext();
   return isFlyout ? <ApmAvailabilityFlyout /> : <ApmAvailabilityFullPage />;
 }

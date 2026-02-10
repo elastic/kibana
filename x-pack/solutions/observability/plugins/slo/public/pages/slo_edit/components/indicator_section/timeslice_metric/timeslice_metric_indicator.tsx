@@ -31,13 +31,7 @@ import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 
 export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 
-interface TimesliceMetricIndicatorTypeFormProps {
-  isFlyout?: boolean;
-}
-
-export function TimesliceMetricIndicatorTypeForm({
-  isFlyout = false,
-}: TimesliceMetricIndicatorTypeFormProps) {
+export function TimesliceMetricIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
   const dataViewId = watch(DATA_VIEW_FIELD);
@@ -61,11 +55,7 @@ export function TimesliceMetricIndicatorTypeForm({
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
-        <IndexAndTimestampField
-          dataView={dataView}
-          isLoading={isIndexFieldsLoading}
-          isFlyout={isFlyout}
-        />
+        <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
         <EuiFlexItem>
           <QueryBuilder

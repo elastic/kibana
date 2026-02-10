@@ -24,6 +24,7 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
+import { useSloFormContext } from '../../slo_form_context';
 
 const LABELS = {
   advancedSettings: i18n.translate('xpack.slo.sloEdit.settings.advancedSettingsLabel', {
@@ -240,6 +241,7 @@ function AdvancedSettingsFullPage() {
   );
 }
 
-export function AdvancedSettings({ isFlyout = false }: { isFlyout?: boolean }) {
+export function AdvancedSettings() {
+  const { isFlyout } = useSloFormContext();
   return isFlyout ? <AdvancedSettingsFlyout /> : <AdvancedSettingsFullPage />;
 }
