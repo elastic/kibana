@@ -82,7 +82,7 @@ export function createGetTracesTool({
       { esClient }
     ) => {
       try {
-        const { sequences } = await getToolHandler({
+        const result = await getToolHandler({
           core,
           plugins,
           logger,
@@ -97,7 +97,7 @@ export function createGetTracesTool({
         });
 
         return {
-          results: [{ type: ToolResultType.other, data: { sequences } }],
+          results: [{ type: ToolResultType.other, data: result }],
         };
       } catch (error) {
         logger.error(`Error fetching traces: ${error.message}`);

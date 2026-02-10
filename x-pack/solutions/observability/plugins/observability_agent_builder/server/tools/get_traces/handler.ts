@@ -17,7 +17,7 @@ import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
-import type { Correlation, TraceSequence } from './types';
+import type { Correlation } from './types';
 import { getTotalHits } from '../../utils/get_total_hits';
 
 export async function getDocuments({
@@ -56,7 +56,7 @@ export async function getDocuments({
     },
   });
   return {
-    traces: searchResult.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
+    items: searchResult.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
     isTruncated: getTotalHits(searchResult) > size,
   };
 }
@@ -107,7 +107,7 @@ export async function getToolHandler({
   });
 
   // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
-  const sequences: TraceSequence[] = await Promise.all(
+  const traces = await Promise.all(
     correlationIdentifiers.map(async (correlation) => {
       return await getDocuments({
         esClient,
@@ -121,5 +121,5 @@ export async function getToolHandler({
     })
   );
 
-  return { sequences };
+  return { traces };
 }

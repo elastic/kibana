@@ -17,13 +17,15 @@ import {
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { TraceSequence } from '@kbn/observability-agent-builder-plugin/server/tools/get_traces/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
 interface GetTracesToolResult extends OtherResult {
   data: {
-    sequences: TraceSequence[];
+    traces: {
+      items: Record<string, unknown>[];
+      isTruncated?: boolean;
+    }[];
   };
 }
 
@@ -106,7 +108,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logs: correlatedLogs,
         });
       });
-      it('returns a single trace sequence with APM and logs', async () => {
+      it('returns a single trace items with APM and logs', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -115,15 +117,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
           },
         });
-        const { sequences } = results[0].data;
-        // when traceId is provided, should return exactly one sequence
-        expect(sequences).to.have.length(1);
+        const { traces } = results[0].data;
+        // when traceId is provided, should return exactly one trace
+        expect(traces).to.have.length(1);
 
-        const sequence = sequences[0];
-        expect(sequence.correlation_identifier.field).to.be('trace.id');
-        expect(sequence.correlation_identifier.value).to.be(DEFAULT_TRACE_CONFIGS[0].traceId);
-        expect(sequence.traceItems.length).to.be.greaterThan(0);
-        expect(sequence.logs.length).to.be.greaterThan(0);
+        const trace = traces[0];
+        expect(trace.items.length).to.be.greaterThan(0);
       });
 
       it('returns an empty sequence if the trace does not exist', async () => {
@@ -136,14 +135,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { correlation_identifier, traceItems, logs } = results[0].data.sequences[0];
-        expect(correlation_identifier.field).to.be('trace.id');
-        expect(correlation_identifier.value).to.be('trace-does-not-exist');
-        expect(traceItems).to.have.length(0);
-        expect(logs).to.have.length(0);
+        const { items } = results[0].data.traces[0];
+        expect(items).to.have.length(0);
       });
 
-      it('does not return sequences that do not match the specified terms', async () => {
+      it('does not return traces that do not match the specified terms', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -152,11 +148,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kqlFilter: 'service.name: "non-existing-service"',
           },
         });
-        const { sequences } = results[0].data;
-        expect(sequences.length).to.be(0);
+        const { traces } = results[0].data;
+        expect(traces.length).to.be(0);
       });
 
-      it('returns sequences for slow transactions', async () => {
+      it('returns traces for slow transactions', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -165,8 +161,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kqlFilter: 'transaction.duration.us > 5',
           },
         });
-        const { sequences } = results[0].data;
-        expect(sequences.length).to.be.greaterThan(0);
+        const { traces } = results[0].data;
+        expect(traces.length).to.be.greaterThan(0);
       });
     });
   });

@@ -5,21 +5,6 @@
  * 2.0.
  */
 
-import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-
-export interface TraceSequence {
-  traces: Record<string, unknown>[];
-  isTruncated?: boolean;
-}
-
-export interface GetTracesToolResult {
-  type: ToolResultType.other;
-  data: {
-    sequences: TraceSequence[];
-    message?: string;
-  };
-}
-
 export interface Correlation {
   start: number;
   end: number;
