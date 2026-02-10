@@ -92,6 +92,7 @@
   "alerting_notification_policy": [
     "createdAt",
     "createdBy",
+    "description",
     "name",
     "updatedAt",
     "updatedBy",
