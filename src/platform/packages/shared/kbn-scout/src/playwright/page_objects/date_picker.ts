@@ -82,7 +82,14 @@ export class DatePicker {
       } catch {
         await getTestSubjLocator('superDatePickerToggleQuickMenuButton').click();
       }
-      await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
+      const startButton = getTestSubjLocator('superDatePickerstartDatePopoverButton');
+      try {
+        await startButton.waitFor({ state: 'visible', timeout: 2000 });
+      } catch {
+        await getTestSubjLocator('superDatePickerToggleQuickMenuButton').click();
+        await startButton.waitFor();
+      }
+      await startButton.click();
     } else {
       await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
     }
