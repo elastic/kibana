@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isConditionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React from 'react';
 import { ConditionDisplay } from '../../../../shared';
 import { CreateStepButton } from '../../../create_step_button';

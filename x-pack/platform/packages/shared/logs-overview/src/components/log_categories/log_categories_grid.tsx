@@ -9,10 +9,10 @@ import type { EuiDataGridColumnSortingConfig, EuiDataGridPaginationProps } from 
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { useMachine } from '@xstate5/react';
+import { useMachine } from '@xstate/react';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
-import { assign, setup } from 'xstate5';
+import { assign, setup } from 'xstate';
 import type { LogCategory } from '../../types';
 import type {
   LogCategoriesGridCellDependencies,

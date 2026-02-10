@@ -93,9 +93,9 @@ export const DegradedFieldInfo = () => {
               gutterSize="m"
               data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values"
             >
-              {degradedFieldValues?.values.map((value) => {
+              {degradedFieldValues?.values.map((value: string) => {
                 return (
-                  <EuiFlexItem css={{ lineHeight: '1.6', width: '100%' }}>
+                  <EuiFlexItem key={value} css={{ lineHeight: '1.6', width: '100%' }}>
                     <ExpandableTruncatedText text={value} truncatedTextLength={95} />
                   </EuiFlexItem>
                 );

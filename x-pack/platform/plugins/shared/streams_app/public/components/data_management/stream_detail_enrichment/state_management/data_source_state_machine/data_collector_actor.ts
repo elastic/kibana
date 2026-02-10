@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
-import type { ErrorActorEvent } from 'xstate5';
-import { fromObservable } from 'xstate5';
+import type { ErrorActorEvent } from 'xstate';
+import { fromObservable } from 'xstate';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
