@@ -13,7 +13,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Streams } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
-import { EditDescriptionFlyout } from './flyout/edit_description_flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
 import type { SchemaField } from './types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -78,31 +77,6 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       );
     };
 
-    const openEditDescriptionFlyout = () => {
-      const overlay = core.overlays.openFlyout(
-        toMountPoint(
-          <StreamsAppContextProvider context={context}>
-            <EditDescriptionFlyout
-              field={field}
-              onClose={() => overlay.close()}
-              onSave={(updatedField) => {
-                onFieldUpdate(updatedField);
-              }}
-            />
-          </StreamsAppContextProvider>,
-          core
-        ),
-        { maxWidth: 500 }
-      );
-    };
-
-    const editDescriptionAction = {
-      name: i18n.translate('xpack.streams.actions.editDescriptionLabel', {
-        defaultMessage: 'Edit description',
-      }),
-      onClick: () => openEditDescriptionFlyout(),
-    };
-
     const clearDescriptionAction = {
       name: i18n.translate('xpack.streams.actions.clearDescriptionLabel', {
         defaultMessage: 'Clear description',
@@ -120,6 +94,13 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       onClick: () => openFlyout(),
     };
 
+    const editFieldAction = {
+      name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+        defaultMessage: 'Edit field',
+      }),
+      onClick: () => openFlyout({ isEditingByDefault: true }),
+    };
+
     // Check if this field has a real ES mapping (not type: 'unmapped') in a parent stream.
     // If the parent has type: 'unmapped', the child should still be able to map it.
     const inheritedField = fields.find((f) => f.name === field.name && f.status === 'inherited');
@@ -129,16 +110,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
 
     switch (field.status) {
       case 'mapped':
-        actions = [
-          viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-              defaultMessage: 'Edit field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-          editDescriptionAction,
-        ];
+        actions = [viewFieldAction, editFieldAction];
         if (field.description) {
           actions.push(clearDescriptionAction);
         }
@@ -161,18 +133,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
         break;
       case 'unmapped':
-        actions = [viewFieldAction];
-        // Don't show "Map field" for fields with a real mapping in parent (the parent's mapping applies).
-        // If the parent has type: 'unmapped', the child should still be able to map it.
-        if (!hasRealMappingInParent) {
-          actions.push({
-            name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-              defaultMessage: 'Map field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          });
-        }
-        actions.push(editDescriptionAction);
+        actions = [viewFieldAction, editFieldAction];
         if (field.description) {
           actions.push(clearDescriptionAction);
         }
@@ -196,7 +157,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
         break;
       case 'inherited':
-        actions = [viewFieldAction, editDescriptionAction];
+        actions = [viewFieldAction, editFieldAction];
         if (field.description) {
           actions.push(clearDescriptionAction);
         }

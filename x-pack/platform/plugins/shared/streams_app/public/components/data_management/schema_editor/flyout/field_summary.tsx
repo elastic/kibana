@@ -65,6 +65,7 @@ const FIELD_SUMMARIES = {
 interface FieldSummaryProps {
   field: SchemaField;
   isEditing: boolean;
+  isDescriptionOnlyEditing?: boolean;
   toggleEditMode: () => void;
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
@@ -72,11 +73,20 @@ interface FieldSummaryProps {
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
+  const {
+    field,
+    isEditing,
+    isDescriptionOnlyEditing = false,
+    toggleEditMode,
+    onChange,
+    stream,
+    enableGeoPointSuggestions,
+  } = props;
 
   const router = useStreamsAppRouter();
 
   const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+  const canEditMappingControls = isEditing && !isDescriptionOnlyEditing;
 
   return (
     <>
@@ -170,7 +180,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
           <EuiFlexItem grow={2}>
             <FieldFormType
               field={field}
-              isEditing={isEditing}
+              isEditing={canEditMappingControls}
               onTypeChange={(type) => onChange({ type })}
               streamType={streamType}
               enableGeoPointSuggestions={enableGeoPointSuggestions}
@@ -189,7 +199,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                {isEditing ? (
+                {canEditMappingControls ? (
                   <FieldFormFormat
                     value={field.format}
                     onChange={(format) => onChange({ format })}

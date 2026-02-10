@@ -135,7 +135,7 @@ describe('FieldActionsCell', () => {
   });
 
   describe('mapped fields', () => {
-    it('should show View, Edit, Edit description, and Unmap actions for regular mapped fields', async () => {
+    it('should show View, Edit, and Unmap actions for regular mapped fields', async () => {
       const mappedField: MappedSchemaField = {
         name: 'message',
         parent: 'logs.test',
@@ -149,7 +149,6 @@ describe('FieldActionsCell', () => {
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
       expect(actions).toContain('Edit field');
-      expect(actions).toContain('Edit description');
       expect(actions).toContain('Unmap field');
       expect(actions).not.toContain('Clear description');
     });
@@ -186,7 +185,6 @@ describe('FieldActionsCell', () => {
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
       expect(actions).toContain('Edit field');
-      expect(actions).toContain('Edit description');
       expect(actions).toContain('Clear description');
       expect(actions).not.toContain('Unmap field');
     });
@@ -218,7 +216,6 @@ describe('FieldActionsCell', () => {
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
       expect(actions).toContain('Edit field');
-      expect(actions).toContain('Edit description');
       expect(actions).not.toContain('Unmap field');
     });
 
@@ -249,7 +246,7 @@ describe('FieldActionsCell', () => {
   });
 
   describe('unmapped fields', () => {
-    it('should show View, Map, and Edit description actions for unmapped fields', async () => {
+    it('should show View and Edit actions for unmapped fields', async () => {
       const unmappedField: UnmappedSchemaField = {
         name: 'custom_field',
         parent: 'logs.test',
@@ -261,8 +258,7 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Map field');
-      expect(actions).toContain('Edit description');
+      expect(actions).toContain('Edit field');
       expect(actions).not.toContain('Clear description');
     });
 
@@ -281,7 +277,7 @@ describe('FieldActionsCell', () => {
       expect(actions).toContain('Clear description');
     });
 
-    it('should NOT show Map field action when field has a real mapping in parent', async () => {
+    it('should NOT show geo mapping action when field has a real mapping in parent', async () => {
       // Unmapped field with same name as inherited field with a real type - parent's mapping applies
       const unmappedField: UnmappedSchemaField = {
         name: 'attributes.field1',
@@ -304,12 +300,11 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Edit description');
-      expect(actions).not.toContain('Map field');
+      expect(actions).toContain('Edit field');
       expect(actions).not.toContain('Map as geo field');
     });
 
-    it('should show Map field action when parent has type: unmapped', async () => {
+    it('should show Edit action when parent has type: unmapped', async () => {
       // When parent has type: 'unmapped' (documentation-only), child should be able to map it
       const unmappedField: UnmappedSchemaField = {
         name: 'attributes.field1',
@@ -333,8 +328,7 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Edit description');
-      expect(actions).toContain('Map field'); // Should show because parent only has documentation, not real mapping
+      expect(actions).toContain('Edit field'); // Should show because parent only has documentation, not real mapping
     });
 
     it('should call onFieldUpdate without description when Clear description is clicked', async () => {
@@ -362,7 +356,7 @@ describe('FieldActionsCell', () => {
   });
 
   describe('inherited fields', () => {
-    it('should show View and Edit description actions for inherited fields', async () => {
+    it('should show View and Edit actions for inherited fields', async () => {
       const inheritedField: MappedSchemaField = {
         name: 'attributes.inherited_field',
         parent: 'logs',
@@ -375,7 +369,7 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Edit description');
+      expect(actions).toContain('Edit field');
       expect(actions).not.toContain('Unmap field');
       expect(actions).not.toContain('Map field');
       expect(actions).not.toContain('Clear description');
