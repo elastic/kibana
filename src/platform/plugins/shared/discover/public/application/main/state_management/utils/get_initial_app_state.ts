@@ -59,6 +59,9 @@ export function getInitialAppState({
   if (typeof mergedState.hideChart !== 'boolean') {
     mergedState.hideChart = undefined;
   }
+  if (typeof mergedState.hideDataTable !== 'boolean') {
+    mergedState.hideDataTable = undefined;
+  }
 
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
@@ -216,6 +219,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
+  }
+  if (persistedTab?.hideDataTable !== undefined) {
+    defaultState.hideDataTable = persistedTab.hideDataTable;
   }
 
   return defaultState;

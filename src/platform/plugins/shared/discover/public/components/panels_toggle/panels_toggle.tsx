@@ -14,6 +14,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
+import { VIEW_MODE } from '../../../common/constants';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -42,16 +43,32 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+  const isTableHidden = useAppStateSelector((state) => Boolean(state.hideDataTable));
+  const viewMode = useAppStateSelector((state) => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL);
 
   const onToggleChart = useCallback(() => {
     dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
   }, [dispatch, isChartHidden, updateAppState]);
+
+  const onToggleTable = useCallback(() => {
+    dispatch(updateAppState({ appState: { hideDataTable: !isTableHidden } }));
+  }, [dispatch, isTableHidden, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
+  const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
+
+  // Chart toggle: show in histogram when chart visible, OR in tabs only when chart is hidden
+  // (avoids duplicate when both chart toolbar and hits area would show it)
+  const showChartToggle =
+    isInsideHistogram || (isInsideDiscoverContent && isChartHidden);
+
+  // Table toggle: only in tabs context when in document view
+  const showTableToggle =
+    isInTabsContext && viewMode === VIEW_MODE.DOCUMENT_LEVEL;
 
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||
@@ -69,7 +86,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
           },
         ]
       : []),
-    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
+    ...(showChartToggle
       ? [
           {
             label: isChartHidden
@@ -84,6 +101,24 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
             'aria-expanded': !isChartHidden,
             'aria-controls': 'unifiedHistogramCollapsablePanel',
             onClick: onToggleChart,
+          },
+        ]
+      : []),
+    ...(showTableToggle
+      ? [
+          {
+            label: isTableHidden
+              ? i18n.translate('discover.panelsToggle.showTableButton', {
+                  defaultMessage: 'Show table',
+                })
+              : i18n.translate('discover.panelsToggle.hideTableButton', {
+                  defaultMessage: 'Hide table',
+                }),
+            iconType: isTableHidden ? 'transitionTopIn' : 'transitionTopOut',
+            'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
+            'aria-expanded': !isTableHidden,
+            'aria-controls': 'discoverDocTable',
+            onClick: onToggleTable,
           },
         ]
       : []),

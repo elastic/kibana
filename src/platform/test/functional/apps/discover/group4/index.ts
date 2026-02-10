@@ -28,6 +28,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_adhoc_data_views'));
     loadTestFile(require.resolve('./_date_nested'));
     loadTestFile(require.resolve('./_chart_hidden'));
+    loadTestFile(require.resolve('./_table_hidden'));
     loadTestFile(require.resolve('./_context_encoded_url_params'));
     loadTestFile(require.resolve('./_data_view_edit'));
     loadTestFile(require.resolve('./_field_list_new_fields'));

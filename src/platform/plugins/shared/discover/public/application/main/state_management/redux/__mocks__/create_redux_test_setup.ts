@@ -42,6 +42,7 @@ export const createReduxTestSetup = async () => {
         sort: [['@timestamp', 'desc']],
         interval: 'auto',
         hideChart: false,
+        hideDataTable: false,
       },
     }),
     timeRestore: false,

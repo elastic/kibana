@@ -137,6 +137,9 @@ export const selectTabRuntimeInternalState = (
   };
 };
 
+/** Default chart height for new tabs (chart open by default) */
+const DEFAULT_CHART_HEIGHT = 300;
+
 export const selectInitialUnifiedHistogramLayoutPropsMap = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
@@ -144,15 +147,25 @@ export const selectInitialUnifiedHistogramLayoutPropsMap = (
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const layoutPropsMap = tabRuntimeState?.unifiedHistogramConfig$.getValue().layoutPropsMap ?? {};
 
-  return Object.keys(layoutPropsMap).reduce<InitialUnifiedHistogramLayoutPropsMap>((acc, key) => {
-    const topPanelHeight = layoutPropsMap[key]?.topPanelHeight;
+  const result = Object.keys(layoutPropsMap).reduce<InitialUnifiedHistogramLayoutPropsMap>(
+    (acc, key) => {
+      const topPanelHeight = layoutPropsMap[key]?.topPanelHeight;
 
-    if (topPanelHeight !== undefined) {
-      acc[key] = { topPanelHeight };
-    }
+      if (topPanelHeight !== undefined) {
+        acc[key] = { topPanelHeight };
+      }
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    {}
+  );
+
+  // New tabs have empty layoutPropsMap - use default chart height so chart opens by default
+  if (Object.keys(result).length === 0) {
+    result[DEFAULT_HISTOGRAM_KEY_PREFIX] = { topPanelHeight: DEFAULT_CHART_HEIGHT };
+  }
+
+  return result;
 };
 
 export const useCurrentTabRuntimeState = <T,>(
