@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { txtInsufficientLicenseLevel } from './i18n';
 import type { DrilldownFactory } from '../../types';
 
@@ -21,16 +20,15 @@ interface Props {
 
 export const DrilldownFactoryItem: React.FC<Props> = ({ factory, onSelect }) => {
   const showTooltip = !factory.isLicenseCompatible;
+  const { euiTheme } = useEuiTheme();
 
   let content = (
     <EuiKeyPadMenuItem
-      css={({ euiTheme }: UseEuiTheme) =>
-        css({
-          '.euiKeyPadMenuItem__label': {
-            height: euiTheme.size.xl,
-          },
-        })
-      }
+      css={css`
+        .euikeypadmenuitem__label: {
+          height: ${euiTheme.size.xl};
+        }
+      `}
       label={factory.displayName}
       data-test-subj={`drilldownFactoryItem-${factory.type}`}
       onClick={() => onSelect(factory.type)}

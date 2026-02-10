@@ -29,28 +29,32 @@ export const dashboardDrilldown: DrilldownDefinition<
   displayName: i18n.translate('dashboard.drilldown.goToDashboard', {
     defaultMessage: 'Go to Dashboard',
   }),
-  Editor: DashboardDrilldownEditor,
   euiIcon: 'dashboardApp',
-  execute: async (
-    drilldownState: DashboardDrilldownState,
-    context: ApplyGlobalFilterActionContext
-  ) => {
-    if (drilldownState.open_in_new_tab) {
-      window.open(await getHref(drilldownState, context), '_blank');
-    } else {
-      const { app, path, state } = await getLocation(drilldownState, context);
-      await coreServices.application.navigateToApp(app, { path, state });
-    }
-  },
-  getHref,
-  getInitialState: () => ({
-    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
-  }),
-  isStateValid: (state: Partial<DashboardDrilldownState>) => {
-    return Boolean(state.dashboard_id);
-  },
-  order: 100,
   supportedTriggers: DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
+  action: {
+    execute: async (
+      drilldownState: DashboardDrilldownState,
+      context: ApplyGlobalFilterActionContext
+    ) => {
+      if (drilldownState.open_in_new_tab) {
+        window.open(await getHref(drilldownState, context), '_blank');
+      } else {
+        const { app, path, state } = await getLocation(drilldownState, context);
+        await coreServices.application.navigateToApp(app, { path, state });
+      }
+    },
+    getHref,
+  },
+  setup: {
+    Editor: DashboardDrilldownEditor,
+    getInitialState: () => ({
+      ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+    }),
+    isStateValid: (state: Partial<DashboardDrilldownState>) => {
+      return Boolean(state.dashboard_id);
+    },
+    order: 100,
+  },
 };
 
 async function getHref(

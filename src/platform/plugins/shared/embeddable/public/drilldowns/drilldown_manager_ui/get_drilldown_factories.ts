@@ -21,12 +21,10 @@ export async function getDrilldownFactories(
       type,
       isLicenseCompatible: await isCompatibleLicense(drilldownDefinition.license?.minimalLicense),
       displayName: drilldownDefinition.displayName,
-      Editor: drilldownDefinition.Editor,
       euiIcon: drilldownDefinition.euiIcon,
-      getInitialState: drilldownDefinition.getInitialState,
-      isStateValid: drilldownDefinition.isStateValid,
-      order: drilldownDefinition.order ?? 0,
       supportedTriggers: drilldownDefinition.supportedTriggers,
+      ...drilldownDefinition.setup,
+      order: drilldownDefinition.setup.order ?? 0,
     };
   });
 }

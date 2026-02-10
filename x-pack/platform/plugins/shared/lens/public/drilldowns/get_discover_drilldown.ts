@@ -31,52 +31,62 @@ export function getDiscoverDrilldown(deps: {
     displayName: i18n.translate('xpack.lens.app.exploreDataInDiscoverDrilldown', {
       defaultMessage: 'Open in Discover',
     }),
-    Editor: DiscoverDrilldownEditor,
     euiIcon: 'discoverApp',
-    execute: async (drilldownState: DiscoverDrilldownState, context: DiscoverDrilldownContext) => {
-      if (drilldownState.open_in_new_tab) {
-        window.open(
-          await getHref({
+    supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
+    action: {
+      execute: async (
+        drilldownState: DiscoverDrilldownState,
+        context: DiscoverDrilldownContext
+      ) => {
+        if (drilldownState.open_in_new_tab) {
+          window.open(
+            await getHref({
+              locator: deps.locator(),
+              dataViews: deps.dataViews(),
+              hasDiscoverAccess: deps.hasDiscoverAccess(),
+              ...context,
+              embeddable: context.embeddable,
+            }),
+            '_blank'
+          );
+        } else {
+          const { app, path, state } = await getLocation({
             locator: deps.locator(),
             dataViews: deps.dataViews(),
             hasDiscoverAccess: deps.hasDiscoverAccess(),
             ...context,
             embeddable: context.embeddable,
-          }),
-          '_blank'
-        );
-      } else {
-        const { app, path, state } = await getLocation({
+          });
+          await deps.application().navigateToApp(app, { path, state });
+        }
+      },
+      isCompatible: async (
+        DrilldownState: DiscoverDrilldownState,
+        { embeddable }: DiscoverDrilldownContext
+      ) => {
+        return isCompatible({
+          hasDiscoverAccess: deps.hasDiscoverAccess(),
+          locator: deps.locator(),
+          dataViews: deps.dataViews(),
+          embeddable,
+        });
+      },
+      getHref: (drilldownState: DiscoverDrilldownState, context: DiscoverDrilldownContext) =>
+        getHref({
           locator: deps.locator(),
           dataViews: deps.dataViews(),
           hasDiscoverAccess: deps.hasDiscoverAccess(),
           ...context,
           embeddable: context.embeddable,
-        });
-        await deps.application().navigateToApp(app, { path, state });
-      }
+        }),
     },
-    isCompatible: async (DrilldownState: DiscoverDrilldownState, { embeddable }: DiscoverDrilldownContext) => {
-      return isCompatible({
-        hasDiscoverAccess: deps.hasDiscoverAccess(),
-        locator: deps.locator(),
-        dataViews: deps.dataViews(),
-        embeddable,
-      });
-    },
-    getInitialState: () => ({
-      open_in_new_tab: true,
-    }),
-    getHref: (drilldownState: DiscoverDrilldownState, context: DiscoverDrilldownContext) =>
-      getHref({
-        locator: deps.locator(),
-        dataViews: deps.dataViews(),
-        hasDiscoverAccess: deps.hasDiscoverAccess(),
-        ...context,
-        embeddable: context.embeddable,
+    setup: {
+      Editor: DiscoverDrilldownEditor,
+      getInitialState: () => ({
+        open_in_new_tab: true,
       }),
-    isStateValid: () => true,
-    order: 8,
-    supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
+      isStateValid: () => true,
+      order: 8,
+    },
   };
 }

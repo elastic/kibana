@@ -31,7 +31,7 @@ import type { HasDrilldowns } from '../drilldowns/types';
 import { getDrilldownRegistryEntries, getDrilldownTriggers } from '../drilldowns/registry';
 import { getEmbeddableTriggers } from './get_embeddable_triggers';
 import { core } from '../kibana_services';
-import { CREATE_DRILLDOWN_ACTION, DRILLDOWN_ACTION_GROUP } from './constants';
+import { OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID, DRILLDOWN_ACTION_GROUP } from './constants';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
 
 export type CreateDrilldownActionApi = CanAccessViewMode &
@@ -46,9 +46,9 @@ const isApiCompatible = (api: unknown | null): api is CreateDrilldownActionApi =
   apiCanAccessViewMode(api) &&
   apiHasSupportedTriggers(api);
 
-export const createDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
-  id: CREATE_DRILLDOWN_ACTION,
-  type: CREATE_DRILLDOWN_ACTION,
+export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> = {
+  id: OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID,
+  type: OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID,
   order: 12,
   getIconType: () => 'plusInCircle',
   grouping: [DRILLDOWN_ACTION_GROUP],

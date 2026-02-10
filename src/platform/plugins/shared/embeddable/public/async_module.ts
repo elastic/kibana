@@ -11,5 +11,5 @@ export { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilld
 export { transformDashboardDrilldown } from './bwc/dashboard_drilldown';
 export { initializeDrilldownsManager } from './drilldowns/drilldowns_manager';
 export { getDrilldownTriggers } from './drilldowns/get_drilldown_triggers';
-export { createDrilldownAction } from './ui_actions/create_drilldown_action';
-export { manageDrilldownsAction } from './ui_actions/manage_drilldowns_action';
+export { openCreateDrilldownFlyout } from './ui_actions/open_create_drilldown_flyout';
+export { openManageDrilldownsFlyout } from './ui_actions/open_manage_drilldowns_flyout';

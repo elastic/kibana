@@ -112,50 +112,54 @@ export function getUrlDrilldown(deps: {
     displayName: i18n.translate('xpack.urlDrilldown.DisplayName', {
       defaultMessage: 'Go to URL',
     }),
-    Editor: (props: DrilldownEditorProps<UrlDrilldownState>) => {
-      return <div>Editor placeholder</div>;
-    },
     euiIcon: 'link',
-    execute: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
-      const url = await getHref(drilldownState, context);
-      if (!url) return;
-
-      if (drilldownState.open_in_new_tab) {
-        window.open(url, '_blank', 'noopener');
-      } else {
-        await deps.navigateToUrl(url);
-      }
-    },
-    getInitialState: () => ({
-      open_in_new_tab: DEFAULT_OPEN_IN_NEW_TAB,
-      encode_url: DEFAULT_ENCODE_URL,
-    }),
-    getHref,
-    isCompatible: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
-      const viewMode = getInheritedViewMode(context.embeddable);
-      if (viewMode === 'edit') {
-        // check if context is compatible by building the scope
-        const scope = getRuntimeVariables(context);
-        return !!scope;
-      }
-
-      try {
-        await buildUrl(drilldownState, context);
-        return true;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn(e);
-        return false;
-      }
-    },
-    isStateValid: (state: Partial<UrlDrilldownState>) => {
-      return Boolean(state.url);
-    },
     license: {
       minimalLicense: 'gold',
       featureName: 'URL drilldown',
     },
-    order: 8,
     supportedTriggers: URL_DRILLDOWN_SUPPORTED_TRIGGERS,
-  } as DrilldownDefinition<UrlDrilldownState, UrlDrilldownContext>;
+    action: {
+      execute: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
+        const url = await getHref(drilldownState, context);
+        if (!url) return;
+
+        if (drilldownState.open_in_new_tab) {
+          window.open(url, '_blank', 'noopener');
+        } else {
+          await deps.navigateToUrl(url);
+        }
+      },
+      getHref,
+      isCompatible: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
+        const viewMode = getInheritedViewMode(context.embeddable);
+        if (viewMode === 'edit') {
+          // check if context is compatible by building the scope
+          const scope = getRuntimeVariables(context);
+          return !!scope;
+        }
+
+        try {
+          await buildUrl(drilldownState, context);
+          return true;
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn(e);
+          return false;
+        }
+      },
+    },
+    setup: {
+      Editor: (props: DrilldownEditorProps<UrlDrilldownState>) => {
+        return <div>Editor placeholder</div>;
+      },
+      getInitialState: () => ({
+        open_in_new_tab: DEFAULT_OPEN_IN_NEW_TAB,
+        encode_url: DEFAULT_ENCODE_URL,
+      }),
+      isStateValid: (state: Partial<UrlDrilldownState>) => {
+        return Boolean(state.url);
+      },
+      order: 8,
+    },
+  };
 }

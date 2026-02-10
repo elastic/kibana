@@ -89,15 +89,15 @@ export interface DrilldownTemplate {
   drilldownState: DrilldownState;
 }
 
-export interface DrilldownFactory
-  extends Pick<
-    DrilldownDefinition,
-    'displayName' | 'Editor' | 'euiIcon' | 'getInitialState' | 'isStateValid' | 'supportedTriggers'
-  > {
-  order: number;
-  type: string;
-  isLicenseCompatible: boolean;
-}
+export type DrilldownFactory = Pick<
+  DrilldownDefinition,
+  'displayName' | 'euiIcon' | 'supportedTriggers'
+> &
+  DrilldownDefinition['setup'] & {
+    order: number;
+    type: string;
+    isLicenseCompatible: boolean;
+  };
 
 /**
  * These are static global dependencies of the <DrilldownManager> wired in

@@ -9,6 +9,7 @@
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { createElement } from 'react';
 import { getDrilldown, hasDrilldown } from './registry';
 import { isCompatibleLicense, licensing, uiActions } from '../kibana_services';
 import type { DrilldownActionState } from './types';
@@ -25,7 +26,11 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownAc
   }
 
   uiActions.addTriggerActionAsync(trigger, actionId, async () => {
-    const { execute, euiIcon, getHref, isCompatible, license } = (await getDrilldown(type)) ?? {};
+    const {
+      action: { execute, getHref, isCompatible, MenuItem },
+      euiIcon,
+      license,
+    } = (await getDrilldown(type)) ?? {};
 
     return {
       id: actionId,
@@ -58,6 +63,11 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownAc
 
         return isCompatible ? isCompatible(drilldownState, context) : true;
       },
+      ...(MenuItem
+        ? {
+            MenuItem: ({ context }) => createElement(MenuItem, { context, drilldownState }),
+          }
+        : {}),
     };
   });
 }
