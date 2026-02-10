@@ -89,7 +89,8 @@ export interface FormBasedPrivateState {
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
-  label?: string;
+  // the presence of a non-empty label means a user-defined value
+  label: string;
   params?: {
     format?: ValueFormatConfig;
   };
