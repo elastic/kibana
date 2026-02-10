@@ -35,7 +35,7 @@ const updateTotalFieldLimitSetting = async ({
   indexName,
   totalFieldsLimit,
 }: UpdateIndexOpts) => {
-  logger.info(`Updating total field limit setting for ${indexName} data stream.`);
+  logger.debug(`Updating total field limit setting for ${indexName} data stream.`);
 
   try {
     const settings = { 'index.mapping.total_fields.limit': totalFieldsLimit };
@@ -56,7 +56,7 @@ const updateTotalFieldLimitSetting = async ({
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
 const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: UpdateIndexOpts) => {
-  logger.info(`Updating mappings for ${indexName} data stream.`);
+  logger.debug(`Updating mappings for ${indexName} data stream.`);
 
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
   try {
@@ -106,15 +106,15 @@ const updateIndexMappings = async ({
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    indexNames.map((indexName) => {
-      return updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, indexName });
-    })
+    indexNames.map((indexName) =>
+      updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, indexName })
+    )
   );
   // Update mappings of the found indices.
   await Promise.all(
-    indexNames.map((indexName) => {
-      return updateMapping({ logger, esClient, totalFieldsLimit, indexName, writeIndexOnly });
-    })
+    indexNames.map((indexName) =>
+      updateMapping({ logger, esClient, totalFieldsLimit, indexName, writeIndexOnly })
+    )
   );
 };
 
@@ -174,7 +174,7 @@ export interface CreateIndexParams {
 }
 
 export async function createIndex({ logger, esClient, name }: CreateIndexParams): Promise<void> {
-  logger.info(`Checking existence of index - ${name}`);
+  logger.debug(`Checking existence of index - ${name}`);
 
   // check if index exists
   let indexExists = false;
