@@ -20,6 +20,11 @@ By using Saved Objects your plugin can take advantage of the following features:
 * By declaring `references`, an object’s entire reference graph will be exported. This makes it easy for users to export e.g. a `dashboard` object and have all the `visualization` objects required to display the dashboard included in the export.
 * When the X-Pack security and spaces plugins are enabled these transparently provide RBAC access control and the ability to organize Saved Objects into spaces.
 
+:::::{note}
+When using the (deprecated) Saved Objects HTTP create APIs (`POST /api/saved_objects/{type}` and `POST /api/saved_objects/_bulk_create`), clients may include `typeMigrationVersion` and `coreMigrationVersion` (or legacy `migrationVersion`) in the request payload.
+When present, Kibana can migrate the saved object to the latest version **before** running Saved Objects type validation.
+:::::
+
 This document contains developer guidelines and best-practices for plugins wanting to use Saved Objects.
 
 ## Registering a Saved Object type [saved-objects-type-registration]

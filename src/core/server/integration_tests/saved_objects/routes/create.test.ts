@@ -133,6 +133,40 @@ describe('POST /api/saved_objects/{type}', () => {
         overwrite: false,
         id: undefined,
         migrationVersion: undefined,
+        coreMigrationVersion: undefined,
+        typeMigrationVersion: undefined,
+        references: undefined,
+        initialNamespaces: undefined,
+        migrationVersionCompatibility: 'compatible',
+      }
+    );
+  });
+
+  it('accepts coreMigrationVersion and typeMigrationVersion', async () => {
+    await supertest(server.listener)
+      .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({
+        attributes: {
+          title: 'Testing',
+        },
+        coreMigrationVersion: '8.13.0',
+        typeMigrationVersion: '1.2.3',
+      })
+      .expect(200);
+
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      { title: 'Testing' },
+      {
+        overwrite: false,
+        id: undefined,
+        migrationVersion: undefined,
+        coreMigrationVersion: '8.13.0',
+        typeMigrationVersion: '1.2.3',
+        references: undefined,
+        initialNamespaces: undefined,
         migrationVersionCompatibility: 'compatible',
       }
     );
@@ -155,7 +189,16 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(args).toEqual([
       'index-pattern',
       { title: 'Testing' },
-      { overwrite: false, id: 'logstash-*', migrationVersionCompatibility: 'compatible' },
+      {
+        overwrite: false,
+        id: 'logstash-*',
+        migrationVersion: undefined,
+        coreMigrationVersion: undefined,
+        typeMigrationVersion: undefined,
+        references: undefined,
+        initialNamespaces: undefined,
+        migrationVersionCompatibility: 'compatible',
+      },
     ]);
   });
 

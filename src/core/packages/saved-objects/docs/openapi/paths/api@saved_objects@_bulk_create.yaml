@@ -25,6 +25,37 @@ post:
           type: array
           items:
             type: object
+            required:
+              - type
+              - attributes
+            properties:
+              type:
+                type: string
+                description: The saved object type.
+              id:
+                type: string
+                description: The saved object ID.
+              attributes:
+                $ref: '../components/schemas/attributes.yaml'
+              version:
+                type: string
+                description: The optimistic concurrency control version.
+              coreMigrationVersion:
+                type: string
+                description: The Kibana core migration version of the saved object.
+              typeMigrationVersion:
+                type: string
+                description: The migration version of the saved object type.
+              migrationVersion:
+                type: object
+                description: |
+                  Legacy per-type migration versions. Prefer `coreMigrationVersion` and `typeMigrationVersion`.
+                additionalProperties:
+                  type: string
+              references:
+                $ref: '../components/schemas/references.yaml'
+              initialNamespaces:
+                $ref: '../components/schemas/initial_namespaces.yaml'
   responses:
     '200':
       description: Indicates a successful call.

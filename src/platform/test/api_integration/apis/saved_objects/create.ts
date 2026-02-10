@@ -86,5 +86,34 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.coreMigrationVersion).to.eql('8.8.0');
         });
     });
+
+    it('should accept coreMigrationVersion and typeMigrationVersion in the request (create)', async () => {
+      const { body: created } = await supertest
+        .post(`/api/saved_objects/visualization`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          attributes: {
+            title: 'My favorite vis (used to read migration versions)',
+          },
+        })
+        .expect(200)
+        .then((resp) => resp);
+
+      await supertest
+        .post(`/api/saved_objects/visualization`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          attributes: {
+            title: 'My favorite vis (with migration versions)',
+          },
+          coreMigrationVersion: created.coreMigrationVersion,
+          typeMigrationVersion: created.typeMigrationVersion,
+        })
+        .expect(200)
+        .then((resp) => {
+          expect(resp.body.coreMigrationVersion).to.eql(created.coreMigrationVersion);
+          expect(resp.body.typeMigrationVersion).to.be.ok();
+        });
+    });
   });
 }

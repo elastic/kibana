@@ -97,5 +97,39 @@ export default function ({ getService }: FtrProviderContext) {
             expect(id).not.match(/visualization|dashboard/)
           );
         }));
+
+    it('should accept coreMigrationVersion and typeMigrationVersion in the request (_bulk_create)', async () => {
+      const { body: created } = await supertest
+        .post(`/s/${SPACE_ID}/api/saved_objects/dashboard`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          attributes: {
+            title: 'Dashboard (used to read migration versions)',
+          },
+        })
+        .expect(200)
+        .then((resp) => resp);
+
+      await supertest
+        .post(`/s/${SPACE_ID}/api/saved_objects/_bulk_create`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send([
+          {
+            type: 'dashboard',
+            attributes: {
+              title: 'Bulk create dashboard (with migration versions)',
+            },
+            coreMigrationVersion: created.coreMigrationVersion,
+            typeMigrationVersion: created.typeMigrationVersion,
+          },
+        ])
+        .expect(200)
+        .then((resp) => {
+          expect(resp.body.saved_objects).to.have.length(1);
+          expect(resp.body.saved_objects[0].error).to.not.be.ok();
+          expect(resp.body.saved_objects[0].coreMigrationVersion).to.eql(created.coreMigrationVersion);
+          expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
+        });
+    });
   });
 }

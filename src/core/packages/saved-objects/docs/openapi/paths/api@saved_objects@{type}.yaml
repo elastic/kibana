@@ -29,6 +29,18 @@ post:
           properties:
             attributes:
               $ref: '../components/schemas/attributes.yaml'
+            coreMigrationVersion:
+              type: string
+              description: The Kibana core migration version of the saved object.
+            typeMigrationVersion:
+              type: string
+              description: The migration version of the saved object type.
+            migrationVersion:
+              type: object
+              description: |
+                Legacy per-type migration versions. Prefer `coreMigrationVersion` and `typeMigrationVersion`.
+              additionalProperties:
+                type: string
             initialNamespaces:
               $ref: '../components/schemas/initial_namespaces.yaml'
             references:

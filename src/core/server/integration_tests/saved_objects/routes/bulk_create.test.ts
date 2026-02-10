@@ -120,6 +120,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
         attributes: {
           title: 'foo',
         },
+        coreMigrationVersion: '8.13.0',
+        typeMigrationVersion: '1.2.3',
         references: [],
       },
       {
@@ -128,6 +130,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
         attributes: {
           title: 'bar',
         },
+        coreMigrationVersion: '8.13.0',
+        typeMigrationVersion: '1.2.3',
         references: [],
       },
     ];
