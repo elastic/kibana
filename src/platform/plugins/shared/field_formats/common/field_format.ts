@@ -8,6 +8,7 @@
  */
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import type {
   FieldFormatsGetConfigFn,
@@ -214,5 +215,23 @@ export abstract class FieldFormat {
 
   static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
     return Boolean(fieldFormat && typeof fieldFormat === 'object' && 'convert' in fieldFormat);
+  }
+
+  protected checkForMissingValueText(val: unknown): string | void {
+    if (val === '') {
+      return EMPTY_LABEL;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return NULL_LABEL;
+    }
+  }
+
+  protected checkForMissingValueHtml(val: unknown): string | void {
+    if (val === '') {
+      return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
+    }
   }
 }
