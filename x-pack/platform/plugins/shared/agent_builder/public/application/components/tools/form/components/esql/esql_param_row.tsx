@@ -29,6 +29,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
 import { i18nMessages } from '../../i18n';
 import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
+import { EsqlParamValueInput, getEmptyValue } from './esql_param_value_input';
 
 const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
   [EsqlToolFieldType.STRING]: 'tokenString',
@@ -58,24 +59,40 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
   const { triggerEsqlParamWarnings, triggerEsqlParamFieldsValidation } = useEsqlParamsValidation();
 
   const handleValidation = useCallback(() => {
-    triggerEsqlParamFieldsValidation(['name']);
+    triggerEsqlParamFieldsValidation(['name', 'defaultValue']);
     triggerEsqlParamWarnings();
   }, [triggerEsqlParamFieldsValidation, triggerEsqlParamWarnings]);
 
-  const [warning, source] = useWatch({
+  const [warning, source, isOptional, paramType] = useWatch({
     control,
-    name: [`params.${index}.warning`, `params.${index}.source`],
+    name: [
+      `params.${index}.warning`,
+      `params.${index}.source`,
+      `params.${index}.optional`,
+      `params.${index}.type`,
+    ],
   });
 
   const paramErrors = errors.params?.[index];
   const errorMessages = useMemo(() => {
     // Mobile will display field level validation errors
     if (isMobile) return '';
-    return [paramErrors?.name, paramErrors?.description, paramErrors?.type]
+    return [
+      paramErrors?.name,
+      paramErrors?.description,
+      paramErrors?.type,
+      paramErrors?.defaultValue,
+    ]
       .filter((error): error is FieldError => !!error)
       .map((error) => error.message)
       .join('\n');
-  }, [paramErrors?.name, paramErrors?.description, paramErrors?.type, isMobile]);
+  }, [
+    paramErrors?.name,
+    paramErrors?.description,
+    paramErrors?.type,
+    paramErrors?.defaultValue,
+    isMobile,
+  ]);
 
   return (
     <EuiTableRow
@@ -198,7 +215,10 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.type`}
-          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+          render={({
+            field: { ref, onChange, value: typeValue, ...field },
+            fieldState: { invalid, error },
+          }) => (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiSuperSelect
                 compressed
@@ -224,8 +244,13 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
                     </EuiFlexGroup>
                   ),
                 }))}
-                valueOfSelected={field.value}
+                valueOfSelected={typeValue as EsqlToolFieldType}
                 isInvalid={invalid}
+                onChange={(newType) => {
+                  onChange(newType);
+                  setValue(`params.${index}.defaultValue`, getEmptyValue(newType));
+                  handleValidation();
+                }}
                 {...field}
               />
               {isMobile && invalid && error?.message && (
@@ -247,10 +272,40 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
               inputRef={ref}
               onChange={(e) => {
                 onChange(e.target.checked);
+                handleValidation();
               }}
               checked={value}
               {...field}
             />
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell textOnly={false}>
+        <Controller
+          control={control}
+          name={`params.${index}.defaultValue`}
+          render={({ field: { ref, onChange, value }, fieldState: { invalid, error } }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EsqlParamValueInput
+                type={paramType as EsqlToolFieldType}
+                compressed
+                fullWidth
+                disabled={!isOptional}
+                placeholder={i18nMessages.defaultValuePlaceholder}
+                inputRef={ref}
+                isInvalid={isOptional && invalid}
+                value={value}
+                onChange={(newValue) => {
+                  onChange(newValue);
+                  handleValidation();
+                }}
+              />
+              {isMobile && isOptional && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           )}
         />
       </EuiTableRowCell>
