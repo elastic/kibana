@@ -56,12 +56,18 @@ export class MonitoringEntitySourceDataClient {
 
     let matchersModifiedByUser: boolean | undefined;
     if (isMatcherUpdate) {
-      const existing = await this.monitoringEntitySourceClient.get(update.id);
+      const existing = (await this.monitoringEntitySourceClient.get(
+        update.id
+      )) as MonitoringEntitySource & {
+        matchersModifiedByUser?: boolean;
+      };
       const isManaged = update.managed ?? existing.managed;
 
       if (isManaged) {
         const integrationName = update.integrationName ?? existing.integrationName;
-        const defaultMatchers = getDefaultMatchersForIntegration(integrationName);
+        const sourceType = update.type ?? existing.type;
+        const defaultMatchers =
+          sourceType === 'index' ? [] : getDefaultMatchersForIntegration(integrationName);
         if (!defaultMatchers) {
           this.log(
             'warn',

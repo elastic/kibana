@@ -156,6 +156,102 @@ describe('MonitoringEntitySourceDataClient', () => {
       );
       expect(result).toEqual(updateDescriptor);
     });
+
+    it('should mark matchersModifiedByUser for managed index sources with custom matchers', async () => {
+      const id = 'index-source';
+      const existingSource: MonitoringEntitySourceAttributes = {
+        type: 'index',
+        name: 'Index Source',
+        indexPattern: 'entity_analytics.privileged_monitoring.default',
+        managed: true,
+        matchers: [],
+        matchersModifiedByUser: false,
+      };
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        id,
+        matchers: [
+          {
+            fields: ['someWildMatcherHere'],
+            values: [true],
+          },
+        ],
+      };
+
+      defaultOpts.soClient.get.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes: existingSource,
+        references: [],
+      });
+
+      defaultOpts.soClient.update.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...existingSource, ...updateDescriptor, matchersModifiedByUser: true },
+        references: [],
+      });
+
+      await dataClient.update(updateDescriptor);
+
+      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        id,
+        {
+          ...updateDescriptor,
+          matchers: [
+            {
+              fields: ['someWildMatcherHere'],
+              values: [true],
+            },
+          ],
+          matchersModifiedByUser: true,
+        },
+        { refresh: 'wait_for' }
+      );
+    });
+
+    it('should keep matchersModifiedByUser false for managed index sources with empty matchers', async () => {
+      const id = 'index-source-empty';
+      const existingSource: MonitoringEntitySourceAttributes = {
+        type: 'index',
+        name: 'Index Source',
+        indexPattern: 'entity_analytics.privileged_monitoring.default',
+        managed: true,
+        matchers: [],
+        matchersModifiedByUser: false,
+      };
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        id,
+        matchers: [],
+      };
+
+      defaultOpts.soClient.get.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes: existingSource,
+        references: [],
+      });
+
+      defaultOpts.soClient.update.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...existingSource, ...updateDescriptor, matchersModifiedByUser: false },
+        references: [],
+      });
+
+      await dataClient.update(updateDescriptor);
+
+      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        id,
+        {
+          ...updateDescriptor,
+          matchers: [],
+          matchersModifiedByUser: false,
+        },
+        { refresh: 'wait_for' }
+      );
+    });
   });
 
   describe('delete', () => {
