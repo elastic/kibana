@@ -177,12 +177,14 @@ export class TemplatesService {
       throw new Error('template does not exist');
     }
 
+    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
         definition: input.definition,
-        name: input.name,
+        name: parsedDefinition.name,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
         deletedAt: null,
