@@ -122,7 +122,6 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
 /**
  * Checks whether a single evidence string is grounded in the input documents.
  *
- * Two modes:
  * 1. `field.path=value` evidence: parses key-value pairs and checks that at
  *    least one pair matches a document field value.
  * 2. Direct quote evidence: checks if the text appears as a substring in any
@@ -132,22 +131,30 @@ function isEvidenceGrounded(
   evidence: string,
   documents: Array<Record<string, unknown>>
 ): boolean {
+  // Direct quote: check against all string values in all documents
+  const matchesStringValue = documents.some((doc) => {
+    const allValues = getAllStringValues(doc);
+    return allValues.some((val) => val.includes(evidence) || evidence.includes(val));
+  });
+  if (matchesStringValue) {
+    return true;
+  }
+
   const kvPairs = parseKeyValuePairs(evidence);
   if (kvPairs.length > 0) {
-    // field=value mode: at least one pair must match a document field
-    return documents.some((doc) =>
+    // field=value: at least one pair must match a document field
+    const matchesDocumentKey = documents.some((doc) =>
       kvPairs.some(({ key, value }) => {
         const docValue = getNestedValue(doc, key);
         return docValue !== undefined && String(docValue).includes(value);
       })
     );
+    if (matchesDocumentKey) {
+      return true;
+    }
   }
 
-  // Direct quote mode: check against all string values in all documents
-  return documents.some((doc) => {
-    const allValues = getAllStringValues(doc);
-    return allValues.some((val) => val.includes(evidence) || evidence.includes(val));
-  });
+  return false;
 }
 
 /**
