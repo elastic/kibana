@@ -42,6 +42,7 @@ describe('copyPackRoute', () => {
       ],
       enabled: true,
       version: 1,
+      policy_ids: ['policy-1', 'policy-2'],
       shards: [{ key: 'default', value: 100 }],
       created_at: '2025-01-01T00:00:00.000Z',
       created_by: 'admin',
@@ -77,7 +78,7 @@ describe('copyPackRoute', () => {
     routeHandler = routeVersion.handler;
   };
 
-  it('successfully copies a pack with all fields including queries and references', async () => {
+  it('successfully copies a pack with queries but without policy assignments', async () => {
     const mockSavedObjectsClient = {
       get: jest.fn().mockResolvedValue(sourcePackSO),
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
@@ -88,7 +89,8 @@ describe('copyPackRoute', () => {
           description: 'Test pack description',
           queries: sourcePackSO.attributes.queries,
           enabled: false,
-          shards: sourcePackSO.attributes.shards,
+          policy_ids: [],
+          shards: {},
           created_at: '2025-06-01T00:00:00.000Z',
           created_by: 'tester',
           updated_at: '2025-06-01T00:00:00.000Z',
@@ -117,9 +119,14 @@ describe('copyPackRoute', () => {
     expect(responseBody.data.saved_object_id).toBe('new-pack-id');
     expect(responseBody.data.enabled).toBe(false);
 
-    // Verify references were passed to create
+    // Verify policy_ids and shards are cleared on the copy
+    const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
+    expect(createArgs.policy_ids).toEqual([]);
+    expect(createArgs.shards).toEqual({});
+
+    // Verify all references are cleared (no agent policy or prebuilt asset refs)
     const createOptions = mockSavedObjectsClient.create.mock.calls[0][2];
-    expect(createOptions.references).toEqual(sourcePackSO.references);
+    expect(createOptions.references).toEqual([]);
   });
 
   it('resolves name collision', async () => {
@@ -227,7 +234,7 @@ describe('copyPackRoute', () => {
     expect(createArgs.enabled).toBe(false);
   });
 
-  it('filters out prebuilt asset references from copy', async () => {
+  it('clears all references including prebuilt assets and agent policies', async () => {
     const prebuiltPackSOWithAssetRef = {
       ...sourcePackSO,
       references: [
@@ -244,6 +251,8 @@ describe('copyPackRoute', () => {
         attributes: {
           name: 'my-pack_copy',
           enabled: false,
+          policy_ids: [],
+          shards: {},
           created_at: '2025-06-01T00:00:00.000Z',
           created_by: 'tester',
           updated_at: '2025-06-01T00:00:00.000Z',
@@ -266,12 +275,9 @@ describe('copyPackRoute', () => {
 
     await routeHandler({} as any, mockRequest, mockResponse);
 
-    // Verify osquery-pack-asset references were filtered out
+    // Verify all references are cleared — agent policies and prebuilt assets are both stripped
     const createOptions = mockSavedObjectsClient.create.mock.calls[0][2];
-    expect(createOptions.references).toEqual(sourcePackSO.references);
-    expect(createOptions.references).not.toContainEqual(
-      expect.objectContaining({ type: 'osquery-pack-asset' })
-    );
+    expect(createOptions.references).toEqual([]);
   });
 
   it('strips version and read_only from prebuilt pack copy', async () => {

@@ -11,7 +11,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
+import { packSavedObjectType } from '../../../common/types';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
@@ -58,14 +58,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           });
         }
 
-        const { client, sourceAttributes, sourceReferences, newName, username, now } = copyContext;
-
-        // Filter out prebuilt asset references — the copy is user-created, not prebuilt.
-        // Without this, the assets status endpoint would detect the copy as a stale prebuilt
-        // pack (no version field) and incorrectly show the "Update Elastic prebuilt packs" button.
-        const copyReferences = sourceReferences.filter(
-          (ref) => ref.type !== packAssetSavedObjectType
-        );
+        const { client, sourceAttributes, newName, username, now } = copyContext;
 
         const {
           name: _name,
@@ -75,6 +68,8 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           created_by: _createdBy,
           updated_at: _updatedAt,
           updated_by: _updatedBy,
+          policy_ids: _policyIds,
+          shards: _shards,
           ...restAttributes
         } = sourceAttributes;
 
@@ -84,13 +79,17 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             ...restAttributes,
             name: newName,
             enabled: false, // Always disable copy to prevent unexpected deployments
+            policy_ids: [],
+            shards: {},
             created_by: username,
             created_at: now,
             updated_by: username,
             updated_at: now,
           },
           {
-            references: copyReferences,
+            // No references — agent policy refs and prebuilt asset refs are both stripped.
+            // Agent policies must be explicitly assigned by the user on the new pack.
+            references: [],
             refresh: 'wait_for',
           }
         );
