@@ -225,6 +225,9 @@ describe('getAllConnectorsRoute', () => {
       ]),
     });
 
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).not.toHaveProperty('auth_mode');
+
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
 });

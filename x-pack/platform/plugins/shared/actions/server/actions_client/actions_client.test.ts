@@ -1029,6 +1029,7 @@ describe('get()', () => {
     expect(result).toContainConnector({
       id: '1',
       isMissingSecrets: false,
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`

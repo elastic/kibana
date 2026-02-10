@@ -13,6 +13,7 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
     changes: [],
     schemas: {
       create: rawConnectorSchemaV1,
+      forwardCompatibility: rawConnectorSchemaV1.extends({}, { unknowns: 'ignore' }),
     },
   },
   '2': {
