@@ -27,6 +27,7 @@ plugins:
     - transform
     - dashboard
     - workflows_extensions
+    - custom_branding
   disabled:
 
 packages:
