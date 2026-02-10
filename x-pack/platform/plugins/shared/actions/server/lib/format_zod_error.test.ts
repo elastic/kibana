@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ZodIssue } from '@kbn/zod';
-import { ZodError } from '@kbn/zod';
+import type { ZodIssue } from '@kbn/zod/v3';
+import { ZodError } from '@kbn/zod/v3';
 import { formatZodError } from './format_zod_error';
 
 describe('formatZodError', () => {
@@ -17,7 +17,7 @@ describe('formatZodError', () => {
       received: 'boolean',
       path: ['routingKey'],
       message: 'Expected string, received boolean',
-    } as unknown as ZodIssue;
+    } satisfies ZodIssue;
     expect(formatZodError(new ZodError([issue]))).toMatchInlineSnapshot(
       `"Field \\"routingKey\\": Expected string, received boolean"`
     );
