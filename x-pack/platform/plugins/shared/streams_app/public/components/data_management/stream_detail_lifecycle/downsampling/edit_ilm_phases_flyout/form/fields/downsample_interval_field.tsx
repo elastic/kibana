@@ -18,8 +18,9 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 
 import type { DownsamplePhase, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
-import { formatMillisecondsInUnit, getRelativeBoundsInMs, toMilliseconds } from '../utils';
+import { formatMillisecondsInUnit, getRelativeBoundsInMs } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
+import { getPhaseDurationMs } from '../get_phase_duration_ms';
 
 export interface DownsampleIntervalFieldProps {
   phaseName: PhaseName;
@@ -57,24 +58,12 @@ export const DownsampleIntervalField = ({
     ],
   });
 
-  const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null => {
-    const phaseEnabled = Boolean(form.getFields()[`_meta.${phase}.enabled`]?.value);
-    if (!phaseEnabled) return null;
-
-    const downsampleEnabled = Boolean(form.getFields()[`_meta.${phase}.downsampleEnabled`]?.value);
-    if (!downsampleEnabled) return null;
-
-    const value = String(
-      form.getFields()[`_meta.${phase}.downsample.fixedIntervalValue`]?.value ?? ''
-    ).trim();
-    if (!value) return null;
-
-    const unit = String(
-      form.getFields()[`_meta.${phase}.downsample.fixedIntervalUnit`]?.value ?? 'd'
-    ) as TimeUnit;
-    const ms = toMilliseconds(value, unit);
-    return Number.isFinite(ms) && ms >= 0 ? ms : null;
-  };
+  const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null =>
+    getPhaseDurationMs(form, phase, {
+      valuePathSuffix: 'downsample.fixedIntervalValue',
+      unitPathSuffix: 'downsample.fixedIntervalUnit',
+      extraEnabledPathSuffix: 'downsampleEnabled',
+    });
 
   return (
     <UseField path={valuePath} onError={(errors) => onFieldErrorsChange?.(valuePath, errors)}>

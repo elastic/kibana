@@ -19,6 +19,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import type { TimeUnit } from '../types';
 import { formatMillisecondsInUnit, getRelativeBoundsInMs, toMilliseconds } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
+import { getPhaseDurationMs } from '../get_phase_duration_ms';
 
 export interface MinAgeFieldProps {
   phaseName: PhaseName | undefined;
@@ -58,17 +59,11 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
   const minAgeUnitPath = `_meta.${phaseName}.minAgeUnit`;
   const minAgeMillisPath = `_meta.${phaseName}.minAgeToMilliSeconds`;
 
-  const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null => {
-    const enabled = Boolean(form.getFields()[`_meta.${phase}.enabled`]?.value);
-    if (!enabled) return null;
-
-    const value = String(form.getFields()[`_meta.${phase}.minAgeValue`]?.value ?? '').trim();
-    if (!value) return null;
-
-    const unit = String(form.getFields()[`_meta.${phase}.minAgeUnit`]?.value ?? 'd') as TimeUnit;
-    const ms = toMilliseconds(value, unit);
-    return Number.isFinite(ms) && ms >= 0 ? ms : null;
-  };
+  const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null =>
+    getPhaseDurationMs(form, phase, {
+      valuePathSuffix: 'minAgeValue',
+      unitPathSuffix: 'minAgeUnit',
+    });
 
   const fieldLabel = isDeletePhase
     ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterLabel', {
