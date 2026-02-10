@@ -8,7 +8,7 @@
  */
 
 // Using z3 because @modelcontextprotocol/sdk/types.js uses zod v3
-import type { z3 as z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v3';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolDefinition, ToolDefinitionInputSchema } from '../types';
 

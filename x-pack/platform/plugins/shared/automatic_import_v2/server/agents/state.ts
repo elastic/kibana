@@ -6,7 +6,7 @@
  */
 
 import { MessagesZodState } from '@langchain/langgraph';
-import { z3 as z } from '@kbn/zod';
+import { z } from '@kbn/zod/v3';
 import type { estypes } from '@elastic/elasticsearch';
 
 export const AutomaticImportAgentState = MessagesZodState.extend({

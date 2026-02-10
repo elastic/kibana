@@ -10,7 +10,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
-import { z3 as z } from '@kbn/zod';
+import { z } from '@kbn/zod/v3';
 import type { estypes } from '@elastic/elasticsearch';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
 

@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { z as z3 } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z as z3 } from '@kbn/zod/v3';
+import { z as z4 } from '@kbn/zod';
 import type {
   ActionType,
   ActionTypeConfig,
