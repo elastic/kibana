@@ -35,6 +35,18 @@ describe('parseCliFlags', () => {
     expect(result.pluginFilter).toEqual(['single-plugin']);
   });
 
+  it('keeps plugin and package filters separate', () => {
+    const flags: CliFlags = {
+      plugin: 'plugin-a',
+      package: ['package-b', 'package-a'],
+    };
+
+    const result = parseCliFlags(flags);
+
+    expect(result.pluginFilter).toEqual(['plugin-a']);
+    expect(result.packageFilter).toEqual(['package-b', 'package-a']);
+  });
+
   it('normalizes single string stats to array', () => {
     const flags: CliFlags = {
       stats: 'any',
@@ -53,6 +65,38 @@ describe('parseCliFlags', () => {
     expect(result.collectReferences).toBe(false);
     expect(result.stats).toBeUndefined();
     expect(result.pluginFilter).toBeUndefined();
+    expect(result.packageFilter).toBeUndefined();
+  });
+
+  it('accepts single check flag', () => {
+    const flags: CliFlags = {
+      check: 'any',
+    };
+
+    const result = parseCliFlags(flags);
+
+    expect(result.stats).toEqual(['any']);
+  });
+
+  it('accepts multiple check flags and expands all', () => {
+    const flags: CliFlags = {
+      check: ['comments', 'all'],
+    };
+
+    const result = parseCliFlags(flags);
+
+    expect(result.stats).toEqual(['comments', 'any', 'exports']);
+  });
+
+  it('dedupes overlapping stats and check flags', () => {
+    const flags: CliFlags = {
+      stats: ['any', 'comments'],
+      check: ['comments'],
+    };
+
+    const result = parseCliFlags(flags);
+
+    expect(result.stats).toEqual(['any', 'comments']);
   });
 
   it('throws error for invalid plugin filter type', () => {

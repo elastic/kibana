@@ -6,6 +6,7 @@
  */
 
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { ResourceType } from '@kbn/product-doc-common';
 
 export type DocumentationStatus = InstallationStatus | 'not_available';
 
@@ -14,6 +15,11 @@ export interface DocumentationItem {
   name: string;
   description?: string;
   status: DocumentationStatus;
+  /**
+   * The resource type this row manages.
+   * Use explicit resource types so row actions can be fully data-driven.
+   */
+  resourceType: ResourceType;
   updateAvailable?: boolean;
   isTechPreview?: boolean;
   isStubbed?: boolean;

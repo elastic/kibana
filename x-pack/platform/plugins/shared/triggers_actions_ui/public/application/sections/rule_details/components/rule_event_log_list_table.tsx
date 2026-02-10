@@ -40,13 +40,11 @@ import {
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
 import type { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_event_logs';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import type { RefreshToken } from './types';
 
 const API_FAILED_MESSAGE = i18n.translate(
@@ -94,7 +92,6 @@ export interface RuleEventLogListCommonProps {
   hasRuleNames?: boolean;
   hasAllSpaceSwitch?: boolean;
   filteredRuleTypes?: string[];
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
   getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
@@ -115,8 +112,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     initialPageSize = 10,
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
-    setHeaderActions,
-    filteredRuleTypes,
+    filteredRuleTypes = [],
     getRuleDetailsRoute,
   } = props;
 
@@ -188,17 +184,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       },
     }));
   }, [sortingColumns]);
-
-  useEffect(() => {
-    setHeaderActions?.([
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ]);
-    return () => setHeaderActions?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
     (e) => {
@@ -676,93 +661,95 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [refreshToken]);
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              isClearable
-              value={search}
-              onChange={onSearchChange}
-              onKeyUp={onKeyUp}
-              placeholder={SEARCH_PLACEHOLDER}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              data-test-subj="ruleEventLogListDatePicker"
-              width="auto"
-              isLoading={isLoading}
-              start={dateStart}
-              end={dateEnd}
-              onTimeChange={onTimeChange}
-              onRefresh={onRefresh}
-              dateFormat={dateFormat}
-              commonlyUsedRanges={commonlyUsedRanges}
-              updateButtonProps={updateButtonProps}
-            />
-          </EuiFlexItem>
-          {hasAllSpaceSwitch && canAccessMultipleSpaces && (
-            <EuiFlexItem data-test-subj="showAllSpacesSwitch">
-              <EuiSwitch
-                label={ALL_SPACES_LABEL}
-                checked={showFromAllSpaces}
-                onChange={onShowAllSpacesChange}
+    <>
+      <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                isClearable
+                value={search}
+                onChange={onSearchChange}
+                onKeyUp={onKeyUp}
+                placeholder={SEARCH_PLACEHOLDER}
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <RuleEventLogListKPI
-          ruleId={ruleId}
-          dateStart={dateStart}
-          dateEnd={dateEnd}
-          outcomeFilter={filter}
-          message={searchText}
-          refreshToken={internalRefreshToken}
-          namespaces={namespaces}
-          filteredRuleTypes={filteredRuleTypes}
-        />
-        <EuiSpacer />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {hasExceedLogs && (
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
-                defaultMessage="Results are limited to 10,000 documents, refine your search to see others."
+            <EuiFlexItem grow={false}>
+              <EventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSuperDatePicker
+                data-test-subj="ruleEventLogListDatePicker"
+                width="auto"
+                isLoading={isLoading}
+                start={dateStart}
+                end={dateEnd}
+                onTimeChange={onTimeChange}
+                onRefresh={onRefresh}
+                dateFormat={dateFormat}
+                commonlyUsedRanges={commonlyUsedRanges}
+                updateButtonProps={updateButtonProps}
               />
-            }
-            data-test-subj="exceedLimitLogsCallout"
-            size="m"
+            </EuiFlexItem>
+            {hasAllSpaceSwitch && canAccessMultipleSpaces && (
+              <EuiFlexItem data-test-subj="showAllSpacesSwitch">
+                <EuiSwitch
+                  label={ALL_SPACES_LABEL}
+                  checked={showFromAllSpaces}
+                  onChange={onShowAllSpacesChange}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RuleEventLogListKPI
+            ruleId={ruleId}
+            dateStart={dateStart}
+            dateEnd={dateEnd}
+            outcomeFilter={filter}
+            message={searchText}
+            refreshToken={internalRefreshToken}
+            namespaces={namespaces}
+            filteredRuleTypes={filteredRuleTypes}
+          />
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {hasExceedLogs && (
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
+                  defaultMessage="Results are limited to 10,000 documents, refine your search to see others."
+                />
+              }
+              data-test-subj="exceedLimitLogsCallout"
+              size="m"
+            />
+          )}
+          {!hasExceedLogs && renderList()}
+          {isOnLastPage && (
+            <RefineSearchPrompt
+              documentSize={actualTotalItemCount}
+              visibleDocumentSize={MAX_RESULTS}
+              backToTopAnchor="rule_event_log_list"
+            />
+          )}
+        </EuiFlexItem>
+        {isFlyoutOpen && selectedRunLog && (
+          <RuleActionErrorLogFlyout
+            runLog={selectedRunLog}
+            refreshToken={refreshToken}
+            onClose={onFlyoutClose}
+            activeSpaceId={activeSpace?.id}
           />
         )}
-        {!hasExceedLogs && renderList()}
-        {isOnLastPage && (
-          <RefineSearchPrompt
-            documentSize={actualTotalItemCount}
-            visibleDocumentSize={MAX_RESULTS}
-            backToTopAnchor="rule_event_log_list"
-          />
-        )}
-      </EuiFlexItem>
-      {isFlyoutOpen && selectedRunLog && (
-        <RuleActionErrorLogFlyout
-          runLog={selectedRunLog}
-          refreshToken={refreshToken}
-          onClose={onFlyoutClose}
-          activeSpaceId={activeSpace?.id}
-        />
-      )}
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </>
   );
 };
 // eslint-disable-next-line import/no-default-export

@@ -10,7 +10,7 @@
 import { BinaryExpressionGroup } from '../ast/grouping';
 import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/is';
-import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
+import type { ESQLAstBaseItem, ESQLAstQueryExpression, ESQLMap } from '../types';
 import type {
   CommandOptionVisitorContext,
   ExpressionVisitorContext,
@@ -126,7 +126,8 @@ export class WrappingPrettyPrinter {
     return printer.print(query);
   };
 
-  protected readonly opts: Required<WrappingPrettyPrinterOptions>;
+  protected readonly opts: Omit<Required<WrappingPrettyPrinterOptions>, 'mapRepresentation'> &
+    Pick<WrappingPrettyPrinterOptions, 'mapRepresentation'>;
 
   constructor(opts: WrappingPrettyPrinterOptions = {}) {
     this.opts = {
@@ -142,6 +143,7 @@ export class WrappingPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      mapRepresentation: opts.mapRepresentation,
     };
   }
 
@@ -296,7 +298,8 @@ export class WrappingPrettyPrinter {
       | FunctionCallExpressionVisitorContext
       | ListLiteralExpressionVisitorContext
       | MapExpressionVisitorContext,
-    inp: Input
+    inp: Input,
+    doNotUseCommaAsSeparator: boolean = false
   ) {
     let txt = '';
     let lines = 1;
@@ -318,16 +321,23 @@ export class WrappingPrettyPrinter {
       }
     }
 
-    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+    let commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
+    if (doNotUseCommaAsSeparator) commaBetweenArgs = false;
 
     if (!oneArgumentPerLine) {
       let argIndex = 0;
+      const opts: BasicPrettyPrinterOptions = {
+        ...this.opts,
+        mapRepresentation: ctx.node.type === 'map' ? ctx.node.representation : undefined,
+      };
+
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
         }
 
-        const formattedArg = BasicPrettyPrinter.expression(arg, this.opts);
+        const formattedArg = BasicPrettyPrinter.expression(arg, opts);
         const formattedArgLength = formattedArg.length;
         const needsWrap = remainingCurrentLine < formattedArgLength;
         if (formattedArgLength > largestArg) {
@@ -337,7 +347,7 @@ export class WrappingPrettyPrinter {
         // Check if this command has special comma rules
         const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
         const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
-        let separator = txt ? (needsComma ? ',' : '') : '';
+        let separator = txt ? (needsComma ? ',' : ' ') : '';
 
         argIndex++;
 
@@ -366,14 +376,22 @@ export class WrappingPrettyPrinter {
           argsPerLine = 1;
         } else {
           argsPerLine++;
-          fragment = separator + (separator ? ' ' : '') + formattedArg;
+          fragment = separator + (needsComma && separator ? ' ' : '') + formattedArg;
           remainingCurrentLine -= fragment.length;
         }
         txt += fragment;
       }
     }
 
-    let indent = inp.indent + this.opts.tab;
+    const isAssignmentMap = ctx.node.type === 'map' && ctx.node.representation === 'assignment';
+    const isBareList = ctx.node.type === 'list' && ctx.node.subtype === 'bare';
+
+    if (isAssignmentMap && lines > 1) {
+      oneArgumentPerLine = true;
+    }
+
+    // For bare lists, don't add extra indentation since there's no opening bracket
+    let indent = isBareList ? inp.indent : inp.indent + this.opts.tab;
 
     if (ctx instanceof CommandVisitorContext) {
       const isFirstCommand =
@@ -385,7 +403,7 @@ export class WrappingPrettyPrinter {
 
     if (oneArgumentPerLine) {
       lines = 1;
-      txt = ctx instanceof CommandVisitorContext ? '' : '\n';
+      txt = ctx instanceof CommandVisitorContext || isAssignmentMap || isBareList ? '' : '\n';
       const args = [...ctx.arguments()].filter((arg) => {
         if (!arg) return false;
         if (arg.type === 'option') return arg.name === 'as';
@@ -406,7 +424,25 @@ export class WrappingPrettyPrinter {
         const indentation = arg.indented ? '' : indent;
         const formattedArg = arg.txt;
         const separator = isFirstArg ? '' : '\n';
-        txt += separator + indentation + formattedArg;
+
+        // Remove extra indentation for PROMQL command first map argument
+        let adjustedIndentation = indentation;
+        if (
+          i === 0 &&
+          ctx instanceof CommandVisitorContext &&
+          ctx.name() === 'PROMQL' &&
+          [...children(ctx.node)][0].type === 'map'
+        ) {
+          adjustedIndentation = adjustedIndentation.slice(0, -2);
+        }
+
+        // For bare lists, the first argument should not have indentation since
+        // there's no opening bracket and it continues on the same line
+        if (isBareList && isFirstArg) {
+          adjustedIndentation = '';
+        }
+
+        txt += separator + adjustedIndentation + formattedArg;
         lines++;
       }
     }
@@ -503,9 +539,15 @@ export class WrappingPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
-      const txt = ctx.node.text ?? '<EXPRESSION>';
+      let text = ctx.node.text ?? '<EXPRESSION>';
+
+      if (text) {
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+      }
+
       // TODO: decorate with comments
-      return { txt };
+      return { txt: text };
     })
 
     .on('visitHeaderCommand', (ctx, inp: Input): Output => {
@@ -640,10 +682,12 @@ export class WrappingPrettyPrinter {
         remaining: inp.remaining - 1,
       });
       const node = ctx.node;
-      const isTuple = node.subtype === 'tuple';
-      const leftParenthesis = isTuple ? '(' : '[';
-      const rightParenthesis = isTuple ? ')' : ']';
-      const rightParenthesisIndent = args.oneArgumentPerLine ? '\n' + inp.indent : '';
+      const subtype = node.subtype;
+      const isBare = subtype === 'bare';
+      const isTuple = subtype === 'tuple';
+      const leftParenthesis = isBare ? '' : isTuple ? '(' : '[';
+      const rightParenthesis = isBare ? '' : isTuple ? ')' : ']';
+      const rightParenthesisIndent = !isBare && args.oneArgumentPerLine ? '\n' + inp.indent : '';
       const formatted = leftParenthesis + args.txt + rightParenthesisIndent + rightParenthesis;
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
@@ -651,8 +695,15 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapEntryExpression', (ctx, inp: Input) => {
-      const operator = this.keyword(':');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp, '');
+      const representation = (ctx.parent?.node as ESQLMap).representation ?? 'map';
+      const operator = representation === 'map' ? ':' : representation === 'assignment' ? '=' : '';
+      const operatorLeadingWhitespace = representation === 'assignment' ? ' ' : '';
+      const expression = this.printBinaryOperatorExpression(
+        ctx,
+        operator,
+        inp,
+        operatorLeadingWhitespace
+      );
 
       return this.decorateWithComments(
         { ...inp, suffix: '' },
@@ -663,14 +714,28 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapExpression', (ctx, inp: Input) => {
-      const { txt, oneArgumentPerLine } = this.printChildrenList(ctx, inp);
+      const representation = ctx.node.representation ?? 'map';
+      const doNotUseCommaAsSeparator = representation !== 'map';
+      const { txt, oneArgumentPerLine } = this.printChildrenList(
+        ctx,
+        inp,
+        doNotUseCommaAsSeparator
+      );
 
       let formatted = txt;
 
-      if (oneArgumentPerLine) {
-        formatted = '{' + txt + '\n' + inp.indent + '}';
-      } else {
-        formatted = '{' + txt + '}';
+      if (representation === 'map') {
+        if (oneArgumentPerLine) {
+          formatted = '{' + txt + '\n' + inp.indent + '}';
+        } else {
+          formatted = '{' + txt + '}';
+        }
+      } else if (representation === 'assignment') {
+        // Add initial indentation for assignment maps (bare maps)
+        // Only when not in oneArgumentPerLine mode, as that already handles indentation
+        if (!oneArgumentPerLine) {
+          formatted = this.opts.tab + txt;
+        }
       }
 
       return this.decorateWithComments(inp, ctx.node, formatted);

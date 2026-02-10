@@ -35,7 +35,7 @@ const testMap = [
     'alertsUIShared',
   ],
   [
-    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/flyout/metrics_insights_flyout.tsx',
+    'src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/flyout/metrics_insights_flyout.tsx',
     'metricsExperience',
   ],
   // Package in x-pack with src/ directory (entry in root .i18nrc.json with x-pack/ prefix)

@@ -6,10 +6,16 @@
  */
 
 export { Streams } from './src/models/streams';
-export { IngestBase } from './src/models/ingest/base';
+export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
+export { Query } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+} from './src/models/query/view_name';
 
 export {
   type RoutingDefinition,
@@ -24,6 +30,7 @@ export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -143,7 +150,12 @@ export {
   type Feature,
   type BaseFeature,
   type FeatureStatus,
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
   isFeature,
+  isComputedFeature,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,
@@ -165,4 +177,11 @@ export {
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
 
-export { TaskStatus } from './src/tasks/types';
+export { TaskStatus, type TaskResult } from './src/tasks/types';
+
+export type { GenerateDescriptionResult } from './src/api/description_generation';
+export type { IdentifyFeaturesResult } from './src/api/features';
+
+export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export type { OnboardingResult } from './src/onboarding';
+export { OnboardingStep } from './src/onboarding';

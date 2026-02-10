@@ -67,7 +67,13 @@ describe('prepareConversation', () => {
     mockContext = createAgentHandlerContextMock();
     mockAttachmentsService = mockContext.attachments;
     // prepareConversation relies on a real attachmentStateManager (it mutates it).
-    (mockContext as any).attachmentStateManager = createAttachmentStateManager([]);
+    mockContext.attachmentStateManager = createAttachmentStateManager([], {
+      getTypeDefinition: (type: string) => ({
+        id: type,
+        validate: (input: unknown) => ({ valid: true, data: input }),
+        format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+      }),
+    });
 
     mockGetToolResultId.mockReset();
     let idCounter = 0;
@@ -144,7 +150,13 @@ describe('prepareConversation', () => {
   describe('legacy per-round attachments are promoted to conversation attachments and stripped from rounds', () => {
     it('promotes nextInput attachments into attachmentStateManager and strips nextInput attachments', async () => {
       // Use a real attachment state manager (not the jest mock) to assert promotion/versioning behavior
-      (mockContext as any).attachmentStateManager = createAttachmentStateManager([]);
+      mockContext.attachmentStateManager = createAttachmentStateManager([], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
 
       // We only need getTypeDefinition for attachmentTypes; it won't be used for formatting since we strip.
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
@@ -152,7 +164,7 @@ describe('prepareConversation', () => {
         validate: jest.fn(),
         format: jest.fn(),
         getAgentDescription: () => 'desc',
-      } as any);
+      });
 
       const nextInput: ConverseInput = {
         message: 'Hello',
@@ -193,13 +205,19 @@ describe('prepareConversation', () => {
         ],
       };
 
-      (mockContext as any).attachmentStateManager = createAttachmentStateManager([existing]);
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
         validate: jest.fn(),
         format: jest.fn(),
         getAgentDescription: () => 'desc',
-      } as any);
+      });
 
       const nextInput: ConverseInput = {
         message: 'Hello',

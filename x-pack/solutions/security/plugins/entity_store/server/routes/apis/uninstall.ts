@@ -9,11 +9,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
-import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({
-  entityType: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
 });
 
 export function registerUninstall(router: EntityStorePluginRouter) {
@@ -37,9 +37,9 @@ export function registerUninstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res) => {
         const { logger, assetManager } = await ctx.entityStore;
-        logger.debug(`uninstalling entities: [${req.body.entityType.join(', ')}]`);
+        logger.debug(`uninstalling entities: [${req.body.entityTypes.join(', ')}]`);
 
-        await Promise.all(req.body.entityType.map((type) => assetManager.uninstall(type)));
+        await Promise.all(req.body.entityTypes.map((type) => assetManager.uninstall(type)));
 
         return res.ok({
           body: {

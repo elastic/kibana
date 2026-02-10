@@ -23,6 +23,14 @@ import type {
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarStart, SidebarSetup } from './sidebar';
+
+export interface ChromeSetup {
+  /**
+   * {@link SidebarSetup}
+   */
+  sidebar: SidebarSetup;
+}
 
 /**
  * ChromeSetup exposes APIs available during the setup phase.
@@ -116,14 +124,15 @@ export interface ChromeStart {
    *```tsx
    * import React, { useEffect } from 'react';
    * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-   * import { useKibana } from '@kbn/kibana-react-plugin/public';
+   * import type { CoreStart } from '@kbn/core/public';
    *
    * interface Props {
    *  config: AppMenuConfig;
+   *  core: CoreStart;
    *}
    *
-   * const Example = ({ config }: Props) => {
-   *  const { chrome } = useKibana().services;
+   * const Example = ({ config, core }: Props) => {
+   *  const { chrome } = core;
    *
    *  useEffect(() => {
    *    chrome.setAppMenu(config);
@@ -268,7 +277,17 @@ export interface ChromeStart {
   };
 
   /**
+   * {@link SidebarStart}
+   */
+  sidebar: SidebarStart;
+
+  /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  withProvider(component: ReactNode): ReactNode;
 }

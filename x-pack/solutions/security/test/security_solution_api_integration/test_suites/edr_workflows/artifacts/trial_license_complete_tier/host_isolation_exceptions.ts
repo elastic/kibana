@@ -20,6 +20,7 @@ import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/commo
 import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
@@ -285,11 +286,18 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // no such role in serverless
-    describe('@skipInServerless and user has authorization to read host isolation exceptions', function () {
+    describe('and user has authorization to read host isolation exceptions', function () {
       let hunterSupertest: TestAgent;
+
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const hostIsolationExceptionApiCall of [

@@ -406,6 +406,9 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
+            tableCaption={i18n.translate('savedObjectsFinder.tableCaption', {
+              defaultMessage: 'Saved objects search results',
+            })}
             noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}

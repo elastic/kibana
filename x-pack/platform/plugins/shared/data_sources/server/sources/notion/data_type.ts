@@ -8,12 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
-import {
-  generateGetDataSourceWorkflow,
-  generateGetPageWorkflow,
-  generateQueryWorkflow,
-  generateSearchWorkflow,
-} from './workflows';
 
 export const notionDataSource: DataSource = {
   id: 'notion',
@@ -21,6 +15,8 @@ export const notionDataSource: DataSource = {
   description: i18n.translate('xpack.dataSources.notion.description', {
     defaultMessage: 'Connect to Notion to pull data from your workspace.',
   }),
+
+  iconType: '.notion',
 
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.NOTION,
@@ -34,12 +30,7 @@ export const notionDataSource: DataSource = {
     config: {},
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      { content: generateQueryWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateSearchWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateGetPageWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateGetDataSourceWorkflow(stackConnectorId), shouldGenerateABTool: true },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };

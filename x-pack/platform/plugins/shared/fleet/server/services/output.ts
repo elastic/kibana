@@ -12,7 +12,6 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -95,21 +94,6 @@ type Nullable<T> = { [P in keyof T]: T[P] | null };
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 // differentiate
 function isUUID(val: string) {
@@ -389,7 +373,7 @@ async function remoteSyncIntegrationsCheck(
 
 class OutputService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {

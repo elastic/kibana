@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -25,6 +26,7 @@ const attachmentAddSchema = z.object({
  */
 export const createAttachmentAddTool = ({
   attachmentManager,
+  attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentAddSchema> => ({
   id: platformCoreTools.attachmentAdd,
   type: ToolType.builtin,
@@ -33,8 +35,23 @@ export const createAttachmentAddTool = ({
   schema: attachmentAddSchema,
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {
+    const definition = attachmentsService?.getTypeDefinition(type);
+    const isReadonly = definition?.isReadonly ?? true;
+    if (isReadonly) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: `Attachment type '${type}' is read-only` },
+          },
+        ],
+      };
+    }
+
     // Check for duplicate ID if provided
-    if (id && attachmentManager.get(id)) {
+    const existing = id ? attachmentManager.getAttachmentRecord(id) : undefined;
+    if (existing) {
       return {
         results: [
           {
@@ -46,7 +63,23 @@ export const createAttachmentAddTool = ({
       };
     }
 
-    const attachment = attachmentManager.add({ id, type, data, description });
+    let attachment;
+    try {
+      attachment = await attachmentManager.add(
+        { id, type, data, description },
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    } catch (e) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: e.message },
+          },
+        ],
+      };
+    }
 
     return {
       results: [

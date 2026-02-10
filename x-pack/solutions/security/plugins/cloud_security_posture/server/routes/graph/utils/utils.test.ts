@@ -56,6 +56,7 @@ describe('utils', () => {
         'Volume',
         'Config Map',
         'Managed Certificate',
+        'Storage',
       ];
 
       databaseTypes.forEach((entityType) => {

@@ -20,9 +20,12 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   TrimProcessor,
   LowercaseProcessor,
+  JoinProcessor,
+  ConcatProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -96,6 +99,12 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
 // Math (uses script processor internally)
 export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
   MathProcessor,
@@ -120,6 +129,18 @@ export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Join
+export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
+  JoinProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Concat
+export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
+  ConcatProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -139,7 +160,10 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
   | IngestPipelineUppercaseProcessor
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
+  | IngestPipelineJoinProcessor
+  | IngestPipelineConcatProcessor
   | IngestPipelineManualIngestPipelineProcessor;

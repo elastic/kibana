@@ -24,7 +24,7 @@ import {
   createExceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
@@ -298,7 +298,7 @@ export class ExceptionListClient {
       entries,
       expireTime: undefined, // Not currently used with endpoint exceptions
       itemId,
-      listId: ENDPOINT_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       meta,
       name,
       namespaceType: 'agnostic',
@@ -450,6 +450,7 @@ export class ExceptionListClient {
    * Create an exception list container
    * @param options
    * @param options.description a description of the exception list
+   * @param options.osTypes item os types to apply
    * @param options.immutable True if it's a immutable list, otherwise false
    * @param options.listId the "list_id" of the exception list
    * @param options.meta Optional meta data to add to the exception list
@@ -462,6 +463,7 @@ export class ExceptionListClient {
    */
   public createExceptionList = async ({
     description,
+    osTypes,
     immutable,
     listId,
     meta,
@@ -479,6 +481,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -1089,7 +1092,7 @@ export class ExceptionListClient {
 
     const findOptions = {
       filter,
-      listId: ENDPOINT_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       namespaceType: 'agnostic' as const,
       page,
       perPage,

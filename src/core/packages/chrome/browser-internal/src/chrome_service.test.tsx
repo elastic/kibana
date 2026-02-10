@@ -30,10 +30,12 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import { ChromeService } from './chrome_service';
+import { NavLinksService } from './services/nav_links';
+import { ProjectNavigationService } from './services/project_navigation';
 
 const mockhandleSystemColorModeChange = jest.fn();
 
-jest.mock('./handle_system_colormode_change', () => {
+jest.mock('./side_effects/handle_system_colormode_change', () => {
   return {
     handleSystemColorModeChange: (...args: any[]) => mockhandleSystemColorModeChange(...args),
   };
@@ -170,7 +172,7 @@ describe('start', () => {
     const { chrome, service } = await start({
       options: { browserSupportsCsp: false, kibanaVersion: '1.2.3' },
     });
-    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    const promise = firstValueFrom(chrome.getBodyClasses$().pipe(Rx.take(1), toArray()));
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
       Array [
@@ -188,7 +190,7 @@ describe('start', () => {
     const { chrome, service } = await start({
       options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
     });
-    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    const promise = firstValueFrom(chrome.getBodyClasses$().pipe(Rx.take(1), toArray()));
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
       Array [
@@ -247,17 +249,15 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
+      render(React.createElement(() => chrome.getClassicHeaderComponent()));
     });
 
     it('renders chromeless header', async () => {
       const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
-      chrome.setIsVisible(false);
-
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getLegacyHeaderComponentForFixedLayout()}
+          {chrome.getChromelessHeader()}
         </KibanaRenderContextProvider>
       );
 
@@ -268,7 +268,7 @@ describe('start', () => {
   describe('visibility', () => {
     it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(1), toArray()));
 
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
@@ -277,9 +277,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
-                        false,
-                        false,
                         false,
                       ]
                   `);
@@ -291,7 +288,7 @@ describe('start', () => {
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
 
-      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(3), toArray()));
 
       await navigateToApp('alpha');
 
@@ -302,7 +299,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
                         false,
                         true,
                         false,
@@ -318,7 +314,7 @@ describe('start', () => {
       ]);
       const { applications$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
-      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(4), toArray()));
 
       const availableApps = await Rx.firstValueFrom(applications$);
       [...availableApps.keys()].forEach((appId) => navigateToApp(appId));
@@ -338,7 +334,7 @@ describe('start', () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
-      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getIsVisible$().pipe(Rx.take(1), toArray()));
 
       await navigateToApp('alpha');
       chrome.setIsVisible(true);
@@ -346,8 +342,6 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
                       Array [
-                        false,
-                        false,
                         false,
                       ]
                   `);
@@ -375,7 +369,7 @@ describe('start', () => {
   describe('badge', () => {
     it('updates/emits the current badge', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getBadge$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getBadge$().pipe(Rx.take(4), toArray()));
 
       chrome.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
       chrome.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
@@ -402,7 +396,7 @@ describe('start', () => {
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const { chrome, service } = await start();
-      const promise = firstValueFrom(chrome.getBreadcrumbs$().pipe(toArray()));
+      const promise = firstValueFrom(chrome.getBreadcrumbs$().pipe(Rx.take(5), toArray()));
 
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
       chrome.setBreadcrumbs([{ text: 'foo' }]);
@@ -472,7 +466,9 @@ describe('start', () => {
   describe('breadcrumbsAppendExtension$', () => {
     it('updates the breadcrumbsAppendExtension$', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getBreadcrumbsAppendExtensions$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(
+        chrome.getBreadcrumbsAppendExtensions$().pipe(Rx.take(6), toArray())
+      );
 
       const ext1 = chrome.setBreadcrumbsAppendExtension({
         content: () => () => {},
@@ -542,7 +538,7 @@ describe('start', () => {
   describe('custom nav link', () => {
     it('updates/emits the current custom nav link', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getCustomNavLink$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getCustomNavLink$().pipe(Rx.take(3), toArray()));
 
       chrome.setCustomNavLink({ title: 'Manage cloud deployment' });
       chrome.setCustomNavLink(undefined);
@@ -563,7 +559,7 @@ describe('start', () => {
   describe('help extension', () => {
     it('updates/emits the current help extension', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getHelpExtension$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getHelpExtension$().pipe(Rx.take(3), toArray()));
 
       chrome.setHelpExtension({ appName: 'App name', content: () => () => undefined });
       chrome.setHelpExtension(undefined);
@@ -585,7 +581,7 @@ describe('start', () => {
   describe('header banner', () => {
     it('updates/emits the state of the header banner', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.hasHeaderBanner$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.hasHeaderBanner$().pipe(Rx.take(3), toArray()));
 
       chrome.setHeaderBanner({ content: () => () => undefined });
       chrome.setHeaderBanner(undefined);
@@ -601,9 +597,13 @@ describe('start', () => {
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
 
-      const helpExtensionPromise = chrome.getHelpExtension$().pipe(toArray()).toPromise();
-      const breadcrumbsPromise = chrome.getBreadcrumbs$().pipe(toArray()).toPromise();
-      const badgePromise = chrome.getBadge$().pipe(toArray()).toPromise();
+      const helpExtensionPromise = firstValueFrom(
+        chrome.getHelpExtension$().pipe(Rx.take(3), toArray())
+      );
+      const breadcrumbsPromise = firstValueFrom(
+        chrome.getBreadcrumbs$().pipe(Rx.take(3), toArray())
+      );
+      const badgePromise = firstValueFrom(chrome.getBadge$().pipe(Rx.take(3), toArray()));
       const docTitleResetSpy = jest.spyOn(chrome.docTitle, 'reset');
 
       const promises = Promise.all([helpExtensionPromise, breadcrumbsPromise, badgePromise]);
@@ -718,28 +718,17 @@ describe('start', () => {
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
-    const { chrome, service } = await start();
-    const promise = Rx.combineLatest([
-      chrome.getBreadcrumbs$(),
-      chrome.getIsVisible$(),
-      chrome.getHelpExtension$(),
-    ]).toPromise();
+  it('stops sub-services without relying on observable completion', async () => {
+    const navLinksStopSpy = jest.spyOn(NavLinksService.prototype, 'stop');
+    const projectNavigationStopSpy = jest.spyOn(ProjectNavigationService.prototype, 'stop');
+    const { service } = await start();
 
     service.stop();
-    await promise;
-  });
 
-  it('completes immediately if service already stopped', async () => {
-    const { chrome, service } = await start();
-    service.stop();
+    expect(navLinksStopSpy).toHaveBeenCalledTimes(1);
+    expect(projectNavigationStopSpy).toHaveBeenCalledTimes(1);
 
-    await expect(
-      Rx.combineLatest([
-        chrome.getBreadcrumbs$(),
-        chrome.getIsVisible$(),
-        chrome.getHelpExtension$(),
-      ]).toPromise()
-    ).resolves.toBe(undefined);
+    navLinksStopSpy.mockRestore();
+    projectNavigationStopSpy.mockRestore();
   });
 });

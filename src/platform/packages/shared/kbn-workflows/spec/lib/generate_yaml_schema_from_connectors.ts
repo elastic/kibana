@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -21,9 +22,11 @@ import {
   getParallelStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
-  WorkflowSchema,
+  WorkflowSchemaBase,
+  WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
+import type { JsonModelSchema } from '../schema/common/json_model_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -41,15 +44,43 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    return WorkflowSchema.partial().extend({
+    // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
+    // We use the base schema (without transform) so we can extend it
+    return WorkflowSchemaForAutocompleteBase.extend({
       settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
-    });
+    }).transform((data) => ({
+      ...data,
+      version: '1' as const,
+    }));
   }
 
-  return WorkflowSchema.extend({
+  // For strict mode, extend WorkflowSchemaBase (without transform) and apply the same transform as WorkflowSchema
+  return WorkflowSchemaBase.extend({
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
+  }).transform((data) => {
+    // Transform inputs from legacy array format to JSON Schema format (same logic as WorkflowSchema)
+    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+    if (data.inputs) {
+      if (
+        'properties' in data.inputs &&
+        typeof data.inputs === 'object' &&
+        !Array.isArray(data.inputs)
+      ) {
+        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+      } else if (Array.isArray(data.inputs)) {
+        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+      }
+    }
+
+    // Return the data with normalized inputs, preserving all other fields as-is
+    const { inputs: _, ...rest } = data;
+    return {
+      ...rest,
+      version: '1' as const,
+      ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    };
   });
 }
 

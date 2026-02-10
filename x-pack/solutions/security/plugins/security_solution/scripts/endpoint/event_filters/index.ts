@@ -17,9 +17,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_NAME,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -123,10 +121,10 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
 
 const ensureCreateEndpointEventFiltersList = async (kbn: KbnClient) => {
   const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+    description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
+    list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
     meta: undefined,
-    name: ENDPOINT_EVENT_FILTERS_LIST_NAME,
+    name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
     os_types: [],
     tags: [],
     type: 'endpoint',

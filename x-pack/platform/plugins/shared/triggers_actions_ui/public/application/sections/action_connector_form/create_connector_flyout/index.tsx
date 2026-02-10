@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
@@ -49,6 +50,7 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
+  icon?: IconType;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -58,6 +60,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onConnectorCreated,
   onTestConnector,
   initialConnector,
+  icon,
 }) => {
   const {
     application: { capabilities },
@@ -256,7 +259,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       })}
     >
       <FlyoutHeader
-        icon={actionTypeModel?.iconClass}
+        icon={icon ?? actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
@@ -67,7 +67,7 @@ export function StreamDetailLifecycle({
         refreshDefinition={refreshDefinition}
         data={data}
       />
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <StreamDetailFailureStore
         definition={definition}
         data={data}

@@ -11,16 +11,17 @@ import { SortOrder } from '../../model';
 export type PrebuiltRuleAssetsSortField = z.infer<typeof PrebuiltRuleAssetsSortField>;
 export const PrebuiltRuleAssetsSortField = z.enum(['name', 'risk_score', 'severity']);
 
+export type PrebuiltRuleAssetsSortItem = z.infer<typeof PrebuiltRuleAssetsSortItem>;
+export const PrebuiltRuleAssetsSortItem = z.object({
+  /**
+   * Field to sort by
+   */
+  field: PrebuiltRuleAssetsSortField,
+  /**
+   * Sort order
+   */
+  order: SortOrder,
+});
+
 export type PrebuiltRuleAssetsSort = z.infer<typeof PrebuiltRuleAssetsSort>;
-export const PrebuiltRuleAssetsSort = z.array(
-  z.object({
-    /**
-     * Field to sort by
-     */
-    field: PrebuiltRuleAssetsSortField,
-    /**
-     * Sort order
-     */
-    order: SortOrder,
-  })
-);
+export const PrebuiltRuleAssetsSort = z.array(PrebuiltRuleAssetsSortItem);

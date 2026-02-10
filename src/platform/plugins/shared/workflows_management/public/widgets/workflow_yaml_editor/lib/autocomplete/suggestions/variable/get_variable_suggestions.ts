@@ -75,9 +75,12 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     return [];
   }
   // We only add quotes if there's nothing other than the full key in the value node
+  // But NOT if we're already inside {{ }} braces (completing a variable path)
   const wholePairValue =
     typeof focusedYamlPair?.valueNode.value === 'string' ? focusedYamlPair?.valueNode.value : '';
+  const alreadyInsideBraces = isInsideCurlyBraces(autocompleteContext.lineUpToCursor);
   const shouldBeQuoted =
+    !alreadyInsideBraces &&
     (scalarType === null || scalarType === 'PLAIN') &&
     (wholePairValue.startsWith('@') || wholePairValue.startsWith('{{') || wholePairValue === '');
 

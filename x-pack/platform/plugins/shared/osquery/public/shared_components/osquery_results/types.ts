@@ -7,11 +7,13 @@
 
 import type { Ecs } from '@kbn/cases-plugin/common';
 import type { ActionEdges } from '../../../common/search_strategy';
+import type { AddToTimelineHandler } from '../../types';
 
 export interface OsqueryActionResultsProps {
   ruleName?: string;
   ecsData?: Ecs | null;
   actionItems?: ActionEdges;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 export interface OsqueryActionResultProps {
@@ -19,4 +21,5 @@ export interface OsqueryActionResultProps {
   ecsData?: Ecs | null;
   actionId: string;
   startDate: string;
+  addToTimeline?: AddToTimelineHandler;
 }

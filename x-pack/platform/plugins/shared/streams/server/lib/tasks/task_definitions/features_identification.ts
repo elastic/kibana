@@ -7,23 +7,24 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { BaseFeature } from '@kbn/streams-schema';
-import { identifyFeatures } from '@kbn/streams-ai';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
+import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
+import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
+import { v4 as uuid, v5 as uuidv5 } from 'uuid';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { getFeatureId } from '../../streams/feature/feature_client';
+import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
   start: number;
   end: number;
-}
-
-export interface IdentifyFeaturesResult {
-  features: BaseFeature[];
+  streamName: string;
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
@@ -43,9 +44,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, _task } = runContext.taskInstance
+              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
-              const { stream: name } = _task;
 
               const {
                 taskClient,
@@ -60,7 +60,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
               try {
                 const [stream, { featurePromptOverride }] = await Promise.all([
-                  streamsClient.getStream(name),
+                  streamsClient.getStream(streamName),
                   new PromptsConfigService({
                     soClient,
                     logger: taskContext.logger,
@@ -70,24 +70,63 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { features: baseFeatures } = await identifyFeatures({
+                const { hits: sampleDocuments } = await getSampleDocuments({
+                  esClient,
+                  index: stream.name,
                   start,
                   end,
-                  esClient,
-                  inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('features_identification'),
-                  stream,
-                  signal: runContext.abortController.signal,
-                  systemPrompt: featurePromptOverride,
+                  size: 20,
                 });
 
-                const now = new Date().toISOString();
-                const features = baseFeatures.map((feature) => ({
-                  ...feature,
-                  status: 'active' as const,
-                  last_seen: now,
-                  id: getFeatureId(stream.name, feature),
-                }));
+                const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
+                  identifyFeatures({
+                    streamName: stream.name,
+                    sampleDocuments,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskContext.logger.get('features_identification'),
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                  }),
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                    logger: taskContext.logger.get('computed_features'),
+                  }),
+                ]);
+
+                const identifiedFeatures: BaseFeature[] = [
+                  ...inferredBaseFeatures,
+                  ...computedFeatures,
+                ];
+
+                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
+                  id: identifiedFeatures.map(({ id }) => id),
+                });
+
+                const now = Date.now();
+                const features = identifiedFeatures.map((feature) => {
+                  const existing = existingFeatures.find(({ id }) => id === feature.id);
+                  if (existing) {
+                    taskContext.logger.debug(
+                      `Overwriting feature with id [${
+                        feature.id
+                      }] since it already exists.\nExisting feature: ${JSON.stringify(
+                        existing
+                      )}\nNew feature: ${JSON.stringify(feature)}`
+                    );
+                  }
+                  return {
+                    ...feature,
+                    status: 'active' as const,
+                    last_seen: new Date(now).toISOString(),
+                    expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+                    uuid: isComputedFeature(feature)
+                      ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
+                      : existing?.uuid ?? uuid(),
+                  };
+                });
 
                 await featureClient.bulk(
                   stream.name,
@@ -96,7 +135,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end },
+                  { connectorId, start, end, streamName },
                   { features }
                 );
               } catch (error) {
@@ -111,18 +150,21 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
+                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
+                  { error }
                 );
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end },
+                  { connectorId, start, end, streamName },
                   errorMessage
                 );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

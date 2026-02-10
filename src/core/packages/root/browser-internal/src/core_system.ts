@@ -163,6 +163,7 @@ export class CoreSystem {
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      basePath: injectedMetadata.basePath,
       coreContext: this.coreContext,
     });
     this.docLinks = new DocLinksService(this.coreContext);
@@ -397,6 +398,7 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
         rendering,
+        settings,
       });
 
       resolveNotifications!(notifications);

@@ -15,6 +15,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type {
   DynamicGroupingProps,
   GroupChildComponentRenderer,
+  GroupingSort,
+  GroupingBucket,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
@@ -57,6 +59,10 @@ interface OwnProps {
   globalQuery: Query;
   groupingLevel?: number;
   /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
+  /**
    * Function that returns the group aggregations by field.
    * This is then used to render values in the EuiAccordion `extraAction` section.
    */
@@ -91,7 +97,7 @@ interface OwnProps {
    *
    * Using this property will create a bucket for each value of the multi-value fields in question.
    * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
-   * in 2 groups: one for mac1 and a second formac2.
+   * in 2 groups: one for mac1 and a second for mac2.
    */
   multiValueFieldsToFlatten?: string[];
 
@@ -121,6 +127,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   groupingLevel,
+  sort,
   groupStatsAggregations,
   groupTakeActionItems,
   loading,
@@ -211,6 +218,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       groupStatsAggregations,
+      sort,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -232,6 +240,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     to,
     uniqueValue,
     multiValueFieldsToFlatten,
+    sort,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -314,15 +323,22 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) => {
+    (
+      groupFilters: Filter[],
+      groupNumber: number,
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>,
+      closePopover: () => void
+    ) => {
       const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
+        groupBucket,
+        closePopover,
       };
 
-      return groupTakeActionItems?.(takeActionParams) ?? { items: [], panels: [] };
+      return groupTakeActionItems?.(takeActionParams);
     },
     [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
   );

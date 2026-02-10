@@ -392,6 +392,51 @@ export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<ReplaceProcessor>;
 
 /**
+ * Redact processor
+ *
+ * Uses Grok patterns to identify and mask sensitive data.
+ * For Ingest Pipelines, this maps to the native ES redact processor.
+ * For ESQL, this is emulated using replace() with compiled Grok patterns.
+ */
+
+export interface RedactProcessor extends ProcessorBaseWithWhere {
+  action: 'redact';
+  from: string;
+  patterns: string[];
+  pattern_definitions?: Record<string, string>;
+  prefix?: string; // default: '<'
+  suffix?: string; // default: '>'
+  ignore_missing?: boolean; // default: true (unlike replace which defaults to false)
+}
+
+export const redactProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('redact'),
+    from: StreamlangSourceField.describe('Source field to redact sensitive data from'),
+    patterns: z
+      .array(NonEmptyString)
+      .nonempty()
+      .describe(
+        'Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")'
+      ),
+    pattern_definitions: z
+      .optional(z.record(z.string()))
+      .describe('Custom pattern definitions to use in the patterns'),
+    prefix: z
+      .optional(z.string())
+      .describe('Prefix to prepend to the redacted pattern name (defaults to "<")'),
+    suffix: z
+      .optional(z.string())
+      .describe('Suffix to append to the redacted pattern name (defaults to ">")'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing (defaults to true)'),
+  })
+  .describe(
+    'Redact processor - Mask sensitive data using Grok patterns'
+  ) satisfies z.Schema<RedactProcessor>;
+
+/**
  * Math processor
  */
 
@@ -451,6 +496,67 @@ export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<TrimProcessor>;
 
+export interface JoinProcessor extends ProcessorBaseWithWhere {
+  action: 'join';
+  from: string[];
+  delimiter: string;
+  to: string;
+  ignore_missing?: boolean;
+}
+
+export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('join'),
+  from: z.array(StreamlangSourceField).nonempty(),
+  delimiter: z.string(),
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<JoinProcessor>;
+
+/**
+ * Concat processor
+ */
+
+interface ConcatFromField {
+  type: 'field';
+  value: string;
+}
+
+const concatFromFieldSchema = z.object({
+  type: z.literal('field'),
+  value: StreamlangSourceField,
+}) satisfies z.Schema<ConcatFromField>;
+
+interface ConcatFromLiteral {
+  type: 'literal';
+  value: string;
+}
+
+const concatFromLiteralSchema = z.object({
+  type: z.literal('literal'),
+  value: z.string(),
+}) satisfies z.Schema<ConcatFromLiteral>;
+
+type ConcatFrom = ConcatFromField | ConcatFromLiteral;
+
+const concatFromSchema = z.union([
+  concatFromFieldSchema,
+  concatFromLiteralSchema,
+]) satisfies z.Schema<ConcatFrom>;
+
+export interface ConcatProcessor extends ProcessorBaseWithWhere {
+  action: 'concat';
+  from: ConcatFrom[];
+  to: string;
+  ignore_missing?: boolean;
+}
+
+export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('concat'),
+  from: z.array(concatFromSchema).nonempty(),
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ConcatProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -464,9 +570,12 @@ export type StreamlangProcessorDefinition =
   | RemoveByPrefixProcessor
   | RemoveProcessor
   | ReplaceProcessor
+  | RedactProcessor
   | UppercaseProcessor
   | LowercaseProcessor
   | TrimProcessor
+  | JoinProcessor
+  | ConcatProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -481,10 +590,13 @@ export const streamlangProcessorSchema = z.union([
   removeByPrefixProcessorSchema,
   removeProcessorSchema,
   replaceProcessorSchema,
+  redactProcessorSchema,
   uppercaseProcessorSchema,
   lowercaseProcessorSchema,
   trimProcessorSchema,
+  joinProcessorSchema,
   convertProcessorSchema,
+  concatProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -501,6 +613,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     dissectProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
+    redactProcessorSchema,
     mathProcessorSchema,
   ])
 );
@@ -518,6 +631,11 @@ export const isDissectProcessorDefinition = createIsNarrowSchema(
 export const isDateProcessorDefinition = createIsNarrowSchema(
   streamlangProcessorSchema,
   dateProcessorSchema
+);
+
+export const isRedactProcessorDefinition = createIsNarrowSchema(
+  streamlangProcessorSchema,
+  redactProcessorSchema
 );
 
 /**

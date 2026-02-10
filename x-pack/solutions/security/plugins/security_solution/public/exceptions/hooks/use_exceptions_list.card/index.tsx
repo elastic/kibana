@@ -14,6 +14,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useGeneratedHtmlId } from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import { SecurityPageName } from '../../../../common/constants';
 import type { ExceptionListInfo } from '../use_all_exception_lists';
@@ -71,6 +72,8 @@ export const useExceptionsListCard = ({
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
   const [showIncludeExpiredExceptionsModal, setShowIncludeExpiredExceptionsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
+  const { read: canReadExceptions, edit: canEditExceptions } =
+    useUserPrivileges().rulesPrivileges.exceptions;
 
   const {
     name: listName,
@@ -117,7 +120,7 @@ export const useExceptionsListCard = ({
   const [toggleAccordion, setToggleAccordion] = useState(false);
   const openAccordionId = useGeneratedHtmlId({ prefix: 'openAccordion' });
 
-  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList);
+  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList) || !canEditExceptions;
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
@@ -154,6 +157,7 @@ export const useExceptionsListCard = ({
             setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT);
           }
         },
+        disabled: listType === ExceptionListTypeEnum.ENDPOINT ? false : !canReadExceptions,
       },
       {
         key: 'Duplicate',
@@ -188,6 +192,7 @@ export const useExceptionsListCard = ({
       },
     ],
     [
+      canReadExceptions,
       listCannotBeEdited,
       listType,
       handleExport,

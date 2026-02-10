@@ -32,7 +32,7 @@ import {
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
 } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
-import { getConnectorIcon, toStackConnectorType } from '../../utils';
+import { getConnectorIcon } from '../../utils';
 import { useKibana } from '../hooks/use_kibana';
 
 interface ActiveSourcesTableProps {
@@ -46,14 +46,8 @@ interface ActiveSourcesTableProps {
 
 const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
   const iconComponent = useMemo(() => {
-    const connector = {
-      id: source.type,
-      name: source.name,
-      type: toStackConnectorType(source.type), // Convert 'notion' → '.notion'
-      category: 'all' as const,
-    };
-    return getConnectorIcon(connector, 'm', 'integration');
-  }, [source.type, source.name]);
+    return getConnectorIcon(source.iconType, 'm');
+  }, [source.iconType]);
 
   return iconComponent;
 };

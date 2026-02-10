@@ -15,7 +15,6 @@ import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
-  ChromeRecentlyAccessedHistoryItem,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
@@ -42,22 +41,22 @@ export interface ChromeNavigationProps {
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
-  // other state that might be needed later
-  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  isFeedbackBtnVisible$: Observable<boolean>;
-  loadingCount$: Observable<number>;
-  dataTestSubj$?: Observable<string | undefined>;
-
+  // feedback
+  isFeedbackEnabled$: Observable<boolean>;
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
+
+  // other
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
   const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
+  const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
 
   if (!state) {
     return null;
@@ -72,6 +71,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         logo={logoItem}
         sidePanelFooter={
           <NavigationFeedbackSnippet
+            isEnabled={isFeedbackEnabled}
             solutionId={solutionId}
             feedbackUrlParams={feedbackUrlParams}
           />
