@@ -142,6 +142,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           return null;
         },
         sortable: true,
+        width: '300px',
       },
       {
         name: i18n.MODEL,
