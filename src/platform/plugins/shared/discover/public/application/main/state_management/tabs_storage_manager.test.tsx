@@ -24,6 +24,7 @@ import {
   getTabStateMock,
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -43,7 +44,7 @@ const mockTab1 = getTabStateMock({
   },
   attributes: {
     visContext: { someKey: 'test' } as unknown as UnifiedHistogramVisContext,
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
   },
 });
 
@@ -120,6 +121,7 @@ describe('TabsStorageManager', () => {
     ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
+    initialInternalState: storedTab.initialInternalState,
     attributes: storedTab.attributes,
     appState: storedTab.appState,
     globalState: storedTab.globalState,
@@ -267,6 +269,62 @@ describe('TabsStorageManager', () => {
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('should load tabs state from local storage and migrate the legacy props from internalState', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    jest.spyOn(urlStateStorage, 'get');
+    jest.spyOn(storage, 'get');
+
+    const storedSerializedSearchSource = { index: 'test-index' };
+    const storedSearchSessionId = 'test-session-id';
+    const legacyVisContext = { legacyVis: 'legacyValue' };
+    const legacyControlGroupState = { legacyControlGroup: 'legacyGroupValue' };
+
+    const toLegacyStoredTab = (tab: TabState | RecentlyClosedTabState) => {
+      const storedTab = { ...toStoredTab(tab), attributes: undefined };
+      storedTab.internalState = {
+        serializedSearchSource: storedSerializedSearchSource as SerializedSearchSourceFields,
+        searchSessionId: storedSearchSessionId,
+        visContext: legacyVisContext as unknown as UnifiedHistogramVisContext,
+        controlGroupJson: JSON.stringify(legacyControlGroupState),
+      };
+      return storedTab;
+    };
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toLegacyStoredTab(mockTab1), toLegacyStoredTab(mockTab2)],
+      closedTabs: [toLegacyStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TAB_STATE_URL_KEY, {
+      tabId: 'tab2',
+    });
+
+    jest.spyOn(urlStateStorage, 'set');
+    jest.spyOn(storage, 'set');
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    const loadedTab = loadedProps.allTabs[0];
+    expect(loadedTab.attributes).toStrictEqual({
+      visContext: legacyVisContext,
+      controlGroupState: legacyControlGroupState,
+    });
+    expect(loadedTab.initialInternalState).toStrictEqual({
+      serializedSearchSource: storedSerializedSearchSource,
+      searchSessionId: storedSearchSessionId,
+    });
   });
 
   it('should clear tabs and select a default one', () => {
@@ -494,7 +552,7 @@ describe('TabsStorageManager', () => {
       internalState: {},
       attributes: {
         visContext: { someKey: 'updatedValue' } as unknown as UnifiedHistogramVisContext,
-        controlGroupJson: '{}',
+        controlGroupState: {},
       },
       appState: {
         columns: ['a', 'b', 'c'],

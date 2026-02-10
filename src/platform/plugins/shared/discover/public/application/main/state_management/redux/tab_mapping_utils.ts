@@ -18,6 +18,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToTabState = ({
@@ -70,21 +71,62 @@ export const fromSavedObjectTabToTabState = ({
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       visContext: tab.visContext,
-      controlGroupJson: tab.controlGroupJson,
+      controlGroupState: tab.controlGroupJson
+        ? parseControlGroupJson(tab.controlGroupJson)
+        : undefined,
       timeRestore: tab.timeRestore ?? false,
     },
   };
 };
 
 export const fromSavedObjectTabToSearchSource = async ({
-  tab,
-  services,
-}: {
+                                                         tab,
+                                                         services,
+                                                       }: {
   tab: DiscoverSessionTab;
   services: DiscoverServices;
 }): Promise<ISearchSource> => {
   return services.data.search.searchSource.create(tab.serializedSearchSource);
 };
+
+export const fromSavedObjectTabToSavedSearch = async ({
+  tab,
+  discoverSession,
+  services,
+}: {
+  discoverSession: DiscoverSession;
+  tab: DiscoverSessionTab;
+  services: DiscoverServices;
+}): Promise<SavedSearch> => ({
+  id: discoverSession.id,
+  title: discoverSession.title,
+  description: discoverSession.description,
+  tags: discoverSession.tags,
+  managed: discoverSession.managed,
+  references: discoverSession.references,
+  sharingSavedObjectProps: discoverSession.sharingSavedObjectProps,
+  sort: tab.sort,
+  columns: tab.columns,
+  grid: tab.grid,
+  hideChart: tab.hideChart,
+  isTextBasedQuery: tab.isTextBasedQuery,
+  usesAdHocDataView: tab.usesAdHocDataView,
+  searchSource: await services.data.search.searchSource.create(tab.serializedSearchSource),
+  viewMode: tab.viewMode,
+  hideAggregatedPreview: tab.hideAggregatedPreview,
+  rowHeight: tab.rowHeight,
+  headerRowHeight: tab.headerRowHeight,
+  timeRestore: tab.timeRestore,
+  timeRange: tab.timeRange,
+  refreshInterval: tab.refreshInterval,
+  rowsPerPage: tab.rowsPerPage,
+  sampleSize: tab.sampleSize,
+  breakdownField: tab.breakdownField,
+  chartInterval: tab.chartInterval,
+  density: tab.density,
+  visContext: tab.visContext, // managed via Redux state now
+  controlGroupJson: tab.controlGroupJson, // managed via Redux state now
+});
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
@@ -134,6 +176,55 @@ export const fromTabStateToSavedObjectTab = ({
     chartInterval: tab.appState.interval || 'auto',
     density: tab.appState.density,
     visContext: tab.attributes.visContext,
-    controlGroupJson: tab.attributes.controlGroupJson,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
+  };
+};
+
+export const fromSavedSearchToSavedObjectTab = ({
+  tab,
+  savedSearch,
+  services,
+}: {
+  tab: Pick<TabState, 'id' | 'label'> & {
+    attributes?: TabState['attributes'];
+  };
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+}): DiscoverSessionTab => {
+  const allowedSampleSize = getAllowedSampleSize(savedSearch.sampleSize, services.uiSettings);
+
+  return {
+    id: tab.id,
+    label: tab.label,
+    sort: savedSearch.sort ?? [],
+    columns: savedSearch.columns ?? [],
+    grid: savedSearch.grid ?? {},
+    hideChart: savedSearch.hideChart ?? false,
+    isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+    usesAdHocDataView: savedSearch.usesAdHocDataView,
+    serializedSearchSource: savedSearch.searchSource.getSerializedFields() ?? {},
+    viewMode: savedSearch.viewMode,
+    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+    rowHeight: savedSearch.rowHeight,
+    headerRowHeight: savedSearch.headerRowHeight,
+    timeRestore: savedSearch.timeRestore,
+    timeRange: savedSearch.timeRange,
+    refreshInterval: savedSearch.refreshInterval,
+    rowsPerPage: savedSearch.rowsPerPage,
+    sampleSize:
+      savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
+        ? savedSearch.sampleSize
+        : undefined,
+    breakdownField: savedSearch.breakdownField,
+    chartInterval: savedSearch.chartInterval,
+    density: savedSearch.density,
+    visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
+    controlGroupJson: tab.attributes
+      ? tab.attributes?.controlGroupState
+        ? JSON.stringify(tab.attributes.controlGroupState)
+        : undefined
+      : savedSearch.controlGroupJson,
   };
 };

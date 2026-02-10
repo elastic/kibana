@@ -43,6 +43,7 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import { fetchData } from './tab_state';
+import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -362,12 +363,17 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    const byValueEmbeddableTab = services.embeddableEditor.getByValueInput();
+    const byValueEmbeddableTabState = byValueEmbeddableTab
+      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      : undefined;
+
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
       shouldClearAllTabs,
-      defaultTabState: DEFAULT_TAB_STATE,
+      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
     });
 
     const history = services.getScopedHistory();

@@ -34,8 +34,8 @@ export type RetrievedDocsExtractor<T = unknown> = (output: T) => RetrievedDoc[];
 export type GroundTruthExtractor<T = unknown> = (referenceOutput: T) => GroundTruth;
 
 export interface RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> {
-  /** Number of top results to evaluate (K in Precision@K, Recall@K) */
-  k: number;
+  /** Number of top results to evaluate (K in Precision@K, Recall@K). Can be a single value or array for multi-K evaluation */
+  k: number | number[];
   /** Minimum score in ground truth to consider a document relevant. Default: 1 */
   relevanceThreshold?: number;
   /** Function to extract retrieved docs from task output */

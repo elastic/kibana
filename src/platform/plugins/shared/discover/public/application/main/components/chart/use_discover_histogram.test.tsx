@@ -511,8 +511,8 @@ describe('useDiscoverHistogram', () => {
       } as UnifiedHistogramVisContext;
       act(() => {
         stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(internalStateActions.setAttributeVisContext)({
-            visContext,
+          stateContainer.injectCurrentTab(internalStateActions.updateAttributes)({
+            attributes: { visContext },
           })
         );
       });

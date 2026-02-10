@@ -13,9 +13,9 @@ import {
   EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -120,8 +120,19 @@ export class StreamsApp {
     await this.page.getByTestId('dataQualityTab').click();
   }
 
+  async clickRetentionTab() {
+    await this.page.getByTestId('retentionTab').click();
+  }
+
   async clickRootBreadcrumb() {
     await this.page.getByTestId('breadcrumb first').click();
+  }
+
+  async clickStreamsBreadcrumb() {
+    await this.page
+      .locator('a[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: /^Streams$/ })
+      .click();
   }
 
   // Streams table utility methods
@@ -130,12 +141,13 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    // Use .first() because some pages (like Retention) may have multiple date pickers
     await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
       `Date picker 'start date' is incorrect`
     ).toHaveText(expectedRange.from);
     await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
   }
@@ -277,7 +289,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('columns').click();
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
   }
 
   async saveRoutingRule() {

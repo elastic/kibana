@@ -57,6 +57,10 @@ export interface DiscoverStateContainerParams {
 
 export interface DiscoverStateContainer {
   /**
+   * An observable of the current tab's app state
+   */
+  createAppStateObservable: () => Observable<DiscoverAppState>;
+  /**
    * Data fetching related state
    **/
   dataState: DiscoverDataStateContainer;
@@ -137,6 +141,12 @@ export function getDiscoverStateContainer({
   });
 
   return {
+    createAppStateObservable: () =>
+      createTabAppStateObservable({
+        tabId,
+        internalState$: from(internalState),
+        getState: internalState.getState,
+      }),
     internalState,
     internalStateActions,
     injectCurrentTab,

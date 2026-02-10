@@ -25,11 +25,14 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   },
   attributes: {
     visContext: undefined,
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
     timeRestore: false,
   },
   overriddenVisContextAfterInvalidation: undefined,
-  controlGroupState: undefined,
+  cascadedDocumentsState: {
+    availableCascadeGroups: [],
+    selectedCascadeGroups: [],
+  },
   esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',

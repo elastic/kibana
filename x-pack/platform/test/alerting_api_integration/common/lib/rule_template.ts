@@ -22,6 +22,11 @@ export async function createRuleTemplateSO(
       alerting_rule_template: {
         name: 'Sample alerting rule template v2',
         tags: ['Testing'],
+        description: 'This is a sample alerting rule template description',
+        artifacts: {
+          dashboards: [{ id: 'dash-1' }],
+          investigation_guide: { blob: 'text' },
+        },
         ruleTypeId: '.index-threshold',
         schedule: {
           interval: '1m',

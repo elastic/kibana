@@ -17,6 +17,9 @@ describe('config validation', () => {
               "enabled": false,
             },
           },
+          "attachments": Object {
+            "enabled": false,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -120,8 +123,26 @@ describe('config validation', () => {
           "stack": Object {
             "enabled": true,
           },
+          "templates": Object {
+            "enabled": false,
+          },
         }
       `);
+    });
+
+    it('sets attachments.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('allows attachments.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: true } });
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: false } });
+      expect(config.attachments.enabled).toBe(false);
     });
   });
 });

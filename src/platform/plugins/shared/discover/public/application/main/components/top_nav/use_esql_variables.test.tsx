@@ -25,15 +25,20 @@ import { internalStateActions } from '../../state_management/redux';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
-  inputSubject: BehaviorSubject<Record<string, ControlPanelsState<ESQLControlState>> | null>;
+  inputSubject: BehaviorSubject<{
+    initialChildControlState: ControlPanelsState<ESQLControlState>;
+  } | null>;
   addNewPanel: jest.Mock;
 
   constructor() {
-    this.inputSubject = new BehaviorSubject<Record<
-      string,
-      ControlPanelsState<ESQLControlState>
-    > | null>(null);
+    this.inputSubject = new BehaviorSubject<{
+      initialChildControlState: ControlPanelsState<ESQLControlState>;
+    } | null>(null);
     this.addNewPanel = jest.fn();
+  }
+
+  getInput() {
+    return this.inputSubject.getValue();
   }
 
   getInput$() {
@@ -41,9 +46,13 @@ class MockControlGroupRendererApi {
   }
 
   // Method to simulate new input coming from the API
-  simulateInput(input: Record<string, ControlPanelsState<ESQLControlState>>) {
+  simulateInput(input: { initialChildControlState: ControlPanelsState<ESQLControlState> }) {
     this.inputSubject.next(input);
   }
+
+  updateInput = jest.fn().mockImplementation(() => {
+    throw new Error('Should not be called');
+  });
 }
 
 // --- Test Suite ---
@@ -155,19 +164,15 @@ describe('useESQLVariables', () => {
 
       // Assert dispatches happened
       await waitFor(() => {
-        expect(dispatchSpy).toHaveBeenCalledTimes(4);
+        expect(dispatchSpy).toHaveBeenCalledTimes(3);
         const dispatchCalls = dispatchSpy.mock.calls;
         dispatchCalls.forEach((call) => {
           const action = call[0] as { type: string; payload?: unknown };
-          if (action.type === 'internalState/setAttributeControlGroupJson') {
-            expect((action.payload as { controlGroupJson: unknown }).controlGroupJson).toEqual(
-              JSON.stringify(mockControlState)
-            );
-          }
-          if (action.type === 'internalState/setControlGroupState') {
-            expect((action.payload as { controlGroupState: unknown }).controlGroupState).toEqual(
-              mockControlState
-            );
+          if (action.type === 'internalState/setAttributes') {
+            expect(
+              (action.payload as { attributes: { controlGroupState: unknown } }).attributes
+                .controlGroupState
+            ).toEqual(mockControlState);
           }
           if (action.type === 'internalState/setEsqlVariables') {
             expect((action.payload as { esqlVariables: unknown }).esqlVariables).toEqual(
@@ -212,24 +217,22 @@ describe('useESQLVariables', () => {
 
       // Create a mock control group API with a mock updateInput method
       const mockUpdateInput = jest.fn();
-      const mockControlGroupApiWithUpdate = {
-        ...mockControlGroupAPI,
-        updateInput: mockUpdateInput,
-        getInput$: jest.fn().mockReturnValue(new Observable()),
-      };
+      jest.spyOn(mockControlGroupAPI, 'updateInput').mockImplementation(mockUpdateInput);
 
       // Render the hook
       await renderUseESQLVariables({
         stateContainer,
-        controlGroupApi: mockControlGroupApiWithUpdate as unknown as ControlGroupRendererApi,
+        controlGroupApi: mockControlGroupAPI as unknown as ControlGroupRendererApi,
       });
 
       expect(mockUpdateInput).not.toHaveBeenCalled();
 
       act(() => {
         stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(internalStateActions.setAttributeControlGroupJson)({
-            controlGroupJson: JSON.stringify(mockControlState),
+          stateContainer.injectCurrentTab(internalStateActions.updateAttributes)({
+            attributes: {
+              controlGroupState: mockControlState,
+            },
           })
         );
       });

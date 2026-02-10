@@ -35,9 +35,10 @@ paths:
                       username: "john.doe"
                       index: 1
                   stats:
-                    successful: 1
-                    failed: 1
-                    total: 2
+                    successfulOperations: 1
+                    uploaded: 1
+                    failedOperations: 1
+                    totalOperations: 2
                 properties:
                   errors:
                     type: array
@@ -72,13 +73,16 @@ components:
     PrivmonUserCsvUploadStats:
       type: object
       properties:
-        successful:
+        successfulOperations:
           type: integer
-        failed:
+        uploaded:
           type: integer
-        total:
+        failedOperations:
+          type: integer
+        totalOperations:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations

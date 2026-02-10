@@ -28,7 +28,7 @@ const tab1 = getTabStateMock({
   },
   attributes: {
     visContext: { foo: 'bar' },
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-7d', to: 'now' },
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
   },
   attributes: {
     visContext: { bar: 'foo' },
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
@@ -86,12 +86,15 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
-            "controlGroupJson": undefined,
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
           },
-          "controlGroupState": undefined,
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
             "searchSessionId": undefined,
@@ -169,12 +172,15 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
-            "controlGroupJson": undefined,
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
           },
-          "controlGroupState": undefined,
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
             "searchSessionId": undefined,
@@ -293,7 +299,9 @@ describe('tab mapping utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": undefined,
+          "visContext": Object {
+            "foo": "bar",
+          },
         }
       `);
     });
