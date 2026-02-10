@@ -126,6 +126,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('createAgentPolicyButton').click();
         cy.getBySel('createAgentPolicyNameField').type(policyName);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
+        closeFleetTourIfVisible();
         cy.getBySel('agentPolicyNameLink').contains(policyName).click();
         closeFleetTourIfVisible();
         cy.getBySel('addPackagePolicyButton').click();

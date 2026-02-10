@@ -235,6 +235,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${agentPolicy}' created`);
         closeToastIfVisible();
+        closeFleetTourIfVisible();
         cy.getBySel('agentPolicyNameLink').contains(agentPolicy).click();
         closeFleetTourIfVisible();
         cy.getBySel('addPackagePolicyButton').click();

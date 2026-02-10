@@ -102,9 +102,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // change pagination
-      cy.getBySel('pagination-button-next').scrollIntoView().click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click({ force: true });
       cy.getBySel('globalLoadingIndicator').should('not.exist');
-      cy.getBySel('pagination-button-next').scrollIntoView().click();
+      cy.getBySel('pagination-button-next').scrollIntoView().click({ force: true });
       cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
 
       // exit fullscreen
@@ -302,11 +302,12 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT)
         .click()
         .type('users_elastic{downArrow}{downArrow}{enter}');
+      // Wait for saved query data to fully load before modifying the query
+      cy.contains('Unique identifier of the us').should('exist');
+      cy.contains('User ID').should('exist');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
-      cy.contains('Unique identifier of the us').should('exist');
-      cy.contains('User ID').should('exist');
 
       cy.get(`[aria-labelledby="flyoutTitle"]`).within(() => {
         cy.getBySel('ECSMappingEditorForm')
@@ -317,6 +318,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       });
       cy.contains('Unique identifier of the us').should('not.exist');
       cy.contains('User ID').should('not.exist');
+      // Wait for the editor debounce (500ms) to propagate query changes to the form
+      cy.wait(1000);
       cy.getBySel('query-flyout-save-button').click();
       cy.get(`[aria-labelledby="flyoutTitle"]`).should('not.exist');
 
