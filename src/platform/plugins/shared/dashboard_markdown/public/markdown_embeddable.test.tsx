@@ -184,7 +184,7 @@ describe('MarkdownEmbeddable', () => {
 
   it('loads content from library when by reference', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { savedObjectId: '123' },
+      initialState: { ref_id: '123' },
     });
 
     expect(embeddable.api.defaultTitle$?.value).toBe('Markdown from library');
@@ -201,7 +201,7 @@ describe('MarkdownEmbeddable', () => {
 
   it('can unlink from library when by reference', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { savedObjectId: '123' },
+      initialState: { ref_id: '123' },
     });
 
     expect(await embeddable.api.canUnlinkFromLibrary()).toBe(true);
@@ -232,14 +232,14 @@ describe('MarkdownEmbeddable', () => {
     });
 
     expect(embeddable.api.getSerializedStateByReference('new-id')).toEqual({
-      savedObjectId: 'new-id',
+      ref_id: 'new-id',
     });
   });
 
   it('unlinks from library', async () => {
     const { embeddable } = await renderEmbeddable({
       initialState: {
-        savedObjectId: '123',
+        ref_id: '123',
         title: 'Some title',
         description: 'some description',
         hide_title: true,
