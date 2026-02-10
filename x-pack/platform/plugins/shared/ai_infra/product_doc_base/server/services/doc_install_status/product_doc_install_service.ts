@@ -285,7 +285,7 @@ export class ProductDocInstallClient {
   }: {
     inferenceId: string;
   }): Promise<SecurityLabsStatusResponse> {
-    const objectId = getSecurityLabsObjectId(inferenceId);
+    const objectId = getOpenapiSpecObjectId(inferenceId);
     try {
       const so = await this.soClient.get<TypeAttributes>(typeName, objectId);
       return {
@@ -308,7 +308,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, inferenceId } = fields;
-    const objectId = getSecurityLabsObjectId(inferenceId);
+    const objectId = getOpenapiSpecObjectId(inferenceId);
     const attributes: TypeAttributes = {
       product_name: productName,
       product_version: 'latest', // to be included later
@@ -328,7 +328,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, indexName, inferenceId } = fields;
-    const objectId = getSecurityLabsObjectId(inferenceId);
+    const objectId = getOpenapiSpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       product_name: productName,
       product_version: 'latest', // to be included later
@@ -345,7 +345,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, failureReason, inferenceId } = fields;
-    const objectId = getSecurityLabsObjectId(inferenceId);
+    const objectId = getOpenapiSpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
@@ -356,8 +356,8 @@ export class ProductDocInstallClient {
     });
   }
 
-  async setOpenapiSpecUninstalled(inferenceId: string) {
-    const objectId = getSecurityLabsObjectId(inferenceId);
+  async setOpenapiSpecUninstalled(inferenceId: string | undefined) {
+    const objectId = getOpenapiSpecObjectId(inferenceId);
     try {
       await this.soClient.update<TypeAttributes>(typeName, objectId, {
         installation_status: 'uninstalled',
@@ -372,6 +372,11 @@ export class ProductDocInstallClient {
     }
   }
 }
+
+const getOpenapiSpecObjectId = (inferenceId: string | undefined) => {
+  const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
+  return `kb-openapi-spec${inferenceIdPart}-status`.toLowerCase();
+};
 
 const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) => {
   const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';

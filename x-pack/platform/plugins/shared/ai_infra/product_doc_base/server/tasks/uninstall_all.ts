@@ -11,6 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import { isTaskCurrentlyRunningError } from './utils';
 
@@ -31,11 +32,13 @@ export const registerUninstallAllTaskDefinition = ({
       timeout: '10m',
       maxAttempts: 3,
       createTaskRunner: (context) => {
+        const resourceType = context.taskInstance?.params?.resourceType;
         return {
           async run() {
             const { packageInstaller } = getServices();
             return packageInstaller.uninstallAll({
               inferenceId: context.taskInstance?.params?.inferenceId,
+              ...(resourceType ? { resourceType } : {}),
             });
           },
         };
@@ -49,10 +52,12 @@ export const scheduleUninstallAllTask = async ({
   taskManager,
   logger,
   inferenceId,
+  resourceType,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
+  resourceType?: ResourceType;
 }) => {
   // To avoid conflicts between the default ELSER model and small E5 inference IDs running at the same time,
   // we use different task IDs for each inference ID.
@@ -64,7 +69,7 @@ export const scheduleUninstallAllTask = async ({
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: UNINSTALL_ALL_TASK_TYPE,
-      params: { inferenceId },
+      params: { inferenceId, resourceType },
       state: {},
       scope: ['productDoc'],
     });

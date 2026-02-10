@@ -284,6 +284,7 @@ export const registerInstallationRoutes = ({
         request: req,
         wait: true,
         inferenceId: req.body?.inferenceId,
+        resourceType: req.body?.resourceType,
       });
 
       return res.ok<UninstallResponse>({

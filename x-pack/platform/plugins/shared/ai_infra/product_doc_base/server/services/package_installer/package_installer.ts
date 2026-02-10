@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ResourceType } from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
@@ -14,6 +15,7 @@ import {
   getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
+  ResourceTypes,
 } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
@@ -54,6 +56,20 @@ interface PackageInstallerOpts {
   elserInferenceId?: string;
   isServerless?: boolean;
 }
+// Process each product (elasticsearch and kibana)
+const OPEN_API_SPEC_PRODUCTS: Array<{
+  productName: 'elasticsearch' | 'kibana';
+  indexName: string;
+}> = [
+  {
+    productName: DocumentationProduct.elasticsearch as 'elasticsearch',
+    indexName: '.kibana_ai_openapi_spec_elasticsearch',
+  },
+  {
+    productName: DocumentationProduct.kibana as 'kibana',
+    indexName: '.kibana_ai_openapi_spec_kibana',
+  },
+];
 
 export class PackageInstaller {
   private readonly log: Logger;
@@ -327,12 +343,15 @@ export class PackageInstaller {
     await this.productDocClient.setUninstalled(productName, inferenceId);
   }
 
-  async uninstallAll(params: { inferenceId?: string } = {}) {
-    const { inferenceId } = params;
+  async uninstallAll(params: { inferenceId?: string; resourceType?: ResourceType } = {}) {
+    const { inferenceId, resourceType } = params;
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
       await this.productDocClient.setUninstallationStarted(productName, inferenceId);
       await this.uninstallPackage({ productName, inferenceId });
+    }
+    if (resourceType === ResourceTypes.openapiSpec || !resourceType) {
+      await this.uninstallOpenAPISpec({ inferenceId });
     }
   }
 
@@ -584,6 +603,8 @@ export class PackageInstaller {
 
     let zipArchive: ZipArchive | undefined;
     try {
+      await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
+
       // Ensure ELSER is deployed
       await ensureDefaultElserDeployed({
         client: this.esClient,
@@ -603,22 +624,7 @@ export class PackageInstaller {
       zipArchive = await openZipArchive(downloadedFullPath);
       validateArtifactArchive(zipArchive);
 
-      // Process each product (elasticsearch and kibana)
-      const products: Array<{
-        productName: 'elasticsearch' | 'kibana';
-        indexName: string;
-      }> = [
-        {
-          productName: DocumentationProduct.elasticsearch as 'elasticsearch',
-          indexName: '.kibana_ai_openapi_spec_elasticsearch',
-        },
-        {
-          productName: DocumentationProduct.kibana as 'kibana',
-          indexName: '.kibana_ai_openapi_spec_kibana',
-        },
-      ];
-
-      for (const { productName, indexName } of products) {
+      for (const { productName, indexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
 
         await this.productDocClient.setOpenapiSpecInstallationStarted({
@@ -716,6 +722,14 @@ export class PackageInstaller {
       throw e;
     } finally {
       zipArchive?.close();
+    }
+  }
+
+  async uninstallOpenAPISpec({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    for (const { indexName } of OPEN_API_SPEC_PRODUCTS) {
+      this.log.info(`Uninstalling OpenAPI Spec from index [${indexName}]`);
+      await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
+      await this.productDocClient.setOpenapiSpecUninstalled(inferenceId);
     }
   }
 

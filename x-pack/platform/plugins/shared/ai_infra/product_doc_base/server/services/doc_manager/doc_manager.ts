@@ -193,12 +193,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async uninstall(options: DocUninstallOptions): Promise<void> {
-    const { request, wait = false, inferenceId } = options;
+    const { request, wait = false, inferenceId, resourceType } = options;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
       inferenceId,
+      resourceType,
     });
 
     if (request) {

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
@@ -159,6 +160,10 @@ export interface DocUninstallOptions {
    * If provided, the docs will be uninstalled with the model indicated by Inference ID
    */
   inferenceId: string;
+  /**
+   * If provided, the docs will be uninstalled with the resource type indicated by Resource Type
+   */
+  resourceType?: ResourceType;
 }
 
 /**
