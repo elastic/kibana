@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { MutedAlertInstance } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertQuerySchema, muteAlertParamsSchema } from './schemas';
@@ -16,6 +17,11 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMeta } from '../../../../rules_client/lib';
+
+/** Returns true when the caller supplied conditional-snooze parameters. */
+function hasSnoozeConditions(query: MuteAlertQuery): boolean {
+  return Boolean(query.expiresAt || (query.conditions && query.conditions.length > 0));
+}
 
 export async function muteInstance(
   context: RulesClientContext,
@@ -44,12 +50,19 @@ export async function muteInstance(
 async function muteInstanceWithOCC(
   context: RulesClientContext,
   { alertId: ruleId, alertInstanceId }: MuteAlertParams,
-  { validateAlertsExistence }: MuteAlertQuery
+  query: MuteAlertQuery
 ) {
+  const { validateAlertsExistence, expiresAt, conditions, conditionOperator } = query;
+
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
     ruleId
   );
+
+  // Determine which audit action to use: SNOOZE_ALERT for conditional snooze, MUTE_ALERT for simple mute
+  const auditAction = hasSnoozeConditions(query)
+    ? RuleAuditAction.SNOOZE_ALERT
+    : RuleAuditAction.MUTE_ALERT;
 
   try {
     await context.authorization.ensureAuthorized({
@@ -65,7 +78,7 @@ async function muteInstanceWithOCC(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.MUTE_ALERT,
+        action: auditAction,
         savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
@@ -75,7 +88,7 @@ async function muteInstanceWithOCC(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.MUTE_ALERT,
+      action: auditAction,
       outcome: 'unknown',
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
@@ -102,17 +115,43 @@ async function muteInstanceWithOCC(
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
 
+    // Build the update attributes -- always update mutedInstanceIds for backward compat
+    const updateAttrs: Record<string, unknown> = {
+      mutedInstanceIds,
+      updatedBy: await context.getUserName(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // When conditional-snooze parameters are provided, also write to mutedAlerts
+    if (hasSnoozeConditions(query)) {
+      const existingMutedAlerts: MutedAlertInstance[] =
+        (attributes as Record<string, unknown>).mutedAlerts as MutedAlertInstance[] ?? [];
+
+      // Remove any existing entry for this alert instance (replace it)
+      const filteredMutedAlerts = existingMutedAlerts.filter(
+        (entry) => entry.alertInstanceId !== alertInstanceId
+      );
+
+      const newEntry: MutedAlertInstance = {
+        alertInstanceId,
+        mutedAt: new Date().toISOString(),
+        mutedBy: await context.getUserName(),
+        ...(expiresAt ? { expiresAt } : {}),
+        ...(conditions && conditions.length > 0 ? { conditions } : {}),
+        conditionOperator: conditionOperator ?? 'any',
+      };
+
+      filteredMutedAlerts.push(newEntry);
+      updateAttrs.mutedAlerts = filteredMutedAlerts;
+    }
+
     const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
       id: ruleId,
-      updateRuleAttributes: updateMeta(context, {
-        mutedInstanceIds,
-        updatedBy: await context.getUserName(),
-        updatedAt: new Date().toISOString(),
-      }),
+      updateRuleAttributes: updateMeta(context, updateAttrs),
     });
 
     if (indices && indices.length > 0) {

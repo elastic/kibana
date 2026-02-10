@@ -32,3 +32,52 @@ export const muteAlertQuerySchema = schema.maybe(
     ),
   })
 );
+
+const muteConditionSchema = schema.object({
+  type: schema.oneOf([
+    schema.literal('severity_change'),
+    schema.literal('severity_equals'),
+    schema.literal('field_change'),
+  ]),
+  field: schema.string({
+    meta: { description: 'The alert document field to monitor (e.g. kibana.alert.severity).' },
+  }),
+  value: schema.maybe(
+    schema.string({
+      meta: { description: 'For severity_equals: the target value that triggers unmute.' },
+    })
+  ),
+  snapshot_value: schema.maybe(
+    schema.string({
+      meta: { description: 'Snapshot of the field value at the time the mute was created.' },
+    })
+  ),
+});
+
+export const muteAlertBodySchema = schema.maybe(
+  schema.object({
+    expires_at: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'ISO timestamp after which the mute expires automatically. Absent means indefinite.',
+        },
+      })
+    ),
+    conditions: schema.maybe(
+      schema.arrayOf(muteConditionSchema, {
+        meta: {
+          description: 'Conditions under which the mute is automatically lifted.',
+        },
+      })
+    ),
+    condition_operator: schema.maybe(
+      schema.oneOf([schema.literal('any'), schema.literal('all')], {
+        meta: {
+          description:
+            "How conditions combine with time expiry: 'any' = OR (first met wins), 'all' = AND.",
+        },
+      })
+    ),
+  })
+);

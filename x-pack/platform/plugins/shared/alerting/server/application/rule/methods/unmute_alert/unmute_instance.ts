@@ -76,18 +76,42 @@ async function unmuteInstanceWithOCC(
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+  const mutedAlerts = (attributes as Record<string, unknown>).mutedAlerts as
+    | Array<{ alertInstanceId: string }>
+    | undefined;
+
+  const isInMutedIds = mutedInstanceIds.includes(alertInstanceId);
+  const isInMutedAlerts = mutedAlerts?.some(
+    (entry) => entry.alertInstanceId === alertInstanceId
+  );
+
+  if (!attributes.muteAll && (isInMutedIds || isInMutedAlerts)) {
+    const updateAttrs: Record<string, unknown> = {
+      updatedBy: await context.getUserName(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Remove from legacy mutedInstanceIds
+    if (isInMutedIds) {
+      updateAttrs.mutedInstanceIds = mutedInstanceIds.filter(
+        (id: string) => id !== alertInstanceId
+      );
+    }
+
+    // Remove from mutedAlerts
+    if (isInMutedAlerts && mutedAlerts) {
+      updateAttrs.mutedAlerts = mutedAlerts.filter(
+        (entry) => entry.alertInstanceId !== alertInstanceId
+      );
+    }
+
     const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
       id: ruleId,
-      updateRuleAttributes: updateMeta(context, {
-        mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        updatedBy: await context.getUserName(),
-        updatedAt: new Date().toISOString(),
-      }),
+      updateRuleAttributes: updateMeta(context, updateAttrs),
     });
 
     if (indices && indices.length > 0) {
