@@ -20,11 +20,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
+import { i18n } from '@kbn/i18n';
+
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
+import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
 
 const euiCalloutCss = {
   margin: '10px',
@@ -39,9 +42,10 @@ const EditSavedQueryPageComponent = () => {
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
-  const { isLoading, data: savedQueryDetails } = useSavedQuery({ savedQueryId });
+  const { isLoading, data: savedQueryDetails, error } = useSavedQuery({ savedQueryId });
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
+  const copySavedQueryMutation = useCopySavedQuery({ savedQueryId });
 
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.saved_object_id ?? '' });
 
@@ -64,6 +68,10 @@ const EditSavedQueryPageComponent = () => {
       handleCloseDeleteConfirmationModal();
     });
   }, [deleteSavedQueryMutation, handleCloseDeleteConfirmationModal]);
+
+  const handleDuplicateClick = useCallback(() => {
+    copySavedQueryMutation.mutateAsync();
+  }, [copySavedQueryMutation]);
 
   const LeftColumn = useMemo(
     () => (
@@ -118,14 +126,39 @@ const EditSavedQueryPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
-        <FormattedMessage
-          id="xpack.osquery.editSavedQuery.deleteSavedQueryButtonLabel"
-          defaultMessage="Delete query"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s">
+        {permissions.writeSavedQueries && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={handleDuplicateClick}
+              iconType="copy"
+              isLoading={copySavedQueryMutation.isLoading}
+            >
+              {i18n.translate('xpack.osquery.editSavedQuery.duplicateSavedQueryButtonLabel', {
+                defaultMessage: 'Duplicate query',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {!viewMode && (
+          <EuiFlexItem grow={false}>
+            <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+              <FormattedMessage
+                id="xpack.osquery.editSavedQuery.deleteSavedQueryButtonLabel"
+                defaultMessage="Delete query"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     ),
-    [handleDeleteClick]
+    [
+      permissions.writeSavedQueries,
+      handleDuplicateClick,
+      copySavedQueryMutation.isLoading,
+      viewMode,
+      handleDeleteClick,
+    ]
   );
 
   const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
@@ -139,19 +172,41 @@ const EditSavedQueryPageComponent = () => {
 
   if (isLoading) return null;
 
+  if (error) {
+    return (
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiCallOut
+          title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
+            defaultMessage: 'Failed to load saved query',
+          })}
+          color="danger"
+          iconType="error"
+        >
+          <FormattedMessage
+            id="xpack.osquery.editSavedQuery.loadError.body"
+            defaultMessage="The saved query could not be loaded. Please try again later."
+          />
+        </EuiCallOut>
+      </WithHeaderLayout>
+    );
+  }
+
   return (
     <WithHeaderLayout
       leftColumn={LeftColumn}
-      rightColumn={!viewMode ? RightColumn : undefined}
+      rightColumn={permissions.writeSavedQueries ? RightColumn : undefined}
       rightColumnGrow={false}
     >
-      {!isLoading && !isEmpty(savedQueryDetails) && (
-        <EditSavedQueryForm
-          defaultValue={savedQueryDetails}
-          handleSubmit={handleSubmit}
-          viewMode={viewMode}
-        />
-      )}
+      {!isLoading &&
+        !isEmpty(savedQueryDetails) &&
+        savedQueryDetails?.saved_object_id === savedQueryId && (
+          <EditSavedQueryForm
+            key={savedQueryId}
+            defaultValue={savedQueryDetails}
+            handleSubmit={handleSubmit}
+            viewMode={viewMode}
+          />
+        )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}

@@ -28,6 +28,7 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { SavedQueryRowActions } from './saved_query_row_actions';
 
 export interface SavedQuerySO {
   name: string;
@@ -91,45 +92,6 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
 
 const PlayButton = React.memo(PlayButtonComponent, deepEqual);
 
-interface EditButtonProps {
-  disabled?: boolean;
-  savedQueryId: string;
-  savedQueryName: string;
-}
-
-const EditButtonComponent: React.FC<EditButtonProps> = ({
-  disabled = false,
-  savedQueryId,
-  savedQueryName,
-}) => {
-  const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
-
-  const editText = useMemo(
-    () =>
-      i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
-        defaultMessage: 'Edit {savedQueryName}',
-        values: {
-          savedQueryName,
-        },
-      }),
-    [savedQueryName]
-  );
-
-  return (
-    <EuiToolTip position="top" content={editText} disableScreenReaderOutput>
-      <EuiButtonIcon
-        color="primary"
-        {...buttonProps}
-        iconType="pencil"
-        isDisabled={disabled}
-        aria-label={editText}
-      />
-    </EuiToolTip>
-  );
-};
-
-const EditButton = React.memo(EditButtonComponent);
-
 const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -141,13 +103,6 @@ const SavedQueriesPageComponent = () => {
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
   const { data } = useSavedQueries({ isLive: true });
-
-  const renderEditAction = useCallback(
-    (item: SavedQuerySO) => (
-      <EditButton savedQueryId={item.saved_object_id} savedQueryName={item.id} />
-    ),
-    []
-  );
 
   const renderPlayAction = useCallback(
     (item: SavedQuerySO) =>
@@ -219,10 +174,14 @@ const SavedQueriesPageComponent = () => {
         name: i18n.translate('xpack.osquery.savedQueries.table.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
-        actions: [{ render: renderPlayAction }, { render: renderEditAction }],
+        actions: [{ render: renderPlayAction }],
+      },
+      {
+        width: '40px',
+        render: (item: SavedQuerySO) => <SavedQueryRowActions item={item} />,
       },
     ],
-    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
+    [renderDescriptionColumn, renderPlayAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {

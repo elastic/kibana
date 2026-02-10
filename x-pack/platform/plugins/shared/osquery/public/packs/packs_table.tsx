@@ -26,6 +26,7 @@ import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
+import { PackRowActions } from './pack_row_actions';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,
@@ -208,6 +209,10 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
+      {
+        width: '40px',
+        render: (item: PackSavedObject) => <PackRowActions item={item} />,
+      },
     ],
     [
       permissions.runSavedQueries,
