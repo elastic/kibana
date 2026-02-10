@@ -14,7 +14,6 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
-  RegistryDataStream,
   RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
@@ -35,8 +34,6 @@ import { getNormalizedDataStreams } from '../../../../common/services';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
 import type { PackageInstallContext } from '../../../../common/types';
-
-import { extractSignalTypesFromPipelines } from '../../agent_policies/otel_collector';
 
 import { getInstallation, getInstalledPackageWithAssets } from './get';
 
@@ -116,35 +113,17 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   // For OTel packages with dynamic_signal_types, we need to create index templates for signal types defined in the pipelines
   const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-  let signalTypes: string[];
-
-  if (isDynamicSignalTypes) {
-    // Extract pipelines from the package policy streams
-    const firstStream = packagePolicy.inputs[0]?.streams?.[0] as any;
-    const pipelines = firstStream?.service?.pipelines;
-    if (pipelines) {
-      signalTypes = extractSignalTypesFromPipelines(pipelines);
-    } else {
-      // Edge case: if no pipelines configured, don't create any index templates
-      signalTypes = [];
-      logger.warn(
-        `No pipelines found for OTel package ${pkgInfo.name}, skipping index template installation`
-      );
-    }
-  } else {
-    signalTypes = [
-      packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-        packagePolicy.inputs[0].streams[0].data_stream?.type ||
-        'logs',
-    ];
-  }
-
-  // Collect all installed data streams to update ES asset references once at the end
-  const installedDataStreams: RegistryDataStream[] = [];
+  const signalTypes: string[] = isDynamicSignalTypes
+    ? ['logs', 'metrics', 'traces']
+    : [
+        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+          packagePolicy.inputs[0].streams[0].data_stream?.type ||
+          'logs',
+      ];
 
   // Check each signal type and install templates as needed
   for (const dataStreamType of signalTypes) {
-    const installedDataStream = await installAssetsForDataStreamType({
+    await installAssetsForDataStreamType({
       pkgInfo,
       logger,
       datasetName,
@@ -153,27 +132,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
       soClient,
       force,
     });
-
-    if (installedDataStream) {
-      installedDataStreams.push(installedDataStream);
-    }
-  }
-
-  // Update ES index patterns once for all installed data streams
-  if (installedDataStreams.length > 0) {
-    const installation = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: pkgInfo.name,
-    });
-
-    if (installation) {
-      await optimisticallyAddEsAssetReferences(
-        soClient,
-        installation.name,
-        [],
-        generateESIndexPatterns(installedDataStreams)
-      );
-    }
   }
 }
 
@@ -185,7 +143,7 @@ async function installAssetsForDataStreamType(opts: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   force: boolean;
-}): Promise<RegistryDataStream | null> {
+}) {
   const { pkgInfo, logger, datasetName, dataStreamType, esClient, soClient, force } = opts;
 
   const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
@@ -215,7 +173,7 @@ async function installAssetsForDataStreamType(opts: {
       logger.info(
         `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
-      return null;
+      return;
     }
   }
 
@@ -237,7 +195,7 @@ async function installAssetsForDataStreamType(opts: {
       logger.info(
         `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation`
       );
-      return null;
+      return;
     }
   }
 
@@ -284,11 +242,15 @@ async function installAssetsForDataStreamType(opts: {
       onlyForDataStreams: [dataStream],
     });
 
-    // Return the installed data stream so caller can update ES index patterns
-    return dataStream;
+    // Update ES index patterns
+    await optimisticallyAddEsAssetReferences(
+      soClient,
+      installedPkgWithAssets.installation.name,
+      [],
+      generateESIndexPatterns([dataStream])
+    );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
-    return null;
   }
 }
 

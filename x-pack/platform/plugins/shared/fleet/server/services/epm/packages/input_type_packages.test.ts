@@ -272,13 +272,6 @@ describe('installAssetsForInputPackagePolicy', () => {
                 {
                   data_stream: { type: 'logs' },
                   vars: { 'data_stream.dataset': { value: 'otel.test' } },
-                  service: {
-                    pipelines: {
-                      'logs/otlp': { receivers: ['otlp'] },
-                      'metrics/otlp': { receivers: ['otlp'] },
-                      'traces/otlp': { receivers: ['otlp'] },
-                    },
-                  },
                 },
               ],
             },
@@ -324,68 +317,6 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         })
       );
-    });
-
-    it('should store ES index patterns for all signal types when dynamic_signal_types is true', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
-        installation: {
-          name: 'otel',
-          version: '1.0.0',
-        },
-        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
-        assetsMap: new Map(),
-        paths: [],
-      } as any);
-      const mockedLogger = jest.mocked(appContextService.getLogger());
-
-      await installAssetsForInputPackagePolicy({
-        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
-        soClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-        force: false,
-        logger: mockedLogger,
-        packagePolicy: {
-          inputs: [
-            {
-              name: 'otel',
-              type: 'otelcol',
-              streams: [
-                {
-                  data_stream: { type: 'logs' },
-                  vars: { 'data_stream.dataset': { value: 'custom.dataset' } },
-                  service: {
-                    pipelines: {
-                      'logs/otlp': { receivers: ['otlp'] },
-                      'metrics/otlp': { receivers: ['otlp'] },
-                      'traces/otlp': { receivers: ['otlp'] },
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        } as any,
-      });
-
-      // Verify optimisticallyAddEsAssetReferences was called exactly once
-      // (not once per signal type, but once for all of them together)
-      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledTimes(1);
-
-      // Verify it was called with the installation name and empty assets array
-      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
-        expect.anything(),
-        'otel',
-        [],
-        expect.any(Object)
-      );
-
-      // Get the actual call to verify ES index patterns were passed
-      const calls = jest.mocked(optimisticallyAddEsAssetReferences).mock.calls;
-      expect(calls.length).toBe(1);
-
-      // This verifies the fix: ES index patterns should be provided for all signal types
-      // If the bug existed, this would be called 3 times (once per signal type)
-      // with only the last call's patterns being retained
     });
 
     it('should install index template for single signal type when dynamic_signal_types is false', async () => {
@@ -532,7 +463,7 @@ describe('installAssetsForInputPackagePolicy', () => {
         } as any,
       });
 
-      // Should still create all 3 templates with the custom dataset (extracted from pipelines, not from var)
+      // Should still create all 3 templates with the custom dataset
       expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(3);
 
       const calls = jest.mocked(installIndexTemplatesAndPipelines).mock.calls;
@@ -592,13 +523,6 @@ describe('installAssetsForInputPackagePolicy', () => {
                 {
                   data_stream: { type: 'logs' },
                   vars: { 'data_stream.dataset': { value: 'otel.test' } },
-                  service: {
-                    pipelines: {
-                      'logs/otlp': { receivers: ['otlp'] },
-                      'metrics/otlp': { receivers: ['otlp'] },
-                      'traces/otlp': { receivers: ['otlp'] },
-                    },
-                  },
                 },
               ],
             },
@@ -615,51 +539,6 @@ describe('installAssetsForInputPackagePolicy', () => {
       expect(types).not.toContain('logs');
       expect(types).toContain('metrics');
       expect(types).toContain('traces');
-    });
-
-    it('should skip index template installation when dynamic_signal_types is true but no pipelines configured', async () => {
-      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
-        installation: {
-          name: 'otel',
-          version: '1.0.0',
-        },
-        packageInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES,
-        assetsMap: new Map(),
-        paths: [],
-      } as any);
-
-      const mockedLogger = jest.mocked(appContextService.getLogger());
-
-      await installAssetsForInputPackagePolicy({
-        pkgInfo: OTEL_PKG_INFO_DYNAMIC_SIGNAL_TYPES as any,
-        soClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-        force: false,
-        logger: mockedLogger,
-        packagePolicy: {
-          inputs: [
-            {
-              name: 'otel',
-              type: 'otelcol',
-              streams: [
-                {
-                  data_stream: { type: 'logs' },
-                  vars: { 'data_stream.dataset': { value: 'otel.test' } },
-                  // No service.pipelines configured - edge case
-                },
-              ],
-            },
-          ],
-        } as any,
-      });
-
-      // Should not be called at all (no signal types to install)
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
-
-      // Should log a warning about missing pipelines
-      expect(mockedLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('No pipelines found for OTel package otel')
-      );
     });
   });
 });
