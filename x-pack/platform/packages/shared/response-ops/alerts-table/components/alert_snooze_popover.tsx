@@ -9,7 +9,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
+  EuiDatePicker,
   EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -27,7 +29,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import moment from 'moment';
+import moment, { type Moment } from 'moment';
 import type { MuteCondition } from '@kbn/alerting-types';
 
 const POPOVER_WIDTH_PX = 340;
@@ -111,6 +113,8 @@ interface AlertSnoozePopoverProps {
   }) => Promise<void>;
   /** Current severity value of the alert (for snapshotting) */
   currentSeverity?: string;
+  /** Current alert data (record of field name to array of values) for field_change snapshot */
+  alertData?: Record<string, string[]>;
 }
 
 /**
@@ -124,15 +128,20 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
   button,
   onApplySnooze,
   currentSeverity,
+  alertData,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [customValue, setCustomValue] = useState(1);
   const [customUnit, setCustomUnit] = useState('h');
+  const [absoluteDate, setAbsoluteDate] = useState<Moment | null>(null);
+  const [useAbsoluteTime, setUseAbsoluteTime] = useState(false);
 
   // Condition checkboxes
   const [untilSeverityChanges, setUntilSeverityChanges] = useState(false);
   const [untilSeverityEquals, setUntilSeverityEquals] = useState(false);
   const [targetSeverity, setTargetSeverity] = useState('critical');
+  const [untilFieldChanges, setUntilFieldChanges] = useState(false);
+  const [watchedFieldName, setWatchedFieldName] = useState('');
   const [withTimeBound, setWithTimeBound] = useState(false);
   const [conditionOperator, setConditionOperator] = useState<'any' | 'all'>('any');
 
@@ -143,13 +152,16 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
   const severityEqualsCheckboxId = useGeneratedHtmlId({
     prefix: 'snoozeUntilSeverityEquals',
   });
+  const fieldChangeCheckboxId = useGeneratedHtmlId({
+    prefix: 'snoozeUntilFieldChanges',
+  });
   const timeBoundCheckboxId = useGeneratedHtmlId({
     prefix: 'snoozeWithTimeBound',
   });
 
-  const hasConditions = untilSeverityChanges || untilSeverityEquals;
+  const hasConditions = untilSeverityChanges || untilSeverityEquals || (untilFieldChanges && watchedFieldName.trim().length > 0);
   const hasMultipleConditions =
-    (untilSeverityChanges && untilSeverityEquals) ||
+    [untilSeverityChanges, untilSeverityEquals, untilFieldChanges && watchedFieldName.trim().length > 0].filter(Boolean).length > 1 ||
     (hasConditions && withTimeBound);
 
   const buildConditions = useCallback((): MuteCondition[] => {
@@ -168,8 +180,17 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         value: targetSeverity,
       });
     }
+    if (untilFieldChanges && watchedFieldName.trim().length > 0) {
+      const fieldName = watchedFieldName.trim();
+      const snapshotValue = alertData?.[fieldName]?.[0];
+      conditions.push({
+        type: 'field_change',
+        field: fieldName,
+        ...(snapshotValue != null ? { snapshotValue } : {}),
+      });
+    }
     return conditions;
-  }, [currentSeverity, targetSeverity, untilSeverityChanges, untilSeverityEquals]);
+  }, [alertData, currentSeverity, targetSeverity, untilFieldChanges, untilSeverityChanges, untilSeverityEquals, watchedFieldName]);
 
   const applyQuickSnooze = useCallback(
     async (value: number, unit: string) => {
@@ -207,19 +228,38 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
   }, [buildConditions, conditionOperator, onApplySnooze, onClose]);
 
   const applyCustom = useCallback(async () => {
-    await applyQuickSnooze(customValue, customUnit);
-  }, [applyQuickSnooze, customUnit, customValue]);
+    if (useAbsoluteTime && absoluteDate) {
+      setIsLoading(true);
+      try {
+        const conditions = buildConditions();
+        await onApplySnooze({
+          expiresAt: absoluteDate.toISOString(),
+          ...(conditions.length > 0 ? { conditions, conditionOperator } : {}),
+        });
+        onClose();
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      await applyQuickSnooze(customValue, customUnit);
+    }
+  }, [absoluteDate, applyQuickSnooze, buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, useAbsoluteTime]);
 
   const applyConditionsOnly = useCallback(async () => {
     setIsLoading(true);
     try {
       const conditions = buildConditions();
 
-      const expiresAt = withTimeBound
-        ? moment()
+      let expiresAt: string | undefined;
+      if (withTimeBound) {
+        if (useAbsoluteTime && absoluteDate) {
+          expiresAt = absoluteDate.toISOString();
+        } else {
+          expiresAt = moment()
             .add(customValue, customUnit as moment.unitOfTime.DurationConstructor)
-            .toISOString()
-        : undefined;
+            .toISOString();
+        }
+      }
 
       await onApplySnooze({
         ...(expiresAt ? { expiresAt } : {}),
@@ -229,7 +269,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, withTimeBound]);
+  }, [absoluteDate, buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, useAbsoluteTime, withTimeBound]);
 
   // M5: Radio group options for condition operator
   const conditionOperatorOptions = useMemo(
@@ -350,6 +390,40 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         <EuiSpacer size="s" />
 
         <EuiCheckbox
+          id={fieldChangeCheckboxId}
+          label={i18n.translate('xpack.responseOpsAlertsTable.snooze.untilFieldChanges', {
+            defaultMessage: 'Until a field value changes',
+          })}
+          checked={untilFieldChanges}
+          onChange={(e) => setUntilFieldChanges(e.target.checked)}
+        />
+        {untilFieldChanges && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              compressed
+              placeholder={i18n.translate(
+                'xpack.responseOpsAlertsTable.snooze.fieldNamePlaceholder',
+                { defaultMessage: 'Field name (e.g. host.name)' }
+              )}
+              value={watchedFieldName}
+              onChange={(e) => setWatchedFieldName(e.target.value)}
+              data-test-subj="snooze-field-name"
+            />
+            {watchedFieldName.trim().length > 0 && alertData?.[watchedFieldName.trim()] && (
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.responseOpsAlertsTable.snooze.currentFieldValue', {
+                  defaultMessage: 'Current value: {value}',
+                  values: { value: alertData[watchedFieldName.trim()][0] ?? 'N/A' },
+                })}
+              </EuiText>
+            )}
+          </>
+        )}
+
+        <EuiSpacer size="s" />
+
+        <EuiCheckbox
           id={timeBoundCheckboxId}
           label={i18n.translate('xpack.responseOpsAlertsTable.snooze.orAfterDuration', {
             defaultMessage: 'OR after a time period',
@@ -360,33 +434,73 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         {withTimeBound && (
           <>
             <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormRow>
-                  <EuiFieldNumber
-                    compressed
-                    min={1}
-                    value={customValue}
-                    onChange={(e) => setCustomValue(Number(e.target.value))}
-                    css={css`
-                      width: 60px;
-                    `}
-                    data-test-subj="snooze-custom-value"
-                  />
-                </EuiFormRow>
+                <EuiLink
+                  data-test-subj="snooze-condition-toggle-relative"
+                  color={!useAbsoluteTime ? 'primary' : 'subdued'}
+                  onClick={() => setUseAbsoluteTime(false)}
+                >
+                  {i18n.translate('xpack.responseOpsAlertsTable.snooze.condRelative', {
+                    defaultMessage: 'Relative',
+                  })}
+                </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow>
-                  <EuiSelect
-                    compressed
-                    options={DURATION_UNIT_OPTIONS}
-                    value={customUnit}
-                    onChange={(e) => setCustomUnit(e.target.value)}
-                    data-test-subj="snooze-custom-unit"
-                  />
-                </EuiFormRow>
+                <EuiText size="xs" color="subdued">|</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="snooze-condition-toggle-absolute"
+                  color={useAbsoluteTime ? 'primary' : 'subdued'}
+                  onClick={() => setUseAbsoluteTime(true)}
+                >
+                  {i18n.translate('xpack.responseOpsAlertsTable.snooze.condAbsolute', {
+                    defaultMessage: 'Date/Time',
+                  })}
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            {!useAbsoluteTime ? (
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow>
+                    <EuiFieldNumber
+                      compressed
+                      min={1}
+                      value={customValue}
+                      onChange={(e) => setCustomValue(Number(e.target.value))}
+                      css={css`
+                        width: 60px;
+                      `}
+                      data-test-subj="snooze-custom-value"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow>
+                    <EuiSelect
+                      compressed
+                      options={DURATION_UNIT_OPTIONS}
+                      value={customUnit}
+                      onChange={(e) => setCustomUnit(e.target.value)}
+                      data-test-subj="snooze-custom-unit"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiDatePicker
+                selected={absoluteDate}
+                onChange={(date) => setAbsoluteDate(date)}
+                showTimeSelect
+                minDate={moment()}
+                dateFormat="YYYY-MM-DD HH:mm"
+                timeFormat="HH:mm"
+                data-test-subj="snooze-condition-absolute-date"
+              />
+            )}
           </>
         )}
 
@@ -440,41 +554,109 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
               </h5>
             </EuiTitle>
             <EuiSpacer size="s" />
+
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFieldNumber
-                  compressed
-                  min={1}
-                  value={customValue}
-                  onChange={(e) => setCustomValue(Number(e.target.value))}
-                  css={css`
-                    width: 60px;
-                  `}
-                  data-test-subj="snooze-custom-value-simple"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  compressed
-                  options={DURATION_UNIT_OPTIONS}
-                  value={customUnit}
-                  onChange={(e) => setCustomUnit(e.target.value)}
-                  data-test-subj="snooze-custom-unit-simple"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  isLoading={isLoading}
-                  onClick={applyCustom}
-                  data-test-subj="alert-snooze-apply-custom"
+                <EuiLink
+                  data-test-subj="snooze-toggle-relative"
+                  color={!useAbsoluteTime ? 'primary' : 'subdued'}
+                  onClick={() => setUseAbsoluteTime(false)}
                 >
-                  {i18n.translate('xpack.responseOpsAlertsTable.snooze.apply', {
-                    defaultMessage: 'Apply',
+                  {i18n.translate('xpack.responseOpsAlertsTable.snooze.relative', {
+                    defaultMessage: 'Relative',
                   })}
-                </EuiButton>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">|</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="snooze-toggle-absolute"
+                  color={useAbsoluteTime ? 'primary' : 'subdued'}
+                  onClick={() => setUseAbsoluteTime(true)}
+                >
+                  {i18n.translate('xpack.responseOpsAlertsTable.snooze.absolute', {
+                    defaultMessage: 'Date/Time',
+                  })}
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            {!useAbsoluteTime ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFieldNumber
+                    compressed
+                    min={1}
+                    value={customValue}
+                    onChange={(e) => setCustomValue(Number(e.target.value))}
+                    css={css`
+                      width: 60px;
+                    `}
+                    data-test-subj="snooze-custom-value-simple"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    compressed
+                    options={DURATION_UNIT_OPTIONS}
+                    value={customUnit}
+                    onChange={(e) => setCustomUnit(e.target.value)}
+                    data-test-subj="snooze-custom-unit-simple"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    isLoading={isLoading}
+                    onClick={applyCustom}
+                    data-test-subj="alert-snooze-apply-custom"
+                  >
+                    {i18n.translate('xpack.responseOpsAlertsTable.snooze.apply', {
+                      defaultMessage: 'Apply',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup gutterSize="s" alignItems="center" direction="column">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.responseOpsAlertsTable.snooze.snoozeUntil', {
+                      defaultMessage: 'Snooze until',
+                    })}
+                    fullWidth
+                  >
+                    <EuiDatePicker
+                      selected={absoluteDate}
+                      onChange={(date) => setAbsoluteDate(date)}
+                      showTimeSelect
+                      minDate={moment()}
+                      dateFormat="YYYY-MM-DD HH:mm"
+                      timeFormat="HH:mm"
+                      data-test-subj="snooze-absolute-date"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    size="s"
+                    isLoading={isLoading}
+                    disabled={!absoluteDate || absoluteDate.isBefore(moment())}
+                    onClick={applyCustom}
+                    data-test-subj="alert-snooze-apply-absolute"
+                    fullWidth
+                  >
+                    {i18n.translate('xpack.responseOpsAlertsTable.snooze.applyAbsolute', {
+                      defaultMessage: 'Snooze until date',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </>
         )}
 

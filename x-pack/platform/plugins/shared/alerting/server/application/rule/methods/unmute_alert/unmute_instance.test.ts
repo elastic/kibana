@@ -161,6 +161,95 @@ describe('unmuteInstance()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
+  test('removes from mutedAlerts when alert has conditional snooze entry', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: ['2'],
+        mutedAlerts: [
+          {
+            alertInstanceId: '2',
+            mutedAt: '2025-01-01T00:00:00.000Z',
+            mutedBy: 'elastic',
+            expiresAt: '2025-12-31T00:00:00.000Z',
+            conditionOperator: 'any',
+          },
+          {
+            alertInstanceId: '3',
+            mutedAt: '2025-01-01T00:00:00.000Z',
+            mutedBy: 'elastic',
+            conditionOperator: 'any',
+          },
+        ],
+      },
+      version: '123',
+      references: [],
+    });
+
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({
+        mutedInstanceIds: [],
+        mutedAlerts: [
+          expect.objectContaining({
+            alertInstanceId: '3',
+          }),
+        ],
+      }),
+      { version: '123' }
+    );
+  });
+
+  test('removes from mutedAlerts only (not mutedInstanceIds) when only in mutedAlerts', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: [],
+        mutedAlerts: [
+          {
+            alertInstanceId: '2',
+            mutedAt: '2025-01-01T00:00:00.000Z',
+            mutedBy: 'elastic',
+            conditionOperator: 'any',
+          },
+        ],
+      },
+      version: '123',
+      references: [],
+    });
+
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({
+        mutedAlerts: [],
+      }),
+      { version: '123' }
+    );
+    // mutedInstanceIds should NOT be in the update (not modified since alert wasn't there)
+    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<string, unknown>;
+    expect(updateAttrs.mutedInstanceIds).toBeUndefined();
+  });
+
   describe('authorization', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({

@@ -104,6 +104,65 @@ describe('AlertSnoozePopover', () => {
     });
   });
 
+  it('renders the field_change checkbox', () => {
+    renderPopover();
+    expect(screen.getByText('Until a field value changes')).toBeInTheDocument();
+  });
+
+  it('shows field name input when field_change checkbox is checked', () => {
+    renderPopover();
+    fireEvent.click(screen.getByText('Until a field value changes'));
+    expect(screen.getByTestId('snooze-field-name')).toBeInTheDocument();
+  });
+
+  it('applies field_change condition with snapshot when field name entered', async () => {
+    render(
+      <AlertSnoozePopover
+        isOpen={true}
+        onClose={onClose}
+        button={<button>Trigger</button>}
+        onApplySnooze={onApplySnooze}
+        currentSeverity="high"
+        alertData={{ 'host.name': ['server-01'] }}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Until a field value changes'));
+    const fieldInput = screen.getByTestId('snooze-field-name');
+    fireEvent.change(fieldInput, { target: { value: 'host.name' } });
+
+    // Should show current value
+    expect(screen.getByText('Current value: server-01')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alert-snooze-apply-conditions'));
+
+    await waitFor(() => {
+      expect(onApplySnooze).toHaveBeenCalledTimes(1);
+      const call = onApplySnooze.mock.calls[0][0];
+      expect(call.conditions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'field_change',
+            field: 'host.name',
+            snapshotValue: 'server-01',
+          }),
+        ])
+      );
+    });
+  });
+
+  it('renders the relative/absolute time toggle in custom duration section', () => {
+    renderPopover();
+    expect(screen.getByTestId('snooze-toggle-relative')).toBeInTheDocument();
+    expect(screen.getByTestId('snooze-toggle-absolute')).toBeInTheDocument();
+  });
+
+  it('shows date picker when absolute time toggle is clicked', () => {
+    renderPopover();
+    fireEvent.click(screen.getByTestId('snooze-toggle-absolute'));
+    expect(screen.getByTestId('alert-snooze-apply-absolute')).toBeInTheDocument();
+  });
+
   it('renders nothing when not open', () => {
     renderPopover(false);
     expect(screen.queryByText('Snooze alert notifications')).not.toBeInTheDocument();

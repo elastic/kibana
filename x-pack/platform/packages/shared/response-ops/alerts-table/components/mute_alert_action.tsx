@@ -110,6 +110,7 @@ export const MuteAlertAction = typedMemo(
         }
         onApplySnooze={handleApplySnooze}
         currentSeverity={currentSeverity}
+        alertData={alert as Record<string, string[]>}
       />
     );
   }

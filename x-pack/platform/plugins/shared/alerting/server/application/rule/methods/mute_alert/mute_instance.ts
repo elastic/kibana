@@ -136,7 +136,7 @@ async function muteInstanceWithOCC(
       const newEntry: MutedAlertInstance = {
         alertInstanceId,
         mutedAt: new Date().toISOString(),
-        mutedBy: userName,
+        mutedBy: userName ?? undefined,
         ...(expiresAt ? { expiresAt } : {}),
         ...(conditions && conditions.length > 0 ? { conditions } : {}),
         conditionOperator: conditionOperator ?? 'any',

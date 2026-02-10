@@ -6,7 +6,7 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_RULE_UUID,
