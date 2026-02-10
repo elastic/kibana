@@ -43,9 +43,9 @@ describe('convertUriPartsProcessorToESQL', () => {
     // ignore_missing=true should NOT filter-out docs via WHERE
     expect(result).not.toContain('WHERE NOT(message IS NULL)');
 
-    // instead, the GROK source should be CASE-wrapped
-    expect(result).toContain('CASE(NOT(message IS NULL), message, "")');
-    expect(result).toContain('GROK CASE(');
+    // instead, the URI_PARTS source should be CASE-wrapped (NULL else branch avoids URI parse warnings)
+    expect(result).toContain('CASE(NOT(message IS NULL), message, NULL)');
+    expect(result).toContain('URI_PARTS url = CASE(');
   });
 
   it('should CASE-wrap source when where is provided', () => {
@@ -62,10 +62,10 @@ describe('convertUriPartsProcessorToESQL', () => {
     expect(result).toContain('WHERE NOT(message IS NULL)');
 
     // Conditional execution is applied by CASE-wrapping the GROK source
-    expect(result).toContain('CASE(active == TRUE, message, "")');
+    expect(result).toContain('CASE(active == TRUE, message, NULL)');
 
     // keep_original defaults to true, so it should mirror the same conditional source expression
-    expect(result).toContain('`url.original` = CASE(active == TRUE, message, "")');
+    expect(result).toContain('`url.original` = CASE(active == TRUE, message, NULL)');
   });
 
   it('should not emit `.original` even when where is provided and keep_original is false', () => {
@@ -78,7 +78,7 @@ describe('convertUriPartsProcessorToESQL', () => {
     };
 
     const result = commandsToString(convertUriPartsProcessorToESQL(processor));
-    expect(result).toContain('CASE(active == TRUE, message, "")');
+    expect(result).toContain('CASE(active == TRUE, message, NULL)');
     expect(result).not.toContain('`url.original`');
   });
 });

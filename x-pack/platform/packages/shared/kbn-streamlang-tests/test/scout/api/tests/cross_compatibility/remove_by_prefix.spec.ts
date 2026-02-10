@@ -8,7 +8,8 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,7 +28,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
         const docs = [
@@ -74,7 +75,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
         const docs = [
@@ -129,7 +130,7 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          expect(() => transpile(streamlangDSL)).toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
           expect(() => transpileEsql(streamlangDSL)).toThrow(
@@ -151,7 +152,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
         const docs = [
