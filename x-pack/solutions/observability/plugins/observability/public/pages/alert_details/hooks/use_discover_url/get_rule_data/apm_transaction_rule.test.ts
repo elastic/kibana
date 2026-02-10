@@ -17,7 +17,6 @@ import type { TopAlert } from '../../../../../typings/alerts';
 import { getApmTransactionRuleData } from './apm_transaction_rule';
 
 describe('getApmTransactionRuleData', () => {
-
   const mockAlert: TopAlert = {
     fields: {
       [ALERT_INDEX_PATTERN]: 'metrics-apm*,apm-*',
