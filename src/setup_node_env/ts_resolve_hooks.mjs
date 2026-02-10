@@ -17,7 +17,7 @@
  * This is registered via module.register() in setup_node_env/index.js.
  */
 
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync, realpathSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve as pathResolve } from 'node:path';
 
@@ -65,19 +65,25 @@ function tryDirectFileResolve(specifier) {
  * ESM doesn't support directory imports, but CJS does (via package.json main).
  * Returns a resolved URL or null.
  */
+// Extensions to try when resolving a package.json "main" field
+const MAIN_EXTENSIONS = ['', '.ts', '.tsx', '.js'];
+
 function tryDirectoryResolve(specifier, dirPath) {
   // Check if the directory has a package.json with a main field
   const pkgJsonPath = pathResolve(dirPath, 'package.json');
   try {
     const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
     if (pkgJson.main) {
-      const mainPath = pathResolve(dirPath, pkgJson.main);
-      try {
-        if (statSync(mainPath).isFile()) {
-          return { url: pathToFileURL(mainPath).href, shortCircuit: true };
+      // Try the main field with several extensions (handles extensionless main like "./make_matcher")
+      for (const ext of MAIN_EXTENSIONS) {
+        const mainPath = pathResolve(dirPath, pkgJson.main + ext);
+        try {
+          if (statSync(mainPath).isFile()) {
+            return { url: pathToFileURL(mainPath).href, shortCircuit: true };
+          }
+        } catch {
+          // continue to next extension
         }
-      } catch {
-        // main doesn't point to a file
       }
     }
   } catch {
@@ -99,17 +105,64 @@ function tryDirectoryResolve(specifier, dirPath) {
   return null;
 }
 
+/**
+ * Try to resolve a bare package import (e.g. '@kbn/picomatcher') when Node's
+ * ESM resolver fails because the package's "main" field is extensionless.
+ * Finds the package directory in node_modules and delegates to tryDirectoryResolve.
+ */
+function tryPackageMainResolve(specifier) {
+  const parts = specifier.split('/');
+  let pkgName;
+  if (specifier.startsWith('@')) {
+    if (parts.length > 2) return null; // has subpath, not a bare import
+    pkgName = parts.slice(0, 2).join('/');
+  } else {
+    if (parts.length > 1) return null; // has subpath
+    pkgName = parts[0];
+  }
+
+  const pkgDir = pathResolve(process.cwd(), 'node_modules', pkgName);
+  return tryDirectoryResolve(specifier, pkgDir);
+}
+
+/**
+ * Resolve symlinks for files under node_modules/ to their real paths.
+ * This avoids ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING: Node refuses
+ * to strip types from .ts files under node_modules/, but @kbn/* packages
+ * are symlinked there.  Resolving to the real path (outside node_modules)
+ * lets --experimental-transform-types work normally.
+ */
+function resolveSymlinks(result) {
+  if (result && result.url && result.url.includes('/node_modules/')) {
+    try {
+      const filePath = fileURLToPath(result.url);
+      const realPath = realpathSync(filePath);
+      if (realPath !== filePath) {
+        return { ...result, url: pathToFileURL(realPath).href };
+      }
+    } catch {
+      // realpathSync failed (broken symlink, etc.) — return as-is
+    }
+  }
+  return result;
+}
+
 export async function resolve(specifier, context, nextResolve) {
   // Try default resolution first
   try {
-    return await nextResolve(specifier, context);
+    return resolveSymlinks(await nextResolve(specifier, context));
   } catch (err) {
     // If a package exports map blocks a deep import, try resolving the file directly.
     // This is needed for type-only imports that are erased at compile time but must
     // still resolve in ESM (resolution happens before compilation).
-    if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-      const result = tryDirectFileResolve(specifier);
-      if (result) return result;
+    if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED' || err.code === 'ERR_MODULE_NOT_FOUND') {
+      // Try resolving as a subpath file (e.g. @kbn/foo/bar → @kbn/foo/bar.ts)
+      const fileResult = tryDirectFileResolve(specifier);
+      if (fileResult) return resolveSymlinks(fileResult);
+
+      // Try resolving as a bare package with extensionless "main" field
+      const pkgResult = tryPackageMainResolve(specifier);
+      if (pkgResult) return resolveSymlinks(pkgResult);
     }
 
     // Handle directory imports (ESM doesn't support them, but CJS does).
@@ -119,7 +172,7 @@ export async function resolve(specifier, context, nextResolve) {
       const match = err.message.match(/Directory import '([^']+)'/);
       if (match) {
         const result = tryDirectoryResolve(specifier, match[1]);
-        if (result) return result;
+        if (result) return resolveSymlinks(result);
       }
     }
 
@@ -129,13 +182,13 @@ export async function resolve(specifier, context, nextResolve) {
     if (specifier.endsWith('.js')) {
       const tsSpecifier = specifier.slice(0, -3) + '.ts';
       try {
-        return await nextResolve(tsSpecifier, context);
+        return resolveSymlinks(await nextResolve(tsSpecifier, context));
       } catch {
         // try .tsx as well
       }
       const tsxSpecifier = specifier.slice(0, -3) + '.tsx';
       try {
-        return await nextResolve(tsxSpecifier, context);
+        return resolveSymlinks(await nextResolve(tsxSpecifier, context));
       } catch {
         // fall through to throw original error
       }
@@ -150,7 +203,7 @@ export async function resolve(specifier, context, nextResolve) {
     // Try appending extensions (.ts, .tsx, /index.ts, etc.)
     for (const ext of EXTENSIONS) {
       try {
-        return await nextResolve(specifier + ext, context);
+        return resolveSymlinks(await nextResolve(specifier + ext, context));
       } catch {
         // continue to next extension
       }
@@ -164,6 +217,7 @@ export async function resolve(specifier, context, nextResolve) {
 /**
  * Load hook: transforms .tsx files via esbuild since Node's
  * --experimental-transform-types doesn't support JSX syntax.
+ * Also handles JSON imports so they work without explicit import attributes.
  */
 export async function load(url, context, nextLoad) {
   if (url.endsWith('.tsx')) {
@@ -179,6 +233,16 @@ export async function load(url, context, nextLoad) {
       sourcemap: 'inline',
     });
     return { format: 'module', source: code, shortCircuit: true };
+  }
+
+  // Handle JSON imports: ESM requires `with { type: 'json' }` but most
+  // existing code imports JSON without the attribute.  Automatically load
+  // .json files as JSON modules so the rest of the codebase doesn't need
+  // updating.
+  if (url.endsWith('.json')) {
+    const filePath = fileURLToPath(url);
+    const source = readFileSync(filePath, 'utf-8');
+    return { format: 'json', source, shortCircuit: true };
   }
 
   return nextLoad(url, context);

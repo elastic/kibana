@@ -7,27 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// When this CJS file is loaded via the ESM loader (imported from .mjs), the
+// `require()` provided is the ESM translator's synthetic require, which does
+// NOT go through `require.extensions`.  That means the esbuild CJS hook
+// registered by ts_require_hook.js never fires, and Node fails to load .ts
+// files that contain ESM syntax.  Using `createRequire` gives us a real CJS
+// `require` that honours `require.extensions`, so esbuild can transform .ts
+// files to CJS on the fly.
+const { createRequire: _createRequire } = require('node:module');
+const _require = _createRequire(__filename);
+
 module.exports = {
   ['@kbn/repo-packages'](): any {
     // we need to load this package before we install node modules so we can't use @kbn/* imports here
     // eslint-disable-next-line import/no-dynamic-require
-    return require('../../../../../' + 'src/platform/packages/private/kbn-repo-packages');
+    return _require('../../../../../' + 'src/platform/packages/private/kbn-repo-packages');
   },
 
   // NOTE: babel-register removed - these packages must be pre-built ESM
   ['@kbn/ci-stats-reporter'](): any {
-    return require('@kbn/ci-stats-reporter');
+    return _require('@kbn/ci-stats-reporter');
   },
 
   ['@kbn/yarn-lock-validator'](): any {
-    return require('@kbn/yarn-lock-validator');
+    return _require('@kbn/yarn-lock-validator');
   },
 
   ['@kbn/sort-package-json'](): any {
-    return require('@kbn/sort-package-json');
+    return _require('@kbn/sort-package-json');
   },
 
   ['@kbn/get-repo-files'](): any {
-    return require('@kbn/get-repo-files');
+    return _require('@kbn/get-repo-files');
   },
 };
