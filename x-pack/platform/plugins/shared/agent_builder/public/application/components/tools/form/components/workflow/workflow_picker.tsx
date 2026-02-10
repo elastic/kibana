@@ -13,7 +13,7 @@ import { useListWorkflows } from '../../../../../hooks/tools/use_list_workflows'
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
 
 export const WorkflowPicker: React.FC = () => {
-  const { control, trigger } = useFormContext<WorkflowToolFormData>();
+  const { control, trigger, setValue } = useFormContext<WorkflowToolFormData>();
   const {
     field: { value, onChange, onBlur, name },
     fieldState,
@@ -48,6 +48,15 @@ export const WorkflowPicker: React.FC = () => {
   ) => {
     const selectedWorkflowId = newSelectedOptions.length > 0 ? newSelectedOptions[0].value : '';
     onChange(selectedWorkflowId);
+
+    // Auto-populate description from the workflow definition, mirroring MCP tool behavior
+    if (selectedWorkflowId) {
+      const selectedWorkflow = workflows?.find((w) => w.id === selectedWorkflowId);
+      if (selectedWorkflow?.description) {
+        setValue('description', selectedWorkflow.description, { shouldValidate: true });
+      }
+    }
+
     await trigger(name);
   };
 
