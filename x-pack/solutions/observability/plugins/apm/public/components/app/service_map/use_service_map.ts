@@ -195,5 +195,8 @@ const processServiceMapDataCytoscape = (
     exitSpanDestinations: paths.exitSpanDestinations,
     servicesData: data.servicesData,
     anomalies: data.anomalies,
+    alertCounts: data.alertCounts,
+    sloStats: data.sloStats,
+    healthStatuses: data.healthStatuses,
   });
 };

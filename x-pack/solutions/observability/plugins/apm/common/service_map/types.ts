@@ -68,6 +68,10 @@ export interface ServiceMapRawResponse {
     sloStatus: SloStatus;
     sloCount: number;
   }>;
+  healthStatuses: Array<{
+    serviceName: string;
+    combinedHealthStatus: ServiceHealthStatus;
+  }>;
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
@@ -76,12 +80,7 @@ export interface ServicesResponse {
   [SERVICE_NAME]: string;
   [AGENT_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
-  anomalyHealthStatus?: ServiceHealthStatus;
-  combinedHealthStatus?: ServiceHealthStatus;
-  alertsCount?: number;
-  alertsSeverity?: ServiceAlertsSeverity;
-  sloStatus?: SloStatus;
-  sloCount?: number;
+  // Health data lookup happens from top-level arrays, not stored here
 }
 
 export type ServiceConnectionNode = cytoscape.NodeDataDefinition &

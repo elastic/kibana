@@ -43,15 +43,21 @@ import {
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
-function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
-  // Extract all health-related data from the connection node
-  const serviceAnomalyStats = 'serviceAnomalyStats' in node ? node.serviceAnomalyStats : undefined;
-  const combinedHealthStatus =
-    'combinedHealthStatus' in node ? node.combinedHealthStatus : undefined;
-  const alertsCount = 'alertsCount' in node ? node.alertsCount : undefined;
-  const alertsSeverity = 'alertsSeverity' in node ? node.alertsSeverity : undefined;
-  const sloStatus = 'sloStatus' in node ? node.sloStatus : undefined;
-  const sloCount = 'sloCount' in node ? node.sloCount : undefined;
+function toServiceNodeData(
+  node: ConnectionNode,
+  healthLookups: {
+    anomaliesMap: Map<string, any>;
+    alertsMap: Map<string, { alertsCount: number; alertsSeverity: any }>;
+    sloMap: Map<string, { sloStatus: any; sloCount: number }>;
+    healthStatusMap: Map<string, any>;
+  }
+): ServiceNodeData {
+  const serviceName = node[SERVICE_NAME] || node.id;
+
+  const serviceAnomalyStats = healthLookups.anomaliesMap.get(serviceName);
+  const combinedHealthStatus = healthLookups.healthStatusMap.get(serviceName);
+  const alertData = healthLookups.alertsMap.get(serviceName);
+  const sloData = healthLookups.sloMap.get(serviceName);
 
   return {
     id: node.id,
@@ -60,10 +66,10 @@ function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
     isService: true,
     serviceAnomalyStats,
     combinedHealthStatus,
-    alertsCount,
-    alertsSeverity,
-    sloStatus,
-    sloCount,
+    alertsCount: alertData?.alertsCount,
+    alertsSeverity: alertData?.alertsSeverity,
+    sloStatus: sloData?.sloStatus,
+    sloCount: sloData?.sloCount,
   };
 }
 
@@ -81,16 +87,32 @@ function isServiceNode(node: ConnectionNode): boolean {
   return node[SERVICE_NAME] !== undefined;
 }
 
-function toNodeData(node: ConnectionNode): ServiceMapNodeData {
-  return isServiceNode(node) ? toServiceNodeData(node) : toDependencyNodeData(node);
+function toNodeData(
+  node: ConnectionNode,
+  healthLookups: {
+    anomaliesMap: Map<string, any>;
+    alertsMap: Map<string, { alertsCount: number; alertsSeverity: any }>;
+    sloMap: Map<string, { sloStatus: any; sloCount: number }>;
+    healthStatusMap: Map<string, any>;
+  }
+): ServiceMapNodeData {
+  return isServiceNode(node) ? toServiceNodeData(node, healthLookups) : toDependencyNodeData(node);
 }
 
-function toReactFlowNode(node: ConnectionNode): ServiceMapNode {
+function toReactFlowNode(
+  node: ConnectionNode,
+  healthLookups: {
+    anomaliesMap: Map<string, any>;
+    alertsMap: Map<string, { alertsCount: number; alertsSeverity: any }>;
+    sloMap: Map<string, { sloStatus: any; sloCount: number }>;
+    healthStatusMap: Map<string, any>;
+  }
+): ServiceMapNode {
   return {
     id: node.id,
     type: isServiceNode(node) ? 'service' : 'dependency',
     position: { x: 0, y: 0 },
-    data: toNodeData(node),
+    data: toNodeData(node, healthLookups),
   };
 }
 
@@ -118,6 +140,36 @@ export function transformToReactFlow(
   data: ServiceMapResponse | ServiceMapRawResponse
 ): ReactFlowServiceMapResponse {
   const tracesCount = 'tracesCount' in data ? data.tracesCount : 0;
+
+  // Create lookup maps from top-level health arrays (matching anomalies pattern)
+  const anomaliesMap = new Map(
+    data.anomalies.serviceAnomalies.map((anomaly) => [anomaly.serviceName, anomaly])
+  );
+
+  const alertsMap = new Map(
+    data.alertCounts.map((alert) => [
+      alert.serviceName,
+      { alertsCount: alert.alertsCount, alertsSeverity: alert.alertsSeverity },
+    ])
+  );
+
+  const sloMap = new Map(
+    data.sloStats.map((slo) => [
+      slo.serviceName,
+      { sloStatus: slo.sloStatus, sloCount: slo.sloCount },
+    ])
+  );
+
+  const healthStatusMap = new Map(
+    data.healthStatuses.map((health) => [health.serviceName, health.combinedHealthStatus])
+  );
+
+  const healthLookups = {
+    anomaliesMap,
+    alertsMap,
+    sloMap,
+    healthStatusMap,
+  };
 
   const paths = getPaths({ spans: data.spans });
 
@@ -152,7 +204,7 @@ export function transformToReactFlow(
 
   const reactFlowNodes = [...uniqueNodes.values()]
     .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
-    .map(toReactFlowNode);
+    .map((node) => toReactFlowNode(node, healthLookups));
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {

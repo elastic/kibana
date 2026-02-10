@@ -289,7 +289,14 @@ export function getServiceMapNodes({
   exitSpanDestinations,
   servicesData,
   anomalies,
-}: ServiceMapConnections): GroupResourceNodesResponse {
+  alertCounts,
+  sloStats,
+  healthStatuses,
+}: ServiceMapConnections & {
+  alertCounts?: Array<{ serviceName: string; alertsCount: number; alertsSeverity: any }>;
+  sloStats?: Array<{ serviceName: string; sloStatus: any; sloCount: number }>;
+  healthStatuses?: Array<{ serviceName: string; combinedHealthStatus: any }>;
+}): GroupResourceNodesResponse {
   const allConnections = addMessagingConnections(connections, exitSpanDestinations);
   const allNodes = getAllNodes(servicesData, allConnections);
   const allServices = getAllServices(allNodes, exitSpanDestinations, anomalies);
@@ -315,6 +322,43 @@ export function getServiceMapNodes({
     }, new Map<string, ConnectionNode>())
     .values();
 
+  // Enrich nodes with health data from top-level arrays (matching anomalies pattern)
+  const alertsMap = new Map(
+    (alertCounts || []).map((alert) => [
+      alert.serviceName,
+      { alertsCount: alert.alertsCount, alertsSeverity: alert.alertsSeverity },
+    ])
+  );
+  const sloMap = new Map(
+    (sloStats || []).map((slo) => [
+      slo.serviceName,
+      { sloStatus: slo.sloStatus, sloCount: slo.sloCount },
+    ])
+  );
+  const healthStatusMap = new Map(
+    (healthStatuses || []).map((health) => [health.serviceName, health.combinedHealthStatus])
+  );
+
+  const enrichedNodes = [...uniqueNodes].map((node) => {
+    const serviceName = node[SERVICE_NAME] || node.id;
+    const alertData = alertsMap.get(serviceName);
+    const sloData = sloMap.get(serviceName);
+    const combinedHealthStatus = healthStatusMap.get(serviceName);
+
+    return {
+      ...node,
+      ...(alertData && {
+        alertsCount: alertData.alertsCount,
+        alertsSeverity: alertData.alertsSeverity,
+      }),
+      ...(sloData && {
+        sloStatus: sloData.sloStatus,
+        sloCount: sloData.sloCount,
+      }),
+      ...(combinedHealthStatus && { combinedHealthStatus }),
+    };
+  });
+
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
   const edges = markBidirectionalConnections({
@@ -322,7 +366,7 @@ export function getServiceMapNodes({
   });
 
   // Put everything together in elements, with everything in the "data" property
-  const elements: ConnectionElement[] = [...edges, ...uniqueNodes].map((element) => ({
+  const elements: ConnectionElement[] = [...edges, ...enrichedNodes].map((element) => ({
     data: element,
   }));
 

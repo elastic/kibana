@@ -99,8 +99,22 @@ export function getServiceMap(
       return DEFAULT_ANOMALIES;
     });
 
-    const [connectionData, servicesData, anomalies, alertCounts] = await Promise.all([
-      getConnectionData(options),
+    // Get connection data first to extract all service names from the map
+    const connectionData = await getConnectionData(options);
+
+    // Extract all unique service names from spans (all services in the map)
+    const serviceNamesFromSpans = new Set<string>();
+    connectionData.spans.forEach((span) => {
+      if (span.serviceName) {
+        serviceNamesFromSpans.add(span.serviceName);
+      }
+      if (span.destinationService?.serviceName) {
+        serviceNamesFromSpans.add(span.destinationService.serviceName);
+      }
+    });
+    const allServiceNames = Array.from(serviceNamesFromSpans);
+
+    const [servicesData, anomalies, alertCounts, sloStats] = await Promise.all([
       getServiceStats(options).catch((error) => {
         logger.warn(`Unable to retrieve service stats for service map.`, { error });
         return [];
@@ -113,30 +127,26 @@ export function getServiceMap(
         end,
         environment,
         kuery: options.kuery,
-        serviceGroup: undefined, // Service map doesn't use service groups for filtering
-        serviceName: options.serviceName,
       }).catch((error) => {
         logger.debug(`Unable to retrieve alerts for service maps.`, { error });
         return [];
       }),
+      // Fetch SLO stats for ALL services in the map (from spans)
+      getServicesSloStats({
+        sloClient,
+        environment,
+        maxNumServices: maxNumberOfServices,
+        serviceNames: allServiceNames,
+      }).catch((error) => {
+        logger.debug(`Unable to retrieve SLO stats for service maps.`, { error });
+        return [];
+      }),
     ]);
-
-    // Fetch SLO stats after we have service names
-    const serviceNames = servicesData.map((service) => service['service.name']);
-    const sloStats = await getServicesSloStats({
-      sloClient,
-      environment,
-      maxNumServices: maxNumberOfServices,
-      serviceNames,
-    }).catch((error) => {
-      logger.debug(`Unable to retrieve SLO stats for service maps.`, { error });
-      return [];
-    });
 
     logger.debug('Received and parsed all responses');
 
-    // Merge all data sources into enriched services data for node coloring
-    const enrichedServicesData = mergeServiceMapData({
+    // Calculate combined health status for all services (matching anomalies pattern)
+    const healthStatuses = mergeServiceMapData({
       servicesData,
       anomalies,
       alertCounts,
@@ -146,10 +156,11 @@ export function getServiceMap(
     return {
       spans: connectionData.spans,
       tracesCount: connectionData.tracesCount,
-      servicesData: enrichedServicesData,
+      servicesData, // Keep original servicesData without health merge
       anomalies,
       alertCounts,
       sloStats,
+      healthStatuses, // Return calculated health statuses at top level
     };
   });
 }

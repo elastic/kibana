@@ -13,8 +13,14 @@ import { getSeverity } from '../../../common/anomaly_detection';
 import {
   getServiceAnomaliesHealthStatus,
   calculateCombinedHealthStatus,
+  ServiceHealthStatus,
 } from '../../../common/service_health_status';
 
+/**
+ * Calculate combined health status for all services in the service map.
+ * Returns an array of health statuses that can be looked up by service name.
+ * This matches the pattern used for anomalies (top-level arrays).
+ */
 export function mergeServiceMapData({
   servicesData,
   anomalies,
@@ -25,9 +31,16 @@ export function mergeServiceMapData({
   anomalies: ServiceAnomaliesResponse;
   alertCounts: ServiceAlertsResponse;
   sloStats: ServiceSloStatsResponse;
-}): ServicesResponse[] {
+}): Array<{ serviceName: string; combinedHealthStatus: ServiceHealthStatus }> {
   try {
-    // Create lookup maps for efficient merging
+    // Collect all unique service names from all sources
+    const allServiceNames = new Set<string>();
+    servicesData.forEach((service) => allServiceNames.add(service['service.name']));
+    anomalies.serviceAnomalies.forEach((anomaly) => allServiceNames.add(anomaly.serviceName));
+    alertCounts.forEach((alert) => allServiceNames.add(alert.serviceName));
+    sloStats.forEach((slo) => allServiceNames.add(slo.serviceName));
+
+    // Create lookup maps for efficient access
     const anomalyMap = new Map(
       anomalies.serviceAnomalies.map((anomaly) => {
         const severity = getSeverity(anomaly.anomalyScore);
@@ -37,58 +50,38 @@ export function mergeServiceMapData({
     );
 
     const alertsMap = new Map(
-      alertCounts.map((alert) => [
-        alert.serviceName,
-        {
-          alertsCount: alert.alertsCount,
-          alertsSeverity: alert.alertsSeverity,
-        },
-      ])
+      alertCounts.map((alert) => [alert.serviceName, alert.alertsSeverity])
     );
 
-    const sloMap = new Map(
-      sloStats.map((slo) => [
-        slo.serviceName,
-        {
-          sloStatus: slo.sloStatus,
-          sloCount: slo.sloCount,
-        },
-      ])
-    );
+    const sloMap = new Map(sloStats.map((slo) => [slo.serviceName, slo.sloStatus]));
 
-    // Merge all data for each service
-    return servicesData.map((service) => {
+    // Calculate combined health for all services
+    return Array.from(allServiceNames).map((serviceName) => {
       try {
-        const serviceName = service['service.name'];
         const anomalyHealthStatus = anomalyMap.get(serviceName);
-        const alertData = alertsMap.get(serviceName);
-        const sloData = sloMap.get(serviceName);
+        const alertsSeverity = alertsMap.get(serviceName);
+        const sloStatus = sloMap.get(serviceName);
 
-        // Calculate combined health status from all signals
         const combinedHealthStatus = calculateCombinedHealthStatus({
-          alertsSeverity: alertData?.alertsSeverity,
-          sloStatus: sloData?.sloStatus,
+          alertsSeverity,
+          sloStatus,
           anomalyHealthStatus,
         });
 
         return {
-          ...service,
-          anomalyHealthStatus,
+          serviceName,
           combinedHealthStatus,
-          alertsCount: alertData?.alertsCount ?? 0,
-          alertsSeverity: alertData?.alertsSeverity, // Leave undefined if no alert data
-          sloStatus: sloData?.sloStatus,
-          sloCount: sloData?.sloCount ?? 0,
         };
       } catch (error) {
-        // If merge fails for individual service, return service without health data
-        // This ensures one bad service doesn't break the entire map
-        return service;
+        // If calculation fails for individual service, return unknown status
+        return {
+          serviceName,
+          combinedHealthStatus: ServiceHealthStatus.unknown,
+        };
       }
     });
   } catch (error) {
-    // If entire merge operation fails, return original servicesData
-    // Map will still render, just without combined health status
-    return servicesData;
+    // If entire operation fails, return empty array
+    return [];
   }
 }

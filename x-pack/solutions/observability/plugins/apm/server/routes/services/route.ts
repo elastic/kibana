@@ -55,6 +55,7 @@ import { getServicesSloStats } from './get_services/get_services_slo_stats';
 import { calculateCombinedHealthStatus } from '../../../common/service_health_status';
 import type { ServiceHealthStatus } from '../../../common/service_health_status';
 import type { SloStatus, ServiceAlertsSeverity } from '../../../common/service_inventory';
+import { getAnomalyHealthStatuses } from './get_services/get_health_statuses';
 import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
@@ -938,6 +939,9 @@ const serviceHealthStatusRoute = createApmServerRoute({
     alertsSeverity?: ServiceAlertsSeverity;
     sloStatus?: SloStatus;
     sloCount: number;
+    anomalyHealthStatus?: ServiceHealthStatus;
+    anomalyScore?: number;
+    actualValue?: number;
   }> => {
     const { params, logger } = resources;
     const {
@@ -945,9 +949,10 @@ const serviceHealthStatusRoute = createApmServerRoute({
     } = params;
     const { serviceName } = params.path;
 
-    const [apmAlertsClient, sloClient] = await Promise.all([
+    const [apmAlertsClient, sloClient, mlClient] = await Promise.all([
       getApmAlertsClient(resources),
       getApmSloClient(resources),
+      getMlClient(resources),
     ]);
 
     // Fetch alerts data
@@ -973,21 +978,55 @@ const serviceHealthStatusRoute = createApmServerRoute({
       return [];
     });
 
-    const [alerts, sloStats] = await Promise.all([alertsPromise, sloPromise]);
+    // Fetch anomaly detection data
+    const anomalyPromise = getAnomalyHealthStatuses({
+      mlClient,
+      environment,
+      start,
+      end,
+      searchQuery: serviceName,
+    }).catch(
+      (
+        error: Error
+      ): Array<{
+        serviceName: string;
+        anomalyHealthStatus: ServiceHealthStatus;
+        anomalyScore?: number;
+        actualValue?: number;
+      }> => {
+        logger.warn(`Unable to retrieve anomaly health status for service ${serviceName}`, {
+          error,
+        });
+        return [];
+      }
+    );
+
+    const [alerts, sloStats, anomalyHealthStatuses] = await Promise.all([
+      alertsPromise,
+      sloPromise,
+      anomalyPromise,
+    ]);
 
     const alertData = alerts.length > 0 ? alerts[0] : undefined;
     const sloData = sloStats.length > 0 ? sloStats[0] : undefined;
+    // Filter to get exact service name match for anomaly data
+    const anomalyData = anomalyHealthStatuses.find((item): boolean => {
+      return item.serviceName === serviceName;
+    });
 
     const alertsCount = alertData?.alertsCount ?? 0;
     const alertsSeverity = alertData?.alertsSeverity;
     const sloStatus = sloData?.sloStatus;
     const sloCount = sloData?.sloCount ?? 0;
+    const anomalyHealthStatus = anomalyData?.anomalyHealthStatus;
+    const anomalyScore = anomalyData?.anomalyScore;
+    const actualValue = anomalyData?.actualValue;
 
     // Calculate combined health status
     const combinedHealthStatus = calculateCombinedHealthStatus({
       alertsSeverity,
       sloStatus,
-      anomalyHealthStatus: undefined, // We don't need anomaly status for the header
+      anomalyHealthStatus,
     });
 
     return {
@@ -997,6 +1036,9 @@ const serviceHealthStatusRoute = createApmServerRoute({
       alertsSeverity,
       sloStatus,
       sloCount,
+      anomalyHealthStatus,
+      anomalyScore,
+      actualValue,
     };
   },
 });
