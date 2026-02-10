@@ -28,13 +28,17 @@ export const getPersistedTabMock = ({
   tabId = 'test-tab',
   dataView,
   appStateOverrides = {},
+  globalStateOverrides = {},
   initialInternalStateOverrides = {},
+  timeRestore = false,
   services,
 }: {
   tabId?: string;
   dataView: DataView;
   appStateOverrides?: Partial<DiscoverAppState>;
+  globalStateOverrides?: Partial<TabState['globalState']>;
   initialInternalStateOverrides?: Partial<TabState['initialInternalState']>;
+  timeRestore?: boolean;
   services: DiscoverServices;
 }) => {
   const defaultQuery = { query: '', language: 'kuery' };
@@ -62,8 +66,9 @@ export const getPersistedTabMock = ({
         hideChart: false,
         ...appStateOverrides,
       },
+      globalState: globalStateOverrides,
     }),
-    timeRestore: false,
+    timeRestore,
     services,
   });
 };

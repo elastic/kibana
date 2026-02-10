@@ -103,14 +103,9 @@ describe('saveDiscoverSession', () => {
   it('should call saveDiscoverSession with the expected params', async () => {
     const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'test-tab',
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
-          timeRestore: false,
+        getPersistedTabMock({
+          tabId: 'test-tab',
+          dataView: dataViewMock,
           services,
         }),
       ],
@@ -226,17 +221,13 @@ describe('saveDiscoverSession', () => {
   it('should include timeRange and refreshInterval when timeRestore is true', async () => {
     const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'time-tab',
-            globalState: {
-              timeRange: { from: 'now-15m', to: 'now' },
-              refreshInterval: { value: 10000, pause: false },
-            },
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
+        getPersistedTabMock({
+          tabId: 'time-tab',
+          dataView: dataViewMock,
+          globalStateOverrides: {
+            timeRange: { from: 'now-15m', to: 'now' },
+            refreshInterval: { value: 10000, pause: false },
+          },
           timeRestore: true,
           services,
         }),
@@ -393,14 +384,9 @@ describe('saveDiscoverSession', () => {
   it('should apply overriddenVisContextAfterInvalidation to the saved tab', async () => {
     const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'vis-context-tab',
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
-          timeRestore: false,
+        getPersistedTabMock({
+          tabId: 'vis-context-tab',
+          dataView: dataViewMock,
           services,
         }),
       ],
