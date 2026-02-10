@@ -330,7 +330,7 @@
         "type": "date"
       },
       "uiamApiKey": {
-        "type": "text"
+        "type": "binary"
       }
     }
   },
