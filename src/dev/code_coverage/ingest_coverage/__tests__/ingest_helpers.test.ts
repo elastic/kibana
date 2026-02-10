@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// @ts-nocheck
 
 import { whichIndex } from '../ingest_helpers';
 import { TOTALS_INDEX, RESEARCH_TOTALS_INDEX, RESEARCH_COVERAGE_INDEX } from '../constants';

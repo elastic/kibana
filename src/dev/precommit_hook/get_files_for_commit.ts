@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// @ts-nocheck
 
 import SimpleGit from 'simple-git';
 
@@ -19,7 +20,7 @@ import { File } from '../file';
  * @param  {String} gitRef
  * @return {Promise<Array<File>>}
  */
-export async function getFilesForCommit(gitRef) {
+export async function getFilesForCommit(gitRef: string) {
   const simpleGit = new SimpleGit(REPO_ROOT);
   const gitRefForDiff = gitRef ? gitRef : '--cached';
   const output = await simpleGit.diff(['--name-status', gitRefForDiff]);

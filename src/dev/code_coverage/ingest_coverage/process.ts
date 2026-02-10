@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// @ts-nocheck
 
 import { fromEventPattern, fromEvent, map, mergeMap, takeUntil, bufferCount } from 'rxjs';
 import jsonStream from './json_stream';

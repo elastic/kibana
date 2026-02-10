@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// @ts-nocheck
 
 const mockKeystoreWithOldPassword =
   '1:9OsRzJI+gyDEH1ZjAHuKZFfYH7nEguzFRJwxWgj5WTJm5w+mzwKUzIdy65/lBW+XxY4wa1qYf0RSGJmfJKPz/er7pt58RJ8OgpicM2nCOMrqjPuovQr0QoMPbx736YlHEEIsuAaGAGItW7rlAQ==';

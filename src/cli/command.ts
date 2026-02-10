@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+// @ts-nocheck
+
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Chalk from 'chalk';
 
-import help from './help';
 import { Command } from 'commander';
+import help from './help';
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;
@@ -25,7 +28,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64); // eslint-disable-line no-process-exit
+  process.exit(64);
 };
 
 Command.prototype.defaultHelp = function () {
@@ -36,7 +39,7 @@ ${help(this, '  ')}
 `
   );
 
-  process.exit(64); // eslint-disable-line no-process-exit
+  process.exit(64);
 };
 
 Command.prototype.unknownArgv = function (argv) {
