@@ -151,7 +151,7 @@ export const AgentDetailsComponentHealth: React.FunctionComponent<{
         </EuiFlexItem>
       )}
       {componentEntries.map(([componentName, componentHealth]) => {
-        const treeItems = Object.keys(componentHealth.component_health_map ?? {}).length
+        const treeItems: any = Object.keys(componentHealth.component_health_map ?? {}).length
           ? buildTreeItems(componentHealth.component_health_map, componentName)
           : [];
 
