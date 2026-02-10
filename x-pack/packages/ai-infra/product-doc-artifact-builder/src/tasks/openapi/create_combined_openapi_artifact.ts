@@ -12,9 +12,75 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { DocumentationProduct, LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import type { ProductName } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { getArtifactMappings } from '../../artifact/mappings';
+import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { cloneDeep } from 'lodash';
 import { getArtifactManifest } from '../../artifact/manifest';
-import type { SemanticTextMapping } from '../create_index';
+
+const overrideInferenceSettings = (
+  mappings: MappingTypeMapping,
+  inferenceId: string,
+  modelSettingsToOverride?: object
+) => {
+  const recursiveOverride = (current: MappingTypeMapping | MappingProperty) => {
+    if ('type' in current && current.type === 'semantic_text') {
+      current.inference_id = inferenceId;
+      if (modelSettingsToOverride) {
+        // @ts-expect-error - model_settings is not typed, but exists for semantic_text field
+        current.model_settings = modelSettingsToOverride;
+      }
+    }
+    if ('properties' in current && current.properties) {
+      for (const prop of Object.values(current.properties)) {
+        recursiveOverride(prop);
+      }
+    }
+  };
+  recursiveOverride(mappings);
+};
+
+const OPENAPI_SPEC_MAPPING = {
+  properties: {
+    // Semantic text fields for semantic search
+    description: {
+      type: 'semantic_text',
+      inference_id: '.multilingual-e5-small-elasticsearch',
+    },
+    endpoint: {
+      type: 'semantic_text',
+      inference_id: '.multilingual-e5-small-elasticsearch',
+    },
+    summary: {
+      type: 'semantic_text',
+      inference_id: '.multilingual-e5-small-elasticsearch',
+    },
+    // Text fields for lexical search
+    description_text: { type: 'text' },
+    summary_text: { type: 'text' },
+    operationId: { type: 'text' },
+    // Keyword fields for exact and prefix matching
+    method: { type: 'keyword' },
+    path: {
+      type: 'text',
+      fields: {
+        keyword: { type: 'keyword' },
+      },
+    },
+    tags: { type: 'keyword' },
+    // Nested and other fields
+    parameters: {
+      type: 'object',
+      enabled: false,
+    },
+    responses: {
+      type: 'object',
+      enabled: false,
+    },
+    example: {
+      type: 'object',
+      enabled: false,
+    },
+  },
+};
 
 const isImpliedDefaultElserInferenceId = (inferenceId: string | null | undefined): boolean => {
   return (
@@ -74,14 +140,12 @@ export const createCombinedOpenAPIArtifact = async ({
   targetFolder,
   stackVersion,
   log,
-  semanticTextMapping,
   inferenceId,
 }: {
   buildFolder: string;
   targetFolder: string;
   stackVersion: string;
   log: ToolingLog;
-  semanticTextMapping: SemanticTextMapping;
   inferenceId: string;
 }) => {
   log.info(
@@ -89,7 +153,9 @@ export const createCombinedOpenAPIArtifact = async ({
   );
 
   const zip = new AdmZip();
-  const mappings = getArtifactMappings(semanticTextMapping);
+
+  const mappings = cloneDeep(OPENAPI_SPEC_MAPPING) as MappingTypeMapping;
+  overrideInferenceSettings(mappings, inferenceId);
   const mappingFileContent = JSON.stringify(mappings, undefined, 2);
 
   // Add both products to the zip

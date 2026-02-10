@@ -17,7 +17,6 @@ import {
   createCombinedOpenAPIArtifact,
 } from './tasks/openapi';
 import { cleanupFolders } from './tasks';
-import { getSemanticTextMapping } from './tasks/create_index';
 import type { OpenAPITaskConfig } from './types';
 
 const getEmbeddingClient = (config: OpenAPITaskConfig) => {
@@ -56,15 +55,6 @@ export const buildOpenAPIArtifacts = async (config: OpenAPITaskConfig) => {
 
   // Configuration - use ELSER as default (required by OpenAPI mapping)
   const inferenceId = config.inferenceId ?? defaultInferenceEndpoints.ELSER;
-  const semanticTextMapping = getSemanticTextMapping(inferenceId);
-
-  log.info(
-    `Using inference id [${inferenceId}] for semantic text mapping ${JSON.stringify(
-      semanticTextMapping,
-      null,
-      2
-    )}`
-  );
 
   const products = [
     {
@@ -106,7 +96,6 @@ export const buildOpenAPIArtifacts = async (config: OpenAPITaskConfig) => {
     targetFolder: config.targetFolder,
     stackVersion: config.stackVersion,
     log,
-    semanticTextMapping,
     inferenceId,
   });
 
