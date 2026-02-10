@@ -203,7 +203,7 @@ export class WorkflowEditorPage {
     const nodes = path.split('>').map((substring) => substring.trim());
     const workflowExecutionPanelLocator = this.page.testSubj.locator('workflowExecutionPanel');
     let parentLocator = workflowExecutionPanelLocator.locator(
-      'ul[aria-label="Workflow step execution tree"]'
+      '[data-test-subj="workflowStepExecutionTree"]'
     );
 
     for (let i = 0; i < nodes.length; i++) {

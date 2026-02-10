@@ -154,17 +154,15 @@ triggers:
 consts:
   pipeline_name: add_timestamp_if_missing
   alerts_index_name: test-security-alerts-index
-  alerts:
-    - severity: high
-      alert_id: bruteforce_login_attempt
-      description: Multiple failed login attempts detected from IP 192.168.1.45 targeting admin account. 15 failures in 3 minutes exceeding threshold.
-      category: authentication
-      timestamp: 2023-11-15T08:23:45Z
-    - severity: critical
-      alert_id: suspicious_data_transfer
-      description: Unusual outbound data transfer of 2.3GB to unrecognized external domain detected from workstation WS-0023. Transfer occurred outside business hours.
-      category: data_exfiltration
-      timestamp: 2023-11-15T09:17:32Z
+inputs:
+  type: object
+  properties:
+    alerts:
+      type: array
+      items:
+        type: object
+  required:
+    - "alerts"
 steps:
   - name: create_ingest_pipeline
     type: elasticsearch.request
@@ -181,7 +179,7 @@ steps:
               value: "{% raw %}{{_ingest.timestamp}}{% endraw %}"
   - name: index
     type: elasticsearch.request
-    foreach: "{{consts.alerts}}"
+    foreach: "{{inputs.alerts}}"
     with:
       method: POST
       path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}
@@ -573,6 +571,24 @@ steps:
       Math.random() * 10000
     )}`;
     const triggerAlertWorkflowName = `Trigger alert workflow ${Math.floor(Math.random() * 10000)}`;
+    const mockAlerts = [
+      {
+        severity: 'high',
+        alert_id: 'bruteforce_login_attempt',
+        description:
+          'Multiple failed login attempts detected from IP 192.168.1.45 targeting admin account. 15 failures in 3 minutes exceeding threshold.',
+        category: 'authentication',
+        timestamp: '2023-11-15T08:23:45Z',
+      },
+      {
+        severity: 'critical',
+        alert_id: 'suspicious_data_transfer',
+        description:
+          'Unusual outbound data transfer of 2.3GB to unrecognized external domain detected from workstation WS-0023. Transfer occurred outside business hours.',
+        category: 'data_exfiltration',
+        timestamp: '2023-11-15T09:17:32Z',
+      },
+    ];
     // Step 1: Create workflow with alert trigger
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
@@ -611,7 +627,7 @@ steps:
       getTriggerAlertWorkflowYaml(triggerAlertWorkflowName)
     );
     await pageObjects.workflowEditor.saveWorkflow();
-    await pageObjects.workflowEditor.clickRunButton();
+    await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
 
     // Wait for execution to complete
     const statusBadge2 = page.testSubj.locator('workflowExecutionStatus');

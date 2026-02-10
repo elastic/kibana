@@ -310,6 +310,7 @@ export const WorkflowStepExecutionTree = ({
           {/* Regular steps */}
           {regularItems.length > 0 && (
             <EuiTreeView
+              data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
               expandByDefault
               items={regularItems}
