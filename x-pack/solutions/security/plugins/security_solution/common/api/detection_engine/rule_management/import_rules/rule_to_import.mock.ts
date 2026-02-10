@@ -17,6 +17,7 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     risk_score: 55,
     rule_id: 'rule-1',
     immutable: false,
+    max_signals: 100,
     ...rewrites,
   } as RuleToImport);
 

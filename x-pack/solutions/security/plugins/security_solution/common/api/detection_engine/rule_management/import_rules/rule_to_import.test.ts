@@ -22,7 +22,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", rule_id: Invalid input: expected string, received undefined"`
     );
   });
 
@@ -47,7 +47,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Invalid input: expected string, received undefined, description: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
     );
   });
 
@@ -61,12 +61,12 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
     );
   });
 
   test('[rule_id, description, from] does not validate', () => {
-    const payload: Partial<RuleToImportInput> = {
+    const payload: Partial<RuleToImport> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -76,12 +76,12 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"name: Invalid input: expected string, received undefined, risk_score: Invalid input: expected number, received undefined, severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
     );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
-    const payload: Partial<RuleToImportInput> = {
+    const payload: Partial<RuleToImport> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -95,11 +95,13 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Invalid input: expected number, received undefined"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
-    const payload: Partial<RuleToImportInput> = {
+    const payload: Partial<RuleToImport> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -114,11 +116,13 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Invalid input: expected number, received undefined"`
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -138,7 +142,7 @@ describe('RuleToImport', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
-    const payload: Partial<RuleToImportInput> = {
+    const payload: Partial<RuleToImport> = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -155,11 +159,13 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"risk_score: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Invalid input: expected number, received undefined"`
+    );
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -180,7 +186,7 @@ describe('RuleToImport', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -202,7 +208,7 @@ describe('RuleToImport', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -221,7 +227,7 @@ describe('RuleToImport', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -249,7 +255,7 @@ describe('RuleToImport', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
-    const payload: RuleToImportInput = {
+    const payload: RuleToImport = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -310,7 +316,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"references.0: Expected string, received number"`
+      `"references.0: Invalid input: expected string, received number"`
     );
   });
 
@@ -324,7 +330,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"index.0: Expected string, received number"`
+      `"index.0: Invalid input: expected string, received number"`
     );
   });
 
@@ -370,7 +376,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"filters: Expected array, received string"`
+      `"filters: Invalid input: expected array, received string"`
     );
   });
 
@@ -400,7 +406,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
+      `"language: Invalid option: expected one of \\"kuery\\"|\\"lucene\\""`
     );
   });
 
@@ -411,7 +417,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -422,7 +428,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -452,7 +458,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number"`
+      `"tags.0: Invalid input: expected string, received number, tags.1: Invalid input: expected string, received number, tags.2: Invalid input: expected string, received number"`
     );
   });
 
@@ -480,7 +486,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.framework: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.framework: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -503,7 +511,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.tactic: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.tactic: Invalid input: expected object, received undefined"`
+    );
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -545,7 +555,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"false_positives.0: Expected string, received number, false_positives.1: Expected string, received number"`
+      `"false_positives.0: Invalid input: expected string, received number, false_positives.1: Invalid input: expected string, received number"`
     );
   });
 
@@ -559,7 +569,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Expected boolean, received number"`
+      `"immutable: Invalid input: expected boolean, received number"`
     );
   });
 
@@ -592,7 +602,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"risk_score: Number must be less than or equal to 100"`
+      `"risk_score: Too big: expected number to be <=100"`
     );
   });
 
@@ -605,7 +615,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"risk_score: Number must be greater than or equal to 0"`
+      `"risk_score: Too small: expected number to be >=0"`
     );
   });
 
@@ -651,7 +661,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"meta: Expected object, received string"`
+      `"meta: Invalid input: expected object, received string"`
     );
   });
 
@@ -676,7 +686,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_id: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"rule_id: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('it validates with created_at, updated_at, created_by, updated_by values', () => {
@@ -698,7 +710,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"created_at: Invalid datetime"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"created_at: Invalid ISO datetime"`
+    );
   });
 
   test('it does not validate with epoch strings for updated_at', () => {
@@ -707,7 +721,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"updated_at: Invalid datetime"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"updated_at: Invalid ISO datetime"`
+    );
   });
 
   test('The default for "from" will be "now-6m"', () => {
@@ -742,7 +758,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"`
+      `"severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\""`
     );
   });
 
@@ -768,7 +784,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.id: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.id: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
@@ -783,7 +801,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.action_type_id: Required"`
+      `"actions.0.action_type_id: Invalid input: expected string, received undefined"`
     );
   });
 
@@ -798,7 +816,9 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
 
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.params: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.params: Invalid input: expected object, received undefined"`
+    );
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
@@ -818,7 +838,7 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.action_type_id: Required"`
+      `"actions.0.action_type_id: Invalid input: expected string, received undefined"`
     );
   });
 
@@ -861,12 +881,12 @@ describe('RuleToImport', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"note: Expected string, received object"`
+        `"note: Invalid input: expected string, received object"`
       );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -887,7 +907,7 @@ describe('RuleToImport', () => {
 
   describe('exception_list', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -908,7 +928,7 @@ describe('RuleToImport', () => {
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -949,12 +969,12 @@ describe('RuleToImport', () => {
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toEqual(
-        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"
+        'exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of "detection"|"rule_default"|"endpoint"|"endpoint_trusted_apps"|"endpoint_trusted_devices"|"endpoint_events"|"endpoint_host_isolation_exceptions"|"endpoint_blocklists", exceptions_list.0.namespace_type: Invalid option: expected one of "agnostic"|"single"'
       );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -984,7 +1004,7 @@ describe('RuleToImport', () => {
 
   describe('data_view_id', () => {
     test('Defined data_view_id and empty index does validate', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1005,7 +1025,7 @@ describe('RuleToImport', () => {
 
     // Both can be defined, but if a data_view_id is defined, rule will use that one
     test('Defined data_view_id and index does validate', () => {
-      const payload: RuleToImportInput = {
+      const payload: RuleToImport = {
         rule_id: 'rule-1',
         risk_score: 50,
         description: 'some description',
@@ -1033,7 +1053,9 @@ describe('RuleToImport', () => {
       const result = RuleToImport.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('data_view_id: Expected string');
+      expect(stringifyZodError(result.error)).toContain(
+        'data_view_id: Invalid input: expected string'
+      );
     });
   });
 
