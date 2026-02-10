@@ -87,6 +87,7 @@ describe('RetentionCard', () => {
         // Effective lifecycle for wired streams must include a `from` field
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         dashboards: [],
         rules: [],
@@ -130,6 +131,7 @@ describe('RetentionCard', () => {
         },
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         dashboards: [],
         rules: [],

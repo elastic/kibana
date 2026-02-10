@@ -94,6 +94,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('updates settings when backing data stream is missing', async () => {
+        const name = 'logs.missing-ds-settings';
+        await putStream(apiClient, name, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              settings: {},
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        try {
+          await esClient.indices.deleteDataStream({ name });
+
+          const definition = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, name));
+          expect(definition.data_stream_exists).to.be(false);
+
+          const response = await updateDefinition(definition, {
+            'index.refresh_interval': { value: '15s' },
+          });
+          expect(response).to.have.property('acknowledged', true);
+
+          const updatedDefinition = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, name)
+          );
+          expect(updatedDefinition.data_stream_exists).to.be(false);
+          expect(updatedDefinition.effective_settings).to.eql({
+            'index.refresh_interval': { value: '15s', from: name },
+          });
+        } finally {
+          await deleteStream(apiClient, name);
+        }
+      });
+
       it('inherits settings', async () => {
         await putStream(apiClient, 'logs.foo.bar', {
           ...emptyAssets,

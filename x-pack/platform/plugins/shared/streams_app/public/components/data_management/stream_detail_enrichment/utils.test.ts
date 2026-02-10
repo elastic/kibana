@@ -228,6 +228,7 @@ describe('utils', () => {
       inherited_fields: {},
       effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'ancestor' },
       effective_settings: {},
+      data_stream_exists: true,
       stream: {
         name: 'wired-stream',
         description: 'A wired stream',

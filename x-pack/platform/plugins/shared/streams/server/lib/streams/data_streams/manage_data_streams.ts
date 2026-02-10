@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleDSL,
@@ -13,7 +14,6 @@ import type {
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
-import { errors } from '@elastic/elasticsearch';
 import type {
   IndicesDataStreamFailureStore,
   IndicesSimulateTemplateTemplate,
@@ -27,7 +27,6 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
-import { StatusError } from '../errors/status_error';
 
 interface DataStreamManagementOptions {
   esClient: ElasticsearchClient;
@@ -93,9 +92,17 @@ export async function rolloverDataStream({
   name,
   logger,
 }: UpdateOrRolloverDataStreamOptions) {
-  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
-    logger,
-  });
+  try {
+    await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+      logger,
+    });
+  } catch (err) {
+    // Backing data stream is missing (inconsistent state) - nothing to rollover.
+    if (isNotFoundError(err)) {
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function updateDefaultIngestPipeline({
@@ -103,7 +110,16 @@ export async function updateDefaultIngestPipeline({
   name,
   pipeline,
 }: UpdateDefaultIngestPipelineOptions) {
-  const dataStreams = await esClient.indices.getDataStream({ name });
+  let dataStreams;
+  try {
+    dataStreams = await esClient.indices.getDataStream({ name });
+  } catch (err) {
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    if (isNotFoundError(err)) {
+      return;
+    }
+    throw err;
+  }
   for (const dataStream of dataStreams.data_streams) {
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
@@ -136,18 +152,29 @@ export async function updateDataStreamsMappings({
   mappings,
 }: UpdateDataStreamsMappingsOptions) {
   // update the mappings on the data stream level
-  const response = (await esClient.transport.request({
-    method: 'PUT',
-    path: `/_data_stream/${name}/_mappings`,
-    body: {
-      properties: mappings,
-      _meta: {
-        managed_by: 'streams',
+  let response: DataStreamMappingsUpdateResponse;
+  try {
+    response = (await esClient.transport.request({
+      method: 'PUT',
+      path: `/_data_stream/${name}/_mappings`,
+      body: {
+        properties: mappings,
+        _meta: {
+          managed_by: 'streams',
+        },
       },
-    },
-  })) as DataStreamMappingsUpdateResponse;
+    })) as DataStreamMappingsUpdateResponse;
+  } catch (err) {
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    if (isNotFoundError(err)) {
+      return;
+    }
+    throw err;
+  }
   if (response.data_streams.length === 0) {
-    throw new Error(`Data stream ${name} not found`);
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    logger.debug(() => `Data stream ${name} not found when updating mappings`);
+    return;
   }
   if (response.data_streams[0].error) {
     throw new Error(
@@ -253,6 +280,10 @@ export async function updateDataStreamsLifecycle({
       );
     }
   } catch (err: any) {
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    if (isNotFoundError(err)) {
+      return;
+    }
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
   }
@@ -273,26 +304,21 @@ export async function putDataStreamsSettings({
     'index.refresh_interval'?: string | -1 | null;
   };
 }) {
-  const response = await (async () => {
-    try {
-      return await retryTransientEsErrors(() =>
-        esClient.indices.putDataStreamSettings({
-          name: names,
-          settings,
-        })
-      );
-    } catch (error) {
-      if (error instanceof errors.ResponseError && error.statusCode === 404) {
-        const dataStreams =
-          names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
-        throw new StatusError(
-          `Elasticsearch data stream ${dataStreams} does not exist. The stream definition may be out of sync with Elasticsearch. Use the resync API to recreate missing data streams, then retry.`,
-          404
-        );
-      }
-      throw error;
+  let response;
+  try {
+    response = await retryTransientEsErrors(() =>
+      esClient.indices.putDataStreamSettings({
+        name: names,
+        settings,
+      })
+    );
+  } catch (err) {
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    if (isNotFoundError(err)) {
+      return;
     }
-  })();
+    throw err;
+  }
   const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
     .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
@@ -306,12 +332,8 @@ export async function putDataStreamsSettings({
       joined.includes('no such data stream') ||
       (joined.includes('data stream') && joined.includes('does not exist'))
     ) {
-      const dataStreams =
-        names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
-      throw new StatusError(
-        `Elasticsearch data stream ${dataStreams} does not exist. The stream definition may be out of sync with Elasticsearch. Use the resync API to recreate missing data streams, then retry.`,
-        404
-      );
+      // Backing data stream is missing (inconsistent state) - nothing to update.
+      return;
     }
 
     throw new Error(joined);
@@ -378,6 +400,10 @@ export async function updateDataStreamsFailureStore({
       { logger }
     );
   } catch (err: any) {
+    // Backing data stream is missing (inconsistent state) - nothing to update.
+    if (isNotFoundError(err)) {
+      return;
+    }
     logger.error(`Error updating data stream failure store: ${err.message}`);
     throw err;
   }

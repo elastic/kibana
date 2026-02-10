@@ -44,6 +44,7 @@ describe('EditLifecycleModal', () => {
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},
+      data_stream_exists: true,
       inherited_fields: {},
       dashboards: [],
       rules: [],

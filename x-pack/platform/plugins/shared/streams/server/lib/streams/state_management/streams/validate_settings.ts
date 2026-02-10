@@ -98,7 +98,8 @@ export async function validateSettingsWithDryRun({
   }
 
   if (!response.data_streams || response.data_streams.length === 0) {
-    throw new Error(`Failed to validate stream settings for "${streamName}"`);
+    // Backing data stream is missing (inconsistent state) - skip dry-run validation.
+    return;
   }
 
   const error = response.data_streams.find(({ error: err }) => Boolean(err))?.error;
