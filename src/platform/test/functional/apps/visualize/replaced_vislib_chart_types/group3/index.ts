@@ -35,6 +35,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-    loadTestFile(require.resolve('./_timelion'));
   });
 }
