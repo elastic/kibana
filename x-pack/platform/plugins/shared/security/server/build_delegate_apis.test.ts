@@ -90,13 +90,13 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('authc.getTruncatedSessionId', () => {
-    it('properly delegates to session.getSID and truncates the result', async () => {
+  describe('authc.getRedactedSessionId', () => {
+    it('properly delegates to session.getSID and redacts the result', async () => {
       const request = httpServerMock.createKibanaRequest();
       const fullSid = '1234567890abcdefghijklmno';
       session.getSID.mockResolvedValue(fullSid);
 
-      const result = await api.authc.getTruncatedSessionId(request);
+      const result = await api.authc.getRedactedSessionId(request);
 
       expect(session.getSID).toHaveBeenCalledTimes(1);
       expect(session.getSID).toHaveBeenCalledWith(request);
@@ -107,7 +107,7 @@ describe('buildSecurityApi', () => {
       const request = httpServerMock.createKibanaRequest();
       session.getSID.mockResolvedValue(undefined);
 
-      const result = await api.authc.getTruncatedSessionId(request);
+      const result = await api.authc.getRedactedSessionId(request);
 
       expect(result).toBeUndefined();
     });

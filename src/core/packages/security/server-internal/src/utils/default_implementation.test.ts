@@ -24,9 +24,9 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
-  describe('authc.getTruncatedSessionId', () => {
+  describe('authc.getRedactedSessionId', () => {
     it('returns undefined', async () => {
-      const sessionId = await implementation.authc.getTruncatedSessionId({} as any);
+      const sessionId = await implementation.authc.getRedactedSessionId({} as any);
       expect(sessionId).toBeUndefined();
     });
   });

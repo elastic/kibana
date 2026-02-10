@@ -256,7 +256,7 @@ const createInternalStartContractMock = () => {
     generateOas: jest.fn(),
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
-    setTruncatedSessionIdGetter: jest.fn(),
+    setRedactedSessionIdGetter: jest.fn(),
   };
 
   mock.isListening.mockReturnValue(true);

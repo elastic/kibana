@@ -59,3 +59,4 @@ The following context is automatically added to every log entry by Kibana's HTTP
 | `user.ip` | IP address |
 | `session.id` | Session ID |
 | `kibana.space.id` | Current space ID |
+| `http.request.referrer` | Referrer |

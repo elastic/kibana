@@ -199,7 +199,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
-  private truncatedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
+  private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -220,10 +220,10 @@ export class HttpServer {
   }
 
   /** @internal */
-  public setTruncatedSessionIdGetter(
+  public setRedactedSessionIdGetter(
     getter: (request: KibanaRequest) => Promise<string | undefined>
   ) {
-    this.truncatedSessionIdGetter = getter;
+    this.redactedSessionIdGetter = getter;
   }
 
   private registerRouter(router: IRouter) {
@@ -602,14 +602,18 @@ export class HttpServer {
     });
 
     this.server!.ext('onPostAuth', async (request, responseToolkit) => {
-      if (this.truncatedSessionIdGetter) {
-        // Store the truncated session ID on the request state so the user
+      if (this.redactedSessionIdGetter) {
+        // Store the redacted session ID on the request state so the user
         // activity service can read it later. We cannot call the service
         // directly here because this handler is async and would use its
         // own user-activity
-        const kibanaRequest = CoreKibanaRequest.from(request);
-        (request.app as KibanaRequestState).truncatedSessionId =
-          await this.truncatedSessionIdGetter(kibanaRequest);
+        try {
+          const kibanaRequest = CoreKibanaRequest.from(request);
+          const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+          (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
+        } catch {
+          // just leave the session id as undefined
+        }
       }
       return responseToolkit.continue;
     });
@@ -619,7 +623,7 @@ export class HttpServer {
       (request.app as KibanaRequestState).span = null;
 
       const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
-      const { truncatedSessionId } = request.app as KibanaRequestState;
+      const { redactedSessionId } = request.app as KibanaRequestState;
       userActivity?.setInjectedContext({
         user: user
           ? {
@@ -631,7 +635,7 @@ export class HttpServer {
             }
           : { ip: request.info.remoteAddress },
         session: {
-          id: truncatedSessionId,
+          id: redactedSessionId,
         },
         http: {
           request: {

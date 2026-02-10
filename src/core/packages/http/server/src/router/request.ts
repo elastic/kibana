@@ -46,7 +46,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   authzResult?: Record<string, boolean>;
   measureElu?: () => void;
   startTime: number;
-  truncatedSessionId?: string;
+  redactedSessionId?: string;
 }
 
 /**

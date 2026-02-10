@@ -492,8 +492,8 @@ export class Server {
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
-    httpStart.setTruncatedSessionIdGetter((request) =>
-      securityStart.authc.getTruncatedSessionId(request)
+    httpStart.setRedactedSessionIdGetter((request) =>
+      securityStart.authc.getRedactedSessionId(request)
     );
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,

@@ -86,7 +86,7 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
   generateOas: (args: GenerateOasArgs) => Promise<object>;
   /** Indicates if the http server is listening on the configured port */
   isListening: () => boolean;
-  setTruncatedSessionIdGetter: (
+  setRedactedSessionIdGetter: (
     getter: (request: KibanaRequest) => Promise<string | undefined>
   ) => void;
 }
