@@ -165,13 +165,13 @@ For our framework to understand what kind of data is being returned by a tool, a
 must return a list of results following a specific format.
 
 - resource
-- tabular_data
+- esql_results
 - query
 - other
 - error
 
 This is useful to allow the framework to perform specific processing on the results. For example,
-this is how we perform visualization rendering for the `tabular_data` type, by recognizing that
+this is how we perform visualization rendering for the `esql_results` type, by recognizing that
 a tool returned some result which can be rendered as a visualization if we want to.
 
 This is also how we render specific type of results differently in the UI, e.g we inline `query` results
@@ -193,7 +193,7 @@ agentBuilder.tools.register({
     return {
       results: [
         { type: ToolResultType.query, data: { esql: esqlQuery } },
-        { type: ToolResultType.tabular_data, data },
+        { type: ToolResultType.esqlResults, data },
       ],
     };
   },
