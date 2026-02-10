@@ -265,7 +265,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   );
 
   const presetInput = useInput(
-    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', load),
+    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', parse),
     () => undefined,
     isDisabled('preset')
   );
