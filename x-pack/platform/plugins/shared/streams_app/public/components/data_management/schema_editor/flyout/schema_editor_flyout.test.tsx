@@ -147,7 +147,7 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       ...inheritedField,
       description: 'updated description',
       parent: stream.name,
-      status: 'mapped',
+      status: 'unmapped',
     });
   });
 
@@ -182,8 +182,7 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
     expect(stagedField).toEqual({
       name: documentationOnlyField.name,
       parent: stream.name,
-      status: 'mapped',
-      type: 'unmapped',
+      status: 'unmapped',
       description: 'updated description',
     });
     expect(stagedField).not.toHaveProperty('format');

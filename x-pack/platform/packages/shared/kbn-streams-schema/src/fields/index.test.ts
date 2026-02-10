@@ -38,6 +38,13 @@ describe('fieldDefinitionConfigSchema', () => {
     expect(fieldDefinitionConfigSchema.parse(unmappedFieldWithDesc)).toEqual(unmappedFieldWithDesc);
   });
 
+  it('should accept description-only override without type', () => {
+    const descriptionOnlyOverride = {
+      description: 'Custom description without freezing inherited mapping',
+    };
+    expect(fieldDefinitionConfigSchema.parse(descriptionOnlyOverride)).toEqual(descriptionOnlyOverride);
+  });
+
   it('should accept description on regular field types', () => {
     const keywordFieldWithDesc = {
       type: 'keyword',
@@ -73,6 +80,14 @@ describe('isMappingProperties', () => {
       field2: { type: 'date' },
     };
     expect(isMappingProperties(fields)).toBe(true);
+  });
+
+  it('should return false for description-only overrides (no type)', () => {
+    const fields: FieldDefinition = {
+      field1: { type: 'keyword' },
+      field2: { description: 'doc-only' },
+    };
+    expect(isMappingProperties(fields)).toBe(false);
   });
 
   it('should return false when containing system type', () => {

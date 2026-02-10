@@ -13,7 +13,7 @@ import type {
 import type { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
-export type SchemaFieldType = FieldDefinitionConfig['type'];
+export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']>;
 
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;

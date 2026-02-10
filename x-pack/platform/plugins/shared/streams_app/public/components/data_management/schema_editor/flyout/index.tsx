@@ -237,7 +237,7 @@ export const SchemaEditorFlyout = ({
                         ...field,
                         description: nextField.description,
                         parent: stagedParent,
-                        status: 'mapped',
+                        status: 'unmapped',
                       } as SchemaField;
                     }
 
@@ -245,8 +245,7 @@ export const SchemaEditorFlyout = ({
                       return {
                         name: nextField.name,
                         parent: stagedParent,
-                        status: 'mapped',
-                        type: 'unmapped',
+                        status: 'unmapped',
                         description: nextField.description,
                       } as SchemaField;
                     }

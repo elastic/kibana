@@ -18,6 +18,7 @@ import {
   createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';
 import {
+  deleteStream,
   disableStreams,
   enableStreams,
   fetchDocument,
@@ -749,6 +750,121 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }, {} as InheritedFieldDefinition);
 
         await expectFields(['logs.one.two', 'logs.one.two.three'], inheritedFields);
+      });
+
+      it('persists description-only overrides without freezing inherited mappings', async () => {
+        const parentStream = 'logs.doconlyparent';
+        const childStream = `${parentStream}.child`;
+        const fieldName = 'attributes.abc';
+        const childDescription = 'Child-only description override';
+
+        try {
+          // Create a parent/child hierarchy via fork so routing linkage is valid.
+          await forkStream(apiClient, 'logs', {
+            stream: { name: parentStream },
+            where: { always: {} },
+          });
+          await forkStream(apiClient, parentStream, {
+            stream: { name: childStream },
+            where: { always: {} },
+          });
+
+          // Update the parent stream to include a mapped field.
+          const parentBefore = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, parentStream));
+          const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
+            parentBefore.stream.ingest.processing;
+          await putStream(apiClient, parentStream, {
+            ...emptyAssets,
+            stream: {
+              description: parentBefore.stream.description,
+              ingest: {
+                ...parentBefore.stream.ingest,
+                processing: parentProcessing,
+                wired: {
+                  ...parentBefore.stream.ingest.wired,
+                  fields: {
+                    ...parentBefore.stream.ingest.wired.fields,
+                    [fieldName]: { type: 'keyword', ignore_above: 256 },
+                  },
+                },
+              },
+            },
+          });
+
+          // Update the child stream to only override the description (no type persisted).
+          const childBefore = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, childStream));
+          const { updated_at: _childProcessingUpdatedAt, ...childProcessing } =
+            childBefore.stream.ingest.processing;
+          await putStream(apiClient, childStream, {
+            ...emptyAssets,
+            stream: {
+              description: childBefore.stream.description,
+              ingest: {
+                ...childBefore.stream.ingest,
+                processing: childProcessing,
+                wired: {
+                  ...childBefore.stream.ingest.wired,
+                  fields: {
+                    ...childBefore.stream.ingest.wired.fields,
+                    [fieldName]: { description: childDescription },
+                  },
+                },
+              },
+            },
+          });
+
+          const childBeforeParentMapping = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
+
+          expect(childBeforeParentMapping.stream.ingest.wired.fields[fieldName]).to.eql({
+            description: childDescription,
+          });
+          expect(childBeforeParentMapping.inherited_fields[fieldName]).to.eql({
+            type: 'keyword',
+            ignore_above: 256,
+            from: parentStream,
+          });
+
+          // Later: parent updates the mapping configuration. The child should reflect the updated
+          // inherited mapping, while keeping its own description override as a typeless entry.
+          const parentForUpdate = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, parentStream));
+          const { updated_at: _parentForUpdateProcessingUpdatedAt, ...parentProcessingForUpdate } =
+            parentForUpdate.stream.ingest.processing;
+          await putStream(apiClient, parentStream, {
+            ...emptyAssets,
+            stream: {
+              description: parentForUpdate.stream.description,
+              ingest: {
+                ...parentForUpdate.stream.ingest,
+                processing: parentProcessingForUpdate,
+                wired: {
+                  ...parentForUpdate.stream.ingest.wired,
+                  fields: {
+                    ...parentForUpdate.stream.ingest.wired.fields,
+                    [fieldName]: { type: 'keyword', ignore_above: 1024 },
+                  },
+                },
+              },
+            },
+          });
+
+          const childAfterParentMapping = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
+
+          expect(childAfterParentMapping.inherited_fields[fieldName]).to.eql({
+            type: 'keyword',
+            ignore_above: 1024,
+            from: parentStream,
+          });
+          expect(childAfterParentMapping.stream.ingest.wired.fields[fieldName]).to.eql({
+            description: childDescription,
+          });
+        } finally {
+          await deleteStream(apiClient, childStream).catch(() => {});
+          await deleteStream(apiClient, parentStream).catch(() => {});
+        }
       });
 
       it('fails to create a stream if an existing template takes precedence', async () => {

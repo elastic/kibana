@@ -47,11 +47,11 @@ export const getGeoPointSuggestion = ({
 };
 
 export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => {
-  // Unmapped fields only have type and description
+  // Legacy doc-only fields (pre typeless override) only have type and description.
+  // Persist them in the new typeless form to avoid freezing mappings.
   if (field.type === 'unmapped') {
     return {
-      type: 'unmapped',
-      ...(field.description ? { description: field.description } : {}),
+      description: field.description!,
     };
   }
 
@@ -99,12 +99,27 @@ export const buildSchemaSavePayload = (
   definition: Streams.ingest.all.GetResponse,
   fields: SchemaField[]
 ): { ingest: IngestUpsertRequest } => {
-  const mappedFields = fields
-    .filter((field) => field.status === 'mapped')
-    .reduce((acc, field) => {
-      acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-      return acc;
-    }, {} as Record<string, FieldDefinitionConfig>);
+  const persistedFields = fields.reduce((acc, field) => {
+    const hasNonEmptyDescription = Boolean(field.description && field.description.trim().length > 0);
+
+    // Persist:
+    // - mapped fields (real overrides)
+    // - doc-only overrides (description-only), even if status is 'unmapped'
+    if (field.status === 'mapped') {
+      // For legacy doc-only `type: 'unmapped'`, only persist when description is present.
+      if (field.type === 'unmapped') {
+        if (hasNonEmptyDescription) {
+          acc[field.name] = { description: field.description!.trim() };
+        }
+      } else {
+        acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
+      }
+    } else if (field.status === 'unmapped' && hasNonEmptyDescription) {
+      acc[field.name] = { description: field.description!.trim() };
+    }
+
+    return acc;
+  }, {} as Record<string, FieldDefinitionConfig>);
 
   return {
     ingest: {
@@ -114,13 +129,13 @@ export const buildSchemaSavePayload = (
         ? {
             wired: {
               ...definition.stream.ingest.wired,
-              fields: mappedFields,
+              fields: persistedFields,
             },
           }
         : {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: mappedFields,
+              field_overrides: persistedFields,
             },
           }),
     },

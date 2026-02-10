@@ -136,8 +136,7 @@ describe('buildSchemaSavePayload', () => {
       {
         name: 'documented_field',
         parent: '',
-        status: 'mapped',
-        type: 'unmapped',
+        status: 'unmapped',
         description: 'This field is documented but not mapped to ES',
       },
       {
@@ -158,7 +157,6 @@ describe('buildSchemaSavePayload', () => {
           ...mockDefinition.stream.ingest.wired,
           fields: {
             documented_field: {
-              type: 'unmapped',
               description: 'This field is documented but not mapped to ES',
             },
             regular_field: { type: 'keyword' },

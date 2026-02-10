@@ -224,6 +224,7 @@ describe('logs_layer', () => {
             fields: {
               'attributes.some.field': { type: 'keyword' },
               'attributes.unmapped.field': { type: 'unmapped', description: 'A documented field' },
+              'attributes.doc_only.field': { description: 'A doc-only override without type' },
             },
           },
         },
@@ -233,6 +234,10 @@ describe('logs_layer', () => {
         'resource.attributes.inherited.unmapped': {
           type: 'unmapped',
           description: 'An inherited unmapped field',
+          from: 'parent-stream',
+        },
+        'resource.attributes.inherited.doc_only': {
+          description: 'An inherited doc-only override without type',
           from: 'parent-stream',
         },
       };
@@ -249,6 +254,9 @@ describe('logs_layer', () => {
       // Should NOT create aliases for unmapped fields
       expect(result['unmapped.field']).toBeUndefined();
       expect(result['inherited.unmapped']).toBeUndefined();
+      // Should NOT create aliases for typeless doc-only fields
+      expect(result['doc_only.field']).toBeUndefined();
+      expect(result['inherited.doc_only']).toBeUndefined();
     });
   });
 });

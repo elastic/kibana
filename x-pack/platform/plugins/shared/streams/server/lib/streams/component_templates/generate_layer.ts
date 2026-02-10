@@ -161,7 +161,9 @@ export function generateLayer(
   const properties: StreamsMappingProperties = {};
 
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
-    if (props.type === 'system' || props.type === 'unmapped') {
+    // Skip doc-only fields: they have no ES mapping, so `type` is missing.
+    // Also skip non-mapping field kinds.
+    if (!props.type || props.type === 'system' || props.type === 'unmapped') {
       return;
     }
     const property: AllowedMappingProperty = {

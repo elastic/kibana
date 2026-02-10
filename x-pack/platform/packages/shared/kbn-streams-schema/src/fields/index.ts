@@ -48,6 +48,15 @@ export type FieldDefinitionConfig =
       format?: string;
       description?: string;
     })
+  /**
+   * Documentation-only override for an inherited field: a stream may override only the description
+   * without freezing the inherited ES mapping. In that case `type` MUST be omitted entirely.
+   */
+  | {
+      description: string;
+      type?: never;
+      format?: never;
+    }
   | {
       type: 'system';
       description?: string;
@@ -70,6 +79,12 @@ export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.in
       type: z.enum(FIELD_DEFINITION_TYPES),
       format: z.optional(NonEmptyString),
       description: z.optional(z.string()),
+    }),
+    z.object({
+      // Documentation-only override: require description and forbid type entirely
+      description: z.string(),
+      type: z.never().optional(),
+      format: z.never().optional(),
     }),
     z.object({
       type: z.literal('system'),
@@ -99,7 +114,9 @@ export type AllowedMappingProperty =
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 
 export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
-  return Object.values(value).every((prop) => prop.type !== 'system' && prop.type !== 'unmapped');
+  return Object.values(value).every(
+    (prop) => Boolean(prop.type) && prop.type !== 'system' && prop.type !== 'unmapped'
+  );
 }
 
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
