@@ -53,8 +53,8 @@ pageLoadAssetSize:
   embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
-  enterpriseSearch: 40158
-  entityStore: 1755
+  enterpriseSearch: 40244
+  entityStore: 71717
   esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
