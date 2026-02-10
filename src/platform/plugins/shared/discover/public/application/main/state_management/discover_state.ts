@@ -61,7 +61,7 @@ export interface DiscoverStateContainer {
   /**
    * An observable of the current tab's app state
    */
-  appState$: Observable<DiscoverAppState>;
+  createAppStateObservable: () => Observable<DiscoverAppState>;
   /**
    * Data fetching related state
    **/
@@ -139,14 +139,13 @@ export function getDiscoverStateContainer({
     getCurrentTab,
   });
 
-  const appState$ = createTabAppStateObservable({
-    tabId,
-    internalState$: from(internalState),
-    getState: internalState.getState,
-  });
-
   return {
-    appState$,
+    createAppStateObservable: () =>
+      createTabAppStateObservable({
+        tabId,
+        internalState$: from(internalState),
+        getState: internalState.getState,
+      }),
     internalState,
     internalStateActions,
     injectCurrentTab,
