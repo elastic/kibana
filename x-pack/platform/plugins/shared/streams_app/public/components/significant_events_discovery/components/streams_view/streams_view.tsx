@@ -211,12 +211,9 @@ export function StreamsView({
       onInsightsTaskScheduled?.();
     } catch (error) {
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.streamsApp.insightsDiscoverySchedulingFailureTitle',
-          {
-            defaultMessage: 'Failed to schedule insights discovery',
-          }
-        ),
+        title: i18n.translate('xpack.streamsApp.insightsDiscoverySchedulingFailureTitle', {
+          defaultMessage: 'Failed to schedule insights discovery',
+        }),
       });
     }
   };
