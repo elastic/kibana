@@ -59,7 +59,7 @@ export const PhasePanel = ({
     canCreateRepository || searchableSnapshotRepositories.length > 0;
 
   return (
-    <div hidden={isHidden} aria-hidden={isHidden}>
+    <div hidden={isHidden}>
       <PhaseFieldsMount phase={phase} />
 
       <EuiFlexGroup

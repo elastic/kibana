@@ -47,7 +47,7 @@ const queryTab = (phase: string) => screen.queryByTestId(`${DATA_TEST_SUBJ}Tab-$
 const getPanel = (phase: string) => screen.getByTestId(`${DATA_TEST_SUBJ}Panel-${phase}`);
 const getPhaseContainer = (phase: string) => {
   const panel = getPanel(phase);
-  const container = panel.closest('div[aria-hidden]');
+  const container = panel.parentElement;
   if (!container) {
     throw new Error(`Could not find phase container for "${phase}"`);
   }
