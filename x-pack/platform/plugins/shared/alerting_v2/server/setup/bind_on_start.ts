@@ -29,10 +29,11 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     });
 
     scheduleDispatcherTask({ taskManager }).catch((error) => {
-      logger.error({
-        error,
-        code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
-        type: 'DispatcherTask',
+      logger.error(error as Error, {
+        error: {
+          code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
+          type: 'DispatcherTask',
+        },
       });
     });
   });
