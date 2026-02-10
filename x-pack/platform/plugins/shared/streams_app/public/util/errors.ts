@@ -5,16 +5,40 @@
  * 2.0.
  */
 
-export const getFormattedError = (error: Error) => {
-  if (
-    error &&
-    'body' in error &&
-    typeof error.body === 'object' &&
-    !!error.body &&
-    'message' in error.body &&
-    typeof error.body.message === 'string'
-  ) {
-    return new Error(error.body.message);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getBodyMessage = (body: unknown): string | undefined => {
+  if (typeof body === 'string') return body;
+  if (!isRecord(body)) return;
+
+  const message = body.message;
+  if (typeof message === 'string') return message;
+
+  return;
+};
+
+/**
+ * Normalizes errors coming from core/http + route-repository client.
+ *
+ * Prefer the Boom payload `body.message` when present (e.g. 404 from Streams routes),
+ * otherwise fall back to the base `Error` message or a safe stringification.
+ */
+export const getFormattedError = (error: unknown): Error => {
+  if (isRecord(error) && 'body' in error) {
+    const message = getBodyMessage(error.body);
+    if (message) {
+      return new Error(message);
+    }
   }
-  return error;
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error);
+  }
+
+  return new Error('Unknown error');
 };

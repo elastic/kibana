@@ -13,6 +13,7 @@ import type {
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import { errors } from '@elastic/elasticsearch';
 import type {
   IndicesDataStreamFailureStore,
   IndicesSimulateTemplateTemplate,
@@ -26,6 +27,7 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
+import { StatusError } from '../errors/status_error';
 
 interface DataStreamManagementOptions {
   esClient: ElasticsearchClient;
@@ -271,17 +273,47 @@ export async function putDataStreamsSettings({
     'index.refresh_interval'?: string | -1 | null;
   };
 }) {
-  const response = await retryTransientEsErrors(() =>
-    esClient.indices.putDataStreamSettings({
-      name: names,
-      settings,
-    })
-  );
-  const errors = response.data_streams
+  const response = await (async () => {
+    try {
+      return await retryTransientEsErrors(() =>
+        esClient.indices.putDataStreamSettings({
+          name: names,
+          settings,
+        })
+      );
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        const dataStreams = names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
+        throw new StatusError(
+          `Elasticsearch data stream ${dataStreams} does not exist. The stream definition may be out of sync with Elasticsearch. Use the resync API to recreate missing data streams, then retry.`,
+          404
+        );
+      }
+      throw error;
+    }
+  })();
+  const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
-    .map(({ error }) => error);
-  if (errors.length) {
-    throw new Error(errors.join('\n'));
+    .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
+  if (dataStreamErrors.length) {
+    const joined = dataStreamErrors.join('\n');
+    // Some ES APIs report missing resources via per-item errors rather than a 404 ResponseError.
+    if (
+      joined.includes('index_not_found_exception') ||
+      joined.includes('resource_not_found_exception') ||
+      joined.includes('no such index') ||
+      joined.includes('no such data stream') ||
+      (joined.includes('data stream') && joined.includes('does not exist'))
+    ) {
+      const dataStreams =
+        names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
+      throw new StatusError(
+        `Elasticsearch data stream ${dataStreams} does not exist. The stream definition may be out of sync with Elasticsearch. Use the resync API to recreate missing data streams, then retry.`,
+        404
+      );
+    }
+
+    throw new Error(joined);
   }
 }
 
