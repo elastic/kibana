@@ -31,6 +31,7 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
+import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { UsageReportingService } from './metering/usage_reporting_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';

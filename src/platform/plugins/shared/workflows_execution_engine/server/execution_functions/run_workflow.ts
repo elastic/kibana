@@ -89,7 +89,7 @@ export async function runWorkflow({
         spaceId
       );
       if (finalExecution) {
-        meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
       }
     } catch (err) {
       logger.warn(
