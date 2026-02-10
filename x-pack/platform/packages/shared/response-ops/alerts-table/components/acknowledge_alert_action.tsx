@@ -21,9 +21,7 @@ import { typedMemo } from '../utils/react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 const BULK_UPDATE_PATH = '/internal/rac/alerts/bulk_update';
-// TODO: Derive the correct alert index from the alert's rule type or _index field
-// instead of using a wildcard pattern.
-const ALERTS_INDEX_PATTERN = '.alerts-*';
+const FALLBACK_ALERTS_INDEX = '.alerts-*';
 
 /**
  * Alerts table row action to acknowledge (ACK) or unacknowledge (reopen) the selected alert.
@@ -41,7 +39,8 @@ export const AcknowledgeAlertAction = typedMemo(
       services: { http, notifications },
     } = useAlertsTableContext();
 
-    const alertUuid = alert[ALERT_UUID]?.[0] as string | undefined;
+    const alertId = (alert._id ?? alert[ALERT_UUID]?.[0]) as string | undefined;
+    const alertIndex = (alert._index as string) ?? FALLBACK_ALERTS_INDEX;
     const ruleId = alert[ALERT_RULE_UUID]?.[0] as string | undefined;
     const alertStatus = alert[ALERT_STATUS]?.[0] as string | undefined;
     const workflowStatus = alert[ALERT_WORKFLOW_STATUS]?.[0] as string | undefined;
@@ -54,15 +53,15 @@ export const AcknowledgeAlertAction = typedMemo(
     const canUnacknowledge = isAcknowledged;
 
     const handleClick = useCallback(async () => {
-      if (!alertUuid) return;
+      if (!alertId) return;
 
       const newStatus = canAcknowledge ? 'acknowledged' : 'open';
       try {
         await http.post(BULK_UPDATE_PATH, {
           body: JSON.stringify({
-            ids: [alertUuid],
+            ids: [alertId],
             status: newStatus,
-            index: ALERTS_INDEX_PATTERN,
+            index: alertIndex,
           }),
         });
         notifications.toasts.addSuccess(
@@ -86,10 +85,10 @@ export const AcknowledgeAlertAction = typedMemo(
       }
       onActionExecuted?.();
       refresh();
-    }, [alertUuid, canAcknowledge, http, notifications, onActionExecuted, refresh]);
+    }, [alertId, alertIndex, canAcknowledge, http, notifications, onActionExecuted, refresh]);
 
     // Only show when we can acknowledge or unacknowledge
-    if ((!canAcknowledge && !canUnacknowledge) || !alertUuid || !ruleId) {
+    if ((!canAcknowledge && !canUnacknowledge) || !alertId || !ruleId) {
       return null;
     }
 
