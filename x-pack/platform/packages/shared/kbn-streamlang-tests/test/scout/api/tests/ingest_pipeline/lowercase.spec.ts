@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { LowercaseProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'TEST MESSAGE 1' }, { message: 'TEST MESSAGE 2' }];
       await testBed.ingest(indexName, docs, processors);
@@ -51,7 +51,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'TEST MESSAGE 1' }, { message: 'TEST MESSAGE 2' }];
       await testBed.ingest(indexName, docs, processors);
@@ -80,7 +80,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = transpileIngestPipeline(streamlangDSL);
 
         const docs = [
           { message: 'TEST MESSAGE 1', should_lowercase: 'yes' },
@@ -107,7 +107,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ id: 1234 }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
