@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   EuiIcon,
 
@@ -7,8 +7,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
 } from '@elastic/eui';
+import { parse, stringify } from 'query-string';
+import { useLocation } from 'react-router-dom';
 
 import { useNavigation } from '../../common/lib/kibana';
 import { ENTITY_ANALYTICS_THREAT_HUNTING_PATH, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
@@ -37,6 +38,8 @@ type WatchlistFilterProps = {
   onChangeSelectedId?: (id: string) => void;
 };
 
+const WATCHLIST_QUERY_PARAM = 'watchlist_id';
+
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
   
@@ -54,23 +57,50 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
 export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
 
   // hook this up to real data
-  const [options, setOptions] = useState<WatchlistOption[]>(WATCHLIST_OPTIONS);
+  const options = WATCHLIST_OPTIONS;
   const [selected, setSelected] = useState<WatchlistItem | null>(null);
 
+  const { search } = useLocation();
 
   const { navigateTo } = useNavigation();
 
+  const selectedIdFromUrl = useMemo(() => {
+    const params = parse(search);
+    const value = params[WATCHLIST_QUERY_PARAM];
+    if (Array.isArray(value)) {
+      return value[0];
+    }
+    return value ?? undefined;
+  }, [search]);
+
+  const selectedFromUrl = useMemo(() => {
+    if (!selectedIdFromUrl) {
+      return null;
+    }
+    return (
+      options.find(
+        (option): option is WatchlistItem =>
+          !option.isGroupLabelOption && option.id === selectedIdFromUrl
+      ) ?? null
+    );
+  }, [options, selectedIdFromUrl]);
+
+  useEffect(() => {
+    setSelected(selectedFromUrl);
+  }, [selectedFromUrl]);
+
   const navigateToWatchlist = useCallback(
-    (watchlist_id: string) => {
-      if(watchlist_id === 'none' || watchlist_id === 'clear-selection') {        
-        navigateTo({
-        path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH
+    (watchlistId?: string) => {
+      const isCleared = !watchlistId || watchlistId === 'none' || watchlistId === 'clear-selection';
+      const nextPath = isCleared
+        ? ENTITY_ANALYTICS_THREAT_HUNTING_PATH
+        : ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH;
+      const query = isCleared ? '' : stringify({ [WATCHLIST_QUERY_PARAM]: watchlistId });
+
+      navigateTo({
+        path: query ? `${nextPath}?${query}` : nextPath,
       });
-      }
-      else {navigateTo({
-        path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
-      });
-    }},
+    },
     [navigateTo]
   );
 
@@ -82,8 +112,8 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
-        navigateToWatchlist(newlySelected.id);
         setSelected(newlySelected);
+        navigateToWatchlist(newlySelected.id);
       } else {
         setSelected(null);
         navigateToWatchlist('none');
