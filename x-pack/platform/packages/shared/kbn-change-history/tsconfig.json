@@ -1,0 +1,17 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/data-streams",
+    "@kbn/alerting-types",
+    "@kbn/core/server",
+    "@elasticsearch/elasticsearch",
+    "@kbn/es-mappings",
+    "@kbn/logging",
+  ]
+}
