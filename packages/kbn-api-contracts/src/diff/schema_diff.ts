@@ -300,7 +300,9 @@ export const diffParameters = (
   }
 
   if (!baseline && current) {
-    const hasRequiredParams = current.some((p) => isSchemaObject(p) && p.required === true);
+    const hasRequiredParams = current.some(
+      (p) => typeof p === 'object' && p !== null && (p as Record<string, unknown>).required === true
+    );
     if (hasRequiredParams) {
       changes.push({
         type: 'property_added_required',
