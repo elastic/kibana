@@ -19,11 +19,7 @@ import type {
 } from '../../common/http_api/skills';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
-import {
-  skillIdParamSchema,
-  createSkillBodySchema,
-  updateSkillBodySchema,
-} from './skills_schemas';
+import { skillIdParamSchema, createSkillBodySchema, updateSkillBodySchema } from './skills_schemas';
 import { builtinSkillToPublicDefinition } from '../services/skills/utils';
 
 const featureFlagConfig = {
