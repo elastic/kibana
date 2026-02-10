@@ -360,7 +360,7 @@ describe('Types', () => {
           "section": "def-public.MyProps",
           "text": "MyProps",
         },
-        ", string | React.JSXElementConstructor<any>>",
+        ">",
       ]
     `);
   });
