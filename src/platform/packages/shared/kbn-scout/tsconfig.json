@@ -35,6 +35,7 @@
     "@kbn/streams-schema",
     "@kbn/streamlang",
     "@kbn/axe-config",
-    "@kbn/peggy"
+    "@kbn/peggy",
+    "@kbn/spaces-plugin"
   ]
 }
