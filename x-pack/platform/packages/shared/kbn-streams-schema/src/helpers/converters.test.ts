@@ -101,6 +101,26 @@ describe('Converter Helpers', () => {
       expect(definition.title).toEqual('Production Logs');
       expect(definition.tags).toEqual(['logs', 'production', 'nginx']);
     });
+
+    it('converts query streams', () => {
+      const request: Streams.QueryStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          query: {
+            view: '$.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
+          },
+        },
+      };
+
+      const definition = convertUpsertRequestIntoDefinition('my-query-stream', request);
+
+      expect(Streams.QueryStream.Definition.is(definition)).toEqual(true);
+      expect((definition as Streams.QueryStream.Definition).query.view).toEqual(
+        '$.my-query-stream'
+      );
+    });
   });
 
   describe('convertGetResponseIntoUpsertRequest', () => {
@@ -280,6 +300,29 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
       expect(upsertRequest.stream.title).toEqual('Production NGINX Logs');
       expect(upsertRequest.stream.tags).toEqual(['nginx', 'production', 'access-logs']);
+    });
+
+    it('converts query streams', () => {
+      const getResponse: Streams.QueryStream.GetResponse = {
+        stream: {
+          name: 'my-query-stream',
+          description: '',
+          updated_at: new Date().toISOString(),
+          query: {
+            view: '$.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
+          },
+        },
+        inherited_fields: {},
+        ...emptyAssets,
+      };
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
+
+      expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect((upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view).toEqual(
+        '$.my-query-stream'
+      );
     });
   });
 });

@@ -14,12 +14,21 @@ import { modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
+  export interface QueryStreamReference {
+    name: string;
+  }
+
   export interface Definition {
     name: string;
     description: string;
     updated_at: string;
     title?: string;
     tags?: string[];
+    /**
+     * Child query streams that belong to this stream.
+     * Names must follow the parent.childname naming convention.
+     */
+    query_streams?: QueryStreamReference[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -53,6 +62,13 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
     updated_at: z.string().datetime(),
     title: z.string().optional(),
     tags: z.array(z.string()).optional(),
+    query_streams: z
+      .array(
+        z.object({
+          name: z.string(),
+        })
+      )
+      .optional(),
   }),
   Source: z.object({}),
   GetResponse: z.object({

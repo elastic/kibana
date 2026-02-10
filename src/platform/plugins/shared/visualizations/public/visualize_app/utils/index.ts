@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './get_table_columns';
 export * from './get_top_nav_config';
 export * from './breadcrumbs';
 export * from './utils';

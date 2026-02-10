@@ -26,6 +26,8 @@ const streamsStorageSettings = {
       title: types.text(),
       tags: types.keyword(),
       ingest: types.object({ enabled: false }),
+      query: types.object({ enabled: false }),
+      query_streams: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;
