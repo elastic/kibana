@@ -8,67 +8,84 @@
  */
 
 import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
+import type { TerraformImpactResult, TerraformImpact } from '../terraform/check_terraform_impact';
 import { DOCS_LINK, ESCALATION_LINK } from './links';
+
+const HEADER = [
+  '╔════════════════════════════════════════════════════════════════════════════╗',
+  '║                     API CONTRACT BREAKING CHANGES DETECTED                 ║',
+  '╚════════════════════════════════════════════════════════════════════════════╝',
+  '',
+];
+
+const TERRAFORM_HEADER = [
+  '╔════════════════════════════════════════════════════════════════════════════╗',
+  '║                        TERRAFORM PROVIDER IMPACT                           ║',
+  '╚════════════════════════════════════════════════════════════════════════════╝',
+  '',
+  '⚠️  The following breaking changes affect Terraform Provider APIs:',
+  '',
+];
+
+const FOOTER = [
+  '────────────────────────────────────────────────────────────────────────────',
+  '',
+  'What to do next:',
+  '',
+  '1. Review the breaking changes above',
+  '2. If intentional, update the baseline after approval',
+  '3. If unintentional, revert the changes',
+  '',
+  `Documentation: ${DOCS_LINK}`,
+  `Need help? ${ESCALATION_LINK}`,
+  '',
+];
+
+const formatBreakingChange = (change: BreakingChange, idx: number): string[] => {
+  const lines = [`${idx + 1}. ${change.reason}`, `   Path: ${change.path}`];
+
+  if (change.method) {
+    lines.push(`   Method: ${change.method.toUpperCase()}`);
+  }
+
+  if (change.details) {
+    lines.push(`   Details: ${JSON.stringify(change.details, null, 2).split('\n').join('\n   ')}`);
+  }
+
+  return [...lines, ''];
+};
+
+const formatTerraformImpact = (impact: TerraformImpact): string[] => {
+  const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
+  return [
+    `• ${impact.change.path}${method}`,
+    `  Terraform Resource: ${impact.terraformResource}`,
+    `  Reason: ${impact.change.reason}`,
+    '',
+  ];
+};
 
 export function formatFailure(
   breakingChanges: BreakingChange[],
   terraformImpact?: TerraformImpactResult
 ): string {
-  const lines: string[] = [];
+  const breakingSection = breakingChanges.flatMap(formatBreakingChange);
 
-  lines.push('╔════════════════════════════════════════════════════════════════════════════╗');
-  lines.push('║                     API CONTRACT BREAKING CHANGES DETECTED                 ║');
-  lines.push('╚════════════════════════════════════════════════════════════════════════════╝');
-  lines.push('');
-  lines.push(`Found ${breakingChanges.length} breaking change(s):`);
-  lines.push('');
+  const terraformSection = terraformImpact?.hasImpact
+    ? [
+        ...TERRAFORM_HEADER,
+        ...terraformImpact.impactedChanges.flatMap(formatTerraformImpact),
+        'Coordinate with @elastic/terraform-provider before merging.',
+        '',
+      ]
+    : [];
 
-  breakingChanges.forEach((change, idx) => {
-    lines.push(`${idx + 1}. ${change.reason}`);
-    lines.push(`   Path: ${change.path}`);
-    if (change.method) {
-      lines.push(`   Method: ${change.method.toUpperCase()}`);
-    }
-    if (change.details) {
-      lines.push(
-        `   Details: ${JSON.stringify(change.details, null, 2).split('\n').join('\n   ')}`
-      );
-    }
-    lines.push('');
-  });
-
-  if (terraformImpact?.hasImpact) {
-    lines.push('╔════════════════════════════════════════════════════════════════════════════╗');
-    lines.push('║                        TERRAFORM PROVIDER IMPACT                           ║');
-    lines.push('╚════════════════════════════════════════════════════════════════════════════╝');
-    lines.push('');
-    lines.push('⚠️  The following breaking changes affect Terraform Provider APIs:');
-    lines.push('');
-
-    terraformImpact.impactedChanges.forEach((impact) => {
-      const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
-      lines.push(`• ${impact.change.path}${method}`);
-      lines.push(`  Terraform Resource: ${impact.terraformResource}`);
-      lines.push(`  Reason: ${impact.change.reason}`);
-      lines.push('');
-    });
-
-    lines.push('Coordinate with @elastic/terraform-provider before merging.');
-    lines.push('');
-  }
-
-  lines.push('────────────────────────────────────────────────────────────────────────────');
-  lines.push('');
-  lines.push('What to do next:');
-  lines.push('');
-  lines.push('1. Review the breaking changes above');
-  lines.push('2. If intentional, update the baseline after approval');
-  lines.push('3. If unintentional, revert the changes');
-  lines.push('');
-  lines.push(`Documentation: ${DOCS_LINK}`);
-  lines.push(`Need help? ${ESCALATION_LINK}`);
-  lines.push('');
-
-  return lines.join('\n');
+  return [
+    ...HEADER,
+    `Found ${breakingChanges.length} breaking change(s):`,
+    '',
+    ...breakingSection,
+    ...terraformSection,
+    ...FOOTER,
+  ].join('\n');
 }

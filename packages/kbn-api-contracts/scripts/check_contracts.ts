@@ -8,6 +8,7 @@
  */
 
 import { resolve } from 'path';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { run } from '@kbn/dev-cli-runner';
 import { loadOas } from '../src/input/load_oas';
 import { normalizeOas } from '../src/input/normalize_oas';
@@ -18,8 +19,19 @@ import { filterBreakingChangesWithAllowlist } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
 import { checkBaselineGovernance } from '../src/governance/check_baseline_governance';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
-import { filterSpecPaths } from '../src/filter/filter_paths';
+import { filterSpecPaths, type PathFilterOptions } from '../src/filter/filter_paths';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
+
+interface CheckContractsOptions {
+  distribution: Distribution;
+  specPath: string;
+  version?: string;
+  baselinePath?: string;
+  allowlistPath?: string;
+  terraformApisPath?: string;
+  include?: string[];
+  exclude?: string[];
+}
 
 const parseArrayFlag = (value: string | string[] | undefined): string[] | undefined => {
   if (!value) return undefined;
@@ -27,45 +39,69 @@ const parseArrayFlag = (value: string | string[] | undefined): string[] | undefi
   return value.split(',').map((s) => s.trim());
 };
 
+const getDefaultSpecPath = (distribution: Distribution): string =>
+  distribution === 'stack'
+    ? 'oas_docs/output/kibana.yaml'
+    : 'oas_docs/output/kibana.serverless.yaml';
+
+const validateDistribution = (distribution: string | undefined): Distribution => {
+  if (!distribution || !['stack', 'serverless'].includes(distribution)) {
+    throw new Error('--distribution must be either "stack" or "serverless"');
+  }
+  return distribution as Distribution;
+};
+
+const logConfiguration = (log: ToolingLog, opts: CheckContractsOptions) => {
+  log.info(`Checking ${opts.distribution} API contracts...`);
+  log.info(`Current spec: ${opts.specPath}`);
+  if (opts.include?.length) log.info(`Include filter: ${opts.include.join(', ')}`);
+  if (opts.exclude?.length) log.info(`Exclude filter: ${opts.exclude.join(', ')}`);
+};
+
+const checkGovernance = (log: ToolingLog, distribution: Distribution, baselinePath: string) => {
+  const governance = checkBaselineGovernance(distribution, baselinePath);
+  if (!governance.allowed) {
+    log.error(governance.reason!);
+    throw new Error('Baseline governance check failed');
+  }
+};
+
+const loadAndNormalizeCurrentSpec = async (specPath: string) => {
+  const spec = await loadOas(resolve(process.cwd(), specPath));
+  return normalizeOas(spec);
+};
+
+const applyFilters = (
+  baseline: ReturnType<typeof normalizeOas>,
+  current: ReturnType<typeof normalizeOas>,
+  filterOptions: PathFilterOptions
+) => ({
+  filteredBaseline: filterSpecPaths(baseline, filterOptions),
+  filteredCurrent: filterSpecPaths(current, filterOptions),
+});
+
 run(
   async ({ flags, log }) => {
-    const distribution = flags.distribution as Distribution;
-    const specPath =
-      (flags.specPath as string) ||
-      (distribution === 'stack'
-        ? 'oas_docs/output/kibana.yaml'
-        : 'oas_docs/output/kibana.serverless.yaml');
-    const version = flags.version as string | undefined;
-    const baselinePath = flags.baselinePath as string | undefined;
-    const include = parseArrayFlag(flags.include as string | string[] | undefined);
-    const exclude = parseArrayFlag(flags.exclude as string | string[] | undefined);
+    const distribution = validateDistribution(flags.distribution as string);
+    const opts: CheckContractsOptions = {
+      distribution,
+      specPath: (flags.specPath as string) || getDefaultSpecPath(distribution),
+      version: flags.version as string | undefined,
+      baselinePath: flags.baselinePath as string | undefined,
+      allowlistPath: flags.allowlistPath as string | undefined,
+      terraformApisPath: flags.terraformApisPath as string | undefined,
+      include: parseArrayFlag(flags.include as string | string[] | undefined),
+      exclude: parseArrayFlag(flags.exclude as string | string[] | undefined),
+    };
 
-    if (!distribution || !['stack', 'serverless'].includes(distribution)) {
-      throw new Error('--distribution must be either "stack" or "serverless"');
-    }
+    logConfiguration(log, opts);
 
-    log.info(`Checking ${distribution} API contracts...`);
-    log.info(`Current spec: ${specPath}`);
-
-    if (include?.length) {
-      log.info(`Include filter: ${include.join(', ')}`);
-    }
-    if (exclude?.length) {
-      log.info(`Exclude filter: ${exclude.join(', ')}`);
-    }
-
-    const baselineSelection = selectBaseline(distribution, version, baselinePath);
+    const baselineSelection = selectBaseline(opts.distribution, opts.version, opts.baselinePath);
     log.info(`Baseline: ${baselineSelection.path}`);
 
-    const governance = checkBaselineGovernance(distribution, baselineSelection.path);
-    if (!governance.allowed) {
-      log.error(governance.reason!);
-      throw new Error('Baseline governance check failed');
-    }
+    checkGovernance(log, opts.distribution, baselineSelection.path);
 
-    const currentSpec = await loadOas(resolve(process.cwd(), specPath));
-    const normalizedCurrent = normalizeOas(currentSpec);
-
+    const normalizedCurrent = await loadAndNormalizeCurrentSpec(opts.specPath);
     const baseline = await loadBaseline(baselineSelection.path);
 
     if (!baseline) {
@@ -73,13 +109,12 @@ run(
       return;
     }
 
-    const filterOptions = { include, exclude };
-    const filteredBaseline = filterSpecPaths(baseline, filterOptions);
-    const filteredCurrent = filterSpecPaths(normalizedCurrent, filterOptions);
+    const { filteredBaseline, filteredCurrent } = applyFilters(normalizedCurrent, baseline, {
+      include: opts.include,
+      exclude: opts.exclude,
+    });
 
-    const allowlistPath = flags.allowlistPath as string | undefined;
-    const allowlist = loadAllowlist(allowlistPath);
-
+    const allowlist = loadAllowlist(opts.allowlistPath);
     const diff = diffOas(filteredBaseline, filteredCurrent);
     const { breakingChanges, allowlistedChanges } = filterBreakingChangesWithAllowlist(
       diff,
@@ -95,9 +130,7 @@ run(
       return;
     }
 
-    const terraformApisPath = flags.terraformApisPath as string | undefined;
-    const terraformImpact = checkTerraformImpact(breakingChanges, terraformApisPath);
-
+    const terraformImpact = checkTerraformImpact(breakingChanges, opts.terraformApisPath);
     const report = formatFailure(breakingChanges, terraformImpact);
     log.error(report);
     throw new Error(`Found ${breakingChanges.length} breaking change(s)`);

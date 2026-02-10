@@ -30,17 +30,31 @@ const operationBreaking = (
   details?: unknown
 ): BreakingChange => ({ type: 'operation_breaking', path, method, reason, details });
 
+const expectOutputContains = (output: string, ...substrings: string[]) => {
+  substrings.forEach((substring) => {
+    expect(output).toContain(substring);
+  });
+};
+
+const expectOutputNotContains = (output: string, ...substrings: string[]) => {
+  substrings.forEach((substring) => {
+    expect(output).not.toContain(substring);
+  });
+};
+
 describe('formatFailure', () => {
   it('formats a single breaking change', () => {
     const changes = [pathRemovedBreaking('/api/test')];
-
     const output = formatFailure(changes);
 
-    expect(output).toContain('API CONTRACT BREAKING CHANGES DETECTED');
-    expect(output).toContain('Found 1 breaking change(s)');
-    expect(output).toContain('1. Endpoint removed');
-    expect(output).toContain('Path: /api/test');
-    expect(output).toContain('What to do next:');
+    expectOutputContains(
+      output,
+      'API CONTRACT BREAKING CHANGES DETECTED',
+      'Found 1 breaking change(s)',
+      '1. Endpoint removed',
+      'Path: /api/test',
+      'What to do next:'
+    );
   });
 
   it('formats multiple breaking changes', () => {
@@ -49,15 +63,17 @@ describe('formatFailure', () => {
       methodRemovedBreaking('/api/test', 'delete'),
       operationBreaking('/api/test', 'post', 'requestBody modified', { content: {} }),
     ];
-
     const output = formatFailure(changes);
 
-    expect(output).toContain('Found 3 breaking change(s)');
-    expect(output).toContain('1. Endpoint removed');
-    expect(output).toContain('2. HTTP method removed');
-    expect(output).toContain('3. requestBody modified');
-    expect(output).toContain('Method: DELETE');
-    expect(output).toContain('Method: POST');
+    expectOutputContains(
+      output,
+      'Found 3 breaking change(s)',
+      '1. Endpoint removed',
+      '2. HTTP method removed',
+      '3. requestBody modified',
+      'Method: DELETE',
+      'Method: POST'
+    );
   });
 
   it('includes details when present', () => {
@@ -66,12 +82,9 @@ describe('formatFailure', () => {
         '200': { description: 'Success' },
       }),
     ];
-
     const output = formatFailure(changes);
 
-    expect(output).toContain('Details:');
-    expect(output).toContain('"200"');
-    expect(output).toContain('"description": "Success"');
+    expectOutputContains(output, 'Details:', '"200"', '"description": "Success"');
   });
 
   it('produces deterministic output for same input', () => {
@@ -85,11 +98,9 @@ describe('formatFailure', () => {
 
   it('includes help links', () => {
     const changes = [pathRemovedBreaking('/api/test')];
-
     const output = formatFailure(changes);
 
-    expect(output).toContain('Documentation:');
-    expect(output).toContain('Need help?');
+    expectOutputContains(output, 'Documentation:', 'Need help?');
   });
 
   describe('terraform impact', () => {
@@ -99,30 +110,26 @@ describe('formatFailure', () => {
         hasImpact: false,
         impactedChanges: [],
       };
-
       const output = formatFailure(changes, terraformImpact);
 
-      expect(output).not.toContain('TERRAFORM PROVIDER IMPACT');
+      expectOutputNotContains(output, 'TERRAFORM PROVIDER IMPACT');
     });
 
     it('shows terraform section when there is impact', () => {
       const changes = [pathRemovedBreaking('/api/spaces/space')];
       const terraformImpact: TerraformImpactResult = {
         hasImpact: true,
-        impactedChanges: [
-          {
-            change: changes[0],
-            terraformResource: 'elasticstack_kibana_space',
-          },
-        ],
+        impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
       };
-
       const output = formatFailure(changes, terraformImpact);
 
-      expect(output).toContain('TERRAFORM PROVIDER IMPACT');
-      expect(output).toContain('elasticstack_kibana_space');
-      expect(output).toContain('/api/spaces/space');
-      expect(output).toContain('Coordinate with @elastic/terraform-provider');
+      expectOutputContains(
+        output,
+        'TERRAFORM PROVIDER IMPACT',
+        'elasticstack_kibana_space',
+        '/api/spaces/space',
+        'Coordinate with @elastic/terraform-provider'
+      );
     });
 
     it('shows multiple terraform impacts', () => {
@@ -137,11 +144,9 @@ describe('formatFailure', () => {
           { change: changes[1], terraformResource: 'elasticstack_fleet_agent_policy' },
         ],
       };
-
       const output = formatFailure(changes, terraformImpact);
 
-      expect(output).toContain('elasticstack_kibana_space');
-      expect(output).toContain('elasticstack_fleet_agent_policy');
+      expectOutputContains(output, 'elasticstack_kibana_space', 'elasticstack_fleet_agent_policy');
     });
   });
 });
