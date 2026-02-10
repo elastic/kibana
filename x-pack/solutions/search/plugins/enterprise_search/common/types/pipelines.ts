@@ -9,17 +9,6 @@ import type { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsear
 
 import type { FieldMapping } from '../ml_inference_pipeline';
 
-/**
- * Extends IngestPipeline with system-managed date fields that are returned by ES
- * on read operations but not allowed on write operations (added in ES 9.2).
- */
-export interface IngestPipelineWithManagedFields extends IngestPipeline {
-  created_date?: string;
-  created_date_millis?: number;
-  modified_date?: string;
-  modified_date_millis?: number;
-}
-
 export interface InferencePipeline {
   modelId: string | undefined;
   modelState: TrainedModelState;

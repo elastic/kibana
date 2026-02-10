@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type {
-  AttachMlInferencePipelineResponse,
-  IngestPipelineWithManagedFields,
-} from '../../common/types/pipelines';
+import type { AttachMlInferencePipelineResponse } from '../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_utils';
 
@@ -29,7 +27,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // Fetch the parent pipeline
-  let parentPipeline: IngestPipelineWithManagedFields | undefined;
+  let parentPipeline: IngestPipeline | undefined;
   try {
     const pipelineResponse = await esClient.ingest.getPipeline({
       id: parentPipelineId,

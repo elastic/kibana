@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline, IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type {
-  DeleteMlInferencePipelineResponse,
-  IngestPipelineWithManagedFields,
-} from '../../../../../../common/types/pipelines';
+import type { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
@@ -28,7 +25,7 @@ export const detachMlInferencePipeline = async (
     id: parentPipelineId,
   });
 
-  const parentPipeline: IngestPipelineWithManagedFields | undefined =
+  const parentPipeline: IngestPipeline | undefined =
     pipelineResponse[parentPipelineId];
 
   if (parentPipeline !== undefined) {
