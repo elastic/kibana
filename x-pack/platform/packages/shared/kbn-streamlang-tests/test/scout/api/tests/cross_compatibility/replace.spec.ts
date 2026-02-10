@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileEsql } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -27,7 +26,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
@@ -57,7 +56,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
@@ -87,7 +86,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
@@ -116,7 +115,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
@@ -149,7 +148,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -196,7 +195,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       // Source field is numeric (non-string)
@@ -235,7 +234,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       // Target field exists as numeric, source field is string
@@ -282,7 +281,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         };
 
         // Both transpilers should reject Mustache template syntax
-        expect(() => transpile(streamlangDSL)).toThrow(
+        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(
@@ -318,7 +317,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: ['An error occurred 01', 'An error occurred 02'] }];

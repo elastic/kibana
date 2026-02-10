@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL, SetProcessor } from '@kbn/streamlang';
-import { transpileEsql } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 // Tests document expected differences in type coercion behavior between ESQL and Ingest Pipeline
@@ -26,7 +25,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
           } as SetProcessor,
         ],
       };
-      const { processors } = transpile(dsl);
+      const { processors } = transpileIngestPipeline(dsl);
       const { query } = transpileEsql(dsl);
 
       const docs = [{ attributes: { flag: true } }, { attributes: { flag: 'true' } }];
@@ -69,7 +68,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
           } as SetProcessor,
         ],
       };
-      const { processors } = transpile(dsl);
+      const { processors } = transpileIngestPipeline(dsl);
       const { query } = transpileEsql(dsl);
 
       const docs = [{ attributes: { val: '450' } }, { attributes: { val: '404' } }];
@@ -113,7 +112,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
           } as SetProcessor,
         ],
       };
-      const { processors } = transpile(dsl);
+      const { processors } = transpileIngestPipeline(dsl);
       const { query } = transpileEsql(dsl);
 
       const docs = [{ attributes: { val: 450 } }, { attributes: { val: 404 } }];
@@ -150,7 +149,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
         } as SetProcessor,
       ],
     };
-    const { processors } = transpile(dsl);
+    const { processors } = transpileIngestPipeline(dsl);
     const { query } = transpileEsql(dsl);
 
     const docs = [
@@ -188,7 +187,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
           } as SetProcessor,
         ],
       };
-      const { processors } = transpile(dsl);
+      const { processors } = transpileIngestPipeline(dsl);
       const { query } = transpileEsql(dsl);
 
       const docs = [
@@ -227,7 +226,7 @@ apiTest.describe('Cross-compatibility - Operator Coercion', { tag: ['@ess', '@sv
           } as SetProcessor,
         ],
       };
-      const { processors } = transpile(dsl);
+      const { processors } = transpileIngestPipeline(dsl);
       const { query } = transpileEsql(dsl);
 
       const docs = [

@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileEsql } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -27,7 +26,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     // ES|QL needs a mapping doc for the new field
@@ -79,7 +78,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { status: 'null', not_deleted: 'null' } };
@@ -132,7 +131,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { priority: 0, high_priority: 'null' } };
@@ -189,7 +188,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { age: 0, adult: 'null' } };
@@ -240,7 +239,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { quantity: 100, low_stock: 'null' } };
@@ -295,7 +294,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { size: 1000, small_file: 'null' } };
@@ -345,7 +344,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { user_email: 'null', user_name: 'null', has_email: 'null' } };
@@ -404,7 +403,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { temperature: 0, in_range: 'null' } };
@@ -464,7 +463,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { service_name: 'null', matched: 'null' } };
@@ -570,7 +569,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { message: 'null', is_error: 'null' } };
@@ -637,7 +636,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { filename: 'null', is_log_file: 'null' } };
@@ -707,7 +706,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = {
@@ -783,7 +782,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { log_level: 'null', not_debug: 'null' } };
@@ -850,7 +849,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { message: 'null', important: 'null' } };
@@ -921,7 +920,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { tags: [''], has_error_tag: 'null' } };
@@ -981,7 +980,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { roles: [''], no_admin: 'null' } };
@@ -1033,7 +1032,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { url_path: 'null', is_api_path: 'null' } };
@@ -1100,7 +1099,7 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };

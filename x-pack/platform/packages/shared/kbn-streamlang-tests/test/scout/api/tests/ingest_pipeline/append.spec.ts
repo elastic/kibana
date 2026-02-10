@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { AppendProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -50,7 +50,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'a' }];
       await testBed.ingest(indexName, docs, processors);
@@ -76,7 +76,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
         const docs = [{ tags: ['existing_tag'] }]; // Ingest already existing tag
         await testBed.ingest(indexName, docs, processors);
@@ -101,7 +101,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ tags: ['existing_tag'] }];
       await testBed.ingest(indexName, docs, processors);
@@ -136,7 +136,7 @@ apiTest.describe(
         };
 
         // Should throw validation error for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
       });

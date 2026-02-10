@@ -7,8 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileEsql } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -27,7 +26,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -59,7 +58,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'value1-value2' }];
@@ -106,7 +105,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpile(streamlangDSL)).toThrow(
+        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(
@@ -129,7 +128,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -175,7 +174,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -224,7 +223,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ case: 'missing', log: { level: 'info' } }];
@@ -258,7 +257,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -304,7 +303,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -359,7 +358,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -414,7 +413,7 @@ apiTest.describe('Cross-compatibility - Dissect Processor', { tag: ['@ess', '@sv
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
