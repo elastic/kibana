@@ -22,6 +22,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
+    attachments: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),

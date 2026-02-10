@@ -165,7 +165,12 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         </Display>
 
         <EuiSpacer />
-        <KPIsSection />
+        <KPIsSection
+          pageFilters={pageFilters}
+          assignees={assignees}
+          selectedConnectorNames={selectedConnectorNames}
+          dataView={dataView}
+        />
 
         <EuiSpacer />
         <TableSection

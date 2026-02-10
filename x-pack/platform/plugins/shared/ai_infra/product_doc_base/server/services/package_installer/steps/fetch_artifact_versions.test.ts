@@ -84,7 +84,7 @@ describe('fetchArtifactVersions', () => {
     await fetchArtifactVersions({ artifactRepositoryUrl });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`);
+    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`, {});
   });
 
   it('parses the local file', async () => {
