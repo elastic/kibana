@@ -94,10 +94,15 @@ async function fetchLinkedChildrenOfSpan({
     const source = 'span' in hit._source ? hit._source : undefined;
     const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields).build();
 
+    const spanLinksArray = source?.span?.links
+      ? Array.isArray(source?.span?.links)
+        ? source.span.links
+        : [source.span.links]
+      : undefined;
     return {
       ...event,
       [SPAN_LINKS]:
-        source?.span?.links ??
+        spanLinksArray ??
         mapOtelToSpanLink({
           trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
           span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
