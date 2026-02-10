@@ -7,6 +7,10 @@
 
 import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 
+// ============================================================================
+// Volume types
+// ============================================================================
+
 /**
  * Options passed to volume glob operations.
  */
@@ -56,6 +60,10 @@ export interface Volume {
    */
   dispose?(): Promise<void>;
 }
+
+// ============================================================================
+// VirtualFileSystem types
+// ============================================================================
 
 /**
  * Options for mounting a volume.
