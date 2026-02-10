@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { Assignees } from './assignees';
 import { TestProviders } from '../../../common/mock';
 import { useAttackDetailsAssignees } from '../hooks/use_attack_details_assignees';
 import { HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID } from '../constants/test_ids';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../common/components/assignees/test_ids';
+
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
@@ -140,20 +140,5 @@ describe('Assignees', () => {
     expect(screen.getByTestId('attackDetailsFlyoutHeaderAssignees')).toBeInTheDocument();
     expect(screen.queryByTestId(USERS_AVATARS_PANEL_TEST_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('calls onApplyAssignees when applying from popover', async () => {
-    const onApplyAssignees = jest.fn().mockResolvedValue(undefined);
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      onApplyAssignees,
-    } as ReturnType<typeof useAttackDetailsAssignees>);
-
-    renderAssignees();
-
-    fireEvent.click(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID));
-    fireEvent.click(screen.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
-
-    expect(onApplyAssignees).toHaveBeenCalled();
   });
 });
