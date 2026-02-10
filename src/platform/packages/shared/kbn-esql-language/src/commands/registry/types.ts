@@ -193,6 +193,7 @@ export interface ICommandContext {
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
+  views?: Array<{ name: string; query: string }>;
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;

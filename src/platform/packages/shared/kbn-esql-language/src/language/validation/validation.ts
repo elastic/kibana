@@ -69,7 +69,7 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources] = await Promise.all([
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
     shouldValidateCallback(callbacks, 'getSources')
       ? retrieveSources(rootCommands, callbacks)
       : new Set<string>(),
@@ -80,6 +80,7 @@ async function validateAst(
     shouldValidateCallback(callbacks, 'getTimeseriesIndices')
       ? callbacks?.getTimeseriesIndices?.()
       : undefined,
+    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
   ]);
 
   const sourceQuery = queryString.split('|')[0];

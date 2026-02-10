@@ -23,6 +23,7 @@ import {
   getEsqlPolicies,
   getInferenceEndpoints,
   getTimeseriesIndices,
+  getViews,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import { clearCacheWhenOld } from './helpers';
@@ -161,6 +162,10 @@ export const useEsqlCallbacks = ({
     return (await getTimeseriesIndices(core.http)) || [];
   }, [core.http]);
 
+  const getViewsCallback = useCallback(async () => {
+    return await getViews(core.http);
+  }, [core.http]);
+
   const getEditorExtensionsCallback = useCallback(
     async (queryString: string) => {
       // Only fetch recommendations if there's an active solutionId and a non-empty query
@@ -248,6 +253,7 @@ export const useEsqlCallbacks = ({
       canSuggestVariables,
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: getTimeseriesIndicesCallback,
+      getViews: getViewsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
       getLicense,
@@ -267,6 +273,7 @@ export const useEsqlCallbacks = ({
       canSuggestVariables,
       getJoinIndicesCallback,
       getTimeseriesIndicesCallback,
+      getViewsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
       getLicense,

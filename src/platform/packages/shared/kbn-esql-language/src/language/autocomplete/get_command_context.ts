@@ -52,9 +52,11 @@ export const getCommandContext = async (
         recommendedQueries: [],
         recommendedFields: [],
       };
+      const views = await callbacks?.getViews?.();
       context = {
         sources: await getSources(),
         editorExtensions,
+        views: views?.views || [],
       };
       break;
     case 'join':

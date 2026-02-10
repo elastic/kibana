@@ -131,6 +131,7 @@ export interface ESQLCallbacks {
     forceRefresh?: boolean;
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getViews?: () => Promise<{ views: Array<{ name: string; query: string }> }>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];
