@@ -172,10 +172,10 @@ const conditionSchema = schema.discriminatedUnion(
 // FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
 
-interface RecursiveType {
+export interface AsCodeGroupFilterRecursive {
   group: {
     operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
-    conditions: Array<TypeOf<typeof conditionSchema> | RecursiveType>;
+    conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
   };
 }
 
@@ -207,7 +207,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
-            schema.lazy<RecursiveType>(GROUP_FILTER_ID), // Recursive reference for nested groups
+            schema.lazy<AsCodeGroupFilterRecursive>(GROUP_FILTER_ID), // Recursive reference for nested groups
           ])
         ),
       },
