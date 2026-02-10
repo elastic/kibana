@@ -39,6 +39,9 @@ import {
   MANUAL_RUN_RULES_API_PRIVILEGE,
   MANUAL_RUN_RULES_SUBFEATURE_ID,
   MANUAL_RUN_RULES_UI,
+  RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+  RULES_MANAGEMENT_SETTINGS_UI,
   SERVER_APP_ID,
 } from '../../constants';
 
@@ -223,6 +226,38 @@ export const getManualRunRulesSubFeature = (): SubFeatureConfig => ({
           },
           ui: [MANUAL_RUN_RULES_UI],
           api: [MANUAL_RUN_RULES_API_PRIVILEGE],
+        },
+      ],
+    },
+  ],
+});
+
+export const getRulesManagementSettingsSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.rulesManagementSettingsSubFeatureName',
+    {
+      defaultMessage: 'Rules management settings',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          id: RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+          includeIn: 'all',
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.rulesManagementSettingsPrivilegeName',
+            {
+              defaultMessage: 'Manage automated gap remediation settings',
+            }
+          ),
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [RULES_MANAGEMENT_SETTINGS_UI],
+          api: [RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE],
         },
       ],
     },

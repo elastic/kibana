@@ -272,4 +272,5 @@ export enum RulesSubFeatureId {
   customHighlightedFields = 'customHighlightedFieldsSubFeature',
   enableDisableRules = 'enableDisableRulesSubFeature',
   manualRunRules = 'manualRunRulesSubFeature',
+  rulesManagementSettings = 'rulesManagementSettingsSubFeature',
 }

@@ -13,6 +13,7 @@ import {
   EXCEPTIONS_UI_READ,
   INVESTIGATION_GUIDE_UI_EDIT,
   MANUAL_RUN_RULES_UI,
+  RULES_MANAGEMENT_SETTINGS_UI,
   RULES_UI_EDIT,
   RULES_UI_READ,
 } from '@kbn/security-solution-features/constants';
@@ -25,6 +26,7 @@ export interface RulesUICapabilities {
   customHighlightedFields: { edit: boolean };
   enableDisable: { edit: boolean };
   manualRun: { edit: boolean };
+  rulesManagementSettings: { edit: boolean };
 }
 
 export const getRulesCapabilitiesInitialState = () => ({
@@ -34,6 +36,7 @@ export const getRulesCapabilitiesInitialState = () => ({
   investigationGuide: { edit: false },
   customHighlightedFields: { edit: false },
   manualRun: { edit: false },
+  rulesManagementSettings: { edit: false },
 });
 
 export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICapabilities => {
@@ -53,6 +56,10 @@ export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICap
   // Manual run rules permissions
   const canManualRunRules = rulesCapabilities?.[MANUAL_RUN_RULES_UI] === true;
 
+  // Rules management settings permissions
+  const canAccessRulesManagementSettings =
+    rulesCapabilities?.[RULES_MANAGEMENT_SETTINGS_UI] === true;
+
   // Edit investigation guide permissions
   const canEditInvestigationGuides = rulesCapabilities?.[INVESTIGATION_GUIDE_UI_EDIT] === true;
 
@@ -65,6 +72,7 @@ export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICap
     exceptions: { read: readExceptions, edit: editExceptions },
     enableDisable: { edit: canEnableDisableRules },
     manualRun: { edit: canManualRunRules },
+    rulesManagementSettings: { edit: canAccessRulesManagementSettings },
     investigationGuide: { edit: canEditInvestigationGuides },
     customHighlightedFields: { edit: canEditCustomHighlightedFields },
   };

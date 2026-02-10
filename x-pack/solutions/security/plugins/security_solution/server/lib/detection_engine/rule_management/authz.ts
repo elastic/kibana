@@ -14,6 +14,7 @@ import {
   EXCEPTIONS_UI_EDIT,
   ENABLE_DISABLE_RULES_UI,
   MANUAL_RUN_RULES_UI,
+  RULES_MANAGEMENT_SETTINGS_UI,
   CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT,
   INVESTIGATION_GUIDE_UI_EDIT,
 } from '@kbn/security-solution-features/constants';
@@ -52,5 +53,7 @@ export const calculateRulesAuthz = async ({
     canManualRunRules: capabilities[MANUAL_RUN_RULES_UI] as boolean,
     canEditCustomHighlightedFields: capabilities[CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT] as boolean,
     canEditInvestigationGuides: capabilities[INVESTIGATION_GUIDE_UI_EDIT] as boolean,
+    canAccessRulesManagementSettings:
+      capabilities[RULES_MANAGEMENT_SETTINGS_UI] as boolean,
   };
 };
