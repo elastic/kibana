@@ -18,6 +18,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { useInstallEntityStoreV2 } from '@kbn/entity-store/public';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -105,6 +106,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   theme$,
 }) => {
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
+
+  useInstallEntityStoreV2(services);
 
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
