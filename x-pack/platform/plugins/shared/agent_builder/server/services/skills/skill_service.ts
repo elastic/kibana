@@ -68,9 +68,6 @@ export const createSkillRegistry = (params: CreateSkillRegistryParams): SkillReg
 };
 
 export interface SkillServiceSetup {
-  /**
-   * @deprecated This API is still in development and not ready to be used yet.
-   */
   registerSkill(skill: SkillDefinition): Promise<void>;
 }
 
