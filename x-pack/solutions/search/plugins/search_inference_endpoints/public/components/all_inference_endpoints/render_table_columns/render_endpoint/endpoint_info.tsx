@@ -59,7 +59,6 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
   const { task_type: taskType } = endpointInfo;
   const isPreconfigured = isEndpointPreconfigured(inferenceId);
   const isTechPreview = isProviderTechPreview(endpointInfo);
-  const hasBadges = Boolean(taskType) || isPreconfigured || isTechPreview;
 
   useEffect(() => {
     return () => {
@@ -112,45 +111,41 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {hasBadges && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-            {taskType && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
-                  <EuiBadge
-                    tabIndex={0}
-                    data-test-subj={`table-column-task-type-${taskType}`}
-                    color="hollow"
-                  >
-                    {taskType}
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {isPreconfigured && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
-                  <EuiBadge tabIndex={0} data-test-subj="preconfiguredBadge" color="hollow">
-                    {i18n.PRECONFIGURED_LABEL}
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {isTechPreview && (
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.TECH_PREVIEW_LABEL}
-                  tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
-                  size="s"
-                  color="subdued"
-                  alignment="middle"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
+              <EuiBadge
+                tabIndex={0}
+                data-test-subj={`table-column-task-type-${taskType}`}
+                color="hollow"
+              >
+                {taskType}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {isPreconfigured && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
+                <EuiBadge tabIndex={0} data-test-subj="preconfiguredBadge" color="hollow">
+                  {i18n.PRECONFIGURED_LABEL}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          {isTechPreview && (
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.TECH_PREVIEW_LABEL}
+                tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                size="s"
+                color="subdued"
+                alignment="middle"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
