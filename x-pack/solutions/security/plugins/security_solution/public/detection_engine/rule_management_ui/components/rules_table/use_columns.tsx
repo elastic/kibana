@@ -400,13 +400,7 @@ export const useRulesColumns = ({
       enabledColumn,
       actionsColumn,
     ],
-    [
-      showRelatedIntegrations,
-      executionStatusColumn,
-      snoozeColumn,
-      enabledColumn,
-      actionsColumn,
-    ]
+    [showRelatedIntegrations, executionStatusColumn, snoozeColumn, enabledColumn, actionsColumn]
   );
 };
 
