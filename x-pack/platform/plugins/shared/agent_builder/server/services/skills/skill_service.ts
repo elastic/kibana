@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -179,6 +180,8 @@ class SkillServiceImpl implements SkillService {
 }
 
 class SkillRegistryImpl implements SkillRegistry {
+  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
+
   private readonly builtinSkillsMap: Map<string, SkillDefinition>;
   private readonly persistedProvider: SkillProvider;
   private readonly toolRegistry: ToolRegistry;
@@ -333,8 +336,6 @@ class SkillRegistryImpl implements SkillRegistry {
 
     return result;
   }
-
-  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
 
   /**
    * Validates that all tool IDs exist in the tool registry
