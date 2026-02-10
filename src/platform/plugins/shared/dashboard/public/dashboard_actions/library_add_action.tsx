@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import type { PanelPackage, PresentationContainer } from '@kbn/presentation-containers';
+import type { PanelPackage, PresentationContainer } from '@kbn/presentation-publishing';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,

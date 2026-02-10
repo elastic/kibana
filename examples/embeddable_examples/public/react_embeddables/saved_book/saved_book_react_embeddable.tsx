@@ -29,9 +29,9 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';

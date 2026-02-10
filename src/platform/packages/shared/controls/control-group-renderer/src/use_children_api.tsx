@@ -24,7 +24,7 @@ import {
 import {
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import {
   apiAppliesFilters,
   apiAppliesTimeslice,

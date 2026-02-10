@@ -15,7 +15,7 @@ import { AddFromLibraryFlyout } from './add_from_library_flyout';
 import { usageCollection } from '../kibana_services';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { registerAddFromLibraryType } from './registry';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { HasType } from '@kbn/presentation-publishing';
 
 // Mock saved objects finder component so we can call the onChoose method.

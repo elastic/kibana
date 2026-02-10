@@ -12,7 +12,7 @@ import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import {
   apiHasSerializedChildState,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import {
   apiAppliesFilters,
   apiAppliesTimeslice,

@@ -19,7 +19,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';

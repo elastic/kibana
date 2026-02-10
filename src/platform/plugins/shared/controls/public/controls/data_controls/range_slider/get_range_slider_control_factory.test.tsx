@@ -20,7 +20,7 @@ import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;

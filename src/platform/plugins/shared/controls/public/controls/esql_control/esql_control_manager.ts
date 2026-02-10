@@ -25,7 +25,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiHasSections } from '@kbn/presentation-containers';
+import { apiHasSections } from '@kbn/presentation-publishing';
 import {
   fetch$,
   type PublishingSubject,

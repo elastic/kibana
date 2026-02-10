@@ -13,7 +13,7 @@ import type {
   HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import type {
   HasExecutionContext,
   PublishesDataLoading,

@@ -20,7 +20,7 @@ import {
   initializeTimeRangeManager,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';

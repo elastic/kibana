@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,

@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,

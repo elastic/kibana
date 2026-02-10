@@ -16,7 +16,7 @@ import {
   type CanPinPanels,
   type IsPinnable,
   type PresentationContainer,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,

@@ -29,7 +29,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';

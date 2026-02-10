@@ -24,7 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
-import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksState } from '../../server';
 import {

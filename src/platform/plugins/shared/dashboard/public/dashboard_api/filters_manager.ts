@@ -23,7 +23,7 @@ import {
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-publishing';
 import { apiAppliesFilters, type AppliesFilters } from '@kbn/presentation-publishing';
 
 import type { initializeLayoutManager } from './layout_manager';

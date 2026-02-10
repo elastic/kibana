@@ -10,7 +10,7 @@
 import { map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,

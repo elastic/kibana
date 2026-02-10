@@ -9,7 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import type { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';

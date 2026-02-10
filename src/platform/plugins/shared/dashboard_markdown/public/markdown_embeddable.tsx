@@ -15,7 +15,7 @@ import {
   apiCanFocusPanel,
   apiIsPresentationContainer,
   initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
   getViewModeSubject,

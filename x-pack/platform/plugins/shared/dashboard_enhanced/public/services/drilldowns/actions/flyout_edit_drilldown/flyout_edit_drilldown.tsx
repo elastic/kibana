@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
+import { type PresentationContainer } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,

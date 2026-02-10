@@ -12,7 +12,7 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
+import { type PresentationContainer } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,

@@ -26,7 +26,7 @@ import type { LensApi } from '@kbn/lens-common-2';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers/interfaces/presentation_container';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { isControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { isLensApi } from '../react_embeddable/type_guards';
 

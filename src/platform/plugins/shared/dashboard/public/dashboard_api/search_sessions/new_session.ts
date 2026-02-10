@@ -11,7 +11,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, startWith } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiPublishesSettings } from '@kbn/presentation-publishing';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../unified_search_manager';
 

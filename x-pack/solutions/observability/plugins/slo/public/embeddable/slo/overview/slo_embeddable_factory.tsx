@@ -24,7 +24,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';

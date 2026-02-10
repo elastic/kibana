@@ -17,7 +17,7 @@ import type {
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';

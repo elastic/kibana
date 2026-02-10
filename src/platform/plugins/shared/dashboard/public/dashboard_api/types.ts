@@ -23,7 +23,7 @@ import type {
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import type {
   EmbeddableAppContext,
   HasAppContext,

@@ -14,7 +14,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   type PublishingSubject,
   initializeStateManager,

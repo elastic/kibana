@@ -29,8 +29,8 @@ import {
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { IsCustomizable } from '@kbn/presentation-containers';
-import { apiCanBeCustomized } from '@kbn/presentation-containers';
+import type { IsCustomizable } from '@kbn/presentation-publishing';
+import { apiCanBeCustomized } from '@kbn/presentation-publishing';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
 

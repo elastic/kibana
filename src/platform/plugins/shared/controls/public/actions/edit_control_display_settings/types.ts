@@ -14,7 +14,7 @@ import {
   type CanPinPanels,
   apiCanBePinned,
   apiCanPinPanels,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiHasUniqueId,

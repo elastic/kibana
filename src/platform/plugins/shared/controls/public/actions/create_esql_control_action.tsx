@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-publishing';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';

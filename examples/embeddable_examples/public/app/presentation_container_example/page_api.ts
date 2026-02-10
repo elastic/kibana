@@ -10,11 +10,11 @@
 import { BehaviorSubject, Subject, combineLatest, map, merge, tap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import type { TimeRange } from '@kbn/es-query';
-import type { PanelPackage } from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-publishing';
 import {
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import { isEqual, omit } from 'lodash';
 import type {
   PublishesDataLoading,

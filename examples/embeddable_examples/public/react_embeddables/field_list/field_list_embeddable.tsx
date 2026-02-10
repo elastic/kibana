@@ -27,7 +27,7 @@ import {
 } from '@kbn/unified-field-list';
 import React, { useEffect } from 'react';
 import { merge, skip, Subscription, switchMap } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { FIELD_LIST_ID } from './constants';
 import type {
   FieldListApi,
