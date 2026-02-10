@@ -29,6 +29,7 @@ import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   AddSummarizedAlertsOpts,
+  AlertToAutoUnmute,
   GetActionsToScheduleOpts,
   HelperOpts,
   IActionScheduler,
@@ -64,7 +65,7 @@ export class PerAlertActionScheduler<
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
   /** Alert instance IDs whose mute conditions were met during this run and should be auto-unmuted. */
-  public alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
+  public alertsToAutoUnmute: AlertToAutoUnmute[] = [];
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -84,9 +85,7 @@ export class PerAlertActionScheduler<
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
 
     // Build a lookup map for conditional muted alerts
-    const mutedAlerts = (context.rule as Record<string, unknown>).mutedAlerts as
-      | MutedAlertInstance[]
-      | undefined;
+    const mutedAlerts = context.rule.mutedAlerts;
     if (mutedAlerts) {
       for (const entry of mutedAlerts) {
         this.mutedAlertsMap.set(entry.alertInstanceId, entry);

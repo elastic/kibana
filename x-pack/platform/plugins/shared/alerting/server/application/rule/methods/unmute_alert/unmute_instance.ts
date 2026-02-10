@@ -76,9 +76,7 @@ async function unmuteInstanceWithOCC(
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  const mutedAlerts = (attributes as Record<string, unknown>).mutedAlerts as
-    | Array<{ alertInstanceId: string }>
-    | undefined;
+  const mutedAlerts = attributes.mutedAlerts;
 
   const isInMutedIds = mutedInstanceIds.includes(alertInstanceId);
   const isInMutedAlerts = mutedAlerts?.some(

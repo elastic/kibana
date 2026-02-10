@@ -115,17 +115,18 @@ async function muteInstanceWithOCC(
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
 
+    const userName = await context.getUserName();
+
     // Build the update attributes -- always update mutedInstanceIds for backward compat
     const updateAttrs: Record<string, unknown> = {
       mutedInstanceIds,
-      updatedBy: await context.getUserName(),
+      updatedBy: userName,
       updatedAt: new Date().toISOString(),
     };
 
     // When conditional-snooze parameters are provided, also write to mutedAlerts
     if (hasSnoozeConditions(query)) {
-      const existingMutedAlerts: MutedAlertInstance[] =
-        (attributes as Record<string, unknown>).mutedAlerts as MutedAlertInstance[] ?? [];
+      const existingMutedAlerts: MutedAlertInstance[] = attributes.mutedAlerts ?? [];
 
       // Remove any existing entry for this alert instance (replace it)
       const filteredMutedAlerts = existingMutedAlerts.filter(
@@ -135,7 +136,7 @@ async function muteInstanceWithOCC(
       const newEntry: MutedAlertInstance = {
         alertInstanceId,
         mutedAt: new Date().toISOString(),
-        mutedBy: await context.getUserName(),
+        mutedBy: userName,
         ...(expiresAt ? { expiresAt } : {}),
         ...(conditions && conditions.length > 0 ? { conditions } : {}),
         conditionOperator: conditionOperator ?? 'any',

@@ -437,17 +437,16 @@ export class TaskRunner<
     if (alertsToAutoUnmute.length > 0) {
       try {
         const idsToUnmute = new Set(alertsToAutoUnmute.map((a) => a.alertInstanceId));
-        const ruleAttrs = rule as Record<string, unknown>;
         const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter(
           (id: string) => !idsToUnmute.has(id)
         );
-        const updatedMutedAlerts = (
-          (ruleAttrs.mutedAlerts as Array<{ alertInstanceId: string }>) ?? []
-        ).filter((entry) => !idsToUnmute.has(entry.alertInstanceId));
+        const updatedMutedAlerts = (rule.mutedAlerts ?? []).filter(
+          (entry) => !idsToUnmute.has(entry.alertInstanceId)
+        );
 
         await partiallyUpdateRuleWithEs(this.internalSavedObjectsRepository, ruleId, {
           mutedInstanceIds: updatedMutedInstanceIds,
-          mutedAlerts: updatedMutedAlerts as never,
+          mutedAlerts: updatedMutedAlerts,
           updatedAt: new Date().toISOString(),
         });
 

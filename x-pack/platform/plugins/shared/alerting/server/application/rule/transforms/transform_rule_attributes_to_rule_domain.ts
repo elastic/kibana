@@ -211,9 +211,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
-    mutedAlerts: (esRule as Record<string, unknown>).mutedAlerts as
-      | import('@kbn/alerting-types').MutedAlertInstance[]
-      | undefined,
+    mutedAlerts: esRule.mutedAlerts,
     ...(executionStatus
       ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
       : {}),

@@ -11,7 +11,12 @@ import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';
-import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import type {
+  ActionSchedulerOptions,
+  ActionsToSchedule,
+  AlertToAutoUnmute,
+  IActionScheduler,
+} from './types';
 import type { Alert } from '../../alert';
 import type {
   AlertInstanceContext,
@@ -161,13 +166,11 @@ export class ActionScheduler<
    * Returns alert instance IDs whose conditional mute conditions were met during this execution.
    * The task runner should persist the unmute and emit audit / event log entries.
    */
-  public getAlertsToAutoUnmute(): Array<{ alertInstanceId: string; reason: string }> {
-    const result: Array<{ alertInstanceId: string; reason: string }> = [];
+  public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
+    const result: AlertToAutoUnmute[] = [];
     for (const scheduler of this.schedulers) {
-      if ('alertsToAutoUnmute' in scheduler) {
-        result.push(
-          ...((scheduler as unknown as { alertsToAutoUnmute: typeof result }).alertsToAutoUnmute)
-        );
+      if (scheduler.alertsToAutoUnmute) {
+        result.push(...scheduler.alertsToAutoUnmute);
       }
     }
     return result;

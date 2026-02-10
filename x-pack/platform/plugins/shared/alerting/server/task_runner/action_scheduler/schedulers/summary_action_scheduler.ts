@@ -15,6 +15,7 @@ import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
+  getAllMutedAlertInstanceIds,
   getSummarizedAlerts,
   getSummaryActionTimeBounds,
   isActionOnInterval,
@@ -104,7 +105,7 @@ export class SummaryActionScheduler<
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
           ruleId: this.context.rule.id,
-          excludedAlertInstanceIds: this.getAllMutedAlertInstanceIds(),
+          excludedAlertInstanceIds: getAllMutedAlertInstanceIds(this.context.rule),
           alertsFilter: action.alertsFilter,
         };
 
@@ -231,19 +232,4 @@ export class SummaryActionScheduler<
     return results;
   }
 
-  /**
-   * Combines legacy mutedInstanceIds with IDs from the new mutedAlerts array
-   * so that all muted alerts are excluded from summarized alert queries.
-   */
-  private getAllMutedAlertInstanceIds(): string[] {
-    const legacyIds = this.context.rule.mutedInstanceIds ?? [];
-    const mutedAlerts = (this.context.rule as Record<string, unknown>).mutedAlerts as
-      | Array<{ alertInstanceId: string }>
-      | undefined;
-    if (!mutedAlerts || mutedAlerts.length === 0) {
-      return legacyIds;
-    }
-    const mutedAlertIds = mutedAlerts.map((entry) => entry.alertInstanceId);
-    return [...new Set([...legacyIds, ...mutedAlertIds])];
-  }
 }
