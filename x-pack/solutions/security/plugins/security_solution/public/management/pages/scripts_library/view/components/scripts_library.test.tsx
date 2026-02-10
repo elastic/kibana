@@ -34,7 +34,7 @@ describe('ScriptsLibrary', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-  let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsList>;
+  let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsListMock>;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('scripts-library-tests');
