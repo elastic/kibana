@@ -126,10 +126,6 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      // TODO: rely on global setting before https://github.com/elastic/kibana/issues/248983
-      // Hide announcements (e.g. tours) in the current space
-      await kbnClient.uiSettings.update({ hideAnnouncements: true }, { space: spaceId });
-
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });
 

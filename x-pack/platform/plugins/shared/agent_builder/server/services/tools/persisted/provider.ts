@@ -134,9 +134,13 @@ export const createPersistedToolClient = ({
         );
       }
 
+      const persistedConfig = definition.convertToPersistence
+        ? definition.convertToPersistence(updatedConfig as any, conversionContext())
+        : updatedConfig;
+
       const mergedRequest = {
         ...createRequest,
-        configuration: updatedConfig,
+        configuration: persistedConfig,
       };
 
       const tool = await toolClient.create(mergedRequest);
@@ -172,9 +176,13 @@ export const createPersistedToolClient = ({
         );
       }
 
+      const persistedConfig = definition.convertToPersistence
+        ? definition.convertToPersistence(updatedConfig as any, conversionContext())
+        : updatedConfig;
+
       const mergedConfig = {
         ...updateRequest,
-        configuration: updatedConfig,
+        configuration: persistedConfig,
       };
       const tool = await toolClient.update(toolId, mergedConfig);
       return convertPersistedDefinition({ tool, definition, context: conversionContext() });

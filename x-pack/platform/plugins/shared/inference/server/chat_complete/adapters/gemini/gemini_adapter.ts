@@ -134,7 +134,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }),
+          // @ts-expect-error - items is optional (empty object means any)
+          items: def.items ? convertSchemaType({ def: def.items }) : {},
         };
       case 'object':
         return {

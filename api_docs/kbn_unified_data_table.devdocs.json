@@ -928,7 +928,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1447,
+        "lineNumber": 1456,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2519,7 +2519,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1449,
+        "lineNumber": 1458,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

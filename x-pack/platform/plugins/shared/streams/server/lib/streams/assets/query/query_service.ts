@@ -7,10 +7,9 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { StreamsPluginStartDependencies } from '../../../../types';
-import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 
@@ -28,12 +27,10 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const rulesClientRequest =
-      !pluginStart.spaces ||
-      pluginStart.spaces.spacesService.getSpaceId(request) === DEFAULT_SPACE_ID
-        ? request
-        : createFakeRequestBoundToDefaultSpace(request);
-    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(rulesClientRequest);
+    const rulesClient = await pluginStart.alerting.getRulesClientWithRequestInSpace(
+      request,
+      DEFAULT_SPACE_ID
+    );
 
     const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       core.elasticsearch.client.asInternalUser,

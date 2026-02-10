@@ -8,6 +8,7 @@
 import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
+import { coerce, satisfies } from 'semver';
 
 import type {
   PackageInfo,
@@ -30,7 +31,8 @@ const handlebars = Handlebars.create();
 export function getMetaVariables(
   pkg: Pick<PackageInfo, 'name' | 'title' | 'version'>,
   input: PackagePolicyInput,
-  stream?: PackagePolicyInputStream
+  stream?: PackagePolicyInputStream,
+  agentVersion?: string
 ) {
   return {
     // Package variables
@@ -50,6 +52,9 @@ export function getMetaVariables(
     // Input meta variables
     input: {
       id: input?.id || '',
+    },
+    agent: {
+      version: agentVersion,
     },
   };
 }
@@ -250,6 +255,25 @@ function urlEncodeHelper(input: string) {
   return encodedString;
 }
 handlebars.registerHelper('url_encode', urlEncodeHelper);
+
+function semverSatisfiesHelper(
+  this: any,
+  agentVersion: string,
+  versionCondition: string,
+  options: any
+) {
+  // without agent version (parent policy), the condition is not met, the conditional template is not included
+  if (!agentVersion) {
+    return options.inverse(this);
+  }
+  return satisfies(coerce(agentVersion)!, versionCondition)
+    ? options.fn(this)
+    : options.inverse(this);
+}
+// cel.yml.hbs
+// {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+// {{/semverSatisfies}}
+handlebars.registerHelper('semverSatisfies', semverSatisfiesHelper);
 
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {

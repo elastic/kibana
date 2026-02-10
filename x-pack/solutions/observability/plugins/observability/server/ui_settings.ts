@@ -31,6 +31,7 @@ import {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmUseUnifiedTraceWaterfall,
+  enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   enableDiagnosticMode,
@@ -155,6 +156,22 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.number({ min: 1 }),
     solutionViews: ['classic', 'oblt'],
+  },
+  [enableInfrastructureAssetCustomDashboards]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
+      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
+      {
+        defaultMessage: 'Enable option to link custom dashboards in the asset details view.',
+      }
+    ),
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
   },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],

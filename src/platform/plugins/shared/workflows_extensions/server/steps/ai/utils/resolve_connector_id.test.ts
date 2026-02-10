@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validate as validateUuid } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-// Mock external dependencies
-jest.mock('uuid', () => ({
-  validate: jest.fn(),
-}));
-
 import { resolveConnectorId } from './resolve_connector_id';
-
-const mockValidateUuid = validateUuid as jest.MockedFunction<typeof validateUuid>;
 
 describe('resolveConnectorId', () => {
   let mockInferencePlugin: jest.Mocked<InferenceServerStart>;
@@ -48,9 +40,6 @@ describe('resolveConnectorId', () => {
       getDefaultConnector: jest.fn(),
       getConnectorList: jest.fn(),
     } as any;
-
-    // Reset UUID validation mock
-    mockValidateUuid.mockReset();
   });
 
   describe('when nameOrId is undefined', () => {
@@ -73,7 +62,7 @@ describe('resolveConnectorId', () => {
 
       await expect(
         resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest)
-      ).rejects.toThrow('No default connector configured');
+      ).rejects.toThrow('No default AI connector configured');
 
       expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
     });
@@ -84,7 +73,7 @@ describe('resolveConnectorId', () => {
 
       await expect(
         resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest)
-      ).rejects.toThrow('No default connector configured');
+      ).rejects.toThrow('No default AI connector configured');
 
       expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
     });
@@ -105,17 +94,38 @@ describe('resolveConnectorId', () => {
     });
   });
 
-  describe('when nameOrId is a valid UUID', () => {
-    it('should return the UUID directly without further validation', async () => {
-      const validUuid = '550e8400-e29b-41d4-a716-446655440000';
-      mockValidateUuid.mockReturnValue(true);
+  describe('when nameOrId is a connector ID', () => {
+    it('should return the connector ID when it exists in the connector list', async () => {
+      const connectorId = 'openai-gpt4-connector-id';
+      const mockConnectors = [
+        createMockConnector({
+          name: 'OpenAI GPT-4',
+          connectorId,
+        }),
+      ];
+      mockInferencePlugin.getConnectorList.mockResolvedValue(mockConnectors);
 
-      const result = await resolveConnectorId(validUuid, mockInferencePlugin, mockKibanaRequest);
+      const result = await resolveConnectorId(connectorId, mockInferencePlugin, mockKibanaRequest);
 
-      expect(mockValidateUuid).toHaveBeenCalledWith(validUuid);
-      expect(result).toBe(validUuid);
-      expect(mockInferencePlugin.getDefaultConnector).not.toHaveBeenCalled();
-      expect(mockInferencePlugin.getConnectorList).not.toHaveBeenCalled();
+      expect(mockInferencePlugin.getConnectorList).toHaveBeenCalledWith(mockKibanaRequest);
+      expect(result).toBe(connectorId);
+    });
+
+    it('should throw an error when connector ID is not found', async () => {
+      const nonExistentId = 'non-existent-connector-id';
+      const mockConnectors = [
+        createMockConnector({
+          name: 'OpenAI GPT-4',
+          connectorId: 'openai-gpt4-connector-id',
+        }),
+      ];
+      mockInferencePlugin.getConnectorList.mockResolvedValue(mockConnectors);
+
+      await expect(
+        resolveConnectorId(nonExistentId, mockInferencePlugin, mockKibanaRequest)
+      ).rejects.toThrow(
+        `AI Connector '${nonExistentId}' not found. Available AI connectors: OpenAI GPT-4 (ID: openai-gpt4-connector-id)`
+      );
     });
   });
 
@@ -136,7 +146,6 @@ describe('resolveConnectorId', () => {
     ];
 
     beforeEach(() => {
-      mockValidateUuid.mockReturnValue(false);
       mockInferencePlugin.getConnectorList.mockResolvedValue(mockConnectors);
     });
 
@@ -150,7 +159,6 @@ describe('resolveConnectorId', () => {
         mockKibanaRequest
       );
 
-      expect(mockValidateUuid).toHaveBeenCalledWith(connectorName);
       expect(mockInferencePlugin.getConnectorList).toHaveBeenCalledWith(mockKibanaRequest);
       expect(result).toBe(expectedConnectorId);
     });
@@ -161,7 +169,7 @@ describe('resolveConnectorId', () => {
       await expect(
         resolveConnectorId(connectorName, mockInferencePlugin, mockKibanaRequest)
       ).rejects.toThrow(
-        `AI Connector 'openai gpt-4' not found. Available AI connectors: OpenAI GPT-4, Azure OpenAI, Anthropic Claude`
+        `AI Connector 'openai gpt-4' not found. Available AI connectors: OpenAI GPT-4 (ID: openai-gpt4-connector-id), Azure OpenAI (ID: azure-openai-connector-id), Anthropic Claude (ID: anthropic-claude-connector-id)`
       );
     });
 
@@ -171,7 +179,7 @@ describe('resolveConnectorId', () => {
       await expect(
         resolveConnectorId(nonExistentName, mockInferencePlugin, mockKibanaRequest)
       ).rejects.toThrow(
-        `AI Connector 'Non-existent Connector' not found. Available AI connectors: OpenAI GPT-4, Azure OpenAI, Anthropic Claude`
+        `AI Connector 'Non-existent Connector' not found. Available AI connectors: OpenAI GPT-4 (ID: openai-gpt4-connector-id), Azure OpenAI (ID: azure-openai-connector-id), Anthropic Claude (ID: anthropic-claude-connector-id)`
       );
 
       expect(mockInferencePlugin.getConnectorList).toHaveBeenCalledWith(mockKibanaRequest);
@@ -194,7 +202,6 @@ describe('resolveConnectorId', () => {
         createMockConnector({ name: 'Duplicate Connector', connectorId: 'second-connector-id' }),
       ];
 
-      mockValidateUuid.mockReturnValue(false);
       mockInferencePlugin.getConnectorList.mockResolvedValue(duplicateConnectors);
 
       const result = await resolveConnectorId(

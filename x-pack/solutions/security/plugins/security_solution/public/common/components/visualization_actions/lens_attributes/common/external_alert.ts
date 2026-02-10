@@ -41,7 +41,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = ({
             showGridlines: false,
             layerType: 'data',
             xAccessor: columnTimestamp,
-            splitAccessor: columnTopValue,
+            splitAccessors: [columnTopValue],
           },
         ],
         yRightExtent: {

@@ -39,9 +39,17 @@ export const createTracesContextService = ({
 
   const { transaction, span } = indices;
   const allTraceIndices = getAllIndices(transaction, span);
-
   const tracesIndexPattern = allTraceIndices.join();
-  const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+
+  // Allow:
+  // - each individual configured traces index pattern (e.g. `traces-apm*`)
+  // - the full combined list (e.g. `traces-apm*,apm-*,traces-*.otel-*`)
+  // - generic `trace|traces` base patterns (fallback)
+  const allowedDataSources = [
+    tracesIndexPattern,
+    ...allTraceIndices,
+    DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
+  ];
 
   return getTracesContextService({ tracesIndexPattern, allowedDataSources });
 };

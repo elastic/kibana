@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
+import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =

@@ -12,6 +12,7 @@ import type { AttackDetailsPanelPaths } from '.';
 import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_ids';
 import { TableTab } from './tabs/table_tab';
 import { JsonTab } from './tabs/json_tab';
+import { OverviewTab } from './tabs/overview_tab';
 
 export interface AttackDetailsPanelTabType {
   id: AttackDetailsPanelPaths;
@@ -29,7 +30,7 @@ export const overviewTab: AttackDetailsPanelTabType = {
       defaultMessage="Overview"
     />
   ),
-  content: <div>{`${OVERVIEW_TAB_TEST_ID}`}</div>,
+  content: <OverviewTab />,
 };
 
 export const tableTab: AttackDetailsPanelTabType = {

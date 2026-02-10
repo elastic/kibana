@@ -5,35 +5,30 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
 test.describe('Copy integration', { tag: ['@ess'] }, () => {
+  // This test can take a bit longer on ECH
+  test.setTimeout(2 * 60 * 1000); // 2 minutes
   const testAgentPolicyName = 'Test Agent Policy for Copy';
   const packagePolicyName = 'nginx-test-copy';
   let agentPolicyId: string;
   let packagePolicyId: string;
 
-  test.beforeAll(async ({ kbnClient }) => {
-    const agentPolicyResponse = await kbnClient.request<{ item: { id: string } }>({
-      method: 'POST',
-      path: '/api/fleet/agent_policies',
-      body: {
-        name: testAgentPolicyName,
-        namespace: 'default',
+  test.beforeAll(async ({ apiServices }) => {
+    const agentPolicyResponse = await apiServices.fleet.agent_policies.create({
+      policyName: testAgentPolicyName,
+      policyNamespace: 'default',
+      params: {
         monitoring_enabled: ['logs', 'metrics'],
       },
     });
     agentPolicyId = agentPolicyResponse.data.item.id;
 
-    const packagePolicyResponse = await kbnClient.request<{ item: { id: string } }>({
-      method: 'POST',
-      path: '/api/fleet/package_policies',
-      query: {
-        format: 'simplified',
-      },
-      body: {
+    const packagePolicyResponse = await apiServices.fleet.package_policies.create(
+      {
         policy_ids: [agentPolicyId],
         package: {
           name: 'nginx',
@@ -84,11 +79,14 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
           },
         },
       },
-    });
+      {
+        format: 'simplified',
+      }
+    );
     packagePolicyId = packagePolicyResponse.data.item.id;
   });
 
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ apiServices, kbnClient }) => {
     if (packagePolicyId) {
       await kbnClient.request({
         method: 'POST',
@@ -99,14 +97,8 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
       });
     }
 
-    const packagePoliciesResponse = await kbnClient.request<{
-      items: Array<{ id: string; name: string }>;
-    }>({
-      method: 'GET',
-      path: '/api/fleet/package_policies',
-      query: {
-        kuery: `ingest-package-policies.name:${packagePolicyName}*`,
-      },
+    const packagePoliciesResponse = await apiServices.fleet.package_policies.get({
+      kuery: `ingest-package-policies.name:${packagePolicyName}*`,
     });
     for (const policy of packagePoliciesResponse.data.items) {
       if (policy.name.startsWith(packagePolicyName)) {
@@ -121,13 +113,7 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
     }
 
     if (agentPolicyId) {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/fleet/agent_policies/delete',
-        body: {
-          agentPolicyId,
-        },
-      });
+      await apiServices.fleet.agent_policies.delete(agentPolicyId);
     }
   });
 

@@ -20,3 +20,17 @@ export const TECH_PREVIEW_LABEL = i18n.translate(
     defaultMessage: 'TECH PREVIEW',
   }
 );
+
+export const COPY_ID_TO_CLIPBOARD = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',
+  {
+    defaultMessage: 'Copy endpoint ID to clipboard',
+  }
+);
+
+export const COPY_ID_COPIED = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
+  {
+    defaultMessage: 'Copied',
+  }
+);

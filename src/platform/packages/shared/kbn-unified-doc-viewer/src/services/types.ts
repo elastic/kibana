@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ReactElement } from 'react';
@@ -43,6 +43,15 @@ export type DocViewFilterFn = (
   mode: '+' | '-'
 ) => void;
 
+export interface DocViewActions {
+  openInNewTab?: (params: {
+    query?: Query | AggregateQuery;
+    tabLabel?: string;
+    timeRange?: TimeRange;
+  }) => void;
+  updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+}
+
 export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
@@ -60,6 +69,7 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;

@@ -238,6 +238,14 @@
             "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
+          },
+          {
             "plugin": "apm",
             "path": "x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links/open_span_in_discover_link.tsx"
           },
@@ -929,8 +937,12 @@
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
           },
           {
-            "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/to_esql.ts"
           },
           {
             "plugin": "@kbn/unified-metrics-grid",
@@ -938,7 +950,7 @@
           },
           {
             "plugin": "@kbn/unified-metrics-grid",
-            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/common/utils/esql/create_esql_query.ts"
           },
           {
             "plugin": "@kbn/unified-metrics-grid",
@@ -955,6 +967,18 @@
           {
             "plugin": "@kbn/unified-metrics-grid",
             "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+          },
+          {
+            "plugin": "@kbn/unified-metrics-grid",
+            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/trace_charts_definition.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.test.ts"
           }
         ],
         "children": [

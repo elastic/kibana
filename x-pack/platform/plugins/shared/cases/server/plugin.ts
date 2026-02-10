@@ -20,6 +20,7 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -73,6 +74,7 @@ export class CasePlugin
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -126,6 +128,7 @@ export class CasePlugin
       logger: this.logger,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
+      config: this.caseConfig,
     });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
@@ -143,6 +146,7 @@ export class CasePlugin
           usageCollection: plugins.usageCollection,
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
+          templatesConfig: this.caseConfig.templates,
         });
       }
 
@@ -157,17 +161,17 @@ export class CasePlugin
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
-    const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
     registerRoutes({
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
-      telemetryUsageCounter,
+      telemetryUsageCounter: this.usageCounter,
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
@@ -272,6 +276,10 @@ export class CasePlugin
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
       filesPluginStart: plugins.files,
+      // usageCounter will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      usageCounter: this.usageCounter!,
+      config: this.caseConfig,
     });
 
     return {

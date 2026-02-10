@@ -74,9 +74,8 @@ export const assignNextDataView: InternalStateThunkActionCreator<
 export const changeDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewOrDataViewId: string | DataView }>],
   Promise<void>
-> =
-  ({ tabId, dataViewOrDataViewId }) =>
-  async (dispatch, getState, { services, runtimeStateManager }) => {
+> = ({ tabId, dataViewOrDataViewId }) =>
+  async function changeDataViewThunkFn(dispatch, getState, { services, runtimeStateManager }) {
     addLog('[ui] changeDataView', { id: dataViewOrDataViewId });
 
     const { dataViews, uiSettings } = services;
@@ -149,9 +148,8 @@ export const changeDataView: InternalStateThunkActionCreator<
 export const onDataViewCreated: InternalStateThunkActionCreator<
   [TabActionPayload<{ nextDataView: DataView }>],
   Promise<void>
-> =
-  ({ tabId, nextDataView }) =>
-  async (dispatch) => {
+> = ({ tabId, nextDataView }) =>
+  async function onDataViewCreatedThunkFn(dispatch) {
     if (!nextDataView.isPersisted()) {
       dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
@@ -173,9 +171,8 @@ export const onDataViewCreated: InternalStateThunkActionCreator<
 export const onDataViewEdited: InternalStateThunkActionCreator<
   [TabActionPayload<{ editedDataView: DataView }>],
   Promise<void>
-> =
-  ({ tabId, editedDataView }) =>
-  async (dispatch, _, { services }) => {
+> = ({ tabId, editedDataView }) =>
+  async function onDataViewEditedThunkFn(dispatch, _, { services }) {
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
@@ -197,9 +194,12 @@ export const onDataViewEdited: InternalStateThunkActionCreator<
 export const updateAdHocDataViewId: InternalStateThunkActionCreator<
   [TabActionPayload<{ editedDataView: DataView }>],
   Promise<DataView | undefined>
-> =
-  ({ tabId, editedDataView }) =>
-  async (dispatch, getState, { runtimeStateManager, services }) => {
+> = ({ tabId, editedDataView }) =>
+  async function updateAdHocDataViewIdThunkFn(
+    dispatch,
+    getState,
+    { runtimeStateManager, services }
+  ) {
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
@@ -260,9 +260,8 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
 export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
   Promise<DataView>
-> =
-  ({ tabId, dataViewSpec }) =>
-  async (dispatch, _, { services }) => {
+> = ({ tabId, dataViewSpec }) =>
+  async function createAndAppendAdHocDataViewThunkFn(dispatch, _, { services }) {
     const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';

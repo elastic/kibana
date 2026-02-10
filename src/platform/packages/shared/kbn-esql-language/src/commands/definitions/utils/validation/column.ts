@@ -10,7 +10,7 @@
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
 import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
-import { getColumnExists } from '../columns';
+import { getColumnExists, getColumnName } from '../columns';
 import { isParametrized } from '../../../../ast/is';
 
 export function validateColumnForCommand(
@@ -29,7 +29,7 @@ export class ColumnValidator {
   ) {}
 
   validate(): ESQLMessage[] {
-    if (!this.exists) {
+    if (!this.exists || this.isPreviouslyUsedUnmappedColumn) {
       if (this.isUnmappedColumnAllowed) {
         return [errors.unmappedColumnWarning(this.column)];
       } else {
@@ -57,5 +57,11 @@ export class ColumnValidator {
       unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
       unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
     );
+  }
+
+  private get isPreviouslyUsedUnmappedColumn(): boolean {
+    const columnName = getColumnName(this.column);
+    const column = this.context.columns.get(columnName);
+    return Boolean(column && column.isUnmappedField);
   }
 }

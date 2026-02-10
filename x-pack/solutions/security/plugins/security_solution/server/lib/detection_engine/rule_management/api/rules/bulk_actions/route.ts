@@ -44,7 +44,6 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { ConfigType } from '../../../../../../config';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
@@ -132,8 +131,7 @@ const prepareGapParams = ({
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  config: ConfigType
+  ml: SetupPlugins['ml']
 ) => {
   router.versioned
     .post({
@@ -377,7 +375,6 @@ export const performBulkActionRoute = (
               const suppressionSupportError = await checkAlertSuppressionBulkEditSupport({
                 editActions: body.edit,
                 licensing: ctx.licensing,
-                experimentalFeatures: config.experimentalFeatures,
               });
 
               if (suppressionSupportError) {

@@ -82,6 +82,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
     packageInput,
@@ -92,6 +93,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    varGroupSelections = {},
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
@@ -311,6 +313,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   }
                   forceShowErrors={forceShowErrors}
                   isEditPage={isEditPage}
+                  varGroupSelections={varGroupSelections}
                 />
                 {index !== inputStreams.length - 1 ? (
                   <>

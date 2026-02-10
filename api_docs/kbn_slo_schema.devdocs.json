@@ -867,6 +867,90 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOGroupedStatsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetSLOGroupedStatsResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.GetSLOGroupedStatsResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.GroupedStatsResult",
+                "text": "GroupedStatsResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GroupedStatsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupedStatsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.GroupedStatsResult.entity",
+            "type": "string",
+            "tags": [],
+            "label": "entity",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.GroupedStatsResult.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "{ violated: number; degrading: number; healthy: number; noData: number; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.Paginated",
         "type": "Interface",
         "tags": [],
@@ -1827,6 +1911,23 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOGroupedStatsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOGroupedStatsParams",
+        "description": [],
+        "signature": [
+          "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.GetSLOParams",
         "type": "Type",
         "tags": [],
@@ -1867,7 +1968,7 @@
         "label": "GetSLOSettingsResponse",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; staleInstancesCleanupEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "lineNumber": 25,
@@ -2181,7 +2282,7 @@
         "label": "PutServerlessSLOSettingsParams",
         "description": [],
         "signature": [
-          "{ staleThresholdInHours: number; }"
+          "{ staleThresholdInHours: number; staleInstancesCleanupEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "lineNumber": 21,
@@ -2198,7 +2299,7 @@
         "label": "PutSLOSettingsParams",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; staleInstancesCleanupEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "lineNumber": 20,
@@ -2215,7 +2316,7 @@
         "label": "PutSLOSettingsResponse",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; staleInstancesCleanupEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "lineNumber": 24,
@@ -4696,7 +4797,7 @@
           "<Date, string, unknown>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 97,
+        "lineNumber": 104,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -10564,6 +10665,40 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOGroupedStatsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOGroupedStatsParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"apm\">; }>, ",
+          "PartialC",
+          "<{ size: ",
+          "NumberC",
+          "; serviceNames: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; environment: ",
+          "StringC",
+          "; }>]>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
+        "lineNumber": 33,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.getSLOParamsSchema",
         "type": "Object",
         "tags": [],
@@ -12442,7 +12577,7 @@
           "]>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 60,
+        "lineNumber": 67,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -12494,7 +12629,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 75,
+        "lineNumber": 82,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -14763,7 +14898,7 @@
           "; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 62,
+        "lineNumber": 69,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -15520,6 +15655,8 @@
           "TypeC",
           "<{ staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
@@ -15548,6 +15685,8 @@
           "StringC",
           ">; staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
@@ -15574,6 +15713,8 @@
           "StringC",
           ">; staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
@@ -15669,7 +15810,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 70,
+        "lineNumber": 77,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -17388,10 +17529,12 @@
           "TypeC",
           "<{ staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
-        "lineNumber": 27,
+        "lineNumber": 29,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -17442,6 +17585,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/slo.ts",
         "lineNumber": 30,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.SLO_STATUS",
+        "type": "Object",
+        "tags": [],
+        "label": "SLO_STATUS",
+        "description": [],
+        "signature": [
+          "{ readonly NO_DATA: \"NO_DATA\"; readonly HEALTHY: \"HEALTHY\"; readonly DEGRADING: \"DEGRADING\"; readonly VIOLATED: \"VIOLATED\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
+        "lineNumber": 39,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -20850,10 +21010,12 @@
           "StringC",
           ">; staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -24141,7 +24303,7 @@
           "<\"VIOLATED\">]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 39,
+        "lineNumber": 46,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
@@ -25776,6 +25938,8 @@
           "PartialC",
           "<{ staleThresholdInHours: ",
           "NumberC",
+          "; staleInstancesCleanupEnabled: ",
+          "BooleanC",
           "; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/settings.ts",
@@ -25857,7 +26021,7 @@
           "]>; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
-        "lineNumber": 46,
+        "lineNumber": 53,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
