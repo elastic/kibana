@@ -31,7 +31,11 @@ export const createGetDocViewer =
           title: tabTitle,
           order: 0,
           render: (props) => (
-            <UnifiedDocViewerObservabilityGenericOverview {...props} indexes={indexes} />
+            <UnifiedDocViewerObservabilityGenericOverview
+              {...props}
+              indexes={indexes}
+              docViewActions={params.actions}
+            />
           ),
         });
 
