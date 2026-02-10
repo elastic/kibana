@@ -6,8 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { tap } from 'rxjs';
-import { filter, of, defer, switchMap, merge, EMPTY } from 'rxjs';
+import { filter, of, defer, shareReplay, switchMap, merge, EMPTY, tap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -186,7 +185,7 @@ class ChatServiceImpl implements ChatService {
                 this.dependencies.logger.error(error);
               }
             }),
-            shareReplay() // Required to prevent multiple subscriptions to the same event stream
+            shareReplay()
           );
         })
       );

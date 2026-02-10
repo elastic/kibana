@@ -23,6 +23,7 @@ import type {
   ScopedRunner,
   ToolProvider,
   ToolRegistry,
+  HooksServiceStart,
 } from '@kbn/agent-builder-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
@@ -38,7 +39,6 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
-import type { HooksServiceStart } from '../services/hooks';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
 import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
 import type { ToolsServiceStartMock } from './tools';
@@ -247,6 +247,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     logger: loggerMock.create(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    hooks: createHooksServiceStartMock(),
     filestore: createFileSystemStoreMock(),
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),

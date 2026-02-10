@@ -7,7 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, HookLifecycle } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
@@ -36,7 +36,6 @@ import {
 } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
-import { HookLifecycle } from '../hooks';
 
 export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
@@ -93,7 +92,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       toolParams,
       source,
       request: manager.deps.request,
-      abortSignal: manager.context.abortSignal,
+      abortSignal: manager.deps.abortSignal,
     };
     const updated = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
     toolParams = updated.toolParams;
@@ -181,7 +180,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       source,
       request: manager.deps.request,
       toolReturn: runToolReturn,
-      abortSignal: context.abortSignal,
+      abortSignal: manager.deps.abortSignal,
     };
     const updated = await hooks.run(HookLifecycle.afterToolCall, postContext);
     runToolReturn = updated.toolReturn;

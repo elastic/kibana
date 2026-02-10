@@ -14,6 +14,7 @@ import {
   HookExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { RunToolReturn } from '../runner';
+import type { ToolCallSource } from '../runner/runner';
 
 export { HookLifecycle, HookExecutionMode };
 export type { ProcessedRoundInput };
@@ -36,7 +37,7 @@ interface ToolCallHookContextBase extends AgentHookContextBase {
   toolId: string;
   toolCallId: string;
   toolParams: Record<string, unknown>;
-  source: 'agent' | 'user' | 'mcp' | 'unknown';
+  source: ToolCallSource;
 }
 
 export type BeforeToolCallHookContext = ToolCallHookContextBase;

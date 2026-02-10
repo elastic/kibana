@@ -112,11 +112,10 @@ export const runAgent = async ({
   agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
-  const { agentId, agentParams, abortSignal } = agentExecutionParams;
+  const { agentId, agentParams } = agentExecutionParams;
 
   const forkedContext = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
-  const context = { ...forkedContext, abortSignal };
-  const manager = parentManager.createChild(context);
+  const manager = parentManager.createChild(forkedContext);
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
@@ -129,7 +128,7 @@ export const runAgent = async ({
       {
         runId: manager.context.runId,
         agentParams,
-        abortSignal,
+        abortSignal: manager.deps.abortSignal,
       },
       agentHandlerContext
     );

@@ -139,7 +139,7 @@ export interface AgentHandlerContext {
   /**
    * Hooks service for agent lifecycle interception.
    */
-  hooks?: AgentBuilderHooks;
+  hooks: AgentBuilderHooks;
   /**
    * File store to access data from the agent's virtual filesystem
    */

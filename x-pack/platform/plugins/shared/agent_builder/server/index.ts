@@ -22,9 +22,6 @@ export type {
   ToolsStart,
 } from './types';
 
-export { HookLifecycle, HookExecutionMode } from './services/hooks';
-export type { HookRegistration } from './services/hooks';
-
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

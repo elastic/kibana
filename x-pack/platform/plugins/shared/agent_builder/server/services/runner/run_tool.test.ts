@@ -24,7 +24,7 @@ import {
 import { RunnerManager } from './runner';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { HookLifecycle } from '../hooks';
+import { HookLifecycle } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -44,7 +44,7 @@ describe('runTool', () => {
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
-    hooksRunMock = runnerDeps.hooks!.run as jest.MockedFunction<HooksServiceStart['run']>;
+    hooksRunMock = runnerDeps.hooks.run as jest.MockedFunction<HooksServiceStart['run']>;
 
     getToolResultIdMock.mockReturnValue('some-result-id');
 
@@ -224,7 +224,7 @@ describe('runTool', () => {
   });
 
   it('runs successfully when hooks are undefined', async () => {
-    const depsWithoutHooks = { ...runnerDeps, hooks: undefined };
+    const depsWithoutHooks = { ...runnerDeps, hooks: {} as HooksServiceStart };
     const managerWithoutHooks = new RunnerManager(depsWithoutHooks);
 
     const params: ScopedRunnerRunToolsParams = {

@@ -110,18 +110,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-  let processedConversation = await prepareConversation({
+  const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
   });
 
-  processedConversation = await runBeforeAgentHook({
-    processedConversation,
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
     abortSignal,
-    context,
+    nextInput: processedConversation.nextInput,
   });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
@@ -258,75 +258,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
-  let round = await extractRound(events$);
-
-  round = await runAfterAgentHook({
-    round,
-    conversation,
-    request,
-    abortSignal,
-    context,
-  });
-
-  return {
-    round,
-  };
-};
-
-const runBeforeAgentHook = async ({
-  processedConversation,
-  request,
-  abortSignal,
-  context,
-}: {
-  processedConversation: ProcessedConversation;
-  request: AgentHandlerContext['request'];
-  abortSignal: AbortSignal | undefined;
-  context: AgentHandlerContext;
-}): Promise<ProcessedConversation> => {
-  if (!context.hooks) {
-    return processedConversation;
-  }
-
-  const beforeHookContext = await context.hooks.run(HookLifecycle.beforeAgent, {
-    request,
-    abortSignal,
-    nextInput: processedConversation.nextInput,
-  });
-
-  return {
-    ...processedConversation,
-    nextInput: beforeHookContext.nextInput ?? processedConversation.nextInput,
-  };
-};
-
-/**
- * Runs afterAgent hook so hooks can mutate the round before it is persisted/emitted.
- */
-const runAfterAgentHook = async ({
-  round,
-  conversation,
-  request,
-  abortSignal,
-  context,
-}: {
-  round: ConversationRound;
-  conversation: Conversation | undefined;
-  request: AgentHandlerContext['request'];
-  abortSignal: AbortSignal | undefined;
-  context: AgentHandlerContext;
-}): Promise<ConversationRound> => {
-  if (!context.hooks) {
-    return round;
-  }
-
-  const afterHookContext = await context.hooks.run(HookLifecycle.afterAgent, {
+  const round = await extractRound(events$);
+  const afterHookResult = await context.hooks.run(HookLifecycle.afterAgent, {
     request,
     abortSignal,
     conversation,
     round,
   });
-  return afterHookContext.round;
+
+  return {
+    round: afterHookResult.round ?? round,
+  };
 };
 
 const getConversationState = ({

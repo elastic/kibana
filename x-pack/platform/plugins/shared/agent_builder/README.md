@@ -147,7 +147,7 @@ Example: register hooks for every lifecycle event in a single call. `priority` a
 
 ```ts
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-plugin/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
 
 export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup) => {
   if (!agentBuilder) return;

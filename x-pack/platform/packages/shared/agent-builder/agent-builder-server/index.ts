@@ -90,7 +90,7 @@ export type {
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
-  applyHookResultByLifecycle as applyHookResultByEvent,
+  applyHookResultByLifecycle,
   applyBeforeAgentResult,
   applyAfterAgentResult,
   applyBeforeToolCallResult,

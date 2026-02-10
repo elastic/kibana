@@ -72,21 +72,22 @@ describe('runAgent', () => {
   });
 
   it('calls the agent handler with the expected parameters', async () => {
+    const abortSignal = new AbortController().signal;
+    const managerWithAbortSignal = new RunnerManager({ ...runnerDeps, abortSignal });
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
-      abortSignal: new AbortController().signal,
     };
 
     await runAgent({
       agentExecutionParams: params,
-      parentManager: runnerManager,
+      parentManager: managerWithAbortSignal,
     });
 
     expect(agentHandler).toHaveBeenCalledTimes(1);
     expect(agentHandler).toHaveBeenCalledWith(
       {
-        runId: runnerManager.context.runId,
+        runId: managerWithAbortSignal.context.runId,
         agentParams: params.agentParams,
         abortSignal: expect.any(AbortSignal),
       },
@@ -96,16 +97,18 @@ describe('runAgent', () => {
 
   it('propagates the abort signal when provided', async () => {
     const abortCtrl = new AbortController();
-
+    const managerWithAbortSignal = new RunnerManager({
+      ...runnerDeps,
+      abortSignal: abortCtrl.signal,
+    });
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
-      abortSignal: abortCtrl.signal,
     };
 
     await runAgent({
       agentExecutionParams: params,
-      parentManager: runnerManager,
+      parentManager: managerWithAbortSignal,
     });
 
     expect(agentHandler).toHaveBeenCalledTimes(1);

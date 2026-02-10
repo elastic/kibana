@@ -53,12 +53,17 @@ export function applyAfterToolCallResult(
   return { ...context, toolReturn: result.toolReturn };
 }
 
-export const applyHookResultByLifecycle: {
+/**
+ * Map of each hook lifecycle to its corresponding apply-result function.
+ */
+export type ApplyHookResultByLifecycle = {
   [K in HookLifecycle]: (
     context: HookContextByLifecycle[K],
     result: void | HookHandlerResult<K>
   ) => HookContextByLifecycle[K];
-} = {
+};
+
+export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
   [HookLifecycle.afterAgent]: applyAfterAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
