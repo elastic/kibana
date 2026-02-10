@@ -66,7 +66,6 @@ export function renderMessage(message: FormMessage) {
     return (
       <Fragment>
         <EuiCallOut
-          announceOnMount
           size="s"
           color="danger"
           data-test-subj="loginErrorMessage"
@@ -82,7 +81,6 @@ export function renderMessage(message: FormMessage) {
     return (
       <Fragment>
         <EuiCallOut
-          announceOnMount
           size="s"
           color="primary"
           data-test-subj="loginInfoMessage"
