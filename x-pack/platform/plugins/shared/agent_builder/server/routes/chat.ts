@@ -242,7 +242,7 @@ export function registerChatRoutes({
     };
   };
 
-  const executeAndFollow = async ({
+  const executeAgent = async ({
     payload,
     attachments,
     request,
@@ -254,7 +254,7 @@ export function registerChatRoutes({
     executionService: AgentExecutionService;
   }) => {
     const params = buildExecutionParams({ payload, attachments });
-    const { executionId } = await executionService.executeAgent({ request, params });
+    const { executionId, events$ } = await executionService.executeAgent({ request, params });
 
     // When the request is aborted, abort the execution
     request.events.aborted$.subscribe(() => {
@@ -263,7 +263,7 @@ export function registerChatRoutes({
       });
     });
 
-    return executionService.followExecution(executionId);
+    return events$;
   };
 
   router.versioned
@@ -310,7 +310,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        const chatEvents$ = await executeAndFollow({
+        const chatEvents$ = await executeAgent({
           payload,
           attachments,
           request,
@@ -385,7 +385,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        const chatEvents$ = await executeAndFollow({
+        const chatEvents$ = await executeAgent({
           payload,
           attachments,
           request,

@@ -101,6 +101,22 @@ export interface ExecuteAgentParams {
   request: KibanaRequest;
   /** Execution parameters (serializable). */
   params: AgentExecutionParams;
+  /** When true, schedule execution on a Task Manager node. When false (default), execute locally on the current node. */
+  useTaskManager?: boolean;
+}
+
+/**
+ * Result of {@link AgentExecutionService.executeAgent}.
+ */
+export interface ExecuteAgentResult {
+  /** The unique execution ID. */
+  executionId: string;
+  /**
+   * Observable of events for this execution.
+   * - Local mode: the live agent event stream (multicasted).
+   * - TM mode: polls the data stream (equivalent to followExecution).
+   */
+  events$: Observable<ChatEvent>;
 }
 
 /**
@@ -117,11 +133,10 @@ export interface FollowExecutionOptions {
  */
 export interface AgentExecutionService {
   /**
-   * Schedule an agent execution on a task manager node.
-   * Creates an execution document and schedules the TM task.
-   * @returns The execution ID.
+   * Execute an agent, either locally or on a Task Manager node.
+   * Creates an execution document and returns the execution ID along with an events observable.
    */
-  executeAgent(params: ExecuteAgentParams): Promise<{ executionId: string }>;
+  executeAgent(params: ExecuteAgentParams): Promise<ExecuteAgentResult>;
 
   /**
    * Abort an ongoing execution.

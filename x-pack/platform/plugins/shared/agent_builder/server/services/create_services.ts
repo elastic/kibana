@@ -161,6 +161,13 @@ export class ServiceManager {
       dataStreams,
       taskManager,
       spaces,
+      inference,
+      conversationService: conversations,
+      agentService: agents,
+      uiSettings,
+      savedObjects,
+      trackingService,
+      analyticsService,
     });
 
     this.internalStart = {

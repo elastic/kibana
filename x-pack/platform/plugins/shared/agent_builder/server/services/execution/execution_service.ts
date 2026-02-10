@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
@@ -15,7 +15,13 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentExecutionService, ExecuteAgentParams, FollowExecutionOptions } from './types';
+import type {
+  AgentExecutionService,
+  ExecuteAgentParams,
+  ExecuteAgentResult,
+  FollowExecutionOptions,
+  AgentExecution,
+} from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
 import {
@@ -24,11 +30,17 @@ import {
   type AgentExecutionClient,
   type ExecutionEventsClient,
 } from './persistence';
+import {
+  buildAgentEventStream,
+  collectAndWriteEvents,
+  writeErrorEvent,
+  type ExecutionRunnerDeps,
+} from './execution_runner';
+import { AbortMonitor } from './task/abort_monitor';
 
 const FOLLOW_POLL_INTERVAL_MS = 500;
 
-export interface AgentExecutionServiceDeps {
-  logger: Logger;
+export interface AgentExecutionServiceDeps extends ExecutionRunnerDeps {
   elasticsearch: ElasticsearchServiceStart;
   dataStreams: DataStreamsStart;
   taskManager: TaskManagerStartContract;
@@ -50,36 +62,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
-  async executeAgent({ request, params }: ExecuteAgentParams): Promise<{ executionId: string }> {
+  async executeAgent({
+    request,
+    params,
+    useTaskManager = false,
+  }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
 
-    // 1. Create execution document
     const executionClient = this.createExecutionClient();
-    await executionClient.create({
+    const execution = await executionClient.create({
       executionId,
       agentId,
       spaceId,
       agentParams: params,
     });
 
-    // 2. Schedule TM task
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
-
-    this.logger.debug(`Scheduled agent execution ${executionId} for agent ${agentId}`);
-
-    return { executionId };
+    if (useTaskManager) {
+      return this.executeRemote({ executionId, agentId, request });
+    } else {
+      return this.executeLocally({ execution, request });
+    }
   }
 
   async abortExecution(executionId: string): Promise<void> {
@@ -111,11 +115,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       const poll = async (): Promise<boolean> => {
         if (stopped) {
-          return true; // signal done
+          return true;
         }
 
         try {
-          // Read new events
           const events = await eventsClient.readEvents(executionId, lastEventNumber);
 
           for (const eventDoc of events) {
@@ -125,7 +128,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             }
           }
 
-          // Check execution status
           const execution = await executionClient.get(executionId);
           if (!execution) {
             observer.error(new Error(`Execution ${executionId} not found`));
@@ -138,15 +140,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             execution.status === ExecutionStatus.aborted;
 
           if (isTerminal) {
-            // Do one final poll to make sure we got all events
             const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
             for (const eventDoc of finalEvents) {
               observer.next(eventDoc.event);
             }
-            return true; // done
+            return true;
           }
 
-          return false; // keep polling
+          return false;
         } catch (err) {
           observer.error(err);
           return true;
@@ -176,6 +177,153 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         stopped = true;
       };
     });
+  }
+
+  /**
+   * Execute on a TM node: schedule the task and return the followExecution polling observable.
+   */
+  private async executeRemote({
+    executionId,
+    agentId,
+    request,
+  }: {
+    executionId: string;
+    agentId: string;
+    request: ExecuteAgentParams['request'];
+  }): Promise<ExecuteAgentResult> {
+    await this.deps.taskManager.schedule(
+      {
+        id: `agent-${executionId}`,
+        taskType: taskTypes.runAgent,
+        params: { executionId },
+        scope: ['agent-builder'],
+        enabled: true,
+        state: {},
+      },
+      { request }
+    );
+
+    this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
+
+    return {
+      executionId,
+      events$: this.followExecution(executionId),
+    };
+  }
+
+  /**
+   * Execute on the current node: build the event stream, multicast it,
+   * and set up a side-effect subscription that writes events to ES and updates status.
+   */
+  private async executeLocally({
+    execution,
+    request,
+  }: {
+    execution: AgentExecution;
+    request: ExecuteAgentParams['request'];
+  }): Promise<ExecuteAgentResult> {
+    const { executionId } = execution;
+    const executionClient = this.createExecutionClient();
+    const eventsClient = this.createEventsClient();
+
+    // Update status to running
+    await executionClient.updateStatus(executionId, ExecutionStatus.running);
+
+    // Set up abort monitoring (same mechanism as TM path)
+    const abortMonitor = new AbortMonitor({
+      executionId,
+      executionClient,
+      logger: this.logger.get('abort-monitor'),
+    });
+    abortMonitor.start();
+
+    try {
+      // Build the live event stream
+      const rawEvents$ = await buildAgentEventStream({
+        deps: this.deps,
+        request,
+        execution,
+        abortSignal: abortMonitor.getSignal(),
+      });
+
+      // Multicast the stream so multiple subscribers share the same source
+      const events$ = rawEvents$.pipe(shareReplay());
+
+      // Side-effect subscription: write events to ES and update execution status.
+      // The abortMonitor is stopped in the .finally() of this subscription.
+      this.subscribeForPersistence({
+        events$,
+        execution,
+        executionClient,
+        eventsClient,
+        abortMonitor,
+      });
+
+      this.logger.debug(
+        `Started local agent execution ${executionId} for agent ${execution.agentId}`
+      );
+
+      return {
+        executionId,
+        events$,
+      };
+    } catch (e) {
+      abortMonitor.stop();
+      throw e;
+    }
+  }
+
+  /**
+   * Subscribe to the events observable to persist events to ES and update execution status.
+   * This runs in the background - errors are logged but don't affect the live observable.
+   */
+  private subscribeForPersistence({
+    events$,
+    execution,
+    executionClient,
+    eventsClient,
+    abortMonitor,
+  }: {
+    events$: Observable<ChatEvent>;
+    execution: AgentExecution;
+    executionClient: AgentExecutionClient;
+    eventsClient: ExecutionEventsClient;
+    abortMonitor: AbortMonitor;
+  }): void {
+    const { executionId } = execution;
+
+    collectAndWriteEvents({
+      events$,
+      execution,
+      eventsClient,
+      logger: this.logger,
+    })
+      .then(async () => {
+        await executionClient.updateStatus(executionId, ExecutionStatus.completed);
+        this.logger.debug(`Local execution ${executionId} completed`);
+      })
+      .catch(async (error) => {
+        this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
+
+        try {
+          await writeErrorEvent({ execution, eventsClient, error });
+        } catch (writeErr) {
+          this.logger.error(
+            `Failed to write error event for local execution ${executionId}: ${writeErr.message}`
+          );
+        }
+
+        try {
+          await executionClient.updateStatus(executionId, ExecutionStatus.failed);
+        } catch (statusErr) {
+          this.logger.error(
+            `Failed to update status for local execution ${executionId}: ${statusErr.message}`
+          );
+        }
+      })
+      .finally(() => {
+        abortMonitor.stop();
+      });
   }
 
   private createExecutionClient(): AgentExecutionClient {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { of, Subject } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
 import type { ExecutionEventsClient } from './persistence';
@@ -29,6 +31,26 @@ jest.mock('./persistence', () => ({
   createExecutionEventsClient: () => mockEventsClient,
 }));
 
+// Mock execution_runner module
+const mockBuildAgentEventStream = jest.fn();
+const mockCollectAndWriteEvents = jest.fn();
+const mockWriteErrorEvent = jest.fn();
+
+jest.mock('./execution_runner', () => ({
+  buildAgentEventStream: (...args: any[]) => mockBuildAgentEventStream(...args),
+  collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
+  writeErrorEvent: (...args: any[]) => mockWriteErrorEvent(...args),
+}));
+
+// Mock abort monitor
+jest.mock('./task/abort_monitor', () => ({
+  AbortMonitor: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+    getSignal: jest.fn().mockReturnValue(new AbortController().signal),
+  })),
+}));
+
 const mockTaskManagerSchedule = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
@@ -46,6 +68,11 @@ describe('AgentExecutionService', () => {
     elasticsearch,
     dataStreams,
     taskManager,
+    inference: {} as any,
+    conversationService: {} as any,
+    agentService: {} as any,
+    uiSettings: {} as any,
+    savedObjects: {} as any,
   });
 
   beforeEach(() => {
@@ -60,7 +87,7 @@ describe('AgentExecutionService', () => {
     });
   });
 
-  describe('executeAgent', () => {
+  describe('executeAgent (TM mode)', () => {
     it('should create an execution document and schedule a task', async () => {
       const request = httpServerMock.createKibanaRequest();
 
@@ -70,9 +97,11 @@ describe('AgentExecutionService', () => {
           agentId: 'agent-1',
           nextInput: { message: 'hello' },
         },
+        useTaskManager: true,
       });
 
       expect(result.executionId).toBeDefined();
+      expect(result.events$).toBeDefined();
 
       expect(mockExecutionClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -93,6 +122,90 @@ describe('AgentExecutionService', () => {
         }),
         { request }
       );
+    });
+  });
+
+  describe('executeAgent (local mode)', () => {
+    it('should create an execution document and execute locally', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fakeEvent: ChatEvent = {
+        type: 'message_chunk',
+        data: { message_id: 'm1', text_chunk: 'hello' },
+      } as any;
+
+      mockBuildAgentEventStream.mockResolvedValue(of(fakeEvent));
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      const result = await service.executeAgent({
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: false,
+      });
+
+      expect(result.executionId).toBeDefined();
+      expect(result.events$).toBeDefined();
+
+      // Should have created the execution doc
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: 'agent-1',
+        })
+      );
+
+      // Should NOT have scheduled a TM task
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+
+      // Should have updated status to running
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        result.executionId,
+        ExecutionStatus.running
+      );
+
+      // Should have called buildAgentEventStream
+      expect(mockBuildAgentEventStream).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request,
+          execution: expect.objectContaining({
+            executionId: result.executionId,
+            agentId: 'agent-1',
+          }),
+        })
+      );
+    });
+
+    it('should return a live observable that emits events from the agent stream', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const eventsSubject = new Subject<ChatEvent>();
+      const fakeEvent: ChatEvent = {
+        type: 'message_chunk',
+        data: { message_id: 'm1', text_chunk: 'hello' },
+      } as any;
+
+      mockBuildAgentEventStream.mockResolvedValue(eventsSubject.asObservable());
+      mockCollectAndWriteEvents.mockImplementation(({ events$ }: { events$: any }) => {
+        return new Promise<void>((resolve) => {
+          events$.subscribe({ complete: () => resolve() });
+        });
+      });
+
+      const { events$ } = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+      });
+
+      const receivedEvents: ChatEvent[] = [];
+      events$.subscribe({ next: (e) => receivedEvents.push(e) });
+
+      eventsSubject.next(fakeEvent);
+      eventsSubject.complete();
+
+      // Allow microtasks to settle
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(receivedEvents).toEqual([fakeEvent]);
     });
   });
 

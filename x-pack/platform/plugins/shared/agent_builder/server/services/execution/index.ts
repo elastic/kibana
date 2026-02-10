@@ -9,14 +9,12 @@ export type {
   AgentExecutionService,
   AgentExecutionParams,
   ExecuteAgentParams,
+  ExecuteAgentResult,
   FollowExecutionOptions,
   AgentExecution,
   AgentExecutionEventDoc,
 } from './types';
 export { ExecutionStatus } from './types';
-export {
-  createAgentExecutionService,
-  type AgentExecutionServiceDeps,
-} from './execution_service';
+export { createAgentExecutionService, type AgentExecutionServiceDeps } from './execution_service';
 export { registerTaskDefinitions, createTaskHandler, type TaskHandler } from './task';
 export { registerExecutionEventsDataStream } from './persistence';
