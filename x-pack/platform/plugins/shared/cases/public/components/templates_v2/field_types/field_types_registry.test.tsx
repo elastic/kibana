@@ -17,6 +17,7 @@ import { TemplateFieldRenderer } from './field_renderer';
  * as per their definitions stored in the controlRegistry
  */
 const mockTemplateDefinition = `
+name: Template definition
 fields:
   - name: severity
     control: SELECT_BASIC
@@ -43,6 +44,7 @@ fields:
 `;
 
 const invalidTemplateDefinition = `
+name: Invalid definition
 fields:
   - name: unsupported
     control: UNKNOWN
