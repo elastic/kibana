@@ -33,6 +33,25 @@ jest.mock('../hooks/use_attack_details', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_header_data', () => ({
+  useHeaderData: jest.fn().mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' }),
+}));
+
+jest.mock('../hooks/use_attack_entities_lists', () => ({
+  useAttackEntitiesLists: jest.fn().mockReturnValue({
+    userNames: [],
+    hostNames: [],
+    loading: false,
+    error: false,
+  }),
+}));
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn().mockReturnValue({
+    openLeftPanel: jest.fn(),
+  }),
+}));
+
 describe('AttackDetailsLeftPanel', () => {
   it('renders when provided with context via AttackDetailsProvider', () => {
     render(
@@ -45,6 +64,6 @@ describe('AttackDetailsLeftPanel', () => {
 
     expect(screen.getByTestId('flyout-header')).toBeInTheDocument();
     expect(screen.getByTestId('flyout-body')).toBeInTheDocument();
-    expect(screen.getByText('Attack details')).toBeInTheDocument();
+    expect(screen.getByText('Insights')).toBeInTheDocument();
   });
 });
