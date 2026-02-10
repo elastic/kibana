@@ -295,9 +295,9 @@ describe('CompositeSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(toolIds),
       });
 
-      await expect(
-        registry.update('custom-skill-1', { tool_ids: toolIds })
-      ).rejects.toThrow('A skill can reference at most 5 tools, but 6 were provided');
+      await expect(registry.update('custom-skill-1', { tool_ids: toolIds })).rejects.toThrow(
+        'A skill can reference at most 5 tools, but 6 were provided'
+      );
     });
   });
 
