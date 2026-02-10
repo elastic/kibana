@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSnapshots } from './get_snapshots';
-export { validateNewTypes } from './validate_new_types';
-export { validateUpdatedTypes } from './validate_updated_types';
-export { automatedRollbackTests } from './automated_rollback_tests';
-export { checkRemovedTypes } from './check_removed_types';
+require('@kbn/setup-node-env');
+require('@kbn/test-suites-xpack-platform/agent_builder/scripts/discover_eis_models');
