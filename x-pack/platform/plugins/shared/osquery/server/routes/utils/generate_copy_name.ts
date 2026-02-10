@@ -11,8 +11,7 @@
  * Characters like `"`, `*`, `\` can cause query errors or unexpected behaviour
  * when interpolated into a `filter` string. This helper backslash-escapes them.
  */
-export const escapeFilterValue = (value: string): string =>
-  value.replace(/[\\"*]/g, '\\$&');
+export const escapeFilterValue = (value: string): string => value.replace(/[\\"*]/g, '\\$&');
 
 /**
  * Generates a unique copy name by appending `_copy` or `_copy_{n}` to the base name.

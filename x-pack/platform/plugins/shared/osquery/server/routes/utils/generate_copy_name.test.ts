@@ -43,9 +43,7 @@ describe('generateCopyName', () => {
   });
 
   it('works with names containing special characters', () => {
-    expect(generateCopyName('my query (v2)', ['my query (v2)_copy'])).toBe(
-      'my query (v2)_copy_2'
-    );
+    expect(generateCopyName('my query (v2)', ['my query (v2)_copy'])).toBe('my query (v2)_copy_2');
   });
 });
 

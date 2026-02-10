@@ -24,8 +24,7 @@ const DELETE_MODAL_CONFIG = {
   titleMessageId: 'xpack.osquery.packList.deleteConfirmationModal.title',
   titleDefaultMessage: 'Are you sure you want to delete this pack?',
   bodyMessageId: 'xpack.osquery.packList.deleteConfirmationModal.body',
-  bodyDefaultMessage:
-    "You're about to delete this pack. Are you sure you want to do this?",
+  bodyDefaultMessage: "You're about to delete this pack. Are you sure you want to do this?",
   cancelMessageId: 'xpack.osquery.packList.deleteConfirmationModal.cancelButtonLabel',
   cancelDefaultMessage: 'Cancel',
   confirmMessageId: 'xpack.osquery.packList.deleteConfirmationModal.confirmButtonLabel',
@@ -47,10 +46,7 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
     copyPackMutation.mutateAsync();
   }, [copyPackMutation]);
 
-  const handleDelete = useCallback(
-    () => deletePackMutation.mutateAsync(),
-    [deletePackMutation]
-  );
+  const handleDelete = useCallback(() => deletePackMutation.mutateAsync(), [deletePackMutation]);
 
   const actionsAriaLabel = useMemo(
     () =>

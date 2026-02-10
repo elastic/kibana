@@ -58,9 +58,7 @@ describe('RowActionsMenu', () => {
   });
 
   it('shows only edit when canWrite is false', () => {
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false })
-    );
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit')).toBeInTheDocument();
@@ -69,9 +67,7 @@ describe('RowActionsMenu', () => {
   });
 
   it('hides delete but shows duplicate when isReadOnly is true', () => {
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true })
-    );
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit')).toBeInTheDocument();

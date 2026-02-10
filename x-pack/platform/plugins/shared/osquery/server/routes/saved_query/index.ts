@@ -20,6 +20,7 @@ export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext
   if (context.experimentalFeatures.queryHistoryRework) {
     copySavedQueryRoute(router, context);
   }
+
   deleteSavedQueryRoute(router, context);
   findSavedQueryRoute(router, context);
   readSavedQueryRoute(router, context);

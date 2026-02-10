@@ -114,12 +114,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
 
       if (!isReadOnly) {
         items.push(
-          <EuiContextMenuItem
-            key="delete"
-            icon="trash"
-            color="danger"
-            onClick={handleDeleteClick}
-          >
+          <EuiContextMenuItem key="delete" icon="trash" color="danger" onClick={handleDeleteClick}>
             {deleteLabel}
           </EuiContextMenuItem>
         );

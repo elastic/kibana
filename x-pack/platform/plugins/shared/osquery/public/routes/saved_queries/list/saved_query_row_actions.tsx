@@ -14,7 +14,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
 import { useDeleteSavedQuery } from '../../../saved_queries/use_delete_saved_query';
 import { RowActionsMenu } from '../../../components/row_actions_menu';
-import type { SavedQuerySO } from './index';
+import type { SavedQuerySO } from '.';
 
 interface SavedQueryRowActionsProps {
   item: SavedQuerySO;
@@ -24,8 +24,7 @@ const DELETE_MODAL_CONFIG = {
   titleMessageId: 'xpack.osquery.savedQueryList.deleteConfirmationModal.title',
   titleDefaultMessage: 'Are you sure you want to delete this query?',
   bodyMessageId: 'xpack.osquery.savedQueryList.deleteConfirmationModal.body',
-  bodyDefaultMessage:
-    "You're about to delete this query. Are you sure you want to do this?",
+  bodyDefaultMessage: "You're about to delete this query. Are you sure you want to do this?",
   cancelMessageId: 'xpack.osquery.savedQueryList.deleteConfirmationModal.cancelButtonLabel',
   cancelDefaultMessage: 'Cancel',
   confirmMessageId: 'xpack.osquery.savedQueryList.deleteConfirmationModal.confirmButtonLabel',
