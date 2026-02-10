@@ -871,7 +871,10 @@ describe('tagKibanaAssets', () => {
       });
 
       expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
-      expect(savedObjectTagClient.create).toHaveBeenCalledWith(managedTagPayloadArg1, managedTagPayloadArg2);
+      expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+        managedTagPayloadArg1,
+        managedTagPayloadArg2
+      );
       expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalled();
     });
 

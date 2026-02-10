@@ -264,13 +264,13 @@ async function getPackageSpecTags(
         // are installed in parallel
         await withConflictRetry(() =>
           savedObjectTagClient.create(
-              {
-                name: tag.text,
-                description: 'Tag defined in package-spec',
-                color: getRandomColor(),
-              },
-              { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
-            ),
+            {
+              name: tag.text,
+              description: 'Tag defined in package-spec',
+              color: getRandomColor(),
+            },
+            { id: uniqueTagId, overwrite: true, refresh: false, managed: true }
+          )
         );
       }
       const assetTypes = getAssetTypesObjectReferences(tag?.asset_types, taggableAssets);
