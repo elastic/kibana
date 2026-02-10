@@ -106,9 +106,9 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      JEST_CONFIGS_DEPS: 'check_types'
+      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,check_types'
+      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
     retry:
       automatic:
         - exit_status: '*'
@@ -123,7 +123,7 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'check_types,build_scout_tests'
+      SCOUT_CONFIGS_DEPS: 'quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types,build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
