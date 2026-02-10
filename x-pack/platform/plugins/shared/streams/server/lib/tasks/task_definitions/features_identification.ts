@@ -69,6 +69,29 @@ const MIN_NEW_PATTERNS = 2;
 
 const MAX_DISCOVERED_PATTERNS = 200;
 
+/**
+ * Merges previously discovered patterns with newly discovered ones, capping the
+ * total at {@link MAX_DISCOVERED_PATTERNS}.
+ *
+ * New patterns are always retained so they appear in the next exclusion round.
+ * When the combined count exceeds the cap, the oldest previous patterns
+ * (highest-volume, discovered first by `categorize_text`) are kept and the most
+ * recently discovered previous patterns (lowest-volume) are evicted.
+ */
+const mergeDiscoveredPatterns = ({
+  previousPatterns,
+  newPatterns,
+}: {
+  previousPatterns: DiscoveredPattern[];
+  newPatterns: DiscoveredPattern[];
+}): DiscoveredPattern[] => {
+  const sortedPrevious = [...previousPatterns].sort((a, b) => a.discoveredAt - b.discoveredAt);
+  const remainingSlots = Math.max(0, MAX_DISCOVERED_PATTERNS - newPatterns.length);
+  const keptPrevious = sortedPrevious.slice(0, remainingSlots);
+
+  return [...keptPrevious, ...newPatterns].slice(0, MAX_DISCOVERED_PATTERNS);
+};
+
 const getSampleDocuments = async ({
   esClient,
   index,
@@ -110,11 +133,10 @@ const getSampleDocuments = async ({
     discoveredAt: now,
   }));
 
-  const previousPatterns = excludePatterns && !resetPatterns ? excludePatterns : [];
-  const remainingSlots = Math.max(0, MAX_DISCOVERED_PATTERNS - newPatterns.length);
-  const keptPrevious = previousPatterns.slice(0, remainingSlots);
-
-  const updatedPatterns = [...keptPrevious, ...newPatterns];
+  const updatedPatterns = mergeDiscoveredPatterns({
+    previousPatterns: excludePatterns && !resetPatterns ? excludePatterns : [],
+    newPatterns,
+  });
 
   return {
     updatedPatterns,
