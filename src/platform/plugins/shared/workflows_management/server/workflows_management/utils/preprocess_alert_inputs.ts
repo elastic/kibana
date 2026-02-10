@@ -127,9 +127,7 @@ async function fetchAlerts(
 
         const expandedAlert = expandFlattenedAlert(alert as object) as Alert;
 
-        // Preserve flat keys (alert) and add nested structure (expandedAlert) for backward compatibility
-        // TODO: deprecate this in favor of only using the expandedAlert
-        alerts.push({ _id: doc._id, _index: doc._index, ...alert, ...expandedAlert });
+        alerts.push({ _id: doc._id, _index: doc._index, ...expandedAlert });
       } else {
         logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
       }

@@ -121,12 +121,6 @@ interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBa
   owner: 'custom-property-validation';
 }
 
-interface YamlValidationResultAlertBracketKey extends YamlValidationResultBase {
-  severity: YamlValidationErrorSeverity;
-  message: string;
-  owner: 'alert-bracket-key-validation';
-}
-
 export type CustomPropertyValidationResult =
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;
@@ -138,7 +132,6 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'connector-id-validation',
   'json-schema-default-validation',
   'custom-property-validation',
-  'alert-bracket-key-validation',
 ] as const;
 
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
@@ -157,5 +150,4 @@ export type YamlValidationResult =
   | YamlValidationResultConnectorIdValid
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
-  | YamlValidationResultCustomPropertyValid
-  | YamlValidationResultAlertBracketKey;
+  | YamlValidationResultCustomPropertyValid;
