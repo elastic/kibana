@@ -60,6 +60,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'unknownIndexOrView':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownIndexOrView', {
+          defaultMessage: 'Unknown index or view "{name}"',
+          values: { name: out.name },
+        }),
+      };
     case 'unknownCastingType':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownCastingType', {
@@ -601,6 +608,12 @@ export const errors = {
   unknownIndex: (source: ESQLSource): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownIndex', source.location, { name: source.name }),
+      'getSources'
+    ),
+
+  unknownIndexOrView: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownIndexOrView', source.location, { name: source.name }),
       'getSources'
     ),
 

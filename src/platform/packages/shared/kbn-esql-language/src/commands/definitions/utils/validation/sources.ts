@@ -16,9 +16,22 @@ function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 
-export function validateSources(sources: ESQLSource[], context?: ICommandContext) {
+export interface ValidateSourcesOptions {
+  /** When true, use "Unknown index or view" error (e.g. for FROM). When false, use "Unknown index" (e.g. for TS). */
+  useIndexOrViewError?: boolean;
+}
+
+export function validateSources(
+  sources: ESQLSource[],
+  context?: ICommandContext,
+  options?: ValidateSourcesOptions
+) {
   const messages: ESQLMessage[] = [];
-  const sourcesMap = new Set<string>(context?.sources?.map((source) => source.name) || []);
+  const sourcesMap = new Set<string>([
+    ...(context?.sources?.map((source) => source.name) ?? []),
+    ...(context?.views?.map((view) => view.name) ?? []),
+  ]);
+  const useIndexOrViewError = options?.useIndexOrViewError ?? false;
 
   for (const source of sources) {
     if (source.incomplete) {
@@ -31,7 +44,9 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
       if (!sourceName) continue;
 
       if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        messages.push(errors.unknownIndex(source));
+        messages.push(
+          useIndexOrViewError ? errors.unknownIndexOrView(source) : errors.unknownIndex(source)
+        );
       }
     }
   }

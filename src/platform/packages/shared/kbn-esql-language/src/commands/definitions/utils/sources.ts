@@ -94,6 +94,29 @@ export const buildSourcesDefinitions = (
   });
 
 /**
+ * Builds suggestion items for ES|QL views (GET _query/view).
+ */
+export const buildViewsDefinitions = (
+  views: Array<{ name: string; query: string }>,
+  alreadyUsed: string[] = [],
+  queryString?: string
+): ISuggestionItem[] =>
+  views
+    .filter(({ name }) => !alreadyUsed.includes(name))
+    .map(({ name }) => {
+      const text = getSafeInsertSourceText(name);
+      return withAutoSuggest({
+        label: name,
+        text,
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
+          defaultMessage: 'View',
+        }),
+        sortText: 'A-view',
+      });
+    });
+
+/**
  * Checks if the source exists in the provided sources set.
  * It supports both exact matches and fuzzy searches.
  *
@@ -155,17 +178,26 @@ export async function additionalSourcesSuggestions(
   queryText: string,
   sources: ESQLSourceResult[],
   ignored: string[],
-  recommendedQuerySuggestions: ISuggestionItem[]
+  recommendedQuerySuggestions: ISuggestionItem[],
+  views: Array<{ name: string; query: string }> = []
 ) {
+  const sourceNames = new Set([
+    ...sources.map(({ name }) => name),
+    ...views.map(({ name }) => name),
+  ]);
   const suggestionsToAdd = await handleFragment(
     queryText,
-    (fragment) =>
-      sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+    (fragment) => sourceExists(fragment, sourceNames),
     (_fragment, rangeToReplace) => {
-      return getSourceSuggestions(sources, ignored).map((suggestion) => ({
+      const sourceSuggestions = getSourceSuggestions(sources, ignored).map((suggestion) => ({
         ...suggestion,
         rangeToReplace,
       }));
+      const viewSuggestions = buildViewsDefinitions(views, ignored).map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+      }));
+      return [...sourceSuggestions, ...viewSuggestions];
     },
     (fragment, rangeToReplace) => {
       const exactMatch = sources.find(({ name: _name }) => _name === fragment);
