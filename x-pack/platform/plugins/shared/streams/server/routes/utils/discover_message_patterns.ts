@@ -126,7 +126,7 @@ const SAMPLE_DOCS_PER_CATEGORY = 2;
  */
 export const isMeaningfulPattern = (pattern: string): boolean => {
   const { cleaned } = stripPlaceholderTokensWithCount(pattern);
-  return cleaned.split(/\s+/).length >= MIN_EXCLUSION_TOKENS;
+  return cleaned.split(/\s+/).filter((token) => token.length > 0).length >= MIN_EXCLUSION_TOKENS;
 };
 
 /**
