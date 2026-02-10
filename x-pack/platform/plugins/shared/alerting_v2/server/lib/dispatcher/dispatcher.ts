@@ -51,19 +51,10 @@ export class DispatcherService implements DispatcherServiceContract {
     const suppressions = await withDispatcherSpan('dispatcher:fetch-suppressions', () =>
       this.fetchAlertEpisodeSuppressions(alertEpisodes)
     );
-
-    const [suppressedEpisodes, nonSuppressedEpisodes] = partition(alertEpisodes, (episode) =>
-      suppressions.some(
-        (s) =>
-          s.should_suppress &&
-          s.rule_id === episode.rule_id &&
-          s.group_hash === episode.group_hash &&
-          (s.episode_id == null || s.episode_id === episode.episode_id)
-      )
-    );
+    const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
 
     this.logger.debug({
-      message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressedEpisodes.length} suppressed, ${nonSuppressedEpisodes.length} not suppressed`,
+      message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressed.length} suppressed, ${active.length} not suppressed`,
     });
 
     const now = new Date();
@@ -71,17 +62,47 @@ export class DispatcherService implements DispatcherServiceContract {
       this.storageService.bulkIndexDocs<AlertAction>({
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: [
-          ...suppressedEpisodes.map((episode) =>
-            this.toAction({ episode, isSuppressed: true, now })
-          ),
-          ...nonSuppressedEpisodes.map((episode) =>
-            this.toAction({ episode, isSuppressed: false, now })
-          ),
+          ...suppressed.map((episode) => this.toAction({ episode, isSuppressed: true, now })),
+          ...active.map((episode) => this.toAction({ episode, isSuppressed: false, now })),
         ],
       })
     );
 
     return { startedAt };
+  }
+
+  private applySuppression(
+    episodes: AlertEpisode[],
+    suppressions: AlertEpisodeSuppression[]
+  ): { suppressed: AlertEpisode[]; active: AlertEpisode[] } {
+    const suppressionMap = new Map<string, AlertEpisodeSuppression>();
+
+    for (const s of suppressions) {
+      if (s.episode_id) {
+        suppressionMap.set(`${s.rule_id}:${s.group_hash}:${s.episode_id}`, s);
+      } else {
+        suppressionMap.set(`${s.rule_id}:${s.group_hash}:*`, s);
+      }
+    }
+
+    const suppressed: AlertEpisode[] = [];
+    const active: AlertEpisode[] = [];
+
+    for (const ep of episodes) {
+      const episodeKey = `${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`;
+      const seriesKey = `${ep.rule_id}:${ep.group_hash}:*`;
+
+      const episodeSuppression = suppressionMap.get(episodeKey);
+      const seriesSuppression = suppressionMap.get(seriesKey);
+
+      if (episodeSuppression?.should_suppress || seriesSuppression?.should_suppress) {
+        suppressed.push(ep);
+      } else {
+        active.push(ep);
+      }
+    }
+
+    return { suppressed, active };
   }
 
   private toAction({
