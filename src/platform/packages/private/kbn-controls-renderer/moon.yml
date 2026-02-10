@@ -28,10 +28,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/controls-schemas'
   - '@kbn/presentation-containers'
-  - '@kbn/utility-types'
-  - '@kbn/es-query'
-  - '@kbn/esql-utils'
-  - '@kbn/esql-types'
 tags:
   - shared-browser
   - package
