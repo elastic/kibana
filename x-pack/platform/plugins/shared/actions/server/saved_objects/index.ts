@@ -183,4 +183,22 @@ export function setupSavedObjects(
       'createdBy',
     ]),
   });
+
+  savedObjects.registerType({
+    name: OAUTH_STATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: oauthStateMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: oauthStateModelVersions,
+  });
+
+  encryptedSavedObjects.registerType({
+    type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['codeVerifier']),
+    attributesToIncludeInAAD: new Set(['connectorId', 'kibanaReturnUrl', 'redirectUri', 'createdAt']),
+  });
 }

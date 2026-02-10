@@ -81,6 +81,7 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  OAUTH_STATE_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
@@ -221,6 +222,7 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  OAUTH_STATE_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin
@@ -421,6 +423,7 @@ export class ActionsPlugin
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
       licenseState: this.licenseState,
       actionsConfigUtils,
+      getStartServices: core.getStartServices,
       usageCounter: this.usageCounter,
       logger: this.logger,
       core,

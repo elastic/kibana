@@ -77,11 +77,14 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 export interface GetTokenOpts {
+  grantType?: 'client_credentials' | 'authorization_code';
   tokenUrl: string;
   scope?: string;
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
+  useBasicAuth?: boolean;
+  tokenExtractor?: string;
 }
 
 export interface AuthContext {

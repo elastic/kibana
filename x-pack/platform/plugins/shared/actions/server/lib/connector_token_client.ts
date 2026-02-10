@@ -43,6 +43,7 @@ interface UpdateOrReplaceOptions {
   expiresInSec?: number;
   tokenRequestDate: number;
   deleteExisting: boolean;
+  tokenType?: string;
 }
 
 export class ConnectorTokenClient {
@@ -278,6 +279,7 @@ export class ConnectorTokenClient {
     expiresInSec,
     tokenRequestDate,
     deleteExisting,
+    tokenType = 'access_token',
   }: UpdateOrReplaceOptions) {
     expiresInSec = expiresInSec ?? 3600;
     tokenRequestDate = tokenRequestDate ?? Date.now();
@@ -285,7 +287,7 @@ export class ConnectorTokenClient {
       if (deleteExisting) {
         await this.deleteConnectorTokens({
           connectorId,
-          tokenType: 'access_token',
+          tokenType,
         });
       }
 
@@ -293,14 +295,14 @@ export class ConnectorTokenClient {
         connectorId,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
-        tokenType: 'access_token',
+        tokenType,
       });
     } else {
       await this.update({
         id: token.id!,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
-        tokenType: 'access_token',
+        tokenType,
       });
     }
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, CoreSetup } from '@kbn/core/server';
 import { getAllConnectorsRoute } from './connector/get_all';
@@ -14,6 +14,7 @@ import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
 import type { ILicenseState } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
+import type { ActionsPluginsStart } from '../plugin';
 import { createConnectorRoute } from './connector/create';
 import { deleteConnectorRoute } from './connector/delete';
 import { executeConnectorRoute } from './connector/execute';
@@ -25,14 +26,13 @@ import { oauthCallbackRoute } from './oauth_callback';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
-
-import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
   licenseState: ILicenseState;
   actionsConfigUtils: ActionsConfigurationUtilities;
+  getStartServices: StartServicesAccessor<ActionsPluginsStart>;
   usageCounter?: UsageCounter;
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;

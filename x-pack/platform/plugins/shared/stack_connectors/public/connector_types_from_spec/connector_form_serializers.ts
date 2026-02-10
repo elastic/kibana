@@ -18,8 +18,13 @@ export const createConnectorFormSerializer = () => {
       return formData;
     }
 
+    // Strip any UI-only fields from secrets before sending to the API.
+    // Example: oauth_authorization_code uses `authorize` as an "Authorize" button widget.
+    const { authorize, ...secrets } = formData.secrets ?? {};
+
     return {
       ...formData,
+      secrets,
       config: { ...formData.config, authType: formData.secrets.authType },
     };
   };

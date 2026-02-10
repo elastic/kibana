@@ -616,4 +616,38 @@ describe('updateOrReplace()', () => {
       'newToken'
     );
   });
+
+  test('supports updating/creating non-access token types', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'refresh_token',
+        token: 'refresh-xyz',
+        expiresAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+
+    await connectorTokenClient.updateOrReplace({
+      connectorId: '1',
+      token: null,
+      newToken: 'refresh-xyz',
+      tokenRequestDate: Date.now(),
+      expiresInSec: 1000,
+      deleteExisting: true,
+      tokenType: 'refresh_token',
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'connector_token',
+      expect.objectContaining({
+        connectorId: '1',
+        token: 'refresh-xyz',
+        tokenType: 'refresh_token',
+      }),
+      { id: 'mock-saved-object-id' }
+    );
+  });
 });

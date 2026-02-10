@@ -131,6 +131,14 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
+export const OAUTH_AUTHORIZE_LABEL = i18n.translate('connectorSpecs.oauthAuthorize.label', {
+  defaultMessage: 'Authorize',
+});
+
+export const OAUTH_AUTHORIZE_HELP_TEXT = i18n.translate('connectorSpecs.oauthAuthorize.helpText', {
+  defaultMessage: 'Save the connector first, then authorize to generate and store access tokens.',
+});
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });

@@ -202,12 +202,19 @@ export const getAxiosInstanceWithAuth = ({
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: async (opts: GetTokenOpts) => {
-          // Use different token retrieval method based on auth type
-          if (authTypeId === 'oauth_authorization_code') {
-            // For authorization code flow, retrieve stored tokens from callback
-            if (!connectorTokenClient) {
-              throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
-            }
+          const { grantType, useBasicAuth } = opts as GetTokenOpts & {
+            grantType?: 'client_credentials' | 'authorization_code';
+            useBasicAuth?: boolean;
+          };
+
+          // Prefer explicit grantType if provided; fall back to authTypeId for backward compatibility
+          const isAuthorizationCodeFlow =
+            grantType === 'authorization_code' || authTypeId === 'oauth_authorization_code';
+
+          if (isAuthorizationCodeFlow) {
+            // For authorization code flow, retrieve stored tokens from callback and auto-refresh if needed
+            if (!connectorTokenClient) return null;
+
             return await getOAuthAuthorizationCodeAccessToken({
               connectorId,
               logger,
@@ -217,6 +224,7 @@ export const getAxiosInstanceWithAuth = ({
                   clientId: opts.clientId,
                   tokenUrl: opts.tokenUrl,
                   ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
+                  useBasicAuth,
                 },
                 secrets: {
                   clientSecret: opts.clientSecret,
@@ -227,7 +235,6 @@ export const getAxiosInstanceWithAuth = ({
             });
           }
 
-          // For client credentials flow, request new token each time
           return await getOAuthClientCredentialsAccessToken({
             connectorId,
             logger,

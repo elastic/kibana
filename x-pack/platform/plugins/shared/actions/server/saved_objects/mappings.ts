@@ -137,3 +137,13 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     // },
   },
 };
+
+export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    connectorId: {
+      type: 'keyword',
+    },
+    // no need to index the other fields
+  },
+};
