@@ -1,0 +1,23 @@
+# Generic auto-approve for machine-created PRs.
+# Add new (branch prefix, user, optional base ref) rules below as needed.
+# To migrate other auto-approve-*.yml workflows, add their condition here and remove the old workflow.
+on:
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  approve:
+    name: Auto-approve machine PR
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login == 'kibanamachine' && (
+        (startsWith(github.event.pull_request.head.ref, 'api_docs') && github.event.pull_request.base.ref == 'main') ||
+        (startsWith(github.event.pull_request.head.ref, 'backport') && github.event.pull_request.base.ref != 'main') ||
+        startsWith(github.event.pull_request.head.ref, 'scout_metadata_update')
+      ) ||
+      (github.event.pull_request.user.login == 'elasticmachine' && startsWith(github.event.pull_request.head.ref, 'update-bundled-packages'))
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
