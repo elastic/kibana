@@ -50,7 +50,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17521
+  embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
@@ -76,14 +76,14 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 209495
+  fleet: 322115
   genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13338
   imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522
