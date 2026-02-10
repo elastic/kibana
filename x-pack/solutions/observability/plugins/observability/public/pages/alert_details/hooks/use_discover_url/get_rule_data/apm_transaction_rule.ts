@@ -8,9 +8,6 @@
 import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
-import type { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
-import type { TypeOf } from '@kbn/config-schema';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 
@@ -22,41 +19,32 @@ import {
 } from '@kbn/apm-types';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-type TransactionRuleParams =
-  | TypeOf<typeof transactionErrorRateParamsSchema>
-  | TypeOf<typeof transactionDurationParamsSchema>;
-
 type ApmTransactionRuleDataResult = {
   discoverAppLocatorParams: DiscoverAppLocatorParams & {
     query: { query: string; language: 'kuery' };
   };
 } | null;
 
-export const apmTransactionParamsToKqlQuery = (
-  params: TransactionRuleParams,
-  _alert?: TopAlert
-): string => {
+export const apmTransactionAlertFieldsToKqlQuery = (alert: TopAlert): string => {
   const filters = [];
+  const { fields } = alert as TopAlert<ObservabilityApmAlert>;
 
-  const alert = _alert as TopAlert<ObservabilityApmAlert>;
-
-  // Use alert fields first, fallback to rule params
-  const serviceName = alert?.fields[SERVICE_NAME] ?? params.serviceName;
+  const serviceName = fields[SERVICE_NAME];
   if (serviceName) {
     filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
   }
 
-  const transactionType = alert?.fields[TRANSACTION_TYPE] ?? params.transactionType;
+  const transactionType = fields[TRANSACTION_TYPE];
   if (transactionType) {
     filters.push(`${escapeKuery(TRANSACTION_TYPE)}:"${escapeQuotes(transactionType)}"`);
   }
 
-  const transactionName = alert?.fields[TRANSACTION_NAME] ?? params.transactionName;
+  const transactionName = fields[TRANSACTION_NAME];
   if (transactionName) {
     filters.push(`${escapeKuery(TRANSACTION_NAME)}:"${escapeQuotes(transactionName)}"`);
   }
 
-  const environment = alert?.fields[SERVICE_ENVIRONMENT] ?? params.environment;
+  const environment = fields[SERVICE_ENVIRONMENT];
   if (environment && environment !== 'ENVIRONMENT_ALL') {
     filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
   }
@@ -86,10 +74,9 @@ export const getApmTransactionRuleData = ({
     return null;
   }
 
-  const ruleParams = rule.params as TransactionRuleParams;
-
-  const queryText = ruleParams.searchConfiguration?.query?.query;
-  const generatedQuery = apmTransactionParamsToKqlQuery(ruleParams, alert);
+  const queryText = (rule.params as { searchConfiguration?: { query?: { query?: string } } })
+    .searchConfiguration?.query?.query;
+  const generatedQuery = apmTransactionAlertFieldsToKqlQuery(alert);
 
   let kqlQuery: string;
   if (typeof queryText === 'string' && queryText) {

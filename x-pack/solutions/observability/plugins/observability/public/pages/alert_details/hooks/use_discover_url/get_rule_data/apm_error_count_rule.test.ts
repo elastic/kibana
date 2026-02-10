@@ -25,7 +25,7 @@ describe('getApmErrorCountRuleData', () => {
   } as unknown as Rule;
 
   describe('when alert has no index pattern', () => {
-    it('returns empty object', () => {
+    it('returns null', () => {
       const alertWithoutIndex = {
         fields: {},
       } as unknown as TopAlert;
@@ -36,18 +36,19 @@ describe('getApmErrorCountRuleData', () => {
     });
   });
 
-  describe('when alert has index pattern', () => {
-    it('returns discover params with all filters when all rule params provided', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
-          environment: 'production',
+  describe('when alert has index pattern and fields', () => {
+    it('returns discover params with all filters when all alert fields are present', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
+          [SERVICE_NAME]: 'checkout-service',
+          [ERROR_GROUP_ID]: 'abc123',
+          [SERVICE_ENVIRONMENT]: 'production',
         },
-      };
+      } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule });
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule });
 
       expect(result).toEqual({
         discoverAppLocatorParams: {
@@ -64,16 +65,17 @@ describe('getApmErrorCountRuleData', () => {
       });
     });
 
-    it('excludes service.name filter when not provided', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          errorGroupingKey: 'abc123',
-          environment: 'production',
+    it('excludes service.name filter when not present in alert fields', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
+          [ERROR_GROUP_ID]: 'abc123',
+          [SERVICE_ENVIRONMENT]: 'production',
         },
-      };
+      } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -81,16 +83,17 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
-    it('excludes error.grouping_key filter when not provided', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'checkout-service',
-          environment: 'production',
+    it('excludes error.grouping_key filter when not present in alert fields', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
+          [SERVICE_NAME]: 'checkout-service',
+          [SERVICE_ENVIRONMENT]: 'production',
         },
-      };
+      } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -99,16 +102,17 @@ describe('getApmErrorCountRuleData', () => {
     });
 
     it('excludes service.environment filter when ENVIRONMENT_ALL', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
-          environment: 'ENVIRONMENT_ALL',
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
+          [SERVICE_NAME]: 'checkout-service',
+          [ERROR_GROUP_ID]: 'abc123',
+          [SERVICE_ENVIRONMENT]: 'ENVIRONMENT_ALL',
         },
-      };
+      } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -116,61 +120,60 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
-    it('includes only processor.event filter when no other params provided', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {},
-      };
-
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+    it('includes only processor.event filter when no other alert fields are present', () => {
+      const result = getApmErrorCountRuleData({ alert: mockAlert, rule: baseRule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe('processor.event:"error"');
     });
 
-    it('handles all combinations of optional params', () => {
+    it('handles various combinations of alert fields', () => {
       const testCases = [
         {
-          params: { serviceName: 'service-a' },
+          fields: { [SERVICE_NAME]: 'service-a' },
           expectedQuery: '(service.name:"service-a" AND processor.event:"error")',
         },
         {
-          params: { errorGroupingKey: 'xyz789' },
+          fields: { [ERROR_GROUP_ID]: 'xyz789' },
           expectedQuery: '(error.grouping_key:"xyz789" AND processor.event:"error")',
         },
         {
-          params: { environment: 'staging' },
+          fields: { [SERVICE_ENVIRONMENT]: 'staging' },
           expectedQuery: '(service.environment:"staging" AND processor.event:"error")',
         },
         {
-          params: { serviceName: 'service-b', environment: 'development' },
+          fields: { [SERVICE_NAME]: 'service-b', [SERVICE_ENVIRONMENT]: 'development' },
           expectedQuery:
             '(service.name:"service-b" AND service.environment:"development" AND processor.event:"error")',
         },
         {
-          params: { errorGroupingKey: 'def456', environment: 'qa' },
+          fields: { [ERROR_GROUP_ID]: 'def456', [SERVICE_ENVIRONMENT]: 'qa' },
           expectedQuery:
             '(error.grouping_key:"def456" AND service.environment:"qa" AND processor.event:"error")',
         },
       ];
 
-      testCases.forEach(({ params, expectedQuery }) => {
-        const rule: Rule = { ...baseRule, params };
-        const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      testCases.forEach(({ fields, expectedQuery }) => {
+        const alert = {
+          ...mockAlert,
+          fields: { ...mockAlert.fields, ...fields },
+        } as unknown as TopAlert;
+        const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
         expect(result).toBeDefined();
         expect(result.discoverAppLocatorParams?.query?.query).toBe(expectedQuery);
       });
     });
 
     it('uses kuery as query language', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'test-service',
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'test-service',
         },
-      };
+      } as unknown as TopAlert;
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.language).toBe('kuery');
@@ -198,230 +201,21 @@ describe('getApmErrorCountRuleData', () => {
     });
   });
 
-  describe('when alert fields are available', () => {
-    it('prioritizes alert fields over rule params for service.name', () => {
-      const alertWithFields: TopAlert = {
+  describe('when searchConfiguration is provided in rule params', () => {
+    it('combines searchConfiguration query with alert field filters', () => {
+      const alert: TopAlert = {
         ...mockAlert,
         fields: {
           [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [SERVICE_NAME]: 'alert-service',
+          [SERVICE_NAME]: 'checkout-service',
+          [ERROR_GROUP_ID]: 'abc123',
+          [SERVICE_ENVIRONMENT]: 'production',
         },
       } as unknown as TopAlert;
 
       const rule: Rule = {
         ...baseRule,
         params: {
-          serviceName: 'rule-service',
-          errorGroupingKey: 'abc123',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toContain(
-        'service.name:"alert-service"'
-      );
-      expect(result.discoverAppLocatorParams?.query?.query).not.toContain('rule-service');
-    });
-
-    it('prioritizes alert fields over rule params for error.grouping_key', () => {
-      const alertWithFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [ERROR_GROUP_ID]: 'alert-error-key',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'test-service',
-          errorGroupingKey: 'rule-error-key',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toContain(
-        'error.grouping_key:"alert-error-key"'
-      );
-      expect(result.discoverAppLocatorParams?.query?.query).not.toContain('rule-error-key');
-    });
-
-    it('prioritizes alert fields over rule params for service.environment', () => {
-      const alertWithFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [SERVICE_ENVIRONMENT]: 'alert-env',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'test-service',
-          environment: 'rule-env',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toContain(
-        'service.environment:"alert-env"'
-      );
-      expect(result.discoverAppLocatorParams?.query?.query).not.toContain('rule-env');
-    });
-
-    it('uses all alert fields when all are available', () => {
-      const alertWithFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [SERVICE_NAME]: 'alert-service',
-          [ERROR_GROUP_ID]: 'alert-error-key',
-          [SERVICE_ENVIRONMENT]: 'alert-production',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'rule-service',
-          errorGroupingKey: 'rule-error-key',
-          environment: 'rule-env',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name:"alert-service" AND error.grouping_key:"alert-error-key" AND service.environment:"alert-production" AND processor.event:"error")'
-      );
-    });
-
-    it('falls back to rule params when alert fields are not present', () => {
-      const alertWithoutFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'rule-service',
-          errorGroupingKey: 'rule-error-key',
-          environment: 'rule-env',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithoutFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name:"rule-service" AND error.grouping_key:"rule-error-key" AND service.environment:"rule-env" AND processor.event:"error")'
-      );
-    });
-
-    it('mixes alert fields and rule params when only some alert fields are present', () => {
-      const alertWithPartialFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [SERVICE_NAME]: 'alert-service',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'rule-service',
-          errorGroupingKey: 'rule-error-key',
-          environment: 'rule-env',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithPartialFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name:"alert-service" AND error.grouping_key:"rule-error-key" AND service.environment:"rule-env" AND processor.event:"error")'
-      );
-    });
-
-    it('excludes service.environment when alert field is ENVIRONMENT_ALL', () => {
-      const alertWithFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
-          [SERVICE_NAME]: 'alert-service',
-          [SERVICE_ENVIRONMENT]: 'ENVIRONMENT_ALL',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'rule-service',
-          environment: 'production',
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name:"alert-service" AND processor.event:"error")'
-      );
-    });
-
-    it('uses alert fields even when searchConfiguration is provided', () => {
-      const alertWithFields: TopAlert = {
-        ...mockAlert,
-        fields: {
-          ...mockAlert.fields,
-          [SERVICE_NAME]: 'alert-service',
-          [ERROR_GROUP_ID]: 'alert-error',
-        },
-      } as unknown as TopAlert;
-
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'rule-service',
-          errorGroupingKey: 'rule-error',
-          searchConfiguration: {
-            query: {
-              query: 'custom.field: true',
-            },
-          },
-        },
-      };
-
-      const result = getApmErrorCountRuleData({ alert: alertWithFields, rule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(custom.field: true) AND ((service.name:"alert-service" AND error.grouping_key:"alert-error" AND processor.event:"error"))'
-      );
-    });
-  });
-
-  describe('when searchConfiguration is provided', () => {
-    it('combines searchConfiguration query with generated filters', () => {
-      const rule: Rule = {
-        ...baseRule,
-        params: {
-          serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
-          environment: 'production',
           searchConfiguration: {
             query: {
               query: 'custom.field: "custom-value" AND another.field: 123',
@@ -430,7 +224,7 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -438,7 +232,7 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
-    it('uses only searchConfiguration query when no rule params provided', () => {
+    it('uses only searchConfiguration query when no alert fields are present', () => {
       const rule: Rule = {
         ...baseRule,
         params: {
@@ -458,12 +252,19 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
-    it('uses basic params when searchConfiguration query is empty string', () => {
+    it('uses only alert field filters when searchConfiguration query is empty string', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'checkout-service',
+          [ERROR_GROUP_ID]: 'abc123',
+        },
+      } as unknown as TopAlert;
+
       const rule: Rule = {
         ...baseRule,
         params: {
-          serviceName: 'checkout-service',
-          errorGroupingKey: 'abc123',
           searchConfiguration: {
             query: {
               query: '',
@@ -472,7 +273,7 @@ describe('getApmErrorCountRuleData', () => {
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
@@ -480,19 +281,26 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
-    it('uses basic params when searchConfiguration exists but query is undefined', () => {
+    it('uses only alert field filters when searchConfiguration exists but query is undefined', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_NAME]: 'checkout-service',
+          [SERVICE_ENVIRONMENT]: 'production',
+        },
+      } as unknown as TopAlert;
+
       const rule: Rule = {
         ...baseRule,
         params: {
-          serviceName: 'checkout-service',
-          environment: 'production',
           searchConfiguration: {
             query: {},
           },
         },
       };
 
-      const result = getApmErrorCountRuleData({ alert: mockAlert, rule })!;
+      const result = getApmErrorCountRuleData({ alert, rule })!;
 
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(

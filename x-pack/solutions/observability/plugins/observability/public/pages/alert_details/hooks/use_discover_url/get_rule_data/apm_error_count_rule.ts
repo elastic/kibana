@@ -10,31 +10,25 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
-import type { TypeOf } from '@kbn/config-schema';
-import type { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-const apmErrorCountParamsToKqlQuery = (
-  params: TypeOf<typeof errorCountParamsSchema>,
-  _alert?: TopAlert
-): string => {
+const apmErrorCountAlertFieldsToKqlQuery = (alert: TopAlert): string => {
   const filters = [];
+  const { fields } = alert as TopAlert<ObservabilityApmAlert>;
 
-  const alert = _alert as TopAlert<ObservabilityApmAlert>;
-
-  const serviceName = alert?.fields[SERVICE_NAME] ?? params.serviceName;
+  const serviceName = fields[SERVICE_NAME];
   if (serviceName) {
     filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
   }
 
-  const errorGroupingKey = alert?.fields[ERROR_GROUP_ID] ?? params.errorGroupingKey;
+  const errorGroupingKey = fields[ERROR_GROUP_ID];
   if (errorGroupingKey) {
     filters.push(`${escapeKuery(ERROR_GROUP_ID)}:"${escapeQuotes(errorGroupingKey)}"`);
   }
 
-  const environment = alert?.fields[SERVICE_ENVIRONMENT] ?? params.environment;
+  const environment = fields[SERVICE_ENVIRONMENT];
   if (environment && environment !== 'ENVIRONMENT_ALL') {
     filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
   }
@@ -68,10 +62,9 @@ export const getApmErrorCountRuleData = ({
     return null;
   }
 
-  const ruleParams = rule.params as TypeOf<typeof errorCountParamsSchema>;
-
-  const queryText = ruleParams.searchConfiguration?.query?.query;
-  const generatedQuery = apmErrorCountParamsToKqlQuery(ruleParams, alert);
+  const queryText = (rule.params as { searchConfiguration?: { query?: { query?: string } } })
+    .searchConfiguration?.query?.query;
+  const generatedQuery = apmErrorCountAlertFieldsToKqlQuery(alert);
 
   let kqlQuery: string;
   if (typeof queryText === 'string' && queryText) {
