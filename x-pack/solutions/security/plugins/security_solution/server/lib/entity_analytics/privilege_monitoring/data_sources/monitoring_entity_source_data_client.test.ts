@@ -42,6 +42,7 @@ describe('MonitoringEntitySourceDataClient', () => {
         values: ['admin'],
       },
     ],
+    matchersModifiedByUser: false,
     filter: {},
   };
 
@@ -131,6 +132,13 @@ describe('MonitoringEntitySourceDataClient', () => {
         total: 0,
         saved_objects: [],
       } as unknown as SavedObjectsFindResponse<unknown>);
+
+      defaultOpts.soClient.get.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes: testSource,
+        references: [],
+      });
 
       defaultOpts.soClient.update.mockResolvedValue({
         id,
