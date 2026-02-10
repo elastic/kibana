@@ -48,11 +48,11 @@ export const FindListItemsRequestQuery = z.object({
    * Determines the sort order, which can be `desc` or `asc`
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
-  /** 
+  /**
       * Returns the list that come after the last list returned in the previous call
 (use the cursor value returned in the previous call). This parameter uses
 the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
- 
+
       */
   cursor: FindListItemsCursor.optional(),
   /**

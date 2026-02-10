@@ -32,7 +32,7 @@ Required when importing to an existing list.
       * Type of the importing list.
 
 Required when importing a new list that is `list_id` is not specified.
- 
+
       */
   type: ListType.optional(),
   serializer: z.string().optional(),
