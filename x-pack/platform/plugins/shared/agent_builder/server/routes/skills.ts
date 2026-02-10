@@ -24,6 +24,7 @@ import {
   createSkillBodySchema,
   updateSkillBodySchema,
 } from './skills_schemas';
+import { builtinSkillToPublicDefinition } from '../services/skills/utils';
 
 const featureFlagConfig = {
   featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -97,22 +98,8 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
           });
         }
 
-        // Convert SkillDefinition to PublicSkillDefinition if needed
         const publicSkill: GetSkillResponse =
-          'readonly' in skill
-            ? (skill as GetSkillResponse)
-            : {
-                id: skill.id,
-                name: skill.name,
-                description: skill.description,
-                content: skill.content,
-                referenced_content: skill.referencedContent?.map((rc) => ({
-                  name: rc.name,
-                  relativePath: rc.relativePath,
-                  content: rc.content,
-                })),
-                readonly: true,
-              };
+          'readonly' in skill ? (skill as GetSkillResponse) : builtinSkillToPublicDefinition(skill);
 
         return response.ok<GetSkillResponse>({
           body: publicSkill,

@@ -17,3 +17,4 @@ export {
   type SkillProvider,
   createSkillRegistry,
 } from './skill_registry';
+export { builtinSkillToPublicDefinition, persistedSkillToPublicDefinition } from './utils';

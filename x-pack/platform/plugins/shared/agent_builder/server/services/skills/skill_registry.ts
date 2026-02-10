@@ -15,6 +15,7 @@ import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
+import { builtinSkillToPublicDefinition } from './utils';
 
 export interface SkillProvider {
   id: string;
@@ -79,20 +80,7 @@ class SkillRegistryImpl implements SkillRegistry {
    * Lists all skills (built-in + persisted) as PublicSkillDefinition for API responses.
    */
   async list(): Promise<PublicSkillDefinition[]> {
-    const builtinPublic: PublicSkillDefinition[] = [...this.builtinSkillsMap.values()].map(
-      (skill) => ({
-        id: skill.id,
-        name: skill.name,
-        description: skill.description,
-        content: skill.content,
-        referenced_content: skill.referencedContent?.map((rc) => ({
-          name: rc.name,
-          relativePath: rc.relativePath,
-          content: rc.content,
-        })),
-        readonly: true,
-      })
-    );
+    const builtinPublic = [...this.builtinSkillsMap.values()].map(builtinSkillToPublicDefinition);
 
     const persistedSkills = await this.persistedProvider.list();
 

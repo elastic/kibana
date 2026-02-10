@@ -11,35 +11,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
 import { createClient } from './client';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillProvider, SkillRegistry } from './skill_registry';
-
-const toPublicDefinition = (skill: {
-  id: string;
-  name: string;
-  description: string;
-  content: string;
-  referenced_content?: Array<{
-    name: string;
-    relativePath: string;
-    content: string;
-  }>;
-  tool_ids?: string[];
-}): PublicSkillDefinition => {
-  return {
-    id: skill.id,
-    name: skill.name,
-    description: skill.description,
-    content: skill.content,
-    referenced_content: skill.referenced_content,
-    tool_ids: skill.tool_ids,
-    readonly: false,
-  };
-};
+import { persistedSkillToPublicDefinition } from './utils';
 
 export interface SkillServiceSetup {
   registerSkill(skill: SkillDefinition): Promise<void>;
@@ -124,22 +101,22 @@ class SkillServiceImpl implements SkillService {
           async get(skillId: string) {
             try {
               const skill = await skillClient.get(skillId);
-              return toPublicDefinition(skill);
+              return persistedSkillToPublicDefinition(skill);
             } catch {
               return undefined;
             }
           },
           async list() {
             const skills = await skillClient.list();
-            return skills.map(toPublicDefinition);
+            return skills.map(persistedSkillToPublicDefinition);
           },
           async create(createRequest) {
             const skill = await skillClient.create(createRequest);
-            return toPublicDefinition(skill);
+            return persistedSkillToPublicDefinition(skill);
           },
           async update(skillId, updateRequest) {
             const skill = await skillClient.update(skillId, updateRequest);
-            return toPublicDefinition(skill);
+            return persistedSkillToPublicDefinition(skill);
           },
           async delete(skillId: string) {
             return skillClient.delete(skillId);
