@@ -36,8 +36,7 @@ export const deserializeState = async ({
     const { getDiscoverSession } = discoverServices.savedSearch;
     const session = await getDiscoverSession(savedObjectId);
 
-    const selectedTabId = (serializedState.rawState as SearchEmbeddableByReferenceState)
-      .selectedTabId;
+    const selectedTabId = (serializedState as SearchEmbeddableByReferenceState).selectedTabId;
     let resolvedTab = session.tabs[0];
     let isSelectedTabDeleted = false;
 
@@ -52,7 +51,7 @@ export const deserializeState = async ({
     // Skip stale dashboard overrides when the selected tab was deleted
     const savedObjectOverride = isSelectedTabDeleted
       ? {}
-      : pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
+      : pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
 
     return {
       // Build runtime state from the resolved tab's attributes
@@ -109,7 +108,7 @@ export const serializeState = ({
   serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
   selectedTabId?: string;
-}): SerializedPanelState<SearchEmbeddableState> => {
+}): SearchEmbeddableState => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
@@ -127,16 +126,13 @@ export const serializeState = ({
     }, {});
 
     return {
-      rawState: {
-        // Serialize the current dashboard state into the panel state **without** updating the saved object
-        ...serializeTitles(),
-        ...serializeTimeRange(),
-        ...serializeDynamicActions?.(),
-        ...overwriteState,
-        savedObjectId,
-        ...(selectedTabId ? { selectedTabId } : {}),
-      },
-      references: [],
+      // Serialize the current dashboard state into the panel state **without** updating the saved object
+      ...serializeTitles(),
+      ...serializeTimeRange(),
+      ...serializeDynamicActions?.(),
+      ...overwriteState,
+      savedObjectId,
+      ...(selectedTabId ? { selectedTabId } : {}),
     };
   }
 

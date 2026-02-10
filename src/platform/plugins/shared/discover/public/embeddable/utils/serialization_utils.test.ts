@@ -10,7 +10,6 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -156,13 +155,10 @@ describe('Serialization utils', () => {
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          title: 'test panel title',
-          savedObjectId: 'savedSearch',
-          selectedTabId: 'tab-2',
-        },
-        references: [],
+      const serializedState: SearchEmbeddableState = {
+        title: 'test panel title',
+        savedObjectId: 'savedSearch',
+        selectedTabId: 'tab-2',
       };
 
       const deserializedState = await deserializeState({
@@ -191,16 +187,13 @@ describe('Serialization utils', () => {
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          title: 'test panel title',
-          savedObjectId: 'savedSearch',
-          selectedTabId: 'deleted-tab-id',
-          // Stale overrides from the deleted tab
-          columns: ['stale-col-a'],
-          sort: [['stale_field', 'asc']],
-        },
-        references: [],
+      const serializedState: SearchEmbeddableState = {
+        title: 'test panel title',
+        savedObjectId: 'savedSearch',
+        selectedTabId: 'deleted-tab-id',
+        // Stale overrides from the deleted tab
+        columns: ['stale-col-a'],
+        sort: [['stale_field', 'asc']],
       };
 
       const deserializedState = await deserializeState({
@@ -228,15 +221,12 @@ describe('Serialization utils', () => {
         .fn()
         .mockResolvedValue(mockDiscoverSession(sessionTabs));
 
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          title: 'test panel title',
-          savedObjectId: 'savedSearch',
-          selectedTabId: 'tab-2',
-          // Dashboard override for columns on top of tab-2
-          columns: ['custom-col'],
-        },
-        references: [],
+      const serializedState: SearchEmbeddableState = {
+        title: 'test panel title',
+        savedObjectId: 'savedSearch',
+        selectedTabId: 'tab-2',
+        // Dashboard override for columns on top of tab-2
+        columns: ['custom-col'],
       };
 
       const deserializedState = await deserializeState({
@@ -266,7 +256,6 @@ describe('Serialization utils', () => {
         initialState: {
           ...mockedSavedSearchAttributes,
           tabs: [],
-          selectedTabId: undefined,
           serializedSearchSource: {} as SerializedSearchSourceFields,
         },
         savedSearch,
