@@ -830,20 +830,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
                 enabled: true,
                 data_stream: { type: 'logs', dataset: 'otel.dataset' },
                 vars: {},
-                service: {
-                  pipelines: {
-                    'logs/otlp': {
-                      receivers: ['otlp'],
-                    },
-                    'metrics/otlp': {
-                      receivers: ['otlp'],
-                    },
-                    'traces/otlp': {
-                      receivers: ['otlp'],
-                    },
-                  },
-                },
-              },
+              } as any,
             ],
           },
         ],
@@ -857,10 +844,36 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
+    const agentInputs = [
+      {
+        id: 'otelcol-input-1',
+        type: 'otelcol',
+        streams: [
+          {
+            id: 'stream-1',
+            service: {
+              pipelines: {
+                'logs/otlp': {
+                  receivers: ['otlp'],
+                },
+                'metrics/otlp': {
+                  receivers: ['otlp'],
+                },
+                'traces/otlp': {
+                  receivers: ['otlp'],
+                },
+              },
+            },
+          },
+        ],
+      },
+    ] as any;
+
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       'default',
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
 
     expect(permissions).toMatchObject({
@@ -946,18 +959,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
                 enabled: true,
                 data_stream: { type: 'logs', dataset: 'otel.dataset' },
                 vars: {},
-                service: {
-                  pipelines: {
-                    'logs/otlp': {
-                      receivers: ['otlp'],
-                    },
-                    'metrics/otlp': {
-                      receivers: ['otlp'],
-                    },
-                    // No traces pipeline - should only grant logs and metrics permissions
-                  },
-                },
-              },
+              } as any,
             ],
           },
         ],
@@ -971,10 +973,34 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
+    const agentInputs = [
+      {
+        id: 'otelcol-input-1',
+        type: 'otelcol',
+        streams: [
+          {
+            id: 'stream-1',
+            service: {
+              pipelines: {
+                'logs/otlp': {
+                  receivers: ['otlp'],
+                },
+                'metrics/otlp': {
+                  receivers: ['otlp'],
+                },
+                // No traces pipeline - should only grant logs and metrics permissions
+              },
+            },
+          },
+        ],
+      },
+    ] as any;
+
     const permissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       'default',
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
 
     expect(permissions).toMatchObject({
@@ -994,6 +1020,126 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         idx.names.includes('traces-*-*')
       )
     ).toBe(false);
+  });
+
+  it('extracts signal types from agentInputs pipelines for stored policies', async () => {
+    // This simulates a stored package policy with pipelines provided via agentInputs
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-agent-inputs',
+        name: 'otel-stored-policy',
+        namespace: 'default',
+        enabled: true,
+        package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-1',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                vars: {},
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const agentInputs = [
+      {
+        id: 'otelcol-input-1',
+        type: 'otelcol',
+        streams: [
+          {
+            id: 'stream-1',
+            service: {
+              pipelines: {
+                'logs/otlp': {
+                  receivers: ['otlp'],
+                },
+                'metrics/otlp': {
+                  receivers: ['otlp'],
+                },
+                // Only logs and metrics, no traces
+              },
+            },
+          },
+        ],
+      },
+    ] as any;
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'default',
+      packagePolicies,
+      agentInputs
+    );
+
+    // Should extract from agentInputs and only grant logs and metrics permissions
+    expect(permissions).toMatchObject({
+      'package-policy-agent-inputs': {
+        indices: [
+          { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
+        ],
+      },
+    });
+
+    // Verify traces is NOT present
+    expect(permissions?.['package-policy-agent-inputs']?.indices).toHaveLength(2);
+    expect(
+      permissions?.['package-policy-agent-inputs']?.indices?.some((idx: any) =>
+        idx.names.includes('traces-*-*')
+      )
+    ).toBe(false);
+  });
+
+  it('throws error when agentInputs is not provided for dynamic_signal_types package', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-no-inputs',
+        name: 'otel-no-inputs-policy',
+        namespace: 'default',
+        enabled: true,
+        package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-1',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                vars: {},
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    // No agentInputs provided
+    expect(() =>
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies)
+    ).toThrow('Cannot determine signal types for OTel package policy package-policy-no-inputs');
   });
 });
 

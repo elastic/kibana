@@ -15,6 +15,7 @@ import {
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants';
 
 import { getNormalizedDataStreams } from '../../../common/services';
@@ -27,7 +28,7 @@ import type {
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 import { PackagePolicyRequestError } from '../../errors';
 
-import type { PackagePolicy } from '../../types';
+import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
@@ -68,7 +69,8 @@ export const AGENTLESS_INDEX_PERMISSIONS = [
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
-  packagePolicies?: PackagePolicy[]
+  packagePolicies?: PackagePolicy[],
+  agentInputs?: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]
 ): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
@@ -88,7 +90,13 @@ export function storedPackagePoliciesToAgentPermissions(
       );
     }
 
-    const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
+    const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package));
+
+    if (!pkg) {
+      throw new PackagePolicyRequestError(
+        `Package ${packagePolicy.package.name}:${packagePolicy.package.version} not found in cache for package policy ${packagePolicy.id}`
+      );
+    }
 
     // Special handling for Universal Profiling packages, as it does not use data streams _only_,
     // but also indices that do not adhere to the convention.
@@ -107,8 +115,13 @@ export function storedPackagePoliciesToAgentPermissions(
       return connectorServicePermissions(packagePolicy.id);
     }
 
+    // For input packages with dynamic_signal_types, skip the dataStreams check
+    // as permissions will be determined dynamically from pipelines
+    const isDynamicInput =
+      (pkg as PackageInfo & { type?: string }).type === 'input' && hasDynamicSignalTypes(pkg);
+
     const dataStreams = getNormalizedDataStreams(pkg);
-    if (!dataStreams || dataStreams.length === 0) {
+    if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
       return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy)];
     }
 
@@ -138,32 +151,35 @@ export function storedPackagePoliciesToAgentPermissions(
 
       default:
         // - Input packages with dynamic_signal_types produce data for signal types defined in the pipelines;
-        //   grant index permissions for each signal type pattern (e.g., logs-*-*, metrics-*-*).
+        //   grant index permissions for each signal type pattern (e.g., logs-*-*, metrics-*-*) from agentInputs
         if (
           (pkg as PackageInfo & { type?: string }).type === 'input' &&
           hasDynamicSignalTypes(pkg)
         ) {
-          // Extract pipelines from the first enabled stream
-          const firstEnabledStream = packagePolicy.inputs
-            .find((i) => i.enabled)
-            ?.streams?.find((s) => s.enabled) as any;
-          const pipelines = firstEnabledStream?.service?.pipelines;
+          const otelcolPipelines = agentInputs?.find((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE)
+            ?.streams?.[0]?.service?.pipelines;
 
-          if (pipelines) {
-            const signalTypes = extractSignalTypesFromPipelines(pipelines);
-            const baseMeta: DataStreamMeta = {
-              type: 'logs',
-              dataset: '',
-              elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
-            };
-            dataStreamsForPermissions = signalTypes.map((type) => ({
-              ...baseMeta,
-              type,
-            }));
+          let signalTypes: string[];
+          if (otelcolPipelines) {
+            // Use pipelines if available
+            signalTypes = extractSignalTypesFromPipelines(otelcolPipelines);
           } else {
-            // Fallback: if no pipelines found, don't grant any permissions
-            dataStreamsForPermissions = [];
+            // For packages with dynamic_signal_types, pipelines are required to determine permissions
+            // This should not happen in production as compiled_input.service.pipelines should always be present
+            throw new PackagePolicyRequestError(
+              `Cannot determine signal types for OTel package policy ${packagePolicy.id}: no pipelines found.`
+            );
           }
+
+          const baseMeta: DataStreamMeta = {
+            type: 'logs',
+            dataset: '',
+            elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+          };
+          dataStreamsForPermissions = signalTypes.map((type) => ({
+            ...baseMeta,
+            type,
+          }));
         } else {
           // - Normal packages store some of the `data_stream` metadata in
           //   `packagePolicy.inputs[].streams[].data_stream`
