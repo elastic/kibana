@@ -9,19 +9,19 @@
 
 import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import { SharePageObjects } from './share';
+import { SharePageObject } from './share';
 
-export interface SharePluginPageObjects extends PageObjects {
-  share: SharePageObjects;
+export interface ShareExtendedPageObjects extends PageObjects {
+  share: SharePageObject;
 }
 
 export function extendPageObjects(
   pageObjects: PageObjects,
   page: ScoutPage,
   kbnUrl: KibanaUrl
-): SharePluginPageObjects {
+): ShareExtendedPageObjects {
   return {
     ...pageObjects,
-    share: createLazyPageObject(SharePageObjects, page, kbnUrl),
+    share: createLazyPageObject(SharePageObject, page, kbnUrl),
   };
 }

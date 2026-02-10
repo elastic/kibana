@@ -9,7 +9,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 
-export class SharePageObjects {
+export class SharePageObject {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async gotoNonExistentShortUrl(shortUrlId: string) {
