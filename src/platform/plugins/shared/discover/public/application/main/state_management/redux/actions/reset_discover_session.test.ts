@@ -101,10 +101,14 @@ export const setup = async () => {
 
 describe('resetDiscoverSession', () => {
   it('should do nothing when there is no persisted session', async () => {
-    const { internalState, initializeTabs } = getDiscoverInternalStateMock();
-    const updateTabsSpy = jest.spyOn(tabsActions, 'updateTabs');
+    const setupWithoutPersistedSession = async () => {
+      const toolkit = getDiscoverInternalStateMock();
+      await toolkit.initializeTabs();
+      return toolkit;
+    };
 
-    await initializeTabs();
+    const { internalState } = await setupWithoutPersistedSession();
+    const updateTabsSpy = jest.spyOn(tabsActions, 'updateTabs');
 
     expect(internalState.getState().persistedDiscoverSession).toBeUndefined();
 

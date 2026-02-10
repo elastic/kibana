@@ -19,72 +19,48 @@ import {
   selectTabRuntimeState,
   selectTab,
 } from '..';
-import { createDataViewDataSource, DataSourceType } from '../../../../../../common/data_sources';
+import { createDataViewDataSource } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
   dataViewAdHoc,
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
+import { createDefaultPersistedTab } from '../__mocks__/test_helpers';
 import * as tabStateActions from './tab_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
-  const { internalState, initializeTabs, initializeSingleTab, runtimeStateManager } =
-    getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [
-        dataViewMockWithTimeField,
-        dataViewMock,
-        dataViewComplexMock,
-        dataViewWithDefaultColumnMock,
-      ],
-    });
-
-  const dataView = dataViewMockWithTimeField;
-
-  // Create a persisted tab
-  const persistedTab = fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: 'test-tab',
-      initialInternalState: {
-        serializedSearchSource: {
-          index: dataView.id,
-        },
-      },
-      appState: {
-        query: { language: 'kuery', query: 'test' },
-        columns: ['field1', 'field2'],
-        dataSource: {
-          type: DataSourceType.DataView,
-          dataViewId: dataView.id!,
-        },
-        sort: [['@timestamp', 'desc']],
-        interval: 'auto',
-        hideChart: false,
-      },
-    }),
-    timeRestore: false,
+  const toolkit = getDiscoverInternalStateMock({
     services,
+    persistedDataViews: [
+      dataViewMockWithTimeField,
+      dataViewMock,
+      dataViewComplexMock,
+      dataViewWithDefaultColumnMock,
+    ],
   });
 
-  const persistedDiscoverSession = createDiscoverSessionMock({
-    id: 'test-session',
-    tabs: [persistedTab],
+  const persistedTab = createDefaultPersistedTab({
+    services,
+    appStateOverrides: {
+      query: { language: 'kuery', query: 'test' },
+    },
   });
 
-  await initializeTabs({ persistedDiscoverSession });
-  await initializeSingleTab({ tabId: persistedTab.id });
+  await toolkit.initializeTabs({
+    persistedDiscoverSession: createDiscoverSessionMock({
+      id: 'test-session',
+      tabs: [persistedTab],
+    }),
+  });
+  await toolkit.initializeSingleTab({ tabId: persistedTab.id });
 
   return {
-    internalState,
-    runtimeStateManager,
+    ...toolkit,
     tabId: persistedTab.id,
-    services,
   };
 };
 
