@@ -41,7 +41,7 @@ import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
@@ -377,13 +377,19 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core } = useApmPluginContext();
-  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
   const { kuery, environment } = query;
+
+  const { data: indexSettingsData = { apmIndexSettings: [] } } = useFetcher(
+    (_callApmApi, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+    [apmSourcesAccess]
+  );
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -523,6 +529,10 @@ export function ApmServicesTable({
   const { actions: serviceActions, showActionsColumn } = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
+    rangeFrom: query.rangeFrom,
+    rangeTo: query.rangeTo,
+    environment,
+    indexSettings: indexSettingsData.apmIndexSettings,
   });
 
   return (
