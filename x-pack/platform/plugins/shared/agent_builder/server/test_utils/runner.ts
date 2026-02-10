@@ -156,7 +156,6 @@ export const createSkillRegistryMock = (): SkillRegistryMock => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    resolveSkillSelection: jest.fn().mockResolvedValue([]),
   };
 };
 

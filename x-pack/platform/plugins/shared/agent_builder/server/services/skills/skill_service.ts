@@ -19,8 +19,6 @@ import {
   type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
 } from '@kbn/agent-builder-common';
 import { createClient } from './client';
 import type { SkillPersistedDefinition } from './client';
@@ -57,7 +55,6 @@ export interface SkillRegistry {
   create(params: PersistedSkillCreateRequest): Promise<PublicSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<PublicSkillDefinition>;
   delete(skillId: string): Promise<boolean>;
-  resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]>;
 }
 
 interface CreateSkillRegistryParams {
@@ -295,49 +292,6 @@ class SkillRegistryImpl implements SkillRegistry {
   }
 
   /**
-   * Resolves a SkillSelection[] to concrete SkillDefinition[] for runtime use.
-   * Expands wildcard '*' to all built-in skills, resolves explicit IDs from both providers.
-   */
-  async resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]> {
-    if (!selection || selection.length === 0) {
-      return [];
-    }
-
-    const result: SkillDefinition[] = [];
-    const seenIds = new Set<string>();
-
-    for (const sel of selection) {
-      for (const skillId of sel.skill_ids) {
-        if (skillId === allSkillsSelectionWildcard) {
-          // Wildcard: add all built-in skills
-          for (const skill of this.builtinSkillsMap.values()) {
-            if (!seenIds.has(skill.id)) {
-              seenIds.add(skill.id);
-              result.push(skill);
-            }
-          }
-        } else if (!seenIds.has(skillId)) {
-          // Try built-in first
-          const builtinSkill = this.builtinSkillsMap.get(skillId);
-          if (builtinSkill) {
-            seenIds.add(skillId);
-            result.push(builtinSkill);
-          } else {
-            // Try persisted - convert to SkillDefinition for runtime
-            const persistedSkill = await this.persistedProvider.get(skillId);
-            if (persistedSkill) {
-              seenIds.add(skillId);
-              result.push(this.convertPersistedToSkillDefinition(persistedSkill));
-            }
-          }
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Validates that all tool IDs exist in the tool registry
    * and enforces a maximum of 5 tools per skill.
    */
@@ -364,26 +318,5 @@ class SkillRegistryImpl implements SkillRegistry {
         `Invalid tool IDs: ${invalidIds.join(', ')}. These tools do not exist in the tool registry.`
       );
     }
-  }
-
-  /**
-   * Converts a PublicSkillDefinition (persisted) to a runtime SkillDefinition.
-   * Maps `tool_ids` to `getAllowedTools()`.
-   */
-  private convertPersistedToSkillDefinition(skill: PublicSkillDefinition): SkillDefinition {
-    const toolIds = skill.tool_ids ?? [];
-    return {
-      id: skill.id,
-      name: skill.name as any, // Persisted skills use simpler name constraints
-      basePath: 'skills/platform' as any, // User-created skills use a generic base path
-      description: skill.description,
-      content: skill.content,
-      referencedContent: skill.referenced_content?.map((rc) => ({
-        name: rc.name,
-        relativePath: rc.relativePath,
-        content: rc.content,
-      })),
-      getAllowedTools: () => toolIds as any[],
-    };
   }
 }

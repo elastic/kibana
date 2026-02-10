@@ -15,7 +15,6 @@ export {
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
-export type { SkillSelection } from '../skills';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,

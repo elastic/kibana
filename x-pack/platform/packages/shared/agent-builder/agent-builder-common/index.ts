@@ -156,16 +156,10 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export {
-  type SkillSelection,
   type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,

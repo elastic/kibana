@@ -8,7 +8,7 @@
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { AgentType, ToolSelection, SkillSelection } from '@kbn/agent-builder-common';
+import type { AgentType, ToolSelection } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const agentsIndexName = chatSystemIndex('agents');
@@ -51,7 +51,6 @@ export interface AgentProperties {
 export interface AgentConfigurationProperties {
   instructions?: string;
   tools: ToolSelection[];
-  skills?: SkillSelection[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;
