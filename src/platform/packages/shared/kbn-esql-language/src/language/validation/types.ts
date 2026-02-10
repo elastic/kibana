@@ -18,6 +18,7 @@ export interface ReferenceMaps {
   query: string;
   joinIndices: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
+  views?: Array<{ name: string; query: string }>;
 }
 
 export interface ValidationResult {

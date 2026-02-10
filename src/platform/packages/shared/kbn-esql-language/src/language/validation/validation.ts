@@ -114,6 +114,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -151,6 +152,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -231,6 +233,7 @@ function validateCommand(
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
+    views: references.views,
     unmappedFieldsStrategy,
   };
 

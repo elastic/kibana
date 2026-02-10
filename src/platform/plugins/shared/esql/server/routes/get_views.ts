@@ -11,10 +11,7 @@ import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
 import { EsqlService } from '../services/esql_service';
 
-export const registerGetViewsRoute = (
-  router: IRouter,
-  { logger }: PluginInitializerContext
-) => {
+export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
     {
       path: '/internal/esql/views',
