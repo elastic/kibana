@@ -127,7 +127,9 @@ export default function ({ getService }: FtrProviderContext) {
         .then((resp) => {
           expect(resp.body.saved_objects).to.have.length(1);
           expect(resp.body.saved_objects[0].error).to.not.be.ok();
-          expect(resp.body.saved_objects[0].coreMigrationVersion).to.eql(created.coreMigrationVersion);
+          expect(resp.body.saved_objects[0].coreMigrationVersion).to.eql(
+            created.coreMigrationVersion
+          );
           expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
         });
     });
