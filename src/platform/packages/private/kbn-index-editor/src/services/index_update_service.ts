@@ -48,7 +48,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import { esql } from '@kbn/esql-language';
-import type { ESQLOrderExpression } from '@kbn/esql-language/src/types';
+import type { ESQLOrderExpression } from '@kbn/esql-language';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';

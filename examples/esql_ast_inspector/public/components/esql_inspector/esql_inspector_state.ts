@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ESQLCommand } from '@kbn/esql-language';
 import { EsqlQuery, Parser, Walker } from '@kbn/esql-language';
-import type { ESQLProperNode } from '@kbn/esql-language/src/types';
+import type { ESQLProperNode } from '@kbn/esql-language';
 import type { Annotation } from '../annotations';
 import { highlight } from './helpers';
 

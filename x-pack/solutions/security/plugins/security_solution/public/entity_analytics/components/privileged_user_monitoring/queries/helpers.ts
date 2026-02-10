@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand, ESQLForkParens } from '@kbn/esql-language';
+import type {
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLForkParens,
+  ESQLProperNode,
+} from '@kbn/esql-language';
 import {
   Walker,
   BasicPrettyPrinter,
@@ -13,11 +18,11 @@ import {
   isColumn,
   mutate,
   Parser,
+  isAsExpression,
+  isFieldExpression,
 } from '@kbn/esql-language';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { partition } from 'lodash/fp';
-import type { ESQLProperNode } from '@kbn/esql-language/src/types';
-import { isAsExpression, isFieldExpression } from '@kbn/esql-language/src/ast/is';
 import * as E from 'fp-ts/Either';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 

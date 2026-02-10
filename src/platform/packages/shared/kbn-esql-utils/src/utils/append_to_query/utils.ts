@@ -12,7 +12,7 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLStringLiteral,
-} from '@kbn/esql-language/src/types';
+} from '@kbn/esql-language';
 
 export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
 

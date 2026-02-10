@@ -9,12 +9,7 @@
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { isAssignment, isColumn, LeafPrinter, singleItems, Walker } from '@kbn/esql-language';
-import type {
-  ESQLColumn,
-  ESQLList,
-  ESQLLiteral,
-  ESQLProperNode,
-} from '@kbn/esql-language/src/types';
+import type { ESQLColumn, ESQLList, ESQLLiteral, ESQLProperNode } from '@kbn/esql-language';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];

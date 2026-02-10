@@ -10,11 +10,7 @@
 import { ParameterReplacer } from './parameter_replacer';
 import type { ESQLColumn } from '@kbn/esql-language';
 import { Builder } from '@kbn/esql-language';
-import type {
-  ESQLFunction,
-  ESQLParamLiteral,
-  ESQLUnnamedParamLiteral,
-} from '@kbn/esql-language/src/types';
+import type { ESQLFunction, ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@kbn/esql-language';
 
 function createParamLiteral(
   paramType: 'named' | 'positional',

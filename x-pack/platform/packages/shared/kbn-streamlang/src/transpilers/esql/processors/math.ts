@@ -10,7 +10,7 @@ import type { ESQLAstCommand, ESQLAstItem, ESQLSingleAstItem } from '@kbn/esql-l
 import type {
   BinaryExpressionArithmeticOperator,
   BinaryExpressionComparisonOperator,
-} from '@kbn/esql-language/src/types';
+} from '@kbn/esql-language';
 import type { MathProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import {
