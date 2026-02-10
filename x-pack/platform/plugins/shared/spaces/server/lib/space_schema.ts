@@ -80,7 +80,7 @@ const spaceSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Cross-project search project routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.',
+          'Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.',
       },
     })
   ),
