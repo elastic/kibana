@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'

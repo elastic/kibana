@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/visualizations-plugin'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
   - '@kbn/config-schema'

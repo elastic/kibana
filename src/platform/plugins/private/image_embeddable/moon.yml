@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
   - '@kbn/screenshot-mode-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/embeddable-enhanced-plugin'

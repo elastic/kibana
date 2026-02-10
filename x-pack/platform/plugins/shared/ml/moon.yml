@@ -95,7 +95,6 @@ dependsOn:
   - '@kbn/ml-validators'
   - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-context-render'
