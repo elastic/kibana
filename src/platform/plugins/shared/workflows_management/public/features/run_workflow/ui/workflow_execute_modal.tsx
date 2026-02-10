@@ -34,6 +34,7 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import type { WorkflowTriggerTab } from '../../../common/lib/telemetry/events/workflows/execution/types';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 

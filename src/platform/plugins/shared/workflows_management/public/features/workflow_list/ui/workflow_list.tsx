@@ -57,7 +57,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       telemetry.reportWorkflowListViewed({
         workflowCount: workflows.results.length,
         pageNumber: search.page || 1,
-        search,
+        search: { ...search },
       });
     }
   }, [isLoadingWorkflows, workflows, search, telemetry]);

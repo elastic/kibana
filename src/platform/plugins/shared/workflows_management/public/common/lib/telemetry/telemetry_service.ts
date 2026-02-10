@@ -12,22 +12,16 @@ import { workflowsTelemetryEvents } from './events/workflows';
 import type {
   TelemetryEventTypeData,
   TelemetryEventTypes,
+  TelemetryServiceClient,
   TelemetryServiceSetupParams,
 } from './types';
-
-export interface TelemetryServiceStart {
-  reportEvent: <T extends TelemetryEventTypes>(
-    eventType: T,
-    eventData: TelemetryEventTypeData<T>
-  ) => void;
-}
 
 /**
  * Service that interacts with the Core's analytics module
  * to trigger custom events for Workflows plugin features
  */
 export class TelemetryService {
-  constructor(private analytics: AnalyticsServiceSetup | null = null) {}
+  private analytics: AnalyticsServiceSetup | null = null;
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;
@@ -36,7 +30,7 @@ export class TelemetryService {
     );
   }
 
-  public start(): TelemetryServiceStart {
+  public getClient(): TelemetryServiceClient {
     const reportEvent = this.analytics?.reportEvent.bind(this.analytics);
 
     if (!this.analytics || !reportEvent) {

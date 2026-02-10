@@ -90,34 +90,6 @@ export interface WorkflowTelemetryMetadata {
 }
 
 /**
- * Recursively counts all steps in a workflow, including nested steps
- */
-function countStepsRecursive(steps: WorkflowYaml['steps']): number {
-  if (!steps || !Array.isArray(steps)) {
-    return 0;
-  }
-
-  let count = 0;
-  for (const step of steps) {
-    if (step && typeof step === 'object') {
-      count++; // Count this step
-
-      // Count nested steps in 'steps', 'else', and 'fallback' arrays
-      if ('steps' in step && Array.isArray(step.steps)) {
-        count += countStepsRecursive(step.steps);
-      }
-      if ('else' in step && Array.isArray(step.else)) {
-        count += countStepsRecursive(step.else);
-      }
-      if ('fallback' in step && Array.isArray(step.fallback)) {
-        count += countStepsRecursive(step.fallback);
-      }
-    }
-  }
-  return count;
-}
-
-/**
  * Extracts telemetry metadata from a workflow YAML definition
  *
  * @param workflow - The workflow YAML definition (can be partial)
@@ -156,12 +128,9 @@ export function extractWorkflowMetadata(
     return defaultMetadata;
   }
 
-  // Count steps (including nested)
-  const stepCount = countStepsRecursive(workflow.steps || []);
-
   // Extract all step types and count occurrences
   const stepTypeCounts: Record<string, number> = {};
-  const connectorTypes: string[] = [];
+  const connectorTypes = new Set<string>();
 
   function countStepTypesRecursive(steps: WorkflowYaml['steps']): void {
     if (!steps || !Array.isArray(steps)) {
@@ -178,9 +147,7 @@ export function extractWorkflowMetadata(
         // Extract only the connector name (part before the dot), not the full step type
         if (isConnectorStep(step)) {
           const connectorName = stepType.split('.')[0];
-          if (!connectorTypes.includes(connectorName)) {
-            connectorTypes.push(connectorName);
-          }
+          connectorTypes.add(connectorName);
         }
 
         // Recursively process nested steps
@@ -198,6 +165,9 @@ export function extractWorkflowMetadata(
   }
 
   countStepTypesRecursive(workflow.steps || []);
+
+  // Derive stepCount from stepTypeCounts (sum of all counts) to avoid traversing steps twice
+  const stepCount = Object.values(stepTypeCounts).reduce((sum, count) => sum + count, 0);
 
   // Extract unique step types as an array for easy aggregation
   const stepTypes = Object.keys(stepTypeCounts);
@@ -234,7 +204,7 @@ export function extractWorkflowMetadata(
   return {
     enabled,
     stepCount,
-    connectorTypes: [...new Set(connectorTypes)], // Remove duplicates
+    connectorTypes: [...connectorTypes],
     stepTypes,
     stepTypeCounts,
     triggerTypes,

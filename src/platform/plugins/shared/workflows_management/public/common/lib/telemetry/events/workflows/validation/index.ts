@@ -46,7 +46,13 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
   },
   errorTypes: {
     type: 'array',
-    items: { type: 'keyword' },
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A validation error type',
+        optional: false,
+      },
+    },
     _meta: {
       description:
         'Unique validation error types (e.g., ["step-name-validation", "connector-id-validation"])',
@@ -58,6 +64,14 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
     _meta: {
       description: 'Total number of validation errors',
       optional: false,
+    },
+  },
+  origin: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Origin of the action: workflow_list or workflow_detail. Only present when the action originates from a specific page.',
+      optional: true,
     },
   },
 };

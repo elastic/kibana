@@ -19,6 +19,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -55,13 +56,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // Report detail viewed telemetry when page is ready
   useEffect(() => {
     if (isReady && workflowId && activeTab) {
-      // Map activeTab to telemetry tab type
-      const tab: 'workflow' | 'executions' | 'logs' =
-        activeTab === 'executions' ? 'executions' : activeTab === 'workflow' ? 'workflow' : 'logs';
+      const tab: WorkflowDetailTab = activeTab;
       telemetry.reportWorkflowDetailViewed({
         workflowId,
         tab,
-        editorType: activeTab === 'workflow' ? 'yaml' : undefined, // Default to yaml for workflow tab
+        editorType: 'yaml',
       });
     }
   }, [isReady, workflowId, activeTab, telemetry]);

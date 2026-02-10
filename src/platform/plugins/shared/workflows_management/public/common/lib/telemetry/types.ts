@@ -14,7 +14,7 @@ export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
 
-export interface TelemetryServiceStart {
+export interface TelemetryServiceClient {
   reportEvent: <T extends AllWorkflowEventTypes>(
     eventType: T,
     eventData: WorkflowsTelemetryEventsMap[T]

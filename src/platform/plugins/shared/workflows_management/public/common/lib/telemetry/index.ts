@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './telemetry_service';
+export type * from './types';
+export { TelemetryService } from './telemetry_service';
 export * from './events/workflows';

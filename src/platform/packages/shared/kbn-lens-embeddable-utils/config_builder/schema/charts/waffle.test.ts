@@ -143,11 +143,41 @@ describe('Waffle Schema', () => {
             fields: ['category'],
             size: 5,
             color: {
-              type: 'dynamic',
-              range: 'absolute',
-              steps: [
-                { type: 'from', from: 0, color: 'red' },
-                { type: 'to', to: 100, color: 'blue' },
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [
+                {
+                  values: ['success'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 6,
+                  },
+                },
+                {
+                  values: ['info'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 9,
+                  },
+                },
+                {
+                  values: ['security'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 4,
+                  },
+                },
+                {
+                  values: ['__other__'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 5,
+                  },
+                },
               ],
             },
           },
@@ -155,7 +185,7 @@ describe('Waffle Schema', () => {
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+      expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
     it('validates configuration with collapsed dimensions', () => {
@@ -290,7 +320,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /Only a single non-collapsed breakdown dimension is allowed/i
+          /Only a single non-collapsed dimension is allowed for group_by/i
         );
       });
 
@@ -411,7 +441,7 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only collapsed breakdown dimensions are allowed/i
+          /only collapsed group_by dimensions are allowed/i
         );
       });
     });

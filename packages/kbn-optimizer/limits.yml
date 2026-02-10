@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 79354
+  agentBuilder: 96771
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
   aiops: 15359
@@ -9,13 +9,13 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 10605
+  automaticImportVTwo: 12306
   banners: 4087
   canvas: 15142
-  cases: 153204
+  cases: 225900
   charts: 40269
   cloud: 10648
-  cloudConnect: 7932
+  cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -26,11 +26,11 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 556319
+  core: 556473
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
-  dashboard: 19000
+  dashboard: 20000
   dashboardEnhanced: 12159
   dashboardMarkdown: 4994
   data: 500179
@@ -50,9 +50,9 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 18432
+  embeddable: 17521
   embeddableAlertsTable: 6524
-  embeddableEnhanced: 7912
+  embeddableEnhanced: 4488
   enterpriseSearch: 40244
   entityStore: 1755
   esql: 18224
@@ -70,6 +70,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
+  feedback: 7000
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
@@ -83,7 +84,7 @@ pageLoadAssetSize:
   graph: 9924
   grokdebugger: 5484
   home: 13560
-  imageEmbeddable: 6000
+  imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522
   inference: 10368
@@ -181,7 +182,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 111000
+  triggersActionsUi: 112000
   uiActions: 24670
   uiActionsEnhanced: 19272
   unifiedDocViewer: 14513
@@ -205,8 +206,9 @@ pageLoadAssetSize:
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
-  visualizations: 38375
+  visualizationListing: 5148
+  visualizations: 53333
   watcher: 10485
-  workflowsExtensions: 76765
+  workflowsExtensions: 90040
   workflowsManagement: 21318
   workplaceAIApp: 65731

@@ -21,8 +21,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlsRenderer } from '@kbn/controls-renderer';
-import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -36,7 +34,6 @@ import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -60,6 +57,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -369,28 +367,6 @@ export function InternalDashboardTopNav({
     []
   );
 
-  const onControlsLayoutChanged = useCallback(
-    ({ controls }: ControlsLayout) => {
-      dashboardApi.layout$.next({
-        ...dashboardApi.layout$.getValue(),
-        pinnedPanels: controls,
-      });
-    },
-    [dashboardApi.layout$]
-  );
-
-  const [controls, setControls] = useState<{ controls: DashboardLayout['pinnedPanels'] }>({
-    controls: dashboardApi.layout$.getValue().pinnedPanels,
-  });
-  useEffect(() => {
-    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
-      setControls({ controls: pinnedPanels });
-    });
-    return () => {
-      controlLayoutChangedSubscription.unsubscribe();
-    };
-  }, [dashboardApi.layout$]);
-
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -441,13 +417,7 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? (
-        <ControlsRenderer
-          parentApi={dashboardApi}
-          controls={controls} // only controls can currently be pinned
-          onControlsChanged={onControlsLayoutChanged}
-        />
-      ) : null}
+      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

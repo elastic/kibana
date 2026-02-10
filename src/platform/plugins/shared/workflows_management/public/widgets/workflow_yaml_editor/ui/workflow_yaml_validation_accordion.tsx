@@ -20,7 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,7 @@ import type {
 } from '../../../features/validate_workflow_yaml/model/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
-const severityOrder = ['error', 'warning', 'info'];
+const severityOrder = ['error', 'warning'];
 
 interface WorkflowYamlValidationAccordionProps {
   isMounted: boolean;
@@ -61,25 +61,30 @@ export function WorkflowYamlValidationAccordion({
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
 
-  const allValidationErrors: YamlValidationResult[] = [
-    ...(validationErrors || []),
-    ...(errorValidating
-      ? [
-          {
-            id: 'error-validating',
-            endLineNumber: 0,
-            endColumn: 0,
-            hoverMessage: null,
-            severity: 'error' as YamlValidationErrorSeverity,
-            message: errorValidating.message,
-            owner: 'variable-validation' as YamlValidationResult['owner'],
-            startLineNumber: 0,
-            startColumn: 0,
-            afterMessage: null,
-          },
-        ]
-      : []),
-  ];
+  const allValidationErrors: YamlValidationResult[] = useMemo(
+    () => [
+      ...(validationErrors?.filter(
+        (error) => error.severity === 'error' || error.severity === 'warning'
+      ) || []),
+      ...(errorValidating
+        ? [
+            {
+              id: 'error-validating',
+              endLineNumber: 0,
+              endColumn: 0,
+              hoverMessage: null,
+              severity: 'error' as YamlValidationErrorSeverity,
+              message: errorValidating.message,
+              owner: 'variable-validation' as YamlValidationResult['owner'],
+              startLineNumber: 0,
+              startColumn: 0,
+              afterMessage: null,
+            },
+          ]
+        : []),
+    ],
+    [validationErrors, errorValidating]
+  );
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -112,9 +117,6 @@ export function WorkflowYamlValidationAccordion({
     }
     if (error.severity === 'warning' && acc !== 'error') {
       return 'warning';
-    }
-    if (error.severity === 'info' && acc !== 'error' && acc !== 'warning') {
-      return 'info';
     }
     return acc;
   }, null);
