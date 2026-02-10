@@ -3,7 +3,6 @@ plugins:
   enabled:
     - apm
     - console
-    - security
     - dashboard
     - cloud_security_posture
     - discover_enhanced
