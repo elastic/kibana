@@ -7,8 +7,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n as kbnI18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
@@ -36,6 +37,11 @@ import { useKibana } from '../../hooks/use_kibana';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
 import { docLinks } from '../../../common/doc_links';
+import { EndpointStats } from './endpoint_stats';
+
+const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  width: ${euiTheme.base * 25}px;
+`;
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -57,9 +63,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const copyContent = useCallback(
     (inferenceId: string) => {
+      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
       navigator.clipboard.writeText(inferenceId).then(() => {
         toasts?.addSuccess({
-          title: i18n.ENDPOINT_COPY_SUCCESS(inferenceId),
+          title: message,
+          'aria-label': message,
         });
       });
     },
@@ -94,8 +102,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowInferenceFlyout(true);
   }, []);
 
   const onCloseInferenceFlyout = useCallback(() => {
@@ -110,7 +118,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [setFilterOptions]
   );
 
-  const { paginatedSortedTableData, pagination, sorting } = useTableData(
+  const { tableData, paginatedSortedTableData, pagination, sorting } = useTableData(
     inferenceEndpoints,
     queryParams,
     filterOptions,
@@ -129,13 +137,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           endpointInfo: InferenceInferenceEndpointInfo
         ) => {
           if (inferenceId) {
-            return (
-              <EndpointInfo
-                inferenceId={inferenceId}
-                endpointInfo={endpointInfo}
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
-              />
-            );
+            return <EndpointInfo inferenceId={inferenceId} endpointInfo={endpointInfo} />;
           }
 
           return null;
@@ -213,7 +215,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout, cloud?.isCloudEnabled]
+    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
   );
 
   const handleTableChange = useCallback(
@@ -251,31 +253,34 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
           }
         />
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem style={{ width: '400px' }} grow={false}>
-              <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ServiceProviderFilter
-                optionKeys={filterOptions.provider}
-                uniqueProviders={uniqueProvidersAndTaskTypes.providers}
-                onChange={onFilterChangedCallback}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <TaskTypeFilter
-                optionKeys={filterOptions.type}
-                onChange={onFilterChangedCallback}
-                uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem css={searchContainerStyles} grow={false}>
+            <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <ServiceProviderFilter
+                  optionKeys={filterOptions.provider}
+                  uniqueProviders={uniqueProvidersAndTaskTypes.providers}
+                  onChange={onFilterChangedCallback}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TaskTypeFilter
+                  optionKeys={filterOptions.type}
+                  onChange={onFilterChangedCallback}
+                  uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EndpointStats endpoints={tableData} />
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
-            itemId="id"
+            itemId="inference_id"
             items={paginatedSortedTableData}
             onChange={handleTableChange}
             pagination={pagination}
