@@ -432,6 +432,37 @@ export class TaskRunner<
       })
     );
 
+    // Persist auto-unmute for alerts whose conditional snooze conditions were met
+    const alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
+    if (alertsToAutoUnmute.length > 0) {
+      try {
+        const idsToUnmute = new Set(alertsToAutoUnmute.map((a) => a.alertInstanceId));
+        const ruleAttrs = rule as Record<string, unknown>;
+        const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter(
+          (id: string) => !idsToUnmute.has(id)
+        );
+        const updatedMutedAlerts = (
+          (ruleAttrs.mutedAlerts as Array<{ alertInstanceId: string }>) ?? []
+        ).filter((entry) => !idsToUnmute.has(entry.alertInstanceId));
+
+        await partiallyUpdateRuleWithEs(this.internalSavedObjectsRepository, ruleId, {
+          mutedInstanceIds: updatedMutedInstanceIds,
+          mutedAlerts: updatedMutedAlerts as never,
+          updatedAt: new Date().toISOString(),
+        });
+
+        for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+          this.logger.info(
+            `Auto-unmuted alert '${alertInstanceId}' for rule '${ruleId}': ${reason}`
+          );
+        }
+      } catch (err) {
+        this.logger.error(
+          `Failed to persist auto-unmute for rule '${ruleId}': ${err.message}`
+        );
+      }
+    }
+
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
     let alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions = {};

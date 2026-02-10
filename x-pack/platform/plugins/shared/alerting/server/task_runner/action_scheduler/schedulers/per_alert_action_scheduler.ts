@@ -6,9 +6,10 @@
  */
 
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import type { RuleAction, RuleTypeParams, MutedAlertInstance } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
+import { evaluateMuteConditions } from '../../../../lib/mute';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -58,8 +59,12 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
+  private mutedAlertsMap: Map<string, MutedAlertInstance> = new Map();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
+
+  /** Alert instance IDs whose mute conditions were met during this run and should be auto-unmuted. */
+  public alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -77,6 +82,16 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+
+    // Build a lookup map for conditional muted alerts
+    const mutedAlerts = (context.rule as Record<string, unknown>).mutedAlerts as
+      | MutedAlertInstance[]
+      | undefined;
+    if (mutedAlerts) {
+      for (const entry of mutedAlerts) {
+        this.mutedAlertsMap.set(entry.alertInstanceId, entry);
+      }
+    }
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -364,6 +379,48 @@ export class PerAlertActionScheduler<
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ) {
     const alertId = alert.getId();
+
+    // 1. Check conditional muted alerts first (mutedAlerts array)
+    const mutedAlertEntry = this.mutedAlertsMap.get(alertId);
+    if (mutedAlertEntry) {
+      const hasConditions =
+        mutedAlertEntry.expiresAt ||
+        (mutedAlertEntry.conditions && mutedAlertEntry.conditions.length > 0);
+
+      if (hasConditions) {
+        // Build current alert data for condition evaluation
+        const alertData: Record<string, unknown> = alert.isAlertAsData()
+          ? (alert.getAlertAsData() as Record<string, unknown>) ?? {}
+          : {};
+
+        const evalResult = evaluateMuteConditions(mutedAlertEntry, alertData);
+        if (evalResult.shouldUnmute) {
+          // Conditions met -- mark for auto-unmute, allow actions to fire
+          this.alertsToAutoUnmute.push({
+            alertInstanceId: alertId,
+            reason: evalResult.reason ?? 'conditions met',
+          });
+          this.context.logger.debug(
+            `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${evalResult.reason}`
+          );
+          return false;
+        }
+      }
+
+      // Conditions not met or no conditions -- alert is still muted
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is muted`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+
+    // 2. Fall back to legacy mutedInstanceIds (simple, indefinite mute)
     const muted = this.mutedAlertIdsSet.has(alertId);
     if (muted) {
       if (

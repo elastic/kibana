@@ -156,4 +156,20 @@ export class ActionScheduler<
 
     return { throttledSummaryActions };
   }
+
+  /**
+   * Returns alert instance IDs whose conditional mute conditions were met during this execution.
+   * The task runner should persist the unmute and emit audit / event log entries.
+   */
+  public getAlertsToAutoUnmute(): Array<{ alertInstanceId: string; reason: string }> {
+    const result: Array<{ alertInstanceId: string; reason: string }> = [];
+    for (const scheduler of this.schedulers) {
+      if ('alertsToAutoUnmute' in scheduler) {
+        result.push(
+          ...((scheduler as unknown as { alertsToAutoUnmute: typeof result }).alertsToAutoUnmute)
+        );
+      }
+    }
+    return result;
+  }
 }
