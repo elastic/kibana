@@ -33,8 +33,7 @@ export const journey = new Journey({
       await inheritSwitch.click();
     }
 
-    // Click "Custom period" button in the button group
-    await page.locator('[role="button"]').filter({ hasText: 'Custom period' }).click();
+    await page.click(subj('customRetentionButton'));
 
     // Wait for the days field and fill in the retention value
     await page.waitForSelector(subj('streamsAppDslModalDaysField'));

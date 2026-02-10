@@ -21,13 +21,13 @@ const INTERNAL_API_HEADERS = {
 };
 
 /** Batch size for parallel classic stream creation requests */
-const CLASSIC_STREAM_BATCH_SIZE = 10;
+const CLASSIC_STREAM_BATCH_SIZE = 5;
 
 /** Max retries for transient errors (lock contention) */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 /** Base delay between retries in ms */
-const RETRY_BASE_DELAY_MS = 2000;
+const RETRY_BASE_DELAY_MS = 3000;
 
 /**
  * Check if an error is an Axios response error with the given status code.
@@ -140,9 +140,9 @@ export async function createClassicStreams(
       log.info(`  Created ${created}/${count} classic streams`);
     }
 
-    // Small delay between batches to reduce lock contention
+    // Delay between batches to reduce lock contention on the streams backend
     if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
-      await sleep(500);
+      await sleep(1500);
     }
   }
 

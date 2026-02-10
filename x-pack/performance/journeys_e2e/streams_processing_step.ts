@@ -31,11 +31,16 @@ export const journey = new Journey({
   .step('Configure grok processor', async ({ page, inputDelays }) => {
     // Fill in the field selector (EuiComboBox)
     const comboBox = page.locator(subj('streamsAppProcessorFieldSelectorComboFieldText'));
-    await comboBox.locator('input[role="combobox"]').click();
-    await comboBox.locator('input[role="combobox"]').fill('body.text');
-    // Wait for and select the option from the dropdown
-    const option = page.locator('[role="option"]').filter({ hasText: 'body.text' });
-    await option.first().click({ timeout: 15000 });
+    const comboInput = comboBox.locator('input[role="combobox"]');
+    await comboInput.click();
+    await comboInput.pressSequentially('body.text', { delay: 50 });
+
+    const option = page.locator(subj('autocomplete-suggestion-body.text'));
+    try {
+      await option.click({ timeout: 10000 });
+    } catch {
+      await page.keyboard.press('Enter');
+    }
 
     // Fill in the grok pattern using the Expression component's textbox
     const patternExpression = page.locator(subj('streamsAppPatternExpression'));
