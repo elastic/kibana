@@ -41,8 +41,22 @@ export function parseCliOptions(): CliOptions {
       '--agent-policy-name <name>',
       'The name of the agent policy',
       DEFAULTS.AGENT_POLICY_NAME
+    )
+    .option(
+      '--policy-sharding',
+      'Enable policy sharding: create multiple agent policies and enroll one agent per policy',
+      false
+    )
+    .option(
+      '--num-policies <number>',
+      'Number of agent policies to create when --policy-sharding is enabled',
+      '3'
     );
 
   program.parse(process.argv);
-  return program.opts() as CliOptions;
+  const opts = program.opts();
+  return {
+    ...opts,
+    numPolicies: parseInt(opts.numPolicies, 10),
+  } as CliOptions;
 }

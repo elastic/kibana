@@ -34,6 +34,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { PolicyShardingDistributionTask } from './tasks/policy_sharding_distribution_task';
 import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
 import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
@@ -47,6 +48,7 @@ export class Plugin implements PluginType {
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
   private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
+  private policyShardingTask?: PolicyShardingDistributionTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -111,6 +113,9 @@ export class Plugin implements PluginType {
     );
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
+
+    this.policyShardingTask = new PolicyShardingDistributionTask(this.server);
+    this.policyShardingTask.registerTaskDefinition(plugins.taskManager);
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
       getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
         transformIn: getTransformIn(drilldownTransforms.transformIn),
@@ -147,6 +152,10 @@ export class Plugin implements PluginType {
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });
+    });
+
+    this.policyShardingTask?.start().catch((e) => {
+      this.logger.error('Failed to start policy sharding distribution task', { error: e });
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);

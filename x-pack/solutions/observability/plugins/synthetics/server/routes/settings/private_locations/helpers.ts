@@ -21,6 +21,13 @@ import type { MonitorConfigUpdate } from '../../monitor_cruds/bulk_cruds/edit_mo
 import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import type { RouteContext } from '../../types';
 
+export const getEffectiveAgentPolicyIds = (location: {
+  agentPolicyId: string;
+  agentPolicyIds?: string[];
+}): string[] => {
+  return location.agentPolicyIds?.length ? location.agentPolicyIds : [location.agentPolicyId];
+};
+
 export const toClientContract = (
   locationObject: SavedObject<PrivateLocationAttributes>
 ): PrivateLocation => {
@@ -29,6 +36,7 @@ export const toClientContract = (
     label: location.label,
     id: location.id,
     agentPolicyId: location.agentPolicyId,
+    agentPolicyIds: location.agentPolicyIds,
     isServiceManaged: false,
     isInvalid: false,
     tags: location.tags,
@@ -47,6 +55,7 @@ export const allLocationsToClientContract = (
       label: location.label,
       id: location.id,
       agentPolicyId: location.agentPolicyId,
+      agentPolicyIds: location.agentPolicyIds,
       isServiceManaged: false,
       isInvalid: !Boolean(agPolicy),
       tags: location.tags,
@@ -61,6 +70,7 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     label: location.label,
     id: location.id,
     agentPolicyId: location.agentPolicyId,
+    agentPolicyIds: location.agentPolicyIds,
     tags: location.tags,
     isServiceManaged: false,
     geo: location.geo,

@@ -30,6 +30,7 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { getEffectiveAgentPolicyIds } from '../../routes/settings/private_locations/helpers';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -80,16 +81,18 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    targetAgentPolicyId?: string
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);
 
     try {
+      const effectivePolicyId = targetAgentPolicyId ?? privateLocation.agentPolicyId;
       newPolicy.is_managed = true;
-      newPolicy.policy_id = privateLocation.agentPolicyId;
-      newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      newPolicy.policy_id = effectivePolicyId;
+      newPolicy.policy_ids = [effectivePolicyId];
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
@@ -151,6 +154,8 @@ export class SyntheticsPrivateLocation {
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy();
 
+    const policyCounts = await this.getShardedPolicyCounts(privateLocations);
+
     for (const { config, globalParams } of configs) {
       try {
         const { locations } = config;
@@ -164,6 +169,8 @@ export class SyntheticsPrivateLocation {
             );
           }
 
+          const targetAgentPolicyId = this.pickLeastLoadedPolicy(location, policyCounts);
+
           const newPolicy = await this.generateNewPolicy(
             config,
             location,
@@ -172,7 +179,8 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            targetAgentPolicyId
           );
 
           if (!newPolicy) {
@@ -214,6 +222,54 @@ export class SyntheticsPrivateLocation {
       this.server.logger.error(e);
       throw e;
     }
+  }
+
+  private async getShardedPolicyCounts(
+    privateLocations: SyntheticsPrivateLocations
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+
+    for (const location of privateLocations) {
+      const policyIds = getEffectiveAgentPolicyIds(location);
+      if (policyIds.length <= 1) {
+        continue;
+      }
+      for (const policyId of policyIds) {
+        const { total } = await this.server.fleet.packagePolicyService.list(soClient, {
+          kuery: `ingest-package-policies.policy_ids:"${policyId}" AND ingest-package-policies.package.name:synthetics`,
+          perPage: 0,
+          page: 1,
+        });
+        counts.set(policyId, total);
+      }
+    }
+
+    return counts;
+  }
+
+  private pickLeastLoadedPolicy(
+    location: PrivateLocation,
+    policyCounts: Map<string, number>
+  ): string | undefined {
+    const policyIds = getEffectiveAgentPolicyIds(location);
+    if (policyIds.length <= 1) {
+      return undefined;
+    }
+
+    let leastLoadedId = policyIds[0];
+    let minCount = policyCounts.get(policyIds[0]) ?? 0;
+
+    for (const policyId of policyIds) {
+      const count = policyCounts.get(policyId) ?? 0;
+      if (count < minCount) {
+        minCount = count;
+        leastLoadedId = policyId;
+      }
+    }
+
+    policyCounts.set(leastLoadedId, minCount + 1);
+    return leastLoadedId;
   }
 
   async inspectPackagePolicy({
