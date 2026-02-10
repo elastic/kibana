@@ -31,4 +31,3 @@ describe('getFormattedError', () => {
     expect(getFormattedError({}).message).toBe('Unknown error');
   });
 });
-

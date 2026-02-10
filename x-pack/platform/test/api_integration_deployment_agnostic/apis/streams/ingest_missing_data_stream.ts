@@ -78,9 +78,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.body).to.have.property('statusCode', 404);
       expect(response.body).to.have.property('error', 'Not Found');
-      expect(response.body.message).to.contain(`Elasticsearch data stream "${streamName}" does not exist`);
+      expect(response.body.message).to.contain(
+        `Elasticsearch data stream "${streamName}" does not exist`
+      );
       expect(response.body.message).to.contain('resync API');
     });
   });
 }
-

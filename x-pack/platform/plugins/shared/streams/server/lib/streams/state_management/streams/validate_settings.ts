@@ -89,7 +89,8 @@ export async function validateSettingsWithDryRun({
     if (
       error instanceof errors.ResponseError &&
       error.statusCode === 404 &&
-      (esErrorType === 'index_not_found_exception' || esErrorType === 'resource_not_found_exception')
+      (esErrorType === 'index_not_found_exception' ||
+        esErrorType === 'resource_not_found_exception')
     ) {
       return;
     }

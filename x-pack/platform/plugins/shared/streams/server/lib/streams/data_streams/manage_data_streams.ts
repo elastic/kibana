@@ -283,7 +283,8 @@ export async function putDataStreamsSettings({
       );
     } catch (error) {
       if (error instanceof errors.ResponseError && error.statusCode === 404) {
-        const dataStreams = names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
+        const dataStreams =
+          names.length === 1 ? `"${names[0]}"` : names.map((n) => `"${n}"`).join(', ');
         throw new StatusError(
           `Elasticsearch data stream ${dataStreams} does not exist. The stream definition may be out of sync with Elasticsearch. Use the resync API to recreate missing data streams, then retry.`,
           404
