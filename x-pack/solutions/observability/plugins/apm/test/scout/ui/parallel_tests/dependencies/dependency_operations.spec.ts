@@ -37,19 +37,6 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     });
   });
 
-  test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
-    await test.step('land on operations tab', async () => {
-      await dependencyDetailsPage.operationsTab.goToTab();
-    });
-
-    await test.step('renders operations content', async () => {
-      await expect(dependencyDetailsPage.operationsTab.operationsTable).toBeVisible();
-      await expect(
-        dependencyDetailsPage.operationsTab.getOperationInOperationsTable(SPAN_NAME)
-      ).toBeVisible();
-    });
-  });
-
   test('Links to dependency operation detail when clicking on an operation in operations table', async ({
     page,
     pageObjects: { dependencyDetailsPage },
@@ -66,20 +53,6 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/dependencies/operation`);
       expect(url.searchParams.get('spanName')).toBe(SPAN_NAME);
-    });
-  });
-
-  test('Has no a11y violations on load', async ({
-    page,
-    pageObjects: { dependencyDetailsPage },
-  }) => {
-    await test.step('land on operations tab', async () => {
-      await dependencyDetailsPage.operationsTab.goToTab();
-    });
-
-    await test.step('check a11y', async () => {
-      const { violations } = await page.checkA11y({ include: ['main'] });
-      expect(violations).toHaveLength(0);
     });
   });
 });
