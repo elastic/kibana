@@ -128,7 +128,7 @@ export class HeadlessChromiumDriverFactory {
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs();
-      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+      logger.info(`Chromium launch args set to: ${chromiumArgs}`);
 
       // We set the viewport width using the client-side layout info to reduce the chances of
       // browser reflow. Only the window height is expected to be adjusted dramatically
@@ -139,7 +139,7 @@ export class HeadlessChromiumDriverFactory {
         deviceScaleFactor: defaultViewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
       };
 
-      logger.debug(
+      logger.info(
         `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
       );
 
@@ -175,7 +175,7 @@ export class HeadlessChromiumDriverFactory {
 
         // Log version info for debugging / maintenance
         const versionInfo = await devTools.send('Browser.getVersion');
-        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+        logger.info(`Browser version: ${JSON.stringify(versionInfo)}`);
 
         await page.emulateTimezone(browserTimezone);
 
@@ -183,7 +183,7 @@ export class HeadlessChromiumDriverFactory {
         // All waitFor methods have their own timeout config passed in to them
         page.setDefaultTimeout(openUrlTimeout);
 
-        logger.debug(`Browser page driver created`);
+        logger.info(`Browser page driver created`);
 
         const childProcess = {
           async kill(): Promise<ClosePageResult> {
@@ -199,7 +199,7 @@ export class HeadlessChromiumDriverFactory {
                 metrics = getMetrics(startMetrics, endMetrics);
                 const { cpuInPercentage, memoryInMegabytes } = metrics;
 
-                logger.debug(
+                logger.info(
                   `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
                 );
               }
@@ -208,9 +208,9 @@ export class HeadlessChromiumDriverFactory {
             }
 
             try {
-              logger.debug('Attempting to close browser...');
+              logger.info('Attempting to close browser...');
               await browser?.close();
-              logger.debug('Browser closed.');
+              logger.info('Browser closed.');
             } catch (err) {
               // do not throw
               logger.error(err);
@@ -224,7 +224,7 @@ export class HeadlessChromiumDriverFactory {
         // Ensure that the browser is closed once the observable completes.
         observer.add(() => {
           if (page.isClosed()) return; // avoid emitting a log unnecessarily
-          logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
+          logger.info(`It looks like the browser is no longer being used. Closing the browser...`);
           void childProcess.kill(); // ignore async
         });
 
@@ -233,7 +233,7 @@ export class HeadlessChromiumDriverFactory {
           terminate$
             .pipe(
               tap((signal) => {
-                logger.debug(`Termination signal received: ${signal}`);
+                logger.info(`Termination signal received: ${signal}`);
               }),
               ignoreElements()
             )
@@ -263,7 +263,7 @@ export class HeadlessChromiumDriverFactory {
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
           const userDataDir = this.userDataDir;
-          logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+          logger.info(`deleting chromium user data directory at [${userDataDir}]`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.
           del(userDataDir, { force: true }).catch((error) => {
@@ -327,7 +327,7 @@ export class HeadlessChromiumDriverFactory {
 
         logger
           .get(`headless-browser-console:${line.type()}`)
-          .debug(
+          .info(
             `Message in browser console: { text: "${line.text()?.trim()}", url: ${
               line.location()?.url
             } }`
