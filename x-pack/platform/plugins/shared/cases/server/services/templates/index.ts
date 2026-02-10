@@ -31,6 +31,7 @@ export class TemplatesService {
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
+      internalClusterClient: ElasticsearchClient;
     }
   ) {}
 
@@ -59,14 +60,12 @@ export class TemplatesService {
         bool: {
           filter: [
             toElasticsearchQuery(
-              fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`)
+              fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.deletedAt: *`)
             ),
             ...(filterById
               ? [
                   toElasticsearchQuery(
-                    fromKueryExpression(
-                      `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateId: "${filterById}"`
-                    )
+                    fromKueryExpression(`${CASE_TEMPLATE_SAVED_OBJECT}.templateId: "${filterById}"`)
                   ),
                 ]
               : []),
@@ -74,7 +73,7 @@ export class TemplatesService {
               ? [
                   toElasticsearchQuery(
                     fromKueryExpression(
-                      `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateVersion: "${version}"`
+                      `${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion: "${version}"`
                     )
                   ),
                 ]
@@ -85,7 +84,7 @@ export class TemplatesService {
       aggs: {
         by_template: {
           terms: {
-            field: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateId`,
+            field: `${CASE_TEMPLATE_SAVED_OBJECT}.templateId`,
             size: 10000,
           },
           aggs: {
@@ -94,7 +93,7 @@ export class TemplatesService {
                 size: 1,
                 sort: [
                   {
-                    [`${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateVersion`]: {
+                    [`${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion`]: {
                       order: 'desc',
                     },
                   },
@@ -126,7 +125,7 @@ export class TemplatesService {
   private async updateMappings(definition: string) {
     const parsedDefinition = parseYaml(definition) as ParsedTemplate['definition'];
 
-    await this.dependencies.esClient.indices.putMapping({
+    await this.dependencies.internalClusterClient.indices.putMapping({
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       properties: {
         cases: {
