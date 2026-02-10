@@ -78,14 +78,7 @@ test.describe('React Flow Service Map Accessibility', { tag: ['@ess', '@svlOblt'
     });
 
     await test.step('pressing Enter on a focused node opens the popover', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-
-      const node = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      await node.focus();
-      await page.keyboard.press('Enter');
-
-      await reactFlowServiceMapPage.waitForPopoverToBeVisible();
-      await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeVisible();
+      await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, 'Enter');
     });
 
     await test.step('pressing Escape closes the popover', async () => {
@@ -96,12 +89,7 @@ test.describe('React Flow Service Map Accessibility', { tag: ['@ess', '@svlOblt'
     });
 
     await test.step('pressing Space on a focused node opens the popover', async () => {
-      const node = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      await node.focus();
-      await page.keyboard.press(' ');
-
-      await reactFlowServiceMapPage.waitForPopoverToBeVisible();
-      await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeVisible();
+      await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, ' ');
 
       await page.keyboard.press('Escape');
       await reactFlowServiceMapPage.waitForPopoverToBeHidden();
