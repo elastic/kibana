@@ -300,4 +300,23 @@ describe('When the tabular page is loaded', () => {
     expect(rows[10]).not.toHaveTextContent(techPreview);
     expect(rows[11]).not.toHaveTextContent(techPreview);
   });
+
+  it('should display endpoint stats with correct counts', () => {
+    renderTabularPageWithProviders();
+
+    const stats = screen.getByTestId('endpointStats');
+    expect(stats).toBeInTheDocument();
+
+    // 3 unique services: elasticsearch, openai, elastic
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
+
+    // 8 unique models
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
+
+    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
+
+    // 11 endpoints total
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
+  });
 });
