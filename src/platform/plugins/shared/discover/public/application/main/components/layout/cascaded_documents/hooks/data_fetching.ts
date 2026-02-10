@@ -156,7 +156,10 @@ export function useDataCascadeRowExpansionHandlers({
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
     >
-  >(() => Promise.resolve([]));
+  >(() => {
+    // TODO: We don't support nested groups yet.
+    return Promise.resolve([]);
+  });
 
   /**
    * Callback invoked when a group node gets collapsed, cancels any pending requests for the group node if necessary.
@@ -165,7 +168,9 @@ export function useDataCascadeRowExpansionHandlers({
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeCollapsed']
     >
-  >(() => {});
+  >(() => {
+    // TODO: We don't support nested groups yet.
+  });
 
   /**
    * Callback invoked when a leaf node gets expanded, used to fetch data for leaf nodes.
