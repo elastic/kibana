@@ -357,13 +357,16 @@ export class ActionsPlugin
       );
 
       // We plan to remove the usage config from this plugin in the future in favor of the new Usage API plugin.
-      let usageApiConfig: Writable<ActionsConfig['usage']> = plugins.usageApi?.config;
-      if (usageApiConfig) {
+      let usageApiConfig: Writable<ActionsConfig['usage']> = {};
+      if (plugins.usageApi?.config) {
+        usageApiConfig.enabled = plugins.usageApi?.config?.enabled;
+        usageApiConfig.url = plugins.usageApi?.config?.url;
         if (plugins.usageApi?.config?.tls?.ca) {
           // Normalize the CA path to the format expected by the ConnectorUsageReportingTask
           usageApiConfig.ca = { path: plugins.usageApi.config.tls.ca };
         }
       } else {
+        // If no configuration is provided via the Usage API plugin, use the configuration from this plugin.
         usageApiConfig = this.actionsConfig.usage;
       }
 

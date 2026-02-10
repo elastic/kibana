@@ -16,7 +16,7 @@ export interface UsageApiSetup {
   /**
    * Configuration for the Usage API.
    */
-  config?: UsageApiConfigType;
+  config: UsageApiConfigType;
 }
 
 /**
