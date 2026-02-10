@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { setSpaceSolution } from './spaces';
-export type { SolutionView } from '@kbn/spaces-plugin/common';
 export { getAgentBuilderNoneRole, getAIAssistantsNoneRole, getFullAIPrivilegesRole } from './roles';

@@ -8,6 +8,16 @@
  */
 
 import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+
+/**
+ * Solution view types for Kibana spaces.
+ * - 'es' (Elasticsearch/Search)
+ * - 'oblt' (Observability)
+ * - 'security' (Security)
+ * - 'classic' (Classic/default)
+ */
+export type SpaceSolutionView = Exclude<SolutionView, 'workplaceai'>;
 
 export interface ImportSavedObjects {
   type: string;
@@ -35,6 +45,11 @@ export interface ScoutSpaceParallelFixture {
     unset: (...keys: string[]) => Promise<any[]>;
     setDefaultTime: ({ from, to }: { from: string; to: string }) => Promise<void>;
   };
+  /**
+   * Sets the solution view for this space.
+   * @param solution - The solution to set ('es', 'oblt', 'security', or 'classic')
+   */
+  setSolutionView: (solution: SpaceSolutionView) => Promise<void>;
 }
 
 export { scoutSpaceParallelFixture } from './parallel';

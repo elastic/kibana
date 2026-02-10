@@ -14,8 +14,7 @@ ui/
 │   │   └── gen_ai_settings_page.ts  # GenAI Settings page object
 │   └── services/
 │       ├── index.ts             # Services export
-│       ├── roles.ts             # Custom KibanaRole definitions
-│       └── spaces.ts            # Space solution helpers
+│       └── roles.ts             # Custom KibanaRole definitions
 ├── parallel_tests/
 │   ├── page_display.spec.ts
 │   ├── page_display.no_ab_privilege.spec.ts
@@ -91,21 +90,21 @@ The fixtures provide custom authentication methods for testing different privile
 - `browserAuth.loginAsNonAssistantUser()` - Has Agent Builder, no AI Assistants
 - `browserAuth.loginAsFullAIPrivilegesUser()` - Has both AI Assistants and Agent Builder
 
-## Services
+## Solution Spaces
 
-### `setSpaceSolution`
+### `scoutSpace.setSolutionView()`
 
-Sets the solution view for a space (Security, Observability, Search, Classic):
+Sets the solution view for a space (Security, Observability, Search, Classic). This method is built into Scout's `scoutSpace` fixture:
 
 ```typescript
-import { spaceTest, setSpaceSolution } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
-  await setSpaceSolution(kbnClient, scoutSpace.id, 'security');
+spaceTest.beforeAll(async ({ scoutSpace }) => {
+  await scoutSpace.setSolutionView('security');
 });
 
-spaceTest.afterAll(async ({ scoutSpace, kbnClient }) => {
-  await setSpaceSolution(kbnClient, scoutSpace.id, 'classic');
+spaceTest.afterAll(async ({ scoutSpace }) => {
+  await scoutSpace.setSolutionView('classic');
 });
 ```
 
@@ -160,7 +159,7 @@ Key methods in `GenAiSettingsPage`:
 2. Import fixtures:
   ```typescript
    import { expect } from '@kbn/scout';
-   import { spaceTest, setSpaceSolution } from '../fixtures';
+   import { spaceTest } from '../fixtures';
   ```
 3. Use appropriate tags:
   - `@ess` - ESS/Stateful deployments

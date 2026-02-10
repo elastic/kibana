@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { spaceTest, setSpaceSolution } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 /**
  * Tests that the Chat Experience can be changed to Classic mode
@@ -18,8 +18,8 @@ spaceTest.describe(
   'GenAI Settings - Change Chat Experience to Classic in Search Space',
   { tag: ['@ess'] },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
-      await setSpaceSolution(kbnClient, scoutSpace.id, 'es');
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.setSolutionView('es');
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -27,8 +27,8 @@ spaceTest.describe(
       await pageObjects.genAiSettings.navigateTo();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace, kbnClient }) => {
-      await setSpaceSolution(kbnClient, scoutSpace.id, 'classic');
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.setSolutionView('classic');
       await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
     });
 
