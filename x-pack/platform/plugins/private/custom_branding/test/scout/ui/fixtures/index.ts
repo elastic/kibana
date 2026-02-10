@@ -31,5 +31,3 @@ export const test = base.extend<CustomBrandingTestFixtures, ScoutWorkerFixtures>
     await use(extendedPageObjects);
   },
 });
-
-export { expect } from '@kbn/scout/ui';
