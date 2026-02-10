@@ -129,6 +129,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.eql(200, JSON.stringify(response.body));
     };
 
+    /** Waits for the sync task to be idle so triggerCleanup's runSoon doesn't hit pRetry backoff. */
+    const waitForSyncTaskIdle = async () => {
+      await retry.try(async () => {
+        let taskDoc;
+        try {
+          taskDoc = await es.get({
+            index: '.kibana_task_manager',
+            id: 'task:Synthetics:Sync-Private-Location-Monitors-single-instance',
+            _source_includes: ['task.status'],
+          });
+        } catch (e) {
+          return; // task doc doesn't exist yet — treat as idle
+        }
+        const status = (taskDoc._source as any)?.task?.status;
+        if (status !== 'idle') {
+          throw new Error(`Sync task not idle yet (status: ${status})`);
+        }
+      });
+    };
+
     before(async () => {
       supertestAdmin = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
@@ -266,6 +286,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         let policies = await getPackagePolicies();
         expect(policies.some((p) => p.id === orphanedLegacyPolicyId)).to.be(true);
 
+        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
@@ -301,6 +322,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
         expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
 
+        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
@@ -330,6 +352,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
         expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
 
+        await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
