@@ -94,38 +94,56 @@ function generateOtelTypeTransforms(
   dataset: string,
   namespace: string
 ): Record<string, any> {
-  let otelType: string;
-  let context: string;
-
   switch (type) {
     case 'logs':
-      otelType = 'log';
-      context = 'log';
-      break;
+      return {
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              `set(attributes["data_stream.type"], "logs")`,
+              `set(attributes["data_stream.dataset"], "${dataset}")`,
+              `set(attributes["data_stream.namespace"], "${namespace}")`,
+            ],
+          },
+        ],
+      };
     case 'metrics':
-      otelType = 'metric';
-      context = 'datapoint';
-      break;
+      return {
+        metric_statements: [
+          {
+            context: 'datapoint',
+            statements: [
+              `set(attributes["data_stream.type"], "metrics")`,
+              `set(attributes["data_stream.dataset"], "${dataset}")`,
+              `set(attributes["data_stream.namespace"], "${namespace}")`,
+            ],
+          },
+        ],
+      };
     case 'traces':
-      otelType = 'trace';
-      context = 'span';
-      break;
+      return {
+        trace_statements: [
+          {
+            context: 'span',
+            statements: [
+              `set(attributes["data_stream.type"], "traces")`,
+              `set(attributes["data_stream.dataset"], "${dataset}")`,
+              `set(attributes["data_stream.namespace"], "${namespace}")`,
+            ],
+          },
+          {
+            context: 'spanevent',
+            statements: [
+              `set(attributes["data_stream.type"], "logs")`,
+              `set(attributes["data_stream.namespace"], "${namespace}")`,
+            ],
+          },
+        ],
+      };
     default:
       throw new FleetError(`unexpected data stream type ${type}`);
   }
-
-  return {
-    [`${otelType}_statements`]: [
-      {
-        context,
-        statements: [
-          `set(attributes["data_stream.type"], "${type}")`,
-          `set(attributes["data_stream.dataset"], "${dataset}")`,
-          `set(attributes["data_stream.namespace"], "${namespace}")`,
-        ],
-      },
-    ],
-  };
 }
 
 function extractSignalTypesFromPipelines(

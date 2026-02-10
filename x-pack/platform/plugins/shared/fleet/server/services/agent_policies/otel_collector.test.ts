@@ -718,6 +718,13 @@ describe('generateOtelcolConfig', () => {
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
+          {
+            context: 'spanevent',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
         ],
       });
     });
@@ -753,6 +760,13 @@ describe('generateOtelcolConfig', () => {
             statements: [
               'set(attributes["data_stream.type"], "traces")',
               'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+          {
+            context: 'spanevent',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
