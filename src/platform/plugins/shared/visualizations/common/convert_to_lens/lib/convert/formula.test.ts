@@ -27,7 +27,7 @@ describe('createFormulaColumn', () => {
     aggType: METRIC_TYPES.CUMULATIVE_SUM,
     aggId,
     aggParams: {
-      customMetric: ({
+      customMetric: {
         id: 'some-id-metric',
         enabled: true,
         type: { name: METRIC_TYPES.AVG },
@@ -38,7 +38,7 @@ describe('createFormulaColumn', () => {
           aggs: [],
         },
         schema: 'metric',
-      } as unknown) as IAggConfig,
+      } as unknown as IAggConfig,
     },
   };
   test('should return formula column', () => {

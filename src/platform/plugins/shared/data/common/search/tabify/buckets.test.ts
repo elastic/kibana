@@ -60,7 +60,7 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const agg = ({
+      const agg = {
         params: {
           filters: [
             {
@@ -75,7 +75,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -94,7 +94,7 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const agg = ({
+      const agg = {
         params: {
           filters: [
             {
@@ -109,7 +109,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -127,7 +127,7 @@ describe('Buckets wrapper', () => {
         },
       };
 
-      const agg = ({
+      const agg = {
         params: {
           filters: [
             {
@@ -138,7 +138,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -188,7 +188,7 @@ describe('Buckets wrapper', () => {
     };
 
     test('drops partial buckets when enabled', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: true,
           field: {
@@ -197,7 +197,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -249,7 +249,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('keeps partial buckets when disabled', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: false,
           field: {
@@ -258,7 +258,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -270,7 +270,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('keeps aligned buckets when enabled', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: true,
           field: {
@@ -279,7 +279,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(400),
@@ -291,7 +291,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('does not drop buckets for non-timerange fields', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: true,
           field: {
@@ -300,7 +300,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -312,7 +312,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('does drop bucket when multiple time fields specified', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: true,
           field: {
@@ -321,7 +321,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),
@@ -333,7 +333,7 @@ describe('Buckets wrapper', () => {
     });
 
     test('does not drop bucket when no timeFields have been specified', () => {
-      const agg = ({
+      const agg = {
         params: {
           drop_partials: true,
           field: {
@@ -342,7 +342,7 @@ describe('Buckets wrapper', () => {
         },
         aggConfigs: {},
         getKey: (bucket: any) => bucket.key,
-      } as unknown) as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),

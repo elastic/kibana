@@ -20,13 +20,14 @@ import type {
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchOptions } from '@kbn/search-types';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '../../../public';
 
 import type { IAggType } from './agg_type';
-import { writeParams, AggParam } from './agg_params';
+import type { AggParam } from './agg_params';
+import { writeParams } from './agg_params';
 import type { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
-import type { DataViewField } from '../../../../data_views/public';
 
 /** @public **/
 export type AggConfigSerialized = Ensure<

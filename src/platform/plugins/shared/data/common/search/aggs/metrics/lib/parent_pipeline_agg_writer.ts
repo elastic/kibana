@@ -18,8 +18,7 @@ export const parentPipelineAggWriter = (
   const customMetric = agg.getParam('customMetric') as IMetricAggConfig;
   const metricAgg = agg.getParam('metricAgg') as string;
 
-  const selectedMetric =
-    customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
+  const selectedMetric = customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
 
   if (selectedMetric && customMetric && customMetric.type.name !== 'count') {
     output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
