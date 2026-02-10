@@ -5,25 +5,7 @@
  * 2.0.
  */
 
-import {
-  GroupByOptions,
-  SortFieldInferenceEndpoint,
-  SortOrder,
-  type QueryParams,
-  type FilterOptions,
-} from '../../types';
-import type { AllInferenceEndpointsTableState } from './types';
-
-export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 25;
-
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
-  page: DEFAULT_TABLE_ACTIVE_PAGE,
-  perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldInferenceEndpoint.inference_id,
-  sortOrder: SortOrder.asc,
-  groupBy: GroupByOptions.None,
-};
+import type { FilterOptions } from '../../types';
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   provider: [],

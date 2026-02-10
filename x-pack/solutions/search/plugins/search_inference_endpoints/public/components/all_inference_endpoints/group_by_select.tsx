@@ -77,6 +77,7 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         ownFocus
         button={
           <EuiFilterButton
+            data-test-subj="group-by-button"
             iconType="arrowDown"
             css={GroupByFilterButton}
             onClick={() => setIsPopoverOpen((prevValue) => !prevValue)}
@@ -97,11 +98,14 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         repositionOnScroll
       >
         <EuiSelectable
+          data-test-subj="group-by-selectable"
           options={options}
           emptyMessage={EMPTY_FILTER_MESSAGE}
           onChange={handleValueChange}
           singleSelection="always"
-          renderOption={(option) => option.label}
+          renderOption={(option) => (
+            <span data-test-subj={`group-by-option-${option.key}`}>{option.label}</span>
+          )}
           listProps={{
             onFocusBadge: false,
           }}

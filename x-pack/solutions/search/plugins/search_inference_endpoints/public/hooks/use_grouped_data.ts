@@ -6,12 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import {
   type FilterOptions,
-  type QueryParams,
   type GroupedInferenceEndpointsData,
   GroupByOptions,
 } from '../types';
@@ -34,9 +32,9 @@ function GroupByReducer(groupBy: GroupByOptions) {
 
 export const GroupByModelReducer = (
   acc: Record<string, GroupedInferenceEndpointsData>,
-  endpoint: InferenceInferenceEndpointInfo,
-  index: number,
-  array: InferenceInferenceEndpointInfo[]
+  endpoint: InferenceAPIConfigResponse,
+  _index: number,
+  _array: InferenceAPIConfigResponse[]
 ): Record<string, GroupedInferenceEndpointsData> => {
   const modelId = getModelId(endpoint) ?? 'unknown_model';
   if (modelId in acc) {
@@ -53,11 +51,11 @@ export const GroupByModelReducer = (
 
 export const useGroupedData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  queryParams: QueryParams,
+  groupBy: GroupByOptions,
   filterOptions: FilterOptions,
   searchKey: string
 ): UseGroupedDataResult => {
-  if (queryParams.groupBy === GroupByOptions.None) {
+  if (groupBy === GroupByOptions.None) {
     throw new Error('Grouping is not enabled');
   }
 
@@ -70,10 +68,10 @@ export const useGroupedData = (
   const groupedEndpoints = useMemo(
     () =>
       filteredEndpoints.reduce<Record<string, GroupedInferenceEndpointsData>>(
-        GroupByReducer(queryParams.groupBy),
+        GroupByReducer(groupBy),
         {}
       ),
-    [queryParams.groupBy, filteredEndpoints]
+    [groupBy, filteredEndpoints]
   );
 
   return {

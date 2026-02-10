@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -63,5 +63,5 @@ export interface FilterOptions {
 export interface GroupedInferenceEndpointsData {
   groupId: string;
   groupLabel: string;
-  endpoints: InferenceInferenceEndpointInfo[];
+  endpoints: InferenceAPIConfigResponse[];
 }

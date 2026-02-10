@@ -37,6 +37,7 @@ import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
+import { GroupByOptions, type FilterOptions } from '../../types';
 
 import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -50,6 +51,7 @@ import { DeleteAction } from './render_table_columns/render_actions/actions/dele
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
 import { EndpointStats } from './endpoint_stats';
+import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
@@ -101,6 +103,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
       {
+        id: 'inference_id-column',
         field: 'inference_id',
         name: ENDPOINT,
         'data-test-subj': 'endpointCell',
@@ -119,6 +122,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
+        id: 'model-column',
         name: MODEL,
         'data-test-subj': 'modelCell',
         render: (endpointInfo: InferenceInferenceEndpointInfo) => {
@@ -128,6 +132,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '200px',
       },
       {
+        id: 'service-column',
         field: 'service',
         name: SERVICE_PROVIDER,
         'data-test-subj': 'providerCell',
@@ -227,23 +232,35 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           </EuiFlexItem>
         </EuiFlexGroup>
         <EndpointStats endpoints={tableData} />
-        <EuiInMemoryTable
-          allowNeutralSort={false}
-          columns={tableColumns}
-          itemId="inference_id"
-          items={tableData}
-          pagination={{
-            pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-          }}
-          sorting={{
-            sort: {
-              field: 'inference_id',
-              direction: 'asc',
-            },
-          }}
-          data-test-subj="inferenceEndpointTable"
-          tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
-        />
+        {groupBy === GroupByOptions.None ? (
+          <EuiInMemoryTable
+            allowNeutralSort={false}
+            columns={tableColumns}
+            itemId="inference_id"
+            items={tableData}
+            pagination={{
+              pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+            }}
+            sorting={{
+              sort: {
+                field: 'inference_id',
+                direction: 'asc',
+              },
+            }}
+            data-test-subj="inferenceEndpointTable"
+            tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
+          />
+        ) : (
+          <EuiFlexItem>
+            <GroupedEndpointsTables
+              inferenceEndpoints={inferenceEndpoints}
+              groupBy={groupBy}
+              filterOptions={filterOptions}
+              searchKey={searchKey}
+              columns={tableColumns}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {showDeleteAction && selectedInferenceEndpoint && (
         <DeleteAction
