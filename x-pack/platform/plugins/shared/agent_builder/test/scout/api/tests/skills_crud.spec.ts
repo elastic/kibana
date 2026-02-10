@@ -55,9 +55,9 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       const body = response.body as {
         results: Array<{ id: string; readonly: boolean; description: string }>;
       };
-      expect(body).toHaveProperty('results');
+      expect(body).toMatchObject({ results: expect.arrayContaining([]) });
       expect(Array.isArray(body.results)).toBe(true);
-      expect(body.results.length).toBeGreaterThanOrEqual(1);
+      expect(body.results.length).toBeGreaterThan(0);
 
       // The built-in data-exploration skill should always be present
       const builtinSkill = body.results.find((skill) => skill.id === BUILTIN_SKILL_ID);
@@ -89,10 +89,12 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       content: string;
       readonly: boolean;
     };
-    expect(body).toHaveProperty('id', skillId);
-    expect(body).toHaveProperty('description', 'A skill for e2e testing');
-    expect(body).toHaveProperty('content', 'This is the skill content with instructions.');
-    expect(body).toHaveProperty('readonly', false);
+    expect(body).toMatchObject({
+      id: skillId,
+      description: 'A skill for e2e testing',
+      content: 'This is the skill content with instructions.',
+      readonly: false,
+    });
   });
 
   apiTest('should retrieve a created skill by ID', async ({ apiClient }) => {
@@ -116,8 +118,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     expect(response.statusCode).toBe(200);
     const body = response.body as { id: string; name: string; readonly: boolean };
-    expect(body).toHaveProperty('id', skillId);
-    expect(body).toHaveProperty('readonly', false);
+    expect(body).toMatchObject({ id: skillId, readonly: false });
   });
 
   apiTest('should update an existing skill', async ({ apiClient }) => {
@@ -152,9 +153,11 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       description: string;
       content: string;
     };
-    expect(body).toHaveProperty('name', updatedName);
-    expect(body).toHaveProperty('description', 'Updated description');
-    expect(body).toHaveProperty('content', 'Updated content.');
+    expect(body).toMatchObject({
+      name: updatedName,
+      description: 'Updated description',
+      content: 'Updated content.',
+    });
   });
 
   apiTest('should delete a user-created skill', async ({ apiClient }) => {
@@ -177,7 +180,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     expect(response.statusCode).toBe(200);
     const body = response.body as { success: boolean };
-    expect(body).toHaveProperty('success', true);
+    expect(body).toMatchObject({ success: true });
 
     // Verify it's gone - should return 404
     const getResponse = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
@@ -239,10 +242,9 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       description: string;
       content: string;
     };
-    expect(body).toHaveProperty('id', BUILTIN_SKILL_ID);
-    expect(body).toHaveProperty('name', 'data-exploration');
-    expect(body.description).toBeTruthy();
-    expect(body.content).toBeTruthy();
+    expect(body).toMatchObject({ id: BUILTIN_SKILL_ID, name: 'data-exploration' });
+    expect(body.description).toBeDefined();
+    expect(body.content).toBeDefined();
   });
 
   apiTest('should reject deleting a built-in skill', async ({ apiClient }) => {
