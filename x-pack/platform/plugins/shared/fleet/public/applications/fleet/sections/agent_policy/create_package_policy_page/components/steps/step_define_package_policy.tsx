@@ -79,13 +79,16 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Var group selections - derives from policy, initializes defaults, handles changes
+    // Var group selections - derives from policy, initializes defaults, handles changes.
+    // packagePolicy is passed so that policy effects (e.g., supports_cloud_connector flag
+    // and supports_cloud_connectors var) are computed when the selection changes.
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
         varGroups: packageInfo.var_groups,
         savedSelections: packagePolicy.var_group_selections,
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
+        packagePolicy,
       });
 
     // Cloud connector state from var_group selections

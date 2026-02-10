@@ -32,6 +32,7 @@ import {
   AZURE_PROVIDER,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
 } from './constants';
 
 // Cloud connector name validation constants
@@ -332,22 +333,35 @@ export const updateInputVarsWithCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
+  let updatedVars: PackagePolicyConfigRecord | undefined;
+
   // If credentials is undefined, clear all credential fields (both AWS and Azure)
   if (!credentials) {
-    let clearedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
-    clearedVars = updateInputVarsWithAzureCredentials(clearedVars, undefined);
-    return clearedVars;
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, undefined);
+    updatedVars = updateInputVarsWithAzureCredentials(updatedVars, undefined);
+  } else if (isAwsCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAwsCredentials(inputVars, credentials);
+  } else if (isAzureCredentials(credentials)) {
+    updatedVars = updateInputVarsWithAzureCredentials(inputVars, credentials);
+  } else {
+    updatedVars = inputVars;
   }
 
-  if (isAwsCredentials(credentials)) {
-    return updateInputVarsWithAwsCredentials(inputVars, credentials);
+  // Set supports_cloud_connectors flag if the var exists in the record.
+  // This flag is required for the agent's auth provider to use cloud connector
+  // credential exchange and must be set alongside other cloud connector vars.
+  // Always explicitly false when not using cloud connectors (never undefined).
+  if (updatedVars && SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in updatedVars) {
+    updatedVars = {
+      ...updatedVars,
+      [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]: {
+        ...updatedVars[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+        value: !!credentials,
+      },
+    };
   }
 
-  if (isAzureCredentials(credentials)) {
-    return updateInputVarsWithAzureCredentials(inputVars, credentials);
-  }
-
-  return inputVars;
+  return updatedVars;
 };
 
 export const isCloudConnectorReusableEnabled = (

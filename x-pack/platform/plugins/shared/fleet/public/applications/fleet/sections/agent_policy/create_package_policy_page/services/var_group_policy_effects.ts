@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy } from '../../../../../../../common';
+import type { NewPackagePolicy, PackagePolicyConfigRecord } from '../../../../../../../common';
+import { SUPPORTS_CLOUD_CONNECTORS_VAR_NAME } from '../../../../../../../common/constants';
 import {
   getCloudConnectorOption,
   type VarGroupSelection,
@@ -26,8 +27,37 @@ export type PolicyEffectHandler = (
 const policyEffectHandlers: PolicyEffectHandler[] = [];
 
 /**
+ * Builds a vars update that sets the supports_cloud_connectors package-level var.
+ * Returns an empty object if the var doesn't exist in the current policy vars
+ * (meaning the integration doesn't declare it in its manifest).
+ */
+function buildSupportsCloudConnectorsVarsUpdate(
+  currentVars: PackagePolicyConfigRecord | undefined,
+  value: boolean
+): { vars: PackagePolicyConfigRecord } | Record<string, never> {
+  if (!currentVars || !(SUPPORTS_CLOUD_CONNECTORS_VAR_NAME in currentVars)) {
+    return {};
+  }
+
+  return {
+    vars: {
+      ...currentVars,
+      [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]: {
+        ...currentVars[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME],
+        value,
+      },
+    },
+  };
+}
+
+/**
  * Cloud Connector policy effect handler.
- * Sets supports_cloud_connector and cloud_connector_id based on var_group selection.
+ * Sets supports_cloud_connector, cloud_connector_id, and the supports_cloud_connectors
+ * package-level var based on var_group selection.
+ *
+ * The supports_cloud_connectors var is required for the agent's auth provider to use
+ * cloud connector credential exchange. It must always be explicitly false when cloud
+ * connector is not selected.
  */
 export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
   packagePolicy,
@@ -35,27 +65,32 @@ export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
   varGroups
 ) => {
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
+  const currentVarValue = packagePolicy.vars?.[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]?.value;
 
   if (cloudConnectorOption.isCloudConnector) {
     // Only update if values have changed
     if (
       packagePolicy.supports_cloud_connector !== true ||
-      packagePolicy.cloud_connector_id !== undefined
+      packagePolicy.cloud_connector_id !== undefined ||
+      (currentVarValue !== undefined && currentVarValue !== true)
     ) {
       return {
         supports_cloud_connector: true,
         cloud_connector_id: undefined, // Will be set by CloudConnectorSetup
+        ...buildSupportsCloudConnectorsVarsUpdate(packagePolicy.vars, true),
       };
     }
   } else {
     // Cloud connector not selected - clear the flags if they were set
     if (
       packagePolicy.supports_cloud_connector === true ||
-      packagePolicy.cloud_connector_id !== undefined
+      packagePolicy.cloud_connector_id !== undefined ||
+      (currentVarValue !== undefined && currentVarValue !== false)
     ) {
       return {
         supports_cloud_connector: false,
         cloud_connector_id: undefined,
+        ...buildSupportsCloudConnectorsVarsUpdate(packagePolicy.vars, false),
       };
     }
   }

@@ -226,6 +226,88 @@ describe('updateInputVarsWithCredentials - Azure support', () => {
   });
 });
 
+describe('updateInputVarsWithCredentials - supports_cloud_connectors flag', () => {
+  it('should set supports_cloud_connectors to true when AWS credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+  });
+
+  it('should set supports_cloud_connectors to true when Azure credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      tenant_id: { value: '' },
+      client_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'test-tenant-id',
+      clientId: 'test-client-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+  });
+
+  it('should set supports_cloud_connectors to false when credentials are undefined', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: 'some-arn' },
+      external_id: { value: 'some-id' },
+      supports_cloud_connectors: { value: true },
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, undefined);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(false);
+  });
+
+  it('should not add supports_cloud_connectors if it does not exist in input vars', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result).not.toHaveProperty('supports_cloud_connectors');
+  });
+
+  it('should preserve other properties on the supports_cloud_connectors var entry', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined, type: 'bool' },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+    expect(result?.supports_cloud_connectors?.type).toBe('bool');
+  });
+});
+
 describe('isCloudConnectorReusableEnabled - AWS provider', () => {
   it('should return true for CSPM when package version meets minimum requirement', () => {
     expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview06', 'cspm')).toBe(true);

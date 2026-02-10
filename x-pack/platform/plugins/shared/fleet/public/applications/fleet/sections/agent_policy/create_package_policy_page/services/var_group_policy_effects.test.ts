@@ -102,6 +102,112 @@ describe('var_group_policy_effects', () => {
 
       expect(result).toBeNull();
     });
+
+    describe('supports_cloud_connectors var', () => {
+      it('should set supports_cloud_connectors var to true when selecting cloud connector', () => {
+        const packagePolicy = createMockPackagePolicy({
+          vars: {
+            role_arn: { value: '' },
+            external_id: { value: '' },
+            supports_cloud_connectors: { value: false, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: true, type: 'bool' });
+        expect(result?.supports_cloud_connector).toBe(true);
+      });
+
+      it('should set supports_cloud_connectors var to false when deselecting cloud connector', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          vars: {
+            role_arn: { value: 'some-arn' },
+            external_id: { value: 'some-id' },
+            supports_cloud_connectors: { value: true, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false, type: 'bool' });
+        expect(result?.supports_cloud_connector).toBe(false);
+      });
+
+      it('should preserve other vars when updating supports_cloud_connectors', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          vars: {
+            role_arn: { value: 'some-arn' },
+            external_id: { value: 'some-id' },
+            supports_cloud_connectors: { value: true },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.role_arn).toEqual({ value: 'some-arn' });
+        expect(result?.vars?.external_id).toEqual({ value: 'some-id' });
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
+      });
+
+      it('should not include vars update when supports_cloud_connectors var does not exist', () => {
+        const packagePolicy = createMockPackagePolicy({
+          vars: {
+            role_arn: { value: '' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result).toEqual({
+          supports_cloud_connector: true,
+          cloud_connector_id: undefined,
+        });
+        expect(result).not.toHaveProperty('vars');
+      });
+
+      it('should return null when var is already in desired state', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: undefined,
+          vars: {
+            supports_cloud_connectors: { value: true },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result).toBeNull();
+      });
+
+      it('should trigger update when root flag is correct but var is stale', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+          vars: {
+            supports_cloud_connectors: { value: true },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
+      });
+    });
   });
 
   describe('computePolicyEffects', () => {
