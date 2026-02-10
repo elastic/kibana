@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CustomThresholdExpressionMetric } from '../../../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../../../types';
 
 const CHART_TITLE_LIMIT = 120;
@@ -14,6 +15,15 @@ const equationResultText = i18n.translate('xpack.observability.customThreshold.a
   defaultMessage: 'Equation result for ',
 });
 
+const resolveMetricDisplay = (metric: CustomThresholdExpressionMetric) => {
+  if (metric.field && metric.filter) {
+    return `${metric.aggType} (${metric.field}, ${metric.filter})`;
+  }
+
+  return `${metric.aggType} (${
+    metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
+  })`;
+};
 export const generateChartTitleAndTooltip = (
   criterion: MetricExpression,
   chartTitleLimit = CHART_TITLE_LIMIT
@@ -21,10 +31,7 @@ export const generateChartTitleAndTooltip = (
   const metricNameResolver: Record<string, string> = {};
 
   criterion.metrics.forEach(
-    (metric) =>
-      (metricNameResolver[metric.name] = `${metric.aggType} (${
-        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-      })`)
+    (metric) => (metricNameResolver[metric.name] = resolveMetricDisplay(metric))
   );
 
   let equation = criterion.equation

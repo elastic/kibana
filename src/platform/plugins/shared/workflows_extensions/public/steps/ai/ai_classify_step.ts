@@ -9,21 +9,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { z } from '@kbn/zod/v4';
 import {
   AiClassifyStepCommonDefinition,
-  type AiClassifyStepInputSchema,
   AiClassifyStepTypeId,
   buildStructuredOutputSchema,
 } from '../../../common/steps/ai';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+import { ActionsMenuGroup, createPublicStepDefinition } from '../../step_registry/types';
 
-export const AiClassifyStepDefinition: PublicStepDefinition = {
+export const AiClassifyStepDefinition = createPublicStepDefinition({
   ...AiClassifyStepCommonDefinition,
   editorHandlers: {
     dynamicSchema: {
-      getOutputSchema: ({ input }) =>
-        buildStructuredOutputSchema(input as z.infer<AiClassifyStepInputSchema>),
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
     },
   },
   icon: React.lazy(() =>
@@ -118,4 +115,4 @@ When \`allowMultipleCategories\` is true, the output includes a \`categories\` a
 \`\`\``,
     ],
   },
-};
+});

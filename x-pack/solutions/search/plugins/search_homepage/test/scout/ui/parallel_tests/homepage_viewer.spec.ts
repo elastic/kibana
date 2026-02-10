@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-search';
+import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
 test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
@@ -17,16 +17,17 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
     await pageObjects.homepage.goto();
   });
 
-  test('should not be able to see manage button', async ({ pageObjects }) => {
+  test('should not be able to see manage button', async ({ pageObjects, samlAuth }) => {
     const headerLeftGroup = await pageObjects.homepage.getHeaderLeftGroup();
+    const userData = await samlAuth.session.getUserData('viewer');
 
-    await expect(headerLeftGroup).toContainText('Welcome, test viewer');
+    await expect(headerLeftGroup).toContainText(`Welcome, ${userData?.full_name}`);
     await expect(headerLeftGroup).not.toContainText('Manage');
   });
 
   test('Navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
     const navigationCards = await pageObjects.homepage.getNavigationCards();
-    await expect(navigationCards).toHaveCount(5);
+    await expect(navigationCards).toHaveCount(4);
 
     const navCardTests = [
       {
@@ -44,10 +45,6 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
       {
         cardTestId: 'searchHomepageNavLinks-machineLearning',
         expectedUrl: 'ml/overview',
-      },
-      {
-        cardTestId: 'searchHomepageNavLinks-dataManagement',
-        expectedUrl: 'index_management',
       },
     ];
 

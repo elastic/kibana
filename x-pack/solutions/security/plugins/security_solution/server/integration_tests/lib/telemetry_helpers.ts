@@ -14,6 +14,7 @@ import type {
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -341,6 +342,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
   const meta = undefined;
   const user = '';
   const version = 1;
+  const osTypes: OsTypeArray = ['linux'];
   const tags: string[] = [];
   const tieBreaker = '';
 
@@ -353,6 +355,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
     description,
     meta,
     user,
+    osTypes,
     tags,
     tieBreaker,
     type,
