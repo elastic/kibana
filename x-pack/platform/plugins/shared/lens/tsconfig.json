@@ -26,7 +26,6 @@
     "@kbn/url-forwarding-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/saved-objects-plugin",
