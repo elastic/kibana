@@ -69,7 +69,7 @@ describe('DateRangePicker', () => {
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
 
-    it.skip('closes on outside click and returns to display mode', () => {
+    it('closes on outside click and returns to display mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -82,5 +82,7 @@ describe('DateRangePicker', () => {
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
+
+    // TODO test popover opens according to editing mode
   });
 });
