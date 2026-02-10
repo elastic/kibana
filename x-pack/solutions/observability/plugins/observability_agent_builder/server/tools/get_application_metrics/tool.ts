@@ -68,7 +68,7 @@ When to use:
 
 When NOT to use:
 - For host-level metrics (CPU, memory of the entire host) - use ${OBSERVABILITY_GET_HOSTS_TOOL_ID} instead
-- For trace/transaction metrics - use observability.get_trace_metrics instead`,
+- For trace/transaction metrics - use ${OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID} instead`,
     schema: getApplicationMetricsToolSchema,
     tags: ['observability', 'apm', 'application', 'metrics', 'jvm'],
     availability: {
