@@ -314,9 +314,9 @@ export function registerToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Execute a Tool',
+      summary: 'Run a tool',
       description:
-        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
