@@ -174,10 +174,9 @@ export function setupSavedObjects(
     attributesToIncludeInAAD: new Set([
       'state',
       'connectorId',
+      'redirectUri',
       'spaceId',
-      'createdAt',
       'expiresAt',
-      'createdBy',
     ]),
   });
 }
