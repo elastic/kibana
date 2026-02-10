@@ -41,7 +41,7 @@ export type ResumeRoundParams = BaseConverseParams & {
   prompts: Record<string, PromptResponse>;
 };
 
-export type ResendParams = BaseConverseParams & {
+export type RegenerateParams = BaseConverseParams & {
   conversationId: string;
 };
 
@@ -80,7 +80,7 @@ export class ChatService {
     });
   }
 
-  regenerate(params: ResendParams): Observable<ChatEvent> {
+  regenerate(params: RegenerateParams): Observable<ChatEvent> {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
