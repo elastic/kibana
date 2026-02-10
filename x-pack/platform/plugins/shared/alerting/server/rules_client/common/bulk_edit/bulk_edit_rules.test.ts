@@ -314,25 +314,6 @@ describe('bulkEditRules', () => {
     ).rejects.toThrow('More than 10000 rules matched for bulk edit');
   });
 
-  test('should throw error if no aggregation buckets found', async () => {
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      aggregations: { alertTypeId: {} },
-      saved_objects: [],
-      per_page: 0,
-      page: 0,
-      total: 1,
-    });
-    await expect(
-      bulkEditRules(rulesClientContext, {
-        name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
-        shouldInvalidateApiKeys: false,
-        requiredAuthOperation: WriteOperations.BulkEdit,
-        auditAction: RuleAuditAction.BULK_EDIT,
-      })
-    ).rejects.toThrow('No rules found for bulk edit');
-  });
-
   test('should throw error if rule type is not enabled', async () => {
     ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementationOnce(() => {
       throw new Error('Not enabled');
@@ -349,7 +330,7 @@ describe('bulkEditRules', () => {
   });
 
   test('should throw error if rule type is not authorized for user', async () => {
-    authorization.ensureAuthorized.mockImplementationOnce(() => {
+    authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
       throw new Error('Unauthorized');
     });
     await expect(
@@ -362,15 +343,14 @@ describe('bulkEditRules', () => {
       })
     ).rejects.toThrow('Unauthorized');
 
-    expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenLastCalledWith({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
       operation: 'bulkEdit',
-      ruleTypeId: 'myType',
+      entity: 'rule',
     });
   });
 
-  test('should call ensureAuthorized once for each unique rule type and with the required permission from the method call', async () => {
+  test('should call bulkEnsureAuthorized once with all rule type consumer pairs and with the required permission from the method call', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: {
         alertTypeId: {
@@ -393,18 +373,14 @@ describe('bulkEditRules', () => {
       auditAction: RuleAuditAction.BULK_EDIT,
     });
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(1, {
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'myType', consumers: ['myApp'] },
+        { ruleTypeId: 'myOtherType', consumers: ['myApp'] },
+      ],
       operation: 'bulkEditParams',
-      ruleTypeId: 'myType',
-    });
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(2, {
-      consumer: 'myApp',
       entity: 'rule',
-      operation: 'bulkEditParams',
-      ruleTypeId: 'myOtherType',
     });
   });
 
