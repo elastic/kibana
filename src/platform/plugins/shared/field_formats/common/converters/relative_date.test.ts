@@ -9,6 +9,7 @@
 
 import moment from 'moment-timezone';
 import { RelativeDateFormat } from './relative_date';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('Relative Date Format', () => {
   let convert: Function;
@@ -18,9 +19,15 @@ describe('Relative Date Format', () => {
     convert = relativeDate.convert.bind(relativeDate);
   });
 
-  test('decoding an undefined or null date should return a "-"', () => {
-    expect(convert(null)).toBe('-');
-    expect(convert(undefined)).toBe('-');
+  test('decoding a missing value', () => {
+    expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 
   test('decoding invalid date should echo invalid value', () => {
