@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { Parser } from '../../../parser';
+import { isSubQuery } from '../../../ast/is';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
@@ -61,24 +63,24 @@ describe('FROM Validation', () => {
       });
 
       test('errors on trailing comma', () => {
-        fromExpectErrors(`from assignment = 1`, ['Unknown index "assignment"']);
+        fromExpectErrors(`from assignment = 1`, ['Unknown index or view "assignment"']);
       });
 
       test('errors on invalid syntax', () => {
-        fromExpectErrors('FROM `index`', ['Unknown index "`index`"']);
-        fromExpectErrors(`from assignment = 1`, ['Unknown index "assignment"']);
+        fromExpectErrors('FROM `index`', ['Unknown index or view "`index`"']);
+        fromExpectErrors(`from assignment = 1`, ['Unknown index or view "assignment"']);
       });
 
-      test('errors on unknown index', () => {
-        fromExpectErrors(`FROM index, missingIndex`, ['Unknown index "missingIndex"']);
-        fromExpectErrors(`from average()`, ['Unknown index "average"']);
-        fromExpectErrors(`fRom custom_function()`, ['Unknown index "custom_function"']);
-        fromExpectErrors('from numberField', ['Unknown index "numberField"']);
-        fromExpectErrors('FROM policy', ['Unknown index "policy"']);
-        fromExpectErrors('FROM index, missingIndex', ['Unknown index "missingIndex"']);
-        fromExpectErrors('FROM missingIndex, index', ['Unknown index "missingIndex"']);
+      test('errors on unknown index or view', () => {
+        fromExpectErrors(`FROM index, missingIndex`, ['Unknown index or view "missingIndex"']);
+        fromExpectErrors(`from average()`, ['Unknown index or view "average"']);
+        fromExpectErrors(`fRom custom_function()`, ['Unknown index or view "custom_function"']);
+        fromExpectErrors('from numberField', ['Unknown index or view "numberField"']);
+        fromExpectErrors('FROM policy', ['Unknown index or view "policy"']);
+        fromExpectErrors('FROM index, missingIndex', ['Unknown index or view "missingIndex"']);
+        fromExpectErrors('FROM missingIndex, index', ['Unknown index or view "missingIndex"']);
         fromExpectErrors('FROM *missingIndex, missingIndex2, index', [
-          'Unknown index "missingIndex2"',
+          'Unknown index or view "missingIndex2"',
         ]);
       });
       test('no errors on unknown index if using wildcards', () => {
@@ -105,7 +107,24 @@ describe('FROM Validation', () => {
           ...mockContext,
           views: [{ name: 'my_saved_view', query: 'FROM logs' }],
         };
-        fromExpectErrors('FROM other_view', ['Unknown index "other_view"'], contextWithViews);
+        fromExpectErrors(
+          'FROM other_view',
+          ['Unknown index or view "other_view"'],
+          contextWithViews
+        );
+      });
+
+      test('uses "Unknown index" (not "Unknown index or view") for unknown source inside subquery', () => {
+        const query = 'FROM index, (FROM missingIndex)';
+        const { root } = Parser.parse(query);
+        const rootFrom = root.commands[0];
+        const subqueryArg = rootFrom.args.find((arg) => !Array.isArray(arg) && isSubQuery(arg)) as {
+          child: { commands: typeof root.commands };
+        };
+        const innerFrom = subqueryArg.child.commands[0];
+        const result = validate(innerFrom, root.commands, mockContext);
+        const errors = result.map((e) => e.text);
+        expect(errors).toEqual(['Unknown index "missingIndex"']);
       });
     });
 
@@ -130,9 +149,9 @@ describe('FROM Validation', () => {
   describe('CCS indices', () => {
     describe('... <sources> ...', () => {
       test('display errors on unknown indices', () => {
-        fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown index "remote-ccs:indexes"']);
+        fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown index or view "remote-ccs:indexes"']);
         fromExpectErrors('fRoM a_index, remote-ccs:indexes', [
-          'Unknown index "remote-ccs:indexes"',
+          'Unknown index or view "remote-ccs:indexes"',
         ]);
       });
       test('no errors on unknown index if using wildcards', () => {
@@ -144,7 +163,7 @@ describe('FROM Validation', () => {
     describe('... METADATA <indices>', () => {
       test('no errors on correct usage', () => {
         fromExpectErrors(`from remote-ccs:indexes METADATA _id`, [
-          'Unknown index "remote-ccs:indexes"',
+          'Unknown index or view "remote-ccs:indexes"',
         ]);
         fromExpectErrors(`from *:indexes METADATA _id`, []);
       });
