@@ -43,7 +43,10 @@ export const useRulesTableActions = ({
   } = useKibana().services;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const {
-    rulesPrivileges: { manualRun: { edit: canManualRunRules }, rules: {edit: canEditRules} },
+    rulesPrivileges: {
+      manualRun: { edit: canManualRunRules },
+      rules: { edit: canEditRules },
+    },
   } = useUserPrivileges();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
@@ -125,9 +128,11 @@ export const useRulesTableActions = ({
       type: 'icon',
       'data-test-subj': 'manualRuleRunAction',
       description: (rule) =>
-        !canManualRunRules ? i18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP :
-        !rule.enabled ? i18n.MANUAL_RULE_RUN_TOOLTIP :
-        i18n.MANUAL_RULE_RUN,
+        !canManualRunRules
+          ? i18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
+          : !rule.enabled
+          ? i18n.MANUAL_RULE_RUN_TOOLTIP
+          : i18n.MANUAL_RULE_RUN,
       icon: 'play',
       name: i18n.MANUAL_RULE_RUN,
       onClick: async (rule: Rule) => {
@@ -164,7 +169,7 @@ export const useRulesTableActions = ({
           ids: [rule.id],
         });
       },
-      enabled: () => canEditRules
+      enabled: () => canEditRules,
     },
   ];
 };

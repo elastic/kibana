@@ -770,7 +770,7 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   }
 );
 
-export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP =  i18n.translate(
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
   {
     defaultMessage: 'You need access to the "Manual rule run" privilege',

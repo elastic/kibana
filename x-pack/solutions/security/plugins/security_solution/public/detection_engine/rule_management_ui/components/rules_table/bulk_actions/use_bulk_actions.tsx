@@ -613,9 +613,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
               'data-test-subj': 'scheduleRuleRunBulk',
               disabled:
-                containsLoading ||
-                (!containsEnabled && !isAllSelected) ||
-                !canManualRunRules,
+                containsLoading || (!containsEnabled && !isAllSelected) || !canManualRunRules,
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
@@ -626,9 +624,7 @@ export const useBulkActions = ({
                     name: i18n.BULK_ACTION_FILL_RULE_GAPS,
                     'data-test-subj': 'scheduleFillGaps',
                     disabled:
-                      containsLoading ||
-                      (!containsEnabled && !isAllSelected) ||
-                      !canManualRunRules,
+                      containsLoading || (!containsEnabled && !isAllSelected) || !canManualRunRules,
                     onClick: handleScheduleFillGapsAction,
                     icon: undefined,
                   },

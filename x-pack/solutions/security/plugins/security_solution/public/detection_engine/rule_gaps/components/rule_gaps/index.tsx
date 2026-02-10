@@ -45,18 +45,12 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-const getGapsTableColumns = (
-  ruleId: string,
-  enabled: boolean,
-  canManualRunRules: boolean
-) => {
+const getGapsTableColumns = (ruleId: string, enabled: boolean, canManualRunRules: boolean) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
     align: 'right' as const,
     render: (gap: Gap) =>
-      canManualRunRules ? (
-        <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} />
-      ) : null,
+      canManualRunRules ? <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} /> : null,
     width: '15%',
   };
 
