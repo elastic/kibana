@@ -68,7 +68,7 @@ describe('validateUrlTemplate', () => {
     expect(
       (
         await validateUrlTemplate(
-          { template: '{{kibanaUrl}}/test' },
+          '{{kibanaUrl}}/test',
           { kibanaUrl: 'http://localhost:5601/app' }
         )
       ).isValid
@@ -79,7 +79,7 @@ describe('validateUrlTemplate', () => {
     expect(
       (
         await validateUrlTemplate(
-          { template: '{{kibanaUrl}}/test' },
+          '{{kibanaUrl}}/test',
           // eslint-disable-next-line no-script-url
           { kibanaUrl: 'javascript:evil()' }
         )
@@ -91,7 +91,7 @@ describe('validateUrlTemplate', () => {
     expect(
       (
         await validateUrlTemplate(
-          { template: '{{url}}/test' },
+          '{{url}}/test',
           { kibanaUrl: 'http://localhost:5601/app' }
         )
       ).isValid

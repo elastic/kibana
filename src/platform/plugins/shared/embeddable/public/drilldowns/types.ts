@@ -9,7 +9,6 @@
 
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { Observable } from 'rxjs';
 import type { FC } from 'react';
 import type { SerializedDrilldowns, DrilldownState } from '../../server';
@@ -52,7 +51,7 @@ export type DrilldownDefinition<
    */
   getHref?(drilldownState: TDrilldownState, context: TContext): Promise<string | undefined>;
 
-  isCompatible?: ActionDefinition['isCompatible'];
+  isCompatible?: (drilldownState: TDrilldownState, context: TContext) => Promise<boolean>;
 
   isStateValid(state: Partial<Omit<TDrilldownState, 'label' | 'trigger' | 'type'>>): boolean;
 

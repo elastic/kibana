@@ -56,7 +56,7 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownAc
 
         if (!(await isCompatibleLicense(license?.minimalLicense))) return false;
 
-        return isCompatible ? isCompatible(context) : true;
+        return isCompatible ? isCompatible(drilldownState, context) : true;
       },
     };
   });

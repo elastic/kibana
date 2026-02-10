@@ -56,7 +56,7 @@ export function getDiscoverDrilldown(deps: {
         await deps.application().navigateToApp(app, { path, state });
       }
     },
-    isCompatible: async ({ embeddable }: DiscoverDrilldownContext) => {
+    isCompatible: async (DrilldownState: DiscoverDrilldownState, { embeddable }: DiscoverDrilldownContext) => {
       return isCompatible({
         hasDiscoverAccess: deps.hasDiscoverAccess(),
         locator: deps.locator(),
