@@ -59,7 +59,8 @@ export async function identifyFeatures({
         const result = baseFeatureSchema.safeParse(feature);
         return result.success;
       }),
-    (feature) => feature.id);
+    (feature) => feature.id
+  );
 
   return {
     features,

@@ -8,6 +8,7 @@
 import type { BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { get } from 'lodash';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type {
@@ -15,7 +16,6 @@ import type {
   FeatureIdentificationEvaluationExample,
   ValidFeatureType,
 } from './features_identification_datasets';
-import { get } from 'lodash';
 import {
   FEATURE_IDENTIFICATION_DATASETS,
   VALID_FEATURE_TYPES,
@@ -28,12 +28,12 @@ evaluate.describe.configure({ timeout: 300_000 });
  * These verify objectively measurable properties without relying on an LLM judge.
  */
 
-type CodeEvaluatorParams = {
+interface CodeEvaluatorParams {
   input: FeatureIdentificationEvaluationExample['input'];
-  output: { features: BaseFeature[]; }
+  output: { features: BaseFeature[] };
   expected: FeatureIdentificationEvaluationExample['output'];
   metadata: FeatureIdentificationEvaluationExample['metadata'];
-};
+}
 
 /**
  * Validates that every feature's `type` is one of the valid feature types.
@@ -59,7 +59,9 @@ const typeValidationEvaluator = {
       score,
       explanation:
         invalidFeatures.length > 0
-          ? `Invalid types: ${invalidFeatures.map((f) => `"${f.id}" has type "${f.type}"`).join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
+          ? `Invalid types: ${invalidFeatures
+              .map((f) => `"${f.id}" has type "${f.type}"`)
+              .join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
           : 'All features have a valid type',
       details: {
         total: features.length,
@@ -75,7 +77,8 @@ const typeValidationEvaluator = {
  * Returns an empty array if the string doesn't match the pattern.
  */
 function parseKeyValuePairs(evidence: string): Array<{ key: string; value: string }> {
-  const regex = /([a-zA-Z_][a-zA-Z0-9_.]*)\s*=\s*([^\s]+(?:\s+(?![a-zA-Z_][a-zA-Z0-9_.]*\s*=)[^\s]+)*)/g;
+  const regex =
+    /([a-zA-Z_][a-zA-Z0-9_.]*)\s*=\s*([^\s]+(?:\s+(?![a-zA-Z_][a-zA-Z0-9_.]*\s*=)[^\s]+)*)/g;
   const pairs: Array<{ key: string; value: string }> = [];
   let match: RegExpExecArray | null;
 
@@ -127,10 +130,7 @@ function getAllStringValues(doc: Record<string, unknown>): string[] {
  * 2. Direct quote evidence: checks if the text appears as a substring in any
  *    string value across all document fields.
  */
-function isEvidenceGrounded(
-  evidence: string,
-  documents: Array<Record<string, unknown>>
-): boolean {
+function isEvidenceGrounded(evidence: string, documents: Array<Record<string, unknown>>): boolean {
   // Direct quote: check against all string values in all documents
   const matchesStringValue = documents.some((doc) => {
     const allValues = getAllStringValues(doc);
@@ -200,7 +200,11 @@ const evidenceGroundingEvaluator = {
       score,
       explanation:
         ungroundedItems.length > 0
-          ? `${ungroundedItems.length}/${totalEvidence} evidence strings not grounded: ${ungroundedItems.slice(0, 3).join('; ')}`
+          ? `${
+              ungroundedItems.length
+            }/${totalEvidence} evidence strings not grounded: ${ungroundedItems
+              .slice(0, 3)
+              .join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded in input documents`,
       details: { totalEvidence, groundedEvidence, ungroundedItems },
     };
@@ -231,7 +235,9 @@ const featureCountEvaluator = {
       explanation:
         issues.length > 0
           ? issues.join('; ')
-          : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${max_features ?? '∞'}]`,
+          : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${
+              max_features ?? '∞'
+            }]`,
       details: { count, min_features, max_features },
     };
   },
@@ -248,7 +254,10 @@ const confidenceBoundsEvaluator = {
 
     const features = output?.features ?? [];
     if (features.length === 0) {
-      return { score: 1, explanation: 'No features emitted — confidence bounds satisfied trivially' };
+      return {
+        score: 1,
+        explanation: 'No features emitted — confidence bounds satisfied trivially',
+      };
     }
 
     const violations = features.filter((f) => f.confidence > max_confidence);
@@ -257,9 +266,16 @@ const confidenceBoundsEvaluator = {
       score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
       explanation:
         violations.length > 0
-          ? `${violations.length}/${features.length} features exceed max confidence ${max_confidence}: ${violations.map((f) => `"${f.id}" (${f.confidence})`).join(', ')}`
+          ? `${violations.length}/${
+              features.length
+            } features exceed max confidence ${max_confidence}: ${violations
+              .map((f) => `"${f.id}" (${f.confidence})`)
+              .join(', ')}`
           : `All features have confidence ≤ ${max_confidence}`,
-      details: { max_confidence, violations: violations.map((f) => ({ id: f.id, confidence: f.confidence })) },
+      details: {
+        max_confidence,
+        violations: violations.map((f) => ({ id: f.id, confidence: f.confidence })),
+      },
     };
   },
 };
@@ -301,7 +317,9 @@ const typeAssertionsEvaluator = {
           passedAssertions++;
         } else {
           const violating = features.filter((f) => f.type === forbiddenType).map((f) => f.id);
-          issues.push(`Forbidden type "${forbiddenType}" found in features: ${violating.join(', ')}`);
+          issues.push(
+            `Forbidden type "${forbiddenType}" found in features: ${violating.join(', ')}`
+          );
         }
       }
     }

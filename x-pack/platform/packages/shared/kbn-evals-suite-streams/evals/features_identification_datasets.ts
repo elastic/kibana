@@ -7,7 +7,12 @@
 
 import type { EvaluationCriterion } from '@kbn/evals';
 
-export const VALID_FEATURE_TYPES = ['entity', 'infrastructure', 'technology', 'dependency'] as const;
+export const VALID_FEATURE_TYPES = [
+  'entity',
+  'infrastructure',
+  'technology',
+  'dependency',
+] as const;
 export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
 
 export interface FeatureIdentificationEvaluationExample {
@@ -1187,8 +1192,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           '@timestamp': '2026-04-12T15:20:01.210Z',
-          message:
-            'FATAL: OutOfMemoryError in analytics-system-dispatcher-3, restarting actor',
+          message: 'FATAL: OutOfMemoryError in analytics-system-dispatcher-3, restarting actor',
           'service.name': 'analytics-engine',
           'log.level': 'FATAL',
         },
