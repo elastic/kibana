@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/licensing-types'
   - '@kbn/es-query'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -56,6 +57,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:
