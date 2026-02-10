@@ -9,6 +9,9 @@ import type { IlmPolicyHotPhase, IlmPolicyPhases } from '@kbn/streams-schema';
 
 export type TimeUnit = 'd' | 'h' | 'm' | 's';
 
+export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const;
+export type DownsamplePhase = (typeof DOWNSAMPLE_PHASES)[number];
+
 export interface MinAgeMetaFields {
   minAgeValue: string;
   minAgeUnit: TimeUnit;

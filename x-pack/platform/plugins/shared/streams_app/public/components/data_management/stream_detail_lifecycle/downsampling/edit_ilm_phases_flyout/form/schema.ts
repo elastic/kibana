@@ -7,6 +7,7 @@
 
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { IlmPhasesFlyoutFormInternal } from './types';
+import { DOWNSAMPLE_PHASES, type DownsamplePhase } from './types';
 import {
   downsampleIntervalMultipleOfPreviousOne,
   ifExistsNumberGreaterThanZero,
@@ -20,13 +21,13 @@ import {
 } from './validations';
 
 const getDownsampleFieldsToValidateOnChange = (
-  phase: 'hot' | 'warm' | 'cold',
+  phase: DownsamplePhase,
   includeCurrentPhase = true
 ) => {
-  const all: Array<'hot' | 'warm' | 'cold'> = ['hot', 'warm', 'cold'];
-  const getIntervalPath = (p: 'hot' | 'warm' | 'cold') =>
-    `_meta.${p}.downsample.fixedIntervalValue`;
-  const phasesToValidate = all.slice(all.indexOf(phase) + (includeCurrentPhase ? 0 : 1));
+  const getIntervalPath = (p: DownsamplePhase) => `_meta.${p}.downsample.fixedIntervalValue`;
+  const phasesToValidate = DOWNSAMPLE_PHASES.slice(
+    DOWNSAMPLE_PHASES.indexOf(phase) + (includeCurrentPhase ? 0 : 1)
+  );
   // When a phase is validated, also validate all downsample intervals in the next phases.
   return phasesToValidate.map(getIntervalPath);
 };

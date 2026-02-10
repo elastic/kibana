@@ -16,7 +16,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { TimeUnit } from '../types';
+import type { DownsamplePhase, TimeUnit } from '../types';
+import { DOWNSAMPLE_PHASES } from '../types';
 import { formatMillisecondsInUnit, getRelativeBoundsInMs, toMilliseconds } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 
@@ -56,7 +57,7 @@ export const DownsampleIntervalField = ({
     ],
   });
 
-  const getPhaseDownsampleIntervalMs = (phase: 'hot' | 'warm' | 'cold'): number | null => {
+  const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null => {
     const phaseEnabled = Boolean(form.getFields()[`_meta.${phase}.enabled`]?.value);
     if (!phaseEnabled) return null;
 
@@ -87,10 +88,8 @@ export const DownsampleIntervalField = ({
             const showInvalid = isEnabled && isInvalid;
             const showError = isEnabled ? errorMessage : null;
 
-            const downsamplePhases = ['hot', 'warm', 'cold'] as const;
-            type DownsamplePhase = (typeof downsamplePhases)[number];
             const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
-              downsamplePhases,
+              DOWNSAMPLE_PHASES,
               phaseName as DownsamplePhase,
               getPhaseDownsampleIntervalMs
             );

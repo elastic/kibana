@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { TimeUnit, IlmPhasesFlyoutFormInternal, IlmPhasesFlyoutFormOutput } from './types';
+export type {
+  DownsamplePhase,
+  TimeUnit,
+  IlmPhasesFlyoutFormInternal,
+  IlmPhasesFlyoutFormOutput,
+} from './types';
+export { DOWNSAMPLE_PHASES } from './types';
 export { getIlmPhasesFlyoutFormSchema } from './schema';
 export { createIlmPhasesFlyoutDeserializer } from './deserializer';
 export { createIlmPhasesFlyoutSerializer } from './serializer';

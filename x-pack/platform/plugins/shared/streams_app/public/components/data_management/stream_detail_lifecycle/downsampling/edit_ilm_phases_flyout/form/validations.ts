@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-import type { TimeUnit } from './types';
+import type { DownsamplePhase, TimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 const { emptyField, isInteger } = fieldValidators;
@@ -24,7 +24,7 @@ const isPhaseEnabled = (
   phase: 'hot' | 'warm' | 'cold' | 'frozen' | 'delete'
 ) => Boolean((formData as any)[`_meta.${phase}.enabled`]);
 
-const isDownsampleEnabled = (formData: Record<string, unknown>, phase: 'hot' | 'warm' | 'cold') =>
+const isDownsampleEnabled = (formData: Record<string, unknown>, phase: DownsamplePhase) =>
   Boolean((formData as any)[`_meta.${phase}.downsampleEnabled`]);
 
 export const requiredMinAgeValue =
@@ -163,7 +163,7 @@ export const minAgeGreaterThanPreviousPhase =
   };
 
 export const requiredDownsampleIntervalValue =
-  (phase: 'hot' | 'warm' | 'cold'): AnyValidationFunc =>
+  (phase: DownsamplePhase): AnyValidationFunc =>
   (...args) => {
     const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
     if (!isPhaseEnabled(formData, phase)) return;
@@ -176,7 +176,7 @@ export const requiredDownsampleIntervalValue =
   };
 
 export const ifExistsNumberGreaterThanZero =
-  (phase: 'hot' | 'warm' | 'cold'): AnyValidationFunc =>
+  (phase: DownsamplePhase): AnyValidationFunc =>
   (...args) => {
     const [{ value, formData }] = args as any as [
       { value: unknown; formData: Record<string, unknown> }
@@ -196,7 +196,7 @@ export const ifExistsNumberGreaterThanZero =
   };
 
 export const downsampleIntervalMustBeInteger =
-  (phase: 'hot' | 'warm' | 'cold'): AnyValidationFunc =>
+  (phase: DownsamplePhase): AnyValidationFunc =>
   (...args) => {
     const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
     if (!isPhaseEnabled(formData, phase)) return;
@@ -215,7 +215,7 @@ export const downsampleIntervalMultipleOfPreviousOne =
     if (!isPhaseEnabled(formData, phase)) return;
     if (!isDownsampleEnabled(formData, phase)) return;
 
-    const getValueFor = (p: 'hot' | 'warm' | 'cold') => {
+    const getValueFor = (p: DownsamplePhase) => {
       if (!isPhaseEnabled(formData, p)) return null;
       if (!isDownsampleEnabled(formData, p)) return null;
 

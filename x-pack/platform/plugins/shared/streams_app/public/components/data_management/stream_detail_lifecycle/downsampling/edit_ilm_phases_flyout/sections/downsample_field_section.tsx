@@ -18,13 +18,13 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { IlmPhasesFlyoutFormInternal } from '../form';
+import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
 import { DownsampleIntervalField } from '../form';
 import { TIME_UNIT_OPTIONS } from '../constants';
 
 export interface DownsampleFieldSectionProps {
   form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
-  phaseName: 'hot' | 'warm' | 'cold';
+  phaseName: DownsamplePhase;
   dataTestSubj: string;
 }
 
