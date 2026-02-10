@@ -13,7 +13,7 @@ import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common'
 
 import { AddFromLibraryFlyout } from './add_from_library_flyout';
 import { usageCollection } from '../kibana_services';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks/mocks';
 import { registerAddFromLibraryType } from './registry';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { HasType } from '@kbn/presentation-publishing';
