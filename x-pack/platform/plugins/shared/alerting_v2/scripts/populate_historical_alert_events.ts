@@ -11,8 +11,71 @@ import { run } from '@kbn/dev-cli-runner';
 import { ALERT_EVENTS_DATA_STREAM } from '../server/resources/alert_events';
 import type { AlertEvent } from '../server/resources/alert_events';
 
-const BULK_SIZE = 500;
 const DEFAULT_ES_URL = 'http://localhost:9200';
+const PROGRESS_LOG_INTERVAL = 1_000_000;
+
+/**
+ * Build exactly numCombos sizes that sum to totalCount, with variation (some combos more, some less).
+ * Uses random weights so distribution is uneven.
+ */
+function buildComboSizesFixed(totalCount: number, numCombos: number): number[] {
+  const weights: number[] = [];
+  let totalWeight = 0;
+  for (let i = 0; i < numCombos; i++) {
+    const w = 0.3 + Math.random();
+    weights.push(w);
+    totalWeight += w;
+  }
+  const sizes = weights.map((w) => Math.max(1, Math.floor((totalCount * w) / totalWeight)));
+  let sum = sizes.reduce((a, b) => a + b, 0);
+  let diff = totalCount - sum;
+  if (diff > 0) {
+    for (let k = 0; k < diff; k++) sizes[k % sizes.length] += 1;
+  } else if (diff < 0) {
+    let d = -diff;
+    for (let k = 0; d > 0; k++) {
+      const idx = k % sizes.length;
+      if (sizes[idx] > 1) {
+        sizes[idx] -= 1;
+        d -= 1;
+      }
+    }
+  }
+  return sizes;
+}
+
+/** Build list of "documents per combo" that sum to totalCount (used when --num-combos is not set). */
+function buildComboSizesVariable(
+  totalCount: number,
+  maxDocsPerCombo: number,
+  runIntervalMin: number
+): number[] {
+  const runsPerDay = Math.floor((24 * 60) / runIntervalMin);
+  const maxPerCombo = Math.min(maxDocsPerCombo, Math.max(1, runsPerDay));
+  const sizes: number[] = [];
+  let sum = 0;
+  while (sum < totalCount) {
+    const remaining = totalCount - sum;
+    const r = Math.random();
+    let size: number;
+    if (r < 0.4) size = 1;
+    else if (r < 0.65) size = 2 + Math.floor(Math.random() * Math.min(5, maxPerCombo - 1));
+    else if (r < 0.85) size = 7 + Math.floor(Math.random() * Math.min(18, maxPerCombo - 6));
+    else if (r < 0.95) size = 25 + Math.floor(Math.random() * Math.min(48, maxPerCombo - 24));
+    else {
+      const minLong = Math.min(73, maxPerCombo);
+      size = minLong + Math.floor(Math.random() * Math.max(0, maxPerCombo - minLong + 1));
+    }
+    size = Math.max(1, Math.min(size, remaining, maxPerCombo));
+    sizes.push(size);
+    sum += size;
+  }
+  if (sum > totalCount && sizes.length > 0) {
+    sizes[sizes.length - 1] -= sum - totalCount;
+    if (sizes[sizes.length - 1] < 1) sizes.pop();
+  }
+  return sizes;
+}
 
 /**
  * Normalize Elasticsearch URL from env/flag so it is valid for new URL().
@@ -65,34 +128,31 @@ function createEsClient(
   });
 }
 
-function generateAlertEvent(opts: {
+/** One document for a combo: same rule_id, group_hash, episode_id; @timestamp is startTs + runIndex * interval (rule run every N min). */
+function generateAlertEventForCombo(opts: {
   ruleId: string;
   ruleVersion: number;
-  index: number;
-  total: number;
-  daysBack: number;
+  comboIndex: number;
+  runIndexInCombo: number;
+  totalRunsInCombo: number;
+  timestamp: string;
   status: AlertEvent['status'];
   type: AlertEvent['type'];
   source: string;
 }): AlertEvent {
-  const { ruleId, ruleVersion, index, total, daysBack, status, type, source } = opts;
-  const now = Date.now();
-  const spreadMs = daysBack * 24 * 60 * 60 * 1000;
-  const step = total > 1 ? spreadMs / (total - 1) : 0;
-  const ts = new Date(now - (total - 1 - index) * step).toISOString();
-
-  const groupHash = `historical-${ruleId}-${index}-${ts.slice(0, 10)}`;
-  const episodeId = `episode-${ruleId}-${index}`;
+  const { ruleId, ruleVersion, comboIndex, runIndexInCombo, totalRunsInCombo, timestamp, status, type, source } = opts;
+  const groupHash = `historical-${ruleId}-combo-${comboIndex}`;
+  const episodeId = `episode-${ruleId}-${comboIndex}`;
 
   return {
-    '@timestamp': ts,
-    scheduled_timestamp: ts,
+    '@timestamp': timestamp,
+    scheduled_timestamp: timestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
     data: {
-      message: `Historical alert event ${index + 1}/${total}`,
-      host: `host-${(index % 5) + 1}`,
-      count: index + 1,
+      message: `Alert event run ${runIndexInCombo + 1}/${totalRunsInCombo} for combo ${comboIndex}`,
+      host: `host-${(comboIndex % 5) + 1}`,
+      count: runIndexInCombo + 1,
     },
     status,
     source,
@@ -102,6 +162,52 @@ function generateAlertEvent(opts: {
       status: status === 'recovered' ? 'recovering' : 'active',
     },
   };
+}
+
+/** Generate all documents for one combo: same (rule_id, group_hash, episode_id), timestamps spaced by runIntervalMin. */
+function generateDocsForCombo(opts: {
+  comboIndex: number;
+  numDocs: number;
+  ruleId: string;
+  ruleVersion: number;
+  daysBack: number;
+  runIntervalMin: number;
+  status: AlertEvent['status'];
+  type: AlertEvent['type'];
+  source: string;
+}): AlertEvent[] {
+  const { comboIndex, numDocs, ruleId, ruleVersion, daysBack, runIntervalMin, status, type, source } = opts;
+  const now = Date.now();
+  const windowMs = daysBack * 24 * 60 * 60 * 1000;
+  const intervalMs = runIntervalMin * 60 * 1000;
+  const maxStart = now - (numDocs - 1) * intervalMs;
+  const minStart = now - windowMs;
+  const startMs = minStart + Math.random() * Math.max(0, maxStart - minStart);
+  const docs: AlertEvent[] = [];
+  for (let j = 0; j < numDocs; j++) {
+    const ts = new Date(startMs + j * intervalMs).toISOString();
+    docs.push(
+      generateAlertEventForCombo({
+        ruleId,
+        ruleVersion,
+        comboIndex,
+        runIndexInCombo: j,
+        totalRunsInCombo: numDocs,
+        timestamp: ts,
+        status,
+        type,
+        source,
+      })
+    );
+  }
+  return docs;
+}
+
+function buildBulkBody(docs: AlertEvent[]): unknown[] {
+  return docs.flatMap((doc) => [
+    { create: { _index: ALERT_EVENTS_DATA_STREAM } },
+    doc,
+  ]);
 }
 
 run(
@@ -118,6 +224,23 @@ run(
     const status = (flags.status as string) ?? 'breached';
     const type = (flags.type as string) ?? 'alert';
     const source = (flags.source as string) ?? 'internal';
+    const bulkSize = Math.min(
+      Math.max(1, Math.floor(Number(flags['bulk-size']) || 10000)),
+      50000
+    );
+    const concurrency = Math.min(
+      Math.max(1, Math.floor(Number(flags.concurrency) || 8)),
+      64
+    );
+    const skipRefresh = Boolean(flags['skip-refresh']);
+    const runIntervalMin = Math.max(1, Math.floor(Number(flags['run-interval-min']) || 5));
+    const maxDocsPerCombo = Math.min(
+      10000,
+      Math.max(1, Math.floor(Number(flags['max-docs-per-combo']) || 288))
+    );
+    const numCombosExplicit = flags['num-combos'] !== undefined && flags['num-combos'] !== ''
+      ? Math.max(1, Math.floor(Number(flags['num-combos'])))
+      : undefined;
 
     if (count <= 0 || !Number.isInteger(count)) {
       throw createFailError('--count must be a positive integer');
@@ -142,31 +265,48 @@ run(
     }
     const client = createEsClient(esUrl, auth);
 
-    log.info(
-      `Generating ${count} historical alert events for rule ${ruleId} over the last ${daysBack} days into ${ALERT_EVENTS_DATA_STREAM}`
-    );
-
-    const events: AlertEvent[] = [];
-    for (let i = 0; i < count; i++) {
-      events.push(
-        generateAlertEvent({
-          ruleId,
-          ruleVersion,
-          index: i,
-          total: count,
-          daysBack,
-          status: status as AlertEvent['status'],
-          type: type as AlertEvent['type'],
-          source,
-        })
+    if (numCombosExplicit !== undefined) {
+      log.info(
+        `Building ${numCombosExplicit.toLocaleString()} combos for ${count.toLocaleString()} docs (run every ${runIntervalMin}min)...`
+      );
+    } else {
+      log.info(
+        `Building combo distribution for ${count.toLocaleString()} docs (run every ${runIntervalMin}min, max ${maxDocsPerCombo} docs/combo)...`
       );
     }
+    const comboSizes =
+      numCombosExplicit !== undefined
+        ? buildComboSizesFixed(count, numCombosExplicit)
+        : buildComboSizesVariable(count, maxDocsPerCombo, runIntervalMin);
+    const numCombos = comboSizes.length;
+    log.info(
+      `Indexing ${count.toLocaleString()} alert events across ${numCombos.toLocaleString()} combos into ${ALERT_EVENTS_DATA_STREAM} (bulk-size=${bulkSize}, concurrency=${concurrency}, refresh=${skipRefresh ? 'false' : 'wait_for'})`
+    );
+
+    const genOpts = {
+      ruleId,
+      ruleVersion,
+      daysBack,
+      status: status as AlertEvent['status'],
+      type: type as AlertEvent['type'],
+      source,
+      runIntervalMin,
+    };
 
     let indexed = 0;
-    for (let offset = 0; offset < events.length; offset += BULK_SIZE) {
-      const chunk = events.slice(offset, offset + BULK_SIZE);
-      const body = chunk.flatMap((doc) => [{ create: { _index: ALERT_EVENTS_DATA_STREAM } }, doc]);
-      const resp = await client.bulk({ body, refresh: 'wait_for' });
+    let lastLogAt = 0;
+    const startTime = Date.now();
+    const buffer: AlertEvent[] = [];
+
+    const flushBuffer = async (): Promise<void> => {
+      if (buffer.length === 0) return;
+      const body = buildBulkBody(buffer);
+      buffer.length = 0;
+      const resp = await client.bulk({
+        body,
+        refresh: skipRefresh ? false : 'wait_for',
+        timeout: '120s',
+      });
       if (resp.errors) {
         const firstError = resp.items?.find(
           (item) => item.create?.error ?? item.index?.error
@@ -175,11 +315,105 @@ run(
           firstError?.create?.error?.reason ?? firstError?.index?.error?.reason ?? 'unknown';
         throw createFailError(`Bulk index error: ${reason}`);
       }
-      indexed += chunk.length;
-      log.info(`Indexed ${indexed}/${events.length} events`);
+    };
+
+    const runBulkForDocs = async (docs: AlertEvent[]): Promise<number> => {
+      if (docs.length === 0) return 0;
+      const body = buildBulkBody(docs);
+      const resp = await client.bulk({
+        body,
+        refresh: skipRefresh ? false : 'wait_for',
+        timeout: '120s',
+      });
+      if (resp.errors) {
+        const firstError = resp.items?.find(
+          (item) => item.create?.error ?? item.index?.error
+        ) as { create?: { error?: { reason?: string } }; index?: { error?: { reason?: string } } };
+        const reason =
+          firstError?.create?.error?.reason ?? firstError?.index?.error?.reason ?? 'unknown';
+        throw createFailError(`Bulk index error: ${reason}`);
+      }
+      return docs.length;
+    };
+
+    if (concurrency <= 1) {
+      for (let comboIndex = 0; comboIndex < numCombos; comboIndex++) {
+        const numDocs = comboSizes[comboIndex];
+        const docs = generateDocsForCombo({
+          ...genOpts,
+          comboIndex,
+          numDocs,
+        });
+        for (const doc of docs) {
+          buffer.push(doc);
+          if (buffer.length >= bulkSize) {
+            indexed += buffer.length;
+            await flushBuffer();
+            if (indexed - lastLogAt >= PROGRESS_LOG_INTERVAL) {
+              log.info(`Indexed ${indexed.toLocaleString()}/${count.toLocaleString()} (${((indexed / count) * 100).toFixed(1)}%)`);
+              lastLogAt = indexed;
+            }
+          }
+        }
+      }
+      indexed += buffer.length;
+      await flushBuffer();
+    } else {
+      const targetChunkDocs = Math.max(bulkSize * 4, Math.floor(count / (concurrency * 2)));
+      const chunks: { startCombo: number; endCombo: number }[] = [];
+      let startCombo = 0;
+      let docAcc = 0;
+      for (let c = 0; c < numCombos; c++) {
+        docAcc += comboSizes[c];
+        if (docAcc >= targetChunkDocs || c === numCombos - 1) {
+          chunks.push({ startCombo, endCombo: c + 1 });
+          startCombo = c + 1;
+          docAcc = 0;
+        }
+      }
+      if (startCombo < numCombos) chunks.push({ startCombo, endCombo: numCombos });
+
+      let nextChunk = 0;
+      const runNext = async (): Promise<void> => {
+        const i = nextChunk++;
+        if (i >= chunks.length) return;
+        const { startCombo: sc, endCombo: ec } = chunks[i];
+        const buffer: AlertEvent[] = [];
+        for (let comboIndex = sc; comboIndex < ec; comboIndex++) {
+          const numDocs = comboSizes[comboIndex];
+          const docs = generateDocsForCombo({ ...genOpts, comboIndex, numDocs });
+          for (const doc of docs) {
+            buffer.push(doc);
+            if (buffer.length >= bulkSize) {
+              const toSend = buffer.splice(0, bulkSize);
+              const n = await runBulkForDocs(toSend);
+              indexed += n;
+              if (indexed - lastLogAt >= PROGRESS_LOG_INTERVAL) {
+                log.info(`Indexed ${indexed.toLocaleString()}/${count.toLocaleString()} (${((indexed / count) * 100).toFixed(1)}%)`);
+                lastLogAt = indexed;
+              }
+            }
+          }
+        }
+        if (buffer.length > 0) {
+          const n = await runBulkForDocs(buffer);
+          indexed += n;
+          if (indexed - lastLogAt >= PROGRESS_LOG_INTERVAL) {
+            log.info(`Indexed ${indexed.toLocaleString()}/${count.toLocaleString()} (${((indexed / count) * 100).toFixed(1)}%)`);
+            lastLogAt = indexed;
+          }
+        }
+        await runNext();
+      };
+      const workers = Array.from({ length: Math.min(concurrency, chunks.length) }, () => runNext());
+      await Promise.all(workers);
     }
 
-    log.success(`Successfully indexed ${indexed} alert events into ${ALERT_EVENTS_DATA_STREAM}`);
+    const elapsed = (Date.now() - startTime) / 1000;
+    const rate = elapsed > 0 ? (indexed / elapsed).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0';
+    log.success(
+      `Indexed ${indexed.toLocaleString()} alert events into ${ALERT_EVENTS_DATA_STREAM} in ${elapsed.toFixed(1)}s (~${rate} docs/s)`
+    );
   },
   {
     description: 'Populate the .alerts-events data stream with historical alert events',
@@ -195,7 +429,13 @@ run(
         'count',
         'days-back',
         'rule-version',
+        'bulk-size',
+        'concurrency',
+        'run-interval-min',
+        'max-docs-per-combo',
+        'num-combos',
       ],
+      boolean: ['skip-refresh'],
       default: {
         count: '100',
         'rule-id': 'historical-rule-1',
@@ -204,18 +444,28 @@ run(
         status: 'breached',
         type: 'alert',
         source: 'internal',
+        'bulk-size': '10000',
+        concurrency: '8',
+        'run-interval-min': '5',
+        'max-docs-per-combo': '288',
       },
       help: `
-        --count          Number of alert events to generate (default: 100)
-        --rule-id        Rule ID to assign to events (default: historical-rule-1)
-        --rule-version   Rule version (default: 1)
-        --days-back      Spread event @timestamp over this many days (default: 7)
-        --es-url         Elasticsearch URL (default: ELASTICSEARCH_URL or http://localhost:9200)
-        --username      Elasticsearch username (or set ELASTIC_USERNAME)
-        --password      Elasticsearch password (or set ELASTIC_PASSWORD)
-        --status        Event status: breached | recovered | no_data (default: breached)
-        --type          Event type: signal | alert (default: alert)
-        --source        Event source string (default: internal)
+        --count              Total number of alert event documents (default: 100)
+        --num-combos         If set, use exactly this many unique (rule_id, group_hash, episode_id) combos; docs distributed with variation
+        --run-interval-min   Rule run interval in minutes; events for same combo spaced by this (default: 5)
+        --max-docs-per-combo Max documents per combo when --num-combos is not set (default: 288)
+        --bulk-size          Documents per bulk request, 1-50000 (default: 10000)
+        --concurrency        Parallel bulk requests in flight, 1-64 (default: 8)
+        --skip-refresh       Set refresh=false during bulk for max speed (default: false)
+        --rule-id            Rule ID to assign to events (default: historical-rule-1)
+        --rule-version       Rule version (default: 1)
+        --days-back          Time window for event @timestamp in days (default: 7)
+        --es-url             Elasticsearch URL (default: ELASTICSEARCH_URL or http://localhost:9200)
+        --username           Elasticsearch username (or set ELASTIC_USERNAME)
+        --password           Elasticsearch password (or set ELASTIC_PASSWORD)
+        --status             Event status: breached | recovered | no_data (default: breached)
+        --type               Event type: signal | alert (default: alert)
+        --source             Event source string (default: internal)
       `,
     },
   }
