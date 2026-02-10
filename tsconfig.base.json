@@ -2458,6 +2458,8 @@
       "@kbn/url-drilldown-plugin/*": ["x-pack/platform/plugins/private/drilldowns/url_drilldown/*"],
       "@kbn/url-forwarding-plugin": ["src/platform/plugins/private/url_forwarding"],
       "@kbn/url-forwarding-plugin/*": ["src/platform/plugins/private/url_forwarding/*"],
+      "@kbn/usage-api-plugin": ["x-pack/platform/plugins/shared/usage_api"],
+      "@kbn/usage-api-plugin/*": ["x-pack/platform/plugins/shared/usage_api/*"],
       "@kbn/usage-collection-plugin": ["src/platform/plugins/shared/usage_collection"],
       "@kbn/usage-collection-plugin/*": ["src/platform/plugins/shared/usage_collection/*"],
       "@kbn/usage-collection-test-plugin": ["src/platform/test/plugin_functional/plugins/usage_collection"],

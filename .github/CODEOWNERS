@@ -1130,6 +1130,7 @@ x-pack/platform/plugins/shared/streams @elastic/obs-onboarding-team @elastic/obs
 x-pack/platform/plugins/shared/streams_app @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops

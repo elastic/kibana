@@ -16,7 +16,7 @@ pageLoadAssetSize:
   cases: 225900
   charts: 40269
   cloud: 10648
-  cloudConnect: 7932
+  cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -55,7 +55,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
-  entityStore: 1755
+  entityStore: 71717
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -211,5 +211,5 @@ pageLoadAssetSize:
   visualizations: 53333
   watcher: 10485
   workflowsExtensions: 90040
-  workflowsManagement: 8497
-  workplaceAIApp: 65529
+  workflowsManagement: 21318
+  workplaceAIApp: 65731
