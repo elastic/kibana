@@ -15,6 +15,7 @@ import { createStreamsSignificantEventsQueriesGenerationTask } from './significa
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsPipelineSuggestionTask } from './pipeline_suggestion';
+import { createStreamsOnboardingTask } from './onboarding';
 
 export interface TaskContext {
   logger: Logger;
@@ -30,6 +31,7 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsFeaturesIdentificationTask(taskContext),
     ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsPipelineSuggestionTask(taskContext),
+    ...createStreamsOnboardingTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 

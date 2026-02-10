@@ -103,6 +103,7 @@ export const interactiveModeMachine = setup({
           convertedProcessor,
           parentRef,
           assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
           { isNew: true }
         );
         const insertIndex = findInsertIndex(
@@ -135,6 +136,7 @@ export const interactiveModeMachine = setup({
         },
         parentRef,
         assignArgs.spawn as StepSpawner,
+        assignArgs.context.grokCollection,
         { isNew: true }
       );
       const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
@@ -171,6 +173,7 @@ export const interactiveModeMachine = setup({
           convertedCondition,
           parentRef,
           assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
           { isNew: true }
         );
         const insertIndex = findInsertIndex(
@@ -317,10 +320,16 @@ export const interactiveModeMachine = setup({
       const parentRef: StepParentActor = assignArgs.self;
 
       const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, parentRef, assignArgs.spawn as StepSpawner, {
-          isNew: true,
-          isUpdated: true,
-        });
+        return spawnStep(
+          step,
+          parentRef,
+          assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
+          {
+            isNew: true,
+            isUpdated: true,
+          }
+        );
       });
 
       return {
@@ -368,7 +377,7 @@ export const interactiveModeMachine = setup({
       // "new" and also "updated" (to mimic being fully configured in interactive mode). "new" alone would just
       // denote a draft state.
       const shouldBeMarkedAsNewAndUpdated = input.newStepIds.includes(step.customIdentifier);
-      return spawnStep(step, parentRef, spawn as StepSpawner, {
+      return spawnStep(step, parentRef, spawn as StepSpawner, input.grokCollection, {
         isNew: shouldBeMarkedAsNewAndUpdated,
         isUpdated: shouldBeMarkedAsNewAndUpdated,
       });
@@ -382,6 +391,7 @@ export const interactiveModeMachine = setup({
       simulationMode: input.simulationMode,
       streamName: input.streamName,
       suggestedPipeline: undefined,
+      grokCollection: input.grokCollection,
     };
   },
   type: 'parallel',

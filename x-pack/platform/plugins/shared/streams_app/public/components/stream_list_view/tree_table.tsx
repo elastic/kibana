@@ -59,7 +59,7 @@ import {
   SUGGESTION_COLUMN_HEADER,
   SUGGESTION_COLUMN_HEADER_ARIA_LABEL,
 } from './translations';
-import { DiscoverBadgeButton } from '../stream_badges';
+import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -198,10 +198,7 @@ export function StreamsTreeTable({
   const filteredStreams = React.useMemo(() => {
     const dataQualityPattern = /dataQuality:\((.*)\)/;
     const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
-    return filterStreamsByQuery(
-      streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
-      freeText
-    );
+    return filterStreamsByQuery(streams, freeText);
   }, [streams, searchQuery]);
 
   const enrichedStreams = React.useMemo(() => {
@@ -391,17 +388,20 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate(
+                      aria-label={
                         isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
+                          ? i18n.translate(
+                              'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
+                              {
+                                defaultMessage: 'Collapsed node with {childCount} children',
+                                values: { childCount: item.children.length },
+                              }
+                            )
+                          : i18n.translate('xpack.streams.streamsTreeTable.expandedNodeAriaLabel', {
+                              defaultMessage: 'Expanded node with {childCount} children',
+                              values: { childCount: item.children.length },
+                            })
+                      }
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}
@@ -422,7 +422,7 @@ export function StreamsTreeTable({
                     <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
                   <EuiLink
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', {
@@ -439,7 +439,8 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
-                </EuiFlexItem>
+                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                </EuiFlexGroup>
               </EuiFlexGroup>
             );
           },
@@ -502,7 +503,9 @@ export function StreamsTreeTable({
                   totalDocsResult.loading || failedDocsResult.loading || degradedDocsResult.loading
                 }
               />
-            ) : null,
+            ) : (
+              '-'
+            ),
         },
         {
           field: 'suggestion',
@@ -550,14 +553,9 @@ export function StreamsTreeTable({
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
             <DiscoverBadgeButton
-              definition={
-                {
-                  stream: item.stream,
-                  data_stream_exists: !!item.data_stream,
-                  index_mode: item.data_stream?.index_mode,
-                } as Streams.ingest.all.GetResponse
-              }
-              isWiredStream={item.type === 'wired'}
+              hasDataStream={!!item.data_stream || Streams.QueryStream.Definition.is(item.stream)}
+              indexMode={item.data_stream?.index_mode}
+              stream={item.stream}
             />
           ),
         },
