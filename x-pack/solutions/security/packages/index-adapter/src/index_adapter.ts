@@ -26,6 +26,7 @@ export interface IndexAdapterParams {
   kibanaVersion: string;
   totalFieldsLimit?: number;
   writeIndexOnly?: boolean;
+  expandIndexPattern?: boolean;
 }
 export type SetComponentTemplateParams = GetComponentTemplateOpts;
 export type SetIndexTemplateParams = Omit<
