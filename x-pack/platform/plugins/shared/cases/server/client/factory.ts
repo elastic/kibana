@@ -45,6 +45,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  TemplatesService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -202,6 +203,12 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
     });
 
+    const templatesService = new TemplatesService({
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      esClient,
+    });
+
     const caseService = new CasesService({
       log: this.logger,
       unsecuredSavedObjectsClient,
@@ -228,6 +235,7 @@ export class CasesClientFactory {
     });
 
     return {
+      templatesService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
