@@ -503,10 +503,9 @@ describe(
         it('Investigate alert in timeline', () => {
           loadPrepackagedTimelineTemplates();
           createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
-            (rule) => visitRuleDetailsPage(rule.body.id)
+            (rule) => visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
           );
 
-          goToAlertsTab();
           waitForAlertsToPopulate();
           investigateFirstAlertInTimeline();
 
