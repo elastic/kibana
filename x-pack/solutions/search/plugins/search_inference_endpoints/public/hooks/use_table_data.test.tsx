@@ -137,4 +137,70 @@ describe('useTableData', () => {
 
     expect(result.current.length).toBe(0);
   });
+
+  it('should return empty array when inferenceEndpoints is empty', () => {
+    const filterOptions: FilterOptions = { provider: [], type: [] };
+    const { result } = renderHook(() => useTableData([], filterOptions, ''));
+
+    expect(result.current.length).toBe(0);
+  });
+
+  it('should filter by multiple providers', () => {
+    const filterOptions: FilterOptions = {
+      provider: [ServiceProviderKeys.elasticsearch, ServiceProviderKeys.openai],
+      type: [],
+    };
+    const { result } = renderHook(() => useTableData(inferenceEndpoints, filterOptions, ''));
+
+    expect(result.current.length).toBe(3);
+  });
+
+  it('should handle endpoints with no model_id in service_settings', () => {
+    const endpointsWithNoModelId: InferenceAPIConfigResponse[] = [
+      {
+        inference_id: 'endpoint-no-model',
+        task_type: 'sparse_embedding',
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+        },
+        task_settings: {},
+      },
+    ];
+    const filterOptions: FilterOptions = { provider: [], type: [] };
+
+    // Should still find by inference_id
+    const { result } = renderHook(() =>
+      useTableData(endpointsWithNoModelId, filterOptions, 'endpoint-no-model')
+    );
+    expect(result.current.length).toBe(1);
+
+    // Should not match when searching for non-existent model_id
+    const { result: result2 } = renderHook(() =>
+      useTableData(endpointsWithNoModelId, filterOptions, 'some-model-id')
+    );
+    expect(result2.current.length).toBe(0);
+  });
+
+  it('should search by service_settings.model field (alternative to model_id)', () => {
+    const endpointsWithModelField: InferenceAPIConfigResponse[] = [
+      {
+        inference_id: 'bedrock-endpoint',
+        task_type: 'text_embedding',
+        service: 'amazonbedrock',
+        service_settings: {
+          model: 'amazon.titan-embed-text-v1',
+        },
+        task_settings: {},
+      },
+    ];
+    const filterOptions: FilterOptions = { provider: [], type: [] };
+    const { result } = renderHook(() =>
+      useTableData(endpointsWithModelField, filterOptions, 'titan-embed')
+    );
+
+    expect(result.current.length).toBe(1);
+    expect(result.current[0].inference_id).toBe('bedrock-endpoint');
+  });
 });
