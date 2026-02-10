@@ -49,7 +49,13 @@ export type Template = z.infer<typeof TemplateSchema>;
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
-  fields: z.array(FieldSchema),
+  fields: z.array(FieldSchema).refine(
+    (fields) => {
+      const fieldNames = new Set(fields.map((field) => field.name));
+      return fieldNames.size === fields.length;
+    },
+    { message: 'Field names must be unique.' }
+  ),
 });
 
 /**

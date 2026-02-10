@@ -277,6 +277,33 @@ describe('ParsedTemplateSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('rejects parsed template with duplicate field names', () => {
+    const templateWithDuplicateFields = {
+      ...validParsedTemplate,
+      definition: {
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'duplicate_field',
+            type: 'keyword' as const,
+            metadata: {},
+          },
+          {
+            control: 'SELECT_BASIC',
+            name: 'duplicate_field',
+            label: 'Duplicate Field',
+            type: 'keyword' as const,
+            metadata: { options: ['a', 'b'] },
+          },
+        ],
+      },
+    };
+
+    const result = ParsedTemplateSchema.safeParse(templateWithDuplicateFields);
+
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CreateTemplateInputSchema', () => {
