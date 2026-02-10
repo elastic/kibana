@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -14,30 +21,37 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { useObservedHostHeaderLastSeen } from './hooks/use_observed_host_header_last_seen';
 
 interface HostPanelHeaderProps {
   hostName: string;
-  lastSeenDate: string | null | undefined;
+  scopeId: string;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({
-  hostName,
-  lastSeenDate: observedUserLastSeenDate,
-}: HostPanelHeaderProps) => {
-  const lastSeenDate = useMemo(
-    () => observedUserLastSeenDate && new Date(observedUserLastSeenDate),
-    [observedUserLastSeenDate]
+export const HostPanelHeader = ({ hostName, scopeId }: HostPanelHeaderProps) => {
+  const { lastSeenDate, isLoading } = useObservedHostHeaderLastSeen(hostName, scopeId);
+  const lastSeenDateFormatted = useMemo(
+    () => lastSeenDate && new Date(lastSeenDate),
+    [lastSeenDate]
   );
   return (
     <FlyoutHeader data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
-            {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
+            {isLoading ? (
+              <EuiSkeletonText
+                lines={1}
+                size="xs"
+                data-test-subj="host-panel-header-lastSeen-loading"
+              />
+            ) : (
+              lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
+            )}
             <EuiSpacer size="xs" />
           </EuiText>
         </EuiFlexItem>
@@ -56,13 +70,21 @@ export const HostPanelHeader = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {lastSeenDate && (
-                <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
-                    defaultMessage="Observed"
-                  />
-                </EuiBadge>
+              {isLoading ? (
+                <EuiSkeletonText
+                  lines={1}
+                  size="xs"
+                  data-test-subj="host-panel-header-observed-badge-loading"
+                />
+              ) : (
+                lastSeenDateFormatted && (
+                  <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
+                      defaultMessage="Observed"
+                    />
+                  </EuiBadge>
+                )
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

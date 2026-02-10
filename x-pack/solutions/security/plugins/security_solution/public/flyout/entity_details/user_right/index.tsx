@@ -29,7 +29,6 @@ import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { useObservedUser } from './hooks/use_observed_user';
-import { useObservedUserHeaderLastSeen } from './hooks/use_observed_user_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
@@ -77,7 +76,6 @@ export const UserPanel = ({
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
-  const lastSeenDate = useObservedUserHeaderLastSeen(userName, scopeId);
   const observedUser = useObservedUser(userName, scopeId);
 
   const managedUser = useManagedUser();
@@ -150,7 +148,7 @@ export const UserPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <UserPanelHeader userName={userName} lastSeenDate={lastSeenDate} managedUser={managedUser} />
+      <UserPanelHeader userName={userName} scopeId={scopeId} managedUser={managedUser} />
       <UserPanelContent
         userName={userName}
         observedUser={observedUser}

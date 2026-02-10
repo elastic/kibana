@@ -28,7 +28,6 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { useObservedHost } from './hooks/use_observed_host';
-import { useObservedHostHeaderLastSeen } from './hooks/use_observed_host_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
@@ -134,7 +133,6 @@ export const HostPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
-  const lastSeenDate = useObservedHostHeaderLastSeen(hostName, scopeId);
   const observedHost = useObservedHost(hostName, scopeId);
 
   return (
@@ -150,7 +148,7 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader hostName={hostName} lastSeenDate={lastSeenDate} />
+      <HostPanelHeader hostName={hostName} scopeId={scopeId} />
       <HostPanelContent
         hostName={hostName}
         observedHost={observedHost}

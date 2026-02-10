@@ -16,7 +16,7 @@ import { sourcererSelectors } from '../../../../sourcerer/store';
 export const useObservedUserHeaderLastSeen = (
   userName: string,
   scopeId: string
-): string | null | undefined => {
+): { lastSeenDate: string | null | undefined; isLoading: boolean } => {
   const globalTime = useGlobalTime();
   const { isInitializing } = globalTime;
 
@@ -28,7 +28,7 @@ export const useObservedUserHeaderLastSeen = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
-  const [, { lastSeen }] = useFirstLastSeen({
+  const [loading, { lastSeen }] = useFirstLastSeen({
     field: 'user.name',
     value: userName,
     defaultIndex: securityDefaultPatterns,
@@ -36,5 +36,8 @@ export const useObservedUserHeaderLastSeen = (
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
 
-  return isInitializing ? undefined : lastSeen ?? undefined;
+  const isLoading = isInitializing || loading;
+  const lastSeenDate = isInitializing ? undefined : lastSeen ?? undefined;
+
+  return { lastSeenDate, isLoading };
 };

@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { useObservedUserHeaderLastSeen } from './hooks/use_observed_user_header_last_seen';
+import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 
 interface UserPanelHeaderProps {
   userName: string;
-  lastSeenDate: string | null | undefined;
+  scopeId: string;
   managedUser: ManagedUserData;
 }
 
@@ -28,11 +36,12 @@ const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({
-  userName,
-  lastSeenDate: observedUserLastSeenDate,
-  managedUser,
-}: UserPanelHeaderProps) => {
+export const UserPanelHeader = ({ userName, scopeId, managedUser }: UserPanelHeaderProps) => {
+  const { lastSeenDate: observedUserLastSeenDate, isLoading } = useObservedUserHeaderLastSeen(
+    userName,
+    scopeId
+  );
+
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
@@ -54,7 +63,15 @@ export const UserPanelHeader = ({
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
-            {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
+            {isLoading ? (
+              <EuiSkeletonText
+                lines={1}
+                size="xs"
+                data-test-subj="user-panel-header-lastSeen-loading"
+              />
+            ) : (
+              lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
+            )}
             <EuiSpacer size="xs" />
           </EuiText>
         </EuiFlexItem>
@@ -73,13 +90,21 @@ export const UserPanelHeader = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {observedUserLastSeenDate && (
-                <EuiBadge data-test-subj="user-panel-header-observed-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.user.observedBadge"
-                    defaultMessage="Observed"
-                  />
-                </EuiBadge>
+              {isLoading ? (
+                <EuiSkeletonText
+                  lines={1}
+                  size="xs"
+                  data-test-subj="user-panel-header-observed-badge-loading"
+                />
+              ) : (
+                observedUserLastSeenDate && (
+                  <EuiBadge data-test-subj="user-panel-header-observed-badge" color="hollow">
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.user.observedBadge"
+                      defaultMessage="Observed"
+                    />
+                  </EuiBadge>
+                )
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
