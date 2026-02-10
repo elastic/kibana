@@ -23,9 +23,10 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import {
   ClientError,
   validateMlAuth,
-  isKeyUpdateableWithReadPermission,
   toggleRuleEnabledOnUpdate,
   formatBulkEditResultErrors,
+  isReadAuthEditField,
+  validateFieldWritePermissions,
 } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import type { RuleParams } from '../../../../rule_schema';
@@ -87,16 +88,19 @@ export const patchRule = async ({
   if (
     !rulesAuthz.canEditRules &&
     !isEmpty(rulePatchObjWithoutIds) &&
-    Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
+    Object.keys(rulePatchObjWithoutIds).every((key) => isReadAuthEditField(key))
   ) {
+    validateFieldWritePermissions(rulePatch, rulesAuthz);
+
+    // We remove the `enabled` field from the `patchReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
+    // `enabled` is modified later if it exists in the PATCH object
+    const { enabled: unusedField, ...fieldsToPatch } = rulePatchObjWithoutIds;
+
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchReadAuthEditRuleFields(
       {
         rulesClient,
-        // Don't want to pass ID fields to the read authz PATCH method as it will apply patches on all fields in the object
-        rulePatch: { ...rulePatchObjWithoutIds, rule_source: patchedRule.rule_source },
+        rulePatch: { ...fieldsToPatch, rule_source: patchedRule.rule_source },
         existingRule,
-        prebuiltRuleAssetClient,
-        rulesAuthz,
       }
     );
 

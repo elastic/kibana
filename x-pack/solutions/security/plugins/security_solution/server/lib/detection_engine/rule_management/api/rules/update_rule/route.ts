@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  ENABLE_DISABLE_RULES_API_PRIVILEGE,
   EXCEPTIONS_API_ALL,
   INVESTIGATION_GUIDE_API_EDIT,
   RULES_API_ALL,
@@ -42,6 +43,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
                 EXCEPTIONS_API_ALL,
                 CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
                 INVESTIGATION_GUIDE_API_EDIT,
+                ENABLE_DISABLE_RULES_API_PRIVILEGE,
               ],
             },
           ],

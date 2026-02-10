@@ -17,7 +17,7 @@ export type ReadAuthRuleUpdateWithRuleSource = ReadAuthRuleUpdateProps & {
 };
 
 /**
- * Fields that can be edited with read auth permissions.
+ * Fields that can be edited via update with read auth permissions.
  * Uses a Record type to ensure this stays in sync with ReadAuthRuleUpdateProps.
  */
 export const READ_AUTH_EDIT_FIELDS: Record<keyof ReadAuthRuleUpdateWithRuleSource, true> = {

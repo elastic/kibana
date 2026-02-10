@@ -21,6 +21,7 @@ import {
   formatBulkEditResultErrors,
   hasOnlyReadAuthEditableChanges,
   toggleRuleEnabledOnUpdate,
+  validateFieldWritePermissions,
   validateMlAuth,
 } from '../utils';
 
@@ -85,13 +86,13 @@ export const updateRule = async ({
   if (!rulesAuthz.canEditRules && hasOnlyReadAuthEditableChanges(ruleWithUpdates, existingRule)) {
     // We're only modifying the fields that are editable with read permissions
     const modifiedFields = extractChangedUpdatableFields(ruleWithUpdates, existingRule);
+    validateFieldWritePermissions(modifiedFields, rulesAuthz);
 
     const appliedUpdateWithReadPrivs: BulkEditResult<RuleParams> =
       await updateReadAuthEditRuleFields({
         rulesClient,
         ruleUpdate: modifiedFields,
         existingRule,
-        rulesAuthz,
       });
 
     const updateErrors = formatBulkEditResultErrors(appliedUpdateWithReadPrivs);

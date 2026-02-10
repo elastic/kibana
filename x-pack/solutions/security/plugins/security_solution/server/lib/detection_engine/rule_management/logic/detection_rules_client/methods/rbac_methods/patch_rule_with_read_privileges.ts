@@ -9,12 +9,10 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { camelCase } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
-import type { DetectionRulesAuthz } from '../../../../../../../../common/detection_engine/rule_management/authz';
 import type { ReadAuthRulePatchWithRuleSource } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
-import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
-import { getReadAuthFieldValue, validateFieldWritePermissions } from '../../utils';
+import { getReadAuthFieldValue } from '../../utils';
 
 /**
  * Applies the `bulkEditRuleParamsWithReadAuth` function to patch rule field values
@@ -25,17 +23,11 @@ export const patchReadAuthEditRuleFields = async ({
   rulesClient,
   rulePatch,
   existingRule,
-  prebuiltRuleAssetClient,
-  rulesAuthz,
 }: {
   rulesClient: RulesClient;
   rulePatch: ReadAuthRulePatchWithRuleSource;
   existingRule: RuleResponse;
-  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  rulesAuthz: DetectionRulesAuthz;
 }): Promise<BulkEditResult<RuleParams>> => {
-  validateFieldWritePermissions(rulePatch, rulesAuthz);
-
   const operations = Object.keys(rulePatch).map((field) => {
     const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
     return {

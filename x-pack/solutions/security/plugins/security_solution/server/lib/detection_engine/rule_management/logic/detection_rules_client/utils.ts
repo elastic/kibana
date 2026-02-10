@@ -11,7 +11,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { camelCase, isEmpty, isEqual, omit } from 'lodash';
-import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
 import { validFields } from '@kbn/alerting-plugin/common/constants';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 
@@ -71,6 +70,10 @@ export const validateFieldWritePermissions = (
 
   if (ruleUpdate.note != null && !rulesAuthz.canEditInvestigationGuides) {
     errors.push('note');
+  }
+
+  if (ruleUpdate.enabled != null && !rulesAuthz.canEnableDisableRules) {
+    errors.push('enabled');
   }
 
   if (errors.length > 0) {
@@ -139,16 +142,6 @@ export const mergeExceptionLists = (
   }
 };
 
-/**
- * Typeguard to determine if given key is one of
- * valid string literals for editable rule fields
- * with read authz
- * @param key string
- * @returns boolean
- */
-export const isKeyUpdateableWithReadPermission = (key: string): boolean =>
-  Object.values(validFields).includes(camelCase(key) as ValidReadAuthEditFields);
-
 export const formatBulkEditResultErrors = (
   appliedPatchWithReadPrivs: BulkEditResult<RuleParams>
 ) => {
@@ -183,7 +176,7 @@ export const getReadAuthFieldValue = (
  * Type guard to check if a field name is one of the fields editable with read-only authorization.
  * Uses the READ_AUTH_EDIT_FIELDS constant to ensure type safety with ReadAuthRuleUpdateProps.
  */
-const isReadAuthEditField = (key: string): key is keyof ReadAuthRuleUpdateProps =>
+export const isReadAuthEditField = (key: string): key is keyof ReadAuthRuleUpdateProps =>
   key in READ_AUTH_EDIT_FIELDS;
 
 /**

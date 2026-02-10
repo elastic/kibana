@@ -21,6 +21,7 @@ import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysoluti
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import moment from 'moment';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
@@ -38,6 +39,7 @@ import {
   updateUsername,
 } from '../../../utils';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
@@ -3477,6 +3479,265 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rule.timeline_id).toEqual(timelineId);
       expect(rule.timeline_title).toEqual(timelineTitle);
+    });
+
+    describe('RBAC', () => {
+      describe('@skipInServerless with rules_read_custom_highlighted_fields_all user role', () => {
+        const role = ROLES.rules_read_custom_highlighted_fields_all;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+
+        it('should allow bulk setting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: ruleId })
+          );
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_investigation_fields,
+                  value: { field_names: ['host.name', 'user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+          expect(body.attributes.results.updated[0].investigation_fields).toEqual({
+            field_names: ['host.name', 'user.name'],
+          });
+        });
+
+        it('should allow bulk adding investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.add_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+          expect(body.attributes.results.updated[0].investigation_fields).toEqual({
+            field_names: ['host.name', 'user.name'],
+          });
+        });
+
+        it('should allow bulk deleting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name', 'user.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.delete_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+          expect(body.attributes.results.updated[0].investigation_fields).toEqual({
+            field_names: ['host.name'],
+          });
+        });
+      });
+
+      describe('@skipInServerless without custom highlighted fields subfeature permission', () => {
+        const role = ROLES.rules_read_investigation_guide_all;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+
+        it('should fail bulk setting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: ruleId })
+          );
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_investigation_fields,
+                  value: { field_names: ['host.name', 'user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should fail bulk adding investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.add_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should fail bulk deleting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name', 'user.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: {},
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.delete_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
+        });
+      });
     });
   });
 };
