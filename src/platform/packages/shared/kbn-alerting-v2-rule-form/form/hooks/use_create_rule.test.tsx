@@ -40,7 +40,7 @@ const createMockNotifications = () => ({
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
     name: 'Test Rule',
-    description: 'Test Description',
+    description: 'Test Rule Description',
     tags: ['tag1', 'tag2'],
     schedule: { custom: '5m' },
     enabled: true,
@@ -95,7 +95,17 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-        body: JSON.stringify(validFormData),
+        body: JSON.stringify({
+          kind: 'signal',
+          name: 'Test Rule',
+          tags: ['tag1', 'tag2'],
+          schedule: { custom: '5m' },
+          enabled: true,
+          query: 'FROM logs | LIMIT 10',
+          timeField: '@timestamp',
+          lookbackWindow: '15m',
+          groupingKey: ['host.name'],
+        }),
       });
     });
   });
@@ -195,8 +205,8 @@ describe('useCreateRule', () => {
     await waitFor(() => {
       const callBody = JSON.parse(http.post.mock.calls[0][1].body);
       expect(callBody).toEqual({
+        kind: 'signal',
         name: 'Complex Rule',
-        description: 'Complex Rule Description',
         tags: ['production', 'critical'],
         schedule: { custom: '1m' },
         enabled: false,

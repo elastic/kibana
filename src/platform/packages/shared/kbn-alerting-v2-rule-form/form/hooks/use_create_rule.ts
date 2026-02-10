@@ -22,6 +22,7 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
     (formValues: FormValues) => {
       const ruleData: CreateRuleData = {
         kind: 'signal',
+        // description: formValues.description, description is not yet supported by the api, but will be added in a future PR
         name: formValues.name,
         tags: formValues.tags,
         schedule: formValues.schedule,
