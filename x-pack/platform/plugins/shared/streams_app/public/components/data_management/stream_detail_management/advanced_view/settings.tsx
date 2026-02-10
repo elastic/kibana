@@ -45,7 +45,6 @@ interface Setting {
 }
 
 interface MetadataState {
-  title: string;
   tags: string[];
   description: string;
 }
@@ -109,17 +108,15 @@ export function Settings({
     toStringValues(definition.stream.ingest.settings, definition.effective_settings)
   );
 
-  // Metadata state (title, tags, description)
+  // Metadata state (tags, description)
   const originalMetadata = useMemo<MetadataState>(
     () => ({
-      title: definition.stream.title ?? '',
       tags: definition.stream.tags ?? [],
       description: definition.stream.description ?? '',
     }),
-    [definition.stream.title, definition.stream.tags, definition.stream.description]
+    [definition.stream.tags, definition.stream.description]
   );
   const [metadata, setMetadata] = useState<MetadataState>(() => ({
-    title: definition.stream.title ?? '',
     tags: definition.stream.tags ?? [],
     description: definition.stream.description ?? '',
   }));
@@ -217,13 +214,12 @@ export function Settings({
   }, [originalSettings, settings]);
 
   const hasMetadataChanges = useMemo(() => {
-    const titleChanged = metadata.title !== originalMetadata.title;
     const tagsChanged =
       metadata.tags.length !== originalMetadata.tags.length ||
       metadata.tags.some((tag, index) => tag !== originalMetadata.tags[index]);
     const descriptionChanged =
       showDescription && metadata.description !== originalMetadata.description;
-    return titleChanged || tagsChanged || descriptionChanged;
+    return tagsChanged || descriptionChanged;
   }, [metadata, originalMetadata, showDescription]);
 
   const hasChanges = hasSettingsChanges || hasMetadataChanges;
@@ -269,11 +265,9 @@ export function Settings({
         await acknowledgeDescriptionGenerationTask();
       }
 
-      // Save metadata (title, tags, description) via stream upsert API if changed
+      // Save metadata (tags, description) via stream upsert API if changed
       if (hasMetadataChanges) {
         const request = convertGetResponseIntoUpsertRequest(definition);
-        const trimmedTitle = metadata.title.trim();
-        request.stream.title = trimmedTitle || undefined;
         request.stream.tags = metadata.tags.length > 0 ? metadata.tags : undefined;
         if (showDescription) {
           request.stream.description = metadata.description;
@@ -332,7 +326,6 @@ export function Settings({
   const resetAllChanges = useCallback(() => {
     setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
     setMetadata({
-      title: definition.stream.title ?? '',
       tags: definition.stream.tags ?? [],
       description: definition.stream.description ?? '',
     });
@@ -342,7 +335,6 @@ export function Settings({
     if (!definition) return;
     setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
     setMetadata({
-      title: definition.stream.title ?? '',
       tags: definition.stream.tags ?? [],
       description: definition.stream.description ?? '',
     });
@@ -366,8 +358,6 @@ export function Settings({
   return (
     <>
       <StreamMetadataForm
-        title={metadata.title}
-        onTitleChange={(value) => setMetadata((prev) => ({ ...prev, title: value }))}
         tags={metadata.tags}
         onTagsChange={(tags) => setMetadata((prev) => ({ ...prev, tags }))}
         description={metadata.description}

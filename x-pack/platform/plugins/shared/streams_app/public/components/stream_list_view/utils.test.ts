@@ -27,7 +27,7 @@ const createStream = (name: string, retention: string | undefined): ListStreamDe
 
 const createIngestStream = (
   name: string,
-  options?: { title?: string; tags?: string[] }
+  options?: { tags?: string[] }
 ): ListStreamDetail => {
   return {
     stream: {
@@ -39,7 +39,6 @@ const createIngestStream = (
       },
       description: '',
       updated_at: new Date().toISOString(),
-      ...(options?.title && { title: options.title }),
       ...(options?.tags && { tags: options.tags }),
     },
     effective_lifecycle: { dsl: { data_retention: '1d' } } as any,
@@ -294,17 +293,15 @@ describe('filterCollapsedStreamRows', () => {
 });
 
 describe('filterStreamsByQuery', () => {
-  const rootStream = createIngestStream('logs', { title: 'Root Logs', tags: ['production'] });
+  const rootStream = createIngestStream('logs', { tags: ['production'] });
   const childWithTitle = createIngestStream('logs.nginx', {
-    title: 'Nginx Access Logs',
     tags: ['web', 'nginx'],
   });
   const childWithoutTitle = createIngestStream('logs.system', { tags: ['system'] });
   const grandchild = createIngestStream('logs.nginx.errors', {
-    title: 'Error Logs',
     tags: ['errors'],
   });
-  const unrelatedStream = createIngestStream('metrics.cpu', { title: 'CPU Metrics' });
+  const unrelatedStream = createIngestStream('metrics.cpu');
 
   const allStreams = [rootStream, childWithTitle, childWithoutTitle, grandchild, unrelatedStream];
 
@@ -316,42 +313,11 @@ describe('filterStreamsByQuery', () => {
   it('filters streams by name', () => {
     const result = filterStreamsByQuery(allStreams, 'nginx');
     const names = result.map((s) => s.stream.name);
-    // Should include logs (ancestor), logs.nginx (matches), and logs.nginx.errors (descendant matches name via ancestor)
+    // Should include logs (ancestor), logs.nginx (matches), and logs.nginx.errors (descendant included via ancestor)
     expect(names).toContain('logs');
     expect(names).toContain('logs.nginx');
     expect(names).toContain('logs.nginx.errors');
     expect(names).not.toContain('metrics.cpu');
-  });
-
-  it('filters streams by title', () => {
-    const result = filterStreamsByQuery(allStreams, 'Access');
-    const names = result.map((s) => s.stream.name);
-    // Should include logs.nginx (title matches) and its ancestor logs
-    expect(names).toContain('logs.nginx');
-    expect(names).toContain('logs');
-    expect(names).not.toContain('metrics.cpu');
-  });
-
-  it('is case insensitive for title search', () => {
-    const result = filterStreamsByQuery(allStreams, 'nginx access');
-    const names = result.map((s) => s.stream.name);
-    expect(names).toContain('logs.nginx');
-  });
-
-  it('includes ancestors of streams matching by title', () => {
-    const result = filterStreamsByQuery(allStreams, 'Error Logs');
-    const names = result.map((s) => s.stream.name);
-    // logs.nginx.errors matches by title, so ancestors logs and logs.nginx should be included
-    expect(names).toContain('logs.nginx.errors');
-    expect(names).toContain('logs.nginx');
-    expect(names).toContain('logs');
-  });
-
-  it('returns stream when title matches even if name does not', () => {
-    const result = filterStreamsByQuery(allStreams, 'CPU');
-    const names = result.map((s) => s.stream.name);
-    expect(names).toContain('metrics.cpu');
-    expect(names).toHaveLength(1);
   });
 
   it('returns empty array when no streams match', () => {
@@ -359,7 +325,7 @@ describe('filterStreamsByQuery', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('handles streams without title gracefully', () => {
+  it('handles streams without matching descendants gracefully', () => {
     const result = filterStreamsByQuery(allStreams, 'system');
     const names = result.map((s) => s.stream.name);
     // logs.system matches by name

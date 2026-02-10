@@ -10,7 +10,10 @@ import { generateLogsData } from '../../fixtures/generators';
 
 const TEST_STREAM_NAME = 'logs-test-title-tags';
 
-test.describe('Stream title and tags - Advanced Settings', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.serial(
+  'Stream tags - Advanced Settings',
+  { tag: ['@ess', '@svlOblt'] },
+  () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     // Generate 10 logs over the last 5 minutes to create a classic stream
@@ -31,35 +34,11 @@ test.describe('Stream title and tags - Advanced Settings', { tag: ['@ess', '@svl
     await apiServices.streams.deleteStream(TEST_STREAM_NAME);
   });
 
-  test('shows empty title and tags in advanced settings by default', async ({ pageObjects }) => {
+  test('shows empty tags in advanced settings by default', async ({ pageObjects }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
-    // Verify empty state for title and tags (fields are always editable, so check for empty values)
-    await pageObjects.streams.expectStreamMetadataTitleEmpty();
+    // Verify empty state for tags (field is always editable, so check for empty values)
     await pageObjects.streams.expectStreamMetadataTagsEmpty();
-  });
-
-  test('can add and display title in advanced settings', async ({ pageObjects, page }) => {
-    await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
-
-    // Fill in the title (no edit button needed - always editable)
-    await pageObjects.streams.fillStreamMetadataTitle('Test Stream Title');
-
-    // Bottom bar should appear with changes
-    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
-
-    // Save via bottom bar
-    await pageObjects.streams.saveStreamSettings();
-
-    // Wait for save to complete (toast notification)
-    await page.waitForTimeout(1000);
-
-    // Verify the title is displayed in the input
-    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
-
-    // Refresh page to verify persistence
-    await page.reload();
-    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
   });
 
   test('can add and display tags in advanced settings', async ({ pageObjects, page }) => {
@@ -88,25 +67,6 @@ test.describe('Stream title and tags - Advanced Settings', { tag: ['@ess', '@svl
     await pageObjects.streams.expectStreamMetadataTag('production');
   });
 
-  test('can cancel title edit without saving', async ({ pageObjects }) => {
-    await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
-
-    // Fill in a new title
-    await pageObjects.streams.fillStreamMetadataTitle('Cancelled Title');
-
-    // Bottom bar should appear
-    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
-
-    // Cancel via bottom bar
-    await pageObjects.streams.cancelStreamSettingsChanges();
-
-    // Verify the original title is still displayed (Test Stream Title from previous test)
-    await pageObjects.streams.expectStreamMetadataTitle('Test Stream Title');
-
-    // Bottom bar should be hidden after cancel
-    await pageObjects.streams.expectStreamSettingsBottomBarHidden();
-  });
-
   test('can cancel tags edit without saving', async ({ pageObjects }) => {
     await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
 
@@ -125,24 +85,5 @@ test.describe('Stream title and tags - Advanced Settings', { tag: ['@ess', '@svl
 
     // Bottom bar should be hidden after cancel
     await pageObjects.streams.expectStreamSettingsBottomBarHidden();
-  });
-
-  test('can clear title by saving empty value', async ({ pageObjects, page }) => {
-    await pageObjects.streams.gotoAdvancedTab(TEST_STREAM_NAME);
-
-    // Clear the title
-    await pageObjects.streams.fillStreamMetadataTitle('');
-
-    // Bottom bar should appear with changes
-    await pageObjects.streams.expectStreamSettingsBottomBarVisible();
-
-    // Save via bottom bar
-    await pageObjects.streams.saveStreamSettings();
-
-    // Wait for save to complete
-    await page.waitForTimeout(1000);
-
-    // Verify the title is empty
-    await pageObjects.streams.expectStreamMetadataTitleEmpty();
   });
 });

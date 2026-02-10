@@ -225,57 +225,13 @@ describe('Settings', () => {
   });
 
   describe('Stream metadata form', () => {
-    it('renders title and tags fields', () => {
+    it('renders tags field', () => {
       renderWithI18n(
         <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
       );
 
-      // Title field should be present
-      expect(screen.getByTestId('streamMetadataFormTitleInput')).toBeInTheDocument();
       // Tags field should be present
       expect(screen.getByTestId('streamMetadataFormTagsInput')).toBeInTheDocument();
-    });
-
-    it('shows bottom bar when title is changed', () => {
-      renderWithI18n(
-        <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
-      );
-
-      // Bottom bar should not be visible initially
-      expect(screen.queryByTestId('streamsAppSettingsBottomBar')).not.toBeInTheDocument();
-
-      // Change the title
-      fireEvent.change(screen.getByTestId('streamMetadataFormTitleInput'), {
-        target: { value: 'New Stream Title' },
-      });
-
-      // Bottom bar should appear
-      expect(screen.getByTestId('streamsAppSettingsBottomBar')).toBeInTheDocument();
-    });
-
-    it('hides bottom bar when title change is cancelled', async () => {
-      renderWithI18n(
-        <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
-      );
-
-      // Change the title
-      fireEvent.change(screen.getByTestId('streamMetadataFormTitleInput'), {
-        target: { value: 'New Stream Title' },
-      });
-
-      // Bottom bar should be visible
-      expect(screen.getByTestId('streamsAppSettingsBottomBar')).toBeInTheDocument();
-
-      // Click cancel button
-      fireEvent.click(screen.getByTestId('streamsAppSettingsCancelButton'));
-
-      // Bottom bar should disappear
-      await waitFor(() => {
-        expect(screen.queryByTestId('streamsAppSettingsBottomBar')).not.toBeInTheDocument();
-      });
-
-      // Title should be reset to original value (empty)
-      expect(screen.getByTestId('streamMetadataFormTitleInput')).toHaveValue('');
     });
 
     it('does not render description field by default', () => {

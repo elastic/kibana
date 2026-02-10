@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
-  EuiText,
   EuiToolTip,
   EuiTourStep,
   useEuiTheme,
@@ -150,28 +149,14 @@ export function Wrapper({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem grow={false}>
-                    {Streams.ingest.all.GetResponse.is(definition) &&
-                    definition.stream.description ? (
+                    {Streams.ingest.all.GetResponse.is(definition) && definition.stream.description ? (
                       <EuiToolTip content={definition.stream.description}>
-                        {definition.stream.title ? (
-                          <span data-test-subj="streamTitle">{definition.stream.title}</span>
-                        ) : (
-                          <span data-test-subj="streamName">{streamId}</span>
-                        )}
+                        <span data-test-subj="streamName">{streamId}</span>
                       </EuiToolTip>
-                    ) : Streams.ingest.all.GetResponse.is(definition) && definition.stream.title ? (
-                      <span data-test-subj="streamTitle">{definition.stream.title}</span>
                     ) : (
                       <span data-test-subj="streamName">{streamId}</span>
                     )}
                   </EuiFlexItem>
-                  {Streams.ingest.all.GetResponse.is(definition) && definition.stream.title && (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued" data-test-subj="streamNameSubtitle">
-                        {streamId}
-                      </EuiText>
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">

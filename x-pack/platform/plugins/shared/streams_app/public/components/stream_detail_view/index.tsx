@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadgeGroup, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadgeGroup, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
@@ -19,7 +19,6 @@ import { StreamDetailAttachments } from '../stream_detail_attachments';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
-import { StreamTitle } from './title';
 import { StreamTags } from './tags';
 import { FeedbackButton } from '../feedback_button';
 
@@ -84,8 +83,6 @@ export function StreamDetailView() {
 
   const selectedTabObject = tabs?.[tab as StreamDetailTabName];
 
-  const hasTitle = Boolean(definition.stream.title);
-
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -110,11 +107,7 @@ export function StreamDetailView() {
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {hasTitle ? (
-                    <StreamTitle definition={definition} />
-                  ) : (
-                    <span data-test-subj="streamName">{key}</span>
-                  )}
+                  <span data-test-subj="streamName">{key}</span>
                   <EuiBadgeGroup gutterSize="s">
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
@@ -122,13 +115,6 @@ export function StreamDetailView() {
                   </EuiBadgeGroup>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {hasTitle && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued" data-test-subj="streamNameSubtitle">
-                    {key}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
             <FeedbackButton />
           </EuiFlexGroup>

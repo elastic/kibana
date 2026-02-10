@@ -8,7 +8,6 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -21,22 +20,6 @@ import React, { useCallback } from 'react';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { DescriptionGenerationControl } from '../../../stream_detail_systems/stream_description/description_generation_control';
 import { Row, RowMetadata } from './row';
-
-const STREAM_TITLE_LABEL = i18n.translate('xpack.streams.streamMetadataForm.title.label', {
-  defaultMessage: 'Title',
-});
-
-const STREAM_TITLE_HELP = i18n.translate('xpack.streams.streamMetadataForm.title.helpText', {
-  defaultMessage:
-    'A human-friendly title for this stream. This will be displayed prominently in the UI.',
-});
-
-const STREAM_TITLE_PLACEHOLDER = i18n.translate(
-  'xpack.streams.streamMetadataForm.title.placeholder',
-  {
-    defaultMessage: 'Enter a title for this stream',
-  }
-);
 
 const STREAM_TAGS_LABEL = i18n.translate('xpack.streams.streamMetadataForm.tags.label', {
   defaultMessage: 'Tags',
@@ -77,8 +60,6 @@ const STREAM_DESCRIPTION_PLACEHOLDER = i18n.translate(
 );
 
 export interface StreamMetadataFormProps {
-  title: string;
-  onTitleChange: (value: string) => void;
   tags: string[];
   onTagsChange: (tags: string[]) => void;
   description?: string;
@@ -98,8 +79,6 @@ export interface StreamMetadataFormProps {
 }
 
 export const StreamMetadataForm: React.FC<StreamMetadataFormProps> = ({
-  title,
-  onTitleChange,
   tags,
   onTagsChange,
   description,
@@ -141,24 +120,6 @@ export const StreamMetadataForm: React.FC<StreamMetadataFormProps> = ({
 
   return (
     <>
-      <Row
-        left={<RowMetadata label={STREAM_TITLE_LABEL} description={STREAM_TITLE_HELP} />}
-        right={
-          <EuiFormRow fullWidth>
-            <EuiFieldText
-              data-test-subj="streamMetadataFormTitleInput"
-              fullWidth
-              placeholder={STREAM_TITLE_PLACEHOLDER}
-              value={title}
-              onChange={(e) => onTitleChange(e.target.value)}
-              disabled={disabled || !canManage}
-            />
-          </EuiFormRow>
-        }
-      />
-
-      <EuiHorizontalRule margin="m" />
-
       <Row
         left={<RowMetadata label={STREAM_TAGS_LABEL} description={STREAM_TAGS_HELP} />}
         right={

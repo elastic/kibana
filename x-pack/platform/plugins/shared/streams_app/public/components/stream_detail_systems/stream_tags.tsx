@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertGetResponseIntoUpsertRequest, type Streams } from '@kbn/streams-schema';
+import { convertGetResponseIntoUpsertRequest, Streams } from '@kbn/streams-schema';
 import React, { useState, useCallback } from 'react';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
@@ -77,7 +77,7 @@ export const StreamTagsPanel: React.FC<StreamTagsPanelProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const updateStream = useUpdateStreams(definition.stream.name);
-  const canManage = definition.privileges.manage === true;
+  const canManage = Streams.ingest.all.GetResponse.is(definition) && definition.privileges.manage === true;
 
   const onStartEditing = useCallback(() => {
     setTags(definition.stream.tags ?? []);

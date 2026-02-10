@@ -22,7 +22,6 @@ export namespace BaseStream {
     name: string;
     description: string;
     updated_at: string;
-    title?: string;
     tags?: string[];
     /**
      * Child query streams that belong to this stream.
@@ -60,7 +59,6 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
     name: z.string(),
     description: z.string(),
     updated_at: z.string().datetime(),
-    title: z.string().optional(),
     tags: z.array(z.string()).optional(),
     query_streams: z
       .array(

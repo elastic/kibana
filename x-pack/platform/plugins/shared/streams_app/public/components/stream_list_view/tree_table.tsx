@@ -19,7 +19,6 @@ import {
   EuiButtonIcon,
   EuiTourStep,
   EuiBadge,
-  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -417,9 +416,7 @@ export function StreamsTreeTable({
                             }}
                           >
                             <EuiHighlight search={searchQuery?.text ?? ''}>
-                              {Streams.ingest.all.Definition.is(item.stream) && item.stream.title
-                                ? item.stream.title
-                                : item.stream.name}
+                              {item.stream.name}
                             </EuiHighlight>
                           </EuiLink>
                         </EuiFlexItem>
@@ -430,15 +427,6 @@ export function StreamsTreeTable({
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {Streams.ingest.all.Definition.is(item.stream) && item.stream.title && (
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued" data-test-subj="streamNameSubtitle">
-                          <EuiHighlight search={searchQuery?.text ?? ''}>
-                            {item.stream.name}
-                          </EuiHighlight>
-                        </EuiText>
-                      </EuiFlexItem>
-                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 {Streams.ingest.all.Definition.is(item.stream) &&

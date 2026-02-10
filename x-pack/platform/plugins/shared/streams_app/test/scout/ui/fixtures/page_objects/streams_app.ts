@@ -1143,27 +1143,9 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
-  // Stream title utility methods (header)
+  // Stream name utility methods (header)
   async expectStreamName(name: string) {
     await expect(this.page.getByTestId('streamName')).toHaveText(name);
-  }
-
-  async expectStreamNameSubtitle(name: string) {
-    await expect(this.page.getByTestId('streamNameSubtitle')).toContainText(name);
-  }
-
-  async expectStreamNameSubtitleHidden() {
-    await expect(this.page.getByTestId('streamNameSubtitle')).toBeHidden();
-  }
-
-  async editStreamTitleInHeader(title: string) {
-    // Click to edit the title inline
-    await this.page.getByTestId('streamTitleEdit').click();
-    // Clear and type new title
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.type(title);
-    // Save by clicking the save button
-    await this.page.locator('[data-test-subj="streamTitleEdit"] button[type="submit"]').click();
   }
 
   // Stream tags utility methods (header)
@@ -1195,21 +1177,6 @@ export class StreamsApp {
   }
 
   // Stream metadata form utility methods (unified form in advanced settings)
-  // Title is always editable - no edit button needed
-  async fillStreamMetadataTitle(title: string) {
-    const input = this.page.getByTestId('streamMetadataFormTitleInput');
-    await input.clear();
-    await input.fill(title);
-  }
-
-  async expectStreamMetadataTitle(title: string) {
-    await expect(this.page.getByTestId('streamMetadataFormTitleInput')).toHaveValue(title);
-  }
-
-  async expectStreamMetadataTitleEmpty() {
-    await expect(this.page.getByTestId('streamMetadataFormTitleInput')).toHaveValue('');
-  }
-
   // Tags are always editable - no edit button needed
   async addStreamMetadataTag(tag: string) {
     const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
@@ -1248,34 +1215,6 @@ export class StreamsApp {
   }
 
   // Legacy methods (kept for backwards compatibility with any other tests)
-  // Stream title utility methods (advanced settings panel)
-  async clickStreamTitlePanelEdit() {
-    await this.page.getByTestId('streamTitlePanelEditButton').click();
-  }
-
-  async fillStreamTitlePanelInput(title: string) {
-    await this.page.getByTestId('streamTitlePanelInput').clear();
-    await this.page.getByTestId('streamTitlePanelInput').fill(title);
-  }
-
-  async saveStreamTitlePanel() {
-    await this.page.getByTestId('streamTitlePanelSaveButton').click();
-  }
-
-  async cancelStreamTitlePanel() {
-    await this.page.getByTestId('streamTitlePanelCancelButton').click();
-  }
-
-  async expectStreamTitlePanelDisplay(title: string) {
-    await expect(this.page.getByTestId('streamTitlePanelDisplay')).toHaveText(title);
-  }
-
-  async expectStreamTitlePanelEmpty() {
-    const display = this.page.getByTestId('streamTitlePanelDisplay');
-    // When no title, it shows "No title set"
-    await expect(display).toContainText('No title set');
-  }
-
   // Stream tags utility methods (advanced settings panel)
   async clickStreamTagsPanelEdit() {
     await this.page.getByTestId('streamTagsPanelEditButton').click();

@@ -54,12 +54,11 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
 
-    it('preserves title and tags in classic streams', () => {
+    it('preserves tags in classic streams', () => {
       const request: Streams.ClassicStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
           description: 'Test description',
-          title: 'My Custom Title',
           tags: ['nginx', 'production'],
           ingest: {
             lifecycle: { inherit: {} },
@@ -74,16 +73,14 @@ describe('Converter Helpers', () => {
       const definition = convertUpsertRequestIntoDefinition('classic-stream', request);
 
       expect(Streams.ClassicStream.Definition.is(definition)).toEqual(true);
-      expect(definition.title).toEqual('My Custom Title');
       expect(definition.tags).toEqual(['nginx', 'production']);
     });
 
-    it('preserves title and tags in wired streams', () => {
+    it('preserves tags in wired streams', () => {
       const request: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
           description: 'Test description',
-          title: 'Production Logs',
           tags: ['logs', 'production', 'nginx'],
           ingest: {
             lifecycle: { inherit: {} },
@@ -98,7 +95,6 @@ describe('Converter Helpers', () => {
       const definition = convertUpsertRequestIntoDefinition('wired-stream', request);
 
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
-      expect(definition.title).toEqual('Production Logs');
       expect(definition.tags).toEqual(['logs', 'production', 'nginx']);
     });
 
@@ -209,12 +205,11 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
     });
 
-    it('preserves title and tags when converting classic streams', () => {
+    it('preserves tags when converting classic streams', () => {
       const getResponse: Streams.ClassicStream.GetResponse = {
         stream: {
           name: 'classic-stream',
           description: 'Test description',
-          title: 'My Classic Stream Title',
           tags: ['classic', 'test'],
           updated_at: new Date().toISOString(),
           ingest: {
@@ -249,16 +244,14 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.ClassicStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-      expect(upsertRequest.stream.title).toEqual('My Classic Stream Title');
       expect(upsertRequest.stream.tags).toEqual(['classic', 'test']);
     });
 
-    it('preserves title and tags when converting wired streams', () => {
+    it('preserves tags when converting wired streams', () => {
       const getResponse: Streams.WiredStream.GetResponse = {
         stream: {
           name: 'wired-stream',
           description: 'Test description',
-          title: 'Production NGINX Logs',
           tags: ['nginx', 'production', 'access-logs'],
           updated_at: new Date().toISOString(),
           ingest: {
@@ -298,7 +291,6 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-      expect(upsertRequest.stream.title).toEqual('Production NGINX Logs');
       expect(upsertRequest.stream.tags).toEqual(['nginx', 'production', 'access-logs']);
     });
 
