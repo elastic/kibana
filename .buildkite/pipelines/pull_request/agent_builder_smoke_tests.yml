@@ -22,6 +22,10 @@ steps:
           spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
         artifact_paths:
           - 'target/eis_models.json'
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
 
       - command: |
           mkdir -p target

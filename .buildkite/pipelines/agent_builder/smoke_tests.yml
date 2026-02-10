@@ -35,6 +35,10 @@ steps:
       preemptible: true
     artifact_paths:
       - 'target/eis_models.json'
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - wait
 
