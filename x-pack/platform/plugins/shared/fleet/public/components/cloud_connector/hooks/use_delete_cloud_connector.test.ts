@@ -126,10 +126,9 @@ describe('useDeleteCloudConnector', () => {
     mockHttp.delete.mockResolvedValue({ id: 'connector-123' });
     const onSuccess = jest.fn();
 
-    const { result } = renderHook(
-      () => useDeleteCloudConnector('connector-123', onSuccess),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useDeleteCloudConnector('connector-123', onSuccess), {
+      wrapper,
+    });
 
     act(() => {
       result.current.mutate({});

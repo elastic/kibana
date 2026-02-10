@@ -118,10 +118,9 @@ describe('useUpdateCloudConnector', () => {
     mockHttp.put.mockResolvedValue({ item: updatedConnector });
     const onSuccess = jest.fn();
 
-    const { result } = renderHook(
-      () => useUpdateCloudConnector('connector-123', onSuccess),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useUpdateCloudConnector('connector-123', onSuccess), {
+      wrapper,
+    });
 
     act(() => {
       result.current.mutate({ name: 'Updated Name' });
