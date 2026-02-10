@@ -24,6 +24,8 @@ interface CreateClientOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
+  /** Promise resolving per-space salt for deterministic tokenization. */
+  saltPromise?: Promise<string | undefined>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -35,8 +37,16 @@ export function createClient(options: BoundCreateClientOptions): BoundInferenceC
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger, anonymizationRulesPromise, esClient, regexWorker, callbacks } =
-    options;
+  const {
+    actions,
+    request,
+    logger,
+    anonymizationRulesPromise,
+    esClient,
+    regexWorker,
+    callbacks,
+    saltPromise,
+  } = options;
   const client = createInferenceClient({
     request,
     actions,
@@ -45,6 +55,7 @@ export function createClient(
     regexWorker,
     esClient,
     callbacks,
+    saltPromise,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

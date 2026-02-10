@@ -11,6 +11,7 @@ import type { InferenceServerStart, InferenceStartDependencies } from '../types'
 import { registerChatCompleteRoute } from './chat_complete';
 import { registerConnectorsRoute } from './connectors';
 import { registerPromptRoute } from './prompt';
+import { registerReplacementsRoutes } from '../chat_complete/anonymization/replacements/replacements_routes';
 
 export const registerRoutes = ({
   router,
@@ -24,4 +25,5 @@ export const registerRoutes = ({
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
   registerConnectorsRoute({ router, coreSetup });
+  registerReplacementsRoutes(router, logger.get('replacements'));
 };

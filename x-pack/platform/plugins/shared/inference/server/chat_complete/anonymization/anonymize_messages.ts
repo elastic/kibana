@@ -18,12 +18,14 @@ export async function anonymizeMessages({
   anonymizationRules,
   regexWorker,
   esClient,
+  salt,
 }: {
   system?: string | undefined;
   messages: Message[];
   anonymizationRules: AnonymizationRule[];
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  salt?: string;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
   if (!rules.length) {
@@ -45,6 +47,7 @@ export async function anonymizeMessages({
     anonymizationRules: rules,
     regexWorker,
     esClient,
+    salt,
   });
 
   const anonymizedMessages = messages.map((original, index) => {

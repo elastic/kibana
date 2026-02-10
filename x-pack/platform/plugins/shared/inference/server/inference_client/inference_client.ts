@@ -29,6 +29,7 @@ export function createInferenceClient({
   regexWorker,
   esClient,
   callbacks,
+  saltPromise,
 }: {
   request: KibanaRequest;
   logger: Logger;
@@ -37,6 +38,7 @@ export function createInferenceClient({
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
+  saltPromise?: Promise<string | undefined>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -48,6 +50,7 @@ export function createInferenceClient({
     regexWorker,
     esClient,
     callbackManager,
+    saltPromise,
   });
 
   const chatComplete = createChatCompleteApi({

@@ -46,6 +46,8 @@ interface CreateChatCompleteApiOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   callbackManager?: InferenceCallbackManager;
+  /** Promise resolving per-space salt for deterministic tokenization (from AnonymizationPolicyService). */
+  saltPromise?: Promise<string | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -81,6 +83,7 @@ export function createChatCompleteCallbackApi({
   regexWorker,
   esClient,
   callbackManager,
+  saltPromise,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -96,10 +99,11 @@ export function createChatCompleteCallbackApi({
       forkJoin({
         executor: from(getInferenceExecutor({ connectorId, request, actions })),
         anonymizationRules: from(anonymizationRulesPromise),
+        salt: from(saltPromise ?? Promise.resolve(undefined)),
       })
     )
       .pipe(
-        switchMap(({ executor, anonymizationRules }) => {
+        switchMap(({ executor, anonymizationRules, salt }) => {
           const {
             system,
             messages: givenMessages,
@@ -131,6 +135,7 @@ export function createChatCompleteCallbackApi({
               anonymizationRules,
               regexWorker,
               esClient,
+              salt: salt ?? undefined,
             })
           ).pipe(
             switchMap((anonymization) => {

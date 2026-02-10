@@ -19,11 +19,13 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   anonymizationRules,
   regexWorker,
   esClient,
+  salt,
 }: {
   input: T[];
   anonymizationRules: AnonymizationRule[];
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  salt?: string;
 }): Promise<AnonymizationState>;
 
 export async function anonymizeRecords({
@@ -31,11 +33,13 @@ export async function anonymizeRecords({
   anonymizationRules,
   regexWorker,
   esClient,
+  salt,
 }: {
   input: Array<Record<string, string>>;
   anonymizationRules: AnonymizationRule[];
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  salt?: string;
 }): Promise<AnonymizationState> {
   let state: AnonymizationState = {
     records: input.concat(),
@@ -58,6 +62,7 @@ export async function anonymizeRecords({
     detectedMatches: detectedRegexEntities,
     state,
     rules: regexRules,
+    salt,
   });
 
   if (!nerRules.length) {
