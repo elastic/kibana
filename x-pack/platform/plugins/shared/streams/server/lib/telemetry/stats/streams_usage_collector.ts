@@ -33,9 +33,7 @@ function createFetchFunction(logger: Logger, getReader: () => Promise<StreamsUsa
         wired_streams: { count: wiredStreamsCount },
       };
     } catch (error) {
-      logger.error(
-        `Failed to collect Streams telemetry data: ${getErrorMessage(error)}`
-      );
+      logger.error(`Failed to collect Streams telemetry data: ${getErrorMessage(error)}`);
       throw error;
     }
   };
