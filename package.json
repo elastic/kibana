@@ -1418,7 +1418,7 @@
     "puppeteer": "24.32.0",
     "query-string": "6.13.2",
     "rbush": "4.0.1",
-    "re2js": "0.4.3",
+    "re2js": "1.2.1",
     "react": "18.2.0",
     "react-diff-view": "3.3.1",
     "react-dom": "18.2.0",
