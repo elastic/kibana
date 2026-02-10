@@ -761,19 +761,17 @@ describe('Trusted apps form', () => {
 
   describe('and a wildcard value is used with the IS operator', () => {
     beforeEach(() => render());
-    // todo
-    it.only('shows warning callout and help text warning if the field is PATH', async () => {
+    it('shows warning callout and help text warning if the field is PATH', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
       };
       latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
+      
+      act(() => {
+        fireEvent.blur(getConditionValue(getCondition()));
+      })
 
-      /*setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
-      rerenderWithLatestProps();*/
-    
-    
-      console.log(renderResult.container.innerHTML);
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
     });
