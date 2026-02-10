@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
@@ -78,16 +78,13 @@
     "@kbn/unified-field-list",
     "@kbn/content-management-utils",
     "@kbn/core-lifecycle-browser",
-    "@kbn/presentation-containers",
     "@kbn/core-ui-settings-browser",
     "@kbn/file-upload-common",
     "@kbn/charts-theme",
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
-    "@kbn/presentation-publishing-schemas",
+    "@kbn/presentation-publishing-schemas"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
