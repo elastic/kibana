@@ -75,10 +75,6 @@ describe('user activity injected context', () => {
       return toolkit.authenticated({ state: authenticatedUser });
     });
 
-    server
-      .getStartContract()
-      .setRedactedSessionIdGetter(() => Promise.resolve('some-redacted-sid'));
-
     const router = httpSetup.createRouter('');
     router.post(
       {
@@ -101,7 +97,8 @@ describe('user activity injected context', () => {
       }
     );
 
-    await server.start();
+    const httpStart = await server.start();
+    httpStart.setRedactedSessionIdGetter(() => Promise.resolve('some-redacted-sid'));
 
     const referrer = 'https://example.com/referrer';
     await supertest(httpSetup.server.listener)
