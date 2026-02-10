@@ -10,6 +10,12 @@ import type { TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * TODO: Remove before merging on main
+   */
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
