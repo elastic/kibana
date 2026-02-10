@@ -181,5 +181,4 @@ describe('NavLinksService', () => {
       expect(start.has('phony')).toBe(false);
     });
   });
-
 });

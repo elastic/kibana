@@ -109,5 +109,4 @@ export interface ChromeNavLinks {
    * @param id
    */
   has(id: string): boolean;
-
 }
