@@ -18,6 +18,11 @@ import { bindTasks } from './setup/bind_tasks';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    ui: {
+      enabled: true,
+    },
+  },
 };
 
 export const module = new ContainerModule((options) => {
