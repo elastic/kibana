@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
-import type { DocumentProfileProvider } from '../../../profiles';
-import { DocumentType, SolutionType } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
-import { SECURITY_PROFILE_ID } from '../constants';
-import * as i18n from '../translations';
-import type { SecurityProfileProviderFactory } from '../types';
-import { AlertEventOverviewLazy } from '../components';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EnhancedAlertEventOverviewLazy } from './components';
+import { SECURITY_PROFILE_ID } from './constants';
+import { extendProfileProvider } from '../extend_profile_provider';
+import { createSecurityDocumentProfileProvider } from './security_document_profile';
+import type { ProfileProviderServices } from '../profile_provider_services';
+import * as i18n from './translations';
 
-export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
-  DocumentProfileProvider
-> = (_services: ProfileProviderServices) => {
-  return {
-    profileId: SECURITY_PROFILE_ID.document,
+export const createSecurityDocumentProfileProviders = (
+  providerServices: ProfileProviderServices
+) => {
+  const baseProvider = createSecurityDocumentProfileProvider(providerServices);
+  const enhancedProvider = extendProfileProvider(baseProvider, {
+    profileId: SECURITY_PROFILE_ID.enhanced_document,
+    isExperimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
@@ -34,7 +35,7 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              render: (props) => <AlertEventOverviewLazy {...props} />,
+              render: (props) => <EnhancedAlertEventOverviewLazy {...props} />,
             });
 
             return prevDocViewer.docViewsRegistry(registry);
@@ -42,17 +43,6 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
         };
       },
     },
-    resolve: ({ rootContext }) => {
-      if (rootContext.solutionType !== SolutionType.Security) {
-        return { isMatch: false };
-      }
-
-      return {
-        isMatch: true,
-        context: {
-          type: DocumentType.Default,
-        },
-      };
-    },
-  };
+  });
+  return [enhancedProvider, baseProvider];
 };
