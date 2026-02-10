@@ -57,7 +57,7 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
     private readonly executionContext?: KibanaExecutionContext,
-    private readonly projectRouting?: ProjectRouting
+    public readonly projectRouting?: ProjectRouting
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -122,6 +122,67 @@ export class SearchAPI {
     if (this.inspectorAdapters) {
       this.inspectorAdapters.requests.reset();
     }
+  }
+
+  searchEsql(
+    esqlRequests: Array<{
+      query: string;
+      filter?: unknown;
+      params?: Array<Record<string, unknown>>;
+      dropNullColumns?: boolean;
+      name: string;
+    }>
+  ) {
+    const { search } = this.dependencies;
+    const requestResponders: any = {};
+
+    return combineLatest(
+      esqlRequests.map((request) => {
+        const { name: requestId, ...restRequest } = request;
+
+        return from(Promise.resolve()).pipe(
+          tap(() => {
+            /** inspect request data **/
+            if (this.inspectorAdapters) {
+              requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
+                ...request,
+                searchSessionId: this.searchSessionId,
+              });
+              requestResponders[requestId].json(restRequest);
+            }
+          }),
+          switchMap(() => {
+            return search
+              .search(
+                { params: restRequest },
+                {
+                  strategy: 'esql_async',
+                  abortSignal: this.abortSignal,
+                  sessionId: this.searchSessionId,
+                  executionContext: this.executionContext,
+                  projectRouting: this.projectRouting,
+                }
+              )
+              .pipe(
+                tap(
+                  (data) => this.inspectSearchResult(data, requestResponders[requestId]),
+                  (err) =>
+                    this.inspectSearchResult(
+                      {
+                        rawResponse: err?.err,
+                      },
+                      requestResponders[requestId]
+                    )
+                ),
+                map((data) => ({
+                  name: requestId,
+                  rawResponse: structuredClone(data.rawResponse),
+                }))
+              );
+          })
+        );
+      })
+    );
   }
 
   private inspectSearchResult(response: IEsSearchResponse, requestResponder: RequestResponder) {

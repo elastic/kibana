@@ -25,6 +25,8 @@
           "{}"
         ],
         "path": "x-pack/platform/plugins/shared/entity_manager/common/config.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -992,6 +994,8 @@
           "; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1006,6 +1010,8 @@
       "label": "EntityManagerServerPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+      "lineNumber": 35,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1020,6 +1026,8 @@
       "label": "EntityManagerServerPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1038,6 +1046,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1049,6 +1059,8 @@
               "label": "options",
               "description": [],
               "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+              "lineNumber": 37,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -1064,6 +1076,8 @@
                     "<unknown, unknown, unknown, any>"
                   ],
                   "path": "x-pack/platform/plugins/shared/entity_manager/server/plugin.ts",
+                  "lineNumber": 37,
+                  "columnNumber": 32,
                   "deprecated": false,
                   "trackAdoption": false
                 }

@@ -10,7 +10,6 @@
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
-import type { QueryStringInputProps } from './query_string_input';
 
 const Fallback = () => <div />;
 
@@ -26,16 +25,3 @@ export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
     <LazyQueryBarTopRow {...(props as unknown as QueryBarTopRowProps<AggregateQuery>)} />
   </React.Suspense>
 );
-
-const LazyQueryStringInputUI = React.lazy(async () => {
-  const { QueryStringInput } = await import('../ui_module');
-  return { default: QueryStringInput };
-});
-
-export const QueryStringInput = (props: QueryStringInputProps) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyQueryStringInputUI {...props} />
-  </React.Suspense>
-);
-
-export type { QueryStringInputProps };

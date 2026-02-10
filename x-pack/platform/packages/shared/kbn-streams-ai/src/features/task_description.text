@@ -1,61 +1,154 @@
-Your task is to identify systems in a data stream. The single data stream may contain multiple systems. Documents that do not match any identified system will be rendered into their own separate cluster.
+Task: Create a system prompt for an LLM to extract "features" from log data.
 
-**System definition**:
+## What are Features?
+Features are stable facts about real system entities (environment, deployment, agent, runtime, etc.) that are explicitly supported by log evidence. 
 
-A "System" is a _single, specific_ software component, application, or service that represents a distinct informational stream. It's important to understand that while all systems are entities, not all entities are systems. For example, a single, specific device or host, on its own, is an entity but not a system. However, a specific, consistent stream of logs *from* that host (e.g., its kernel logs) could be defined as a system if you need to isolate it.
+**Required BaseFeature schema fields** (ALL must be present in every feature):
+- `type` (string): "infrastructure", "technology", or "dependency"
+- `name` (string): Generic name in snake_case
+- `description` (string): A summary of what this feature represents
+- `value` (object): Stable, low-cardinality properties for deduplication (e.g., cloud provider, library name)
+- `confidence` (number): 0-100 score
+- `evidence` (array of strings): Supporting evidence from logs
+- `tags` (array of strings): Descriptive tags
+- `meta` (object): High-cardinality or variable data (e.g., availability zones, API endpoints), can be empty {}
 
-Grouping multiple distinct systems (e.g., all databases) into one definition is incorrect. Think of it as the most granular source you want to isolate. Systems are not exclusive; a single document can match the definitions of multiple systems.
+## Feature Types
+- **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking, hardware
+- **technology**: Programming languages, web servers, databases, libraries, frameworks (e.g., nginx, postgresql, log4j, React)
+- **dependency**: Relationships between systems (service-to-service calls, database connections, API integrations)
 
-Some examples:
-*   **Specific infrastructure services**: A load balancer (e.g., `lb-edge`), a stream processing unit (e.g., `stream-processor-alpha`), a central authentication service (e.g., `authn-core`), a distributed cache (`dist-cache-main`), a message broker (`msg-broker-prod`), a web server (`web-frontend-pool`), an application server (`app-server-backend`).
-*   **Specific application logs**:
-    *   `order-processing-svc` (a microservice, treated as one system).
-    *   `inventory-update-worker` (a background job, treated as another distinct system).
-    *   `legacy-reporting-system` (a monolithic application, treated as one system).
-*   **Specific os/host log types (if distinguishable and needing separation)**: Potentially `kernel-logs-compute-node-123`, `auth-events-fileserver-abc` if they have distinct, consistent characteristics and represent different informational streams. Often, a field like `host.id` or `system.source_type` will help distinguish these.
-*   **Specific Cloud Service Logs**: `cloud-provider-trails` (as one system), `blob-storage-access-events` (as another, distinct system if its logs are different), `serverless-function-invocations`.
-*   **Specific Network Device Logs**: `firewall-dmz-primary` (as one system), `vpn-gateway-regional` (as another).
-*   **Specific Databases**: `document-store-prod` (for its general logs, as one system), `timeseries-db-metrics` (for its logs, as another). If you had two different instances of the same database type (e.g., two separate `analytics-db` instances) with vastly different log structures or purposes that are identifiable, they _could_ even be separate systems.
+## Consolidation Strategy
+- **Consolidate** when properties belong to the same entity and appear together in logs
+  - Example: Consolidate cloud provider with other stable deployment identifiers in one feature (see Value vs Meta rules for what belongs in `value` vs `meta`)
+  - Example: `{name: "cloud_deployment", value: {provider: "aws"}, meta: {regions: ["eu-west-1"]}}`
+- **Separate** distinct technologies even if related
+  - Example: Separate features for nginx, postgresql, redis (not one combined feature)
 
-**The guiding principle is: if two data sources have different schemas or represent fundamentally different operational concerns, they are different Systems and should be identified separately.**
+## Naming Conventions
+- Use **generic names** with specific values in the value object
+  - Good: `{name: "programming_language", value: {language: "java", version: "11"}}`
+  - Bad: `{name: "java_runtime", value: {version: "11"}}`
+- Use snake_case for feature names
+- Keep names descriptive but concise
 
-You have access to a `validate_systems` tool to test your system definitions. It allows you to check how well your defined filters identify coherent groups of documents. The process is iterative:
+## Value vs Meta Field Usage
+The `value` field should contain **stable, low-cardinality properties** that enable feature deduplication. High-cardinality or highly variable data should go in `meta` instead.
 
-1.  Define a set of systems, each with a `name` and a `filter`.
-2.  Call `validate_systems` to see the results. It will analyze and cluster the documents that match each of your system filters, as well as any documents that do not match any filter.
-3.  The clustering results give you a *hint* about the cohesiveness of your system definitions. A large number of clusters within a system you've defined suggests it may be too broad and could be broken down further.
-4.  Refine your system definitions and repeat the process until you have a low number of clusters per-system, indicating that your filters are accurately identifying specific, logical systems.
+**Use `value` for**:
+- Cloud provider name (aws, gcp, azure)
+- Programming language and major version
+- Database type (postgresql, mysql)
+- Service names in dependencies
 
+**Heuristics**:
+- Prefer `value` for categorical properties that are expected to have a small set of possible values across many deployments (e.g., provider, runtime, db type).
+- Prefer `meta` for identifiers and “instance-like” values (IDs, hostnames, pod/container names, IPs, URLs/paths, trace/request IDs).
 
-/***************************************************************
-*
-*   For the prompt generating LLM:
-*   
-*   Include examples of how _not_ to cluster (including in the
-*   reasoning examples). E.g., too broad filters based on
-*   initial clustering hints that are too coarse, or vice versa.
-*   Emphasize that clustering is a hint.
-*
-***************************************************************/
+**Use `meta` for**:
+- Availability zones/regions (high cardinality across deployments)
+- Specific API endpoints or HTTP operations (many possible values)
+- Instance IDs, pod names, container IDs
+- Non-semver labels and build metadata attached to versions (e.g., distro codenames, edition labels, build hashes)
 
-Once you are satisfied with the identified systems, you must first call `complete()`. After that, you will be asked to call `finalize_systems` to complete the task.
+**Example**: For a REST API dependency:
+- `value: {source: "api-service", target: "user-service"}` (stable, dedupable)
+- `meta: {endpoints: ["/users", "/users/:id", "/users/:id/profile"]}` (high cardinality)
 
-**System Definition Fields for `validate_systems`**:
-*   `name`: An alphanumerical name for the system (dashes are allowed).
-*   `filter`: A condition that identifies documents belonging to the system. The schema for this condition is referenced below as `condition_schema`.
+**Conflict & cardinality rules**:
+- If multiple values are observed for the same property (e.g., multiple versions), prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` along with evidence.
+- Avoid emitting separate features that differ only by high-cardinality metadata. Merge them into one feature and store the varying details in `meta`.
 
-/***************************************************************
-*
-*   For the prompt generating LLM:
-*   
-*   Reference the schema below using `{{{condition_schema}}}` in
-*   a section at the end called "System variables".
-*   Mustache will be used to render it into the system prompt.
-*
-***************************************************************/
+## Inference Rules
+- Allow **one-level inference** from strong patterns with lower confidence
+  - Example: "NullPointerException" in logs → infer `programming_language: java` with confidence 40-60
+  - Must tag inferred features with "inferred" tag and explain the inference briefly in `meta.notes`
+- Accept features with confidence ≥ 30 if evidence supports them
+- Extract version numbers when available (important for CVE/vulnerability analysis)
+- **Version formatting**:
+  - Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
+  - Strip leading `v` and surrounding text; keep only the numeric portion when possible
+  - If the version contains extra labels (LTS, Enterprise, codenames, build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
+  - Example: `attributes.host.os.version: 20.04.6 LTS (Focal Fossa)` → record as `version: "20.04.6"`
+  - Remove codenames, release names, edition labels (LTS, Enterprise, etc.) from version values
 
-`condition_schema`:
+## Confidence Scoring
+- 90-100: Explicit, unambiguous evidence
+- 70-89: Strong patterns with multiple corroborating signals
+- 50-69: Clear indicators with some ambiguity
+- 30-49: Weak inference from patterns (tag as "inferred")
 
-```json
-{"openapi":"3.0.0","info":{"title":"Condition API Specification","version":"1.0.0","description":"OpenAPI specification derived from a TypeScript file defining a condition-based filtering language."},"components":{"schemas":{"StringOrNumberOrBoolean":{"description":"A value that can be a string, a number, or a boolean.","oneOf":[{"type":"string"},{"type":"number"},{"type":"boolean"}]},"RangeCondition":{"type":"object","description":"Defines a numeric or date range.","properties":{"gt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"}},"additionalProperties":false},"ShorthandBinaryFilterCondition":{"type":"object","description":"A filter condition that compares a field to a value using a binary operator. It must contain 'field' and at least one operator.","properties":{"field":{"type":"string"},"eq":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"neq":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"lte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gt":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"gte":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"contains":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"startsWith":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"endsWith":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"},"range":{"$ref":"#/components/schemas/RangeCondition"}},"required":["field"],"anyOf":[{"required":["eq"]},{"required":["neq"]},{"required":["lt"]},{"required":["lte"]},{"required":["gt"]},{"required":["gte"]},{"required":["contains"]},{"required":["startsWith"]},{"required":["endsWith"]},{"required":["range"]}]},"ShorthandUnaryFilterCondition":{"type":"object","description":"A filter condition that checks for the existence of a field.","properties":{"field":{"type":"string"},"exists":{"type":"boolean"}},"required":["field","exists"]},"AndCondition":{"type":"object","description":"A condition that is true if all of its sub-conditions are true.","properties":{"and":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["and"]},"OrCondition":{"type":"object","description":"A condition that is true if any of its sub-conditions are true.","properties":{"or":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["or"]},"NotCondition":{"type":"object","description":"A condition that is true if its sub-condition is false.","properties":{"not":{"$ref":"#/components/schemas/Condition"}},"required":["not"]},"AlwaysCondition":{"type":"object","description":"A condition that is always true.","properties":{"always":{"type":"object","description":"An empty object.","additionalProperties":false}},"required":["always"]},"NeverCondition":{"type":"object","description":"A condition that is always false.","properties":{"never":{"type":"object","description":"An empty object.","additionalProperties":false}},"required":["never"]},"Condition":{"description":"Represents a single condition or a boolean combination of other conditions.","oneOf":[{"$ref":"#/components/schemas/ShorthandBinaryFilterCondition"},{"$ref":"#/components/schemas/ShorthandUnaryFilterCondition"},{"$ref":"#/components/schemas/AndCondition"},{"$ref":"#/components/schemas/OrCondition"},{"$ref":"#/components/schemas/NotCondition"},{"$ref":"#/components/schemas/NeverCondition"},{"$ref":"#/components/schemas/AlwaysCondition"}]}}}}
-```
+## Evidence Requirements
+- Provide specific examples from logs (prefer `field.path=value` style; otherwise short direct quotes)
+- Multiple pieces of evidence strengthen confidence
+- Evidence must support the feature claim
+
+**Evidence formatting rules**:
+- Keep each evidence string short and specific; prefer stable field paths and values when present.
+- Provide 2–5 evidence strings per feature (merge/aggregate instead of duplicating many similar lines).
+
+## Purpose & Downstream Use
+These features will be used as input for another LLM workflow that generates:
+- Queries for significant events
+- Error pattern detection
+- CVE and vulnerability queries
+This is why extracting libraries/frameworks (like log4j) and their versions is important—the downstream system needs to know what technologies are present to generate relevant security and error queries.
+
+## Input Context
+The LLM receives:
+- sample_documents: Sample log documents (typically 20 examples)
+
+## Output Format
+Return features following the BaseFeature schema structure using the finalize_features tool.
+
+**Output quality requirements**:
+- Deduplicate: do not output multiple features with the same (`type`, `name`, `value`) tuple; merge evidence/tags/meta instead.
+- Prefer fewer, higher-confidence features over many speculative ones.
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
+
+**Dependency feature anti-spam rules**:
+- Only emit a dependency feature when the logs contain explicit evidence of a relationship (e.g., clear client→server/service or service→database connection).
+- Aggregate many endpoints/operations under a single dependency feature using `meta.endpoints` and cap the list (e.g., max 10; summarize additional entries).
+
+## Example Format Requirements
+
+**CRITICAL**: All examples MUST include ALL required schema fields:
+- `type` (string)
+- `name` (string) 
+- `description` (string) - A summary of what the feature represents
+- `value` (object)
+- `confidence` (number)
+- `evidence` (array)
+- `tags` (array)
+- `meta` (object) - Can be empty {} or contain relevant metadata
+
+Use **full JSON format in code blocks** for examples (not inline shorthand). Each example must be complete and valid.
+
+## Examples to Include
+1. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
+2. Infrastructure feature showing value vs meta (e.g., cloud provider in value, region/availability zones in meta)
+3. Technology feature with version (e.g., log4j with version number, include security note in meta)
+4. Inferred feature with lower confidence (e.g., Java inferred from exceptions, explain inference in meta.notes)
+5. Dependency feature showing value vs meta + aggregation/capping (e.g., stable service names in value, many API endpoints in meta.endpoints)
+
+## Prompt Structure
+The prompt should follow this structure:
+1. Opening paragraph: Define features, list all required fields (type, name, description, value, confidence, evidence, tags, meta), state downstream purpose
+2. Feature Types section: List the three types (infrastructure, technology, dependency) with example names
+3. Consolidation Rules section: When to consolidate vs separate with examples
+4. Naming Conventions section: Generic names with good/bad examples using checkmarks
+5. Value vs Meta Fields section: Explain stable/low-cardinality in value, high-cardinality in meta, with examples
+6. Inference & Confidence section: One-level inference rules with examples, confidence scoring bands
+7. Evidence & Versions section: Evidence requirements and version formatting rules with examples
+8. Examples section: 5 complete examples with ALL schema fields in code blocks
+9. Closing: "Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results."
+
+## Style Requirements
+- Keep prompt concise but complete
+- Use clear, directive language (imperatives: "Extract", "Consolidate", "Tag")
+- Use markdown headers (##) for major sections
+- Provide concrete examples with ALL schema fields included
+- Emphasize practical application for query generation
+- Format examples as complete JSON objects in code blocks (triple backticks)
+- Include both empty meta objects {} and populated ones to show flexibility
+- Every example must have a descriptive title like "Example 1 - Infrastructure with clean version"

@@ -22,6 +22,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -37,6 +39,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -65,6 +69,8 @@
           "<string>, \"isLoading\" | \"isInvalid\">>"
         ],
         "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +92,8 @@
               "<Record<string, unknown>, Record<string, unknown>>[]"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +108,8 @@
               "(connectorId: string) => void"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -114,6 +124,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+                "lineNumber": 29,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -132,6 +144,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +160,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -162,6 +178,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -176,6 +194,8 @@
               "\"default\" | \"combobox\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,6 +210,8 @@
               "SettingsStart"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

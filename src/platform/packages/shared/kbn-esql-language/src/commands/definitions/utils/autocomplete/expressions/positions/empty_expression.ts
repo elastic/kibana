@@ -29,9 +29,12 @@ import {
   allStarConstant,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
+  buildAddValuePlaceholder,
+  findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
+// functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
 /** Handles suggestions when starting a new expression (empty position) */
@@ -237,8 +240,8 @@ async function buildFieldAndFunctionSuggestions(
   if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
-      ignoredFunctions: functionParamContext.functionsToIgnore || [],
       addComma: config.shouldAddComma,
+      excludeParentFunctions: true,
     });
   }
 
@@ -274,8 +277,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     if (suggestFunctions) {
       builder.addFunctions({
         types: acceptedTypes,
-        ignoredFunctions: [],
-        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 
@@ -429,5 +430,18 @@ function buildConstantOnlyLiteralSuggestions(
     constantGeneratingOnly: true,
   });
 
-  return builder.build();
+  const suggestions = builder.build();
+
+  // Add placeholder hint ONLY for explicit constantOnly parameters
+  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+
+  if (hasExplicitConstantOnly) {
+    const placeholderType = findConstantPlaceholderType(types);
+
+    if (placeholderType) {
+      suggestions.push(buildAddValuePlaceholder(placeholderType));
+    }
+  }
+
+  return suggestions;
 }

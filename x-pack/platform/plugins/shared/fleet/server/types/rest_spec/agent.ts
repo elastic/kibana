@@ -205,7 +205,7 @@ export const AgentResponseSchema = schema.object({
   ),
   status: schema.maybe(AgentStatusSchema),
   last_known_status: schema.maybe(AgentStatusSchema),
-  packages: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  packages: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   sort: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10 })), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
     schema.object({
@@ -241,13 +241,14 @@ export const AgentResponseSchema = schema.object({
             error_msg: schema.maybe(schema.string()),
             retry_error_msg: schema.maybe(schema.string()),
             retry_until: schema.maybe(schema.string()),
+            reason: schema.maybe(schema.string()),
           })
         ),
       }),
     ])
   ),
   upgrade_attempts: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string(), { maxSize: 1000 })])
+    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string(), { maxSize: 10000 })])
   ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
@@ -288,11 +289,11 @@ export const AgentResponseSchema = schema.object({
               message: schema.string(),
               payload: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             }),
-            { maxSize: 1000 }
+            { maxSize: 10000 }
           )
         ),
       }),
-      { maxSize: 1000 }
+      { maxSize: 10000 }
     )
   ),
   agent: schema.maybe(
@@ -392,7 +393,7 @@ export const PostRetrieveAgentsByActionsRequestSchema = {
 };
 
 export const PostRetrieveAgentsByActionsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const PostAgentUnenrollRequestSchema = {
@@ -551,7 +552,7 @@ export const ListAgentUploadsResponseSchema = schema.object({
       actionId: schema.string(),
       error: schema.maybe(schema.string()),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
@@ -694,7 +695,7 @@ export const GetAgentDataResponseSchema = schema.object({
     ),
     { maxSize: 10000 }
   ),
-  dataPreview: schema.arrayOf(schema.any(), { maxSize: 1000 }),
+  dataPreview: schema.arrayOf(schema.any(), { maxSize: 10000 }),
 });
 
 export const GetActionStatusRequestSchema = {
@@ -826,17 +827,19 @@ export const GetActionStatusResponseSchema = schema.object({
         })
       ),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
 export const GetAvailableAgentVersionsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to change privilege level for' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -871,7 +874,9 @@ export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to rollback' },
+    }),
   }),
 };
 

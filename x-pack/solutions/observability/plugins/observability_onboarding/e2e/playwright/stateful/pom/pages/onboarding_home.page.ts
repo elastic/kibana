@@ -20,6 +20,7 @@ export class OnboardingHomePage {
   private readonly otelHostCard: Locator;
   readonly awsCollectionCard: Locator;
   readonly firehoseQuickstartCard: Locator;
+  readonly cloudforwarderQuickstartCard: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -46,6 +47,9 @@ export class OnboardingHomePage {
     this.otelHostCard = this.page.getByTestId('integration-card:otel-logs');
     this.awsCollectionCard = this.page.getByTestId('integration-card:aws-logs-virtual');
     this.firehoseQuickstartCard = this.page.getByTestId('integration-card:firehose-quick-start');
+    this.cloudforwarderQuickstartCard = this.page.getByTestId(
+      'integration-card:cloudforwarder-quick-start'
+    );
   }
 
   public async selectHostUseCase() {

@@ -14,7 +14,6 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
 import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
 import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -26,8 +25,7 @@ const TIMESTAMP_FIELD = '@timestamp';
 export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props) => {
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
-  const [initialSerializedState, setInitialSerializedState] =
-    useState<SerializedPanelState<SearchEmbeddableState>>();
+  const [initialSerializedState, setInitialSerializedState] = useState<SearchEmbeddableState>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -90,19 +88,16 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
             managed: false,
           };
           setInitialSerializedState({
-            rawState: {
-              attributes: {
-                ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
-                references,
-              },
-              timeRange,
-              nonPersistedDisplayOptions: {
-                solutionNavIdOverride,
-                enableDocumentViewer: documentViewerEnabled,
-                enableFilters: filtersEnabled,
-              },
-            } as SearchEmbeddableState,
-            references,
+            attributes: {
+              ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+              references,
+            },
+            timeRange,
+            nonPersistedDisplayOptions: {
+              solutionNavIdOverride,
+              enableDocumentViewer: documentViewerEnabled,
+              enableFilters: filtersEnabled,
+            },
           });
         }
       } catch (e) {
@@ -155,7 +150,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
-    initialSerializedState: SerializedPanelState<SearchEmbeddableState>;
+    initialSerializedState: SearchEmbeddableState;
   }
 > = (props) => {
   const {

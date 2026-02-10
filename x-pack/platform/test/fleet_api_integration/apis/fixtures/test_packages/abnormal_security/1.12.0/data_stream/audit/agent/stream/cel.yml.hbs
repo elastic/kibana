@@ -1,0 +1,94 @@
+config_version: 2
+interval: {{interval}}
+resource.tracer:
+  enabled: {{enable_request_tracer}}
+  filename: "../../logs/cel/http-request-trace-*.ndjson"
+  maxbackups: 5
+{{#if proxy_url}}
+resource.proxy_url: {{proxy_url}}
+{{/if}}
+{{#if http_client_timeout}}
+resource.timeout: {{http_client_timeout}}
+{{/if}}
+resource.url: {{url}}
+state:
+  initial_interval: {{initial_interval}}
+  page_size: {{page_size}}
+  access_token: {{access_token}}
+  next_page: 1
+redact:
+  fields:
+    - access_token
+program: |
+  (
+    state.?want_more.orValue(false) ?
+      state
+    :
+      state.with({
+        "start_time": state.?cursor.last_timestamp.orValue((now - duration(state.initial_interval)).format(time_layout.RFC3339)),
+        "end_time": now.format(time_layout.RFC3339),
+      })
+  ).as(state, state.with(
+    request(
+      "GET",
+      state.url.trim_right("/") + "/v1/auditlogs?" + {
+        "pageSize": [string(state.page_size)],
+        "pageNumber": [string(state.next_page)],
+        "filter": ["timestamp gte " + state.start_time + " lte " + state.end_time]
+      }.format_query()
+    ).with({
+      "Header": {
+        "Authorization": ["Bearer " + string(state.access_token)]
+      }
+    }).do_request().as(resp, resp.StatusCode == 200 ?
+      bytes(resp.Body).decode_json().as(body, {
+        "events": (
+            has(body.auditLogs)
+          ?
+            body.auditLogs.map(e, {
+              "message": e.encode_json(),
+            })
+          :
+            []
+        ),
+        "cursor": {
+          "last_timestamp": state.end_time,
+        },
+        "want_more": has(body.auditLogs) && size(body.auditLogs) > 0,
+        "next_page": has(body.auditLogs) && size(body.auditLogs) > 0 ? int(state.next_page) + 1 : 1,
+      })
+    :
+      {
+        "events": {
+          "error": {
+            "code": string(resp.StatusCode),
+            "id": string(resp.Status),
+            "message": "GET:"+(
+              size(resp.Body) != 0 ?
+                string(resp.Body)
+              :
+                string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
+            ),
+          },
+        },
+        "want_more": false,
+      }
+    )
+  ))
+tags:
+{{#if preserve_original_event}}
+  - preserve_original_event
+{{/if}}
+{{#if preserve_duplicate_custom_fields}}
+  - preserve_duplicate_custom_fields
+{{/if}}
+{{#each tags as |tag|}}
+  - {{tag}}
+{{/each}}
+{{#contains "forwarded" tags}}
+publisher_pipeline.disable_host: true
+{{/contains}}
+{{#if processors}}
+processors:
+{{processors}}
+{{/if}}

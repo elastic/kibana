@@ -30,6 +30,8 @@
           "\nAll valid action context variables"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
             "label": "alertId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,6 +56,8 @@
             "label": "alertName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,6 +69,8 @@
             "label": "alertInstanceId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,6 +82,8 @@
             "label": "alertActionGroup",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,6 +95,8 @@
             "label": "alertActionGroupName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,6 +111,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,6 +124,8 @@
             "label": "spaceId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -124,6 +140,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +156,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +169,8 @@
             "label": "date",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +185,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +201,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,6 +217,8 @@
               "{ id: string; name: string; spaceId: string; type: string; params: Record<string, unknown>; tags?: string[] | undefined; url?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +233,8 @@
               "{ id: string; uuid: string; actionGroup: string; actionGroupName: string; flapping: boolean; consecutiveMatches?: number | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -229,6 +259,8 @@
           "<ActionGroupIds>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +275,8 @@
               "ActionGroupIds"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +288,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -275,6 +311,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -289,6 +327,8 @@
         "label": "ActionGroupSeverity",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,6 +340,8 @@
             "label": "level",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_group_types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -314,6 +356,8 @@
         "label": "ActionVariable",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -325,6 +369,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +382,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,6 +398,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -364,6 +414,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,6 +430,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -403,6 +457,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 197,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,6 +470,8 @@
             "label": "active",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -428,6 +486,8 @@
         "label": "AlertDeleteLastRun",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,6 +502,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -456,6 +518,8 @@
         "label": "AlertDeleteParams",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -470,6 +534,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -484,6 +550,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -498,6 +566,8 @@
               "(\"observability\" | \"securitySolution\" | \"management\")[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -512,6 +582,8 @@
         "label": "AlertDeletePreview",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,6 +595,8 @@
             "label": "affectedAlertCount",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -537,6 +611,8 @@
         "label": "AlertingFrameworkHealth",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -548,6 +624,8 @@
             "label": "isSufficientlySecure",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,6 +637,8 @@
             "label": "hasPermanentEncryptionKey",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +659,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -604,6 +686,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -626,6 +710,8 @@
               "[]; dsl?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -647,6 +733,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -672,6 +760,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -686,6 +776,8 @@
               "(2 | 1 | 7 | 6 | 5 | 4 | 3)[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -697,6 +789,8 @@
             "label": "timezone",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,6 +805,8 @@
               "{ start: string; end: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -725,6 +821,8 @@
         "label": "AlertsHealth",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -747,6 +845,8 @@
               "; timestamp: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -769,6 +869,8 @@
               "; timestamp: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -791,6 +893,8 @@
               "; timestamp: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -805,6 +909,8 @@
         "label": "Artifacts",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 223,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -826,6 +932,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -840,6 +948,8 @@
               "{ blob: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -854,6 +964,8 @@
         "label": "BrowserField",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -865,6 +977,8 @@
             "label": "aggregatable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -876,6 +990,8 @@
             "label": "category",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -890,6 +1006,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -904,6 +1022,8 @@
               "string | number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -926,6 +1046,8 @@
               ">; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -955,6 +1077,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -969,6 +1093,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1106,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -991,6 +1119,8 @@
             "label": "searchable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1002,6 +1132,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1023,6 +1155,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1034,6 +1168,8 @@
             "label": "readFromDocValues",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1055,6 +1191,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1069,6 +1207,8 @@
         "label": "Dashboard",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 219,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1080,6 +1220,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1094,6 +1236,8 @@
         "label": "EsQuerySnapshot",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1108,6 +1252,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1122,6 +1268,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1147,6 +1295,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 213,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1161,6 +1311,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 214,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,6 +1324,8 @@
             "label": "lookBackWindow",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1183,6 +1337,8 @@
             "label": "statusChangeThreshold",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1197,6 +1353,8 @@
         "label": "GetAlertFieldsResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_response.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1218,6 +1376,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_response.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1232,6 +1392,8 @@
         "label": "GetBrowserFieldsResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1254,6 +1416,8 @@
               ">; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1275,6 +1439,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/browser_fields_response.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1300,6 +1466,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1311,6 +1479,8 @@
             "label": "interval",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1325,6 +1495,8 @@
         "label": "LegacyField",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1336,6 +1508,8 @@
             "label": "field",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1350,6 +1524,8 @@
               "(string | number)[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1364,6 +1540,8 @@
         "label": "MappedParamsProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1378,6 +1556,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1392,6 +1572,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1406,6 +1588,8 @@
         "label": "MetaAlertFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1417,6 +1601,8 @@
             "label": "_id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,6 +1614,8 @@
             "label": "_index",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1442,6 +1630,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1466,6 +1656,8 @@
           "<Params>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 230,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1477,6 +1669,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1488,6 +1682,8 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1499,6 +1695,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 233,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1513,6 +1711,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 234,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1524,6 +1724,8 @@
             "label": "alertTypeId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1535,6 +1737,8 @@
             "label": "consumer",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1555,6 +1759,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1576,6 +1782,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1597,6 +1805,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1611,6 +1821,8 @@
               "Params"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1632,6 +1844,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1646,6 +1860,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 242,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1660,6 +1876,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1674,6 +1892,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1688,6 +1908,8 @@
               "Date"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 245,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1702,6 +1924,8 @@
               "Date"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1716,6 +1940,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1730,6 +1956,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1744,6 +1972,8 @@
               "boolean | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 249,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,6 +1988,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 250,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1769,6 +2001,8 @@
             "label": "muteAll",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1783,6 +2017,8 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,6 +2033,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 253,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1817,6 +2055,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 254,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,6 +2078,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1859,6 +2101,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 256,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1873,6 +2117,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 257,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1887,6 +2133,8 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1908,6 +2156,8 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 259,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,6 +2172,8 @@
               "Date | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1933,6 +2185,8 @@
             "label": "revision",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 261,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1947,6 +2201,8 @@
               "boolean | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1961,6 +2217,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 263,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1982,6 +2240,8 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 264,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2003,6 +2263,8 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,6 +2286,8 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2038,6 +2302,8 @@
         "label": "RuleAction",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2052,6 +2318,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,6 +2331,8 @@
             "label": "group",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2074,6 +2344,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2085,6 +2357,8 @@
             "label": "actionTypeId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2099,6 +2373,8 @@
               "SavedObjectAttributes"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2120,6 +2396,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2141,6 +2419,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2155,6 +2435,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2180,6 +2462,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2191,6 +2475,8 @@
             "label": "summary",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2205,6 +2491,8 @@
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2219,6 +2507,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2233,6 +2523,8 @@
         "label": "RuleExecutionStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2247,6 +2539,8 @@
               "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2261,6 +2555,8 @@
               "Date"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2275,6 +2571,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2297,6 +2595,8 @@
               "; message: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2319,6 +2619,8 @@
               "; message: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2333,6 +2635,8 @@
         "label": "RuleLastRun",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2347,6 +2651,8 @@
               "\"warning\" | \"succeeded\" | \"failed\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2361,6 +2667,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2390,6 +2698,8 @@
               " | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 187,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2404,6 +2714,8 @@
               "string[] | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2418,6 +2730,8 @@
               "{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2432,6 +2746,8 @@
         "label": "RuleMonitoring",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2470,6 +2786,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2495,6 +2813,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2509,6 +2829,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2523,6 +2845,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2537,6 +2861,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2548,6 +2874,8 @@
             "label": "success_ratio",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2573,6 +2901,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2584,6 +2914,8 @@
             "label": "success",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2595,6 +2927,8 @@
             "label": "timestamp",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2609,6 +2943,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2623,6 +2959,8 @@
               "\"warning\" | \"succeeded\" | \"failed\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2648,6 +2986,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 154,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2659,6 +2999,8 @@
             "label": "timestamp",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2679,6 +3021,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2704,6 +3048,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 141,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2718,6 +3064,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2732,6 +3080,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2746,6 +3096,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2760,6 +3112,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2774,6 +3128,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2788,6 +3144,8 @@
               "number | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2802,6 +3160,8 @@
               "{ gte: string; lte: string; } | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2816,6 +3176,8 @@
         "label": "RuleRegistryInspect",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2830,6 +3192,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2844,6 +3208,8 @@
         "label": "RuleRegistrySearchRequestPagination",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2855,6 +3221,8 @@
             "label": "pageIndex",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2866,6 +3234,8 @@
             "label": "pageSize",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2914,6 +3284,8 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2935,6 +3307,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2949,6 +3323,8 @@
         "label": "RuleSnoozeSchedule",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 167,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2960,6 +3336,8 @@
             "label": "duration",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2990,6 +3368,8 @@
               ", \"dtstart\" | \"tzid\">"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3004,6 +3384,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3018,6 +3400,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3032,6 +3416,8 @@
         "label": "RuleSpecificFlappingProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3046,6 +3432,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3057,6 +3445,8 @@
             "label": "lookBackWindow",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3068,6 +3458,8 @@
             "label": "statusChangeThreshold",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3082,6 +3474,8 @@
         "label": "RulesSettings",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3103,6 +3497,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3124,6 +3520,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3138,6 +3536,8 @@
         "label": "RulesSettingsAlertDeleteProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3149,6 +3549,8 @@
             "label": "isActiveAlertDeleteEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3160,6 +3562,8 @@
             "label": "isInactiveAlertDeleteEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3171,6 +3575,8 @@
             "label": "activeAlertDeleteThreshold",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3182,6 +3588,8 @@
             "label": "inactiveAlertDeleteThreshold",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3196,6 +3604,8 @@
               "(\"observability\" | \"securitySolution\" | \"management\")[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3210,6 +3620,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3224,6 +3636,8 @@
         "label": "RulesSettingsFlappingProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3235,6 +3649,8 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3246,6 +3662,8 @@
             "label": "lookBackWindow",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3257,6 +3675,8 @@
             "label": "statusChangeThreshold",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3271,6 +3691,8 @@
         "label": "RulesSettingsModificationMetadata",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3285,6 +3707,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3299,6 +3723,8 @@
               "string | null"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3310,6 +3736,8 @@
             "label": "createdAt",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3321,6 +3749,8 @@
             "label": "updatedAt",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3335,6 +3765,8 @@
         "label": "RulesSettingsProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3356,6 +3788,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3377,6 +3811,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3391,6 +3827,8 @@
         "label": "RulesSettingsQueryDelayProperties",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3402,6 +3840,8 @@
             "label": "delay",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3416,6 +3856,8 @@
         "label": "RuleSystemAction",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3430,6 +3872,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3441,6 +3885,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3452,6 +3898,8 @@
             "label": "actionTypeId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3466,6 +3914,8 @@
               "SavedObjectAttributes"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3490,6 +3940,8 @@
           "<ActionGroupIds, RecoveryActionGroupId>"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3501,6 +3953,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3512,6 +3966,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3533,6 +3989,8 @@
               "<ActionGroupIds>[]"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3554,6 +4012,8 @@
               "<RecoveryActionGroupId>"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3592,6 +4052,8 @@
               "[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3606,6 +4068,8 @@
               "ActionGroupIds"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3617,6 +4081,8 @@
             "label": "category",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3628,6 +4094,8 @@
             "label": "producer",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3642,6 +4110,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3653,6 +4123,8 @@
             "label": "isExportable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3667,6 +4139,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3681,6 +4155,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3695,6 +4171,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3706,6 +4184,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3720,6 +4200,8 @@
               "{ [x: string]: ConsumerPrivileges; }"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3734,6 +4216,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3765,6 +4249,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 201,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3787,6 +4273,8 @@
               "[]; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3808,6 +4296,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3824,6 +4314,8 @@
         "label": "HealthStatus",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerting_framework_health_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3836,6 +4328,8 @@
         "label": "RuleExecutionStatusErrorReasons",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3848,6 +4342,8 @@
         "label": "RuleExecutionStatusWarningReasons",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3860,6 +4356,8 @@
         "label": "RuleNotifyWhen",
         "description": [],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_notify_when_type.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3879,6 +4377,8 @@
           "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3910,6 +4410,8 @@
           "<infer groups extends string>> ? groups : never"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_type_types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3941,6 +4443,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3964,6 +4468,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3979,6 +4485,8 @@
           "\"default\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/builtin_action_groups_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3994,6 +4502,8 @@
           "\"Error validating circuit breaker\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/circuit_breaker_message_header.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4009,6 +4519,8 @@
           "2 | 1 | 7 | 6 | 5 | 4 | 3"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4704,6 +5216,8 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4727,6 +5241,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4742,6 +5258,8 @@
           "\"recovered\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/builtin_action_groups_types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4775,6 +5293,8 @@
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 274,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4806,6 +5326,8 @@
           ", \"dtstart\" | \"tzid\">"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/r_rule_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4837,6 +5359,8 @@
           " | undefined; until?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/r_rule_types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4855,6 +5379,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4870,6 +5396,8 @@
           "SavedObjectAttributes"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4885,6 +5413,8 @@
           "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4900,6 +5430,8 @@
           "\"warning\" | \"succeeded\" | \"failed\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4915,6 +5447,8 @@
           "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_notify_when_type.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4961,6 +5495,8 @@
           " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4984,6 +5520,8 @@
           "; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 177,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5013,6 +5551,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5042,6 +5582,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5057,6 +5599,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5072,6 +5616,8 @@
           "\"stack\" | \"security\" | \"observability\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5103,6 +5649,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 269,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5134,6 +5682,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 209,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5158,6 +5708,8 @@
           " & { alerts: { new: { count: number; data: unknown[]; }; ongoing: { count: number; data: unknown[]; }; recovered: { count: number; data: unknown[]; }; all: { count: number; data: unknown[]; }; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5173,6 +5725,8 @@
           "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5196,6 +5750,8 @@
           "[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5213,6 +5769,8 @@
           "readonly [1, 2, 3, 4, 5, 6, 7]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5236,6 +5794,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/builtin_action_groups_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5251,6 +5811,8 @@
           "readonly [\"ok\", \"active\", \"error\", \"pending\", \"unknown\", \"warning\"]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 81,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5266,6 +5828,8 @@
           "readonly [\"succeeded\", \"warning\", \"failed\"]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5281,6 +5845,8 @@
           "readonly [\"onActionGroupChange\", \"onActiveAlert\", \"onThrottleInterval\"]"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_notify_when_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

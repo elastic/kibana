@@ -7,15 +7,15 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
+  EuiComboBox,
+  EuiDatePicker,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
@@ -25,19 +25,21 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  keys,
   useIsWithinBreakpoints,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
-import { ToolFormMode } from '../form/tool_form';
 import { labels } from '../../../utils/i18n';
 
 const flyoutStyles = css`
@@ -69,9 +71,11 @@ const i18nMessages = {
       defaultMessage: 'Enter {label}',
       values: { label },
     }),
-  title: i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
-    defaultMessage: 'Test Tool',
-  }),
+  title: (toolName: string) =>
+    i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
+      defaultMessage: 'Test tool: {toolName}',
+      values: { toolName },
+    }),
   inputsTitle: i18n.translate('xpack.agentBuilder.tools.testTool.inputsTitle', {
     defaultMessage: 'Inputs',
   }),
@@ -80,6 +84,9 @@ const i18nMessages = {
   }),
   responseTitle: i18n.translate('xpack.agentBuilder.tools.testTool.responseTitle', {
     defaultMessage: 'Response',
+  }),
+  arrayStringHint: i18n.translate('xpack.agentBuilder.tools.testTool.arrayStringHint', {
+    defaultMessage: 'Wrap values in quotes to keep them as strings.',
   }),
 };
 
@@ -90,6 +97,7 @@ interface ToolParameter {
   value: string;
   type: string;
   optional: boolean;
+  format?: string;
 }
 
 enum ToolParameterType {
@@ -136,9 +144,62 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       value: '',
       description: paramSchema?.description || '',
       type,
+      format: (paramSchema && 'format' in paramSchema && paramSchema.format) || undefined,
       optional: !requiredParams.has(paramName),
     };
   });
+};
+
+/**
+ * It identifies the type of array values.
+ * It allows forcing numeric values like 123 to be parsed as string by wrapping them in quotes.
+ */
+export const parseArrayEntry = (rawValue: string): string | number | undefined => {
+  const trimmed = rawValue.trim();
+  if (!trimmed) return;
+
+  const hasMatchingQuotes =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"));
+  if (hasMatchingQuotes) {
+    return trimmed.slice(1, -1);
+  }
+
+  const numericValue = Number(trimmed);
+  return Number.isNaN(numericValue) ? trimmed : numericValue;
+};
+
+export const parseFormData = (
+  formData: Record<string, any>,
+  parameters: Array<{ name: string; type: string }>
+): Record<string, any> => {
+  const parsedFormData: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(formData)) {
+    // Skip empty string values
+    if (typeof value === 'string' && value.trim() === '') {
+      continue;
+    }
+
+    const param = parameters.find((p) => p.name === key);
+    if (
+      param &&
+      (param.type === 'object' || param.type === 'array') &&
+      typeof value === 'string' &&
+      value.trim() !== ''
+    ) {
+      try {
+        parsedFormData[key] = JSON.parse(value);
+      } catch {
+        // If parsing fails, use the original string value
+        parsedFormData[key] = value;
+      }
+    } else {
+      parsedFormData[key] = value;
+    }
+  }
+
+  return parsedFormData;
 };
 
 const renderFormField = ({
@@ -168,9 +229,10 @@ const renderFormField = ({
             <EuiFieldNumber
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={(value as number) ?? ''}
               type="number"
-              onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
+              onChange={(e) => onChange(e.target.valueAsNumber ?? e.target.value)}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
@@ -186,6 +248,7 @@ const renderFormField = ({
           render={({ field: { onChange, value, ref, ...field } }) => (
             <EuiSwitch
               {...field}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               checked={Boolean(value)}
               onChange={(e) => onChange(e.target.checked)}
               label={label}
@@ -195,6 +258,71 @@ const renderFormField = ({
       );
 
     case ToolParameterType.TEXT:
+      if (parameter.format === 'date-time') {
+        return (
+          <Controller
+            {...commonProps}
+            render={({ field: { onChange, value, ref, ...field } }) => (
+              <EuiDatePicker
+                {...field}
+                data-test-subj={`agentBuilderToolTestInput-${name}`}
+                showTimeSelect
+                showIcon={false}
+                inputRef={ref}
+                selected={value ? moment(value) : undefined}
+                onChange={(date) => onChange(date ? date.toISOString() : undefined)}
+              />
+            )}
+          />
+        );
+      }
+
+      if (type === 'array') {
+        return (
+          <Controller
+            {...commonProps}
+            render={({ field: { onChange, value } }) => {
+              const arrayValue: Array<string | number> = Array.isArray(value) ? value : [];
+
+              const selectedOptions: Array<EuiComboBoxOptionOption<string | number>> =
+                arrayValue.map((item) => ({
+                  label: String(item),
+                  value: item,
+                }));
+
+              const handleChange = (selected: Array<EuiComboBoxOptionOption<string | number>>) => {
+                onChange(selected.map((opt) => opt.value ?? opt.label));
+              };
+
+              const handleCreateOption = (searchValue: string) => {
+                const newValue = parseArrayEntry(searchValue);
+                if (newValue === undefined) return;
+                onChange([...arrayValue, newValue]);
+              };
+
+              return (
+                <EuiComboBox<string | number>
+                  options={[]}
+                  selectedOptions={selectedOptions}
+                  onChange={handleChange}
+                  onCreateOption={handleCreateOption}
+                  fullWidth
+                  noSuggestions
+                  aria-label={label}
+                  data-test-subj={`agentBuilderToolTestInput-${name}`}
+                  delimiter=","
+                  onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === keys.ENTER) {
+                      // Enter key should not submit the form, instead it should add a new option
+                      event.preventDefault();
+                    }
+                  }}
+                />
+              );
+            }}
+          />
+        );
+      }
     default:
       return (
         <Controller
@@ -203,6 +331,7 @@ const renderFormField = ({
             <EuiFieldText
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={value as string}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
@@ -216,10 +345,9 @@ const renderFormField = ({
 export interface ToolTestFlyoutProps {
   toolId: string;
   onClose: () => void;
-  formMode?: ToolFormMode;
 }
 
-export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
+export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
@@ -253,21 +381,29 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   });
 
   const onSubmit = async (formData: Record<string, any>) => {
+    const parameters = getParameters(tool);
+    const parsedFormData = parseFormData(formData, parameters);
+
     await executeTool({
       toolId: tool!.id,
-      toolParams: formData,
+      toolParams: parsedFormData,
     });
   };
 
   if (!tool) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" css={flyoutStyles}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      css={flyoutStyles}
+      data-test-subj="agentBuilderToolTestFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">{i18nMessages.title}</h2>
+              <h2 id="flyoutTitle">{i18nMessages.title(tool.id)}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -301,7 +437,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                 <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
                   <EuiFlexGroup direction="column" gutterSize="none">
                     {getParameters(tool).map((parameter) => {
-                      const { name, label, description, optional } = parameter;
+                      const { name, label, description, type, optional } = parameter;
                       return (
                         <EuiFormRow
                           key={name}
@@ -313,7 +449,18 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                               </EuiText>
                             )
                           }
-                          helpText={description}
+                          helpText={
+                            <>
+                              <code>{type}</code>
+                              {description && ` - ${description}`}
+                              {type === 'array' && (
+                                <>
+                                  <br />
+                                  {i18nMessages.arrayStringHint}
+                                </>
+                              )}
+                            </>
+                          }
                           isInvalid={!!errors[name]}
                           error={errors[name]?.message as string}
                           fullWidth
@@ -363,17 +510,6 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
           </FormProvider>
         )}
       </EuiFlyoutBody>
-      {formMode === ToolFormMode.Edit && (
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            aria-label={labels.tools.testTool.backToEditToolButton}
-            iconType="sortLeft"
-            onClick={onClose}
-          >
-            {labels.tools.testTool.backToEditToolButton}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      )}
     </EuiFlyout>
   );
 };

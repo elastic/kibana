@@ -328,7 +328,7 @@ function getColorFromMappingFactory(
   }
   return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
     type: 'categories',
-    categories: getColorCategories(rows, tagColumn),
+    categories: getColorCategories(rows, tagColumn ? [tagColumn] : undefined),
   });
 }
 

@@ -20,6 +20,8 @@
           "<ContractType>"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "true"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,6 +52,8 @@
               "ContractType"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -66,6 +72,8 @@
           "\nContract resolver response for not found plugins.\n"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,6 +88,8 @@
               "false"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -96,6 +106,8 @@
           "\nSetup contract of Core's `plugins` service.\n"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +130,8 @@
               "<T>>"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -133,6 +147,8 @@
                   "(keyof T)[]"
                 ],
                 "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+                "lineNumber": 184,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -157,6 +173,8 @@
               "<T>>"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -172,6 +190,8 @@
                   "(keyof T)[]"
                 ],
                 "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+                "lineNumber": 184,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -190,6 +210,8 @@
           "\nStart contract of Core's `plugins` service.\n"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -212,6 +234,8 @@
               "<T>>"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -227,6 +251,8 @@
                   "(keyof T)[]"
                 ],
                 "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+                "lineNumber": 184,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -253,6 +279,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 158,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -274,6 +302,8 @@
           "<T>>"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 176,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -289,6 +319,8 @@
               "(keyof T)[]"
             ],
             "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -312,6 +344,8 @@
           "<ContractMap[Key]>; }"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 166,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -334,6 +368,8 @@
           "<ContractType>"
         ],
         "path": "src/core/packages/plugins/contracts-browser/src/contracts.ts",
+        "lineNumber": 148,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

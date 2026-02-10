@@ -151,4 +151,11 @@ export const timeUnitsToSuggest: Literals[] = [
   },
 ];
 
-export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'multi_match', 'qstr', 'kql'];
+export const FULL_TEXT_SEARCH_FUNCTIONS = [
+  'match',
+  'match_operator',
+  'match_phrase',
+  'multi_match',
+  'qstr',
+  'kql',
+];

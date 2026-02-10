@@ -129,9 +129,9 @@ export class State {
         track_total_hits: false,
       });
 
-      const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
-        streamFromDefinition(definition, dependencies)
-      );
+      const streams = streamsSearchResponse.hits.hits
+        .filter(({ _source: definition }) => !('group' in definition)) // Filter out old Group streams
+        .map(({ _source: definition }) => streamFromDefinition(definition, dependencies));
 
       return new State(streams, dependencies);
     } catch (error) {

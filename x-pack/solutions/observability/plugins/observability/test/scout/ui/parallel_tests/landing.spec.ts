@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from '@kbn/scout-oblt';
+import { test } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   generateApmData,
   generateLogsData,
@@ -119,5 +120,25 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
 
     // Wait for redirect and verify we're on onboarding page
     await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: BIGGER_TIMEOUT });
+  });
+
+  test('redirects to onboarding when log data that should be ignored exists', async ({
+    page,
+    pageObjects,
+    logsSynthtraceEsClient,
+  }) => {
+    // Generate Fleet Agent status change log data which should be ignored
+    await generateLogsData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: logsSynthtraceEsClient,
+      opts: { dataset: 'elastic_agent.status_change' },
+    });
+
+    // Navigate to observability landing page with no data
+    await pageObjects.observabilityNavigation.gotoLanding();
+
+    // Wait for redirect and verify we're on onboarding page
+    await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
   });
 });

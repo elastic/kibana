@@ -13,6 +13,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
   Plugin,
@@ -56,6 +57,7 @@ import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
+import type { UiamServicePublic } from './uiam';
 import { UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
@@ -173,6 +175,8 @@ export class SecurityPlugin
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
 
+  private uiamService?: UiamServicePublic;
+
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -282,6 +286,7 @@ export class SecurityPlugin
       kibanaIndexName,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: () => spaces?.spacesService,
+      getUiamService: () => this.uiamService,
       features,
       getCurrentUser,
       customBranding: core.customBranding,
@@ -292,13 +297,27 @@ export class SecurityPlugin
     this.fipsServiceSetup = this.fipsService.setup({ config, license });
     this.fipsServiceSetup.validateLicenseForFips();
 
+    let getTypeRegistrySync: (() => ISavedObjectTypeRegistry) | undefined;
+    void core.getStartServices().then(([coreStart]) => {
+      getTypeRegistrySync = () => coreStart.savedObjects.getTypeRegistry();
+    });
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       getCurrentUser,
-      getTypeRegistry: () =>
-        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
+      getTypeRegistry: () => {
+        /**
+         * The setup spaces client just registers the callback during setup using `registerClientWrapper` but doesn't invoke it.
+         * When `createSpacesClient` is run during `start`, startServices is guaranteed to be passed in
+         * and we can use the type registry from there.
+         */
+        if (!getTypeRegistrySync) {
+          throw new Error('Type registry is not available');
+        }
+        return getTypeRegistrySync();
+      },
     });
 
     setupSavedObjects({
@@ -314,6 +333,7 @@ export class SecurityPlugin
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
         audit: this.auditSetup,
+        config,
       })
     );
     core.userProfile.registerUserProfileDelegate(
@@ -399,6 +419,10 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
+    this.uiamService = config.uiam?.enabled
+      ? new UiamService(this.logger.get('uiam'), config.uiam)
+      : undefined;
+
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -408,9 +432,7 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
-      uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam)
-        : undefined,
+      uiam: this.uiamService,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
@@ -431,10 +453,13 @@ export class SecurityPlugin
       spaces: spaces?.spacesService,
     });
 
+    // Destructure to exclude 'uiam' from the public API
+    const { uiam: _uiam, ...publicApiKeys } = this.authenticationStart.apiKeys;
+
     return Object.freeze<SecurityPluginStart>({
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
-        apiKeys: this.authenticationStart.apiKeys,
+        apiKeys: publicApiKeys,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

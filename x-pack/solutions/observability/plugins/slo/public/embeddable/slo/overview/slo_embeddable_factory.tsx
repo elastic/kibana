@@ -65,9 +65,9 @@ export const getOverviewEmbeddableFactory = ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
     const deps = { ...coreStart, ...pluginsStart };
-    const state = initialState.rawState;
+    const state = initialState;
 
-    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -81,15 +81,11 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-        dynamicActionsManager?.serializeState() ?? {};
+      const dynamicActionsState = dynamicActionsManager?.getLatestState() ?? {};
       return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...sloStateManager.getLatestState(),
-          ...dynamicActionsState,
-        },
-        references: dynamicActionsReferences ?? [],
+        ...titleManager.getLatestState(),
+        ...sloStateManager.getLatestState(),
+        ...dynamicActionsState,
       };
     }
 
@@ -110,12 +106,12 @@ export const getOverviewEmbeddableFactory = ({
         remoteName: 'referenceEquality',
         overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+        ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
       }),
       onReset: (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        titleManager.reinitializeState(lastSaved?.rawState);
-        sloStateManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        titleManager.reinitializeState(lastSaved);
+        sloStateManager.reinitializeState(lastSaved);
       },
     });
 
@@ -125,8 +121,8 @@ export const getOverviewEmbeddableFactory = ({
       ...(dynamicActionsManager?.api ?? {}),
       ...sloStateManager.api,
       defaultTitle$,
-      hideTitle$: titleManager.api.hidePanelTitles$,
-      setHideTitle: titleManager.api.setHidePanelTitles,
+      hideTitle$: titleManager.api.hideTitle$,
+      setHideTitle: titleManager.api.setHideTitle,
       supportedTriggers: () => [],
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -239,7 +235,6 @@ export const getOverviewEmbeddableFactory = ({
         };
 
         const queryClient = new QueryClient();
-
         return (
           <EuiThemeProvider darkMode={true}>
             <KibanaContextProvider services={deps}>
@@ -253,7 +248,19 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+                  {overviewMode === 'groups' ? (
+                    renderOverview()
+                  ) : showAllGroupByInstances ? (
+                    <div
+                      data-test-subj="sloSingleOverviewPanel"
+                      data-shared-item=""
+                      style={{ width: '100%' }}
+                    >
+                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
+                    </div>
+                  ) : (
+                    renderOverview()
+                  )}
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>

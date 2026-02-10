@@ -142,7 +142,7 @@ function getDataLayers(
       seriesType,
       xAccessor: xColumn?.columnId,
       simpleView: false,
-      splitAccessor,
+      splitAccessors: splitAccessor ? [splitAccessor] : undefined,
       palette: vis.params.palette ?? vis.type.visConfig.defaults.palette,
       yConfig: layer.metrics.map((metricId) => {
         const serie = series.find((s) => s.data.id === layer.seriesIdsMap[metricId]);

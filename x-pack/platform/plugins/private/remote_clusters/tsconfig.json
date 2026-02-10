@@ -24,6 +24,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/test-jest-helpers",
+    "@kbn/test-eui-helpers",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/i18n",
     "@kbn/utility-types",

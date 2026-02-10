@@ -9,6 +9,7 @@ export const METRICS_EXPLORER_API_MAX_METRICS = 20;
 
 export const TIMESTAMP = '@timestamp';
 export const HOST_NAME = 'host.name';
+export const HOST_HOSTNAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 

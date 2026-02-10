@@ -29,6 +29,8 @@ const settingsItemId = basicMock.navItems.footerItems[2].id;
 const advancedSettingsItemId = basicMock.navItems.footerItems[2].sections?.[0].items[1].id!;
 
 // Security mock reusable IDs
+const detectionRulesItemId = securityMock.navItems.primaryItems[2].id;
+const alertsItemId = securityMock.navItems.primaryItems[3].id;
 const mlItemId = securityMock.navItems.primaryItems[11].id;
 
 // Observability mock reusable IDs
@@ -880,13 +882,13 @@ describe('Both modes', () => {
        * THEN all existing footer items are displayed
        */
       it('should display all existing footer items if fewer than 5 exist', () => {
-        // Renders 3 footer items
+        // Renders 4 footer items
         render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
 
         const footer = screen.getByTestId(footerContainerId);
         const footerItems = within(footer).getAllByTestId(/^kbnChromeNav-footerItem-/);
 
-        expect(footerItems.length).toBe(3);
+        expect(footerItems.length).toBe(4);
       });
 
       /**
@@ -981,6 +983,31 @@ describe('Both modes', () => {
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
 
         expect(flaskIcon).toBeInTheDocument();
+      });
+    });
+    describe('New badge', () => {
+      /**
+       * GIVEN a footer item is new
+       * WHEN I hover over that item
+       * THEN a tooltip shows up with the item label
+       * AND a badge reading "New"
+       */
+      it('should render a tooltip with the item label and a beta badge reading "New"', async () => {
+        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+
+        const whatsNewLink = screen.getByTestId(footerItemId('whats_new'));
+
+        await user.hover(whatsNewLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent("What's new");
+
+        const badge = tooltip.querySelector('.euiBadge');
+        expect(badge).toBeInTheDocument();
+        expect(badge).toHaveTextContent('New');
       });
     });
   });
@@ -1079,6 +1106,52 @@ describe('Both modes', () => {
         const techPreviewBadge = await within(hostsLink).findByTitle('Tech preview');
 
         expect(techPreviewBadge).toBeInTheDocument();
+      });
+    });
+
+    describe('New badge', () => {
+      /**
+       * GIVEN a primary menu item is new
+       * WHEN the navigation renders the secondary menu header
+       * THEN a beta badge reading "New" appears next to the menu title
+       */
+      it('should render a beta badge reading "New" next to the menu title', async () => {
+        render(
+          <TestComponent
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+            initialActiveItemId={detectionRulesItemId}
+          />
+        );
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+        const panelHeader = within(sidePanel).getByRole('heading', {
+          name: 'Rules',
+        });
+        const newBadge = await within(panelHeader.parentElement!).findByTitle('New');
+
+        expect(newBadge).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a menu item is new
+       * WHEN the navigation renders the secondary menu items
+       * THEN a beta badge reading "New" appears next to the menu item label
+       */
+      it('should render a beta badge reading "New" next to the menu item label', async () => {
+        render(
+          <TestComponent
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+            initialActiveItemId={alertsItemId}
+          />
+        );
+
+        const sidePanel = screen.getByTestId(sidePanelId);
+        const attacksLink = within(sidePanel).getByTestId(sidePanelItemId('attacks'));
+        const newBadge = await within(attacksLink).findByTitle('New');
+
+        expect(newBadge).toBeInTheDocument();
       });
     });
 
@@ -1590,6 +1663,107 @@ describe('Both modes', () => {
         // Blur handler should skip close when nextElement is null -> popover stays open
         expect(screen.getByTestId(morePopoverId)).toBeInTheDocument();
       });
+    });
+  });
+  describe('New items indicator', () => {
+    /**
+     * GIVEN a primary menu item is new
+     * WHEN the navigation renders
+     * THEN a new indicator should appear next to the menu item
+     */
+    it('should show a new indicator next to the new primary menu item', () => {
+      render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+
+      const alertsItem = screen.getByTestId(primaryItemId('alerts'));
+      expect(alertsItem.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    });
+
+    /**
+     * GIVEN a footer menu item is new
+     * WHEN the navigation renders
+     * THEN a new indicator should appear next to the menu item
+     */
+    it('should show a new indicator next to the new footer menu item', () => {
+      render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
+
+      const whatsNewItem = screen.getByTestId(footerItemId('whats_new'));
+      expect(
+        whatsNewItem.parentElement?.querySelector('[data-euiicon-type="dot"]')
+      ).toBeInTheDocument();
+    });
+
+    /**
+     * GIVEN a secondary menu item is new
+     * WHEN the navigation renders
+     * THEN a new indicator should appear next to its primary parent item
+     */
+    it('should show a new indicator next to the new secondary menu item', async () => {
+      render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+      const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+      expect(alertsLink.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    });
+
+    /**
+     * GIVEN a primary menu item is new
+     * WHEN a user visits the item
+     * AND navigates away from it
+     * THEN the new indicator should disappear
+     */
+    it('should remove new indicator after visiting a new primary item and navigating away from it', async () => {
+      render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
+
+      const webCrawlersItem = screen.getByTestId(primaryItemId('web_crawlers'));
+
+      // Initially should have new indicator
+      expect(webCrawlersItem.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+
+      // Click on the item
+      await user.click(webCrawlersItem);
+
+      // Navigate away from the item
+      await user.click(screen.getByTestId(primaryItemId('dev_tools')));
+
+      // New indicator should disappear
+      expect(webCrawlersItem.querySelector('[data-euiicon-type="dot"]')).not.toBeInTheDocument();
+    });
+
+    /**
+     * GIVEN two secondary menu items are new
+     * WHEN a user visits both items
+     * AND navigates away from them
+     * THEN the new indicator should disappear
+     */
+    it('should remove new indicator after visiting two new secondary items and navigating away from them', async () => {
+      render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
+
+      const performanceItem = screen.getByTestId(footerItemId('project-settings'));
+
+      // Initially should have new indicator
+      expect(
+        performanceItem.parentElement?.querySelector('[data-euiicon-type="dot"]')
+      ).toBeInTheDocument();
+
+      // Click on the item to open side panel
+      await user.click(performanceItem);
+
+      // Click on the secondary new items
+      const sidePanel = screen.getByTestId(sidePanelId);
+      const performanceLink = within(sidePanel).getByTestId(sidePanelItemId('project-performance'));
+      const integrationsLink = within(sidePanel).getByTestId(
+        sidePanelItemId('project-integrations')
+      );
+
+      await user.click(performanceLink);
+      await user.click(integrationsLink);
+
+      // Navigate away from the items
+      await user.click(within(sidePanel).getByTestId(sidePanelItemId('project-fleet')));
+
+      // After clicking, new indicator should disappear
+      expect(
+        performanceItem.parentElement?.querySelector('[data-euiicon-type="dot"]')
+      ).not.toBeInTheDocument();
     });
   });
 });

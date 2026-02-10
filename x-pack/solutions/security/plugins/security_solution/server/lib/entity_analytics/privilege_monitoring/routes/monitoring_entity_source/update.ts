@@ -25,6 +25,7 @@ import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const updateMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,42 +52,49 @@ export const updateMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<UpdateEntitySourceResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-
-        try {
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.update({ ...request.body, id: request.params.id });
-
-          const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
-          const soClient = privMonDataClient.getScopedSoClient(request, {
-            includedHiddenTypes: [
-              PrivilegeMonitoringApiKeyType.name,
-              monitoringEntitySourceType.name,
-            ],
-          });
-
-          const statusService = createEngineStatusService(privMonDataClient, soClient);
-          const engineStatus = await statusService.get();
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<UpdateEntitySourceResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
           try {
-            if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-              await statusService.scheduleNow();
-            }
-          } catch (e) {
-            logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
-          }
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.update({ ...request.body, id: request.params.id });
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+            const soClient = privMonDataClient.getScopedSoClient(request, {
+              includedHiddenTypes: [
+                PrivilegeMonitoringApiKeyType.name,
+                monitoringEntitySourceType.name,
+              ],
+            });
+
+            const statusService = createEngineStatusService(privMonDataClient, soClient);
+            const engineStatus = await statusService.get();
+
+            try {
+              if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+                await statusService.scheduleNow();
+              }
+            } catch (e) {
+              logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
+            }
+
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

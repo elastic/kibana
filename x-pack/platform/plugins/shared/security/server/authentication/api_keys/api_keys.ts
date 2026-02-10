@@ -11,7 +11,7 @@ import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
-  APIKeys as APIKeysType,
+  ClientAuthentication,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
@@ -19,14 +19,17 @@ import type {
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
+  NativeAPIKeysType,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
+import { getScopedClient } from '../../elasticsearch';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
+import { isUiamCredential, type UiamServicePublic } from '../../uiam';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -47,6 +50,7 @@ export interface ConstructorOptions {
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   buildFlavor?: BuildFlavor;
+  uiam?: UiamServicePublic;
 }
 
 type GrantAPIKeyParams =
@@ -65,13 +69,14 @@ type GrantAPIKeyParams =
 /**
  * Class responsible for managing Elasticsearch API keys.
  */
-export class APIKeys implements APIKeysType {
+export class APIKeys implements NativeAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
   private readonly kibanaFeatures: KibanaFeature[];
   private readonly buildFlavor?: BuildFlavor;
+  private readonly uiam?: UiamServicePublic;
 
   constructor({
     logger,
@@ -80,6 +85,7 @@ export class APIKeys implements APIKeysType {
     applicationName,
     kibanaFeatures,
     buildFlavor,
+    uiam,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -87,6 +93,7 @@ export class APIKeys implements APIKeysType {
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
     this.buildFlavor = buildFlavor;
+    this.uiam = uiam;
   }
 
   /**
@@ -156,7 +163,7 @@ export class APIKeys implements APIKeysType {
       return null;
     }
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = this.clusterClient.asScoped(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to create an API key');
 
@@ -211,7 +218,7 @@ export class APIKeys implements APIKeysType {
     }
 
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = this.clusterClient.asScoped(request);
+    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
 
     this.logger.debug('Trying to edit an API key');
 
@@ -271,11 +278,26 @@ export class APIKeys implements APIKeysType {
       );
     }
 
-    // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
-    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
-      request,
-      ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
-    );
+    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
+    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
+    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    let clientAuthentication: ClientAuthentication | undefined;
+
+    if (this.uiam && isUiamCredential(authorizationHeader)) {
+      clientAuthentication = this.uiam.getClientAuthentication();
+    } else {
+      const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
+        request,
+        ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
+      );
+
+      if (clientAuthorizationHeader) {
+        clientAuthentication = {
+          scheme: clientAuthorizationHeader.scheme,
+          value: clientAuthorizationHeader.credentials,
+        };
+      }
+    }
 
     const { expiration, metadata, name } = createParams;
     const roleDescriptors =
@@ -290,7 +312,7 @@ export class APIKeys implements APIKeysType {
     const params = this.getGrantParams(
       { expiration, metadata, name, role_descriptors: roleDescriptors },
       authorizationHeader,
-      clientAuthorizationHeader
+      clientAuthentication
     );
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
@@ -319,7 +341,11 @@ export class APIKeys implements APIKeysType {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+      result = await getScopedClient(
+        request,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.invalidateApiKey({
         ids: params.ids,
       });
       this.logger.debug(
@@ -379,7 +405,11 @@ export class APIKeys implements APIKeysType {
 
     this.logger.debug(`Trying to validate an API key`);
     try {
-      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      await getScopedClient(
+        fakeRequest,
+        this.clusterClient,
+        this.uiam
+      ).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {
@@ -403,21 +433,14 @@ export class APIKeys implements APIKeysType {
   private getGrantParams(
     createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
     authorizationHeader: HTTPAuthorizationHeader,
-    clientAuthorizationHeader: HTTPAuthorizationHeader | null
+    clientAuthentication?: ClientAuthentication
   ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
         api_key: createParams,
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
-        ...(clientAuthorizationHeader
-          ? {
-              client_authentication: {
-                scheme: clientAuthorizationHeader.scheme,
-                value: clientAuthorizationHeader.credentials,
-              },
-            }
-          : {}),
+        ...(clientAuthentication ? { client_authentication: clientAuthentication } : {}),
       };
     }
 

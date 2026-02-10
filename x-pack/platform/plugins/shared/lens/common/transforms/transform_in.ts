@@ -6,7 +6,8 @@
  */
 
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import type { LensTransformDependencies } from '.';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -20,27 +21,24 @@ import type { LensSerializedState } from '../../public';
 /**
  * Transform from Lens API format to Lens Serialized State
  */
-export const getTransformIn = ({
-  builder,
-  transformEnhancementsIn,
-}: LensTransformDependencies): LensTransformIn => {
+export const getTransformIn = (
+  builder: LensConfigBuilder,
+  transformDrilldownsIn: DrilldownTransforms['transformIn']
+): LensTransformIn => {
   return function transformIn(config) {
-    const { enhancementsState: enhancements = null, enhancementsReferences = [] } =
-      config.enhancements ? transformEnhancementsIn?.(config.enhancements) ?? {} : {};
-    const enhancementsState = enhancements ? { enhancements } : {};
+    const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
-    if (isByRefLensConfig(config)) {
-      const { savedObjectId: id, ...rest } = config;
+    if (isByRefLensConfig(storedConfig)) {
+      const { savedObjectId: id, ...rest } = storedConfig;
       return {
         state: rest,
-        ...enhancementsState,
         references: [
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
             id: id!,
           },
-          ...enhancementsReferences,
+          ...drilldownReferences,
         ],
       } satisfies LensByRefTransformInResult;
     }
@@ -48,13 +46,12 @@ export const getTransformIn = ({
     const chartType = builder.getType(config.attributes);
 
     if (!builder.isSupported(chartType)) {
-      const { state, references } = extractLensReferences(config as LensSerializedState);
+      const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {
         state,
-        ...enhancementsState,
-        references: [...references, ...enhancementsReferences],
+        references: [...references, ...drilldownReferences],
       } satisfies LensByValueTransformInResult;
     }
 
@@ -67,14 +64,13 @@ export const getTransformIn = ({
       ? builder.fromAPIFormat(config.attributes)
       : config.attributes;
     const { state, references } = extractLensReferences({
-      ...config,
+      ...storedConfig,
       attributes,
     });
 
     return {
       state,
-      ...enhancementsState,
-      references: [...references, ...enhancementsReferences],
+      references: [...references, ...drilldownReferences],
     } satisfies LensByValueTransformInResult;
   };
 };

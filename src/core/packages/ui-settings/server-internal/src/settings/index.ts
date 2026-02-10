@@ -14,7 +14,7 @@ import { getMiscUiSettings } from './misc';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
-import { getAnnouncementsSettings } from './announcements';
+import { getAnnouncementsSettings, getGlobalAnnouncementsSettings } from './announcements';
 
 export interface GetCoreSettingsOptions {
   isDist: boolean;
@@ -33,5 +33,11 @@ export const getCoreSettings = (
     ...getNotificationsSettings(),
     ...getThemeSettings(options),
     ...getStateSettings(),
+  };
+};
+
+export const getGlobalCoreSettings = (): Record<string, UiSettingsParams> => {
+  return {
+    ...getGlobalAnnouncementsSettings(),
   };
 };

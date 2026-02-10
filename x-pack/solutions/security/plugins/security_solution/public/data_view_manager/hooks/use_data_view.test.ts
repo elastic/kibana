@@ -7,6 +7,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
 import { useDataView } from './use_data_view';
@@ -23,6 +24,7 @@ jest.mock('react-redux', () => ({
 
 const mockGet = jest.fn();
 const mockToastsDanger = jest.fn();
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockNotifications = {
   toasts: {
@@ -47,6 +49,7 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         dataViews: mockDataViews,
         notifications: mockNotifications,
+        logger: mockLogger,
       },
     }),
   };

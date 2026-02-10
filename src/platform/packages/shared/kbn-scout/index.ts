@@ -11,15 +11,7 @@
 export * as cli from './src/cli';
 
 // Test framework
-export {
-  expect,
-  test,
-  spaceTest,
-  lighthouseTest,
-  apiTest,
-  globalSetupHook,
-  tags,
-} from './src/playwright';
+export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
 
 // Fixtures & configuration
 export {
@@ -84,3 +76,6 @@ export type {
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Utility for overriding synthtrace clients
+export { getSynthtraceClient } from './src/common/services/synthtrace';

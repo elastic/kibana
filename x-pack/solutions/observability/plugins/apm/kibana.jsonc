@@ -30,6 +30,7 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
       "lens",
       "maps",
@@ -51,6 +52,7 @@
       "home",
       "ml",
       "security",
+      "slo",
       "spaces",
       "serverless",
       "taskManager",
@@ -61,7 +63,8 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "agentBuilder"
+      "agentBuilder",
+      "slo",
     ],
     "requiredBundles": [
       "fleet",

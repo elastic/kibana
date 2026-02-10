@@ -55,6 +55,7 @@ import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
+  DeleteWorkflowsResponse,
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
@@ -68,13 +69,16 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
-import { affectsYamlMetadata } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import {
+  parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
+  stringifyWorkflowDefinition,
+} from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
+import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -83,6 +87,7 @@ export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  executedBy?: string[];
   page?: number;
   size?: number;
 }
@@ -170,15 +175,17 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(
+  /**
+   * Parses and validates a workflow YAML, returning the prepared document and metadata.
+   * Shared by createWorkflow and bulkCreateWorkflows.
+   */
+  private prepareWorkflowDocument(
     workflow: CreateWorkflowCommand,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<WorkflowDetailDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
-
+    zodSchema: z.ZodType,
+    authenticatedUser: string,
+    now: Date,
+    spaceId: string
+  ): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } {
     let workflowToCreate: EsWorkflowCreate = {
       name: 'Untitled workflow',
       description: undefined,
@@ -187,25 +194,25 @@ export class WorkflowsService {
       definition: undefined,
       valid: false,
     };
-    const parsedYaml = parseWorkflowYamlToJSON(
-      workflow.yaml,
-      await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
-    );
+
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
     if (parsedYaml.success) {
-      // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
       workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
         parsedYaml.data as unknown as WorkflowYaml
       );
 
-      // Validate step name uniqueness
       const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
       if (!stepValidation.isValid) {
         workflowToCreate.valid = false;
         workflowToCreate.definition = undefined;
       }
     }
-    const authenticatedUser = getAuthenticatedUser(request, this.security);
-    const now = new Date();
+
+    const id = workflow.id || this.generateWorkflowId();
+
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+    }
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -223,11 +230,61 @@ export class WorkflowsService {
       updated_at: now.toISOString(),
     };
 
-    const id = workflow.id || this.generateWorkflowId();
+    return { id, workflowData, definition: workflowToCreate.definition };
+  }
+
+  /**
+   * Schedules triggers for a workflow. Used by both createWorkflow and bulkCreateWorkflows.
+   */
+  private async scheduleWorkflowTriggers(
+    workflowId: string,
+    definition: WorkflowYaml | undefined,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const { taskScheduler } = this;
+    if (!taskScheduler || !definition?.triggers) {
+      return;
+    }
+
+    const scheduledTriggers = definition.triggers.filter((t) => t.type === 'scheduled');
+    await Promise.allSettled(
+      scheduledTriggers.map((trigger) =>
+        taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request)
+      )
+    ).then((results) => {
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Failed to schedule trigger for workflow ${workflowId}: ${result.reason}`
+          );
+        }
+      });
+    });
+  }
+
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const now = new Date();
+
+    const { id, workflowData, definition } = this.prepareWorkflowDocument(
+      workflow,
+      zodSchema,
+      authenticatedUser,
+      now,
+      spaceId
+    );
 
     if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
-
       const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
       if (existingWorkflow) {
         throw new WorkflowConflictError(
@@ -240,21 +297,114 @@ export class WorkflowsService {
     await this.workflowStorage.getClient().index({
       id,
       document: workflowData,
+      refresh: true,
     });
 
-    // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition?.triggers) {
-      for (const trigger of workflowToCreate.definition.triggers) {
-        if (trigger.type === 'scheduled') {
-          await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
-        }
-      }
-    }
+    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
 
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
-  // eslint-disable-next-line complexity
+  public async bulkCreateWorkflows(
+    workflows: CreateWorkflowCommand[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    created: WorkflowDetailDto[];
+    failed: Array<{ index: number; error: string }>;
+  }> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const now = new Date();
+
+    const created: WorkflowDetailDto[] = [];
+    const failed: Array<{ index: number; error: string }> = [];
+    const bulkOperations: Array<{
+      index: { _id: string; document: WorkflowProperties };
+    }> = [];
+    const validWorkflows: Array<{
+      idx: number;
+      id: string;
+      workflowData: WorkflowProperties;
+      definition?: WorkflowYaml;
+    }> = [];
+
+    // Phase 1: Validate all workflows and prepare bulk operations
+    for (let i = 0; i < workflows.length; i++) {
+      try {
+        const prepared = this.prepareWorkflowDocument(
+          workflows[i],
+          zodSchema,
+          authenticatedUser,
+          now,
+          spaceId
+        );
+
+        bulkOperations.push({
+          index: { _id: prepared.id, document: prepared.workflowData },
+        });
+        validWorkflows.push({
+          idx: i,
+          id: prepared.id,
+          workflowData: prepared.workflowData,
+          definition: prepared.definition,
+        });
+      } catch (error) {
+        failed.push({
+          index: i,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Phase 2: Bulk index all valid workflows using op_type: create to reject duplicates
+    if (bulkOperations.length > 0) {
+      const bulkResponse = await this.workflowStorage.getClient().bulk({
+        operations: bulkOperations,
+        refresh: true,
+      });
+
+      // Process bulk response
+      bulkResponse.items.forEach((item, itemIndex) => {
+        const operation = item.index;
+        const validWorkflow = validWorkflows[itemIndex];
+
+        if (operation?.error) {
+          failed.push({
+            index: validWorkflow.idx,
+            error:
+              typeof operation.error === 'object' && 'reason' in operation.error
+                ? operation.error.reason ?? JSON.stringify(operation.error)
+                : JSON.stringify(operation.error),
+          });
+        } else {
+          created.push(
+            this.transformStorageDocumentToWorkflowDto(validWorkflow.id, validWorkflow.workflowData)
+          );
+        }
+      });
+    }
+
+    // Phase 3: Schedule triggers for successfully created workflows (in parallel)
+    const workflowsToSchedule = validWorkflows.filter(
+      (vw) =>
+        created.some((w) => w.id === vw.id) &&
+        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+    );
+
+    await Promise.allSettled(
+      workflowsToSchedule.map((vw) =>
+        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+      )
+    );
+
+    return { created, failed };
+  }
+
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -355,12 +505,12 @@ export class WorkflowsService {
       }
 
       // Handle individual field updates only when YAML is not being updated
-      if (affectsYamlMetadata(workflow)) {
-        const existingYaml = existingDocument._source?.yaml;
+      if (!workflow.yaml) {
+        let yamlUpdated = false;
 
-        // Update metadata fields
         if (workflow.name !== undefined) {
           updatedData.name = workflow.name;
+          yamlUpdated = true;
         }
         if (workflow.enabled !== undefined) {
           // If enabling a workflow, ensure it has a valid definition
@@ -369,28 +519,34 @@ export class WorkflowsService {
           } else if (!workflow.enabled) {
             updatedData.enabled = false;
           }
+          yamlUpdated = true;
         }
         if (workflow.description !== undefined) {
           updatedData.description = workflow.description;
+          yamlUpdated = true;
         }
         if (workflow.tags !== undefined) {
           updatedData.tags = workflow.tags;
+          yamlUpdated = true;
         }
 
-        // Update the YAML in place to preserve formatting
-        if (existingYaml) {
-          updatedData.yaml = updateWorkflowYamlFields(existingYaml, workflow, updatedData.enabled);
+        if (yamlUpdated && existingDocument._source?.yaml) {
+          const originalYamlParse = parseYamlToJSONWithoutValidation(existingDocument._source.yaml);
+          const baseDefinition = originalYamlParse.success
+            ? originalYamlParse.json
+            : existingDocument._source?.definition;
 
-          // Also update the definition object to keep it in sync
-          if (existingDocument._source?.definition) {
-            const updatedWorkflowDefinition = {
-              ...existingDocument._source.definition,
+          if (baseDefinition) {
+            const fieldUpdates = {
               ...(workflow.name !== undefined && { name: workflow.name }),
               ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
               ...(workflow.description !== undefined && { description: workflow.description }),
               ...(workflow.tags !== undefined && { tags: workflow.tags }),
             };
-            updatedData.definition = updatedWorkflowDefinition;
+            updatedData.yaml = stringifyWorkflowDefinition({
+              ...baseDefinition,
+              ...fieldUpdates,
+            });
           }
         }
       }
@@ -400,6 +556,7 @@ export class WorkflowsService {
       await this.workflowStorage.getClient().index({
         id,
         document: finalData,
+        refresh: true,
       });
 
       // Update task scheduler if needed
@@ -468,47 +625,75 @@ export class WorkflowsService {
     }
   }
 
-  public async deleteWorkflows(ids: string[], spaceId: string): Promise<void> {
+  public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
     if (!this.workflowStorage) {
       throw new Error('WorkflowsService not initialized');
     }
 
     const now = new Date();
+    const failures: Array<{ id: string; error: string }> = [];
+    const client = this.workflowStorage.getClient();
 
-    // Soft delete by setting deleted_at timestamp
-    for (const id of ids) {
+    // Bulk fetch all workflows in a single search call
+    const searchResponse = await client.search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    // Build bulk operations for all found workflows
+    const bulkOperations = searchResponse.hits.hits.map((hit) => ({
+      index: {
+        _id: hit._id,
+        document: {
+          ...hit._source,
+          deleted_at: now,
+          enabled: false,
+        },
+      },
+    }));
+
+    // Bulk update all found workflows in a single call
+    if (bulkOperations.length > 0) {
       try {
-        // Check if workflow exists and belongs to the correct space
-        const searchResponse = await this.workflowStorage.getClient().search({
-          query: {
-            bool: {
-              must: [{ ids: { values: [id] } }, { term: { spaceId } }],
-            },
-          },
-          size: 1,
-          track_total_hits: false,
+        const bulkResponse = await client.bulk({
+          operations: bulkOperations,
+          refresh: true,
         });
 
-        if (searchResponse.hits.hits.length > 0) {
-          const existingDocument = searchResponse.hits.hits[0];
-          const updatedData = {
-            ...existingDocument._source,
-            deleted_at: now,
-            enabled: false,
-          };
-
-          await this.workflowStorage.getClient().index({
-            id,
-            document: updatedData,
-          });
-        }
+        // Process bulk response to track successes and failures
+        bulkResponse.items.forEach((item) => {
+          const operation = item.index;
+          if (operation?.error) {
+            failures.push({
+              id: operation._id ?? 'unknown',
+              error:
+                typeof operation.error === 'object' && 'reason' in operation.error
+                  ? operation.error.reason ?? JSON.stringify(operation.error)
+                  : JSON.stringify(operation.error),
+            });
+          }
+        });
       } catch (error) {
-        if (error.statusCode !== 404) {
-          throw error;
-        }
-        // Ignore not found errors for soft delete
+        // If the entire bulk operation fails, mark all as failed
+        bulkOperations.forEach((op) => {
+          failures.push({
+            id: op.index._id ?? 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
       }
     }
+
+    return {
+      total: ids.length,
+      deleted: ids.length - failures.length,
+      failures,
+    };
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
@@ -516,7 +701,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { size = 100, page = 1, enabled, createdBy, query } = params;
+    const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
 
     const must: estypes.QueryDslQueryContainer[] = [];
@@ -539,6 +724,10 @@ export class WorkflowsService {
 
     if (createdBy && createdBy.length > 0) {
       must.push({ terms: { createdBy } });
+    }
+
+    if (tags && tags.length > 0) {
+      must.push({ terms: { tags } });
     }
 
     if (query) {
@@ -871,6 +1060,13 @@ export class WorkflowsService {
           },
         });
       }
+    }
+    if (params.executedBy && params.executedBy.length > 0) {
+      must.push({
+        terms: {
+          executedBy: params.executedBy,
+        },
+      });
     }
 
     const page = params.page ?? 1;

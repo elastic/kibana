@@ -262,9 +262,14 @@ export function correctQuerySyntax(_query: string) {
 
   const endsWithBinaryOperatorRegex =
     /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+  const endsWithCastingOperatorRegex = /::\s*$/i;
   const endsWithCommaRegex = /,\s+$/;
 
-  if (endsWithBinaryOperatorRegex.test(query) || endsWithCommaRegex.test(query)) {
+  if (
+    endsWithBinaryOperatorRegex.test(query) ||
+    endsWithCastingOperatorRegex.test(query) ||
+    endsWithCommaRegex.test(query)
+  ) {
     query += ` ${EDITOR_MARKER}`;
   }
 

@@ -32,6 +32,7 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
 /** @internal */
 export interface InstanceInfo {
   uuid: string;
+  airgapped: boolean;
 }
 
 /**
@@ -75,6 +76,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: instanceInfo.airgapped,
     },
 
     /**

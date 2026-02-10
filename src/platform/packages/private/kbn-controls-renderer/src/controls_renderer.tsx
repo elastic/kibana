@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
+import { css } from '@emotion/react';
+import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { distinctUntilChanged } from 'rxjs';
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -28,22 +28,32 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import type { ControlsRendererParentApi, ControlsLayout } from './types';
+import type { ControlsLayout, ControlsRendererParentApi } from './types';
+import { apiPublishesFocusedPanelId } from './utils';
 
-export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
+export const ControlsRenderer = ({
+  controls: controlState,
+  onControlsChanged,
+  parentApi,
+}: {
+  controls: ControlsLayout;
+  onControlsChanged: (controls: ControlsLayout) => void;
+  parentApi: ControlsRendererParentApi;
+}) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
   }, []);
 
-  const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
+  const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
 
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
-      return Object.entries(controlState)
+      return Object.entries(controlState.controls)
         .map(([id, control]) => {
           return { id, ...control };
         })
@@ -53,18 +63,12 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
     }, [controlState]);
 
   useEffect(() => {
-    const layoutSubscription = parentApi.layout$
-      .pipe(
-        map(({ controls }) => controls),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((controls) => {
-        setControlState(controls);
-      });
-
-    return () => {
-      layoutSubscription.unsubscribe();
-    };
+    if (parentApi && apiPublishesFocusedPanelId(parentApi)) {
+      const focusedPanelIdSubscription = parentApi.focusedPanelId$
+        .pipe(distinctUntilChanged())
+        .subscribe((focusId) => setIsEditFlyoutOpen(Boolean(focusId)));
+      return () => focusedPanelIdSubscription.unsubscribe();
+    }
   }, [parentApi]);
 
   /** Handle drag and drop */
@@ -79,8 +83,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       const newIndex = over?.data.current?.sortable.index;
       if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
         const result = arrayMove([...controlsInOrder], oldIndex, newIndex);
-        parentApi.layout$.next({
-          ...parentApi.layout$.getValue(),
+        onControlsChanged({
           // based on the result of `arrayMove`, assign the order to each control
           controls: result.reduce((prev, control, index) => {
             const { id, ...rest } = control;
@@ -91,7 +94,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       (document.activeElement as HTMLElement)?.blur(); // hide hover actions on drop; otherwise, they get stuck
       setDraggingId(null);
     },
-    [parentApi.layout$, controlsInOrder]
+    [onControlsChanged, controlsInOrder]
   );
 
   if (controlsInOrder.length === 0) {
@@ -115,18 +118,23 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
         <EuiFlexGroup
           component="ul"
-          className="controlGroup"
+          className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
+          css={controlsGroupStyles.controlsGroup}
           alignItems="center"
           gutterSize="s"
           wrap={true}
           data-test-subj="controls-group-wrapper"
         >
-          {controlsInOrder.map(({ id, type }) => (
+          {controlsInOrder.map((control) => (
             <ControlPanel
-              key={id}
-              type={type}
-              uuid={id!}
+              key={control.id}
               parentApi={parentApi}
+              control={{
+                width: DEFAULT_CONTROL_WIDTH,
+                grow: DEFAULT_CONTROL_GROW,
+                ...control,
+                uid: control.id!,
+              }}
               setControlPanelRef={setControlPanelRef}
             />
           ))}
@@ -143,4 +151,12 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       </DragOverlay>
     </DndContext>
   );
+};
+
+const controlsGroupStyles = {
+  controlsGroup: css({
+    '&.controlsGroup--editing .controlFrameFloatingActions': {
+      visibility: 'hidden !important' as 'hidden',
+    },
+  }),
 };

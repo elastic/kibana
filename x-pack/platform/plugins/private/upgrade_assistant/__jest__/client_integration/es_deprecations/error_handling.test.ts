@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { screen } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 
 describe('Error handling', () => {
-  let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -30,13 +30,9 @@ describe('Error handling', () => {
 
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
+    await setupElasticsearchPage(httpSetup);
 
-    const { component, find } = testBed;
-    component.update();
-    expect(find('deprecationsPageLoadingError').text()).toContain(
+    expect(await screen.findByTestId('deprecationsPageLoadingError')).toHaveTextContent(
       'You are not authorized to view Elasticsearch deprecation issues.'
     );
   });
@@ -55,13 +51,9 @@ describe('Error handling', () => {
 
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
+    await setupElasticsearchPage(httpSetup);
 
-    const { component, find } = testBed;
-    component.update();
-    expect(find('deprecationsPageLoadingError').text()).toContain(
+    expect(await screen.findByTestId('deprecationsPageLoadingError')).toHaveTextContent(
       'All Elasticsearch nodes have been upgraded.'
     );
   });
@@ -78,13 +70,9 @@ describe('Error handling', () => {
 
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
+    await setupElasticsearchPage(httpSetup);
 
-    const { component, find } = testBed;
-    component.update();
-    expect(find('deprecationsPageLoadingError').text()).toContain(
+    expect(await screen.findByTestId('deprecationsPageLoadingError')).toHaveTextContent(
       'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
     );
   });
@@ -98,13 +86,9 @@ describe('Error handling', () => {
 
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
+    await setupElasticsearchPage(httpSetup);
 
-    const { component, find } = testBed;
-    component.update();
-    expect(find('deprecationsPageLoadingError').text()).toContain(
+    expect(await screen.findByTestId('deprecationsPageLoadingError')).toHaveTextContent(
       'Could not retrieve Elasticsearch deprecation issues.'
     );
   });

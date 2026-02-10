@@ -23,11 +23,7 @@ describe('Clone panel action', () => {
         isDuplicable: true,
         uuid: 'superId',
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        serializeState: () => {
-          return {
-            rawState: {},
-          };
-        },
+        serializeState: () => ({}),
         parentApi: {
           duplicatePanel: jest.fn(),
         },

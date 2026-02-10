@@ -5,6 +5,117 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastBorder",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastBorder",
+        "description": [
+          "\nHelper function to get container border styles for high contrast mode.\nIn high contrast mode, renders a solid border. Otherwise, renders based on color mode.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>) => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastBorder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [
+              "- EUI theme context"
+            ],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 20,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS border string"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastSeparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastSeparator",
+        "description": [
+          "\nHelper function to get separator border styles for high contrast mode.\nIn high contrast mode, renders a real border. Otherwise, renders a pseudo-element with subdued styling.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>, options?: ",
+          "HighContrastSeparatorOptions",
+          ") => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Configuration options for the separator"
+            ],
+            "signature": [
+              "HighContrastSeparatorOptions"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS string for the separator"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
         "id": "def-public.getScrollContainer",
         "type": "Function",
         "tags": [],
@@ -16,6 +127,8 @@
           "() => HTMLElement"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -37,6 +150,8 @@
           "(container?: HTMLElement) => { scrollTop: number; scrollHeight: number; clientHeight: number; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +168,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,6 +193,8 @@
           "(container?: HTMLElement) => number"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,6 +211,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 56,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -115,6 +236,8 @@
           "(container?: HTMLElement) => { top: number; bottom: number; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,6 +254,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +279,8 @@
           "(container?: HTMLElement) => number"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,6 +297,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 31,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -193,6 +322,8 @@
           "(container?: HTMLElement) => boolean"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 147,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -209,6 +340,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 147,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -232,6 +365,8 @@
           "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +378,8 @@
             "label": "opts",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 130,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -254,6 +391,8 @@
                 "label": "top",
                 "description": [],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -268,6 +407,8 @@
                   "ScrollBehavior | undefined"
                 ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -286,6 +427,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,6 +450,8 @@
           "(opts: { top: number; behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -318,6 +463,8 @@
             "label": "opts",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 68,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -329,6 +476,8 @@
                 "label": "top",
                 "description": [],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -343,6 +492,8 @@
                   "ScrollBehavior | undefined"
                 ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 70,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -361,6 +512,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -382,6 +535,8 @@
           "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -393,6 +548,8 @@
             "label": "opts",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 99,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -407,6 +564,8 @@
                   "ScrollBehavior | undefined"
                 ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 100,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -425,6 +584,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,6 +607,8 @@
           "(opts?: { behavior?: ScrollBehavior | undefined; }, container?: HTMLElement) => void"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -457,6 +620,8 @@
             "label": "opts",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 84,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -471,6 +636,8 @@
                   "ScrollBehavior | undefined"
                 ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -489,6 +656,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -498,7 +667,96 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.HighContrastSeparatorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HighContrastSeparatorOptions",
+        "description": [],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.side",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "side",
+            "description": [
+              "The side to place the border separator ('top' or 'bottom'). Default: 'bottom'"
+            ],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Width of the separator line. Default: theme.size.xl"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.left",
+            "type": "string",
+            "tags": [],
+            "label": "left",
+            "description": [
+              "Left position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.right",
+            "type": "string",
+            "tags": [],
+            "label": "right",
+            "description": [
+              "Right position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -512,6 +770,8 @@
           "HTMLElement"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

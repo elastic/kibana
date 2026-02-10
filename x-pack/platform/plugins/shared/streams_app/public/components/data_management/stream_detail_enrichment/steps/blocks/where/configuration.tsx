@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
-import { isCondition } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -169,7 +169,7 @@ export const WhereBlockConditionEditor = () => {
   const { field } = useController<ConditionBlockFormState, 'condition'>({
     name: 'condition',
     rules: {
-      validate: (value) => isCondition(value),
+      validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
 

@@ -44,9 +44,6 @@ export const getMatchersFor = (integration: IntegrationType): Matcher[] => [
 export const integrationsSourceIndex = (namespace: string, integrationName: string) =>
   `${PRIVMON_BASE_INDEX_NAME}.sources.${integrationName}-${namespace}`;
 
-export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
-  '/api/entity_analytics/monitoring/privileges/privileges';
-
 export const INTEGRATION_TYPES = ['entityanalytics_okta', 'entityanalytics_ad'] as const;
 export type IntegrationType = (typeof INTEGRATION_TYPES)[number];
 

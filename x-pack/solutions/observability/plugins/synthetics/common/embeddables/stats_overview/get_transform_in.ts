@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { Reference } from '@kbn/content-management-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { OverviewStatsEmbeddableState } from './types';
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: OverviewStatsEmbeddableState): {
     state: OverviewStatsEmbeddableState;
     references: Reference[];
   } {
-    const { enhancements, ...rest } = state;
-    const { enhancementsState, enhancementsReferences } = enhancements
-      ? transformEnhancementsIn(enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
-
-    return {
-      state: {
-        ...rest,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-      } as OverviewStatsEmbeddableState,
-      references: enhancementsReferences,
-    };
+    return transformDrilldownsIn(state);
   }
   return transformIn;
 }

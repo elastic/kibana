@@ -39,6 +39,7 @@ export function ApmEmbeddableContext({
     observabilityShared: deps.pluginsStart.observabilityShared,
     dataViews: deps.pluginsStart.dataViews,
     unifiedSearch: deps.pluginsStart.unifiedSearch,
+    kql: deps.pluginsStart.kql,
     lens: deps.pluginsStart.lens,
     uiActions: deps.pluginsStart.uiActions,
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,

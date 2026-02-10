@@ -242,6 +242,7 @@ export const OptionsListControl = ({
 
   return (
     <EuiFilterGroup
+      className={'kbnGridLayout--hideDragHandle'}
       fullWidth
       compressed={isCompressed(componentApi)}
       css={optionListControlStyles.filterGroup}

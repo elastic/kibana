@@ -8,6 +8,8 @@
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
@@ -46,8 +48,79 @@ describe('integration schemas', () => {
     ...overrides,
   });
 
+  describe('ApproveAutoImportIntegrationRequestParams', () => {
+    it('requires integration_id', () => {
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse({});
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+    });
+
+    it('rejects empty integration_id', () => {
+      const payload = { integration_id: '   ' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
+    });
+
+    it('accepts valid params', () => {
+      const payload = { integration_id: 'integration-123' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = { integration_id: 'integration-123', unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({ integration_id: 'integration-123' });
+    });
+  });
+
+  describe('ApproveAutoImportIntegrationRequestBody', () => {
+    const validPayload = {
+      version: '1.0.0',
+    };
+
+    it('accepts a valid payload', () => {
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(validPayload);
+      expectParseSuccess(result);
+    });
+
+    it('requires version', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).version;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: Required');
+    });
+
+    it('rejects empty version', () => {
+      const payload = { ...validPayload, version: '   ' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
+    });
+
+    it('accepts non-semver version strings', () => {
+      const payload = { ...validPayload, version: 'build-2026-01-29' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects unknown properties', () => {
+      const payload = { ...validPayload, unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+  });
+
   describe('CreateAutoImportIntegrationRequestBody', () => {
     const validPayload = {
+      connectorId: 'test-connector-id',
       integrationId: 'test-integration',
       title: 'Test Integration',
       description: 'Integration for testing purposes',
@@ -60,8 +133,23 @@ describe('integration schemas', () => {
       expectParseSuccess(result);
     });
 
+    it('requires connectorId', () => {
+      const payload = {
+        integrationId: 'test-integration',
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        dataStreams: [createValidDataStream()],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('connectorId: Required');
+    });
+
     it('requires integrationId', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
@@ -103,6 +191,7 @@ describe('integration schemas', () => {
 
     it('accepts integration without logo', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -115,6 +204,7 @@ describe('integration schemas', () => {
 
     it('accepts integration without dataStreams (optional)', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -136,6 +226,7 @@ describe('integration schemas', () => {
 
     it('requires title', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         description: 'Integration for testing purposes',
         dataStreams: [createValidDataStream()],
@@ -149,6 +240,7 @@ describe('integration schemas', () => {
 
     it('requires description', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         dataStreams: [createValidDataStream()],
@@ -162,6 +254,7 @@ describe('integration schemas', () => {
 
     it('requires data stream title', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -182,6 +275,7 @@ describe('integration schemas', () => {
 
     it('requires data stream dataStreamId', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -202,6 +296,7 @@ describe('integration schemas', () => {
 
     it('rejects invalid input type', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: 'Integration for testing purposes',
@@ -236,6 +331,7 @@ describe('integration schemas', () => {
 
       inputTypes.forEach((inputType) => {
         const payload = {
+          connectorId: 'test-connector-id',
           integrationId: 'test-integration',
           title: 'Test Integration',
           description: 'Integration for testing purposes',
@@ -254,6 +350,7 @@ describe('integration schemas', () => {
 
     it('rejects empty string for title', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: '   ',
         description: 'Integration for testing purposes',
@@ -268,6 +365,7 @@ describe('integration schemas', () => {
 
     it('rejects empty string for description', () => {
       const payload = {
+        connectorId: 'test-connector-id',
         integrationId: 'test-integration',
         title: 'Test Integration',
         description: '   ',
@@ -682,7 +780,14 @@ describe('integration schemas', () => {
     });
 
     it('accepts all valid task status values', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'approved',
+        'failed',
+        'cancelled',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = [
@@ -899,6 +1004,7 @@ describe('integration schemas', () => {
       it('simulates creating, retrieving, updating, and deleting an integration', () => {
         // Step 1: PUT - Create a new integration
         const createRequest = {
+          connectorId: 'test-connector-id',
           integrationId: 'nginx_logs_integration',
           title: 'Nginx Logs Integration',
           description: 'Integration for collecting Nginx access and error logs',
@@ -996,6 +1102,7 @@ describe('integration schemas', () => {
       it('simulates managing multiple integrations', () => {
         // Step 1: PUT - Create first integration (Apache)
         const createApache = {
+          connectorId: 'test-connector-id',
           integrationId: 'apache_logs',
           title: 'Apache Logs',
           description: 'Apache web server logs integration',
@@ -1016,6 +1123,7 @@ describe('integration schemas', () => {
 
         // Step 2: PUT - Create second integration (MySQL)
         const createMySQL = {
+          connectorId: 'test-connector-id',
           integrationId: 'mysql_logs',
           title: 'MySQL Logs',
           description: 'MySQL database logs integration',
@@ -1080,6 +1188,7 @@ describe('integration schemas', () => {
     describe('Edge Cases in Workflow', () => {
       it('handles creating integration with multiple input types', () => {
         const createRequest = {
+          connectorId: 'test-connector-id',
           integrationId: 'multi_input_integration',
           title: 'Multi-Input Integration',
           description: 'Integration supporting multiple input types',

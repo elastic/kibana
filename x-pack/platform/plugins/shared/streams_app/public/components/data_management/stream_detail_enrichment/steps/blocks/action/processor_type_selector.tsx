@@ -14,6 +14,7 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
+import { useGrokCollection } from '@kbn/grok-ui';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
@@ -56,7 +57,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
   });
 
-  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   // To make it possible to clear the selection to enter a new value,
   // keep track of local empty state. As soon as field.value is set, switch back to highlighting
@@ -78,7 +79,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     const formState = getDefaultFormStateByType(
       type,
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection }
+      { grokCollection: grokCollection! }
     );
     reset(formState);
   };
@@ -281,6 +282,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  redact: {
+    type: 'redact' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactInputDisplay',
+      {
+        defaultMessage: 'Redact',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.redactHelpText"
+          defaultMessage="{redactLink} Uses Grok patterns to identify and mask sensitive information like IP addresses, emails, and other PII."
+          values={{
+            redactLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRedactLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.redact}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.redactLinkLabel', {
+                  defaultMessage: 'Masks sensitive data in a field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   drop_document: {
     type: 'drop_document' as const,
     inputDisplay: i18n.translate(
@@ -336,6 +368,157 @@ const getAvailableProcessors: (
       );
     },
   },
+  uppercase: {
+    type: 'uppercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseInputDisplay',
+      {
+        defaultMessage: 'Uppercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseHelpText"
+          defaultMessage="{uppercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            uppercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUppercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.uppercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.uppercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its uppercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  lowercase: {
+    type: 'lowercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseInputDisplay',
+      {
+        defaultMessage: 'Lowercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseHelpText"
+          defaultMessage="{lowercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            lowercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsLowercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.lowercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.lowercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its lowercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  trim: {
+    type: 'trim' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimInputDisplay',
+      {
+        defaultMessage: 'Trim',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.trimHelpText"
+          defaultMessage="{trimLink} If the field is an array of strings, all members of the array will be trimmed."
+          values={{
+            trimLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsTrimLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.trim}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
+                  defaultMessage: 'Trims whitespace from field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  concat: {
+    type: 'concat' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatInputDisplay',
+      {
+        defaultMessage: 'Concat',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.concatHelpText"
+          defaultMessage="Join field values and text into a single string and write it to a target field."
+        />
+      );
+    },
+  },
+  join: {
+    type: 'join' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.joinInputDisplay',
+      {
+        defaultMessage: 'Join',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.joinHelpText"
+          defaultMessage="{joinLink} into a single field by inserting a delimiter (for example: {example1} or {example2}) between the field values."
+          values={{
+            joinLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsJoinLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.join}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.joinLinkLabel', {
+                  defaultMessage: 'Join multiple fields',
+                })}
+              </EuiLink>
+            ),
+            example1: (
+              <>
+                <EuiCode>,</EuiCode>
+              </>
+            ),
+            example2: (
+              <>
+                <EuiCode>|</EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -371,11 +554,17 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  redact: 'convert',
   append: 'set',
   set: 'set',
   rename: 'set',
   math: 'set',
   manual_ingest_pipeline: 'other',
+  uppercase: 'set',
+  lowercase: 'set',
+  trim: 'set',
+  join: 'set',
+  concat: 'set',
 };
 
 const getProcessorDescription =

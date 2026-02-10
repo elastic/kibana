@@ -18,6 +18,7 @@ import {
 import { useQueryClient } from '@kbn/react-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAddToTimeline } from '../../../common/hooks/use_add_to_timeline';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
 
@@ -50,6 +51,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
     services: { osquery },
   } = useKibana();
   const queryClient = useQueryClient();
+  const addToTimeline = useAddToTimeline();
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
@@ -77,6 +79,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               defaultValues={defaultValues}
               ecsData={ecsData}
               onSuccess={invalidateQueries}
+              addToTimeline={addToTimeline}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

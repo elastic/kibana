@@ -61,10 +61,12 @@ describe('getConnectorIdSuggestions', () => {
       focusedStepInfo: { stepType: 'slack' },
       dynamicConnectorTypes: fakeConnectorTypes,
     } as unknown as AutocompleteContext);
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
     expect(result[0].label).toBe('Public Slack • public-slack');
-    expect(result[0].insertText).toBe('Public Slack');
+    expect(result[0].insertText).toBe('public-slack');
     expect(result[1].label).toBe('Private Slack • private-slack');
-    expect(result[1].insertText).toBe('Private Slack');
+    expect(result[1].insertText).toBe('private-slack');
+    expect(result[2].label).toBe('Create a new connector');
+    expect(result[2].insertText).toBe('');
   });
 });

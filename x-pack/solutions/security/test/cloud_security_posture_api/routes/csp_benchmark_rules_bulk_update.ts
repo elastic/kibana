@@ -82,7 +82,8 @@ export default function (providerContext: FtrProviderContext) {
     return detectionRule;
   };
 
-  describe('Verify update csp rules states API', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/248839
+  describe.skip('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });

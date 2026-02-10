@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
-import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 
 /**
  * Availability handler for Observability Agent Builder resources.
@@ -24,27 +20,11 @@ export async function getAgentBuilderResourceAvailability({
   request,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   request: KibanaRequest;
   logger: Logger;
 }): Promise<ToolAvailabilityResult> {
-  const [coreStart, pluginsStart] = await core.getStartServices();
-
-  const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
-    AI_AGENTS_FEATURE_FLAG,
-    AI_AGENTS_FEATURE_FLAG_DEFAULT
-  );
-
-  if (!isAiAgentsEnabled) {
-    logger.debug(`AI agents are disabled (${AI_AGENTS_FEATURE_FLAG}), skipping registration.`);
-    return {
-      status: 'unavailable',
-      reason: `AI agents are disabled (${AI_AGENTS_FEATURE_FLAG})`,
-    };
-  }
+  const [, pluginsStart] = await core.getStartServices();
 
   try {
     const activeSpace = await pluginsStart.spaces?.spacesService.getActiveSpace(request);

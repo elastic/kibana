@@ -103,6 +103,9 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/alerts-ui-shared'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/home-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod

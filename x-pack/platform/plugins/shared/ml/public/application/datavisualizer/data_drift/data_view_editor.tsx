@@ -43,6 +43,13 @@ const mustMatchError = i18n.translate(
   }
 );
 
+const matchedIndicesTableCaption = i18n.translate(
+  'xpack.ml.dataDrift.indexPatternsEditor.matchedIndicesTableCaption',
+  {
+    defaultMessage: 'Matched indices for the selected index pattern',
+  }
+);
+
 export function DataViewEditor({
   id,
   label,
@@ -187,6 +194,7 @@ export function DataViewEditor({
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          tableCaption={matchedIndicesTableCaption}
           data-test-subject={`mlDataDriftIndexPatternTable-${id ?? ''}`}
           rowProps={(item) => {
             return {

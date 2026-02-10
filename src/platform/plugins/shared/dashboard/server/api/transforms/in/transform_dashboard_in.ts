@@ -31,12 +31,11 @@ export const transformDashboardIn = (
     } => {
   try {
     const {
-      controlGroupInput,
+      pinned_panels,
       options,
       filters,
       panels,
       query,
-      references: incomingReferences,
       tags,
       time_range,
       refresh_interval,
@@ -44,9 +43,6 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
-    if (incomingReferences && incomingReferences.length) {
-      throw new Error(`References are not supported.`);
-    }
     const tagReferences = transformTagsIn(tags);
 
     const {
@@ -67,7 +63,7 @@ export const transformDashboardIn = (
     );
 
     const { controlsJSON, references: controlGroupReferences } =
-      transformControlGroupIn(controlGroupInput);
+      transformControlGroupIn(pinned_panels);
 
     const attributes = {
       description: '',
@@ -91,7 +87,6 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...controlGroupReferences,
         ...panelReferences,
         ...controlGroupReferences,
         ...searchSourceReferences,

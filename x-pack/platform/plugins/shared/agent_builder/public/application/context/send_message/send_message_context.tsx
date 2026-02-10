@@ -22,7 +22,7 @@ interface SendMessageState {
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
-  resumeRound: ({ confirm }: { confirm: boolean }) => void;
+  resumeRound: (opts: { promptId: string; confirm: boolean }) => void;
   isResuming: boolean;
   connectorSelection: {
     selectedConnector: string | undefined;

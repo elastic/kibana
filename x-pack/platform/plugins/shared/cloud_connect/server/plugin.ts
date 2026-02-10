@@ -13,11 +13,13 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { type Subscription } from 'rxjs';
 import { cloudConnectedFeature } from './features';
 import { registerRoutes } from './routes';
 import {
@@ -25,6 +27,7 @@ import {
   CloudConnectApiKeyEncryptionParams,
 } from './saved_objects/cloud_connect_api_key';
 import type { CloudConnectConfig } from './config';
+import { registerCloudConnectLicenseSync } from './lib/register_license_sync';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginSetup {}
@@ -40,6 +43,7 @@ interface CloudConnectedSetupDeps {
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export class CloudConnectedPlugin
@@ -53,10 +57,14 @@ export class CloudConnectedPlugin
 {
   private readonly logger: Logger;
   private readonly config: CloudConnectConfig;
+  private licenseSubscription?: Subscription;
+  private isCloudEnabled = false;
+  private cloudApiUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<CloudConnectConfig>();
+    this.cloudApiUrl = `${this.config.cloudUrl}/api/v1`;
   }
 
   public setup(
@@ -69,6 +77,7 @@ export class CloudConnectedPlugin
     // This plugin is only for self-managed clusters connecting to Cloud services
     if (plugins.cloud?.isCloudEnabled) {
       this.logger.debug('cloudConnected: Skipping setup - running on Elastic Cloud');
+      this.isCloudEnabled = true;
       return {};
     }
 
@@ -88,16 +97,34 @@ export class CloudConnectedPlugin
       logger: this.logger,
       getStartServices: core.getStartServices,
       hasEncryptedSOEnabled: plugins.encryptedSavedObjects.canEncrypt,
-      cloudApiUrl: `${this.config.cloudUrl}/api/v1`,
+      cloudApiUrl: this.cloudApiUrl!,
     });
 
     return {};
   }
 
-  public start(core: CoreStart): CloudConnectedPluginStart {
+  public start(core: CoreStart, plugins: CloudConnectedStartDeps): CloudConnectedPluginStart {
     this.logger.debug('cloudConnected: Started');
+
+    // No-op if running on Elastic Cloud (plugin is effectively disabled there).
+    if (this.isCloudEnabled) {
+      return {};
+    }
+
+    this.licenseSubscription = registerCloudConnectLicenseSync({
+      savedObjects: core.savedObjects,
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+      licensing: plugins.licensing,
+      logger: this.logger,
+      cloudApiUrl: this.cloudApiUrl!,
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
+    this.licenseSubscription = undefined;
+  }
 }

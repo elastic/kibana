@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 
-import type { ManageProcessorsTestBed } from './helpers/manage_processors.helpers';
-
-import { setupEnvironment, pageHelpers } from './helpers';
 import type { GeoipDatabase } from '../../common/types';
 import { API_BASE_PATH } from '../../common/constants';
-
-const { setup } = pageHelpers.manageProcessors;
+import { ManageProcessors } from '../../public/application/sections';
+import { getManageProcessorsPath, ROUTES } from '../../public/application/services/navigation';
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
 describe('<ManageProcessors />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: ManageProcessorsTestBed;
+
+  const renderManageProcessors = async (expectedTestId: string) => {
+    const history = createMemoryHistory({ initialEntries: [getManageProcessorsPath()] });
+    const Wrapped = WithAppDependencies(ManageProcessors, httpSetup);
+
+    render(
+      <Router history={history}>
+        <Route path={ROUTES.manageProcessors} component={Wrapped} />
+      </Router>
+    );
+
+    await screen.findByTestId('manageProcessorsTitle');
+    await screen.findByTestId(expectedTestId);
+  };
 
   describe('With databases', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
-    });
-
     const database1: GeoipDatabase = {
       name: 'GeoIP2-Anonymous-IP',
       id: 'geoip2-anonymous-ip',
@@ -54,43 +60,59 @@ describe('<ManageProcessors />', () => {
 
     const databases = [database1, database2, database3, database4];
 
-    httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
-
     test('renders the list of databases', async () => {
-      const { exists, find, table } = testBed;
+      jest.clearAllMocks();
+      httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
+      await renderManageProcessors('geoipDatabaseList');
 
       // Page title
-      expect(exists('manageProcessorsTitle')).toBe(true);
-      expect(find('manageProcessorsTitle').text()).toEqual('Manage Processors');
+      expect(screen.getByTestId('manageProcessorsTitle')).toHaveTextContent('Manage Processors');
 
       // Add database button
-      expect(exists('addGeoipDatabaseButton')).toBe(true);
+      expect(screen.getByTestId('addGeoipDatabaseButton')).toBeInTheDocument();
 
-      // Table has columns for database name and type
-      const { tableCellsValues } = table.getMetaData('geoipDatabaseList');
-      tableCellsValues.forEach((row, i) => {
+      const rows = screen.getAllByTestId('geoipDatabaseListRow');
+      expect(rows).toHaveLength(databases.length);
+      rows.forEach((row, i) => {
         const database = databases[i];
-
-        expect(row).toEqual([
-          database.name,
-          database.type === 'maxmind' ? 'MaxMind' : 'IPinfo',
-          '',
-        ]);
+        expect(within(row).getByText(database.name)).toBeInTheDocument();
+        expect(
+          within(row).getByText(database.type === 'maxmind' ? 'MaxMind' : 'IPinfo')
+        ).toBeInTheDocument();
       });
     });
 
     test('deletes a database', async () => {
-      const { actions } = testBed;
-      const databaseIndexToDelete = 0;
-      const databaseName = databases[databaseIndexToDelete].name;
-      httpRequestsMockHelpers.setDeleteDatabasesResponse(databaseName, {});
+      jest.clearAllMocks();
+      httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
+      httpRequestsMockHelpers.setDeleteDatabasesResponse(database1.id, {});
+      await renderManageProcessors('geoipDatabaseList');
 
-      await actions.clickDeleteDatabaseButton(databaseIndexToDelete);
+      const firstRow = screen.getAllByTestId('geoipDatabaseListRow')[0];
+      fireEvent.click(within(firstRow).getByTestId('deleteGeoipDatabaseButton'));
 
-      await actions.confirmDeletingDatabase();
+      const modalSubmit = await screen.findByTestId('deleteGeoipDatabaseSubmit');
+      fireEvent.change(screen.getByTestId('geoipDatabaseConfirmation'), {
+        target: { value: 'delete' },
+      });
+      await waitFor(() => expect(modalSubmit).not.toBeDisabled());
+
+      const deleteCallsBefore = httpSetup.delete.mock.calls.length;
+      fireEvent.click(modalSubmit);
+
+      await waitFor(() =>
+        expect(httpSetup.delete.mock.calls.length).toBeGreaterThan(deleteCallsBefore)
+      );
+      const deleteRequest = httpSetup.delete.mock.results[deleteCallsBefore]?.value as
+        | Promise<unknown>
+        | undefined;
+      expect(deleteRequest).toBeDefined();
+      await waitFor(async () => {
+        await deleteRequest;
+      });
 
       expect(httpSetup.delete).toHaveBeenLastCalledWith(
-        `${API_BASE_PATH}/databases/${databaseName.toLowerCase()}`,
+        `${API_BASE_PATH}/databases/${database1.id}`,
         expect.anything()
       );
     });
@@ -98,7 +120,8 @@ describe('<ManageProcessors />', () => {
 
   describe('Creates a database', () => {
     it('creates a MaxMind database when none with the same name exists', async () => {
-      const { actions, exists } = testBed;
+      jest.clearAllMocks();
+      httpRequestsMockHelpers.setLoadDatabasesResponse([]);
       const databaseName = 'GeoIP2-ISP';
       const maxmind = '123456';
       httpRequestsMockHelpers.setCreateDatabasesResponse({
@@ -106,13 +129,21 @@ describe('<ManageProcessors />', () => {
         id: databaseName.toLowerCase(),
       });
 
-      await actions.clickAddDatabaseButton();
+      await renderManageProcessors('geoipEmptyListPrompt');
+      fireEvent.click(screen.getByTestId('addGeoipDatabaseButton'));
+      await screen.findByTestId('addGeoipDatabaseForm');
 
-      expect(exists('addGeoipDatabaseForm')).toBe(true);
+      fireEvent.change(screen.getByTestId('databaseTypeSelect'), { target: { value: 'maxmind' } });
+      fireEvent.change(screen.getByTestId('maxmindField'), { target: { value: maxmind } });
+      fireEvent.change(screen.getByTestId('databaseNameSelect'), {
+        target: { value: databaseName },
+      });
 
-      await actions.fillOutDatabaseValues('maxmind', databaseName, maxmind);
-
-      await actions.confirmAddingDatabase();
+      const postCallsBefore = httpSetup.post.mock.calls.length;
+      fireEvent.click(screen.getByTestId('addGeoipDatabaseSubmit'));
+      await waitFor(() =>
+        expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore)
+      );
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/databases`, {
         asSystemRequest: undefined,
@@ -123,24 +154,32 @@ describe('<ManageProcessors />', () => {
     });
 
     it('creates an IPinfo database when none with the same name exists', async () => {
-      const { actions, exists } = testBed;
-      const databaseName = 'ASN';
+      jest.clearAllMocks();
+      httpRequestsMockHelpers.setLoadDatabasesResponse([]);
+      const databaseName = 'standard_asn';
       httpRequestsMockHelpers.setCreateDatabasesResponse({
-        name: databaseName,
-        id: databaseName.toLowerCase(),
+        name: 'ASN',
+        id: 'asn',
       });
 
-      await actions.clickAddDatabaseButton();
+      await renderManageProcessors('geoipEmptyListPrompt');
+      fireEvent.click(screen.getByTestId('addGeoipDatabaseButton'));
+      await screen.findByTestId('addGeoipDatabaseForm');
 
-      expect(exists('addGeoipDatabaseForm')).toBe(true);
+      fireEvent.change(screen.getByTestId('databaseTypeSelect'), { target: { value: 'ipinfo' } });
+      fireEvent.change(screen.getByTestId('databaseNameSelect'), {
+        target: { value: databaseName },
+      });
 
-      await actions.fillOutDatabaseValues('ipinfo', databaseName);
-
-      await actions.confirmAddingDatabase();
+      const postCallsBefore = httpSetup.post.mock.calls.length;
+      fireEvent.click(screen.getByTestId('addGeoipDatabaseSubmit'));
+      await waitFor(() =>
+        expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore)
+      );
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(`${API_BASE_PATH}/databases`, {
         asSystemRequest: undefined,
-        body: '{"databaseType":"ipinfo","databaseName":"ASN","maxmind":""}',
+        body: '{"databaseType":"ipinfo","databaseName":"standard_asn","maxmind":""}',
         query: undefined,
         version: undefined,
       });
@@ -149,20 +188,16 @@ describe('<ManageProcessors />', () => {
 
   describe('No databases', () => {
     test('displays an empty prompt', async () => {
+      jest.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse([]);
-
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      const { exists, component } = testBed;
-      component.update();
-
-      expect(exists('geoipEmptyListPrompt')).toBe(true);
+      await renderManageProcessors('geoipEmptyListPrompt');
+      expect(screen.getByTestId('geoipEmptyListPrompt')).toBeInTheDocument();
     });
   });
 
   describe('Error handling', () => {
-    beforeEach(async () => {
+    test('displays an error callout', async () => {
+      jest.clearAllMocks();
       const error = {
         statusCode: 500,
         error: 'Internal server error',
@@ -170,18 +205,8 @@ describe('<ManageProcessors />', () => {
       };
 
       httpRequestsMockHelpers.setLoadDatabasesResponse(undefined, error);
-
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
-    });
-
-    test('displays an error callout', async () => {
-      const { exists } = testBed;
-
-      expect(exists('geoipListLoadingError')).toBe(true);
+      await renderManageProcessors('geoipListLoadingError');
+      expect(screen.getByTestId('geoipListLoadingError')).toBeInTheDocument();
     });
   });
 });

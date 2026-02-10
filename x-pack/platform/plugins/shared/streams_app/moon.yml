@@ -98,13 +98,18 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
-  - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
   - '@kbn/classic-stream-flyout'
   - '@kbn/ebt-tools'
   - '@kbn/language-documentation'
   - '@kbn/shared-ux-markdown'
   - '@kbn/test-jest-helpers'
+  - '@kbn/react-query'
+  - '@kbn/timerange'
+  - '@kbn/inference-common'
+  - '@kbn/esql'
+  - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/stack-connectors-plugin'
 tags:
   - plugin
   - prod

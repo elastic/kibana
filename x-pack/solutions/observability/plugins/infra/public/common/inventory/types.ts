@@ -77,14 +77,13 @@ export const PALETTES = {
 export const StepRuleRT = rt.intersection([
   rt.type({
     value: rt.number,
-    operator: OperatorRT,
     color: rt.string,
   }),
-  rt.partial({ label: rt.string }),
+  rt.partial({ label: rt.string, operator: OperatorRT }),
 ]);
 
 export const StepLegendRT = rt.type({
-  type: rt.literal('step'),
+  type: rt.literal('steps'),
   rules: rt.array(StepRuleRT),
 });
 export type InfraWaffleMapStepRule = rt.TypeOf<typeof StepRuleRT>;

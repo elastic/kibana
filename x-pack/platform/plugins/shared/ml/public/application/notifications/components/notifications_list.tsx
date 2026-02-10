@@ -401,6 +401,9 @@ export const NotificationsList: FC = () => {
       ) : null}
 
       <EuiBasicTable<NotificationItem>
+        tableCaption={i18n.translate('xpack.ml.notifications.tableCaption', {
+          defaultMessage: 'Machine learning notifications',
+        })}
         columns={columns}
         rowHeader="timestamp"
         items={itemsPerPage}

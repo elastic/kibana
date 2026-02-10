@@ -29,6 +29,7 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
       },
     }),
     {
+      maxSize: 1000,
       validate: (spaceIds) => {
         if (uniq(spaceIds).length !== spaceIds.length) {
           return 'duplicate space ids are not allowed';
@@ -63,7 +64,8 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
               id: schema.string({
                 meta: { description: 'The identifier of the saved object to update.' },
               }),
-            })
+            }),
+            { maxSize: 1000 }
           ),
           spacesToAdd: spacesSchema,
           spacesToRemove: spacesSchema,

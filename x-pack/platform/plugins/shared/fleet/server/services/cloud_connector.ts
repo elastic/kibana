@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
@@ -40,6 +40,8 @@ import {
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
+import { deleteSecrets } from './secrets/common';
 
 export interface CloudConnectorServiceInterface {
   create(
@@ -62,6 +64,7 @@ export interface CloudConnectorServiceInterface {
   ): Promise<CloudConnector>;
   delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     cloudConnectorId: string,
     force?: boolean
   ): Promise<{ id: string }>;
@@ -244,6 +247,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: savedObject.id,
         ...savedObject.attributes,
+        packagePolicyCount: 0,
       };
     } catch (error) {
       logger.error(
@@ -435,6 +439,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     cloudConnectorId: string,
     force: boolean = false
   ): Promise<{ id: string }> {
@@ -463,6 +468,32 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (force && packagePolicyCount > 0) {
         logger.warn(
           `Force deleting cloud connector "${cloudConnector.attributes.name}" which is still being used by ${packagePolicyCount} package policies`
+        );
+      }
+
+      // Extract and delete secrets before deleting the cloud connector
+      try {
+        const secretIds = extractSecretIdsFromCloudConnectorVars(
+          cloudConnector.attributes.cloudProvider,
+          cloudConnector.attributes.vars
+        );
+
+        if (secretIds.length > 0) {
+          logger.debug(
+            `Deleting ${secretIds.length} secret(s) associated with cloud connector ${cloudConnectorId}`
+          );
+          await deleteSecrets({ esClient, ids: secretIds });
+          logger.info(
+            `Successfully deleted ${secretIds.length} secret(s) for cloud connector ${cloudConnectorId}`
+          );
+        } else {
+          logger.debug(`No secrets to delete for cloud connector ${cloudConnectorId}`);
+        }
+      } catch (secretError) {
+        // Log the error but don't fail the deletion
+        logger.warn(
+          `Failed to delete secrets for cloud connector ${cloudConnectorId}: ${secretError.message}`,
+          secretError
         );
       }
 

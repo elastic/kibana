@@ -24,6 +24,13 @@ import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../page_bundle_constants';
  */
 const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
+/**
+ * Removes keys with `undefined` values from a state object.
+ * This mutates the original object and returns it.
+ *
+ * @param stateObj - The state object to clean.
+ * @returns The same object with undefined keys removed.
+ */
 export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
     if (stateObj[key] === undefined) {
@@ -45,11 +52,27 @@ export type ForwardedDashboardState = Omit<
   'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
 >;
 
+/**
+ * Locator definition for the Dashboard application.
+ * This class is responsible for generating URLs and navigation state for dashboard links.
+ */
 export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardLocatorParams> {
+  /** The unique identifier for the dashboard app locator. */
   public readonly id = DASHBOARD_APP_LOCATOR;
 
+  /**
+   * Creates a new DashboardAppLocatorDefinition.
+   *
+   * @param deps - The dependencies required for the locator.
+   */
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
+  /**
+   * Generates the location for a dashboard based on the provided parameters.
+   *
+   * @param params - The {@link DashboardLocatorParams} to use for generating the location.
+   * @returns A promise that resolves to the location object containing app, path, and state.
+   */
   public readonly getLocation = async (params: DashboardLocatorParams) => {
     const {
       filters,

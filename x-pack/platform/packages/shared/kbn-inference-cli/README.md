@@ -63,8 +63,7 @@ You can connect your local Elasticsearch to the Elastic Inference Service (EIS) 
 # Start Elasticsearch with CCM enabled
 yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
 
-# In a separate terminal, configure CCM 
-# Use --no-ssl for HTTP connections
+# In a separate terminal, configure CCM
 node scripts/eis.js
 ```
 

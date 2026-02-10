@@ -98,6 +98,9 @@
     "@kbn/mcp-client",
     "@kbn/react-kibana-context-theme",
     "@kbn/alerts-ui-shared",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/home-plugin",
+    "@kbn/data-plugin",
+    "@kbn/security-plugin"
   ]
 }

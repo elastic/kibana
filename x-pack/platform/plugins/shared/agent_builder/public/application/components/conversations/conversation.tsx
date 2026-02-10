@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
+import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
@@ -32,6 +32,9 @@ import {
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
+import { ErrorPrompt } from '../common/prompt/error_prompt';
+import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
+import { StartNewConversationButton } from './actions/start_new_conversation_button';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -39,6 +42,7 @@ export const Conversation: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
+  const { errorType } = useConversationError();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
 
@@ -50,16 +54,12 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const {
-    showScrollButton,
-    scrollToMostRecentRoundBottom,
-    scrollToMostRecentRoundTop,
-    stickToBottom,
-  } = useConversationScrollActions({
-    isResponseLoading,
-    conversationId: conversationId || '',
-    scrollContainer: scrollContainerRef.current,
-  });
+  const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
+    useConversationScrollActions({
+      isResponseLoading,
+      conversationId: conversationId || '',
+      scrollContainer: scrollContainerRef.current,
+    });
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
@@ -76,14 +76,27 @@ export const Conversation: React.FC<{}> = () => {
     ${fullWidthAndHeightStyles}
   `;
 
+  const scrollMaskHeight = euiTheme.size.l;
+
   // Necessary to position the scroll button absolute to the container.
   const scrollWrapperStyles = css`
     ${fullWidthAndHeightStyles}
     position: relative;
     min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: ${scrollMaskHeight};
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
+    }
   `;
 
-  // TODO: Add custom mask for overflow scroll top and bottom
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
@@ -97,8 +110,18 @@ export const Conversation: React.FC<{}> = () => {
     return <NewConversationPrompt />;
   }
 
+  if (errorType) {
+    return (
+      <ErrorPrompt
+        errorType={errorType}
+        variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE}
+        primaryButton={<StartNewConversationButton />}
+      />
+    );
+  }
+
   return (
-    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles}>
+    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
       <EuiFlexItem grow={true} css={scrollWrapperStyles}>
         <EuiFlexGroup
           direction="column"
@@ -110,7 +133,7 @@ export const Conversation: React.FC<{}> = () => {
             <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
+        {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}

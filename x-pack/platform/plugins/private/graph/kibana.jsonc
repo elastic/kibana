@@ -19,7 +19,7 @@
       "data",
       "dataViews",
       "navigation",
-      "unifiedSearch",
+      "kql",
       "inspector",
       "savedObjectsManagement",
       "savedObjectsFinder",

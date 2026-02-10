@@ -16,7 +16,7 @@ import type {
   Visualization,
   VisualizationMap,
 } from '@kbn/lens-common';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 const visualizationType = 'lnsSomeVis';
 

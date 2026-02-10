@@ -292,12 +292,32 @@
           "label": "Core Rendering Service"
         },
         {
+          "id": "kibDevDocsChromeLayout",
+          "label": "Chrome Layout"
+        },
+        {
+          "id": "kibDevDocsChromeNavigation",
+          "label": "Chrome Navigation"
+        },
+        {
           "id": "kibDevDocsChromeRecentlyAccessed",
           "label": "Recently Viewed"
         },
         {
           "id": "kibDevDocsFeedbackSnippet",
           "label": "Feedback Snippet"
+        },
+        {
+          "id": "kibDevDocsChromeAppMenu",
+          "label": "App Menu"
+        },
+        {
+          "id": "kibDevDocsChromeSidebar",
+          "label": "Chrome Sidebar"
+        },
+        {
+          "id": "kibDevDocsFeedbackPlugin",
+          "label": "Feedback Plugin (One Feedback)"
         }
       ]
     },

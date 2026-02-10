@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/analytics'
   - '@kbn/monaco'
-  - '@kbn/test-jest-helpers'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/core-ui-settings-browser'
@@ -51,6 +50,7 @@ dependsOn:
   - '@kbn/ingest-pipelines-shared'
   - '@kbn/licensing-types'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod

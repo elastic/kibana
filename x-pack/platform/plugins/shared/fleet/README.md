@@ -216,8 +216,23 @@ Observability:
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
 ```
+#### UI Tests
 
-#### Cypress tests
+We used to write our UI tests with cypress. A new tool `kbn-scout` has been introduced based on playwright that should be used for new tests.
+
+##### Scout tests
+
+We support UI end to end test with `kbn-scout` 
+
+```
+# Run server
+node scripts/scout.js start-server --stateful
+
+# Run tests
+npx playwright test --project local --grep @ess --config x-pack/platform/plugins/shared/fleet/test/scout/ui/  --ui
+```
+
+##### Cypress tests
 
 We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](./cypress/README.md) for how to run these tests.
 

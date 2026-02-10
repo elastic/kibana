@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 
@@ -28,10 +27,7 @@ export async function getToolHandler({
   rangeStart,
   rangeEnd,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   mlClient: Ml;
   request: KibanaRequest;
@@ -57,6 +53,19 @@ export async function getToolHandler({
     throw error;
   });
 
+  // Get job stats for state information
+  const { jobs: jobsStats = [] } = await mlClient
+    .getJobStats({ job_id: jobIds.join(',') })
+    .catch((error) => {
+      if (error.statusCode === 404) {
+        return { jobs: [] };
+      }
+      logger.error(`Error retrieving ML job stats: ${error.message}`);
+      return { jobs: [] };
+    });
+
+  const jobsStatsMap = new Map(jobsStats.map((stat) => [stat.job_id, stat]));
+
   return Promise.all(
     jobs.slice(0, jobsLimit).map(async (job) => {
       const topAnomalies = await getTopAnomalyRecords({
@@ -65,6 +74,8 @@ export async function getToolHandler({
         start: rangeStart,
         end: rangeEnd,
       });
+
+      const jobStats = jobsStatsMap.get(job.job_id);
 
       return {
         jobId: job.job_id,
@@ -77,6 +88,11 @@ export async function getToolHandler({
           fieldName: detector.field_name,
         })),
         topAnomalies,
+        jobStats: {
+          state: jobStats?.state,
+          lastRecordTimestamp: jobStats?.data_counts?.latest_record_timestamp,
+          processedRecordCount: jobStats?.data_counts?.processed_record_count,
+        },
       };
     })
   );

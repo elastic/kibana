@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
 const DEPENDENCY_NAME = 'postgresql';
 
-test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/247347
+test.describe.skip('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });

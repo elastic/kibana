@@ -45,6 +45,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +78,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +102,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -122,6 +130,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,6 +146,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -151,6 +163,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -177,6 +191,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,6 +207,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,6 +224,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -221,6 +241,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -255,6 +277,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,6 +300,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -310,6 +336,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,6 +359,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -365,6 +395,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -386,6 +418,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -404,6 +438,8 @@
         "label": "EventAnnotationGroupConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -425,6 +461,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -436,6 +474,8 @@
             "label": "indexPatternId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -447,6 +487,8 @@
             "label": "ignoreGlobalFilters",
             "description": [],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -458,6 +500,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -469,6 +513,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,6 +529,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -504,6 +552,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -524,6 +574,8 @@
           "\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -536,6 +588,8 @@
         "label": "defaultAnnotationColor",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -548,6 +602,8 @@
         "label": "defaultAnnotationLabel",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -563,6 +619,8 @@
           "\"#F04E981A\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -575,6 +633,8 @@
         "label": "defaultRangeAnnotationLabel",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -590,6 +650,8 @@
           "\"event-annotation-group\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -627,6 +689,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -657,6 +721,8 @@
           " | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -672,6 +738,8 @@
           "\"manual\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -703,6 +771,8 @@
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -734,6 +804,8 @@
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -773,6 +845,8 @@
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -788,6 +862,8 @@
           "{ type: \"manual\"; id: string; key: { type: \"range\"; timestamp: string; endTimestamp: string; }; } & StyleSharedProps & { outside?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -803,6 +879,8 @@
           "StyleSharedProps & { outside?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -820,6 +898,8 @@
           "{ readonly ASTERISK: \"asterisk\"; readonly ALERT: \"alert\"; readonly BELL: \"bell\"; readonly BOLT: \"bolt\"; readonly BUG: \"bug\"; readonly CIRCLE: \"circle\"; readonly EDITOR_COMMENT: \"editorComment\"; readonly FLAG: \"flag\"; readonly HEART: \"heart\"; readonly MAP_MARKER: \"mapMarker\"; readonly PIN_FILLED: \"pinFilled\"; readonly STAR_EMPTY: \"starEmpty\"; readonly STAR_FILLED: \"starFilled\"; readonly TAG: \"tag\"; readonly TRIANGLE: \"triangle\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -14,6 +14,8 @@
           "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "ConnectorIconProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+            "lineNumber": 18,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -47,6 +51,8 @@
           "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, maxWidth, minWidth, }: FormInfoFieldProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +67,8 @@
               "FormInfoFieldProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+            "lineNumber": 34,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +90,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +108,8 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/playground.tsx",
+            "lineNumber": 32,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,6 +131,8 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,6 +149,8 @@
               ", \"type\">"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/v2_icons/robot.tsx",
+            "lineNumber": 26,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +170,8 @@
           "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +186,8 @@
               "SearchEmptyPromptProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+            "lineNumber": 35,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -191,6 +211,8 @@
           "\"search_elastic_llm_cost_info_skip\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -206,6 +228,8 @@
           "\"https://your_deployment_url\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,6 +245,8 @@
           "\"gettingStartedVisited\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -236,6 +262,8 @@
           "\"search_onboarding_global_empty_state_skip\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -251,6 +279,8 @@
           "\"search_onboarding_workflow\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -266,6 +296,8 @@
           "\"default\" | \"vector\" | \"semantic\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

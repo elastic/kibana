@@ -28,6 +28,8 @@
         "label": "ActionType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +67,8 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,6 +80,8 @@
             "label": "enabledInConfig",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,6 +93,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +109,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,6 +125,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,6 +138,8 @@
             "label": "isSystemActionType",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -136,6 +154,8 @@
               "\"spec\" | \"yml\" | \"stack\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,6 +170,8 @@
               "\"endpointSecurity\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +183,8 @@
             "label": "isDeprecated",
             "description": [],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +199,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -191,6 +217,8 @@
         "label": "ACTION_TYPE_SOURCES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,6 +236,8 @@
           "\"spec\" | \"yml\" | \"stack\""
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -231,6 +261,8 @@
           "<T[K]> : T[K]; }"
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -254,6 +286,8 @@
           "<T>) => T"
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -277,6 +311,8 @@
               "<T[K]> : T[K]; }"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+            "lineNumber": 22,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -310,6 +346,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -325,6 +363,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -339,6 +379,8 @@
         "label": "SUB_FEATURE",
         "description": [],
         "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -354,6 +396,8 @@
           "\"endpointSecurity\""
         ],
         "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

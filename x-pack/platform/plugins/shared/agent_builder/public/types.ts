@@ -11,12 +11,14 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  EventsServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -57,6 +59,7 @@ export interface AgentBuilderStartDependencies {
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
@@ -83,6 +86,10 @@ export interface AgentBuilderPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Events service contract, can be used to listen to chat events.
+   */
+  events: EventsServiceStartContract;
   /**
    * Opens a conversation flyout.
    *

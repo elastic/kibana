@@ -24,7 +24,7 @@ import type {
   PERCENTILE_RANK_ID,
 } from '@kbn/lens-formula-docs';
 import type { Range } from '@kbn/expressions-plugin/public';
-import type { TinymathAST } from '@kbn/tinymath';
+import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import type { QueryFilter } from '@kbn/data-plugin/common';
 import type { DateRange, ValueFormatConfig } from '../types';
 import type {
@@ -137,7 +137,7 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
   params: {
-    tinymathAst: TinymathAST | string;
+    tinymathAst: TinymathAST | TinymathFunction | string;
     // last value on numeric fields can be formatted
     format?: ValueFormatConfig;
   };

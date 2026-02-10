@@ -16,6 +16,7 @@ import {
 } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
 import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
+import type { SortableScriptLibraryFields } from '../types';
 
 describe('Scripts library schemas', () => {
   const createFileStream = (): HapiReadableStream => {
@@ -155,6 +156,29 @@ describe('Scripts library schemas', () => {
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
     });
 
+    it('should accept `tags` array with valid values', () => {
+      reqBody.tags = ['dataCollection', 'threatHunting'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+    });
+
+    it('should error if `tags` is not an array', () => {
+      // @ts-expect-error
+      reqBody.tags = 'invalid';
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains invalid values', () => {
+      reqBody.tags = ['invalid'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains duplicates', () => {
+      reqBody.tags = ['dataCollection', 'dataCollection'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        '[tags]: Duplicate values are not allowed'
+      );
+    });
+
     // ------------------------------------
     // Field: `description`
     // Field: `instructions`
@@ -221,12 +245,17 @@ describe('Scripts library schemas', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ pageSize: 1001 })).toThrow();
     });
 
-    it.each(['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'])(
-      'should accept a `sortField` param with value %s',
-      (sortField) => {
-        expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
-      }
-    );
+    const sortFields: Array<SortableScriptLibraryFields> = [
+      'name',
+      'createdAt',
+      'createdBy',
+      'updatedAt',
+      'updatedBy',
+      'fileSize',
+    ];
+    it.each(sortFields)('should accept a `sortField` param with value %s', (sortField) => {
+      expect(ListScriptsRequestSchema.query.validate({ sortField })).toBeTruthy();
+    });
 
     it('should error `sortField` has an invalid field name', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ sortField: 'foo' })).toThrow();
@@ -281,6 +310,7 @@ describe('Scripts library schemas', () => {
       ----------             -------------
       ${'name'}             | ${{ name: 'foo' }}
       ${'platform'}         | ${{ platform: ['windows'] }}
+      ${'tags'}             | ${{ tags: ['dataCollection'] }}
       ${'file'}             | ${{ file: createFileStream() }}
       ${'requiresInput'}    | ${{ requiresInput: true }}
       ${'description'}      | ${{ description: 'some description' }}

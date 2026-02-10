@@ -25,6 +25,8 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -41,6 +43,8 @@
         "The plugin start interface"
       ],
       "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

@@ -73,8 +73,11 @@ export function getRequiredPermissionsForActions({
     delete_dot_streams_document,
     delete_queries,
     unlink_assets,
+    unlink_systems,
     unlink_features,
     update_failure_store,
+    upsert_esql_view,
+    delete_esql_view,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

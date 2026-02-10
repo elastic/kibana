@@ -7,15 +7,12 @@
 
 import { z } from '@kbn/zod';
 import dedent from 'dedent';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
@@ -35,10 +32,7 @@ export function createErrorAttachmentType({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {

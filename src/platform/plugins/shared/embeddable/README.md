@@ -1,11 +1,18 @@
-### Table of Contents
+## Table of Contents
 
-- [Guiding principles](#guiding-principles)
-- [Embeddable overview](#embeddable-overview)
-- [Publishing packages](#publishing-packages)
-- [Embeddable panel](#embeddable-panel)
-- [Best practices](#best-practices)
-- [Examples](#examples)
+  - [Public](#public)
+    - [Guiding principles](#guiding-principles)
+    - [Embeddable overview](#embeddable-overview)
+    - [Publishing packages](#publishing-packages)
+    - [Embeddable panel](#embeddable-panel)
+    - [Best practices](#best-practices)
+    - [Examples](#examples)
+  - [Server](#server)
+    - [REST APIs](#rest-apis-considerations)
+    - [Transforms](#transforms)
+
+
+## Public
 
 ### Guiding principles
 
@@ -25,7 +32,7 @@ Embeddables are React components that manage their own state, can be serialized 
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+embeddablePublicSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
@@ -33,9 +40,10 @@ embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
 
 Embeddables are rendered with `EmbeddableRenderer` React component.
 
-### Common publishing packages
+### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
+#### Common publishing packages
 The table below lists interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
 
 | Interface | Description |
@@ -75,7 +83,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
-### Custom publishing packages
+#### Custom publishing packages
 Embeddables can expose interfaces unique to a single embeddable implemenation.
 The table below lists interfaces that only apply to single embeddable types.
 These interfaces may be used by actions to imperatively interact with specific embeddable types.
@@ -168,3 +176,57 @@ Use the following examples to render embeddables in your application. To run emb
 - [Render a single embeddable](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/search/search_embeddable_renderer.tsx)
 - [Embeddable state management](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/app/state_management_example/state_management_example.tsx)
 - [Create a dashboard like application that renders many embeddables and allows users to add and remove embeddables](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/app/presentation_container_example/components/presentation_container_example.tsx)
+
+
+## Server
+Containers, such as Dashboard, incorporate embeddable state in REST APIs and store embeddable state in saved objects.
+
+### REST APIs considerations
+Embeddable serialized state requires additional restrictions and planning since it is incorporated into public REST APIs.
+
+#### No breaking changes
+Embeddable serialized state can not be modified with breaking changes. Fields can not be deleted or change type. Optional fields can not be changed to required. Optional additive changes are allowed.
+
+#### snake_case
+Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
+
+#### Minimize required fields
+Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable. Where possible, avoid a required field by specifying a default.
+
+#### Apply defaults in your schema
+POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. Any key that has a `defaultValue` must not be wrapped
+in a `schema.maybe`, as this will cause the defaults not to be applied at validation time.
+
+### Transforms
+Transforms decouple REST API state from stored state, allowing embeddables to have one shape for REST APIs and another for storage.
+- On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
+- On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
+
+**Note:** Transforms are optional and only required when an embeddable has references or a container has stored legacy embeddable state that needs to converted into new schema defined shape.
+
+Containers use schemas to
+- Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
+- Validate embeddable state, failing REST API requests when schema validation fails.
+
+```
+embeddableServerSetup.registerTransforms(
+  'myEmbeddableType',
+  {
+    getTransforms: (drilldownTransfroms) => ({
+      transformIn: (state: EmbeddableState) => {
+        return {
+          state: convertToStoredState(state),
+          references: extractReferences(state)
+        };
+      },
+      transformOut: (state: StoredEmbeddableState, references?: Reference[]): EmbeddableState => {
+        return convertAndInjectReferences(state, references);
+      },
+    }),
+    getSchema: (getDrilldownsSchema) => schema: schema.object({
+      required_field: schema.string(),
+      optional_field: schema.maybe(schema.string()),
+    })
+  }
+});
+```

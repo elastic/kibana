@@ -15,6 +15,8 @@
       "label": "AutomaticImportPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -47,6 +51,8 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -63,6 +69,8 @@
             "(upselling: React.ReactNode) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+          "lineNumber": 30,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -77,6 +85,8 @@
                 "React.ReactNode"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/public/types.ts",
+              "lineNumber": 35,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -104,6 +114,8 @@
       "label": "AutomaticImportPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -118,6 +130,8 @@
             "(isAvailable: boolean) => void"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -132,6 +146,8 @@
                 "boolean"
               ],
               "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+              "lineNumber": 18,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -151,6 +167,8 @@
       "label": "AutomaticImportPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -171,6 +189,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import/server/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -195,6 +215,8 @@
           "(arr: T[], start: number, end: number, seed: string) => void"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,6 +233,8 @@
               "T[]"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -228,6 +252,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,6 +271,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +288,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/utils.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -280,6 +310,8 @@
           "\nProcessor item for the Elasticsearch processor."
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -295,6 +327,8 @@
               "ESProcessorOptions"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -312,6 +346,8 @@
         "label": "ANALYZE_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,6 +360,8 @@
         "label": "ANALYZE_LOGS_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -339,6 +377,8 @@
           "{ connectorId: string; dataStreamTitle: string; pathOptions: {} & { [k: string]: unknown; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -354,6 +394,8 @@
           "{ results: { suggestedPaths: string[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -369,6 +411,8 @@
           "{ connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -392,6 +436,8 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -407,6 +453,8 @@
           "\"/app/automatic_import\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -422,6 +470,8 @@
           "\"/internal/automatic_import\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -457,6 +507,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/build_integration/build_integration.gen.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -469,6 +521,8 @@
         "label": "CATEGORIZATION_GRAPH_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -500,6 +554,8 @@
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,6 +591,8 @@
           ", \"strip\">[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -547,6 +605,8 @@
         "label": "CEL_INPUT_GRAPH_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -564,6 +624,8 @@
           "\"basic\" | \"digest\" | \"oauth2\" | \"header\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -581,6 +643,8 @@
           "{ url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -596,6 +660,8 @@
           "{ connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -611,6 +677,8 @@
           "{ results: { configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -623,6 +691,8 @@
         "label": "CHECK_PIPELINE_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -654,6 +724,8 @@
           "[] | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -673,6 +745,8 @@
           ", \"strip\">[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -710,6 +784,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 168,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -730,6 +806,8 @@
           ", \"strip\">[]"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -742,6 +820,8 @@
         "label": "ECS_GRAPH_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -769,6 +849,8 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -800,6 +882,8 @@
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -817,6 +901,8 @@
           "\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -854,6 +940,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 211,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -866,6 +954,8 @@
         "label": "INTEGRATION_BUILDER_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -883,6 +973,8 @@
           "{ apiKey: string; projectName: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 238,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -916,6 +1008,8 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -931,6 +1025,8 @@
           "\"automaticImport\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -943,6 +1039,8 @@
         "label": "RELATED_GRAPH_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -974,6 +1072,8 @@
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1009,6 +1109,8 @@
           ", \"strip\">[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1026,6 +1128,8 @@
           "{ name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1043,6 +1147,8 @@
           "\"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"unsupported\" | \"cef\" | \"leef\" | \"fix\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1089,6 +1195,8 @@
           ", { connectorId: string; dataStreamTitle: string; pathOptions: {} & { [k: string]: unknown; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; dataStreamTitle: string; pathOptions: {} & { [k: string]: unknown; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1115,6 +1223,8 @@
           ", { results: { suggestedPaths: string[]; }; }, { results: { suggestedPaths: string[]; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_api/analyze_api_route.gen.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1157,6 +1267,8 @@
           ", { connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; dataStreamName: string; packageTitle: string; dataStreamTitle: string; logSamples: string[]; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1237,6 +1349,8 @@
           "[] | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/analyze_logs/analyze_logs_route.gen.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1525,6 +1639,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/build_integration/build_integration.gen.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1679,6 +1795,8 @@
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1841,6 +1959,8 @@
           ", \"strip\">[]; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/categorization/categorization_route.gen.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1857,6 +1977,8 @@
           "<[\"basic\", \"digest\", \"oauth2\", \"header\"]>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1911,6 +2033,8 @@
           ", { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1965,6 +2089,8 @@
           ", { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2019,6 +2145,8 @@
           ", { results: { configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }, { results: { configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2131,6 +2259,8 @@
           "[] | undefined; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2183,6 +2313,8 @@
           ", \"strip\">[]; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/check_pipeline/check_pipeline.gen.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2395,6 +2527,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 172,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2423,6 +2557,8 @@
           ", \"strip\">>, \"many\">"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2537,6 +2673,8 @@
           "[] | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2681,6 +2819,8 @@
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2709,6 +2849,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
+        "lineNumber": 107,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2725,6 +2867,8 @@
           "<[\"aws-cloudwatch\", \"aws-s3\", \"azure-blob-storage\", \"azure-eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp-pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 149,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2981,6 +3125,8 @@
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 215,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3003,6 +3149,8 @@
           ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 242,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3087,6 +3235,8 @@
           "[] | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 122,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3241,6 +3391,8 @@
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3403,6 +3555,8 @@
           ", \"strip\">[]; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/related/related_route.gen.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3443,6 +3597,8 @@
           ", { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }, { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3459,6 +3615,8 @@
           "<[\"ndjson\", \"json\", \"csv\", \"structured\", \"unstructured\", \"unsupported\", \"cef\", \"leef\", \"fix\"]>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

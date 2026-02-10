@@ -53,15 +53,11 @@ export const SecondaryMenuSectionComponent = ({
     }
   `;
 
-  /**
-   * To reflect the design perfectly while maintaining a logical structure,
-   * we need to use `6px` which isn't a multiple of 4 and there's no token for it,
-   * hence why we're not using `euiTheme` here.
-   */
   const labelStyles = css`
     font-size: ${euiTheme.size.m};
-    color: ${euiTheme.colors.subduedText};
-    padding: 6px ${euiTheme.size.s};
+    color: ${euiTheme.colors.textSubdued};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    display: block;
   `;
 
   const listStyles = css`

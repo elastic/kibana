@@ -97,9 +97,9 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   );
 
   const confirmDelete = useCallback(() => {
-    deleteMigration(migrationStats.id);
+    deleteMigration(migrationStats);
     closeDeleteModal();
-  }, [deleteMigration, migrationStats.id, closeDeleteModal]);
+  }, [deleteMigration, migrationStats, closeDeleteModal]);
 
   const stopPropagation = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
@@ -136,6 +136,11 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
             onCancel={cancelEdit}
             onSave={saveName}
             startWithEditOpen
+            editModeProps={{
+              inputProps: {
+                autoFocus: true,
+              },
+            }}
           />
         </EuiFlexItem>
       ) : (

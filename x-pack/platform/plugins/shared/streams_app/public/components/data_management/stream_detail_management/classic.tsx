@@ -31,7 +31,6 @@ const classicStreamManagementSubTabs = [
   'schemaEditor',
   'schema',
   'attachments',
-  'references',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -119,7 +118,7 @@ export function ClassicStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span tabIndex={0}>
+          <span data-test-subj="retentionTab" tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -127,7 +126,9 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.processing = processing;
+    if (processing) {
+      tabs.processing = processing;
+    }
   }
 
   tabs.schema = {
