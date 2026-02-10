@@ -82,7 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('when traceId is provided', () => {
+    describe('when trace.id is provided', () => {
       before(async () => {
         const { traceId, serviceName, environment } = DEFAULT_TRACE_CONFIGS[0];
 
@@ -108,7 +108,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logs: correlatedLogs,
         });
       });
-      it('returns a single trace items with APM and logs', async () => {
+
+      it('returns a single trace with APM events and logs', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -118,14 +119,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         const { traces } = results[0].data;
-        // when traceId is provided, should return exactly one trace
         expect(traces).to.have.length(1);
 
         const trace = traces[0];
         expect(trace.items.length).to.be.greaterThan(0);
       });
 
-      it('returns an empty sequence if the trace does not exist', async () => {
+      it('respects maxTraces and indicates truncation', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
+            maxTraces: 1,
+          },
+        });
+
+        const { traces } = results[0].data;
+        expect(traces).to.have.length(1);
+
+        const trace = traces[0];
+        expect(trace.items).to.have.length(1);
+        expect(trace.isTruncated).to.be(true);
+      });
+
+      it('returns no traces if the trace does not exist', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -135,11 +154,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { items } = results[0].data.traces[0];
-        expect(items).to.have.length(0);
+        const { traces } = results[0].data;
+        expect(traces).to.have.length(0);
       });
 
-      it('does not return traces that do not match the specified terms', async () => {
+      it('does not return traces when the query matches no documents', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -163,6 +182,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const { traces } = results[0].data;
         expect(traces.length).to.be.greaterThan(0);
+      });
+
+      it('returns no traces when the time range excludes the data', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: 'now-2h',
+            end: 'now-1h',
+            kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
+          },
+        });
+
+        const { traces } = results[0].data;
+        expect(traces).to.have.length(0);
       });
     });
   });
