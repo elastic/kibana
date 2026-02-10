@@ -34,10 +34,6 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
         process.argv.push('--cache');
       }
 
-      if (!flags._.ext) {
-        process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-      }
-
       // common-js is required so that logic before this executes before loading eslint
       // requiring the module is still going to pass along all flags
       require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
@@ -54,7 +50,6 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
       flags: {
         allowUnexpected: true,
         boolean: ['cache', 'fix', 'quiet'],
-        string: ['ext'],
       },
     }
   );
