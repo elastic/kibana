@@ -21,7 +21,16 @@ export const apiKeyPendingInvalidationModelVersions: SavedObjectsModelVersionMap
     },
   },
   '2': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'text',
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawApiKeyPendingInvalidationSchemaV2.extends(
         {},

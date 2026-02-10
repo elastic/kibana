@@ -106,7 +106,16 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '9': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'text',
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawRuleSchemaV9.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV9,
