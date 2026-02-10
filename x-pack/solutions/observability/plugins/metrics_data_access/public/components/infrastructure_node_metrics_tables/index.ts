@@ -6,5 +6,6 @@
  */
 
 export { ContainerMetricsTable, useContainerMetricsTable } from './container';
+export type { ContainerSemconvRuntime } from './container';
 export { HostMetricsTable, useHostMetricsTable } from './host';
 export { PodMetricsTable, usePodMetricsTable } from './pod';

@@ -80,6 +80,7 @@ export function useTabs({
           timerange,
           kuery: containersFilter,
           schema,
+          semconvRuntime: podNames.length > 0 ? 'k8s' : 'docker',
         })}
     </>
   );

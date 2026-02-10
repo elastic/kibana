@@ -42,7 +42,7 @@ const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
         {
           name: 'B',
           aggregation: 'avg',
-          field: 'kubernetes.node.memory.usage.bytes)',
+          field: 'kubernetes.node.memory.usage.bytes',
         },
       ],
       equation: 'B / A',

@@ -10,17 +10,19 @@ import { CoreProviders } from '../../../apps/common_providers';
 import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
-
+import type { ContainerSemconvRuntime } from './container_metrics_configs';
 function HookedContainerMetricsTable({
   timerange,
   kuery,
   schema,
+  semconvRuntime,
   metricsClient,
-}: UseNodeMetricsTableOptions) {
+}: UseNodeMetricsTableOptions & { semconvRuntime?: ContainerSemconvRuntime }) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
     schema,
+    semconvRuntime,
     metricsClient,
   });
   return <ContainerMetricsTable {...containerMetricsTableProps} />;
@@ -31,9 +33,10 @@ function ContainerMetricsTableWithProviders({
   kuery,
   sourceId,
   schema,
+  semconvRuntime,
   metricsClient,
   ...coreProvidersProps
-}: IntegratedNodeMetricsTableProps) {
+}: IntegratedNodeMetricsTableProps & { semconvRuntime?: ContainerSemconvRuntime }) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
@@ -41,6 +44,7 @@ function ContainerMetricsTableWithProviders({
         kuery={kuery}
         schema={schema}
         metricsClient={metricsClient}
+        semconvRuntime={semconvRuntime}
       />
     </CoreProviders>
   );

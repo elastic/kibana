@@ -9,13 +9,20 @@ import type { CoreStart } from '@kbn/core/public';
 import React, { lazy, Suspense } from 'react';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
+import type { ContainerSemconvRuntime } from './container_metrics_configs';
 
 const LazyIntegratedContainerMetricsTable = lazy(
   () => import('./integrated_container_metrics_table')
 );
 
 export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({ timerange, kuery, sourceId, schema }: NodeMetricsTableProps) => {
+  return ({
+    timerange,
+    kuery,
+    sourceId,
+    schema,
+    semconvRuntime,
+  }: NodeMetricsTableProps & { semconvRuntime?: ContainerSemconvRuntime }) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
@@ -25,6 +32,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
           timerange={timerange}
           kuery={kuery}
           schema={schema}
+          semconvRuntime={semconvRuntime}
         />
       </Suspense>
     );

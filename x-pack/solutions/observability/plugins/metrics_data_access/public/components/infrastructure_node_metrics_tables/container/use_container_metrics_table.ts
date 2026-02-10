@@ -10,56 +10,23 @@ import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import type { SortState, UseNodeMetricsTableOptions } from '../shared';
+import { averageOfValues, scaleUpPercentage, useInfrastructureNodeMetrics } from '../shared';
 import {
-  averageOfValues,
-  createMetricByFieldLookup,
-  makeUnpackMetric,
-  metricsToApiOptions,
-  scaleUpPercentage,
-  useInfrastructureNodeMetrics,
-} from '../shared';
+  getOptionsForSchema,
+  unpackMetricEcs,
+  unpackMetricSemconvDocker,
+  unpackMetricSemconvK8s,
+  type ContainerSemconvRuntime,
+} from './container_metrics_configs';
 
-type ContainerMetricsField =
-  | 'kubernetes.container.cpu.usage.limit.pct'
-  | 'kubernetes.container.memory.usage.bytes';
+export type { ContainerSemconvRuntime };
+export { metricByFieldEcs, metricByField } from './container_metrics_configs';
 
-const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
-  sourceFilter: `event.dataset: "kubernetes.container"`,
-  groupByField: 'container.id',
-  metricsMap: {
-    'kubernetes.container.cpu.usage.limit.pct': {
-      aggregation: 'avg',
-      field: 'kubernetes.container.cpu.usage.limit.pct',
-    },
-    'kubernetes.container.memory.usage.bytes': {
-      aggregation: 'avg',
-      field: 'kubernetes.container.memory.usage.bytes',
-    },
-  },
-};
-
-type ContainerMetricsFieldsOtel = 'metrics.container.cpu.usage' | 'metrics.container.memory.usage';
-
-const containerMetricsQueryConfigOtel: MetricsQueryOptions<ContainerMetricsFieldsOtel> = {
-  sourceFilter: '',
-  groupByField: 'container.id',
-  metricsMap: {
-    'metrics.container.cpu.usage': {
-      // this field is opt-in
-      aggregation: 'avg',
-      field: 'metrics.container.cpu.usage',
-    },
-    'metrics.container.memory.usage': {
-      // this field is opt-in
-      aggregation: 'avg',
-      field: 'metrics.container.memory.usage',
-    },
-  },
-};
-
-export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
-const unpackMetric = makeUnpackMetric(metricByField);
+export interface UseContainerMetricsTableOptions extends UseNodeMetricsTableOptions {
+  /** When schema is 'semconv', which runtime to use. Defaults to 'docker'. */
+  semconvRuntime?: ContainerSemconvRuntime;
+}
 
 export interface ContainerNodeMetricsRow {
   id: string;
@@ -67,33 +34,72 @@ export interface ContainerNodeMetricsRow {
   averageMemoryUsageMegabytes: number | null;
 }
 
+type UnpackMetricsFn = (row: MetricsExplorerRow) => Omit<ContainerNodeMetricsRow, 'id'>;
+
+function getUnpackMetricsForSchema(
+  schema: UseNodeMetricsTableOptions['schema'],
+  semconvRuntime: ContainerSemconvRuntime
+): UnpackMetricsFn {
+  if (schema === 'semconv') {
+    if (semconvRuntime === 'k8s') {
+      return (row) => {
+        const cpuUtilization = unpackMetricSemconvK8s(row, 'metrics.k8s.container.cpu_utilization');
+        const memoryUsage = unpackMetricSemconvK8s(row, 'metrics.k8s.container.memory.request');
+        return {
+          averageCpuUsagePercent:
+            cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
+          averageMemoryUsageMegabytes: memoryUsage !== null ? scaleUpPercentage(memoryUsage) : null,
+        };
+      };
+    }
+    return (row) => {
+      const cpuUtilization = unpackMetricSemconvDocker(row, 'metrics.container.cpu.utilization');
+      const memoryBytes = unpackMetricSemconvDocker(row, 'metrics.container.memory.usage.total');
+      return {
+        averageCpuUsagePercent: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
+        averageMemoryUsageMegabytes:
+          memoryBytes !== null ? Math.floor(memoryBytes / 1000000) : null,
+      };
+    };
+  }
+  return (row) => {
+    const rawCpu = unpackMetricEcs(row, 'kubernetes.container.cpu.usage.limit.pct');
+    const memoryBytes = unpackMetricEcs(row, 'kubernetes.container.memory.usage.bytes');
+    return {
+      averageCpuUsagePercent: rawCpu !== null ? scaleUpPercentage(rawCpu) : null,
+      averageMemoryUsageMegabytes: memoryBytes !== null ? Math.floor(memoryBytes / 1000000) : null,
+    };
+  };
+}
+
 export function useContainerMetricsTable({
   timerange,
   kuery,
   metricsClient,
   schema,
-}: UseNodeMetricsTableOptions) {
+  semconvRuntime = 'docker',
+}: UseContainerMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<ContainerNodeMetricsRow>>({
     field: 'averageCpuUsagePercent',
     direction: 'desc',
   });
 
-  const { options: containerMetricsOptions } = useMemo(
-    () => metricsToApiOptions(containerMetricsQueryConfig, kuery),
-    [kuery]
+  const metricsExplorerOptions = useMemo(
+    () => getOptionsForSchema(schema, semconvRuntime, kuery).options,
+    [schema, semconvRuntime, kuery]
   );
 
-  const { options: containerMetricsOptionsOtel } = useMemo(
-    () => metricsToApiOptions(containerMetricsQueryConfigOtel, kuery),
-    [kuery]
-  );
+  const transform = useMemo(() => {
+    const unpackMetrics = getUnpackMetricsForSchema(schema ?? 'ecs', semconvRuntime);
+    return (series: MetricsExplorerSeries): ContainerNodeMetricsRow =>
+      seriesToContainerNodeMetricsRow(series, unpackMetrics);
+  }, [schema, semconvRuntime]);
 
   const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
-    metricsExplorerOptions:
-      schema === 'semconv' ? containerMetricsOptionsOtel : containerMetricsOptions,
+    metricsExplorerOptions,
     timerange,
-    transform: seriesToContainerNodeMetricsRow,
+    transform,
     sortState,
     currentPageIndex,
     metricsClient,
@@ -109,18 +115,21 @@ export function useContainerMetricsTable({
   };
 }
 
-function seriesToContainerNodeMetricsRow(series: MetricsExplorerSeries): ContainerNodeMetricsRow {
+function seriesToContainerNodeMetricsRow(
+  series: MetricsExplorerSeries,
+  unpackMetrics: UnpackMetricsFn
+): ContainerNodeMetricsRow {
   if (series.rows.length === 0) {
     return rowWithoutMetrics(series.id);
   }
 
   return {
     id: series.id,
-    ...calculateMetricAverages(series.rows),
+    ...calculateMetricAverages(series.rows, unpackMetrics),
   };
 }
 
-function rowWithoutMetrics(id: string) {
+function rowWithoutMetrics(id: string): ContainerNodeMetricsRow {
   return {
     id,
     averageCpuUsagePercent: null,
@@ -128,20 +137,20 @@ function rowWithoutMetrics(id: string) {
   };
 }
 
-function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
-    collectMetricValues(rows);
+function calculateMetricAverages(rows: MetricsExplorerRow[], unpackMetrics: UnpackMetricsFn) {
+  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } = collectMetricValues(
+    rows,
+    unpackMetrics
+  );
 
-  let averageCpuUsagePercent = null;
+  let averageCpuUsagePercent: number | null = null;
   if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+    averageCpuUsagePercent = averageOfValues(averageCpuUsagePercentValues);
   }
 
-  let averageMemoryUsageMegabytes = null;
+  let averageMemoryUsageMegabytes: number | null = null;
   if (averageMemoryUsageMegabytesValues.length !== 0) {
-    const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
-    const bytesPerMegabyte = 1000000;
-    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
+    averageMemoryUsageMegabytes = Math.floor(averageOfValues(averageMemoryUsageMegabytesValues));
   }
 
   return {
@@ -150,7 +159,7 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   };
 }
 
-function collectMetricValues(rows: MetricsExplorerRow[]) {
+function collectMetricValues(rows: MetricsExplorerRow[], unpackMetrics: UnpackMetricsFn) {
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsageMegabytesValues: number[] = [];
 
@@ -169,12 +178,5 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   return {
     averageCpuUsagePercentValues,
     averageMemoryUsageMegabytesValues,
-  };
-}
-
-function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'id'> {
-  return {
-    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
-    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
   };
 }
