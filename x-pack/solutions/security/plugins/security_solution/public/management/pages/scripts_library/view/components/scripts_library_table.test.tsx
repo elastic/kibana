@@ -31,24 +31,7 @@ describe('ScriptsLibraryTable', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-  const defaultProps: ScriptsLibraryTableProps = {
-    items: [],
-    onChange: jest.fn(),
-    onClickAction: jest.fn(),
-    queryParams: {
-      page: 1,
-      pageSize: 10,
-      sortField: 'name',
-      sortDirection: 'asc',
-    },
-    totalItemCount: 1,
-    isLoading: false,
-    sort: {
-      field: 'name',
-      direction: 'asc',
-    },
-    'data-test-subj': 'test',
-  };
+  let defaultProps: ScriptsLibraryTableProps;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('seed');
@@ -58,15 +41,32 @@ describe('ScriptsLibraryTable', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
 
-    defaultProps.items = [
-      scriptsGenerator.generate({
-        id: 'script-1',
-        name: 'Script One',
-        tags: [...SORTED_SCRIPT_TAGS_KEYS],
-        updatedBy: 'user2',
-        updatedAt: '2026-01-13T10:15:00Z',
-      }),
-    ];
+    defaultProps = {
+      items: [
+        scriptsGenerator.generate({
+          id: 'script-1',
+          name: 'Script One',
+          tags: [...SORTED_SCRIPT_TAGS_KEYS],
+          updatedBy: 'user2',
+          updatedAt: '2026-01-13T10:15:00Z',
+        }),
+      ],
+      onChange: jest.fn(),
+      onClickAction: jest.fn(),
+      queryParams: {
+        page: 1,
+        pageSize: 10,
+        sortField: 'name',
+        sortDirection: 'asc',
+      },
+      totalItemCount: 1,
+      isLoading: false,
+      sort: {
+        field: 'name',
+        direction: 'asc',
+      },
+      'data-test-subj': 'test',
+    };
 
     render = (props?: ScriptsLibraryTableProps) => {
       renderResult = mockedContext.render(<ScriptsLibraryTable {...(props ?? defaultProps)} />);
@@ -128,9 +128,10 @@ describe('ScriptsLibraryTable', () => {
       });
 
       const { getByTestId } = renderResult;
-      const range = getByTestId('test-record-range-label');
 
-      expect(range).toHaveTextContent(`Showing 1-10 of 11 scripts`);
+      expect(getByTestId('test-record-range-label')).toHaveTextContent(
+        `Showing 1-10 of 11 scripts`
+      );
     });
 
     it('shows script name as a button for opening details flyout', () => {

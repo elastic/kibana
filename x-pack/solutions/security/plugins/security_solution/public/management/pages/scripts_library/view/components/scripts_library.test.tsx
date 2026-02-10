@@ -34,23 +34,11 @@ describe('ScriptsLibrary', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-
-  const defaultMockGetScriptsResponse = {
-    data: {
-      data: [],
-      page: 1,
-      pageSize: 10,
-      sortDirection: 'asc',
-      sortField: 'name',
-      total: 0,
-    },
-    isFetching: false,
-    isFetched: true,
-    refetch: jest.fn(),
-  };
+  let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsList>;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('scripts-library-tests');
+
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
@@ -60,6 +48,20 @@ describe('ScriptsLibrary', () => {
     (useToastsMock as jest.Mock).mockReturnValue({
       addDanger: jest.fn(),
     });
+
+    defaultMockGetScriptsResponse = {
+      data: {
+        data: [],
+        page: 1,
+        pageSize: 10,
+        sortDirection: 'asc',
+        sortField: 'name',
+        total: 0,
+      },
+      isFetching: false,
+      isFetched: true,
+      refetch: jest.fn(),
+    };
 
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
