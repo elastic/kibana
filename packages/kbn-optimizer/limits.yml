@@ -33,7 +33,7 @@ pageLoadAssetSize:
   dashboard: 20000
   dashboardEnhanced: 11961
   dashboardMarkdown: 4994
-  data: 500179
+  data: 495550
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -53,7 +53,7 @@ pageLoadAssetSize:
   embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
-  enterpriseSearch: 40244
+  enterpriseSearch: 40158
   entityStore: 71717
   esql: 19247
   esqlDataGrid: 10209
