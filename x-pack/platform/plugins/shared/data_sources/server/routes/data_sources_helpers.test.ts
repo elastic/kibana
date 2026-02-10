@@ -167,7 +167,7 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'connector-1',
       type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
-        name: 'My Test Connector',
+        name: 'my-data-source',
         type: 'test_type',
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],
@@ -195,7 +195,7 @@ tags:
     mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
 
     const result = await createDataSourceAndRelatedResources({
-      name: 'My Test Connector',
+      name: 'my-data-source',
       type: 'test_type',
       credentials: 'secret-token-123',
       savedObjectsClient: mockSavedObjectsClient,
@@ -210,7 +210,7 @@ tags:
     expect(result).toBe('connector-1');
     expect(mockActionsClient.create).toHaveBeenCalledWith({
       action: expect.objectContaining({
-        name: '.notion',
+        name: 'my-data-source',
         actionTypeId,
         secrets: expect.objectContaining({
           authType: 'bearer',
@@ -224,13 +224,13 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-test-connector.sources.notion.search');
+    expect(createdYaml).toContain('name: my-data-source.sources.notion.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-test-connector.search',
+        id: 'test_type.my-data-source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -242,7 +242,7 @@ tags:
     expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
       DATA_SOURCE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
-        name: 'My Test Connector',
+        name: 'my-data-source',
         type: 'test_type',
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],

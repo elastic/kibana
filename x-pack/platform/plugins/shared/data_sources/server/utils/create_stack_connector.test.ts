@@ -11,6 +11,7 @@ import { connectorsSpecs } from '@kbn/connector-specs';
 import type { StackConnectorConfig } from '@kbn/data-catalog-plugin';
 
 describe('createStackConnector', () => {
+  const MOCK_DATA_SOURCE_NAME = 'my-test-data-source';
   const mockRequest = httpServerMock.createKibanaRequest();
   const mockActionsClient = {
     create: jest.fn(),
@@ -49,6 +50,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         mockStackConnectorConfig,
         'test-token-123'
       );
@@ -57,7 +59,7 @@ describe('createStackConnector', () => {
       expect(mockActions.getActionsClientWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: '.mcp',
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -94,6 +96,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithApiKey,
         'api-key-123'
       );
@@ -101,7 +104,7 @@ describe('createStackConnector', () => {
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: '.mcp',
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -141,6 +144,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithBasic,
         'username:password'
       );
@@ -148,7 +152,7 @@ describe('createStackConnector', () => {
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: '.mcp',
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -185,6 +189,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigNoAuth,
         ''
       );
@@ -192,7 +197,7 @@ describe('createStackConnector', () => {
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: '.mcp',
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: '.mcp',
           config: {
             serverUrl: 'https://api.example.com/mcp/',
@@ -225,6 +230,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithTools,
         'test-token'
       );
@@ -249,6 +255,7 @@ describe('createStackConnector', () => {
       await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithoutTools,
         'test-token'
       );
@@ -271,6 +278,7 @@ describe('createStackConnector', () => {
       await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithEmptyTools,
         'test-token'
       );
@@ -295,6 +303,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithTools,
         'test-token'
       );
@@ -318,6 +327,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         connectorConfigWithTools,
         'test-token'
       );
@@ -351,6 +361,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         notionConnectorConfig,
         'notion-token-123'
       );
@@ -358,7 +369,7 @@ describe('createStackConnector', () => {
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: '.notion',
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: '.notion',
           config: {},
           secrets: expect.objectContaining({
@@ -400,6 +411,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         apiKeyConnectorConfig,
         'api-key-123'
       );
@@ -407,7 +419,7 @@ describe('createStackConnector', () => {
       expect(result).toEqual(mockStackConnector);
       expect(mockActionsClient.create).toHaveBeenCalledWith({
         action: {
-          name: apiKeySpec.metadata.id,
+          name: MOCK_DATA_SOURCE_NAME,
           actionTypeId: apiKeySpec.metadata.id,
           config: {},
           secrets: expect.objectContaining({
@@ -426,7 +438,13 @@ describe('createStackConnector', () => {
       };
 
       await expect(
-        createStackConnector(mockActions as any, mockRequest, invalidConnectorConfig, 'token')
+        createStackConnector(
+          mockActions as any,
+          mockRequest,
+          MOCK_DATA_SOURCE_NAME,
+          invalidConnectorConfig,
+          'token'
+        )
       ).rejects.toThrow('Stack connector spec not found for type ".nonexistent"');
     });
 
@@ -448,6 +466,7 @@ describe('createStackConnector', () => {
       const result = await createStackConnector(
         mockActions as any,
         mockRequest,
+        MOCK_DATA_SOURCE_NAME,
         notionConnectorConfig,
         'notion-token-123'
       );
