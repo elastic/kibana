@@ -129,8 +129,6 @@ export const ENTITY_RELATIONSHIP_FIELDS = [
   'Accessed_frequently_by',
 ] as const;
 
-export type EntityRelationshipField = (typeof ENTITY_RELATIONSHIP_FIELDS)[number];
-
 /**
  * ECS entity actor fields used for graph visualization.
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
