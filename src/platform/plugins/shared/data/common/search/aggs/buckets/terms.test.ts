@@ -173,7 +173,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('field');
       expect(params.include).toBe('404');
@@ -193,7 +197,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('string_field');
       expect(params.include).toBe('include value');
@@ -215,7 +223,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('string_field');
       expect(params.include).toStrictEqual(['include1', 'include2']);
@@ -237,7 +249,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('string_field');
       expect(params.include).toBe('include.*');
@@ -257,7 +273,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('string_field');
       expect(params.include).toBe(undefined);
@@ -277,7 +297,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('empty_number_field');
       expect(params.include).toBe(undefined);
@@ -297,7 +321,11 @@ describe('Terms Agg', () => {
         },
       });
 
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.field).toBe('number_field');
       expect(params.include).toStrictEqual([1.1, 2, 3.33]);
@@ -357,7 +385,11 @@ describe('Terms Agg', () => {
         { typesRegistry: mockAggTypesRegistry() },
         jest.fn()
       );
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
 
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
     });
@@ -372,7 +404,11 @@ describe('Terms Agg', () => {
         },
         size: 5,
       });
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
       expect(params.shard_size).toEqual(25);
     });
 
@@ -384,7 +420,11 @@ describe('Terms Agg', () => {
         },
         size: 15,
       });
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
       expect(params.shard_size).toBeUndefined();
     });
 
@@ -396,7 +436,11 @@ describe('Terms Agg', () => {
         },
         shardSize: 1000,
       });
-      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      const dsl = aggConfigs.aggs[0].toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const { [BUCKET_TYPES.TERMS]: params } = dsl;
       expect(params.shard_size).toEqual(1000);
     });
 

@@ -8,6 +8,7 @@
  */
 
 import type { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
+import type { AggConfig } from '../../agg_config';
 
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
@@ -31,10 +32,10 @@ export const forwardModifyAggConfigOnSearchRequestStart = (paramName: string) =>
       return;
     }
 
-    const nestedAggConfig = aggConfig.getParam(paramName);
+    const nestedAggConfig = aggConfig.getParam(paramName) as IMetricAggConfig;
 
     if (nestedAggConfig && nestedAggConfig.type && nestedAggConfig.type.params) {
-      nestedAggConfig.type.params.forEach((param: MetricAggParam<IMetricAggConfig>) => {
+      nestedAggConfig.type.params.forEach((param: MetricAggParam<AggConfig>) => {
         // Check if this parameter of the nested aggConfig has a modifyAggConfigOnSearchRequestStart
         // function, that needs to be called.
         if (param.modifyAggConfigOnSearchRequestStart) {

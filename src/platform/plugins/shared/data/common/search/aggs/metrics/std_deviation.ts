@@ -34,14 +34,14 @@ export interface IStdDevAggConfig extends IResponseAggConfig {
 
 const responseAggConfigProps = {
   valProp(this: IStdDevAggConfig) {
-    const customLabel = this.getParam('customLabel');
+    const customLabel = this.getParam('customLabel') as string;
     const details = this.keyedDetails(customLabel)[this.key];
 
     return details.valProp;
   },
   makeLabel(this: IStdDevAggConfig) {
     const fieldDisplayName = this.getFieldDisplayName();
-    const customLabel = this.getParam('customLabel');
+    const customLabel = this.getParam('customLabel') as string;
     const details = this.keyedDetails(customLabel, fieldDisplayName);
 
     return get(details, [this.key, 'title']);

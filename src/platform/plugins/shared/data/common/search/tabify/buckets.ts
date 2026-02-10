@@ -48,7 +48,7 @@ export class TabifyBuckets {
     }
 
     if (this.length && agg) {
-      this.orderBucketsAccordingToParams(agg.params);
+      this.orderBucketsAccordingToParams(agg.params as any);
       if (agg.params.drop_partials) {
         this.dropPartials(agg, timeRange);
       }
@@ -86,7 +86,7 @@ export class TabifyBuckets {
     } else if (params.ranges && params.field.type !== 'date') {
       let ranges = params.ranges;
       if (params.ipRangeType) {
-        ranges = params.ipRangeType === 'mask' ? ranges.mask : ranges.fromTo;
+        ranges = params.ipRangeType === 'mask' ? (ranges as any).mask : (ranges as any).fromTo;
       }
       this.buckets = ranges.map((range: any) => {
         if (range.mask) {

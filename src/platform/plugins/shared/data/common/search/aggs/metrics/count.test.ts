@@ -12,14 +12,19 @@ import type { IMetricAggConfig } from './metric_agg_type';
 import { getCountMetricAgg } from './count';
 
 function makeAgg(emptyAsNull: boolean = false, timeShift?: moment.Duration): IMetricAggConfig {
-  return {
+  return ({
+    id: '1',
     getTimeShift() {
       return timeShift;
     },
     params: {
       emptyAsNull,
     },
-  } as IMetricAggConfig;
+    type: getCountMetricAgg(),
+    aggConfigs: {
+      aggs: [],
+    },
+  } as unknown) as IMetricAggConfig;
 }
 
 function getBucket(value: number | undefined, timeShift?: moment.Duration) {

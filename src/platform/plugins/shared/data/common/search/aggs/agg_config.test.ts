@@ -114,6 +114,9 @@ describe('AggConfig', () => {
       const football = {};
       jest.spyOn(aggConfig, 'write').mockImplementation(() => ({ params: football }));
       const dsl = aggConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl.date_histogram).toBe(football);
     });
 
@@ -144,6 +147,9 @@ describe('AggConfig', () => {
       jest.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
 
       const dsl = histoConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl).toHaveProperty('aggs');
       expect(dsl.aggs).toHaveProperty(avgConfig.id);
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
@@ -186,6 +192,9 @@ describe('AggConfig', () => {
 
       (histoConfig as any).subAggs = [medianConfig];
       const dsl = histoConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl).toHaveProperty('aggs');
       expect(dsl.aggs).toHaveProperty(avgConfig.id);
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');

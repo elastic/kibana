@@ -70,7 +70,7 @@ export const getPercentilesMetricAgg = () => {
     getResponseAggs(agg) {
       const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
-      return agg.getParam('percents').map((percent: any) => new ValueAggConfig(percent));
+      return (agg.getParam('percents') as number[]).map((percent) => new ValueAggConfig(percent));
     },
 
     getValue: getPercentileValue,

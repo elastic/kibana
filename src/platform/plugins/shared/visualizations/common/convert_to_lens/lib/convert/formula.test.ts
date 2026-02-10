@@ -27,14 +27,18 @@ describe('createFormulaColumn', () => {
     aggType: METRIC_TYPES.CUMULATIVE_SUM,
     aggId,
     aggParams: {
-      customMetric: {
+      customMetric: ({
         id: 'some-id-metric',
         enabled: true,
         type: { name: METRIC_TYPES.AVG },
         params: {
           field: stubLogstashDataView.fields[0],
         },
-      } as IAggConfig,
+        aggConfigs: {
+          aggs: [],
+        },
+        schema: 'metric',
+      } as unknown) as IAggConfig,
     },
   };
   test('should return formula column', () => {

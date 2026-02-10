@@ -127,7 +127,11 @@ describe('date_range params', () => {
         field: 'bytes',
       });
       const dateRange = aggConfigs.aggs[0];
-      const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
+      const dsl = dateRange.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const params = dsl[BUCKET_TYPES.DATE_RANGE];
 
       expect(params.time_zone).toBe('Europe/Minsk');
     });
@@ -137,7 +141,11 @@ describe('date_range params', () => {
         field: 'bytes',
       });
       const dateRange = aggConfigs.aggs[0];
-      const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
+      const dsl = dateRange.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const params = dsl[BUCKET_TYPES.DATE_RANGE];
 
       expect(params.time_zone).toBe('defaultTimeZone');
     });
@@ -150,7 +158,11 @@ describe('date_range params', () => {
         false
       );
       const dateRange = aggConfigs.aggs[0];
-      const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
+      const dsl = dateRange.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
+      const params = dsl[BUCKET_TYPES.DATE_RANGE];
 
       expect(params.time_zone).toBe('kibanaTimeZone');
     });

@@ -64,13 +64,13 @@ export const parentPipelineAggHelper = {
   },
 
   getSerializedFormat(agg: IMetricAggConfig) {
-    let subAgg;
-    const customMetric = agg.getParam('customMetric');
+    let subAgg: IMetricAggConfig | undefined;
+    const customMetric = agg.getParam('customMetric') as IMetricAggConfig;
 
     if (customMetric) {
       subAgg = customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
+      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg') as string) as IMetricAggConfig;
     }
     return subAgg ? subAgg.type.getSerializedFormat(subAgg) : {};
   },

@@ -103,7 +103,7 @@ export class AggConfigs {
     );
 
     configStates = AggConfig.ensureIds(configStates);
-    configStates.forEach((params: any) => this.createAggConfig(params));
+    configStates.forEach((params: CreateAggConfigParams) => this.createAggConfig(params));
   }
 
   public get hierarchical() {
@@ -264,7 +264,8 @@ export class AggConfigs {
             config: agg,
             dsl: agg.toDsl(this),
           };
-        });
+        })
+        .filter((agg) => agg.dsl) as Array<{ config: AggConfig; dsl: Record<string, any> }>;
     }
     const requestAggs = this.getRequestAggs();
     const aggsWithDsl = requestAggs.filter((agg) => !agg.type.hasNoDsl).length;
@@ -308,7 +309,7 @@ export class AggConfigs {
       const dsl = config.type.hasNoDslParams
         ? config.toDsl(this)
         : (dslLvlCursor[config.id] = config.toDsl(this));
-      let subAggs: any;
+      let subAggs: Record<string, any> | undefined;
 
       parseParentAggs(dslLvlCursor, dsl);
 
@@ -317,7 +318,9 @@ export class AggConfigs {
         (i < aggsWithDsl - 1 || timeSplitIndex > i)
       ) {
         // buckets that are not the last item in the list of dsl producing aggs or have a time split coming up accept sub-aggs
-        subAggs = dsl.aggs || (dsl.aggs = {});
+        if (dsl) {
+          subAggs = dsl.aggs || (dsl.aggs = {});
+        }
       }
 
       if (subAggs) {

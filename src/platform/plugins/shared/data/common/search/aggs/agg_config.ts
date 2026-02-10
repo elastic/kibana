@@ -23,9 +23,10 @@ import type { ISearchOptions } from '@kbn/search-types';
 import type { ISearchSource } from '../../../public';
 
 import type { IAggType } from './agg_type';
-import { writeParams } from './agg_params';
+import { writeParams, AggParam } from './agg_params';
 import type { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
+import type { DataViewField } from '../../../../data_views/public';
 
 /** @public **/
 export type AggConfigSerialized = Ensure<
@@ -59,14 +60,14 @@ export class AggConfig {
    * @param  {array[object]} list - a list of objects, objects can be anything really
    * @return {array} - the list that was passed in
    */
-  static ensureIds(list: any[]) {
-    const have: IAggConfig[] = [];
-    const haveNot: AggConfigOptions[] = [];
+  static ensureIds<T extends { id?: string }>(list: T[]): T[] {
+    const have: Array<{ id?: string }> = [];
+    const haveNot: T[] = [];
     list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
-    let nextId = AggConfig.nextId(have);
+    let nextId = AggConfig.nextId(have as IAggConfig[]);
     haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
@@ -91,18 +92,18 @@ export class AggConfig {
   public aggConfigs: IAggConfigs;
   public id: string;
   public enabled: boolean;
-  public params: any;
+  public params: Record<string, any>;
   public parent?: IAggConfigs;
   public brandNew?: boolean;
   public schema?: string;
 
   private __type: IAggType;
-  private __typeDecorations: any;
+  private __typeDecorations: Record<string, any> | undefined;
   private subAggs: AggConfig[] = [];
 
   constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
-    this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
+    this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
     // start with empty params so that checks in type/schema setters don't freak
@@ -130,9 +131,9 @@ export class AggConfig {
    *                         used when initializing
    * @return {undefined}
    */
-  setParams(from: any) {
+  setParams(from: Record<string, any>) {
     from = from || this.params || {};
-    const to = (this.params = {} as any);
+    const to = (this.params = {} as Record<string, any>);
 
     this.getAggParams().forEach((aggParam) => {
       let val = from[aggParam.name];
@@ -168,7 +169,7 @@ export class AggConfig {
     });
   }
 
-  getParam(key: string): any {
+  getParam(key: string): unknown {
     return _.get(this.params, key);
   }
 
@@ -179,7 +180,7 @@ export class AggConfig {
   getTimeShift(): undefined | moment.Duration {
     const rawTimeShift = this.getParam('timeShift');
     if (!rawTimeShift) return undefined;
-    const parsedTimeShift = parseTimeShift(rawTimeShift);
+    const parsedTimeShift = parseTimeShift(rawTimeShift as string);
     if (parsedTimeShift === 'invalid') {
       throw new Error(`could not parse time shift ${rawTimeShift}`);
     }
@@ -238,7 +239,7 @@ export class AggConfig {
     }
 
     return Promise.all(
-      this.type.params.map((param: any) =>
+      this.type.params.map((param: AggParam) =>
         param.modifyAggConfigOnSearchRequestStart(this, searchSource, options)
       )
     );
@@ -255,9 +256,9 @@ export class AggConfig {
    */
   toDsl(aggConfigs?: IAggConfigs) {
     if (this.type.hasNoDsl) return;
-    const output = this.write(aggConfigs) as any;
+    const output = this.write(aggConfigs);
 
-    const configDsl = {} as any;
+    const configDsl: Record<string, any> = {};
     if (!this.type.hasNoDslParams) {
       configDsl[this.type.dslName || this.type.name] = output.params;
     }
@@ -270,14 +271,14 @@ export class AggConfig {
 
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
-      output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
+      output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: AggConfig) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
 
     if (output.parentAggs) {
       const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
-      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
+      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig: AggConfig) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
@@ -293,7 +294,7 @@ export class AggConfig {
 
     const outParams = _.transform(
       this.getAggParams(),
-      (out: any, aggParam) => {
+      (out: Record<string, any>, aggParam) => {
         let val = params[aggParam.name];
 
         // don't serialize undefined/null values
@@ -405,7 +406,7 @@ export class AggConfig {
     return (this.type && this.type.getResponseAggs(this)) || [this];
   }
 
-  getValue(bucket: any) {
+  getValue(bucket: Record<string, any>) {
     return this.type.getValue(this, bucket);
   }
 
@@ -413,7 +414,7 @@ export class AggConfig {
     return this.type.getResponseId(this);
   }
 
-  getKey(bucket: any, key?: string) {
+  getKey(bucket: Record<string, any>, key?: string) {
     if (this.type.getKey) {
       return this.type.getKey(bucket, key, this);
     } else {
@@ -492,13 +493,15 @@ export class AggConfig {
 
     if (type && _.isFunction(type.decorateAggConfig)) {
       this.__typeDecorations = type.decorateAggConfig();
-      Object.defineProperties(this, this.__typeDecorations);
+      if (this.__typeDecorations) {
+        Object.defineProperties(this, this.__typeDecorations);
+      }
     }
 
     this.__type = type;
     let availableFields = [];
 
-    const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
+    const fieldParam = this.type && this.type.params.find((p: AggParam) => p.type === 'field');
 
     if (fieldParam) {
       // @ts-ignore
@@ -508,7 +511,7 @@ export class AggConfig {
     // clear out the previous params except for a few special ones
     this.setParams({
       // almost every agg has fields, so we try to persist that when type changes
-      field: availableFields.find((field: any) => field.name === this.getField()),
+      field: availableFields.find((field: DataViewField) => field.name === this.getField()),
     });
   }
 
