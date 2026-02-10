@@ -5,8 +5,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
   class="secAuthenticationStatePage "
 >
   <header
-    class="css-1w0q1qu-AuthenticationStatePage"
-    data-test-subj="secAuthenticationStatePageHeader"
+    class="secAuthenticationStatePage__header"
   >
     <div
       class="secAuthenticationStatePage__content eui-textCenter"
@@ -15,8 +14,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
         class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
       />
       <span
-        class="css-1rux1qp-AuthenticationStatePage"
-        data-test-subj="secAuthenticationStatePageLogo"
+        class="secAuthenticationStatePage__logo"
       >
         <span
           data-euiicon-type="logoElastic"
