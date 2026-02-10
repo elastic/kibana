@@ -31,6 +31,8 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
+import { WorkflowsMeteringService } from './metering/metering_service';
+import { UsageReportingService } from './metering/usage_reporting_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -93,12 +95,10 @@ export class WorkflowsExecutionEnginePlugin
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
 
-    // Initialize metering if enabled and Usage API is configured
-    if (this.config.metering.enabled && this.config.metering.usageApi.url) {
-      const usageReportingService = new UsageReportingService(
-        this.config.metering,
-        this.kibanaVersion
-      );
+    // Initialize metering from the centralized Usage API plugin
+    const usageApiConfig = plugins.usageApi?.config;
+    if (usageApiConfig?.enabled && usageApiConfig.url) {
+      const usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
       this.meteringService = new WorkflowsMeteringService(
         usageReportingService,
         this.logger.get('metering')
@@ -106,9 +106,7 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug('Workflows metering service initialized');
     } else {
       this.logger.debug(
-        'Workflows metering service not initialized: ' +
-          `enabled=${this.config.metering.enabled}, ` +
-          `usageApiUrl=${this.config.metering.usageApi.url ? 'configured' : 'not configured'}`
+        'Workflows metering service not initialized: Usage API plugin is not available or not configured'
       );
     }
 

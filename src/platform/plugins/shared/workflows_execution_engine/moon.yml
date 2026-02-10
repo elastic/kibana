@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
   - '@kbn/licensing-plugin'
+  - '@kbn/usage-api-plugin'
 tags:
   - plugin
   - prod

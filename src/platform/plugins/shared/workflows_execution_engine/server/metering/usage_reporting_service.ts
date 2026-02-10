@@ -14,9 +14,24 @@ import fetch from 'node-fetch';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
-import { USAGE_REPORTING_ENDPOINT } from './constants';
 import type { UsageRecord } from './types';
-import type { MeteringConfig } from '../config';
+
+/**
+ * Config shape accepted by UsageReportingService.
+ *
+ * When supplied by the Usage API plugin, `url` is already the full endpoint.
+ * When falling back to the plugin's own config, the caller must append the
+ * endpoint path before passing the config here.
+ */
+export interface UsageReportingConfig {
+  enabled: boolean;
+  url?: string;
+  tls?: {
+    certificate: string;
+    key: string;
+    ca: string;
+  };
+}
 
 /**
  * HTTP client for sending UsageRecords to the Usage API.
@@ -28,7 +43,7 @@ export class UsageReportingService {
   private agent: https.Agent | undefined;
 
   constructor(
-    private readonly meteringConfig: MeteringConfig,
+    private readonly config: UsageReportingConfig,
     private readonly kibanaVersion: string
   ) {}
 
@@ -50,11 +65,11 @@ export class UsageReportingService {
   }
 
   private get usageApiUrl(): string {
-    const url = this.meteringConfig.usageApi.url;
+    const { url } = this.config;
     if (!url) {
       throw new Error('Usage API URL not configured for workflows metering');
     }
-    return `${url}${USAGE_REPORTING_ENDPOINT}`;
+    return url;
   }
 
   private get httpAgent(): https.Agent {
@@ -62,7 +77,7 @@ export class UsageReportingService {
       return this.agent;
     }
 
-    const { tls } = this.meteringConfig.usageApi;
+    const { tls } = this.config;
     if (!tls) {
       throw new Error('Usage API TLS configuration not provided for workflows metering');
     }

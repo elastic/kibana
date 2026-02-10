@@ -19,9 +19,6 @@ export const BUCKET_SIZE_MINUTES = 5;
 /** Duration normalization bucket size in milliseconds. */
 export const BUCKET_SIZE_MS = BUCKET_SIZE_MINUTES * 60 * 1000;
 
-/** Usage API endpoint path. */
-export const USAGE_REPORTING_ENDPOINT = '/api/v1/usage';
-
 /** Maximum number of retry attempts for sending usage records. */
 export const METERING_RETRY_ATTEMPTS = 3;
 
