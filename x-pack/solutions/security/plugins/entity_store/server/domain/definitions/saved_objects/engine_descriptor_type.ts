@@ -96,7 +96,7 @@ const engineDescriptorAttributesSchema = {
   ]),
   logExtractionState: schema.object({
     filter: schema.string(),
-    additionalIndexPatterns: schema.arrayOf(schema.string()),
+    additionalIndexPatterns: schema.arrayOf(schema.string(), { maxSize: 10000 }),
     fieldHistoryLength: schema.number(),
     lookbackPeriod: schema.string(),
     delay: schema.string(),

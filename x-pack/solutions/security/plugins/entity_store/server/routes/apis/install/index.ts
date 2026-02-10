@@ -11,11 +11,12 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants'
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
+import { ENTITY_STORE_ROUTES } from '../../../../common';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity-store/install',
+      path: ENTITY_STORE_ROUTES.INSTALL,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
