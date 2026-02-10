@@ -133,7 +133,6 @@ export const useConversationRounds = () => {
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
-
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
