@@ -39,5 +39,7 @@
     "@kbn/chart-expressions-common",
     "@kbn/lens-common",
     "@kbn/control-group-renderer",
+    "@kbn/share-plugin",
+    "@kbn/discover-shared-plugin"
   ]
 }

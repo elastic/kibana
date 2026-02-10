@@ -73,6 +73,8 @@ export const categorizeFields = ({
     if (dataViewField.timeSeriesMetric) {
       metricFields.push({
         index: column.meta?.index ?? index,
+        // Added this field to simulate metrics_info
+        dataStream: column.meta?.index ?? index,
         name: columnName,
         type: fieldType,
         instrument: dataViewField.timeSeriesMetric,

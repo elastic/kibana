@@ -32,6 +32,7 @@ export interface Dimension {
 export interface MetricField {
   name: string;
   index: string;
+  dataStream?: string | string[];
   type: ES_FIELD_TYPES;
   instrument?: MappingTimeSeriesMetricType;
   unit?: MetricUnit;

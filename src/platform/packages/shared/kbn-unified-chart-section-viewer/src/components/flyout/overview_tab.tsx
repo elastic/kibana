@@ -20,17 +20,21 @@ import {
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
+import { DataStreamLink } from './data_stream_link';
+
 interface OverviewTabProps {
   metric: MetricField;
   description?: string;
+  services: UnifiedHistogramServices;
 }
 
 const DEFAULT_PAGINATION_SIZE = 20;
 
-export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
+export const OverviewTab = ({ metric, description, services }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
@@ -106,11 +110,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                 </strong>
               </EuiText>
             ),
-            description: (
-              <EuiText color="primary" size="s">
-                {metric.index}
-              </EuiText>
-            ),
+            description: <DataStreamLink dataStream={metric.dataStream} services={services} />,
           },
           {
             title: (

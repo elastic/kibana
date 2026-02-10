@@ -36,6 +36,8 @@ import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -62,6 +64,8 @@ export interface UnifiedHistogramServices {
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  share?: SharePluginStart;
+  discoverShared?: DiscoverSharedPublicStart;
 }
 
 /**

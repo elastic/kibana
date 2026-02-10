@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import type { MetricField } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
@@ -37,6 +38,7 @@ interface MetricInsightsFlyoutProps {
   esqlQuery?: string;
   onClose: () => void;
   chartRef: { current: HTMLDivElement | null };
+  services: UnifiedHistogramServices;
 }
 
 export const MetricInsightsFlyout = ({
@@ -44,6 +46,7 @@ export const MetricInsightsFlyout = ({
   esqlQuery,
   chartRef,
   onClose,
+  services,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const defaultWidth = euiTheme.base * 34;
@@ -130,6 +133,7 @@ export const MetricInsightsFlyout = ({
             metric={metric}
             esqlQuery={esqlQuery}
             description={fieldsMetadata[metric.name]?.description}
+            services={services}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
