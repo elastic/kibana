@@ -67,6 +67,8 @@ export async function getPreviousDiscoveredPatterns(
 
 const MIN_NEW_PATTERNS = 2;
 
+const MAX_DISCOVERED_PATTERNS = 200;
+
 const getSampleDocuments = async ({
   esClient,
   index,
@@ -108,10 +110,11 @@ const getSampleDocuments = async ({
     discoveredAt: now,
   }));
 
-  const updatedPatterns = [
-    ...(excludePatterns && !resetPatterns ? excludePatterns : []),
-    ...newPatterns,
-  ];
+  const previousPatterns = excludePatterns && !resetPatterns ? excludePatterns : [];
+  const remainingSlots = Math.max(0, MAX_DISCOVERED_PATTERNS - newPatterns.length);
+  const keptPrevious = previousPatterns.slice(0, remainingSlots);
+
+  const updatedPatterns = [...keptPrevious, ...newPatterns];
 
   return {
     updatedPatterns,
