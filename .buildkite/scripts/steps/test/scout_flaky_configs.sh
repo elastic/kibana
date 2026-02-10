@@ -17,13 +17,33 @@ if [[ -z "$SCOUT_CONFIG" ]]; then
   exit 1
 fi
 
-if [[ -z "$SCOUT_SERVER_RUN_FLAGS" ]]; then
-  echo "Missing SCOUT_SERVER_RUN_FLAGS env var"
+config_path="$SCOUT_CONFIG"
+config_path="${config_path#./}"
+
+config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
+if [[ -z "$config_run_modes" ]]; then
+  echo "--- Downloading Scout Playwright config manifest (for serverRunFlags)"
+  download_artifact scout_playwright_configs.json .
+
+  if [[ ! -f scout_playwright_configs.json ]]; then
+    echo "Missing scout_playwright_configs.json artifact (needed to compute serverRunFlags)"
+    exit 1
+  fi
+
+  # A single `path` can appear multiple times (e.g. `streams_app` split by serverRunFlags).
+  # Merge to a unique, ordered list of run modes.
+  config_run_modes=$(jq -r --arg path "$config_path" '
+    reduce (.[] | .configs[]? | select(.path == $path) | .serverRunFlags[]?) as $f
+      ([]; if index($f) then . else . + [$f] end)
+    | .[]
+  ' scout_playwright_configs.json)
+fi
+
+if [[ -z "$config_run_modes" ]]; then
+  echo "No serverRunFlags found for SCOUT_CONFIG=$config_path"
   exit 1
 fi
 
-config_path="$SCOUT_CONFIG"
-config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
 passed_count=0
 failedModes=()
 
