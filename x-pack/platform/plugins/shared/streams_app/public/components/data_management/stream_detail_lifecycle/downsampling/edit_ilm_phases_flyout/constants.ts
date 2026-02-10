@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import type { TimeUnit } from './form';
+import { getTimeUnitLabel } from '../../helpers/format_size_units';
 
 export const ILM_PHASE_ORDER: PhaseName[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 
@@ -34,25 +35,19 @@ export const PHASE_LABELS: Record<PhaseName, string> = {
 export const TIME_UNIT_OPTIONS: ReadonlyArray<{ value: TimeUnit; text: string }> = [
   {
     value: 'd',
-    text: i18n.translate('xpack.streams.editIlmPhasesFlyout.unitDays', { defaultMessage: 'days' }),
+    text: getTimeUnitLabel('d'),
   },
   {
     value: 'h',
-    text: i18n.translate('xpack.streams.editIlmPhasesFlyout.unitHours', {
-      defaultMessage: 'hours',
-    }),
+    text: getTimeUnitLabel('h'),
   },
   {
     value: 'm',
-    text: i18n.translate('xpack.streams.editIlmPhasesFlyout.unitMinutes', {
-      defaultMessage: 'minutes',
-    }),
+    text: getTimeUnitLabel('m'),
   },
   {
     value: 's',
-    text: i18n.translate('xpack.streams.editIlmPhasesFlyout.unitSeconds', {
-      defaultMessage: 'seconds',
-    }),
+    text: getTimeUnitLabel('s'),
   },
 ];
 
