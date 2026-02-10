@@ -33,7 +33,7 @@
           "hide_title": {
             "type": "boolean"
           },
-          "savedObjectId": {
+          "ref_id": {
             "description": "The ID of the saved markdown object",
             "type": "string"
           },
@@ -42,7 +42,7 @@
           }  
         },
         "required": [
-          "savedObjectId"
+          "ref_id"
         ],
         "type": "object"
       }
