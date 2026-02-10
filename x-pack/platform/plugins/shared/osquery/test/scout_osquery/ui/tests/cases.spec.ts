@@ -127,6 +127,7 @@ test.describe('Add to Cases', () => {
           await waitForPageReady(page);
         }
       }
+
       await page.testSubj
         .locator('osqueryResultsTable')
         .waitFor({ state: 'visible', timeout: 30_000 });

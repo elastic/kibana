@@ -48,7 +48,9 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
     await expect(responseWrapper).toBeVisible();
 
     // Wait for response actions results to fully load
-    await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
+    await expect(
+      responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
+    ).toBeVisible({ timeout: 120_000 });
 
     // Check action items exist
     await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
@@ -88,7 +90,9 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
     await expect(responseWrapper).toBeVisible();
 
     // Wait for response actions results to fully load
-    await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
+    await expect(
+      responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
+    ).toBeVisible({ timeout: 120_000 });
 
     // Check action items exist
     await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
@@ -129,7 +133,9 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
       await expect(responseWrapper).toBeVisible();
 
       // Wait for response actions results to fully load
-      await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
+      await expect(
+        responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()
+      ).toBeVisible({ timeout: 120_000 });
 
       // Check action items exist
       await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });

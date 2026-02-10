@@ -35,8 +35,12 @@ export async function dismissAllToasts(page: ScoutPage): Promise<void> {
   const closeButtons = toastList.locator('[data-test-subj="toastCloseButton"]');
   const count = await closeButtons.count();
   for (let i = 0; i < count; i++) {
-    await closeButtons.nth(i).click().catch(() => {});
+    await closeButtons
+      .nth(i)
+      .click()
+      .catch(() => {});
   }
+
   // Brief pause to let the toast animation complete
   if (count > 0) {
     await page.waitForTimeout(500);
@@ -58,6 +62,7 @@ export async function waitForAlerts(
   while (Date.now() - start < timeout) {
     try {
       await expandEvent.waitFor({ state: 'visible', timeout: 30_000 });
+
       return;
     } catch {
       // Alerts not yet generated — reload and try again
