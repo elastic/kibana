@@ -33,7 +33,9 @@
       "config": {
         "webhookUrl": "https://hooks.slack.com/services/xxx"
       },
-      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0="
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
     },
     {
       "name": "Email Connector",
@@ -84,7 +86,9 @@
       "config": {
         "webhookUrl": "https://hooks.slack.com/services/xxx"
       },
-      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0="
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false
     },
     {
       "name": "Email Connector",
