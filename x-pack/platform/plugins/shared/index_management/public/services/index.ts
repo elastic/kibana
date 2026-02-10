@@ -8,3 +8,6 @@
 export { ExtensionsService } from './extensions_service';
 
 export { PublicApiService } from './public_api_service';
+
+export { IndexDataEnricher, indexDataEnricher } from './index_data_enricher';
+export type { Enricher } from '@kbn/index-management-shared-types';

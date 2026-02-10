@@ -34,4 +34,5 @@ export default createTestConfig({
     require.resolve('../test_suites/ftr/cloud_security_posture/graph_alerts_flyout'),
     require.resolve('../test_suites/ftr/cloud_security_posture/graph_events_flyout'),
   ],
+  enableFleetDockerRegistry: false,
 });

@@ -17,6 +17,10 @@ jest.mock('./file_size_check');
 jest.mock('../src/utils');
 jest.mock('./doc_count_service');
 
+Object.defineProperty(global.crypto, 'randomUUID', {
+  value: jest.fn(() => 'test-uuid-1234567890'),
+});
+
 describe('FileWrapper', () => {
   let fileWrapper: FileWrapper;
   let mockFile: File;

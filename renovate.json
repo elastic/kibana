@@ -19,7 +19,6 @@
     "main",
     "9.3",
     "9.2",
-    "9.1",
     "8.19"
   ],
   "prConcurrentLimit": 0,
@@ -185,8 +184,7 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash",
-        "@arizeai/phoenix-client"
+        "@types/cache-manager-fs-hash"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -196,6 +194,26 @@
       ],
       "labels": [
         "Team:AI Infra",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "@elastic/obs-ai-team dependencies",
+      "matchDepNames": [
+        "@arizeai/phoenix-client",
+        "simple-statistics"
+      ],
+      "reviewers": [
+        "team:obs-ai-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ai-team",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4468,6 +4486,7 @@
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-hapi",
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",

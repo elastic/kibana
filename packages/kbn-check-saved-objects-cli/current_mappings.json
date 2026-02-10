@@ -301,6 +301,9 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
+      "description": {
+        "type": "text"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -1276,6 +1279,74 @@
     "properties": {
       "apiKey": {
         "type": "binary"
+      }
+    }
+  },
+  "entity-engine-descriptor-v2": {
+    "dynamic": false,
+    "properties": {
+      "error": {
+        "properties": {
+          "action": {
+            "type": "keyword"
+          },
+          "message": {
+            "type": "text"
+          }
+        }
+      },
+      "logExtractionState": {
+        "properties": {
+          "additionalIndexPattern": {
+            "type": "keyword"
+          },
+          "delay": {
+            "type": "keyword"
+          },
+          "docsLimit": {
+            "type": "integer"
+          },
+          "fieldHistoryLength": {
+            "type": "integer"
+          },
+          "filter": {
+            "type": "keyword"
+          },
+          "frequency": {
+            "type": "keyword"
+          },
+          "lastExecutionTimestamp": {
+            "type": "date"
+          },
+          "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationTimestamp": {
+            "type": "date"
+          },
+          "timeout": {
+            "type": "keyword"
+          }
+        }
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "versionState": {
+        "properties": {
+          "isMigratedFromV1": {
+            "type": "boolean"
+          },
+          "state": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
       }
     }
   },
@@ -3394,6 +3465,9 @@
         "type": "keyword"
       },
       "sessionId": {
+        "type": "keyword"
+      },
+      "status": {
         "type": "keyword"
       },
       "username": {
