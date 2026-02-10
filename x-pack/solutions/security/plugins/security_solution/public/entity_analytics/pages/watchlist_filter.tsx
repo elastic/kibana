@@ -126,6 +126,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row" >
       <EuiFlexItem>
         <EuiComboBox
+          data-test-subj="watchlistFilterComboBox"
           prepend="Watchlist"
           placeholder='Select watchlist'
           singleSelection={{ asPlainText: true }}

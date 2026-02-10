@@ -7,7 +7,11 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { ENTITY_ANALYTICS_THREAT_HUNTING_URL } from '../../../urls/navigation';
+import { fillComboBox } from '../../../tasks/eui_form_interactions';
+import {
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
+  ENTITY_ANALYTICS_THREAT_HUNTING_URL,
+} from '../../../urls/navigation';
 import {
   PAGE_TITLE,
   COMBINED_RISK_DONUT_CHART,
@@ -16,6 +20,7 @@ import {
   THREAT_HUNTING_ENTITIES_TABLE_LOADED,
   TIMELINE_ICON,
 } from '../../../screens/entity_analytics/threat_hunting';
+import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/watchlist_filter';
 
 describe(
   'Entity Threat Hunting page',
@@ -87,6 +92,17 @@ describe(
           timeout: 30000,
         }
       ).should('exist');
+    });
+
+    it('persists watchlist selection across navigation', () => {
+      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
+
+      fillComboBox({ parentSelector: WATCHLIST_FILTER_COMBO_BOX, options: 'Privileged users' });
+
+      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
+      cy.url().should('include', 'watchlist_id=prebuilt-priv');
+
+      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('contain', 'Privileged users');
     });
 
     it('displays timeline icon when data is available', () => {
