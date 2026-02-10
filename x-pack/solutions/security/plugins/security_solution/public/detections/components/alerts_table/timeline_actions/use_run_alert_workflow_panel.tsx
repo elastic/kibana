@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { WorkflowSelector } from '@kbn/workflows-ui/src/components';
+import { WorkflowSelector } from '@kbn/workflows-ui';
 import { useWorkflowActions } from '@kbn/workflows-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -19,19 +19,21 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { AlertTriggerInput } from '@kbn/workflows-management-plugin/common/types/alert_types';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { Loader } from '../../../../common/components/loader';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
-export interface UseAlertTagsActionsProps {
+export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
+export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
+
+export interface UseRunAlertWorkflowPanelProps {
   closePopover: () => void;
   ecsRowData: Ecs;
 }
-
-export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
-export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
 
 export interface AlertWorkflowAlertId {
   _id: string;
@@ -46,7 +48,7 @@ export interface AlertWorkflowsPanelProps {
 export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
-  } = useKibana<{ application: ApplicationStart }>();
+  } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
   const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
 
   const { runWorkflow } = useWorkflowActions();
@@ -123,26 +125,20 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     });
   };
 
+  const workflowSelector = useMemo(
+    () => (
+      <WorkflowSelector
+        selectedWorkflowId={selectedId || undefined}
+        onWorkflowChange={setSelectedId}
+        config={{ filterFunction: isAlertWorkflow }}
+      />
+    ),
+    [selectedId]
+  );
+
   return (
     <>
-      <EuiPanel>
-        {isLoading && (
-          <Loader>
-            <WorkflowSelector
-              selectedWorkflowId={selectedId || undefined}
-              onWorkflowChange={setSelectedId}
-              config={{ filterFunction: isAlertWorkflow }}
-            />
-          </Loader>
-        )}
-        {!isLoading && (
-          <WorkflowSelector
-            selectedWorkflowId={selectedId || undefined}
-            onWorkflowChange={setSelectedId}
-            config={{ filterFunction: isAlertWorkflow }}
-          />
-        )}
-      </EuiPanel>
+      <EuiPanel>{isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}</EuiPanel>
       <EuiButton
         data-test-subj="execute-alert-workflow-button"
         fullWidth
@@ -159,10 +155,10 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
 export const useRunAlertWorkflowPanel = ({
   closePopover,
   ecsRowData,
-}: UseAlertTagsActionsProps) => {
+}: UseRunAlertWorkflowPanelProps) => {
   const {
     services: { uiSettings, application },
-  } = useKibana<{ application: ApplicationStart }>();
+  } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
 
   const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
   const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
