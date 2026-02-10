@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { KibanaServer } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -150,6 +151,63 @@ export async function createClassicStreams(
 }
 
 /**
+ * Create a large number of unmanaged Elasticsearch data streams directly via the ES API.
+ * This bypasses the Kibana Streams backend global lock, enabling fast creation of thousands
+ * of data streams. The Streams listing page auto-discovers these as unmanaged classic streams.
+ */
+export async function createBulkDataStreams(
+  es: Client,
+  log: ToolingLog,
+  count: number,
+  prefix: string = 'logs-perf-classic'
+) {
+  log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES API...`);
+
+  // 1. Create an index template matching the naming pattern
+  await es.indices.putIndexTemplate({
+    name: 'perf-classic-streams-template',
+    index_patterns: [`${prefix}-*`],
+    data_stream: {},
+    template: {
+      settings: { number_of_shards: 1, number_of_replicas: 0 },
+    },
+  });
+  log.info('  Index template created');
+
+  // 2. Create data streams in parallel batches
+  const BATCH_SIZE = 50;
+  const names = Array.from({ length: count }, (_, i) =>
+    `${prefix}-${String(i).padStart(5, '0')}`
+  );
+
+  let created = 0;
+  for (let i = 0; i < names.length; i += BATCH_SIZE) {
+    const batch = names.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map((name) =>
+        es.indices.createDataStream({ name }).catch((error) => {
+          // Ignore 'resource_already_exists_exception' for idempotency
+          if (
+            error?.meta?.body?.error?.type === 'resource_already_exists_exception' ||
+            error?.meta?.statusCode === 400
+          ) {
+            return;
+          }
+          throw error;
+        })
+      )
+    );
+    created += batch.length;
+
+    if (created % 500 === 0 || created === count) {
+      log.info(`  Created ${created}/${count} data streams`);
+    }
+  }
+
+  log.info(`Finished creating ${count} unmanaged data streams`);
+}
+
+/**
  * Fork a child wired stream from a parent via the public API.
  * Idempotent — ignores 409 if the child stream already exists.
  */
@@ -218,15 +276,25 @@ export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log
 }
 
 /**
- * Full setup for the streams listing page journey:
+ * Full setup for the streams listing page journey (hybrid approach):
  * - Enable wired streams
  * - Create wired stream hierarchy (1 root + 3 children)
- * - Create 5000 classic streams
+ * - Create 5000 unmanaged data streams via ES API (fast, ~10-30s)
+ * - Create ~20 managed classic streams via Streams API (for realistic mix)
  */
-export async function setupListingPageData(kibanaServer: KibanaServer, log: ToolingLog) {
+export async function setupListingPageData(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog
+) {
   await enableStreams(kibanaServer, log);
   await createWiredStreamHierarchy(kibanaServer, log);
-  await createClassicStreams(kibanaServer, log, 5000);
+
+  // Bulk: 5000 unmanaged data streams via ES API (bypasses Streams backend lock)
+  await createBulkDataStreams(es, log, 5000);
+
+  // Small set: 20 managed classic streams via Streams API (for listing page mix)
+  await createClassicStreams(kibanaServer, log, 20);
 }
 
 /**

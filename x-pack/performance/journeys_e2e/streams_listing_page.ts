@@ -10,8 +10,8 @@ import { subj } from '@kbn/test-subj-selector';
 import { setupListingPageData } from '../synthtrace_data/streams_data';
 
 export const journey = new Journey({
-  beforeSteps: async ({ kibanaServer, log }) => {
-    await setupListingPageData(kibanaServer, log);
+  beforeSteps: async ({ kibanaServer, es, log }) => {
+    await setupListingPageData(kibanaServer, es, log);
   },
 })
   .step('Go to Streams listing page', async ({ page, kbnUrl }) => {
