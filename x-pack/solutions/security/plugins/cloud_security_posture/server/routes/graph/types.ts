@@ -46,6 +46,6 @@ export interface GraphEdge {
   targetEntitySubType?: string | null;
   targetEntityName?: string | string[] | null;
   targetHostIps?: string[] | string;
-  // pinned entity ID (if any entity in this edge is pinned)
+  // entity/event/alert ID if any in this edge is pinned
   pinned?: string | null;
 }
