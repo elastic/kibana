@@ -533,9 +533,14 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(4); // 2 entities + 2 labels
-        expect(response.body).to.have.property('edges').length(4); // actor→label1, label1→target, actor→label2, label2→target
+        expect(response.body).to.have.property('nodes').length(5); // 2 entities + 2 labels + 1 group
+        expect(response.body).to.have.property('edges').length(6); // actor→group, group→target, group↔label1, group↔label2
         expect(response.body).not.to.have.property('messages');
+
+        const groupNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape === 'group'
+        );
+        expect(groupNodes).to.have.length(1);
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group' && node.shape !== 'relationship') {
