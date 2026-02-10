@@ -68,9 +68,7 @@ export function FieldPicker({
             onClick: onClickCallback,
             onClickAriaLabel: badgeDescription,
           }
-        : {
-            'aria-disabled': true,
-          },
+        : {},
     [badgeDescription, hasFields, onClickCallback]
   );
 
@@ -85,6 +83,7 @@ export function FieldPicker({
           data-test-subj="graph-add-field-button"
           color="hollow"
           iconType="plusInCircleFilled"
+          aria-disabled={!hasFields}
           {...onClickProps}
           css={[
             gphFieldBadgeSizeStyles(euiThemeContext),
