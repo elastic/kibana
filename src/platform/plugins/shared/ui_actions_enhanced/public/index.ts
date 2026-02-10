@@ -46,7 +46,6 @@ export type {
 } from './drilldowns/url_drilldown';
 export {
   urlDrilldownCompileUrl,
-  UrlDrilldownCollectConfig,
   UrlDrilldownOptionsComponent,
   urlDrilldownGlobalScopeProvider,
   urlDrilldownValidateUrl,
