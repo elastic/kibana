@@ -21,7 +21,7 @@ export const bulkDeleteTemplatesRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: schema.object({
-      ids: schema.arrayOf(schema.string()),
+      ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     }),
   },
   routerOptions: {

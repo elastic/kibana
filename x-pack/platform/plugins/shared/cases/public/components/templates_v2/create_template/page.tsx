@@ -20,6 +20,7 @@ import { HeaderPage } from '../../header_page';
 import { CreateTemplateForm } from './form';
 import { CreateTemplatePreview } from './preview';
 import { exampleTemplateDefinition } from '../field_types/constants';
+import { GENERAL_CASES_OWNER } from '../../../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}
@@ -29,6 +30,8 @@ export interface CreateTemplatePageProps {}
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const form = useForm({
     defaultValues: {
+      name: '',
+      owner: GENERAL_CASES_OWNER,
       definition: exampleTemplateDefinition,
     },
   });

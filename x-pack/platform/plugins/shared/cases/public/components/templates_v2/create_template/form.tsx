@@ -6,11 +6,20 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { OWNERS, OWNER_INFO } from '../../../../common/constants';
+import { useCreateTemplate } from '../hooks/use_create_template';
 
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
@@ -24,17 +33,54 @@ const styles = {
 
 export const CreateTemplateForm = () => {
   const euiTheme = useEuiTheme();
-  const { control, handleSubmit } = useFormContext<{ definition: string }>();
+  const { control, handleSubmit } = useFormContext<{
+    name: string;
+    owner: string;
+    definition: string;
+  }>();
+  const { mutateAsync, isLoading } = useCreateTemplate();
 
-  const onSubmit = useCallback((data: { definition: string }) => {
-    console.log('handle submit', data);
-  }, []);
+  const ownerOptions = OWNERS.map((owner) => ({
+    value: owner,
+    text: OWNER_INFO[owner].label,
+  }));
+
+  const onSubmit = useCallback(
+    async (data: { name: string; owner: string; definition: string }) => {
+      await mutateAsync({
+        template: {
+          name: data.name,
+          owner: data.owner,
+          definition: data.definition,
+        },
+      });
+    },
+    [mutateAsync]
+  );
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       css={{ width: '100%', height: '70vh', overflowY: 'scroll' }}
     >
+      <EuiFormRow label="Template name">
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => <EuiFieldText {...field} />}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow label="Owner">
+        <Controller
+          control={control}
+          name="owner"
+          render={({ field }) => <EuiSelect {...field} options={ownerOptions} />}
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
       <div css={styles.editorContainer(euiTheme)}>
         <Controller
           control={control}
@@ -55,7 +101,7 @@ export const CreateTemplateForm = () => {
       </div>
 
       <div>
-        <EuiButton type="submit">{`Save`}</EuiButton>
+        <EuiButton type="submit" isLoading={isLoading}>{`Save`}</EuiButton>
       </div>
     </form>
   );

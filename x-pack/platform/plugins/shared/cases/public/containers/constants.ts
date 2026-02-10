@@ -53,6 +53,8 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
+
+  templates: ['templates'] as const,
 };
 
 export const casesMutationsKeys = {
@@ -71,6 +73,7 @@ export const casesMutationsKeys = {
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
   bulkPostObservables: ['bulk-post-observables'] as const,
+  createTemplate: ['create-template'] as const,
 };
 
 export const inferenceKeys = {
