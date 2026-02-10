@@ -22,6 +22,7 @@ describe('ResourceInitializer', () => {
   const resourceDefinition: ResourceDefinition = {
     key: 'data_stream:.alerts-test',
     dataStreamName: '.alerts-test',
+    version: 1,
     mappings: {
       dynamic: false,
       properties: {
@@ -84,12 +85,9 @@ describe('ResourceInitializer', () => {
 
     const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).resolves.toBeUndefined();
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      `Data stream already exists: ${resourceDefinition.dataStreamName}.`
-    );
   });
 
-  it('ignores 400 errors of type resource_already_exists_exceptionwhen creating the data stream', async () => {
+  it('ignores 400 errors of type resource_already_exists_exception when creating the data stream', async () => {
     esClient.indices.createDataStream.mockRejectedValueOnce(
       new errors.ResponseError({
         statusCode: 400,

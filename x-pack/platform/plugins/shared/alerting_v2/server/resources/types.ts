@@ -11,6 +11,7 @@ import type { MappingsDefinition } from '@kbn/es-mappings';
 export interface ResourceDefinition {
   key: string;
   dataStreamName: string;
+  version: number;
   mappings: MappingsDefinition;
   ilmPolicy: {
     name: string;

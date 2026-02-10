@@ -42,7 +42,7 @@ export class ResourceInitializer implements IResourceInitializer {
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
-      version: 1,
+      version: this.resourceDefinition.version,
       template: {
         aliases: {},
         priority: 500,

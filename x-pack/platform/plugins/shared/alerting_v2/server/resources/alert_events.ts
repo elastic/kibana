@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.alerts-events';
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 1;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.alerts-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.alerts-events-ilm-policy';
 
@@ -92,6 +93,7 @@ export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,
   dataStreamName: ALERT_EVENTS_DATA_STREAM,
+  version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   ilmPolicy: { name: ALERT_EVENTS_ILM_POLICY_NAME, policy: ALERT_EVENTS_ILM_POLICY },
 });
