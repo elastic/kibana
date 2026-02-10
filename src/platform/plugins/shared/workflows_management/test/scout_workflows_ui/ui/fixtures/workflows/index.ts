@@ -9,3 +9,17 @@
 
 export { nationalParksWorkflow } from './national_parks_workflow';
 export { createGetUpdateCase } from './create_get_update_case';
+export {
+  getTestRunWorkflowYaml,
+  getWorkflowWithLoopYaml,
+  getIterationLoopWorkflowYaml,
+  getManyIterationsWorkflowYaml,
+  getDummyWorkflowYaml,
+  getInvalidWorkflowYaml,
+  getIncompleteStepTypeYaml,
+} from './console_workflows';
+export {
+  getPrintAlertsWorkflowYaml,
+  getCreateAlertRuleWorkflowYaml,
+  getTriggerAlertWorkflowYaml,
+} from './alert_workflows';

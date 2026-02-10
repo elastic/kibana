@@ -11,41 +11,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
-
-const getDummyWorkflowYaml = (name: string) => `
-name: ${name}
-description: Dummy workflow description
-enabled: true
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
-triggers:
-  - type: manual
-steps:
-  - name: hello_world_step
-    type: console
-    with:
-      message: "{{ inputs.message }}"
-`;
-
-const getInvalidWorkflowYaml = (name: string) => `
-name: ${name}
-description: Invalid workflow - missing steps
-enabled: true
-triggers:
-  - type: manual
-`;
-
-const getIncompleteStepTypeYaml = (name: string) => `
-name: ${name}
-description: Test workflow
-enabled: true
-triggers:
-  - type: manual
-steps:
-  - name: hello_world_step
-    type:`;
+import {
+  getDummyWorkflowYaml,
+  getIncompleteStepTypeYaml,
+  getInvalidWorkflowYaml,
+} from '../fixtures/workflows';
 
 test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {

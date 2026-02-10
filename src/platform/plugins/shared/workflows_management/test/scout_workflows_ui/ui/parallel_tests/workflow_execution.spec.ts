@@ -11,180 +11,15 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
-
-const getTestRunWorkflowYaml = (name: string) => `
-name: ${name}
-enabled: false
-description: This is a new workflow
-triggers:
-  - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
-
-steps:
-  - name: hello_world_step
-    type: console
-    with:
-      message: "Test run: {{ execution.isTestRun }}"
-`;
-
-const getWorkflowWithLoopYaml = (name: string) => `
-name: ${name}
-enabled: false
-description: This is a new workflow
-triggers:
-  - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
-
-steps:
-  - name: first_step
-    type: console
-    with:
-      message: "This is the first step!"
-
-  - name: loop
-    type: foreach
-    foreach: '[1,2,3,4]'
-    steps:
-      - name: hello_world_step
-        type: console
-        with:
-          message: "Test run: {{ execution.isTestRun }}"
-`;
-
-const getPrintAlertsWorkflowYaml = (name: string) => `
-name: ${name}
-enabled: true
-description: Prints all received alerts
-triggers:
- - type: manual
- - type: alert
-steps:
- - name: log
-   type: console
-   foreach: \${{event.alerts}}
-   with:
-     message: \${{event}}
- - name: log_each_alert
-   type: console
-   foreach: \${{event.alerts}}
-   with:
-     message: \${{foreach.item}}
-`;
-
-const getCreateAlertRuleWorkflowYaml = (name: string) => `
-name: ${name}
-description: Create alert rule
-enabled: true
-triggers:
-  - type: manual
-inputs:
-  - name: wf_multiple_alerts
-    type: string
-    required: true
-  - name: wf_single_alert
-    type: string
-    required: true
-consts:
-  alerts_index_name: test-security-alerts-index
-steps:
-  - name: create_security_alert_rule
-    type: kibana.request
-    with:
-      method: POST
-      path: /s/\{{workflow.spaceId}}/api/detection_engine/rules
-      body:
-        type: query
-        index:
-          - test-security-alerts-index
-        filters: []
-        language: kuery
-        query: "not severity: foo"
-        required_fields: []
-        author: []
-        false_positives: []
-        references: []
-        risk_score: 21
-        risk_score_mapping: []
-        severity: low
-        severity_mapping: []
-        threat: []
-        max_signals: 100
-        name: Security alert test
-        description: Security alert test
-        tags: []
-        setup: ""
-        license: ""
-        interval: 15s
-        from: now-20s
-        to: now
-        actions:
-          - id: system-connector-.workflows
-            params:
-              subAction: run
-              subActionParams:
-                workflowId: "{{inputs.wf_single_alert}}"
-                summaryMode: false
-            action_type_id: .workflows
-            uuid: b8bc90a9-2112-41c4-a797-bb6cbb52f5da
-          - id: system-connector-.workflows
-            params:
-              subAction: run
-              subActionParams:
-                workflowId: "{{inputs.wf_multiple_alerts}}"
-                summaryMode: true
-            action_type_id: .workflows
-            uuid: b8bc90a9-2112-41c4-a797-bb6cbb52f5da
-        enabled: true
-`;
-
-const getTriggerAlertWorkflowYaml = (name: string) => `
-name: ${name}
-description: Add timestamp ingest pipeline, ingest docs, which will trigger the alert
-enabled: true
-triggers:
-  - type: manual
-consts:
-  pipeline_name: add_timestamp_if_missing
-  alerts_index_name: test-security-alerts-index
-inputs:
-  type: object
-  properties:
-    alerts:
-      type: array
-      items:
-        type: object
-  required:
-    - "alerts"
-steps:
-  - name: create_ingest_pipeline
-    type: elasticsearch.request
-    on-failure:
-      continue: true
-    with:
-      method: PUT
-      path: _ingest/pipeline/add_timestamp_if_missing
-      body:
-        processors:
-          - set:
-              if: ctx['@timestamp'] == null
-              field: "@timestamp"
-              value: "{% raw %}{{_ingest.timestamp}}{% endraw %}"
-  - name: index
-    type: elasticsearch.request
-    foreach: "{{inputs.alerts}}"
-    with:
-      method: POST
-      path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}
-      body: \${{foreach.item}}
-`;
+import {
+  getCreateAlertRuleWorkflowYaml,
+  getIterationLoopWorkflowYaml,
+  getManyIterationsWorkflowYaml,
+  getPrintAlertsWorkflowYaml,
+  getTestRunWorkflowYaml,
+  getTriggerAlertWorkflowYaml,
+  getWorkflowWithLoopYaml,
+} from '../fixtures/workflows';
 
 test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -385,37 +220,8 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   }) => {
     const workflowName = `Test Workflow with loop ${Math.floor(Math.random() * 10000)}`;
 
-    // Step 1: Create workflow with foreach loop
-    const workflowYaml = `
-name: ${workflowName}
-enabled: false
-description: This is a new workflow
-triggers:
-  - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
-
-steps:
-  - name: first_step
-    type: console
-    with:
-      message: "This is the first step!"
-
-  - name: loop
-    type: foreach
-    foreach: '[1,2]'
-    steps:
-      - name: log_iteration
-        type: console
-        with:
-          message: "Iteration is {{foreach.index}}"
-`;
-
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(workflowYaml);
+    await pageObjects.workflowEditor.setYamlEditorValue(getIterationLoopWorkflowYaml(workflowName));
 
     // Save the workflow first to avoid unsaved changes dialog
     await pageObjects.workflowEditor.saveWorkflow();
@@ -502,23 +308,10 @@ steps:
   }) => {
     const workflowName = `Scroll test workflow ${Math.floor(Math.random() * 10000)}`;
 
-    // Step 1: Create workflow with many foreach iterations
-    const workflowYaml = `
-name: ${workflowName}
-enabled: false
-description: This is a new workflow
-triggers:
-  - type: manual
-steps:
-  - name: hello_world_step
-    type: console
-    foreach: '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]'
-    with:
-      message: "Hello world"
-`;
-
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(workflowYaml);
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getManyIterationsWorkflowYaml(workflowName)
+    );
 
     // Save the workflow first to avoid unsaved changes dialog
     await pageObjects.workflowEditor.saveWorkflow();
