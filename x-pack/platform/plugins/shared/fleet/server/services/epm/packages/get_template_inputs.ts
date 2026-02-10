@@ -7,8 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { stringify, Document, isMap, isScalar } from 'yaml';
-import type { YAMLMap } from 'yaml';
+import { Document } from 'yaml';
 import yamlDoc from 'yaml';
 
 import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
