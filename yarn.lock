@@ -3892,6 +3892,11 @@
     "@hapi/bourne" "^3.0.0"
     "@hapi/hoek" "^11.0.2"
 
+"@harperfast/extended-iterable@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@harperfast/extended-iterable/-/extended-iterable-1.0.3.tgz#471489c5058331017e821bf6c33de70fc2c073ee"
+  integrity sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==
+
 "@hello-pangea/dnd@18.0.1", "@hello-pangea/dnd@^16.6.0":
   version "18.0.1"
   resolved "https://registry.yarnpkg.com/@hello-pangea/dnd/-/dnd-18.0.1.tgz#7d5ef7fe8bddf195307b16e03635b1be582b7b8d"
@@ -9957,40 +9962,40 @@
   dependencies:
     call-bind "^1.0.7"
 
-"@lmdb/lmdb-darwin-arm64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-arm64/-/lmdb-darwin-arm64-3.4.4.tgz#baf0a0135e1e688fd9478f6da1b926e9b45ed5b8"
-  integrity sha512-XaKL705gDWd6XVls3ATDj13ZdML/LqSIxwgnYpG8xTzH2ifArx8fMMDdvqGE/Emd+W6R90W2fveZcJ0AyS8Y0w==
+"@lmdb/lmdb-darwin-arm64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-arm64/-/lmdb-darwin-arm64-3.5.1.tgz#b1fe8b88fa023ccbf5800b1e630285b7eab1538f"
+  integrity sha512-tpfN4kKrrMpQ+If1l8bhmoNkECJi0iOu6AEdrTJvWVC+32sLxTARX5Rsu579mPImRP9YFWfWgeRQ5oav7zApQQ==
 
-"@lmdb/lmdb-darwin-x64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-x64/-/lmdb-darwin-x64-3.4.4.tgz#aca17a2d7083a4379eb605cdad77889646f0a8fb"
-  integrity sha512-GPHGEVcwJlkD01GmIr7B4kvbIcUDS2+kBadVEd7lU4can1RZaZQLDDBJRrrNfS2Kavvl0VLI/cMv7UASAXGrww==
+"@lmdb/lmdb-darwin-x64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-x64/-/lmdb-darwin-x64-3.5.1.tgz#ab5c9937d2019563227291a22aa7e140481eb5eb"
+  integrity sha512-+a2tTfc3rmWhLAolFUWRgJtpSuu+Fw/yjn4rF406NMxhfjbMuiOUTDRvRlMFV+DzyjkwnokisskHbCWkS3Ly5w==
 
-"@lmdb/lmdb-linux-arm64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm64/-/lmdb-linux-arm64-3.4.4.tgz#924616da168cc71e134e5ad27feeecbd878b247c"
-  integrity sha512-mALqr7DE42HsiwVTKpQWxacjHoJk+e9p00RWIJqTACh/hpucxp/0lK/XMh5XzWnU/TDCZLukq1+vNqnNumTP/Q==
+"@lmdb/lmdb-linux-arm64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm64/-/lmdb-linux-arm64-3.5.1.tgz#e05fce5ae4b40990052e184038c8f29a75565e00"
+  integrity sha512-aoERa5B6ywXdyFeYGQ1gbQpkMkDbEo45qVoXE5QpIRavqjnyPwjOulMkmkypkmsbJ5z4Wi0TBztON8agCTG0Vg==
 
-"@lmdb/lmdb-linux-arm@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm/-/lmdb-linux-arm-3.4.4.tgz#d094fe134482c9de5c1675d99a7412ef4cce3b0c"
-  integrity sha512-cmev5/dZr5ACKri9f6GU6lZCXTjMhV72xujlbOhFCgFXrt4W0TxGsmY8kA1BITvH60JBKE50cSxsiulybAbrrw==
+"@lmdb/lmdb-linux-arm@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm/-/lmdb-linux-arm-3.5.1.tgz#95cb7e1186d6f57a7b1b0da4f7bd459eeb1ce812"
+  integrity sha512-0EgcE6reYr8InjD7V37EgXcYrloqpxVPINy3ig1MwDSbl6LF/vXTYRH9OE1Ti1D8YZnB35ZH9aTcdfSb5lql2A==
 
-"@lmdb/lmdb-linux-x64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-x64/-/lmdb-linux-x64-3.4.4.tgz#5d4ff698bd2f0060a57eb4c034e7e815b1c8886f"
-  integrity sha512-QjLs8OcmCNcraAcLoZyFlo0atzBJniQLLwhtR+ymQqS5kLYpV5RqwriL87BW+ZiR9ZiGgZx3evrz5vnWPtJ1fQ==
+"@lmdb/lmdb-linux-x64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-x64/-/lmdb-linux-x64-3.5.1.tgz#8f289fbd336357c22ba0218449d863020b74cacd"
+  integrity sha512-SqNDY1+vpji7bh0sFH5wlWyFTOzjbDOl0/kB5RLLYDAFyd/uw3n7wyrmas3rYPpAW7z18lMOi1yKlTPv967E3g==
 
-"@lmdb/lmdb-win32-arm64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-win32-arm64/-/lmdb-win32-arm64-3.4.4.tgz#ac17086fd0ef7113464d594b8478ff5fdf632a5e"
-  integrity sha512-tr/pwHDlZ33forLGAr0tI04cRmP4SgF93yHbb+2zvZiDEyln5yMHhbKDySxY66aUOkhvBvTuHq9q/3YmTj6ZHQ==
+"@lmdb/lmdb-win32-arm64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-win32-arm64/-/lmdb-win32-arm64-3.5.1.tgz#c667bf2adb59d69a5ecd5986b7898a35925182de"
+  integrity sha512-50v0O1Lt37cwrmR9vWZK5hRW0Aw+KEmxJJ75fge/zIYdvNKB/0bSMSVR5Uc2OV9JhosIUyklOmrEvavwNJ8D6w==
 
-"@lmdb/lmdb-win32-x64@3.4.4":
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-win32-x64/-/lmdb-win32-x64-3.4.4.tgz#2e47e87aa64d4539ee5c2c3be1b8af043d21707b"
-  integrity sha512-KRzfocJzB/mgoTCqnMawuLSKheHRVTqWfSmouIgYpFs6Hx4zvZSvsZKSCEb5gHmICy7qsx9l06jk3MFTtiFVAQ==
+"@lmdb/lmdb-win32-x64@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-win32-x64/-/lmdb-win32-x64-3.5.1.tgz#da0f989e868d2ce02c9ed24c082f561354ab4d0f"
+  integrity sha512-qwosvPyl+zpUlp3gRb7UcJ3H8S28XHCzkv0Y0EgQToXjQP91ZD67EHSCDmaLjtKhe+GVIW5om1KUpzVLA0l6pg==
 
 "@loaders.gl/core@3.4.7":
   version "3.4.7"
@@ -25620,24 +25625,25 @@ listr2@^3.8.3:
     through "^2.3.8"
     wrap-ansi "^7.0.0"
 
-lmdb@3.4.4:
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/lmdb/-/lmdb-3.4.4.tgz#a6ca8803887c13d672542fb35f0ba1c267d4e95f"
-  integrity sha512-+Y2DqovevLkb6DrSQ6SXTYLEd6kvlRbhsxzgJrk7BUfOVA/mt21ak6pFDZDKxiAczHMWxrb02kXBTSTIA0O94A==
+lmdb@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/lmdb/-/lmdb-3.5.1.tgz#36b41ad6f20cba355c7e9ddced54ac9e1418acf3"
+  integrity sha512-NYHA0MRPjvNX+vSw8Xxg6FLKxzAG+e7Pt8RqAQA/EehzHVXq9SxDqJIN3JL1hK0dweb884y8kIh6rkWvPyg9Wg==
   dependencies:
+    "@harperfast/extended-iterable" "^1.0.3"
     msgpackr "^1.11.2"
     node-addon-api "^6.1.0"
     node-gyp-build-optional-packages "5.2.2"
     ordered-binary "^1.5.3"
     weak-lru-cache "^1.2.2"
   optionalDependencies:
-    "@lmdb/lmdb-darwin-arm64" "3.4.4"
-    "@lmdb/lmdb-darwin-x64" "3.4.4"
-    "@lmdb/lmdb-linux-arm" "3.4.4"
-    "@lmdb/lmdb-linux-arm64" "3.4.4"
-    "@lmdb/lmdb-linux-x64" "3.4.4"
-    "@lmdb/lmdb-win32-arm64" "3.4.4"
-    "@lmdb/lmdb-win32-x64" "3.4.4"
+    "@lmdb/lmdb-darwin-arm64" "3.5.1"
+    "@lmdb/lmdb-darwin-x64" "3.5.1"
+    "@lmdb/lmdb-linux-arm" "3.5.1"
+    "@lmdb/lmdb-linux-arm64" "3.5.1"
+    "@lmdb/lmdb-linux-x64" "3.5.1"
+    "@lmdb/lmdb-win32-arm64" "3.5.1"
+    "@lmdb/lmdb-win32-x64" "3.5.1"
 
 load-json-file@6.2.0:
   version "6.2.0"
