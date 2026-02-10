@@ -42,10 +42,12 @@ const buildDefaultContentLinks = ({
   kibanaDocLink,
   docLinks,
   helpSupportUrl,
+  isFeedbackEnabled,
 }: {
   kibanaDocLink: string;
   docLinks: DocLinksStart;
   helpSupportUrl: string;
+  isFeedbackEnabled: boolean;
 }): ChromeHelpMenuLink[] => [
   {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle', {
@@ -59,12 +61,16 @@ const buildDefaultContentLinks = ({
     }),
     href: helpSupportUrl,
   },
-  {
-    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
-      defaultMessage: 'Give feedback',
-    }),
-    href: docLinks.links.kibana.feedback,
-  },
+  ...(isFeedbackEnabled
+    ? [
+        {
+          title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
+            defaultMessage: 'Give feedback',
+          }),
+          href: docLinks.links.kibana.feedback,
+        },
+      ]
+    : []),
   {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
       defaultMessage: 'Open an issue in GitHub',
@@ -78,6 +84,7 @@ interface Props {
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  isFeedbackEnabled$: Observable<boolean>;
   defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
   kibanaVersion: string;
   kibanaDocLink: string;
@@ -90,6 +97,7 @@ interface State {
   helpExtension?: ChromeHelpExtension;
   helpSupportUrl: string;
   globalHelpExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
+  isFeedbackEnabled: boolean;
   defaultContentLinks: ChromeHelpMenuLink[];
 }
 
@@ -104,6 +112,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
       helpExtension: undefined,
       helpSupportUrl: '',
       globalHelpExtensionMenuLinks: [],
+      isFeedbackEnabled: true,
       defaultContentLinks: [],
     };
   }
@@ -113,16 +122,24 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
       this.props.helpExtension$,
       this.props.helpSupportUrl$,
       this.props.globalHelpExtensionMenuLinks$,
+      this.props.isFeedbackEnabled$,
       this.props.defaultContentLinks$
     ).subscribe(
-      ([helpExtension, helpSupportUrl, globalHelpExtensionMenuLinks, defaultContentLinks]) => {
+      ([
+        helpExtension,
+        helpSupportUrl,
+        globalHelpExtensionMenuLinks,
+        isFeedbackEnabled,
+        defaultContentLinks,
+      ]) => {
         this.setState({
           helpExtension,
           helpSupportUrl,
           globalHelpExtensionMenuLinks,
+          isFeedbackEnabled,
           defaultContentLinks:
             defaultContentLinks.length === 0
-              ? buildDefaultContentLinks({ ...this.props, helpSupportUrl })
+              ? buildDefaultContentLinks({ ...this.props, helpSupportUrl, isFeedbackEnabled })
               : defaultContentLinks,
         });
       }
@@ -267,7 +284,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
   }
 
   private renderCustomContent() {
-    const { helpExtension } = this.state;
+    const { helpExtension, isFeedbackEnabled } = this.state;
     if (!helpExtension) {
       return null;
     }
@@ -303,22 +320,28 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
           }
           case 'github': {
             const { linkType, labels, title, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), addSpacer, {
-              iconType: 'logoGithub',
-              href: createGithubUrl(labels, title),
-              target: '_blank',
-              rel: 'noopener',
-              ...rest,
-            });
+            return (
+              isFeedbackEnabled &&
+              createCustomLink(index, getFeedbackText(), addSpacer, {
+                iconType: 'logoGithub',
+                href: createGithubUrl(labels, title),
+                target: '_blank',
+                rel: 'noopener',
+                ...rest,
+              })
+            );
           }
           case 'discuss': {
             const { linkType, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), addSpacer, {
-              iconType: 'editorComment',
-              target: '_blank',
-              rel: 'noopener',
-              ...rest,
-            });
+            return (
+              isFeedbackEnabled &&
+              createCustomLink(index, getFeedbackText(), addSpacer, {
+                iconType: 'editorComment',
+                target: '_blank',
+                rel: 'noopener',
+                ...rest,
+              })
+            );
           }
           case 'custom': {
             const { linkType, content: text, href, external, ...rest } = link;
@@ -333,21 +356,25 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
         }
       });
 
+    const hasCustomLinks = customLinks && customLinks.filter(Boolean).length > 0;
+
     return (
-      <>
-        <EuiPopoverTitle>
-          <h3>{appName}</h3>
-        </EuiPopoverTitle>
-        {customLinks}
-        {content && (
-          <>
-            {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension
-              extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
-            />
-          </>
-        )}
-      </>
+      hasCustomLinks && (
+        <>
+          <EuiPopoverTitle>
+            <h3>{appName}</h3>
+          </EuiPopoverTitle>
+          {customLinks}
+          {content && (
+            <>
+              {customLinks && <EuiSpacer size="xs" />}
+              <HeaderExtension
+                extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
+              />
+            </>
+          )}
+        </>
+      )
     );
   }
 

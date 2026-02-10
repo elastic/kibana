@@ -47,6 +47,7 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     appMenu$: new BehaviorSubject(undefined),
+    isFeedbackEnabled$: new BehaviorSubject(true),
   };
 }
 

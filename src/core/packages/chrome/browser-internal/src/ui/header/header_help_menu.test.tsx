@@ -28,6 +28,7 @@ describe('HeaderHelpMenu', () => {
     | 'helpSupportUrl$'
     | 'kibanaDocLink'
     | 'isServerless'
+    | 'isFeedbackEnabled$'
   > = {
     navigateToUrl: application.navigateToUrl,
     kibanaVersion: 'version',
@@ -37,6 +38,7 @@ describe('HeaderHelpMenu', () => {
     helpSupportUrl$: new BehaviorSubject(''),
     kibanaDocLink: '',
     isServerless: false,
+    isFeedbackEnabled$: new BehaviorSubject(true),
   };
 
   test('it only renders the default content', () => {

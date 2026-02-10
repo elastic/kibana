@@ -115,6 +115,7 @@ export const createChromeComponents = ({
       navControlsExtension$={navControls.extension$}
       customBranding$={customBranding$}
       appMenu$={state.appMenu.$}
+      isFeedbackEnabled$={state.feedback.isEnabled$}
     />
   );
 
@@ -132,6 +133,7 @@ export const createChromeComponents = ({
       navControlsLeft$={navControls.left$}
       navControlsCenter$={navControls.center$}
       navControlsRight$={navControls.right$}
+      isFeedbackEnabled$={state.feedback.isEnabled$}
       loadingCount$={loadingCount$}
       homeHref$={projectNavigation.homeHref$}
       docLinks={docLinks}

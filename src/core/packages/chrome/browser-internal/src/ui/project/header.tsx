@@ -113,6 +113,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsLeft$: Observable<ChromeNavControl[]>;
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
+  isFeedbackEnabled$: Observable<boolean>;
   prependBasePath: (url: string) => string;
 }
 
@@ -271,6 +272,7 @@ export const ProjectHeader = ({
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
                   helpExtension$={observables.helpExtension$}
                   helpSupportUrl$={observables.helpSupportUrl$}
+                  isFeedbackEnabled$={observables.isFeedbackEnabled$}
                   defaultContentLinks$={observables.helpMenuLinks$}
                   kibanaDocLink={docLinks.links.elasticStackGetStarted}
                   docLinks={docLinks}

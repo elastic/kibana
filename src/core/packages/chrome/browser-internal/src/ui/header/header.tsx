@@ -77,6 +77,7 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   appMenu$: Observable<AppMenuConfig | undefined>;
+  isFeedbackEnabled$: Observable<boolean>;
 }
 
 export function Header({
@@ -165,6 +166,7 @@ export function Header({
                     docLinks={docLinks}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
+                    isFeedbackEnabled$={observables.isFeedbackEnabled$}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
