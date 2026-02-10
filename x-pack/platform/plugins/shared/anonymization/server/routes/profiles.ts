@@ -13,6 +13,7 @@ import {
 } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
+import { assertPrivilege, ANONYMIZATION_PRIVILEGES } from './rbac';
 
 const fieldRuleSchema = schema.object({
   field: schema.string(),
@@ -99,20 +100,21 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
+          const coreContext = await context.core;
+          await assertPrivilege(coreContext, ANONYMIZATION_PRIVILEGES.MANAGE);
+
           const validationError = validateFieldRules(request.body.rules.fieldRules);
           if (validationError) {
             return response.badRequest({ body: { message: validationError } });
           }
 
           const namespace = getNamespace(request);
-          const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
 
           const repo = new ProfilesRepository(esClient, logger);
 
-          // TODO(1.9): Get salt from SaltService instead of generating inline
           const saltId = `salt-${namespace}`;
 
           const profile = await repo.create({
@@ -124,6 +126,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
+          if ((err as any).statusCode === 403) {
+            return response.forbidden({ body: { message: err.message } });
+          }
           if ((err as any).statusCode === 409) {
             return response.conflict({ body: { message: err.message } });
           }
@@ -175,8 +180,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          await assertPrivilege(coreContext, ANONYMIZATION_PRIVILEGES.READ);
+
+          const namespace = getNamespace(request);
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
@@ -195,6 +202,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: result });
         } catch (err) {
+          if ((err as any).statusCode === 403) {
+            return response.forbidden({ body: { message: err.message } });
+          }
           logger.error(`Failed to find profiles: ${err.message}`);
           return response.customError({
             body: { message: err.message },
@@ -227,8 +237,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          await assertPrivilege(coreContext, ANONYMIZATION_PRIVILEGES.READ);
+
+          const namespace = getNamespace(request);
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ProfilesRepository(esClient, logger);
@@ -240,6 +252,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
+          if ((err as any).statusCode === 403) {
+            return response.forbidden({ body: { message: err.message } });
+          }
           logger.error(`Failed to get profile: ${err.message}`);
           return response.customError({
             body: { message: err.message },
@@ -277,6 +292,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
+          const coreContext = await context.core;
+          await assertPrivilege(coreContext, ANONYMIZATION_PRIVILEGES.MANAGE);
+
           if (request.body.rules?.fieldRules) {
             const validationError = validateFieldRules(request.body.rules.fieldRules);
             if (validationError) {
@@ -285,7 +303,6 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           }
 
           const namespace = getNamespace(request);
-          const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ProfilesRepository(esClient, logger);
@@ -300,6 +317,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
+          if ((err as any).statusCode === 403) {
+            return response.forbidden({ body: { message: err.message } });
+          }
           logger.error(`Failed to update profile: ${err.message}`);
           return response.customError({
             body: { message: err.message },
@@ -332,8 +352,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          await assertPrivilege(coreContext, ANONYMIZATION_PRIVILEGES.MANAGE);
+
+          const namespace = getNamespace(request);
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ProfilesRepository(esClient, logger);
@@ -345,6 +367,9 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: { deleted: true } });
         } catch (err) {
+          if ((err as any).statusCode === 403) {
+            return response.forbidden({ body: { message: err.message } });
+          }
           logger.error(`Failed to delete profile: ${err.message}`);
           return response.customError({
             body: { message: err.message },
