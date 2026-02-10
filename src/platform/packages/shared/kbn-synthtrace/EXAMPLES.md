@@ -646,6 +646,35 @@ node scripts/synthtrace logs_traces_hosts --type=log --live
 node scripts/synthtrace logs_traces_hosts --type=log --scenarioOpts='{"numServices":20,"numHosts":50}' --live
 ```
 
+#### `kubernetes_logs_traces_pods`
+
+Generates a comprehensive set of correlated Kubernetes logs, APM traces, and Kubernetes pod/container metrics.
+
+**Options:**
+
+- `numServices` (number, default: 10): Number of Kubernetes services to generate
+- `numPods` (number, default: 20): Number of Kubernetes pods to generate
+- `numContainers` (number, default: 30): Number of Kubernetes containers to generate
+- `numAgents` (number, default: 5): Number of agents
+- `logsInterval` (string, default: '1m'): Log generation interval
+- `logsRate` (number, default: 1): Log generation rate
+- `ingestPods` (boolean, default: true): Whether to ingest pod metrics
+- `ingestContainers` (boolean, default: true): Whether to ingest container metrics
+- `ingestTraces` (boolean, default: true): Whether to ingest traces
+- `logsdb` (boolean, default: false): Use LogsDB format
+
+**Usage:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --live
+```
+
+**Example with options:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --scenarioOpts='{"numServices":20,"numPods":50,"numContainers":100}'
+```
+
 ### Specialized Scenarios
 
 #### `aws_lambda`

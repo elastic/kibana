@@ -22,11 +22,13 @@ import { css } from '@emotion/react';
 import type { GroupStatsItem } from '../types';
 import { TAKE_ACTION } from '../translations';
 
+type GetActionItems = (args: { closePopover: () => void }) => JSX.Element | undefined;
+
 interface GroupStatsProps<T> {
   bucketKey: string;
   onTakeActionsOpen?: () => void;
   stats?: GroupStatsItem[];
-  actionItems?: JSX.Element;
+  getActionItems?: GetActionItems;
   /** Optional array of additional action buttons to display before the Take actions button */
   additionalActionButtons?: React.ReactElement[];
 }
@@ -50,7 +52,7 @@ const GroupStatsComponent = <T,>({
   bucketKey,
   onTakeActionsOpen,
   stats,
-  actionItems,
+  getActionItems,
   additionalActionButtons,
 }: GroupStatsProps<T>) => {
   const { euiTheme } = useEuiTheme();
@@ -117,6 +119,16 @@ const GroupStatsComponent = <T,>({
         </EuiFlexItem>
       )) ?? [],
     [additionalActionButtons]
+  );
+
+  const actionItems = useMemo(
+    () =>
+      getActionItems?.({
+        closePopover: () => {
+          setPopover(false);
+        },
+      }),
+    [getActionItems]
   );
 
   const takeActionMenu = useMemo(
