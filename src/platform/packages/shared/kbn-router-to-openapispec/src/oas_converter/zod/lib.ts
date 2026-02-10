@@ -75,7 +75,7 @@ const unwrapZodOptionalDefault = (
     instanceofZodTypeKind(innerType, 'default')
   ) {
     if (instanceofZodTypeKind(innerType, 'optional')) {
-      isOptional = (innerType as z.ZodOptional<z.ZodTypeAny>).isOptional();
+      isOptional = innerType.safeParse(undefined).success;
       description = !description ? innerType.description : description;
       innerType = (innerType as z.ZodOptional<z.ZodTypeAny>).unwrap();
     }
@@ -93,7 +93,6 @@ export const unwrapZodType = (
   type: z.core.$ZodType,
   unwrapPreprocess: boolean
 ): z.core.$ZodType => {
-  // TODO: Allow parsing array query params
   if (instanceofZodTypeKind(type, 'array')) {
     return unwrapZodType((type as z.ZodArray<z.core.$ZodTypes>).element, unwrapPreprocess);
   }
@@ -103,7 +102,6 @@ export const unwrapZodType = (
   if (instanceofZodTypeKind(type, 'nullable')) {
     return unwrapZodType((type as z.ZodNullable<z.core.$ZodTypes>).unwrap(), unwrapPreprocess);
   }
-
   if (instanceofZodTypeKind(type, 'optional')) {
     return unwrapZodType((type as z.ZodOptional<z.core.$ZodTypes>).unwrap(), unwrapPreprocess);
   }
@@ -142,12 +140,15 @@ const instanceofZodTypeCoercible = (_type: z.core.$ZodType): _type is ZodTypeCoe
     instanceofZodTypeKind(type, 'date')
   );
 };
-
 const instanceofZodTypeLikeString = (
   _type: z.core.$ZodType,
   allowMixedUnion: boolean
 ): _type is ZodTypeLikeString => {
   const type = unwrapZodType(_type, false);
+
+  if (instanceofZodTypeKind(type, 'pipe')) {
+    return true;
+  }
 
   if (instanceofZodTypeKind(type, 'union')) {
     return !(type as z.ZodUnion<z.core.$ZodTypes[]>).options.some(
@@ -181,7 +182,7 @@ const instanceofZodTypeLikeString = (
       .every((value) => typeof value === 'string');
   }
   if (instanceofZodTypeKind(type, 'enum')) {
-    return true;
+    return !Object.values((type as z.ZodEnum).enum).some((value) => typeof value === 'number');
   }
   return instanceofZodTypeKind(type, 'string');
 };
@@ -300,6 +301,7 @@ export const convert = (schema: z.ZodTypeAny) => {
       target: 'openapi-3.0',
       cycles: 'ref',
       reused: 'inline',
+      unrepresentable: 'any',
     }) as OpenAPIV3.SchemaObject,
   };
 };

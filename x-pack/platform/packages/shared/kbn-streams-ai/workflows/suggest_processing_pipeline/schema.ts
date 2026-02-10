@@ -6,7 +6,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import {
   // NonEmptyString,
   // conditionSchema,
