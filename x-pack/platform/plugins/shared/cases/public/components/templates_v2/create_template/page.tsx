@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -24,6 +23,8 @@ import { exampleTemplateDefinition } from '../field_types/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}
+
+// TODO: introduce backend service and a hook to store the templates
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const form = useForm({
@@ -53,9 +54,6 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
               <EuiSpacer size="m" />
               <CreateTemplateForm />
               <EuiSpacer size="m" />
-              <div>
-                <EuiButton>{`Save`}</EuiButton>
-              </div>
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiText>

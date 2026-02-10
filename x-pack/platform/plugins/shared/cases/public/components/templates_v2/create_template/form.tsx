@@ -6,10 +6,10 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 const styles = {
@@ -24,10 +24,17 @@ const styles = {
 
 export const CreateTemplateForm = () => {
   const euiTheme = useEuiTheme();
-  const { control } = useFormContext();
+  const { control, handleSubmit } = useFormContext<{ definition: string }>();
+
+  const onSubmit = useCallback((data: { definition: string }) => {
+    console.log('handle submit', data);
+  }, []);
 
   return (
-    <div css={{ width: '100%', height: '70vh', overflowY: 'scroll' }}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      css={{ width: '100%', height: '70vh', overflowY: 'scroll' }}
+    >
       <div css={styles.editorContainer(euiTheme)}>
         <Controller
           control={control}
@@ -46,7 +53,11 @@ export const CreateTemplateForm = () => {
           }}
         />
       </div>
-    </div>
+
+      <div>
+        <EuiButton type="submit">{`Save`}</EuiButton>
+      </div>
+    </form>
   );
 };
 
