@@ -15,6 +15,12 @@ var pkg =
       // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
       require('../../../package.json');
 
+// Detect AI coding agent sandboxes that may not have the correct Node.js version available.
+var isAiSandbox =
+  !!process.env.CLAUDECODE ||
+  !!process.env.CURSOR_AGENT ||
+  !!process.env.CODEX_SANDBOX;
+
 if (!process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION) {
   // Note: This is written in ES5 so we can run this before anything else
   // and gives support for older NodeJS versions
@@ -25,15 +31,32 @@ if (!process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION) {
 
   // Validates current the NodeJS version compatibility when Kibana starts.
   if (!isVersionValid) {
-    var errorMessage =
-      'Kibana does not support the current Node.js version ' +
-      currentVersion +
-      '. Please use Node.js ' +
-      requiredVersion +
-      '.';
+    if (isAiSandbox) {
+      // In AI sandboxes, warn but allow execution to continue.
+      console.log(
+        '\n' +
+          'warn: Kibana expects Node.js ' +
+          requiredVersion +
+          ' but found ' +
+          currentVersion +
+          '.\n' +
+          'Relaxing the requirement because an AI sandbox was detected.\n' +
+          'If you run into issues, use `nvm install ' +
+          rawRequiredVersion +
+          ' && nvm use` to switch to the correct version.\n'
+      );
+      process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION = '1';
+    } else {
+      var errorMessage =
+        'Kibana does not support the current Node.js version ' +
+        currentVersion +
+        '. Please use Node.js ' +
+        requiredVersion +
+        '.';
 
-    // Actions to apply when validation fails: error report + exit.
-    console.error(errorMessage);
-    process.exit(1);
+      // Actions to apply when validation fails: error report + exit.
+      console.error(errorMessage);
+      process.exit(1);
+    }
   }
 }
