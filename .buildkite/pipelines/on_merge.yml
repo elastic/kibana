@@ -36,7 +36,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-16
+      machineType: c4d-standard-16
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
@@ -53,7 +53,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-8
+      machineType: c4d-standard-8
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
@@ -70,7 +70,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-2
+      machineType: c4d-standard-2
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: northamerica-northeast2-b,us-central1-c,us-central1-a
@@ -87,7 +87,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-16
+      machineType: c4d-standard-16
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: northamerica-northeast2-b,us-central1-c,us-central1-a
@@ -104,7 +104,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-32
+      machineType: c4d-standard-32
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: northamerica-northeast2-b,us-central1-c,us-central1-a
@@ -121,7 +121,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n4d-standard-4
+      machineType: c4d-standard-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
