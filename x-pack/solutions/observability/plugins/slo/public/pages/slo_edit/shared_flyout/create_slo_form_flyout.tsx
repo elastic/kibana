@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import type { RecursivePartial } from '@kbn/utility-types';
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
@@ -28,9 +27,10 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
 import type { CreateSLOForm, FormSettings } from '../types';
-import { SloEditFormIndicatorSection } from '../components/slo_edit_form_indicator_section';
-import { SloEditFormObjectiveSection } from '../components/slo_edit_form_objective_section';
-import { SloEditFormDescriptionSection } from '../components/slo_edit_form_description_section';
+import { SloFormContextProvider } from '../components/slo_form_context';
+import { SloEditFormIndicatorSection } from '../components/indicator_section';
+import { SloEditFormObjectiveSection } from '../components/objective_section';
+import { SloEditFormDescriptionSection } from '../components/description_section';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import type { BurnRateRuleParams } from '../../../typings';
@@ -58,7 +58,6 @@ export default function CreateSLOFormFlyout({
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
   const [currentStep, setCurrentStep] = useState(STEP_DEFINE_SLI);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top when step changes
@@ -89,19 +88,16 @@ export default function CreateSLOFormFlyout({
   const isLoading = isCreateSloLoading || isCreateBurnRateRuleLoading;
 
   const getStepStatus = useCallback(
-    (
-      stepIndex: number
-    ): 'incomplete' | 'complete' | 'current' | 'warning' | 'danger' | 'disabled' | 'loading' => {
+    (stepIndex: number): 'incomplete' | 'complete' | 'current' => {
       if (stepIndex === currentStep) {
         return 'current';
       }
-      // Only show complete if the step is before current step and was completed
-      if (stepIndex < currentStep && completedSteps.has(stepIndex)) {
+      if (stepIndex < currentStep) {
         return 'complete';
       }
       return 'incomplete';
     },
-    [currentStep, completedSteps]
+    [currentStep]
   );
 
   const steps = useMemo(
@@ -156,7 +152,6 @@ export default function CreateSLOFormFlyout({
         'indicator.params.total',
       ]);
       if (isValid || isIndicatorSectionValid) {
-        setCompletedSteps((prev) => new Set(prev).add(STEP_DEFINE_SLI));
         setCurrentStep(STEP_SET_OBJECTIVES);
       }
     } else if (currentStep === STEP_SET_OBJECTIVES) {
@@ -167,7 +162,6 @@ export default function CreateSLOFormFlyout({
         'objective.target',
       ]);
       if (isValid || isObjectiveSectionValid) {
-        setCompletedSteps((prev) => new Set(prev).add(STEP_SET_OBJECTIVES));
         setCurrentStep(STEP_DESCRIBE_SLO);
       }
     }
@@ -196,19 +190,14 @@ export default function CreateSLOFormFlyout({
     onClose();
   }, [trigger, getValues, createSlo, createBurnRateRule, onClose]);
 
-  const flyoutFormSettings: FormSettings = {
-    ...formSettings,
-    isFlyout: true,
-  };
-
   const renderStepContent = () => {
     switch (currentStep) {
       case STEP_DEFINE_SLI:
-        return <SloEditFormIndicatorSection formSettings={flyoutFormSettings} />;
+        return <SloEditFormIndicatorSection />;
       case STEP_SET_OBJECTIVES:
-        return <SloEditFormObjectiveSection formSettings={flyoutFormSettings} />;
+        return <SloEditFormObjectiveSection />;
       case STEP_DESCRIBE_SLO:
-        return <SloEditFormDescriptionSection formSettings={flyoutFormSettings} />;
+        return <SloEditFormDescriptionSection />;
       default:
         return null;
     }
@@ -216,112 +205,115 @@ export default function CreateSLOFormFlyout({
 
   const isLastStep = currentStep === STEP_DESCRIBE_SLO;
   const isFirstStep = currentStep === STEP_DEFINE_SLI;
+  const flyoutTitle = i18n.translate('xpack.slo.add.flyoutTitle', {
+    defaultMessage: 'Create SLO',
+  });
 
   return (
     <FormProvider {...form}>
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby="flyoutTitle"
-        size={620}
-        resizable
-        ownFocus
-        session="start"
-        flyoutMenuProps={{
-          title: i18n.translate('xpack.slo.createSLOFormFlyout.title', {
-            defaultMessage: 'Create SLO form',
-          }),
-        }}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
-            <h3 id="flyoutTitle">
-              <FormattedMessage defaultMessage="Create SLO" id="xpack.slo.add.flyoutTitle" />
-            </h3>
-          </EuiTitle>
-        </EuiFlyoutHeader>
+      <SloFormContextProvider value={{ ...formSettings, isFlyout: true, isEditMode: false }}>
+        <EuiFlyout
+          onClose={onClose}
+          aria-labelledby="flyoutTitle"
+          size={620}
+          resizable
+          ownFocus
+          session="start"
+          flyoutMenuProps={{
+            title: flyoutTitle,
+          }}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
+              <h3 id="flyoutTitle" aria-label={flyoutTitle}>
+                {flyoutTitle}
+              </h3>
+            </EuiTitle>
+          </EuiFlyoutHeader>
 
-        <EuiFlyoutBody>
-          <div ref={scrollTargetRef} />
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiStepsHorizontal steps={steps} size="xs" />
-            </EuiFlexItem>
+          <EuiFlyoutBody>
+            <div ref={scrollTargetRef} />
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiStepsHorizontal steps={steps} size="xs" />
+              </EuiFlexItem>
 
-            <EuiFlexItem>{renderStepContent()}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
+              <EuiFlexItem>{renderStepContent()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {isFirstStep ? (
-                <EuiButtonEmpty
-                  onClick={onClose}
-                  disabled={isLoading}
-                  data-test-subj="sloFormCancelButton"
-                >
-                  {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              ) : (
-                <EuiButtonEmpty
-                  onClick={handleBack}
-                  disabled={isLoading}
-                  data-test-subj="sloFormBackButton"
-                >
-                  {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
-                    defaultMessage: 'Back',
-                  })}
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                {isLastStep && (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <EquivalentApiRequest disabled={isLoading} isEditMode={false} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <SLOInspect disabled={isLoading} />
-                    </EuiFlexItem>
-                  </>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                {isFirstStep ? (
+                  <EuiButtonEmpty
+                    onClick={onClose}
+                    disabled={isLoading}
+                    data-test-subj="sloFormCancelButton"
+                  >
+                    {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButtonEmpty>
+                ) : (
+                  <EuiButtonEmpty
+                    onClick={handleBack}
+                    disabled={isLoading}
+                    data-test-subj="sloFormBackButton"
+                  >
+                    {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
+                      defaultMessage: 'Back',
+                    })}
+                  </EuiButtonEmpty>
                 )}
-                <EuiFlexItem grow={false}>
-                  {isLastStep ? (
-                    <EuiButton
-                      fill
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      data-test-subj="sloFormSubmitButton"
-                    >
-                      {i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
-                        defaultMessage: 'Create SLO',
-                      })}
-                    </EuiButton>
-                  ) : (
-                    <EuiButton
-                      fill
-                      onClick={handleNext}
-                      disabled={
-                        (currentStep === STEP_DEFINE_SLI && !isIndicatorSectionValid) ||
-                        (currentStep === STEP_SET_OBJECTIVES && !isObjectiveSectionValid)
-                      }
-                      data-test-subj="sloFormNextButton"
-                    >
-                      {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
-                        defaultMessage: 'Next',
-                      })}
-                    </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
+                  {isLastStep && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EquivalentApiRequest disabled={isLoading} isEditMode={false} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <SLOInspect disabled={isLoading} />
+                      </EuiFlexItem>
+                    </>
                   )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+                  <EuiFlexItem grow={false}>
+                    {isLastStep ? (
+                      <EuiButton
+                        fill
+                        onClick={handleSubmit}
+                        isLoading={isLoading}
+                        data-test-subj="sloFormSubmitButton"
+                      >
+                        {i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
+                          defaultMessage: 'Create SLO',
+                        })}
+                      </EuiButton>
+                    ) : (
+                      <EuiButton
+                        fill
+                        onClick={handleNext}
+                        disabled={
+                          (currentStep === STEP_DEFINE_SLI && !isIndicatorSectionValid) ||
+                          (currentStep === STEP_SET_OBJECTIVES && !isObjectiveSectionValid)
+                        }
+                        data-test-subj="sloFormNextButton"
+                      >
+                        {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
+                          defaultMessage: 'Next',
+                        })}
+                      </EuiButton>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </SloFormContextProvider>
     </FormProvider>
   );
 }
