@@ -122,7 +122,7 @@ describe('copyPackRoute', () => {
     // Verify policy_ids and shards are cleared on the copy
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
     expect(createArgs.policy_ids).toEqual([]);
-    expect(createArgs.shards).toEqual({});
+    expect(createArgs.shards).toEqual([]);
 
     // Verify all references are cleared (no agent policy or prebuilt asset refs)
     const createOptions = mockSavedObjectsClient.create.mock.calls[0][2];
