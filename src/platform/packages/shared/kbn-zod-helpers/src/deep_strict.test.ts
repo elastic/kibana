@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DeepStrict } from './deep_strict';
 import { isValidDateMath } from './is_valid_date_math';
 
