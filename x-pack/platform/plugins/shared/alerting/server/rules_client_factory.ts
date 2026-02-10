@@ -271,28 +271,35 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+          const [_, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
 
-          if (isUiamApiKey(apiKey[1]) && this.isServerless) {
+          if (apiKey) {
+            if (isUiamApiKey(apiKey)) {
+              if (this.isServerless) {
+                return {
+                  apiKeysEnabled: true,
+                  uiamResult: {
+                    name: `uiam-${name}`,
+                    id: apiKey[0],
+                    api_key: apiKey[1],
+                  },
+                };
+              } else {
+                throw new Error('UIAM API keys should only be used in serverless environments');
+              }
+            }
+
             return {
               apiKeysEnabled: true,
-              uiamResult: {
-                name: `uiam-${name}`,
+              result: {
+                name,
                 id: apiKey[0],
                 api_key: apiKey[1],
               },
             };
           }
-          return {
-            apiKeysEnabled: true,
-            result: {
-              name,
-              id: apiKey[0],
-              api_key: apiKey[1],
-            },
-          };
         }
         return { apiKeysEnabled: false };
       },

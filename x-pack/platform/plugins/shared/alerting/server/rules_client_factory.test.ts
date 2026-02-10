@@ -467,3 +467,27 @@ test('createWithSpaceId() uses space-scoped client methods for actions and event
   );
   expect(rulesClientFactoryParams.eventLog.getClient).not.toHaveBeenCalled();
 });
+
+test('getAuthenticationAPIKey() throws when a UIAM API key is used in a non-serverless environment', async () => {
+  const factory = new RulesClientFactory();
+  factory.initialize({
+    ...rulesClientFactoryParams,
+    securityService,
+    securityPluginSetup,
+    securityPluginStart,
+    isServerless: false,
+  });
+
+  const request = mockRouter.createKibanaRequest({
+    headers: {
+      authorization: `ApiKey ${Buffer.from('id:essu_uiam_api_key').toString('base64')}`,
+    },
+  });
+
+  await factory.create(request, savedObjectsService);
+  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+  expect(() => constructorCall.getAuthenticationAPIKey()).toThrowErrorMatchingInlineSnapshot(
+    `"UIAM API keys should only be used in serverless environments"`
+  );
+});
