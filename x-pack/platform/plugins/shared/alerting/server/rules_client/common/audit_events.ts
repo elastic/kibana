@@ -45,6 +45,7 @@ export enum RuleAuditAction {
   SNOOZE_ALERT = 'rule_alert_snooze',
   UNSNOOZE_ALERT = 'rule_alert_unsnooze',
   ACKNOWLEDGE_ALERT = 'rule_alert_acknowledge',
+  UNACKNOWLEDGE_ALERT = 'rule_alert_unacknowledge',
   UNTRACK_ALERT = 'rule_alert_untrack',
   SCHEDULE_BACKFILL = 'rule_schedule_backfill',
   FIND_GAPS = 'rule_find_gaps',
@@ -145,6 +146,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'acknowledging alert of',
     'acknowledged alert of',
   ],
+  rule_alert_unacknowledge: [
+    'unacknowledge alert of',
+    'unacknowledging alert of',
+    'unacknowledged alert of',
+  ],
   rule_alert_untrack: ['untrack', 'untracking', 'untracked'],
   rule_schedule_backfill: [
     'schedule backfill for',
@@ -204,6 +210,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_alert_snooze: 'change',
   rule_alert_unsnooze: 'change',
   rule_alert_acknowledge: 'change',
+  rule_alert_unacknowledge: 'change',
   rule_alert_untrack: 'change',
   rule_schedule_backfill: 'access',
   rule_find_gaps: 'access',

@@ -533,6 +533,37 @@ describe('new per-alert audit actions', () => {
     `);
   });
 
+  test('UNACKNOWLEDGE_ALERT creates correct event', () => {
+    expect(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNACKNOWLEDGE_ALERT,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'RULE_ID', name: 'my_rule' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_unacknowledge",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "RULE_ID",
+            "name": "my_rule",
+            "type": "alert",
+          },
+        },
+        "message": "User has unacknowledged alert of rule [id=RULE_ID] [name=my_rule]",
+      }
+    `);
+  });
+
   test('SNOOZE_ALERT failure creates correct event', () => {
     expect(
       ruleAuditEvent({

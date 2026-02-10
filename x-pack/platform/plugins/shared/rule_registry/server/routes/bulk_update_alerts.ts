@@ -13,6 +13,14 @@ import { buildRouteValidation } from './utils/route_validation';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
+/** Map workflow status transitions to distinct audit action names. */
+const WORKFLOW_STATUS_AUDIT_ACTIONS: Record<string, string> = {
+  acknowledged: 'rule_alert_acknowledge',
+  open: 'rule_alert_unacknowledge',
+  closed: 'rule_alert_close',
+  'in-progress': 'rule_alert_acknowledge', // legacy alias
+};
+
 export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
@@ -81,17 +89,18 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
           });
         }
 
-        // Emit audit event for workflow status changes (ACK, close, reopen)
+        // Emit audit event for workflow status changes (ACK, un-ACK, close)
         const coreContext = await context.core;
         const auditLogger = coreContext.audit;
         if (auditLogger) {
           const alertDesc = ids
             ? `alerts [ids=${ids.join(',')}]`
             : 'alerts matching query';
+          const auditAction = WORKFLOW_STATUS_AUDIT_ACTIONS[status] ?? 'alert_update';
           auditLogger.log({
             message: `User has updated workflow status to '${status}' for ${alertDesc} in index ${index}`,
             event: {
-              action: 'alert_update',
+              action: auditAction,
               category: ['database'],
               type: ['change'],
               outcome: 'success',
