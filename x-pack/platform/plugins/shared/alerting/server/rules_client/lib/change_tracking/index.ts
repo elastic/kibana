@@ -7,27 +7,13 @@
 
 import crypto from 'node:crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { RuleTypeSolution, ChangeTrackingAction } from '@kbn/alerting-types';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
-import type { ClientBulkOperation } from '@kbn/data-streams/src/types/es_api';
+import type { ObjectChange, GetHistoryResult, LogChangeHistoryOptions } from '@kbn/change-history';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { ChangeHistoryClient } from '@kbn/change-history';
+import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
-import type {
-  ChangeHistoryDocument,
-  RuleData,
-  ChangeTrackingContext,
-  GetHistoryResult,
-} from './types';
-import { changeHistoryMappings } from './mappings';
-import { diffDocs } from './utils';
-
-export * from './types';
-
-type RulesDataStreamClient = DataStreamClient<
-  typeof changeHistoryMappings,
-  ChangeHistoryDocument
-> & { startDate: Date };
 
 const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
   executionStatus: false,
@@ -36,38 +22,38 @@ const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
   nextRun: false,
 };
 
+const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
+  params: { apiKey: true },
+};
+
+export interface RuleChange extends ObjectChange {
+  module: RuleTypeSolution;
+  current?: RawRule;
+  next: RawRule;
+  currentReferences?: [] | SavedObjectReference[];
+  nextReferences?: [] | SavedObjectReference[];
+}
+
 export interface IChangeTrackingService {
   register(module: RuleTypeSolution): void;
   initialized(module: RuleTypeSolution): void;
   initialize(elasticsearchClient: ElasticsearchClient): void;
-  logChange(
-    action: ChangeTrackingAction,
-    userId: string,
-    ruleData: RuleData,
-    spaceId: string,
-    kibanaVersion: string,
-    overrides?: Partial<ChangeHistoryDocument>
-  ): void;
-  logBulkChange(
-    action: ChangeTrackingAction,
-    userId: string,
-    rules: RuleData[],
-    spaceId: string,
-    kibanaVersion: string,
-    overrides?: Partial<ChangeHistoryDocument>
-  ): void;
+  log(change: RuleChange, opts: LogChangeHistoryOptions): void;
+  logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): void;
   getHistory(module: RuleTypeSolution, ruleId: string): Promise<GetHistoryResult>;
 }
 
 export class ChangeTrackingService implements IChangeTrackingService {
-  private dataStreams: Record<RuleTypeSolution, RulesDataStreamClient>;
+  private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
   private logger: Logger;
+  private kibanaVersion: string;
   private modules: RuleTypeSolution[];
   private dataset = 'alerting-rules';
 
-  constructor(context: ChangeTrackingContext) {
-    this.dataStreams = {} as Record<RuleTypeSolution, RulesDataStreamClient>;
-    this.logger = context.logger;
+  constructor(logger: Logger, kibanaVersion: string) {
+    this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
+    this.logger = logger;
+    this.kibanaVersion = kibanaVersion;
     this.modules = [];
   }
 
@@ -78,123 +64,65 @@ export class ChangeTrackingService implements IChangeTrackingService {
   }
 
   initialized(module: RuleTypeSolution) {
-    return !!this.dataStreams[module]?.existsIndex();
+    return !!this.clients[module]?.isInitialized();
   }
 
   async initialize(elasticsearchClient: ElasticsearchClient) {
     this.logger.warn(`ChangeTrackingService.initialize(esClient)`);
-    const { dataset } = this;
+    const { dataset, logger, kibanaVersion } = this;
     for (const module of this.modules) {
-      if (this.dataStreams[module]) continue;
-      const dataStreamName = `.kibana-change-history-${module}-${dataset}`;
+      if (this.clients[module]) continue;
 
-      // Step 1: Create data stream definition
-      // TODO: "Generic" functionality should allow certain things:
-      // - Override ILM policy (defaults to none = keep forever)
-      const mappings = { ...changeHistoryMappings };
-      const now = new Date();
-      const dataStream: DataStreamDefinition<typeof mappings> = {
-        name: dataStreamName,
-        version: 1,
-        hidden: true,
-        template: {
-          _meta: { changeHistoryStartDate: now.toISOString() },
-          priority: 100,
-          mappings,
-        },
-      };
+      // Initialize the change history client
+      const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
+      client.initialize(elasticsearchClient);
 
-      // Step 2: Initialize data stream
-      const client = (await DataStreamClient.initialize({
-        dataStream,
-        elasticsearchClient,
-        logger: this.logger,
-        lazyCreation: false,
-      })) as RulesDataStreamClient;
-
-      if (!client) {
+      if (!client.isInitialized()) {
         // TODO: Dont throw all the way up to the plugin.start().
-        throw new Error('Client not initialized properly');
-      }
-
-      // Step 3: Get date history started
-      client.startDate = now;
-      try {
-        const {
-          data_streams: [{ _meta: meta }],
-        } = await elasticsearchClient.indices.getDataStream({
-          name: dataStreamName,
-        });
-        if (meta) client.startDate = meta?.changeHistoryStartDate;
-      } catch (err) {
-        this.logger.error('Unable to get change history start date');
+        const error = new Error('Change history client not initialized properly');
+        this.logger.error(error);
       }
 
       // Step 4: Stash the client for later use
-      this.dataStreams[module] = client;
+      this.clients[module] = client;
     }
   }
 
-  async logChange(
-    action: ChangeTrackingAction,
-    userId: string,
-    ruleData: RuleData,
-    spaceId: string,
-    kibanaVersion: string,
-    overrides?: Partial<ChangeHistoryDocument>
-  ) {
-    this.logBulkChange(action, userId, [ruleData], spaceId, kibanaVersion, overrides);
+  async log(change: RuleChange, opts: LogChangeHistoryOptions) {
+    return this.logBulk([change], opts);
   }
 
-  async logBulkChange(
-    action: ChangeTrackingAction,
-    userId: string,
-    rules: RuleData[],
-    spaceId: string,
-    kibanaVersion: string,
-    overrides?: Partial<ChangeHistoryDocument>
-  ) {
+  async logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions) {
     this.logger.warn(
-      `ChangeTrackingService.logBulkChange(action: ${action}, userId: ${userId}, rules: ${rules.length})`
+      `ChangeTrackingService.logBulkChange(action: ${opts.action}, userId: ${opts.userId}, changes: ${changes.length})`
     );
 
-    // Group operations per solution
-    const transactionId = crypto.randomUUID();
-    const groups = rules.reduce((result, ruleData) => {
-      const { module } = ruleData;
-      let operations = result.get(module);
-      if (!operations) {
-        result.set(module, (operations = []));
+    // Group rule changes per solution
+    const correlationId = crypto.randomBytes(16).toString('hex');
+    const groups = changes.reduce((result, change) => {
+      const { id, type, current, next, module } = change;
+      let objects = result.get(module);
+      if (!objects) {
+        result.set(module, (objects = []));
       }
-      const { id, type } = ruleData;
-      const hash = crypto.createHash('sha256').update(JSON.stringify(ruleData.next)).digest('hex');
-      const document = this.createDocument(overrides);
-      document.user = { ...document.user, id: userId };
-      document.event = { ...document.event, module, action };
-      if (!document.event.group && rules.length > 1) document.event.group = { id: transactionId };
-      document.object = { id, type, hash, snapshot: ruleData.next };
-      document.kibana = { ...document.kibana, space_id: spaceId, version: kibanaVersion };
-      if (ruleData.current) {
-        const { changes, oldvalues } = diffDocs(
-          ruleData.current,
-          ruleData.next,
-          ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS
-        );
-        document.object = { changes, oldvalues, ...document.object };
-      }
-      operations.push({ create: { _id: document.event.id } });
-      operations.push(document);
+      // TODO: Dont forget `references`, these are kept separate in the SOs
+      objects.push({ id, type, current, next });
       return result;
-    }, new Map<RuleTypeSolution, Array<ClientBulkOperation | ChangeHistoryDocument>>());
+    }, new Map<RuleTypeSolution, ObjectChange[]>());
 
     // One bulk call per solution (security, observability, stack, etc.)
     // since each is using different data streams.
     for (const module of groups.keys()) {
-      const client = this.dataStreams[module];
-      const operations = groups.get(module);
-      if (client && operations) {
+      const client = this.clients[module];
+      const groupedChanges = groups.get(module);
+      if (client && groupedChanges) {
         try {
-          await client.bulk({ refresh: true, operations });
+          await client.logBulk(groupedChanges, {
+            ...opts,
+            correlationId,
+            excludeFields: ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS,
+            sensitiveFields: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
+          });
         } catch (err) {
           this.logger.error(new Error('Error saving change history', { cause: err }));
         }
@@ -204,40 +132,12 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   async getHistory(module: RuleTypeSolution, ruleId: string): Promise<GetHistoryResult> {
     this.logger.warn(`ChangeTrackingService.getHistory(module: ${module}, ruleId: ${ruleId})`);
-    const client = this.dataStreams[module];
-    const type = RULE_SAVED_OBJECT_TYPE;
+    const client = this.clients[module];
     if (!client) {
-      throw new Error(`Data stream not found for module: ${module}`);
+      const error = new Error('Change history client not initialized properly');
+      this.logger.error(error);
+      throw error;
     }
-    const history = await client.search<Record<string, ChangeHistoryDocument>>({
-      query: {
-        bool: { filter: [{ term: { 'object.id': ruleId } }, { term: { 'object.type': type } }] },
-      },
-      sort: [{ '@timestamp': { order: 'desc' } }],
-    });
-    return {
-      startDate: client.startDate,
-      total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
-      items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
-    };
-  }
-
-  private createDocument(overrides?: Partial<ChangeHistoryDocument>): ChangeHistoryDocument {
-    const { event, kibana, metadata } = overrides ?? {};
-    return {
-      '@timestamp': new Date().toISOString(),
-      event: {
-        id: event?.id || crypto.randomBytes(15).toString('base64url'),
-        dataset: this.dataset,
-        type: event?.type ?? 'change',
-        outcome: event?.outcome ?? 'success',
-        reason: event?.reason,
-      },
-      kibana: {
-        space_id: kibana?.space_id,
-        version: kibana?.version,
-      },
-      metadata,
-    } as ChangeHistoryDocument;
+    return client.getHistory(RULE_SAVED_OBJECT_TYPE, ruleId);
   }
 }

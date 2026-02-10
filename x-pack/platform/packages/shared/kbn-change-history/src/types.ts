@@ -54,8 +54,7 @@ export interface ChangeHistoryDocument {
   };
 }
 
-// All rules belong to a solution
-export interface ObjectData {
+export interface ObjectChange {
   id: string;
   type: string;
   current?: Record<string, any>; // <-- Current version of the object. If available.
@@ -66,10 +65,12 @@ export interface LogChangeHistoryOptions {
   action: string;
   userId: string;
   spaceId: string;
-  kibanaVersion: string;
-  overrides?: Partial<ChangeHistoryDocument>;
-  excludeFilter?: ChangeTrackingExcludeFilter;
-  diffDocCalculation: (params: ChangeTrackingDiffParameters) => ChangeTrackingDiff;
+  correlationId?: string;
+  overrides?: Partial<Pick<ChangeHistoryDocument, 'event' | 'metadata'>>;
+  excludeFields?: ChangeTrackingExcludeFilter;
+  sensitiveFields?: ChangeTrackingSensitiveDataFilter;
+  // Optional diff to be used instead of standard diff calculation
+  diffDocCalculation?: (params: ChangeTrackingDiffParameters) => ChangeTrackingDiff;
 }
 
 /**
@@ -86,16 +87,32 @@ export interface GetHistoryResult {
   items: ChangeHistoryDocument[];
 }
 
+/**
+ * Fields excluded from diff calculation
+ */
 export interface ChangeTrackingExcludeFilter {
   [Key: string]: boolean | ChangeTrackingExcludeFilter;
 }
 
+/**
+ * Fields hashed due to sensitive nature (PII, Secret keys, etc)
+ */
+export interface ChangeTrackingSensitiveDataFilter {
+  [Key: string]: boolean | ChangeTrackingSensitiveDataFilter;
+}
+
+/**
+ * Input for the diff calculation
+ */
 export interface ChangeTrackingDiffParameters {
   a?: Record<string, any>;
   b?: Record<string, any>;
-  excludeFilter?: ChangeTrackingExcludeFilter;
+  excludeFields?: ChangeTrackingExcludeFilter;
 }
 
+/**
+ * Output of the diff calculation
+ */
 export interface ChangeTrackingDiff {
   stats: {
     total: number;
@@ -103,7 +120,7 @@ export interface ChangeTrackingDiff {
     deletions: number;
     updates: number;
   };
-  changes: Array<string>;
+  fieldChanges: Array<string>;
   oldvalues: Record<string, any>;
   newvalues: Record<string, any>;
 }

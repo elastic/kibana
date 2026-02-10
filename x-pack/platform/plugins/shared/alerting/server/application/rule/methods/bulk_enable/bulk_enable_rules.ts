@@ -20,7 +20,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import { type RuleData } from '../../../../rules_client/lib/change_tracking';
+import { type RuleChange } from '../../../../rules_client/lib/change_tracking';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -351,25 +351,25 @@ const bulkEnableRulesWithOCC = async (
 
   // Track history
   // TODO: Remove items that failed
-  const trackChangeHistoryRuleData = rulesToEnable.map((rule) => {
+  const changes = rulesToEnable.map((rule) => {
     const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+    const original = rulesFinderRules.find((r) => r.id === rule.id);
     return {
       id: rule.id,
       type: rule.type,
-      current: rulesFinderRules.find((r) => r.id === rule.id)?.attributes,
-      next: rule.attributes,
       module: type.solution,
-      references: rule.references,
-    } as RuleData;
+      current: original?.attributes,
+      currentReferences: original?.references,
+      next: rule.attributes,
+      nextReferences: rule.references,
+    } as RuleChange;
   });
-  context.changeTrackingService?.logBulkChange(
-    RuleChangeTrackingAction.ruleEnable,
-    username ?? 'unknown',
-    trackChangeHistoryRuleData,
-    context.spaceId,
-    context.kibanaVersion,
-    { metadata: { bulkCount: rulesToEnable.length } }
-  );
+  context.changeTrackingService?.logBulk(changes, {
+    action: RuleChangeTrackingAction.ruleEnable,
+    userId: username ?? 'unknown',
+    spaceId: context.spaceId,
+    overrides: { metadata: { bulkCount: rulesToEnable.length } },
+  });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping
   const ruleIdsFailedToEnable: Record<string, boolean> = {};

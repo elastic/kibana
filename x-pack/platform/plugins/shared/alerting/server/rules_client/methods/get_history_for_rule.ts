@@ -6,10 +6,10 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
+import type { GetHistoryResult } from '@kbn/change-history';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getRuleSo } from '../../data/rule';
-import type { GetHistoryResult } from '../lib/change_tracking';
 import type { RulesClientContext } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 

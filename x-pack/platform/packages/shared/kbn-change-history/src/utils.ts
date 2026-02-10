@@ -12,9 +12,10 @@ import type { ChangeTrackingDiff, ChangeTrackingDiffParameters } from './types';
  * Returns a filtered diff of two JSON-equivalent objects
  * The diff contains a structure that helps convert one JSON object into the other.
  *
- * @param a first JSON object
- * @param b second JSON object
- * @param filter a nested filter of properties to keep in the diff output
+ * @param params - The parameters for the diff calculation.
+ * @param params.a - The first JSON object.
+ * @param params.b - The second JSON object.
+ * @param params.excludeFields - The fields to exclude from the diff calculation.
  * @returns a [Diff] that helps convert one object into the other.
  */
 export function standardDiffDocCalculation(
@@ -27,20 +28,20 @@ export function standardDiffDocCalculation(
       deletions: 0,
       updates: 0,
     },
-    changes: [],
+    fieldChanges: [],
     oldvalues: {},
     newvalues: {},
   };
 
   // Flatten both objects and work out diff
-  const { a, b, excludeFilter } = params;
+  const { a, b, excludeFields } = params;
   const stats = result.stats;
   const opts = { safe: true };
   const flatA = flatten(a ?? {}, opts) as Record<string, any>;
   const flatB = flatten(b ?? {}, opts) as Record<string, any>;
   const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
   const flatFilter =
-    (excludeFilter && (flatten(excludeFilter, opts) as Record<string, any>)) || undefined;
+    (excludeFields && (flatten(excludeFields, opts) as Record<string, any>)) || undefined;
   // TODO: Might need better array comparison here though this works for now
   const arrayDeepEquals = (a1: any[] | ArrayBufferView, a2: any[] | ArrayBufferView) =>
     JSON.stringify(a1) === JSON.stringify(a2);
@@ -64,6 +65,7 @@ export function standardDiffDocCalculation(
   // - the filter is missing OR
   // - the key (or its parent/ancestor) is explicitly excluded
   const exclude = (key: string) =>
+    // TODO: Review this. If excluding parent property we should also exclude its children
     flatFilter && Object.entries(flatFilter).some(([k, v]) => key === k && !v);
   for (const key of allKeys) {
     if (!exclude(key)) {
@@ -94,6 +96,6 @@ export function standardDiffDocCalculation(
 
   // Gather stats, list of changed fields and return.
   result.stats.total = stats.additions + stats.deletions + stats.updates;
-  result.changes = Object.keys(result.newvalues);
+  result.fieldChanges = Object.keys(result.newvalues);
   return result;
 }

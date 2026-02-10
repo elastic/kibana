@@ -345,20 +345,18 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     });
 
     // Success? Track changes
-    context.changeTrackingService?.logChange(
-      RuleChangeTrackingAction.ruleUpdate,
-      username ?? 'unknown',
-      {
-        id,
-        type: RULE_SAVED_OBJECT_TYPE,
-        current: originalRuleSavedObject.attributes,
-        next: updatedRuleAttributes,
-        references: extractedReferences,
-        module: ruleType.solution,
-      },
-      context.spaceId,
-      context.kibanaVersion
-    );
+    const change = {
+      id,
+      type: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      current: originalRuleSavedObject.attributes,
+      next: updatedRuleAttributes,
+    };
+    context.changeTrackingService?.log(change, {
+      action: RuleChangeTrackingAction.ruleUpdate,
+      userId: username ?? 'unknown',
+      spaceId: context.spaceId,
+    });
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(

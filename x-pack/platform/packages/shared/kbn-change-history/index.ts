@@ -16,7 +16,7 @@ import type {
   ChangeHistoryDocument,
   GetHistoryResult,
   LogChangeHistoryOptions,
-  ObjectData,
+  ObjectChange,
 } from './src/types';
 import { standardDiffDocCalculation } from './src/utils';
 
@@ -27,31 +27,44 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
   ChangeHistoryDocument
 > & { startDate: Date };
 
-// WARNING
-// const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
-//   executionStatus: false,
-//   monitoring: false,
-//   lastRun: false,
-//   nextRun: false,
-// };
-
-export interface IChangeTrackingClient {
+export interface IChangeHistoryClient {
+  isInitialized(): boolean;
   initialize(elasticsearchClient: ElasticsearchClient): void;
-  logChange(objectData: ObjectData, opts: LogChangeHistoryOptions): void;
-  logBulkChange(objects: ObjectData[], opts: LogChangeHistoryOptions): void;
+  log(change: ObjectChange, opts: LogChangeHistoryOptions): void;
+  logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): void;
   getHistory(objectType: string, objectId: string): Promise<GetHistoryResult>;
 }
 
-export class ChangeTrackingClient implements IChangeTrackingClient {
+export class ChangeHistoryClient implements IChangeHistoryClient {
   private client?: ChangeHistoryDataStreamClient;
   private logger: Logger;
   private module: string;
   private dataset: string;
+  private kibanaVersion: string;
 
-  constructor(module: string, dataset: string, logger: Logger) {
+  constructor({
+    module,
+    dataset,
+    logger,
+    kibanaVersion,
+  }: {
+    module: string;
+    dataset: string;
+    logger: Logger;
+    kibanaVersion: string;
+  }) {
     this.module = module;
     this.dataset = dataset;
+    this.kibanaVersion = kibanaVersion;
     this.logger = logger;
+  }
+
+  /**
+   * Check if the change tracking service is initialized.
+   * @returns true if the change tracking service is initialized.
+   */
+  isInitialized() {
+    return !!this.client;
   }
 
   /**
@@ -65,8 +78,7 @@ export class ChangeTrackingClient implements IChangeTrackingClient {
     const dataStreamName = `.kibana-change-history-${module}-${dataset}`;
 
     // Step 1: Create data stream definition
-    // TODO: "Generic" functionality should allow certain things:
-    // - Override ILM policy (defaults to none = keep forever)
+    // TODO: What about ILM policy (defaults to none = keep forever)
     const mappings = { ...changeHistoryMappings };
     const now = new Date();
     const dataStream: DataStreamDefinition<typeof mappings> = {
@@ -89,7 +101,6 @@ export class ChangeTrackingClient implements IChangeTrackingClient {
     })) as ChangeHistoryDataStreamClient;
 
     if (!client) {
-      // TODO: Dont throw all the way up to the plugin.start().
       const err = new Error('Client not initialized properly');
       this.logger.error(err);
       throw err;
@@ -113,72 +124,56 @@ export class ChangeTrackingClient implements IChangeTrackingClient {
 
   /**
    * Log a change for a single object.
-   * @param objectData - The object that was affected.
+   * @param change - The changes to object that was affected.
    * @param opts - The options for the change.
-   * @param opts.action - The action that occurred.
-   * @param opts.userId - The ID of the user who performed the action.
-   * @param opts.spaceId - The ID of the space in which the action occurred.
-   * @param opts.kibanaVersion - The version of Kibana.
-   * @param opts.overrides - Optional overrides for the change history document.
-   * @param opts.excludeFilter - Optional filter to exclude certain fields from the change history document.
-   * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
    * @returns A promise that resolves when the change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
-  async logChange(objectData: ObjectData, opts: LogChangeHistoryOptions) {
-    return this.logBulkChange([objectData], opts);
+  async log(change: ObjectChange, opts: LogChangeHistoryOptions) {
+    return this.logBulk([change], opts);
   }
 
   /**
    * Log a bulk change for one or more objects.
-   * @param objects - The objects that were affected.
+   * @param changes - The changes to objects that were affected.
    * @param opts - The options for the bulk change.
-   * @param opts.action - The action that occurred.
-   * @param opts.userId - The ID of the user who performed the action.
-   * @param opts.spaceId - The ID of the space in which the action occurred.
-   * @param opts.kibanaVersion - The version of Kibana.
-   * @param opts.overrides - Optional overrides for the change history document.
-   * @param opts.excludeFilter - Optional filter to exclude certain fields from the change history document.
-   * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
-  async logBulkChange(objects: ObjectData[], opts: LogChangeHistoryOptions) {
-    this.logger.warn(
-      `ChangeTrackingService.logBulkChange(action: ${opts.action}, userId: ${opts.userId}, rules: ${objects.length})`
+  async logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions) {
+    this.logger.debug(
+      `ChangeHistoryClient.logBulk(action: ${opts.action}, userId: ${opts.userId}, chages: ${changes.length})`
     );
 
-    const transactionId = crypto.randomUUID();
-    const { module, dataset, client } = this;
+    const correlationId =
+      opts.correlationId ?? changes.length > 1 ? crypto.randomBytes(16).toString('hex') : undefined;
+    const { module, dataset, client, kibanaVersion } = this;
     if (!client) {
       const err = new Error(`Data stream not initialized for ${module}-${dataset}`);
       this.logger.error(err);
       throw err;
     }
     const operations = [] as Array<ClientBulkOperation | ChangeHistoryDocument>;
-    for (const objectData of objects) {
+    for (const change of changes) {
       // Create document
-      const { id, type } = objectData;
-      const hash = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(objectData.next))
-        .digest('hex');
+      const { id, type } = change;
+      const hash = crypto.createHash('sha256').update(JSON.stringify(change.next)).digest('hex');
       const document = this.createDocument(opts.overrides);
       document.user = { ...document.user, id: opts.userId };
       document.event = { ...document.event, module, action: opts.action };
-      if (!document.event.group && objects.length > 1) document.event.group = { id: transactionId };
-      document.object = { id, type, hash, snapshot: objectData.next };
-      document.kibana = { ...document.kibana, space_id: opts.spaceId, version: opts.kibanaVersion };
+      if (correlationId && !document.event.group) document.event.group = { id: correlationId };
+      document.object = { id, type, hash, snapshot: change.next };
+      document.kibana = { ...document.kibana, space_id: opts.spaceId, version: kibanaVersion };
       // Do we have "before" state?
       // Perform diff using diffDocCalculation(), defaulted to standard if not passed in.
-      if (objectData.current) {
+      if (change.current) {
         const diffCalc = opts.diffDocCalculation ?? standardDiffDocCalculation;
-        const { changes, oldvalues } = diffCalc({
-          a: objectData.current,
-          b: objectData.next,
-          excludeFilter: opts.excludeFilter,
+        const { fieldChanges, oldvalues } = diffCalc({
+          a: change.current,
+          b: change.next,
+          excludeFields: opts.excludeFields,
         });
-        document.object = { changes, oldvalues, ...document.object };
+        document.object = { changes: fieldChanges, oldvalues, ...document.object };
       }
       // Queue operations
       operations.push({ create: { _id: document.event.id } });

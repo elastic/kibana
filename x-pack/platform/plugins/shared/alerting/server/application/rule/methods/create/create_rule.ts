@@ -244,20 +244,19 @@ export async function createRule<Params extends RuleParams = never>(
   );
 
   // Success? Track changes
-  context.changeTrackingService?.logChange(
-    options?.action ?? RuleChangeTrackingAction.ruleCreate,
-    username ?? 'unknown',
-    {
-      id,
-      type: RULE_SAVED_OBJECT_TYPE,
-      next: ruleAttributes,
-      references,
-      module: ruleType.solution,
-    },
-    context.spaceId,
-    context.kibanaVersion,
-    { metadata: { originalRuleId: options?.originalId } }
-  );
+  const change = {
+    id,
+    type: RULE_SAVED_OBJECT_TYPE,
+    next: ruleAttributes,
+    nextReferences: references,
+    module: ruleType.solution,
+  };
+  context.changeTrackingService?.log(change, {
+    action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
+    userId: username ?? 'unknown',
+    spaceId: context.spaceId,
+    overrides: { metadata: { originalRuleId: options?.originalId } },
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

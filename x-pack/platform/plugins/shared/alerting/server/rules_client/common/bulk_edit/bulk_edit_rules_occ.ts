@@ -34,7 +34,7 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
-import type { RuleData } from '../../lib/change_tracking';
+import type { RuleChange } from '../../lib/change_tracking';
 
 export interface BulkEditOccOptions<Params extends RuleParams> {
   filter: KueryNode | null;
@@ -194,25 +194,25 @@ async function saveBulkUpdatedRules({
     });
 
     // 1. Track changes
-    const trackChangeHistoryRuleData = rules.map((rule) => {
+    const changes = rules.map((rule) => {
       const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      const original = originalRules.find((r) => rule.id === r.id);
       return {
         id: rule.id,
         type: rule.type,
-        current: originalRules.find((r) => rule.id === r.id)?.attributes,
-        next: rule.attributes,
         module: type.solution,
-        references: rule.references,
-      } as RuleData;
+        current: original?.attributes,
+        currentReferences: original?.references,
+        next: rule.attributes,
+        nextReferences: rule.references,
+      };
+    }) as RuleChange[];
+    context.changeTrackingService?.logBulk(changes, {
+      userId: (await context.getUserName()) ?? 'unknown',
+      action: RuleChangeTrackingAction.ruleUpdate,
+      spaceId: context.spaceId,
+      overrides: { metadata: { bulkCount: rules.length } },
     });
-    context.changeTrackingService?.logBulkChange(
-      RuleChangeTrackingAction.ruleUpdate,
-      (await context.getUserName()) ?? 'unknown',
-      trackChangeHistoryRuleData,
-      context.spaceId,
-      context.kibanaVersion,
-      { metadata: { bulkCount: rules.length } }
-    );
   } catch (e) {
     // avoid unused newly generated API keys
     if (apiKeysMap.size > 0) {
