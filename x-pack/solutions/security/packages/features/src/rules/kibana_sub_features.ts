@@ -212,7 +212,7 @@ export const getManualRunRulesSubFeature = (): SubFeatureConfig => ({
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.subFeatures.manualRunRulesPrivilegeName',
             {
-              defaultMessage: 'Manual run rules',
+              defaultMessage: 'Trigger manual rule runs',
             }
           ),
           savedObject: {
