@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 79354
+  agentBuilder: 96771
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
   aiops: 15359
@@ -9,13 +9,13 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 10605
+  automaticImportVTwo: 12306
   banners: 4087
   canvas: 15142
   cases: 225900
   charts: 40269
   cloud: 10648
-  cloudConnect: 7932
+  cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -26,11 +26,11 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
+  core: 556473
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
-  dashboard: 19957
+  dashboard: 20000
   dashboardEnhanced: 12159
   dashboardMarkdown: 4994
   data: 500179
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
-  entityStore: 1755
+  entityStore: 71717
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -70,6 +70,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
+  feedback: 7000
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
@@ -205,8 +206,9 @@ pageLoadAssetSize:
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
-  visualizations: 38375
+  visualizationListing: 5148
+  visualizations: 53333
   watcher: 10485
-  workflowsExtensions: 76765
-  workflowsManagement: 8497
+  workflowsExtensions: 90040
+  workflowsManagement: 21318
   workplaceAIApp: 65731
