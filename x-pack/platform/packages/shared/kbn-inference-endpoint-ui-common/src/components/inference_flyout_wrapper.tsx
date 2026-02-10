@@ -65,7 +65,7 @@ const formDeserializer = (data: InferenceEndpoint): InferenceEndpoint => {
 };
 
 // This serializer is used to transform the form data before sending it to the server
-export const formSerializer = (formData: InferenceEndpoint): InferenceEndpoint => {
+export const formSerializer = (formData: InferenceEndpoint) => {
   const providerConfig = formData.config?.providerConfig as
     | InferenceEndpoint['config']['providerConfig']
     | undefined;
@@ -91,8 +91,6 @@ export const formSerializer = (formData: InferenceEndpoint): InferenceEndpoint =
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
-                // Remove num_allocations as it cannot be set when adaptive allocations is set.
-                num_allocations: undefined,
               }
             : {}),
         },
