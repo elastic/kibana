@@ -61,7 +61,7 @@ export function FieldPicker({
     setOpen(!open);
   }, [open, setOpen]);
 
-  const onClickProps: Partial<EuiBadgeProps> = useMemo(
+  const onClickProps = useMemo(
     () =>
       hasFields
         ? {
