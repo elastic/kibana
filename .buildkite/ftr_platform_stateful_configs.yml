@@ -380,7 +380,6 @@ enabled:
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
-  - x-pack/platform/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts
