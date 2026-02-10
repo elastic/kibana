@@ -9,7 +9,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'a3872e401531d41f50a187fa61fbfffe',
-    _score: 0,
     _source: {
       'host.id': 'host-123',
       'entity.name': 'host-123',
@@ -23,7 +22,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'c51b57fc40995ed530907fcdf981ced9',
-    _score: 0,
     _source: {
       'host.name': 'server-01',
       'host.domain': 'example.com',
@@ -37,23 +35,7 @@ export const expectedHostEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
-    _id: '1260e35e2450159f1676fedb4b67ce46',
-    _score: 0,
-    _source: {
-      'host.domain': 'corp.local',
-      'host.hostname': 'workstation-05',
-      'entity.name': 'workstation-05.corp.local',
-      'entity.type': 'Host',
-      '@timestamp': '2026-01-20T12:05:02.000Z',
-      'entity.EngineMetadata.Type': 'host',
-      'entity.EngineMetadata.UntypedId': 'workstation-05.corp.local',
-      'entity.id': 'host:workstation-05.corp.local',
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
     _id: '17acdbddb5f80cc777f3101c120b66a6',
-    _score: 0,
     _source: {
       'host.entity.id': 'host-with-entity-id',
       'host.name': 'server-01',
@@ -69,7 +51,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'd5b2488f87685ca7ef426aad7ccc777e',
-    _score: 0,
     _source: {
       'host.name': 'server-01',
       'entity.name': 'server-01',
@@ -82,8 +63,21 @@ export const expectedHostEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
+    _id: '1260e35e2450159f1676fedb4b67ce46',
+    _source: {
+      'host.domain': 'corp.local',
+      'host.hostname': 'workstation-05',
+      'entity.name': 'workstation-05.corp.local',
+      'entity.type': 'Host',
+      '@timestamp': '2026-01-20T12:05:02.000Z',
+      'entity.EngineMetadata.Type': 'host',
+      'entity.EngineMetadata.UntypedId': 'workstation-05.corp.local',
+      'entity.id': 'host:workstation-05.corp.local',
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
     _id: 'b3f4c3355bd6bec40156867ae5ddb158',
-    _score: 0,
     _source: {
       'host.hostname': 'laptop-01',
       'entity.name': 'laptop-01',
@@ -97,7 +91,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '5e72f85ad33f4e4cf981dcff134c050c',
-    _score: 0,
     _source: {
       'host.entity.id': 'non-generated-host',
       'entity.name': 'non-generated-host',
@@ -111,7 +104,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'cb20977f0b08562677a022f7362b3e9a',
-    _score: 0,
     _source: {
       'host.name': 'desktop-02',
       'entity.name': 'desktop-02',
@@ -125,7 +117,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '0074d60e067281b4286ec527953c8e7b',
-    _score: 0,
     _source: {
       'host.name': 'server-02',
       'host.domain': 'example.com',
@@ -141,7 +132,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '7ce02ea9458bb0c3adccc71ea36acced',
-    _score: 0,
     _source: {
       'host.domain': 'corp.local',
       'host.hostname': 'workstation-10',
@@ -157,7 +147,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '180b7320d4ce161699c962c956c9bb46',
-    _score: 0,
     _source: {
       'host.name': 'server-03',
       'host.domain': 'test.com',
@@ -173,7 +162,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '8b261663c77543e6a4544fc85cdc62ef',
-    _score: 0,
     _source: {
       'host.name': 'server-04',
       'host.domain': 'example.org',
@@ -189,7 +177,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '9fff579a1f2d32a2c470ed711de1e04b',
-    _score: 0,
     _source: {
       'host.entity.id': '',
       'host.id': 'host-404',
@@ -204,7 +191,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'b4e5db4fb8eb7f13d284ee386210b26e',
-    _score: 0,
     _source: {
       'host.name': 'server-05',
       'host.domain': 'test.net',
@@ -219,7 +205,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '4bf68ff60fc8b19cec2241992556322a',
-    _score: 0,
     _source: {
       'host.name': 'workstation-05',
       'host.id': '',
@@ -234,7 +219,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '40b5875887d5e812570327b9604425a6',
-    _score: 0,
     _source: {
       'host.domain': 'corp.local',
       'host.hostname': 'workstation-20',
@@ -249,7 +233,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'a5d3d8b58538b9ee1ca73b50d15d4b52',
-    _score: 0,
     _source: {
       'host.name': 'server-06',
       'host.domain': '',
@@ -264,7 +247,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'ad6d0148f3ab302b6d9389a05e04e01d',
-    _score: 0,
     _source: {
       'host.entity.id': 'host-505',
       'entity.name': 'host-505',
@@ -278,7 +260,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'dbc04494402b73d5414cdf90850d777e',
-    _score: 0,
     _source: {
       'host.id': 'host-606',
       'entity.name': 'host-606',
@@ -292,7 +273,6 @@ export const expectedHostEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'f69c44458b36688926b09ed388c8b5be',
-    _score: 0,
     _source: {
       'host.name': 'server-08',
       'host.domain': 'corp.local',
@@ -307,22 +287,7 @@ export const expectedHostEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
-    _id: '1fba7560b67c8b51827bac3b6c86fce1',
-    _score: 0,
-    _source: {
-      'host.hostname': 'workstation-30',
-      'entity.name': 'workstation-30',
-      'entity.type': 'Host',
-      '@timestamp': '2026-01-20T12:05:18.000Z',
-      'entity.EngineMetadata.Type': 'host',
-      'entity.EngineMetadata.UntypedId': 'workstation-30',
-      'entity.id': 'host:workstation-30',
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
     _id: '68c7ffbdcf9404e4494ac43a83719ef5',
-    _score: 0,
     _source: {
       'host.name': 'server-07',
       'entity.name': 'server-07',
@@ -333,13 +298,25 @@ export const expectedHostEntities = [
       'entity.id': 'host:server-07',
     },
   },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '1fba7560b67c8b51827bac3b6c86fce1',
+    _source: {
+      'host.hostname': 'workstation-30',
+      'entity.name': 'workstation-30',
+      'entity.type': 'Host',
+      '@timestamp': '2026-01-20T12:05:18.000Z',
+      'entity.EngineMetadata.Type': 'host',
+      'entity.EngineMetadata.UntypedId': 'workstation-30',
+      'entity.id': 'host:workstation-30',
+    },
+  },
 ];
 
 export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '1d9cb6c21dfa9156571de1281d707719',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'john.doe',
@@ -354,7 +331,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '34e67fc3f53984dbfd0ed097197cc453',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'jane.smith',
@@ -369,7 +345,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'ba6d49220ff970733fff891e87d09e56',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'bob.jones',
@@ -384,7 +359,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'd0ddd45157d6fe1cbde790dea38d8817',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'alice.brown',
@@ -398,8 +372,19 @@ export const expectedUserEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
+    _id: '025d1e3fbf1982fba259d37978ee5709',
+    _source: {
+      'entity.EngineMetadata.Type': 'user',
+      'entity.name': 'non-generated-user',
+      'entity.type': 'Identity',
+      '@timestamp': '2026-01-20T12:05:04.000Z',
+      'entity.EngineMetadata.UntypedId': 'non-generated-user',
+      'entity.id': 'user:non-generated-user',
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
     _id: 'bd55eef67b506ab8735e6f0f59e8bee8',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.id': 'user-101',
@@ -412,21 +397,7 @@ export const expectedUserEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
-    _id: '025d1e3fbf1982fba259d37978ee5709',
-    _score: 0,
-    _source: {
-      'entity.EngineMetadata.Type': 'user',
-      'entity.name': 'non-generated-user',
-      'entity.type': 'Identity',
-      '@timestamp': '2026-01-20T12:05:04.000Z',
-      'entity.EngineMetadata.UntypedId': 'non-generated-user',
-      'entity.id': 'user:non-generated-user',
-    },
-  },
-  {
-    _index: '.entities.v2.latest.security_default',
     _id: '6f42b467570b3e7ab0d0ae8b60965648',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.email': 'test@example.com',
@@ -440,7 +411,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '3d6f612371ad997ae58098380912c307',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.domain': 'corp',
@@ -455,7 +425,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'a870b6e8cd872aeb6696cc70997484fd',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'david.lee',
@@ -469,7 +438,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'c049dff0ed865eb3709c2577344652df',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': '',
@@ -484,7 +452,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '7b71429fa06bece73a69aa3b6c111933',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.id': 'user-303',
@@ -498,7 +465,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'a71d3785ad04601f4b98990e871cd82b',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'eve.martin',
@@ -514,7 +480,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'd4ccc5552730aec959408caca3473ee7',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'frank.taylor',
@@ -530,7 +495,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '9c2027667a9851d44876ae4e4008b108',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.email': 'grace@example.com',
@@ -545,7 +509,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: 'fcaaebb1c3ef5431de17f325a54bf97f',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'henry.clark',
@@ -559,7 +522,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '8b8b96fb0537d319e1397a175681a6b6',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.domain': '',
@@ -574,7 +536,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '4b11dd6cf7a4b049ce8afd5f38064094',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'jack.white',
@@ -588,7 +549,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '9211621cb08e16e69dc48158e35579c8',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.name': 'karen.green',
@@ -604,7 +564,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '5a3d5fc12af596c35c9bcce0ec15e297',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.email': 'larry@example.com',
@@ -620,7 +579,6 @@ export const expectedUserEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '855f0e0353f2a443af0c6baea478a6d8',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'user',
       'user.domain': 'corp',
@@ -639,7 +597,6 @@ export const expectedServiceEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '15b621f577206d843980a40d38554c70',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'service',
       'entity.name': 'non-generated-service-id',
@@ -652,7 +609,6 @@ export const expectedServiceEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '0f9d5fcd02e63ca500ca9515f76ce174',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'service',
       'entity.name': 'service-name',
@@ -668,7 +624,6 @@ export const expectedGenericEntities = [
   {
     _index: '.entities.v2.latest.security_default',
     _id: '9e606449c558b5253d8b1f028fe7dca0',
-    _score: 0,
     _source: {
       'entity.EngineMetadata.Type': 'generic',
       'entity.name': 'generic-id',

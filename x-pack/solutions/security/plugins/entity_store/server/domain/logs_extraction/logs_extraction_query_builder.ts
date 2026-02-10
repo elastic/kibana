@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { esqlIsNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
@@ -19,10 +20,13 @@ import {
 export const HASHED_ID_FIELD = 'entity.hashedId';
 const HASH_ALG = 'MD5';
 
-const MAIN_ENTITY_ID_FIELD = 'entity.id';
-const ENTITY_NAME_FIELD = 'entity.name';
+export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
+  'entity.EngineMetadata.FirstSeenLogInPage';
 const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+
+const MAIN_ENTITY_ID_FIELD = 'entity.id';
+const ENTITY_NAME_FIELD = 'entity.name';
 const TIMESTAMP_FIELD = '@timestamp';
 
 const METADATA_FIELDS = ['_index'];
@@ -33,11 +37,17 @@ const DEFAULT_FIELDS_TO_KEEP = [
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   HASHED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 ];
 
 const RECENT_DATA_PREFIX = 'recent';
 // Some fields have only src and we need to fallback to it.
 const recentData = (dest: string) => `${RECENT_DATA_PREFIX}.${dest}`;
+
+export interface PaginationParams {
+  timestampCursor: string;
+  idCursor: string;
+}
 
 interface LogsExtractionQueryParams {
   // source of the query
@@ -52,6 +62,8 @@ interface LogsExtractionQueryParams {
   fromDateISO: string;
 
   toDateISO: string;
+
+  pagination?: PaginationParams;
 }
 
 export const buildLogsExtractionEsqlQuery = ({
@@ -61,35 +73,58 @@ export const buildLogsExtractionEsqlQuery = ({
   toDateISO,
   docsLimit,
   latestIndex,
+  pagination,
 }: LogsExtractionQueryParams): string => {
-  return `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}
+  return (
+    `FROM ${indexPatterns.join(', ')}
+    METADATA ${METADATA_FIELDS.join(', ')}` +
+    // Where clause captures the full window that we will process
+    `
   | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
       AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
-      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-  | SORT ${TIMESTAMP_FIELD} ASC
-  | LIMIT ${docsLimit}
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")` +
+    // Early construct the id (based on euid logic) so we can run stats per entity (equivalent to GROUP BY)
+    `
   | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
-    withTypeId: false,
-  })}
+      withTypeId: false,
+    })}` +
+    // Perform the main aggregation of all the seen logs in the window, taking into consideration the
+    `
   | STATS
+    ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${recentFieldStats(fields)}
-    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
+    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}` +
+    // early sort, paginate and limit so we perform data retention operations (LOOKUP JOIN) only on documents
+    // that are needed
+    `
+  | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
+      ENGINE_METADATA_UNTYPED_ID_FIELD
+    )} ASC
+  ${getPaginationWhereClause(pagination)}
+  | LIMIT ${docsLimit}` +
+    // Concatenate the type of the entity and the id to perform the LOOKUP JOIN (otherwise ids won't match)
+    `
   | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = CONCAT("${type}:", ${recentData(
-    ENGINE_METADATA_UNTYPED_ID_FIELD
-  )})
+      ENGINE_METADATA_UNTYPED_ID_FIELD
+    )})` +
+    // - Perform the LOOKUP JOIN to get the latest data for the entity
+    // - Merge the fields from latest with recent data (taking into consideration the retention strategy)
+    // - Perform the custom fields evaluation logic
+    // Obs: this not an aggregation.
+    `
   | LOOKUP JOIN ${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}
+  | EVAL
+    ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
+    ${customFieldEvalLogic(type, entityTypeFallback)}` +
+    // Rename the fields to the original names
+    `
   | RENAME
     ${recentData(MAIN_ENTITY_ID_FIELD)} AS ${MAIN_ENTITY_ID_FIELD},
     ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}
-  | EVAL
-    ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
-    ${customFieldEvalLogic(type, entityTypeFallback)},
-    ${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID_FIELD})
-  | KEEP ${fieldsToKeep(fields)}
-  | SORT ${TIMESTAMP_FIELD} ASC`;
+  | KEEP ${fieldsToKeep(fields)}`
+  );
 };
 
 function recentFieldStats(fields: EntityField[]) {
@@ -145,11 +180,19 @@ function fieldsToKeep(fields: EntityField[]) {
 
 function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
   const evals = [
+    // Bring recent timestamp back
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
-    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNullOrEmpty(
-      ENTITY_NAME_FIELD
-    )}, ${ENGINE_METADATA_UNTYPED_ID_FIELD}, ${ENTITY_NAME_FIELD})`,
+
+    // Fallback to the untyped id if the name is empty
+    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNullOrEmpty(recentData(ENTITY_NAME_FIELD))}, ${recentData(
+      ENGINE_METADATA_UNTYPED_ID_FIELD
+    )}, ${recentData(ENTITY_NAME_FIELD)})`,
+
+    // Save the engine type
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
+
+    // Hash the id
+    `${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${recentData(MAIN_ENTITY_ID_FIELD)})`,
   ];
 
   if (entityTypeFallback) {
@@ -191,4 +234,53 @@ function castDestType(fieldName: string, field: EntityField) {
     default:
       return fieldName;
   }
+}
+
+function getPaginationWhereClause(pagination?: PaginationParams) {
+  if (!pagination) {
+    return '';
+  }
+
+  return ` | WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${
+    pagination.timestampCursor
+  }") 
+            OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${
+    pagination.timestampCursor
+  }") 
+                AND ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} > "${pagination.idCursor}")`;
+}
+
+export function extractPaginationParams(
+  esqlResponse: ESQLSearchResponse,
+  maxDocs: number
+): PaginationParams | undefined {
+  const count = esqlResponse.values.length;
+  if (count === 0 || count < maxDocs) {
+    return undefined;
+  }
+
+  const columns = esqlResponse.columns;
+  const timestampFieldIdx = columns.findIndex(
+    ({ name }) => name === ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
+  );
+  if (timestampFieldIdx === -1) {
+    throw new Error(
+      `${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} not found in esql response, internal logic error`
+    );
+  }
+
+  const idFieldIdx = columns.findIndex(({ name }) => name === ENGINE_METADATA_UNTYPED_ID_FIELD);
+  if (idFieldIdx === -1) {
+    throw new Error(
+      `${ENGINE_METADATA_UNTYPED_ID_FIELD} not found in esql response, internal logic error`
+    );
+  }
+
+  const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
+  const timestampCursor = lastResult[timestampFieldIdx] as string;
+  const idCursor = lastResult[idFieldIdx] as string;
+  return {
+    timestampCursor,
+    idCursor,
+  };
 }

@@ -9,14 +9,16 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   EntityType,
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import type { PaginationParams } from './logs_extraction/logs_extraction_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  extractPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
@@ -47,6 +49,7 @@ interface LogsExtractionOptions {
 interface ExtractedLogsSummarySuccess {
   success: true;
   count: number;
+  pages: number;
   scannedIndices: string[];
 }
 
@@ -86,7 +89,7 @@ export class LogsExtractionClient {
 
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { esqlResponse, indexPatterns } = await this.runQueryAndIngestDocs({
+      const { count, pages, indexPatterns } = await this.runQueryAndIngestDocs({
         engineDescriptor,
         opts,
         delayMs,
@@ -95,7 +98,8 @@ export class LogsExtractionClient {
 
       const operationResult = {
         success: true as const,
-        count: esqlResponse.values.length,
+        count,
+        pages,
         scannedIndices: indexPatterns,
       };
 
@@ -103,11 +107,15 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      const paginationTimestamp = this.extractLastSeenTimestamp(esqlResponse, delayMs);
       await this.engineDescriptorClient.update(type, {
         logExtractionState: {
           ...engineDescriptor.logExtractionState,
-          paginationTimestamp,
+
+          // we went through all the pages,
+          // therefore we can leave the lastExecutionTimestamp as the beginning of the next
+          // window
+          paginationTimestamp: undefined,
+
           lastExecutionTimestamp: moment().utc().toISOString(),
         },
       });
@@ -146,55 +154,79 @@ export class LogsExtractionClient {
     // too, so we have a few runs and understand it.
     this.validateExtractionWindow(fromDateISO, toDateISO);
 
-    const query = buildLogsExtractionEsqlQuery({
-      indexPatterns,
-      latestIndex,
-      entityDefinition,
-      docsLimit,
-      fromDateISO,
-      toDateISO,
+    let totalCount = 0;
+    let pages = 0;
+    let pagination: PaginationParams | undefined;
+
+    // On abort we save the pagination to the last seen timestamp cursor
+    opts?.abortController?.signal.addEventListener('abort', async () => {
+      await this.engineDescriptorClient.update(engineDescriptor.type, {
+        logExtractionState: {
+          ...engineDescriptor.logExtractionState,
+          paginationTimestamp: pagination?.timestampCursor,
+          lastExecutionTimestamp: moment().utc().toISOString(),
+        },
+      });
     });
 
-    this.logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
-    const esqlResponse = await executeEsqlQuery({
-      esClient: this.esClient,
-      query,
-      abortController: opts?.abortController,
-    });
+    do {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns,
+        latestIndex,
+        entityDefinition,
+        docsLimit,
+        fromDateISO,
+        toDateISO,
+        pagination,
+      });
 
-    if (!opts?.countOnly) {
-      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-      await ingestEntities({
+      this.logger.debug(
+        `Running query to extract logs from ${fromDateISO} to ${toDateISO} ${
+          pagination
+            ? `with pagination: ${pagination.timestampCursor} | ${pagination.idCursor}`
+            : ''
+        }`
+      );
+
+      const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
-        esqlResponse,
-        esIdField: HASHED_ID_FIELD,
-        targetIndex: latestIndex,
-        logger: this.logger,
+        query,
         abortController: opts?.abortController,
       });
-    }
 
-    return { esqlResponse, indexPatterns };
+      totalCount += esqlResponse.values.length;
+      pagination = extractPaginationParams(esqlResponse, docsLimit);
+      if (esqlResponse.values.length > 0) {
+        pages++;
+      }
+
+      if (!opts?.countOnly) {
+        this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+        await ingestEntities({
+          esClient: this.esClient,
+          esqlResponse,
+          esIdField: HASHED_ID_FIELD,
+          fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
+          targetIndex: latestIndex,
+          logger: this.logger,
+          abortController: opts?.abortController,
+        });
+      }
+
+      // should never be larger than limit, just being safe
+    } while (pagination);
+
+    return {
+      count: totalCount,
+      pages,
+      indexPatterns,
+    };
   }
 
   private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
     if (moment(fromDateISO).isAfter(moment(toDateISO))) {
       throw new Error('From date is after to date');
     }
-  }
-
-  private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse, delayMs: number): string {
-    if (esqlResponse.values.length === 0) {
-      // if no logs are found, we use the current time as the last seenTimestamp
-      return moment().utc().subtract(delayMs, 'millisecond').toISOString();
-    }
-
-    const timestampIndex = esqlResponse.columns.findIndex((column) => column.name === '@timestamp');
-    if (timestampIndex === -1) {
-      throw new Error('@timestamp column not found in esql response, internal logic error');
-    }
-
-    return esqlResponse.values[esqlResponse.values.length - 1][timestampIndex] as string;
   }
 
   // Window scenarios:

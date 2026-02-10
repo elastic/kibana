@@ -13,7 +13,10 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
-import { HASHED_ID_FIELD } from './logs_extraction/logs_extraction_query_builder';
+import {
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  HASHED_ID_FIELD,
+} from './logs_extraction/logs_extraction_query_builder';
 import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
@@ -130,13 +133,15 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
         esIdField: HASHED_ID_FIELD,
+        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
         targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
+        abortController: undefined,
       });
 
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         logExtractionState: expect.objectContaining({
-          paginationTimestamp: lastTimestamp,
+          paginationTimestamp: undefined,
           lastExecutionTimestamp: expect.any(String),
         }),
       });
@@ -174,7 +179,7 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         logExtractionState: expect.objectContaining({
-          paginationTimestamp: expect.any(String),
+          paginationTimestamp: undefined,
           lastExecutionTimestamp: expect.any(String),
         }),
       });
@@ -581,7 +586,7 @@ describe('LogsExtractionClient', () => {
       );
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('host', {
         logExtractionState: expect.objectContaining({
-          paginationTimestamp: lastTimestamp,
+          paginationTimestamp: undefined,
           lastExecutionTimestamp: expect.any(String),
         }),
       });
