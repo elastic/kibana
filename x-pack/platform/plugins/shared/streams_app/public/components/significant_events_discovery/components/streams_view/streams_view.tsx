@@ -204,9 +204,21 @@ export function StreamsView({
   const onBulkDiscoverInsightsClick = async () => {
     if (isDiscoverInsightsDisabled) return;
     const streamNames = selectedStreams.map((row) => row.stream.name);
-    await scheduleInsightsDiscoveryTask(streamNames);
-    setSelectedStreams([]);
-    onInsightsTaskScheduled?.();
+
+    try {
+      await scheduleInsightsDiscoveryTask(streamNames);
+      setSelectedStreams([]);
+      onInsightsTaskScheduled?.();
+    } catch (error) {
+      toasts.addError(getFormattedError(error), {
+        title: i18n.translate(
+          'xpack.streamsApp.insightsDiscoverySchedulingFailureTitle',
+          {
+            defaultMessage: 'Failed to schedule insights discovery',
+          }
+        ),
+      });
+    }
   };
 
   return (
@@ -276,6 +288,8 @@ export function StreamsView({
                   role="button"
                   tabIndex={0}
                   aria-label={DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE}
+                  aria-haspopup="dialog"
+                  aria-expanded={discoverInsightsPopoverOpen}
                 >
                   <EuiButtonEmpty iconType="crosshairs" disabled css={{ pointerEvents: 'none' }}>
                     {DISCOVER_INSIGHTS_BUTTON_LABEL}
