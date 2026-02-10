@@ -14,6 +14,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { create } from './create';
 import { getConnectorType } from '../../../../fixtures';
 import type { ActionsClientContext } from '../../../../actions_client';
@@ -21,6 +22,7 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { z } from '@kbn/zod';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -60,8 +62,10 @@ const actionTypeRegistry: ActionTypeRegistry = {
   }),
 } as unknown as ActionTypeRegistry;
 
+const authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
 const mockContext: ActionsClientContext = {
   actionTypeRegistry,
+  authTypeRegistry,
   authorization: authorization as unknown as ActionsAuthorization,
   unsecuredSavedObjectsClient,
   scopedClusterClient,
@@ -490,6 +494,11 @@ describe('create()', () => {
 
   describe('authMode', () => {
     test('creates an action with authMode "shared"', async () => {
+      // Mock authTypeRegistry to return an auth type with authMode 'shared'
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'basic',
+      });
+
       const savedObjectCreateResult = {
         id: '1',
         type: 'action',
@@ -497,7 +506,9 @@ describe('create()', () => {
           name: 'my name',
           actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
-          config: {},
+          config: {
+            authType: 'basic',
+          },
           authMode: 'shared' as const,
         },
         references: [],
@@ -509,9 +520,8 @@ describe('create()', () => {
         action: {
           name: 'my name',
           actionTypeId: 'my-connector-type',
-          config: {},
+          config: { authType: 'basic' },
           secrets: {},
-          authMode: 'shared',
         },
       });
 
@@ -520,21 +530,26 @@ describe('create()', () => {
         actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
-        config: {},
+        config: {
+          authType: 'basic',
+        },
+        authMode: 'shared',
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
-        authMode: 'shared',
       });
 
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('basic');
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'action',
         {
           actionTypeId: 'my-connector-type',
           name: 'my name',
           isMissingSecrets: false,
-          config: {},
+          config: {
+            authType: 'basic',
+          },
           secrets: {},
           authMode: 'shared',
         },
@@ -543,6 +558,12 @@ describe('create()', () => {
     });
 
     test('creates an action with authMode "per-user"', async () => {
+      // Mock authTypeRegistry to return an auth type with authMode 'per-user'
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'oauth2',
+        authMode: 'per-user',
+      });
+
       const savedObjectCreateResult = {
         id: '1',
         type: 'action',
@@ -551,6 +572,7 @@ describe('create()', () => {
           actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
+          secrets: { authType: 'oauth_authorization_code' },
           authMode: 'per-user' as const,
         },
         references: [],
@@ -563,8 +585,7 @@ describe('create()', () => {
           name: 'my name',
           actionTypeId: 'my-connector-type',
           config: {},
-          secrets: {},
-          authMode: 'per-user',
+          secrets: { authType: 'oauth_authorization_code' },
         },
       });
 
@@ -581,6 +602,58 @@ describe('create()', () => {
         authMode: 'per-user',
       });
 
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('oauth_authorization_code');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: 'my-connector-type',
+          name: 'my name',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: 'per-user',
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates an action without authMode when no authType is provided', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        actionTypeId: 'my-connector-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {},
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      expect(authTypeRegistry.get).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'action',
         {
@@ -589,7 +662,6 @@ describe('create()', () => {
           isMissingSecrets: false,
           config: {},
           secrets: {},
-          authMode: 'per-user',
         },
         { id: 'mock-saved-object-id' }
       );

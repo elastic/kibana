@@ -15,10 +15,11 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets, authMode },
+  action: { actionTypeId, name, config, secrets },
   options,
 }: ConnectorCreateParams): Promise<ActionResult> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -115,6 +116,12 @@ export async function create({
       outcome: 'unknown',
     })
   );
+
+  const authMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
 
   const result = await tryCatch(
     async () =>

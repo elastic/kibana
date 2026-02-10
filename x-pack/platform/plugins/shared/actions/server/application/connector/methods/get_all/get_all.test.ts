@@ -28,6 +28,8 @@ import { getAllUnsecured } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { createMockInMemoryConnector } from '../../mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -71,7 +73,8 @@ const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
-
+const authTypeRegistry: AuthTypeRegistry =
+  authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
 describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -79,6 +82,7 @@ describe('getAll()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -138,6 +142,7 @@ describe('getAll()', () => {
         actionsClient = new ActionsClient({
           logger,
           actionTypeRegistry,
+          authTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -283,6 +288,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -375,6 +381,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -467,6 +474,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -554,6 +562,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -599,6 +608,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -682,6 +692,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -766,6 +777,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -849,6 +861,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -932,6 +945,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -998,6 +1012,7 @@ describe('getAll()', () => {
         actionsClient = new ActionsClient({
           logger,
           actionTypeRegistry,
+          authTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -1072,6 +1087,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,

@@ -13,7 +13,6 @@ export interface ConnectorCreate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
-  authMode?: 'shared' | 'per-user';
 }
 
 export interface ConnectorCreateParams {
