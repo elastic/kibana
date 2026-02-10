@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -21,10 +20,6 @@ import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { skillIdParamSchema, createSkillBodySchema, updateSkillBodySchema } from './skills_schemas';
 import { builtinSkillToPublicDefinition } from '../services/skills/utils';
-
-const featureFlagConfig = {
-  featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-};
 
 export function registerSkillsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -57,7 +52,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
             results: skills,
           },
         });
-      }, featureFlagConfig)
+      }, {})
     );
 
   // get skill by ID
@@ -100,7 +95,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      }, {})
     );
 
   // create skill
@@ -134,7 +129,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         return response.ok<CreateSkillResponse>({
           body: skill,
         });
-      }, featureFlagConfig)
+      }, {})
     );
 
   // update skill
@@ -170,7 +165,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         return response.ok<UpdateSkillResponse>({
           body: skill,
         });
-      }, featureFlagConfig)
+      }, {})
     );
 
   // delete skill
@@ -204,6 +199,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         return response.ok<DeleteSkillResponse>({
           body: { success },
         });
-      }, featureFlagConfig)
+      }, {})
     );
 }

@@ -9,8 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 
 const SKILLS_API_BASE = '/api/agent_builder/skills';
-const BUILTIN_SKILL_ID = 'data-exploration';
-const EXPERIMENTAL_FEATURES_SETTING = 'agentBuilder:experimentalFeatures';
 
 const COMMON_HEADERS: Record<string, string> = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -23,16 +21,12 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   const createdSkillIds: string[] = [];
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...COMMON_HEADERS,
     };
-    // Enable the experimental features flag so skill routes are accessible
-    await kbnClient.uiSettings.update({
-      [EXPERIMENTAL_FEATURES_SETTING]: true,
-    });
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
@@ -46,25 +40,16 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     createdSkillIds.length = 0;
   });
 
-  apiTest(
-    'should list skills including the built-in data-exploration skill',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(SKILLS_API_BASE, { headers: defaultHeaders });
+  apiTest('should list skills', async ({ apiClient }) => {
+    const response = await apiClient.get(SKILLS_API_BASE, { headers: defaultHeaders });
 
-      expect(response.statusCode).toBe(200);
-      const body = response.body as {
-        results: Array<{ id: string; readonly: boolean; description: string }>;
-      };
-      expect(body).toMatchObject({ results: expect.arrayContaining([]) });
-      expect(Array.isArray(body.results)).toBe(true);
-      expect(body.results.length).toBeGreaterThan(0);
-
-      // The built-in data-exploration skill should always be present
-      const builtinSkill = body.results.find((skill) => skill.id === BUILTIN_SKILL_ID);
-      expect(builtinSkill).toBeDefined();
-      expect(builtinSkill!.readonly).toBe(true);
-    }
-  );
+    expect(response.statusCode).toBe(200);
+    const body = response.body as {
+      results: Array<{ id: string; readonly: boolean; description: string }>;
+    };
+    expect(body).toMatchObject({ results: expect.arrayContaining([]) });
+    expect(Array.isArray(body.results)).toBe(true);
+  });
 
   apiTest('should create a new user-created skill', async ({ apiClient }) => {
     const skillId = `test-skill-create-${Date.now()}`;
@@ -228,45 +213,6 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     });
 
     expect(response.statusCode).toBe(400);
-  });
-
-  apiTest('should retrieve the built-in skill by ID', async ({ apiClient }) => {
-    const response = await apiClient.get(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-      headers: defaultHeaders,
-    });
-
-    expect(response.statusCode).toBe(200);
-    const body = response.body as {
-      id: string;
-      name: string;
-      description: string;
-      content: string;
-    };
-    expect(body).toMatchObject({ id: BUILTIN_SKILL_ID, name: 'data-exploration' });
-    expect(body.description).toBeDefined();
-    expect(body.content).toBeDefined();
-  });
-
-  apiTest('should reject deleting a built-in skill', async ({ apiClient }) => {
-    const response = await apiClient.delete(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-      headers: defaultHeaders,
-    });
-
-    expect(response.statusCode).not.toBe(200);
-  });
-
-  apiTest('should reject updating a built-in skill', async ({ apiClient }) => {
-    const response = await apiClient.put(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-      headers: defaultHeaders,
-      body: {
-        name: 'hacked-name',
-        description: 'Attempted modification',
-        content: 'Should not work.',
-        tool_ids: [],
-      },
-    });
-
-    expect(response.statusCode).not.toBe(200);
   });
 
   apiTest('should reject deleting a non-existent skill', async ({ apiClient }) => {
