@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 
 import { useNavigation } from '../../common/lib/kibana';
-import { ENTITY_ANALYTICS_OVERVIEW_PATH, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
+import { ENTITY_ANALYTICS_THREAT_HUNTING_PATH, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../common/constants';
 
 type WatchlistGroupLabel = {
   id: string;
@@ -64,7 +64,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     (watchlist_id: string) => {
       if(watchlist_id === 'none' || watchlist_id === 'clear-selection') {        
         navigateTo({
-        path: ENTITY_ANALYTICS_OVERVIEW_PATH
+        path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH
       });
       }
       else {navigateTo({
