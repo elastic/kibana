@@ -40,6 +40,8 @@
     "@kbn/projects-solutions-groups",
     "@kbn/dot-text",
     "@kbn/yarn-lock-validator",
-    "@kbn/sort-package-json"
+    "@kbn/sort-package-json",
+    "@kbn/vite-config",
+    "@kbn/vite-optimizer"
   ]
 }

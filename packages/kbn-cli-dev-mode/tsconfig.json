@@ -26,6 +26,8 @@
     "@kbn/picomatcher",
     "@kbn/repo-packages",
     "@kbn/dev-utils",
+    "@kbn/vite-config",
+    "@kbn/vite-optimizer",
   ],
   "exclude": [
     "target/**/*",

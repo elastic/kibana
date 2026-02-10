@@ -4,5 +4,11 @@
     "outDir": "target/types"
   },
   "include": ["**/*.ts"],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/vite-config",
+    "@kbn/projects-solutions-groups",
+    "@kbn/repo-packages",
+    "@kbn/repo-info"
+  ]
 }

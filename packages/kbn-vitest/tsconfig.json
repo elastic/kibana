@@ -9,5 +9,9 @@
     "noUnusedParameters": false
   },
   "include": ["index.ts", "src/**/*.ts"],
-  "exclude": ["target/**/*", "scripts/**/*"]
+  "exclude": ["target/**/*", "scripts/**/*"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/vite-config"
+  ]
 }

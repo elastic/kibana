@@ -29,7 +29,15 @@
     "@kbn/dev-utils",
     "@kbn/projects-solutions-groups",
     "@kbn/apm-config-loader",
-    "@kbn/telemetry"
+    "@kbn/telemetry",
+    "@kbn/cli-dev-mode",
+    "@kbn/import-resolver",
+    "@kbn/optimizer",
+    "@kbn/picomatcher",
+    "@kbn/repo-source-classifier",
+    "@kbn/vite-config",
+    "@kbn/vite-optimizer",
+    "@kbn/vite-server"
   ],
   "exclude": ["target/**/*", "**/*.test.js", "**/*.test.ts"]
 }
