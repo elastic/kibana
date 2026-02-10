@@ -9,6 +9,7 @@
 
 import { printTree } from 'tree-dump';
 import { childrenOfAnyNode } from '../../ast/visitor/utils';
+import { isParamLiteral } from '../../ast';
 import type { ESQLProperNode } from '../../types';
 import type { PromQLAstNode } from '../../promql/types';
 
@@ -102,7 +103,7 @@ export const printAst = (
     let inlineDetails = '';
 
     if (!options?.compact) {
-      name = node.name ? ` "${node.name}"` : '';
+      name = node.name ? ` "${node.name}"` : isParamLiteral(node) ? ` ?${node.value}` : '';
       location =
         node.location && (options?.location ?? true)
           ? ` ${node.location.min}-${node.location.max}`

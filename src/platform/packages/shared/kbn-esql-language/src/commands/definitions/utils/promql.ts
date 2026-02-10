@@ -17,7 +17,7 @@ import {
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isSource } from '../../../ast/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting';
 import { techPreviewLabel } from './shared';
 
@@ -127,7 +127,7 @@ export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
   );
 };
 
-// TODO: Remove when ES solve the discrepancy with signatures.
+// TODO: Remove when ES solve the discrepancy with signatures
 const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
   'instant vector': 'instant_vector',
   'range vector': 'range_vector',
@@ -135,7 +135,7 @@ const PROMQL_RETURN_TYPE_MAP: Record<string, PromQLFunctionParamType> = {
   string: 'string',
 };
 
-function normalizePromqlReturnType(
+export function normalizePromqlReturnType(
   returnType: string | undefined
 ): PromQLFunctionParamType | undefined {
   return returnType ? PROMQL_RETURN_TYPE_MAP[returnType] : undefined;
@@ -152,6 +152,21 @@ export function getIndexFromPromQLParams({
     );
 
     const { value } = indexEntry ?? {};
+
+    if (isList(value) && value.values.length > 0) {
+      const listText = value.text?.trim();
+      if (listText) {
+        return listText;
+      }
+
+      const names = value.values
+        .map((item) => (isIdentifier(item) || isSource(item) ? item.name : ''))
+        .filter(Boolean);
+
+      if (names.length > 0) {
+        return names.join(',');
+      }
+    }
 
     if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
       return value.name;
