@@ -27,10 +27,11 @@ export const API_KEY_MIGRATION_TASK_ID = 'api_key_migration';
 export const API_KEY_MIGRATION_TASK_TYPE = `alerting:${API_KEY_MIGRATION_TASK_ID}`;
 export const API_KEY_MIGRATION_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 
-const mockUiamApiKeyFromApiKey = (apiKey: string) => {
-  const seed = `uiam:${apiKey}`;
-  return Buffer.from(seed).toString('base64');
-};
+const mockGenerateUiamKeysForRules = (ruleIds: string[]) =>
+  ruleIds.reduce<Record<string, string>>((acc, id) => {
+    acc[id] = `essu_${id}`;
+    return acc;
+  }, {});
 
 export class MigrateApiKeysTask {
   private readonly logger: Logger;
@@ -98,14 +99,11 @@ export class MigrateApiKeysTask {
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AlertingPluginsStart>
-  ): Promise<{ state: LatestTaskStateSchema }> => {
+  ): Promise<{ state: LatestTaskStateSchema; runAt?: Date }> => {
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
     const updatedRuleIds = new Set(state.updated_rule_ids ?? []);
 
-    const [coreStart, { encryptedSavedObjects }] = await core.getStartServices();
-    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
+    const [coreStart] = await core.getStartServices();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
       RULE_SAVED_OBJECT_TYPE,
     ]);
@@ -121,48 +119,45 @@ export class MigrateApiKeysTask {
             ),
           ])
         : undefined;
-    const rulesFinder =
-      await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
+    const response = await savedObjectsClient.find<RawRule>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 100,
+      namespaces: ['*'],
+      filter: excludeUpdatedIdsFilter,
+    });
+
+    const ruleIdsToConvert = response.saved_objects
+      .filter((rule) => rule.attributes?.apiKey)
+      .map((rule) => rule.id);
+
+    const nextUiamKeysById = mockGenerateUiamKeysForRules(ruleIdsToConvert);
+    const updates: Array<SavedObjectsBulkUpdateObject<RawRule>> = response.saved_objects
+      .filter((rule) => rule.id in nextUiamKeysById)
+      .map((rule) => ({
         type: RULE_SAVED_OBJECT_TYPE,
-        perPage: 100,
-        namespaces: ['*'],
-        filter: excludeUpdatedIdsFilter,
-      });
+        id: rule.id,
+        attributes: { uiamApiKey: nextUiamKeysById[rule.id] } as Partial<RawRule>,
+        ...(rule.namespaces?.[0] ? { namespace: rule.namespaces[0] } : {}),
+      }));
 
-    try {
-      for await (const response of rulesFinder.find()) {
-        const updates: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-
-        for (const rule of response.saved_objects) {
-          if (!rule.attributes?.uiamApiKey && rule.attributes?.apiKey) {
-            const nextUiamApiKey = mockUiamApiKeyFromApiKey(rule.attributes.apiKey);
-            updates.push({
-              type: RULE_SAVED_OBJECT_TYPE,
-              id: rule.id,
-              attributes: { uiamApiKey: nextUiamApiKey },
-              ...(rule.namespaces?.[0] ? { namespace: rule.namespaces[0] } : {}),
-            });
+    if (updates.length > 0) {
+      try {
+        const bulkUpdateResult = await savedObjectsClient.bulkUpdate(updates);
+        bulkUpdateResult.saved_objects.forEach((savedObject) => {
+          if (!savedObject.error) {
+            updatedRuleIds.add(savedObject.id);
           }
-        }
-        if (updates.length > 0) {
-          try {
-            const bulkUpdateResult = await savedObjectsClient.bulkUpdate(updates);
-            bulkUpdateResult.saved_objects.forEach((savedObject) => {
-              if (!savedObject.error) {
-                updatedRuleIds.add(savedObject.id);
-              }
-            });
-          } catch (e) {
-            this.logger.error(`Error bulk updating rules: ${e.message}`);
-          }
-        }
+        });
+      } catch (e) {
+        this.logger.error(`Error bulk updating rules: ${e.message}`);
       }
-    } finally {
-      await rulesFinder.close();
     }
+
+    const hasMoreToConvert = response.total > response.saved_objects.length;
 
     return {
       state: { updated_rule_ids: Array.from(updatedRuleIds) },
+      ...(hasMoreToConvert ? { runAt: new Date(Date.now() + 60_000) } : {}),
     };
   };
 }
