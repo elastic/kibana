@@ -34,7 +34,7 @@ TODO (input text is source of truth, state flow)
 
 1. Avoid complexity in TypeScript types
 2. Prefer function declaration over arrow functions
-3. Add JSDoc DocBlocks for every function
+3. Add JSDoc DocBlocks for every top-level function
 4. Describe all props in exported types with JSDoc, including @default when not undefined
 5. Do not expose `moment` objects in public APIs, we might replace it
 6. Keep tests concise
