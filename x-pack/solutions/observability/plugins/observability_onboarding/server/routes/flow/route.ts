@@ -546,9 +546,9 @@ async function ensureInstalledIntegrations(
  * checkout_service custom /path/to/error.log
  * ```
  */
-const MAX_INTEGRATIONS_LIMIT = 100;
+export const MAX_INTEGRATIONS_LIMIT = 100;
 
-function parseIntegrationsTSV(tsv: string) {
+export function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
