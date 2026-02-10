@@ -86,23 +86,19 @@ import {
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
-export const hasTimestampFields = async (args: {
-  timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
+export const checkForNoReadableIndices = async (args: {
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
+  const { timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices.length,
   });
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
@@ -113,7 +109,6 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString.trimEnd(),
@@ -123,7 +118,22 @@ export const hasTimestampFields = async (args: {
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
     };
-  } else if (
+  }
+
+  return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const hasTimestampFields = async (args: {
+  timestampField: string;
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+}): Promise<{
+  foundNoIndices: boolean;
+  warningMessage: string | undefined;
+}> => {
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
+
+  if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null

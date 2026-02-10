@@ -20,6 +20,7 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  checkForNoReadableIndices,
   getExceptions,
   getRuleRangeTuples,
   hasTimestampFields,
@@ -342,17 +343,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 )
               );
 
-              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
-                await hasTimestampFields({
-                  timestampField: primaryTimestamp,
+              const { foundNoIndices, warningMessage: noIndicesWarning } =
+                await checkForNoReadableIndices({
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-              if (warningMissingTimestampFieldsMessage != null) {
-                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
+              if (noIndicesWarning) {
+                wrapperWarnings.push(noIndicesWarning);
               }
               skipExecution = foundNoIndices;
+
+              if (!foundNoIndices) {
+                const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: timestampFieldCaps,
+                  ruleExecutionLogger,
+                });
+                if (missingTimestampWarning) {
+                  wrapperWarnings.push(missingTimestampWarning);
+                }
+              }
             } catch (exc) {
               wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
