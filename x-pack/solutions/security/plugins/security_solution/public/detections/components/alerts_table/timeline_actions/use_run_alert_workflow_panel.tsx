@@ -31,13 +31,19 @@ export interface UseAlertTagsActionsProps {
 }
 
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
+export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
 
-export interface AlertWorkflowsPanelProps {
-  closePopover: () => void;
-  ecsRowData: Ecs;
+export interface AlertWorkflowAlertId {
+  _id: string;
+  _index: string;
 }
 
-export const AlertWorkflowsPanel = ({ closePopover, ecsRowData }: AlertWorkflowsPanelProps) => {
+export interface AlertWorkflowsPanelProps {
+  alertIds: AlertWorkflowAlertId[];
+  onClose: () => void;
+}
+
+export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart }>();
@@ -54,7 +60,7 @@ export const AlertWorkflowsPanel = ({ closePopover, ecsRowData }: AlertWorkflows
     const inputsPayload: AlertTriggerInput = {
       event: {
         triggerType: 'alert',
-        alertIds: [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }],
+        alertIds,
       },
     };
 
@@ -94,7 +100,7 @@ export const AlertWorkflowsPanel = ({ closePopover, ecsRowData }: AlertWorkflows
         },
         onSettled: () => {
           setIsLoading(false);
-          closePopover();
+          onClose();
         },
       }
     );
@@ -105,8 +111,8 @@ export const AlertWorkflowsPanel = ({ closePopover, ecsRowData }: AlertWorkflows
     workflowTriggerSuccess,
     workflowTriggerFailed,
     rendering,
-    closePopover,
-    ecsRowData,
+    onClose,
+    alertIds,
   ]);
 
   const isAlertWorkflow = (workflows: WorkflowListDto['results']): WorkflowListDto['results'] => {
@@ -168,7 +174,6 @@ export const useRunAlertWorkflowPanel = ({
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-workflow-action',
         key: 'run-workflow-action',
-        onClick: () => {},
         size: 's',
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_WORKFLOW_PANEL_ID,
@@ -183,7 +188,12 @@ export const useRunAlertWorkflowPanel = ({
         id: RUN_WORKFLOW_PANEL_ID,
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'alert-workflow-context-menu-panel',
-        content: <AlertWorkflowsPanel closePopover={closePopover} ecsRowData={ecsRowData} />,
+        content: (
+          <AlertWorkflowsPanel
+            alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}
+            onClose={closePopover}
+          />
+        ),
       },
     ],
     [closePopover, ecsRowData]
