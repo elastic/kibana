@@ -13,9 +13,6 @@ import { loadSavedQuery, cleanupSavedQuery } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
 test.describe('ALL - Live Query run custom and saved', { tag: ['@ess', '@svlSecurity'] }, () => {
-  // Live queries require agent communication which can be slow
-  test.describe.configure({ timeout: 300_000 });
-
   let savedQueryId: string;
   let savedQueryName: string;
 

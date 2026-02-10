@@ -13,9 +13,6 @@ import { loadRule, cleanupRule } from '../common/api_helpers';
 import { waitForPageReady, dismissAllToasts, waitForAlerts } from '../common/constants';
 
 test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
-  // Alert tests require waiting for rule execution + alert generation, which can be slow
-  test.describe.configure({ timeout: 300_000 });
-
   let ruleId: string;
   let ruleName: string;
 

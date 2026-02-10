@@ -33,16 +33,14 @@ export async function waitForPageReady(page: ScoutPage): Promise<void> {
 export async function dismissAllToasts(page: ScoutPage): Promise<void> {
   const toastList = page.testSubj.locator('globalToastList');
   const closeButtons = toastList.locator('[data-test-subj="toastCloseButton"]');
-  const count = await closeButtons.count();
-  for (let i = 0; i < count; i++) {
-    await closeButtons
-      .nth(i)
-      .click()
-      .catch(() => {});
+  const allButtons = await closeButtons.all();
+
+  for (const button of allButtons) {
+    await button.click().catch(() => {});
   }
 
   // Brief pause to let the toast animation complete
-  if (count > 0) {
+  if (allButtons.length > 0) {
     await page.waitForTimeout(500);
   }
 }
@@ -57,7 +55,7 @@ export async function waitForAlerts(
   { timeout = 240_000 }: { timeout?: number } = {}
 ): Promise<void> {
   const start = Date.now();
-  const expandEvent = page.testSubj.locator('expand-event').first();
+  const expandEvent = page.testSubj.locator('expand-event');
 
   while (Date.now() - start < timeout) {
     try {

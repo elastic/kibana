@@ -28,9 +28,6 @@ for (const testSpace of testSpaces) {
     `ALL - Custom space [${testSpace.name}]`,
     { tag: testSpace.tags as unknown as string[] },
     () => {
-      // Custom space tests involve live query execution which can be slow
-      test.describe.configure({ timeout: 300_000 });
-
       let packName: string;
       let packId: string;
       let spaceId: string;

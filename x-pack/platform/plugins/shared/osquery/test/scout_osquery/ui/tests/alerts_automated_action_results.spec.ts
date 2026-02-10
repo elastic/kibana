@@ -15,9 +15,6 @@ import { waitForPageReady, waitForAlerts } from '../common/constants';
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
 test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecurity'] }, () => {
-  // Alert tests require waiting for rule execution + alert generation, which can be slow
-  test.describe.configure({ timeout: 300_000 });
-
   let ruleId: string;
 
   test.beforeAll(async ({ kbnClient }) => {

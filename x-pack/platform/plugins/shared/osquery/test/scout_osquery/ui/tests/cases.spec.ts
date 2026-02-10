@@ -13,9 +13,6 @@ import { loadLiveQuery, loadCase, cleanupCase } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
 test.describe('Add to Cases', () => {
-  // Case tests involve live query results and case creation which can be slow
-  test.describe.configure({ timeout: 300_000 });
-
   let liveQueryId: string;
   let liveQueryQuery: string;
 
@@ -86,9 +83,6 @@ test.describe('Add to Cases', () => {
   test.describe('security', { tag: ['@ess', '@svlSecurity'] }, () => {
     let caseId: string;
     let caseTitle: string;
-
-    // Live query result verification can be slow in serverless mode
-    test.describe.configure({ timeout: 300_000 });
 
     test.beforeEach(async ({ browserAuth, kbnClient }) => {
       const caseData = await loadCase(kbnClient, 'securitySolution');

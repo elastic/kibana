@@ -7,8 +7,13 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  workers: 1,
-  runGlobalSetup: true,
-});
+export default {
+  ...createPlaywrightConfig({
+    testDir: './tests',
+    workers: 1,
+    runGlobalSetup: true,
+  }),
+  // Osquery tests involve agent communication, live-query execution, alert generation
+  // and pack triggering — all of which can take well over the default 60 s.
+  timeout: 300_000,
+};

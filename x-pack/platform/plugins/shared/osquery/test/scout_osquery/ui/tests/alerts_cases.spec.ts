@@ -21,9 +21,6 @@ import {
 import { waitForPageReady, waitForAlerts } from '../common/constants';
 
 test.describe('Alert Event Details - Cases', { tag: ['@ess', '@svlSecurity'] }, () => {
-  // Alert tests require waiting for rule execution + alert generation, which can be slow
-  test.describe.configure({ timeout: 300_000 });
-
   let ruleId: string;
   let packId: string;
   let packName: string;

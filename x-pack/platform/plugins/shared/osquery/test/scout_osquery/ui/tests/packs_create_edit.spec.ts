@@ -18,9 +18,6 @@ import {
 } from '../common/api_helpers';
 
 test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () => {
-  // Pack creation and editing involves multiple form interactions and agent communication
-  test.describe.configure({ timeout: 300_000 });
-
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
@@ -529,9 +526,6 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
 
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe('should verify that packs are triggered', () => {
-    // Pack triggering verification needs to wait for agent-side schedule execution
-    test.describe.configure({ timeout: 420_000 });
-
     let packId: string;
     let packName: string;
 

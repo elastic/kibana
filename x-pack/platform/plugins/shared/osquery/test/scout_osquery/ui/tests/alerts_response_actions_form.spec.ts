@@ -23,9 +23,6 @@ test.describe(
   'Alert Event Details - Response Actions Form',
   { tag: ['@ess', '@svlSecurity'] },
   () => {
-    // Alert response action tests involve complex form interactions that can be slow
-    test.describe.configure({ timeout: 300_000 });
-
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
