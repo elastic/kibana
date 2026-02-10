@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
-  EuiIconTip,
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -164,30 +163,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  wrap={false}
-                  css={css({ minWidth: 0 })}
-                >
-                  {hasVersionSuffix(agent.policy_id ?? '') && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="branch"
-                        color="subdued"
-                        content={
-                          <FormattedMessage
-                            id="xpack.fleet.agentDetails.versionSpecificPolicyTooltip"
-                            defaultMessage="This agent uses a version-specific policy derived from the parent policy."
-                          />
-                        }
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={true} css={css({ minWidth: 0 })}>
-                    <AgentPolicySummaryLine policy={agentPolicy} agent={agent} showPolicyId />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={hasVersionSuffix(agent.policy_id ?? '')}
+                />
               ) : (
                 <EuiSkeletonText lines={1} />
               ),

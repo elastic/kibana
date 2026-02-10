@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLink,
   EuiText,
   EuiToolTip,
@@ -212,27 +211,12 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         return (
           agentPolicy && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
-              {isVersionSpecific && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="branch"
-                    size="m"
-                    color="subdued"
-                    content={
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.versionSpecificPolicyTooltip"
-                        defaultMessage="This agent uses a version-specific policy derived from the parent policy."
-                      />
-                    }
-                  />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
                 <AgentPolicySummaryLine
-                  direction="column"
                   policy={agentPolicy}
                   agent={agent}
                   showPolicyId
+                  isVersionSpecific={isVersionSpecific}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
