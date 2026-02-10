@@ -21,15 +21,23 @@ import type {
   ComplianceDashboardDataV2,
 } from '../../../common/types_old';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
-import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
+import {
+  getPostureStatsFromAggs,
+  getRisksEsQuery,
+  type FailedFindingsQueryResult,
+} from './get_grouped_findings_evaluation';
 import type { ClusterWithoutTrend } from './get_clusters';
-import { getClusters } from './get_clusters';
-import { getStats } from './get_stats';
+import { getClustersFromAggs, getClustersQuery, type ClusterBucket } from './get_clusters';
+import {
+  getEvaluationsQuery,
+  getStatsFromFindingsEvaluationsAggs,
+  type FindingsEvaluationsQueryResult,
+} from './get_stats';
 import type { CspRouter } from '../../types';
 import type { TrendsDetails } from './get_trends';
 import { getTrends } from './get_trends';
 import type { BenchmarkWithoutTrend } from './get_benchmarks';
-import { getBenchmarks } from './get_benchmarks';
+import { getBenchmarksFromAggs, getBenchmarksQuery, type BenchmarkBucket } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
@@ -97,10 +105,12 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
         try {
           const esClient = cspContext.esClient.asCurrentUser;
 
-          const { id: pitId } = await esClient.openPointInTime({
-            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-            keep_alive: '30s',
-          });
+          let pitId = (
+            await esClient.openPointInTime({
+              index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+              keep_alive: '30s',
+            })
+          ).id;
 
           const params: GetComplianceDashboardRequest = request.params;
           const policyTemplate = params.policy_template as PosturePolicyTemplate;
@@ -113,13 +123,42 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] =
-            await Promise.all([
-              getStats(esClient, query, pitId, runtimeMappings, logger),
-              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
-              getClusters(esClient, query, pitId, runtimeMappings, logger),
-              getTrends(esClient, policyTemplate, logger),
-            ]);
+          const trendsPromise = getTrends(esClient, policyTemplate, logger);
+
+          const evaluationsQueryResult = await esClient.search<
+            unknown,
+            FindingsEvaluationsQueryResult
+          >(getEvaluationsQuery(query, pitId, runtimeMappings));
+          pitId = evaluationsQueryResult.pit_id ?? pitId;
+          if (!evaluationsQueryResult.aggregations) {
+            throw new Error('missing findings evaluations');
+          }
+          const stats = getStatsFromFindingsEvaluationsAggs(evaluationsQueryResult.aggregations);
+
+          const resourceTypesQueryResult = await esClient.search<
+            unknown,
+            FailedFindingsQueryResult
+          >(getRisksEsQuery(query, pitId, runtimeMappings));
+          pitId = resourceTypesQueryResult.pit_id ?? pitId;
+          const groupedFindingsBuckets =
+            resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
+          const groupedFindingsEvaluation = Array.isArray(groupedFindingsBuckets)
+            ? getPostureStatsFromAggs(groupedFindingsBuckets)
+            : [];
+
+          const clustersQueryResult = await esClient.search<
+            unknown,
+            { aggs_by_asset_identifier: { buckets: ClusterBucket[] } }
+          >(getClustersQuery(query, pitId, runtimeMappings));
+          pitId = clustersQueryResult.pit_id ?? pitId;
+          const clustersBuckets =
+            clustersQueryResult.aggregations?.aggs_by_asset_identifier.buckets;
+          if (!Array.isArray(clustersBuckets)) {
+            throw new Error('missing aggs by cluster id');
+          }
+          const clustersWithoutTrends = getClustersFromAggs(clustersBuckets);
+
+          const trends = await trendsPromise;
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
@@ -171,10 +210,12 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const encryptedSoClient = cspContext.encryptedSavedObjects;
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
-          const { id: pitId } = await esClient.openPointInTime({
-            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-            keep_alive: '30s',
-          });
+          let pitId = (
+            await esClient.openPointInTime({
+              index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+              keep_alive: '30s',
+            })
+          ).id;
 
           const params: GetComplianceDashboardRequest = request.params;
           const policyTemplate = params.policy_template as PosturePolicyTemplate;
@@ -197,13 +238,41 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trendDetails] =
-            await Promise.all([
-              getStats(esClient, query, pitId, runtimeMappings, logger),
-              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
-              getBenchmarks(esClient, query, pitId, runtimeMappings, logger),
-              getTrends(esClient, policyTemplate, logger, namespace),
-            ]);
+          const trendDetailsPromise = getTrends(esClient, policyTemplate, logger, namespace);
+
+          const evaluationsQueryResult = await esClient.search<
+            unknown,
+            FindingsEvaluationsQueryResult
+          >(getEvaluationsQuery(query, pitId, runtimeMappings));
+          pitId = evaluationsQueryResult.pit_id ?? pitId;
+          if (!evaluationsQueryResult.aggregations) {
+            throw new Error('missing findings evaluations');
+          }
+          const stats = getStatsFromFindingsEvaluationsAggs(evaluationsQueryResult.aggregations);
+
+          const resourceTypesQueryResult = await esClient.search<
+            unknown,
+            FailedFindingsQueryResult
+          >(getRisksEsQuery(query, pitId, runtimeMappings));
+          pitId = resourceTypesQueryResult.pit_id ?? pitId;
+          const groupedFindingsBuckets =
+            resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
+          const groupedFindingsEvaluation = Array.isArray(groupedFindingsBuckets)
+            ? getPostureStatsFromAggs(groupedFindingsBuckets)
+            : [];
+
+          const benchmarksQueryResult = await esClient.search<
+            unknown,
+            { aggs_by_benchmark: { buckets: BenchmarkBucket[] } }
+          >(getBenchmarksQuery(query, pitId, runtimeMappings));
+          pitId = benchmarksQueryResult.pit_id ?? pitId;
+          const benchmarksBuckets = benchmarksQueryResult.aggregations?.aggs_by_benchmark.buckets;
+          if (!Array.isArray(benchmarksBuckets)) {
+            throw new Error('missing aggs by benchmark id');
+          }
+          const benchmarksWithoutTrends = getBenchmarksFromAggs(benchmarksBuckets);
+
+          const trendDetails = await trendDetailsPromise;
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
