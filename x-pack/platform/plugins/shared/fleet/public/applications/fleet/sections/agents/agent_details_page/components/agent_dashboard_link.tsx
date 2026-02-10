@@ -39,13 +39,28 @@ function isKibanaAssetsInstalledInSpace(spaceId: string | undefined, res?: GetIn
     (spaceId && installationInfo.additional_spaces_installed_kibana?.[spaceId])
   );
 }
-
 function useAgentDashboardLink(agent: Agent) {
   const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
   const { spaceId } = useFleetStatus();
 
   const isInstalled = isKibanaAssetsInstalledInSpace(spaceId, data);
   const dashboardLocator = useDashboardLocator();
+
+  if (agent.type === 'OPAMP') {
+    const link = dashboardLocator?.getRedirectUrl({
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_HOST_OVERVIEW,
+      time_range: {
+        from: 'now-15h',
+        to: 'now',
+      },
+    });
+
+    return {
+      isLoading: false,
+      isInstalled: true,
+      link,
+    };
+  }
 
   const link = dashboardLocator?.getRedirectUrl({
     dashboardId: getDashboardIdForSpace(
@@ -79,8 +94,11 @@ export const AgentDashboardLink: React.FunctionComponent<{
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
-  const buttonArgs =
+  let buttonArgs =
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
+  if (agent.type === 'OPAMP') {
+    buttonArgs = { href: link, external: true, target: '_blank' };
+  }
 
   const button = (
     <EuiButtonCompressed
