@@ -97,6 +97,7 @@ export function createPlaywrightEvalsConfig({
     },
     projects: nextProjects,
     globalSetup: require.resolve('./setup.js'),
+    globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
   });
 }
