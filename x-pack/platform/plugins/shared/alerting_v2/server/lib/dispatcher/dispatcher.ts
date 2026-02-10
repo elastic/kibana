@@ -6,7 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { partition } from 'lodash';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import {
@@ -51,6 +50,7 @@ export class DispatcherService implements DispatcherServiceContract {
     const suppressions = await withDispatcherSpan('dispatcher:fetch-suppressions', () =>
       this.fetchAlertEpisodeSuppressions(alertEpisodes)
     );
+
     const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
 
     this.logger.debug({
