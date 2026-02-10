@@ -17,15 +17,23 @@ import {
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
+  EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import moment from 'moment';
 import type { MuteCondition } from '@kbn/alerting-types';
+
+const POPOVER_WIDTH_PX = 340;
+const popoverContentCss = css`
+  width: ${POPOVER_WIDTH_PX}px;
+`;
 
 const COMMON_SNOOZE_TIMES: Array<[number, string, string]> = [
   [1, 'h', i18n.translate('xpack.responseOpsAlertsTable.snooze.1h', { defaultMessage: '1 hour' })],
@@ -35,10 +43,57 @@ const COMMON_SNOOZE_TIMES: Array<[number, string, string]> = [
 ];
 
 const SEVERITY_OPTIONS = [
-  { value: 'critical', text: 'Critical' },
-  { value: 'high', text: 'High' },
-  { value: 'medium', text: 'Medium' },
-  { value: 'low', text: 'Low' },
+  {
+    value: 'critical',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.severity.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    value: 'high',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.severity.high', {
+      defaultMessage: 'High',
+    }),
+  },
+  {
+    value: 'medium',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.severity.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    value: 'low',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.severity.low', {
+      defaultMessage: 'Low',
+    }),
+  },
+];
+
+const DURATION_UNIT_OPTIONS = [
+  {
+    value: 'm',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.unit.minutes', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.unit.hours', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'd',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.unit.days', {
+      defaultMessage: 'days',
+    }),
+  },
+  {
+    value: 'w',
+    text: i18n.translate('xpack.responseOpsAlertsTable.snooze.unit.weeks', {
+      defaultMessage: 'weeks',
+    }),
+  },
 ];
 
 interface AlertSnoozePopoverProps {
@@ -79,68 +134,77 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
   const [untilSeverityEquals, setUntilSeverityEquals] = useState(false);
   const [targetSeverity, setTargetSeverity] = useState('critical');
   const [withTimeBound, setWithTimeBound] = useState(false);
+  const [conditionOperator, setConditionOperator] = useState<'any' | 'all'>('any');
+
+  // Generated IDs for checkbox accessibility (M1)
+  const severityChangesCheckboxId = useGeneratedHtmlId({
+    prefix: 'snoozeUntilSeverityChanges',
+  });
+  const severityEqualsCheckboxId = useGeneratedHtmlId({
+    prefix: 'snoozeUntilSeverityEquals',
+  });
+  const timeBoundCheckboxId = useGeneratedHtmlId({
+    prefix: 'snoozeWithTimeBound',
+  });
+
+  const hasConditions = untilSeverityChanges || untilSeverityEquals;
+  const hasMultipleConditions =
+    (untilSeverityChanges && untilSeverityEquals) ||
+    (hasConditions && withTimeBound);
+
+  const buildConditions = useCallback((): MuteCondition[] => {
+    const conditions: MuteCondition[] = [];
+    if (untilSeverityChanges) {
+      conditions.push({
+        type: 'severity_change',
+        field: 'kibana.alert.severity',
+        snapshotValue: currentSeverity,
+      });
+    }
+    if (untilSeverityEquals) {
+      conditions.push({
+        type: 'severity_equals',
+        field: 'kibana.alert.severity',
+        value: targetSeverity,
+      });
+    }
+    return conditions;
+  }, [currentSeverity, targetSeverity, untilSeverityChanges, untilSeverityEquals]);
 
   const applyQuickSnooze = useCallback(
     async (value: number, unit: string) => {
       setIsLoading(true);
       try {
-        const expiresAt = moment().add(value, unit as moment.unitOfTime.DurationConstructor).toISOString();
-        const conditions: MuteCondition[] = [];
-
-        if (untilSeverityChanges) {
-          conditions.push({
-            type: 'severity_change',
-            field: 'kibana.alert.severity',
-            snapshotValue: currentSeverity,
-          });
-        }
-        if (untilSeverityEquals) {
-          conditions.push({
-            type: 'severity_equals',
-            field: 'kibana.alert.severity',
-            value: targetSeverity,
-          });
-        }
+        const expiresAt = moment()
+          .add(value, unit as moment.unitOfTime.DurationConstructor)
+          .toISOString();
+        const conditions = buildConditions();
 
         await onApplySnooze({
           expiresAt,
-          ...(conditions.length > 0 ? { conditions, conditionOperator: 'any' } : {}),
+          ...(conditions.length > 0 ? { conditions, conditionOperator } : {}),
         });
         onClose();
       } finally {
         setIsLoading(false);
       }
     },
-    [currentSeverity, onApplySnooze, onClose, targetSeverity, untilSeverityChanges, untilSeverityEquals]
+    [buildConditions, conditionOperator, onApplySnooze, onClose]
   );
 
   const applyIndefinite = useCallback(async () => {
     setIsLoading(true);
     try {
-      const conditions: MuteCondition[] = [];
-      if (untilSeverityChanges) {
-        conditions.push({
-          type: 'severity_change',
-          field: 'kibana.alert.severity',
-          snapshotValue: currentSeverity,
-        });
-      }
-      if (untilSeverityEquals) {
-        conditions.push({
-          type: 'severity_equals',
-          field: 'kibana.alert.severity',
-          value: targetSeverity,
-        });
-      }
+      const conditions = buildConditions();
 
       await onApplySnooze({
-        ...(conditions.length > 0 ? { conditions, conditionOperator: 'any' } : {}),
+        ...(conditions.length > 0 ? { conditions, conditionOperator } : {}),
       });
       onClose();
     } finally {
       setIsLoading(false);
     }
-  }, [currentSeverity, onApplySnooze, onClose, targetSeverity, untilSeverityChanges, untilSeverityEquals]);
+  }, [buildConditions, conditionOperator, onApplySnooze, onClose]);
 
   const applyCustom = useCallback(async () => {
     await applyQuickSnooze(customValue, customUnit);
@@ -149,47 +213,42 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
   const applyConditionsOnly = useCallback(async () => {
     setIsLoading(true);
     try {
-      const conditions: MuteCondition[] = [];
-      if (untilSeverityChanges) {
-        conditions.push({
-          type: 'severity_change',
-          field: 'kibana.alert.severity',
-          snapshotValue: currentSeverity,
-        });
-      }
-      if (untilSeverityEquals) {
-        conditions.push({
-          type: 'severity_equals',
-          field: 'kibana.alert.severity',
-          value: targetSeverity,
-        });
-      }
+      const conditions = buildConditions();
 
       const expiresAt = withTimeBound
-        ? moment().add(customValue, customUnit as moment.unitOfTime.DurationConstructor).toISOString()
+        ? moment()
+            .add(customValue, customUnit as moment.unitOfTime.DurationConstructor)
+            .toISOString()
         : undefined;
 
       await onApplySnooze({
         ...(expiresAt ? { expiresAt } : {}),
-        ...(conditions.length > 0 ? { conditions, conditionOperator: 'any' } : {}),
+        ...(conditions.length > 0 ? { conditions, conditionOperator } : {}),
       });
       onClose();
     } finally {
       setIsLoading(false);
     }
-  }, [
-    currentSeverity,
-    customUnit,
-    customValue,
-    onApplySnooze,
-    onClose,
-    targetSeverity,
-    untilSeverityChanges,
-    untilSeverityEquals,
-    withTimeBound,
-  ]);
+  }, [buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, withTimeBound]);
 
-  const hasConditions = untilSeverityChanges || untilSeverityEquals;
+  // M5: Radio group options for condition operator
+  const conditionOperatorOptions = useMemo(
+    () => [
+      {
+        id: 'condition-operator-any',
+        label: i18n.translate('xpack.responseOpsAlertsTable.snooze.conditionOperator.any', {
+          defaultMessage: 'Any condition (OR)',
+        }),
+      },
+      {
+        id: 'condition-operator-all',
+        label: i18n.translate('xpack.responseOpsAlertsTable.snooze.conditionOperator.all', {
+          defaultMessage: 'All conditions (AND)',
+        }),
+      },
+    ],
+    []
+  );
 
   return (
     <EuiPopover
@@ -205,10 +264,11 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         })}
       </EuiPopoverTitle>
 
-      <div style={{ width: 340 }}>
+      <div css={popoverContentCss}>
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.responseOpsAlertsTable.snooze.description', {
-            defaultMessage: 'Suppress actions for this alert for a period or until conditions are met.',
+            defaultMessage:
+              'Suppress actions for this alert for a period or until conditions are met.',
           })}
         </EuiText>
 
@@ -237,10 +297,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-        <EuiLink
-          data-test-subj="alert-snooze-indefinite"
-          onClick={applyIndefinite}
-        >
+        <EuiLink data-test-subj="alert-snooze-indefinite" onClick={applyIndefinite}>
           {i18n.translate('xpack.responseOpsAlertsTable.snooze.indefinitely', {
             defaultMessage: 'Snooze indefinitely',
           })}
@@ -259,7 +316,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         <EuiSpacer size="s" />
 
         <EuiCheckbox
-          id="snooze-until-severity-changes"
+          id={severityChangesCheckboxId}
           label={i18n.translate('xpack.responseOpsAlertsTable.snooze.untilSeverityChanges', {
             defaultMessage: 'Until severity changes',
           })}
@@ -270,7 +327,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         <EuiSpacer size="s" />
 
         <EuiCheckbox
-          id="snooze-until-severity-equals"
+          id={severityEqualsCheckboxId}
           label={i18n.translate('xpack.responseOpsAlertsTable.snooze.untilSeverityReaches', {
             defaultMessage: 'Until severity reaches',
           })}
@@ -293,7 +350,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
         <EuiSpacer size="s" />
 
         <EuiCheckbox
-          id="snooze-with-time-bound"
+          id={timeBoundCheckboxId}
           label={i18n.translate('xpack.responseOpsAlertsTable.snooze.orAfterDuration', {
             defaultMessage: 'OR after a time period',
           })}
@@ -311,7 +368,9 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                     min={1}
                     value={customValue}
                     onChange={(e) => setCustomValue(Number(e.target.value))}
-                    style={{ width: 60 }}
+                    css={css`
+                      width: 60px;
+                    `}
                     data-test-subj="snooze-custom-value"
                   />
                 </EuiFormRow>
@@ -320,12 +379,7 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                 <EuiFormRow>
                   <EuiSelect
                     compressed
-                    options={[
-                      { value: 'm', text: 'minutes' },
-                      { value: 'h', text: 'hours' },
-                      { value: 'd', text: 'days' },
-                      { value: 'w', text: 'weeks' },
-                    ]}
+                    options={DURATION_UNIT_OPTIONS}
                     value={customUnit}
                     onChange={(e) => setCustomUnit(e.target.value)}
                     data-test-subj="snooze-custom-unit"
@@ -333,6 +387,28 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </>
+        )}
+
+        {/* M5: Condition operator selector (AND/OR) shown when multiple conditions selected */}
+        {hasMultipleConditions && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiRadioGroup
+              options={conditionOperatorOptions}
+              idSelected={`condition-operator-${conditionOperator}`}
+              onChange={(optionId) =>
+                setConditionOperator(optionId === 'condition-operator-all' ? 'all' : 'any')
+              }
+              data-test-subj="snooze-condition-operator"
+              legend={{
+                children: i18n.translate(
+                  'xpack.responseOpsAlertsTable.snooze.conditionOperatorLegend',
+                  { defaultMessage: 'Condition logic' }
+                ),
+                display: 'hidden',
+              }}
+            />
           </>
         )}
 
@@ -371,19 +447,16 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                   min={1}
                   value={customValue}
                   onChange={(e) => setCustomValue(Number(e.target.value))}
-                  style={{ width: 60 }}
+                  css={css`
+                    width: 60px;
+                  `}
                   data-test-subj="snooze-custom-value-simple"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   compressed
-                  options={[
-                    { value: 'm', text: 'minutes' },
-                    { value: 'h', text: 'hours' },
-                    { value: 'd', text: 'days' },
-                    { value: 'w', text: 'weeks' },
-                  ]}
+                  options={DURATION_UNIT_OPTIONS}
                   value={customUnit}
                   onChange={(e) => setCustomUnit(e.target.value)}
                   data-test-subj="snooze-custom-unit-simple"

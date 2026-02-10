@@ -21,6 +21,9 @@ import { typedMemo } from '../utils/react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 const BULK_UPDATE_PATH = '/internal/rac/alerts/bulk_update';
+// TODO: Derive the correct alert index from the alert's rule type or _index field
+// instead of using a wildcard pattern.
+const ALERTS_INDEX_PATTERN = '.alerts-*';
 
 /**
  * Alerts table row action to acknowledge (ACK) or unacknowledge (reopen) the selected alert.
@@ -59,7 +62,7 @@ export const AcknowledgeAlertAction = typedMemo(
           body: JSON.stringify({
             ids: [alertUuid],
             status: newStatus,
-            index: '.alerts-*',
+            index: ALERTS_INDEX_PATTERN,
           }),
         });
         notifications.toasts.addSuccess(
@@ -101,6 +104,3 @@ export const AcknowledgeAlertAction = typedMemo(
     );
   }
 );
-
-// For convenience, also export individual components
-export const UnacknowledgeAlertAction = AcknowledgeAlertAction;

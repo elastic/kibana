@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+/** Path parameters for the mute alert API endpoint. */
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
     meta: {
@@ -20,6 +21,7 @@ export const muteAlertParamsSchema = schema.object({
   }),
 });
 
+/** Query parameters for the mute alert API endpoint. */
 export const muteAlertQuerySchema = schema.maybe(
   schema.object({
     validate_alerts_existence: schema.maybe(
@@ -54,6 +56,11 @@ const muteConditionSchema = schema.object({
   ),
 });
 
+/**
+ * Optional request body for the mute alert API endpoint.
+ * When provided, creates a conditional snooze with time-based expiry
+ * and/or field-change conditions.
+ */
 export const muteAlertBodySchema = schema.maybe(
   schema.object({
     expires_at: schema.maybe(
@@ -61,6 +68,15 @@ export const muteAlertBodySchema = schema.maybe(
         meta: {
           description:
             'ISO timestamp after which the mute expires automatically. Absent means indefinite.',
+        },
+        validate(value) {
+          const date = new Date(value);
+          if (isNaN(date.getTime())) {
+            return 'must be a valid ISO 8601 date string';
+          }
+          if (date.getTime() <= Date.now()) {
+            return 'must be a date in the future';
+          }
         },
       })
     ),
