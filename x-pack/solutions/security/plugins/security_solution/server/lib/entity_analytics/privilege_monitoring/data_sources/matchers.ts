@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { Matcher } from '../../../../../common/api/entity_analytics';
+import type {
+  Matcher,
+  MonitoringEntitySourceType,
+} from '../../../../../common/api/entity_analytics';
 import type { IntegrationType } from './constants';
 import { INTEGRATION_TYPES } from './constants';
 
@@ -58,3 +61,14 @@ const isIntegrationType = (value?: string): value is IntegrationType =>
 
 export const getDefaultMatchersForIntegration = (integrationName?: string): Matcher[] | undefined =>
   isIntegrationType(integrationName) ? getMatchersFor(integrationName) : undefined;
+
+export const getDefaultMatchersForSource = (
+  sourceType?: MonitoringEntitySourceType,
+  integrationName?: string
+): Matcher[] | undefined => {
+  if (sourceType === 'index') {
+    return [];
+  }
+
+  return getDefaultMatchersForIntegration(integrationName);
+};

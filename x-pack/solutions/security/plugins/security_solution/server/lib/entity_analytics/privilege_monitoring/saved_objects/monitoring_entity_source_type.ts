@@ -9,8 +9,11 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { Matcher } from '../../../../../common/api/entity_analytics';
-import { areMatchersEqual, getDefaultMatchersForIntegration } from '../data_sources/matchers';
+import type {
+  Matcher,
+  MonitoringEntitySourceType,
+} from '../../../../../common/api/entity_analytics';
+import { areMatchersEqual, getDefaultMatchersForSource } from '../data_sources/matchers';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
@@ -159,6 +162,7 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
         const attrs = document.attributes as {
           matchers?: Matcher[];
           integrationName?: string;
+          type?: string;
           managed?: boolean;
           matchersModifiedByUser?: boolean;
           managedVersion?: number;
@@ -166,7 +170,10 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
 
         const defaultMatchers =
           attrs.managed === true
-            ? getDefaultMatchersForIntegration(attrs.integrationName)
+            ? getDefaultMatchersForSource(
+                attrs.type as MonitoringEntitySourceType,
+                attrs.integrationName
+              )
             : undefined;
 
         const inferredModifiedByUser =

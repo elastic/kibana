@@ -15,7 +15,7 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { PartialMonitoringEntitySource } from '../types';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
-import { areMatchersEqual, getDefaultMatchersForIntegration } from './matchers';
+import { areMatchersEqual, getDefaultMatchersForSource } from './matchers';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
@@ -66,8 +66,7 @@ export class MonitoringEntitySourceDataClient {
       if (isManaged) {
         const integrationName = update.integrationName ?? existing.integrationName;
         const sourceType = update.type ?? existing.type;
-        const defaultMatchers =
-          sourceType === 'index' ? [] : getDefaultMatchersForIntegration(integrationName);
+        const defaultMatchers = getDefaultMatchersForSource(sourceType, integrationName);
         if (!defaultMatchers) {
           this.log(
             'warn',
