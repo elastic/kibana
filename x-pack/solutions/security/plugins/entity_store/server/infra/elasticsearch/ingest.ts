@@ -17,6 +17,7 @@ interface IngestEntitiesParams {
   targetIndex: string;
   logger: Logger;
   abortController?: AbortController;
+  fieldsToIgnore?: string[];
 }
 
 /**
@@ -36,6 +37,7 @@ export async function ingestEntities({
   targetIndex,
   logger,
   abortController,
+  fieldsToIgnore,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -58,9 +60,11 @@ export async function ingestEntities({
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
         if (
-          // ignore esIdField, no need to be in the document
+          // It's not the id field
           columns[i].name !== esIdField &&
-          // ignore null fields
+          // It's not in the ignored fields list
+          !(fieldsToIgnore || []).includes(columns[i].name) &&
+          // It's not null
           row[i] !== null
         ) {
           doc[columns[i].name] = row[i];
