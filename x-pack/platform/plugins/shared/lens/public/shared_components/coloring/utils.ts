@@ -57,7 +57,8 @@ export function getAccessorTypeFromOperation(
   dataTypeFallback?: DataType | DatatableColumnType,
   isTextBased?: boolean
 ) {
-  const useFallback = operation?.dataType === 'unknown' && dataTypeFallback != null;
+  // Use fallback when the operation's dataType differs from the activeData type (and fallback is defined)
+  const useFallback = dataTypeFallback != null && operation?.dataType !== dataTypeFallback;
   const dataType = useFallback ? dataTypeFallback : operation?.dataType;
   const hasArraySupport = operation?.hasArraySupport;
 
@@ -73,13 +74,14 @@ export function getAccessorTypeFromOperation(
   const isBucketableTypeFromOperationType = Boolean(
     isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
   );
-
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
 
 /**
  * Analyze the column from the datasource prospective (formal check)
- * to know whether it's a numeric type or not
+ * to know whether it's a numeric type or not.
+ * Optionally accepts a dataTypeFallback from activeData to override schema type
+ * when there's a mismatch.
  * Note: to be used for Lens UI only
  */
 export function getAccessorType(
@@ -95,7 +97,7 @@ export function getAccessorType(
   }
 
   const operation = datasource.getOperationForColumnId(accessor);
-  const isTextBased = datasource.isTextBasedLanguage();
+  const isTextBased = datasource.isTextBasedLanguage?.();
 
   return getAccessorTypeFromOperation(operation, dataTypeFallback, isTextBased);
 }
