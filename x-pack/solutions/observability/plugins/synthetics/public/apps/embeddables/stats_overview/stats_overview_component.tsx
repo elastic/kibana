@@ -49,8 +49,8 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
       setOverviewPageStateAction({
         tags: filters.tags?.map((tag) => tag.value),
         locations: filters.locations?.map((location) => location.value),
-        monitorTypes: filters.monitorTypes?.map((monitorType) => monitorType.value),
-        monitorQueryIds: filters.monitorIds?.map((monitorId) => monitorId.value),
+        monitorTypes: filters.monitor_types?.map((monitorType) => monitorType.value),
+        monitorQueryIds: filters.monitor_ids?.map((monitorId) => monitorId.value),
         projects: filters.projects?.map((project) => project.value),
       })
     );

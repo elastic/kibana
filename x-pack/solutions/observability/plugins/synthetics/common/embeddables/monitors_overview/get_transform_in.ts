@@ -7,33 +7,13 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type {
-  OverviewMonitorsEmbeddableState,
-  OverviewMonitorsEmbeddableStateSnakeCase,
-} from './types';
+import type { OverviewMonitorsEmbeddableState } from './types';
 
 export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: OverviewMonitorsEmbeddableState): {
     state: OverviewMonitorsEmbeddableState;
     references: Reference[];
   } {
-    // Convert camelCase keys to snake_case for REST API compatibility
-    if (state.filters) {
-      const { monitorIds, monitorTypes, ...restFilters } = state.filters;
-      const stateWithSnakeCaseKeys: OverviewMonitorsEmbeddableStateSnakeCase = {
-        ...state,
-        filters: {
-          ...restFilters,
-          monitor_ids: monitorIds,
-          monitor_types: monitorTypes,
-        },
-      };
-      return transformDrilldownsIn(stateWithSnakeCaseKeys) as {
-        state: OverviewMonitorsEmbeddableState;
-        references: Reference[];
-      };
-    }
-
     return transformDrilldownsIn(state);
   }
   return transformIn;

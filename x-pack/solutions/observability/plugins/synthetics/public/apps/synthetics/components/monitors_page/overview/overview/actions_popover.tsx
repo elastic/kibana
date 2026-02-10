@@ -188,10 +188,10 @@ export function ActionsPopover({
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     embeddableInput: {
       filters: {
-        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
         locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
-        monitorTypes: [],
+        monitor_types: [],
         projects: [],
       },
       view,

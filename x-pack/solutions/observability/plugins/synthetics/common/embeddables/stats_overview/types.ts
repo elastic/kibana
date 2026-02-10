@@ -16,15 +16,6 @@ interface Option {
 export interface MonitorFilters {
   projects: Option[];
   tags: Option[];
-  monitorIds: Option[];
-  monitorTypes: Option[];
-  locations: Option[];
-}
-
-// Snake_case version for REST API
-export interface MonitorFiltersSnakeCase {
-  projects: Option[];
-  tags: Option[];
   monitor_ids: Option[];
   monitor_types: Option[];
   locations: Option[];
@@ -34,15 +25,6 @@ export interface OverviewStatsEmbeddableCustomState {
   filters?: MonitorFilters;
 }
 
-// Snake_case version for REST API serialization
-export interface OverviewStatsEmbeddableCustomStateSnakeCase {
-  filters?: MonitorFiltersSnakeCase;
-}
-
 export type OverviewStatsEmbeddableState = SerializedTitles &
   DynamicActionsSerializedState &
   OverviewStatsEmbeddableCustomState;
-
-export type OverviewStatsEmbeddableStateSnakeCase = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomStateSnakeCase;

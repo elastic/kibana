@@ -65,10 +65,10 @@ export function MonitorConfiguration({
 
   const methods = useForm<MonitorFilters>({
     defaultValues: {
-      monitorIds: [],
+      monitor_ids: [],
       projects: [],
       tags: [],
-      monitorTypes: [],
+      monitor_types: [],
       locations: [],
     },
     values: initialInput?.filters,

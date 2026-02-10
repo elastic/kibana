@@ -13,10 +13,10 @@ export const areFiltersEmpty = (filters: MonitorFilters) => {
   }
 
   return (
-    !filters.monitorIds?.length &&
+    !filters.monitor_ids?.length &&
     !filters.projects?.length &&
     !filters.tags?.length &&
-    !filters.monitorTypes?.length &&
+    !filters.monitor_types?.length &&
     !filters.locations?.length
   );
 };

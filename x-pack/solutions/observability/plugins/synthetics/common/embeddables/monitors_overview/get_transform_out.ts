@@ -9,32 +9,45 @@ import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
-import type {
-  OverviewMonitorsEmbeddableState,
-  OverviewMonitorsEmbeddableStateSnakeCase,
-} from './types';
+import type { OverviewMonitorsEmbeddableState } from './types';
+
+// Legacy stored shape with camelCase keys (backward compatibility)
+interface LegacyFilters {
+  projects: Array<{ label: string; value: string }>;
+  tags: Array<{ label: string; value: string }>;
+  locations: Array<{ label: string; value: string }>;
+  monitorIds?: Array<{ label: string; value: string }>;
+  monitorTypes?: Array<{ label: string; value: string }>;
+  monitor_ids?: Array<{ label: string; value: string }>;
+  monitor_types?: Array<{ label: string; value: string }>;
+}
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(
-    storedState: OverviewMonitorsEmbeddableStateSnakeCase,
-    references?: Reference[]
-  ) {
+  function transformOut(storedState: OverviewMonitorsEmbeddableState, references?: Reference[]) {
     const transformsFlow = flow(
-      transformTitlesOut<OverviewMonitorsEmbeddableStateSnakeCase>,
-      (state: OverviewMonitorsEmbeddableStateSnakeCase) => {
-        // Convert snake_case keys back to camelCase for frontend
+      transformTitlesOut<OverviewMonitorsEmbeddableState>,
+      (state: OverviewMonitorsEmbeddableState) => {
+        // Handle legacy stored shape: convert camelCase to snake_case (REST API shape)
         if (state.filters) {
-          const { monitor_ids, monitor_types, ...restFilters } = state.filters;
-          const stateWithCamelCaseKeys: OverviewMonitorsEmbeddableState = {
-            ...state,
-            filters: {
-              ...restFilters,
-              monitorIds: monitor_ids,
-              monitorTypes: monitor_types,
-            },
-          };
-          return transformDrilldownsOut(stateWithCamelCaseKeys, references);
+          const filters = state.filters as unknown as LegacyFilters;
+          const hasLegacyKeys = 'monitorIds' in filters || 'monitorTypes' in filters;
+
+          if (hasLegacyKeys) {
+            // Convert legacy camelCase to REST API snake_case
+            const convertedState: OverviewMonitorsEmbeddableState = {
+              ...state,
+              filters: {
+                projects: filters.projects,
+                tags: filters.tags,
+                locations: filters.locations,
+                monitor_ids: filters.monitorIds || filters.monitor_ids || [],
+                monitor_types: filters.monitorTypes || filters.monitor_types || [],
+              },
+            };
+            return transformDrilldownsOut(convertedState, references);
+          }
         }
+        // Already in REST API shape (snake_case)
         return transformDrilldownsOut(state, references);
       }
     );
