@@ -37,10 +37,13 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath } from '@kbn/core/server';
+import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
+import type { ExecutionContextRunner } from './lib/execution_context';
+import { getExecutionContextRunner } from './lib/execution_context';
 
 import type {
   ConcreteTaskInstance,
@@ -85,6 +88,7 @@ export interface StoreOpts {
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
   basePath: IBasePath;
+  executionContext: ExecutionContextStart;
 }
 
 export interface SearchOpts {
@@ -158,6 +162,7 @@ export class TaskStore {
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
   private basePath: IBasePath;
+  private executionContextRunner: ExecutionContextRunner<unknown>;
 
   /**
    * Constructs a new TaskStore.
@@ -189,6 +194,10 @@ export class TaskStore {
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
     this.basePath = opts.basePath;
+    this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
+      name: 'taskStore',
+      // individual executions can be specialized with `id` ...
+    });
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
