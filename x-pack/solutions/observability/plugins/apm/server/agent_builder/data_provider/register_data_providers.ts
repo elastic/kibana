@@ -82,6 +82,7 @@ export function registerDataProviders({
       });
     }
   );
+
   observabilityAgentBuilder.registerDataProvider(
     'apmApplicationMetrics',
     async ({ request, serviceName, serviceEnvironment, start, end, kuery }) => {
