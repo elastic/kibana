@@ -9,7 +9,7 @@ owners:
   defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
-language: javascript
+language: typescript
 project:
   name: '@kbn/usage-api-plugin'
   description: Moon project for @kbn/usage-api-plugin
@@ -17,12 +17,19 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/usage_api
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+fileGroups:
+  src:
+    - server/**/*
+    - '!target/**/*'
 tasks:
   jest:
     args:
