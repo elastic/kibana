@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { IlmPolicy, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 
 export interface ResourceDefinition {
   key: string;
   dataStreamName: string;
-  mappings: MappingTypeMapping;
+  version: number;
+  mappings: MappingsDefinition;
   ilmPolicy: {
     name: string;
     policy: IlmPolicy;

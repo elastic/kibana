@@ -7,7 +7,7 @@
 
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-browser';
+import { CoreSetup, PluginInitializer } from '@kbn/core-di-browser';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { mountAlertingV2App } from './main';
 import { ALERTING_V2_APP_ID } from './constants';
@@ -18,7 +18,11 @@ export const module = new ContainerModule(({ bind }) => {
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
 
-    if (!container.isBound(PluginSetup('management'))) {
+    const isUiEnabled = container
+      .get(PluginInitializer('config'))
+      .get<{ ui: { enabled: boolean } }>().ui.enabled;
+
+    if (!isUiEnabled) {
       return;
     }
 

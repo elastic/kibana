@@ -58,9 +58,9 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     timeField: '@timestamp',
     lookbackWindow: '5m',
     groupingKey: [],
-    createdBy: 'elastic',
+    createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic',
+    updatedBy: 'elastic_profile_uid',
     updatedAt: '2025-01-01T00:00:00.000Z',
     ...overrides,
   };
