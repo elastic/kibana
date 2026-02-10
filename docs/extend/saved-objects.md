@@ -20,6 +20,10 @@ By using Saved Objects your plugin can take advantage of the following features:
 * By declaring `references`, an object’s entire reference graph will be exported. This makes it easy for users to export e.g. a `dashboard` object and have all the `visualization` objects required to display the dashboard included in the export.
 * When the X-Pack security and spaces plugins are enabled these transparently provide RBAC access control and the ability to organize Saved Objects into spaces.
 
+:::::{important}
+When integrating with saved objects via the Saved Objects import/export APIs or the deprecated Saved Objects HTTP CRUD APIs, preserve `coreMigrationVersion` and `typeMigrationVersion` when persisting raw saved object documents outside of Kibana (for example, in JSON/NDJSON files). These fields are required to retain forwards compatibility across Kibana versions as saved object types evolve.
+:::::
+
 This document contains developer guidelines and best-practices for plugins wanting to use Saved Objects.
 
 ## Registering a Saved Object type [saved-objects-type-registration]
@@ -576,6 +580,10 @@ As a refresher the `create` schema is a `@kbn/config-schema` object-type schema,
 
 :::{note}
 Implementing this schema is optional, but still recommended, as otherwise there will be no validating when importing objects.
+:::
+
+:::{important}
+Changes to a type’s `create` schema (especially adding new required fields) can effectively become breaking changes for consumers using the deprecated Saved Objects HTTP CRUD APIs, because those APIs validate create and bulk-create payloads against this schema for that type.
 :::
 
 For implementation examples, refer to [Use case examples](#use-case-examples).

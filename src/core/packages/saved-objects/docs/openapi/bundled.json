@@ -104,7 +104,7 @@
       "post": {
         "summary": "Create saved objects",
         "operationId": "bulkCreateSavedObjects",
-        "description": "Create multiple Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\n",
+        "description": "Create multiple Kibana saved objects.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -129,7 +129,17 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "coreMigrationVersion": {
+                      "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                      "type": "string"
+                    },
+                    "typeMigrationVersion": {
+                      "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -704,7 +714,7 @@
       "post": {
         "summary": "Create a saved object",
         "operationId": "createSavedObject",
-        "description": "Create a Kibana saved object with a randomly generated identifier.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\n",
+        "description": "Create a Kibana saved object with a randomly generated identifier.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -737,6 +747,14 @@
                 "properties": {
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
+                  },
+                  "coreMigrationVersion": {
+                    "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
+                  "typeMigrationVersion": {
+                    "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
                   },
                   "initialNamespaces": {
                     "$ref": "#/components/schemas/initial_namespaces"
@@ -816,7 +834,7 @@
       "post": {
         "summary": "Create a saved object",
         "operationId": "createSavedObjectId",
-        "description": "Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\n",
+        "description": "Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.\n\nWARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.\nNOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.\n",
         "deprecated": true,
         "tags": [
           "saved objects"
@@ -853,11 +871,19 @@
                   "attributes": {
                     "$ref": "#/components/schemas/attributes"
                   },
+                  "coreMigrationVersion": {
+                    "description": "The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
+                  "typeMigrationVersion": {
+                    "description": "The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.\n",
+                    "type": "string"
+                  },
                   "initialNamespaces": {
                     "$ref": "#/components/schemas/initial_namespaces"
                   },
                   "references": {
-                    "$ref": "#/components/schemas/initial_namespaces"
+                    "$ref": "#/components/schemas/references"
                   }
                 }
               }
@@ -1093,7 +1119,7 @@
       },
       "attributes": {
         "type": "object",
-        "description": "The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.\n"
+        "description": "The data that you want to create. WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.\n"
       },
       "initial_namespaces": {
         "type": "array",
