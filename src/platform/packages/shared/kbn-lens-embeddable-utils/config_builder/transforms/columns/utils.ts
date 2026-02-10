@@ -45,13 +45,10 @@ export function getLensStateMetricSharedProps(
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
-    // @TODO improve this based on default label logic
-    customLabel: options.label != null,
   };
 }
 
 export function getLensAPIMetricSharedProps(options: {
-  customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   reducedTimeRange?: string;
   timeShift?: string;
@@ -59,7 +56,7 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.label ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
@@ -71,19 +68,14 @@ export function getLensStateBucketSharedProps(options: { label?: string; field?:
   return {
     sourceField: options.field ?? '',
     label: options.label ?? LENS_DEFAULT_LABEL,
-    customLabel: Boolean(options.label),
     isBucketed: true,
   };
 }
 
-export function getLensAPIBucketSharedProps(options: {
-  label?: string;
-  customLabel?: boolean;
-  sourceField: string;
-}) {
+export function getLensAPIBucketSharedProps(options: { label?: string; sourceField: string }) {
   return {
     field: options.sourceField,
-    ...(options.customLabel ? { label: options.label } : {}),
+    ...(options.label ? { label: options.label } : {}),
   };
 }
 

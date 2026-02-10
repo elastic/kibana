@@ -174,7 +174,7 @@ export const percentileRanksOperation: OperationDefinition<
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.customLabel ? currentColumn.label : '',
+          label: currentColumn.label || '',
           params: {
             ...currentColumn.params,
             value: Number(value),

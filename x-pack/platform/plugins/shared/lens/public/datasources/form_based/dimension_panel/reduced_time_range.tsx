@@ -25,7 +25,7 @@ export function setReducedTimeRange(
   const trimmedReducedTimeRange = reducedTimeRange?.trim();
   const currentColumn = layer.columns[columnId];
   const label =
-    currentColumn.customLabel || skipLabelUpdate
+    currentColumn.label || skipLabelUpdate
       ? currentColumn.label
       : adjustTimeScaleLabelSuffix(
           currentColumn.label,

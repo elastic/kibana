@@ -144,7 +144,6 @@ function extractColumns(
         mappedParams
       );
       const newColId = getManagedId(idPrefix, columns.length);
-      newCol.customLabel = true;
       newCol.label = label;
       columns.push({ column: newCol, location: node.location });
       // replace by new column id
@@ -165,7 +164,6 @@ function extractColumns(
         mathColumn.references = subNodeVariables.map(({ value }) => value);
         mathColumn.params.tinymathAst = consumedParam!;
         columns.push({ column: mathColumn });
-        mathColumn.customLabel = true;
         mathColumn.label = label;
       }
 
@@ -190,7 +188,6 @@ function extractColumns(
         mappedParams
       );
       const newColId = getManagedId(idPrefix, columns.length);
-      newCol.customLabel = true;
       newCol.label = label;
       columns.push({ column: newCol, location: node.location });
       // replace by new column id
@@ -205,7 +202,6 @@ function extractColumns(
         indexPattern,
       });
       const newColId = getManagedId(idPrefix, columns.length);
-      newCol.customLabel = true;
       newCol.label = label;
       columns.push({ column: newCol, location: node.location });
       // replace by new column id
@@ -226,7 +222,6 @@ function extractColumns(
     });
     mathColumn.references = variables.map(({ value }) => value);
     mathColumn.params.tinymathAst = root!;
-    mathColumn.customLabel = true;
     mathColumn.label = label;
     columns.push({ column: mathColumn });
   }
@@ -268,7 +263,7 @@ function generateFormulaColumns(
     indexPattern,
     filterByVisibleOperation(operations),
     dateRange,
-    column.customLabel ? column.label : undefined
+    column.label
   );
 
   extracted.forEach(({ column: extractedColumn, location }, index) => {
@@ -282,7 +277,7 @@ function generateFormulaColumns(
 
   columns[id] = {
     ...column,
-    label: !column.customLabel
+    label: !column.label
       ? formula ??
         i18n.translate('xpack.lens.indexPattern.formulaLabel', {
           defaultMessage: 'Formula',

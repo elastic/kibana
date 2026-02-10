@@ -174,7 +174,7 @@ export const staticValueOperation: OperationDefinition<
               ...newLayer.columns,
               [columnId]: {
                 ...newColumn,
-                label: newColumn?.customLabel ? newColumn.label : '',
+                label: newColumn?.label || '',
                 params: {
                   ...newColumn.params,
                   value: newValue,

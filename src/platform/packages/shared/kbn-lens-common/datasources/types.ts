@@ -31,7 +31,6 @@ export type OperationType = string;
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
-  customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   filter?: Query;
   reducedTimeRange?: string;
@@ -91,7 +90,6 @@ export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
   label?: string;
-  customLabel?: boolean;
   params?: {
     format?: ValueFormatConfig;
   };

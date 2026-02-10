@@ -407,7 +407,7 @@ export const termsOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: oldColumn.customLabel ? oldColumn.label : '',
+      label: oldColumn.label || '',
       sourceField: field.name,
       params: newParams,
     };
@@ -509,7 +509,7 @@ export const termsOperation: OperationDefinition<
               ...column,
               dataType: newDataType,
               sourceField: sourcefield,
-              label: column.customLabel
+              label: column.label
                 ? column.label
                 : ofName(
                     mainField?.displayName,
@@ -707,7 +707,7 @@ The top values of a specified field ranked by the chosen metric.
                 ...layer.columns,
                 [columnId]: {
                   ...currentColumn,
-                  label: currentColumn.customLabel
+                  label: currentColumn.label
                     ? currentColumn.label
                     : ofName(
                         indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
