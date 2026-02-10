@@ -115,10 +115,6 @@ export class FileSystemStore implements IFileStore {
     };
   }
 
-  // ============================================================================
-  // Private helpers
-  // ============================================================================
-
   /**
    * Build a nested tree structure from a flat list of entries.
    */

@@ -12,8 +12,7 @@ import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
-import type { CreateRunnerDeps } from '../runner';
-import type { CompositeSkillRegistry } from '../../skills/composite_skill_registry';
+import type { SkillRegistry } from '../../skills';
 
 /**
  * Filters skills based on the agent's skill selection.
@@ -46,44 +45,37 @@ export const filterSkillsBySelection = (
 };
 
 /**
- * Resolves skills using the composite registry when available,
- * falling back to built-in skills only via skillServiceStart.
+ * Resolves skills using the skill registry.
+ * When a skill selection is provided, uses resolveSkillSelection (includes user-created skills).
+ * Otherwise, returns all built-in skills for backward compatibility.
  */
 const resolveSkills = async ({
   skillSelection,
   skillRegistry,
-  runnerDeps,
 }: {
   skillSelection?: SkillSelection[];
-  skillRegistry?: CompositeSkillRegistry;
-  runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'>;
+  skillRegistry: SkillRegistry;
 }): Promise<SkillDefinition[]> => {
-  // When a composite registry is available and there is a skill selection,
-  // use resolveSkillSelection to include user-created skills
-  if (skillRegistry && skillSelection) {
+  if (skillSelection) {
     return skillRegistry.resolveSkillSelection(skillSelection);
   }
 
-  // Fallback: use built-in skills only and filter locally
-  const { skillServiceStart } = runnerDeps;
-  const allSkills = skillServiceStart.listSkills();
-  return filterSkillsBySelection(allSkills, skillSelection);
+  // No selection: return all built-in skills (backward compat)
+  return skillRegistry.listSkillDefinitions();
 };
 
 export const createStore = async ({
   conversation,
-  runnerDeps,
   skillSelection,
   skillRegistry,
 }: {
   conversation?: Conversation;
-  runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'>;
   skillSelection?: SkillSelection[];
-  skillRegistry?: CompositeSkillRegistry;
+  skillRegistry: SkillRegistry;
 }) => {
   const filesystem = new VirtualFileSystem();
 
-  const filteredSkills = await resolveSkills({ skillSelection, skillRegistry, runnerDeps });
+  const filteredSkills = await resolveSkills({ skillSelection, skillRegistry });
 
   const resultStore = createResultStore({ conversation });
   const skillsStore = createSkillsStore({ skills: filteredSkills });

@@ -12,7 +12,7 @@ import type {
   PersistedSkillCreateRequest,
   PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
-import { createSpaceDslFilter } from '../../../../utils/spaces';
+import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { SkillStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';

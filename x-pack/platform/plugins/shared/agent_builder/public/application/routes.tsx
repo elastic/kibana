@@ -18,8 +18,11 @@ import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tool
 import { AgentBuilderSkillsPage } from './pages/skills';
 import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
+import { useExperimentalFeatures } from './hooks/use_experimental_features';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
@@ -54,17 +57,23 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
         <AgentBuilderToolsPage />
       </Route>
 
-      <Route path="/skills/new">
-        <AgentBuilderSkillCreatePage />
-      </Route>
+      {isExperimentalFeaturesEnabled && (
+        <Route path="/skills/new">
+          <AgentBuilderSkillCreatePage />
+        </Route>
+      )}
 
-      <Route path="/skills/:skillId">
-        <AgentBuilderSkillDetailsPage />
-      </Route>
+      {isExperimentalFeaturesEnabled && (
+        <Route path="/skills/:skillId">
+          <AgentBuilderSkillDetailsPage />
+        </Route>
+      )}
 
-      <Route path="/skills">
-        <AgentBuilderSkillsPage />
-      </Route>
+      {isExperimentalFeaturesEnabled && (
+        <Route path="/skills">
+          <AgentBuilderSkillsPage />
+        </Route>
+      )}
 
       {/* Default to conversations page */}
       <Route path="/">

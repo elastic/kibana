@@ -46,7 +46,7 @@ import { createPromptManager, getAgentPromptStorageState } from './utils/prompts
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
-import type { SkillServiceStart } from '../skills';
+import type { SkillServiceStart, SkillRegistry } from '../skills';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -72,7 +72,7 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
-  skillServiceStart: SkillServiceStart;
+  skillRegistry: SkillRegistry;
   toolManager: ToolManager;
   filestore: IFileStore;
 }
@@ -88,8 +88,10 @@ export type CreateRunnerDeps = Omit<
   | 'stateManager'
   | 'filestore'
   | 'toolManager'
+  | 'skillRegistry'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
+  skillServiceStart: SkillServiceStart;
 };
 
 export class RunnerManager {
@@ -155,7 +157,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { modelProviderFactory, skillServiceStart, ...runnerDeps } = deps;
 
   const createScopedRunnerWithDeps = async ({
     request,
@@ -170,10 +172,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
   }): Promise<ScopedRunner> => {
-    const skillRegistry = await runnerDeps.skillServiceStart.getRegistry({ request });
+    const skillRegistry = await skillServiceStart.getRegistry({ request });
     const { resultStore, skillsStore, filestore } = await createStore({
       conversation,
-      runnerDeps,
       skillRegistry,
     });
 
@@ -194,6 +195,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       resultStore,
       skillsStore,
       attachmentStateManager,
+      skillRegistry,
       stateManager,
       promptManager,
       filestore,

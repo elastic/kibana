@@ -10,12 +10,15 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { BehaviorSubject } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -57,6 +60,7 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
@@ -90,6 +94,7 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
@@ -138,6 +143,13 @@ export class AgentBuilderPlugin
     };
 
     this.internalServices = internalServices;
+
+    const isExperimentalFeaturesEnabled = core.uiSettings.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+    if (isExperimentalFeaturesEnabled) {
+      enableSkillsDeepLink(this.appUpdater$);
+    }
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
 

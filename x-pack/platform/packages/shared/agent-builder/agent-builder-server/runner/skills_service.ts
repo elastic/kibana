@@ -15,11 +15,11 @@ export interface SkillsService {
   /**
    * Returns the list of skill type definitions
    */
-  list(): SkillDefinition[];
+  list(): Promise<SkillDefinition[]>;
   /**
    * Returns the skill type definition for a given skill id
    */
-  getSkillDefinition(skillId: string): SkillDefinition | undefined;
+  getSkillDefinition(skillId: string): Promise<SkillDefinition | undefined>;
   /**
    * Convert a skill-scoped tool to a generic executable tool
    */
