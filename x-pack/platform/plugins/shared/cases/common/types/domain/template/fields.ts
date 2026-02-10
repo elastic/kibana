@@ -11,6 +11,7 @@ const BaseFieldSchema = z.object({
   name: z.string(),
   label: z.string().optional(),
   type: z.literal('keyword'),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 export const InputTextFieldSchema = BaseFieldSchema.extend({
@@ -26,6 +27,9 @@ export const InputNumberFieldSchema = BaseFieldSchema.extend({
     z.literal('byte'),
     z.literal('double'),
     z.literal('float'),
+    z.literal('half_float'),
+    z.literal('scaled_float'),
+    z.literal('unsigned_long'),
   ]),
 });
 
@@ -34,6 +38,7 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
   metadata: z
     .object({
       options: z.array(z.string()),
+      default: z.string().optional(),
     })
     .catchall(z.unknown()),
 });

@@ -1,0 +1,32 @@
+version: '1'
+name: 'sources.google_drive.search'
+description: Search for files in Google Drive using Google's query syntax
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: query
+    type: string
+    description: "Google Drive search query. Examples: name contains 'budget' and trashed=false | fullText contains 'quarterly report' and mimeType='application/pdf' | 'me' in owners and modifiedTime > '2024-01-01' | mimeType='application/vnd.google-apps.folder' and trashed=false. Operators: contains, =, !=, <, >, <=, >=. Combine with 'and'/'or'. String values use single quotes. Add 'and trashed=false' to exclude trashed files."
+  - name: pageSize
+    type: number
+    required: false
+    description: Number of results to return (default 250, max 1000)
+  - name: pageToken
+    type: string
+    required: false
+    description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
+  - name: orderBy
+    type: string
+    required: false
+    description: "Sort order: 'createdTime', 'createdTime desc', 'modifiedTime', 'modifiedTime desc', 'name', or 'name desc'"
+steps:
+  - name: search_files
+    type: google_drive.searchFiles
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{inputs.query}}"
+      pageSize: ${{inputs.pageSize}}
+      pageToken: "${{inputs.pageToken}}"
+      orderBy: "${{inputs.orderBy}}"

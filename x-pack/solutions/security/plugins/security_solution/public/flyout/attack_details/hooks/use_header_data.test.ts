@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react';
 import { useHeaderData } from './use_header_data';
 import { useAttackDetailsContext } from '../context';
@@ -39,6 +40,8 @@ describe('useHeaderData', () => {
           return 'alert-1';
         case 'kibana.alert.attack_discovery.replacements':
           return { key: 'value' };
+        case ALERT_WORKFLOW_ASSIGNEE_IDS:
+          return ['user-1'];
         default:
           return null;
       }
@@ -53,6 +56,7 @@ describe('useHeaderData', () => {
     expect(result.current.alertIds).toEqual(['alert-1']);
     expect(result.current.alertsCount).toBe(1);
     expect(result.current.replacements).toEqual({ key: 'value' });
+    expect(result.current.assignees).toEqual(['user-1']);
   });
 
   it('should normalize alertIds array correctly', () => {
@@ -87,5 +91,39 @@ describe('useHeaderData', () => {
     const { result } = renderHook(() => useHeaderData());
     expect(result.current.alertIds).toEqual([]);
     expect(result.current.alertsCount).toBe(0);
+  });
+
+  it('should return assignees from ALERT_WORKFLOW_ASSIGNEE_IDS normalized to string array', () => {
+    getFieldsDataMock.mockImplementation((field: string) => {
+      if (field === ALERT_WORKFLOW_ASSIGNEE_IDS) {
+        return ['uid-1', 'uid-2'];
+      }
+      return null;
+    });
+
+    const { result } = renderHook(() => useHeaderData());
+
+    expect(result.current.assignees).toEqual(['uid-1', 'uid-2']);
+  });
+
+  it('should normalize single assignee string to array', () => {
+    getFieldsDataMock.mockImplementation((field: string) => {
+      if (field === ALERT_WORKFLOW_ASSIGNEE_IDS) {
+        return 'single-uid';
+      }
+      return null;
+    });
+
+    const { result } = renderHook(() => useHeaderData());
+
+    expect(result.current.assignees).toEqual(['single-uid']);
+  });
+
+  it('should return empty assignees when field is null or undefined', () => {
+    getFieldsDataMock.mockImplementation(() => null);
+
+    const { result } = renderHook(() => useHeaderData());
+
+    expect(result.current.assignees).toEqual([]);
   });
 });

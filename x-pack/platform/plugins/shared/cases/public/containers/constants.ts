@@ -18,6 +18,11 @@ export const casesQueriesKeys = {
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
   userActions: ['user-actions'] as const,
+  templates: ['templates'] as const,
+  templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
+  templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
+  templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
+  templatesCreators: () => [...casesQueriesKeys.templates, 'creators'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -53,8 +58,6 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
-
-  templates: ['templates'] as const,
 };
 
 export const casesMutationsKeys = {
@@ -74,6 +77,11 @@ export const casesMutationsKeys = {
   deleteObservable: ['delete-observable'] as const,
   bulkPostObservables: ['bulk-post-observables'] as const,
   createTemplate: ['create-template'] as const,
+  updateTemplate: ['update-template'] as const,
+  deleteTemplate: ['delete-template'] as const,
+  exportTemplate: ['export-template'] as const,
+  bulkDeleteTemplates: ['bulk-delete-templates'] as const,
+  bulkExportTemplates: ['bulk-export-templates'] as const,
 };
 
 export const inferenceKeys = {
