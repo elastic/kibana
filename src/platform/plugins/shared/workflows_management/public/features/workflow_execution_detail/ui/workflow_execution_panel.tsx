@@ -76,7 +76,12 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
       >
         {showBackButton && (
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={onClose} color="text" aria-label={i18nTexts.backToExecutions}>
+            <EuiLink
+              onClick={onClose}
+              color="text"
+              aria-label={i18nTexts.backToExecutions}
+              data-test-subj="backToExecutionsLink"
+            >
               <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>

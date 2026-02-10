@@ -58,6 +58,135 @@ steps:
           message: "Test run: {{ execution.isTestRun }}"
 `;
 
+const getPrintAlertsWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: true
+description: Prints all received alerts
+triggers:
+ - type: manual
+ - type: alert
+steps:
+ - name: log
+   type: console
+   foreach: \${{event.alerts}}
+   with:
+     message: \${{event}}
+ - name: log_each_alert
+   type: console
+   foreach: \${{event.alerts}}
+   with:
+     message: \${{foreach.item}}
+`;
+
+const getCreateAlertRuleWorkflowYaml = (name: string) => `
+name: ${name}
+description: Create alert rule
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: wf_multiple_alerts
+    type: string
+    required: true
+  - name: wf_single_alert
+    type: string
+    required: true
+consts:
+  alerts_index_name: test-security-alerts-index
+steps:
+  - name: hello_world_step
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/\{{workflow.spaceId}}/api/detection_engine/rules
+      body:
+        type: query
+        index:
+          - test-security-alerts-index
+        filters: []
+        language: kuery
+        query: "not severity: foo"
+        required_fields: []
+        author: []
+        false_positives: []
+        references: []
+        risk_score: 21
+        risk_score_mapping: []
+        severity: low
+        severity_mapping: []
+        threat: []
+        max_signals: 100
+        name: Security alert test
+        description: Security alert test
+        tags: []
+        setup: ""
+        license: ""
+        interval: 15s
+        from: now-20s
+        to: now
+        actions:
+          - id: system-connector-.workflows
+            params:
+              subAction: run
+              subActionParams:
+                workflowId: "{{inputs.wf_single_alert}}"
+                summaryMode: false
+            action_type_id: .workflows
+            uuid: b8bc90a9-2112-41c4-a797-bb6cbb52f5da
+          - id: system-connector-.workflows
+            params:
+              subAction: run
+              subActionParams:
+                workflowId: "{{inputs.wf_multiple_alerts}}"
+                summaryMode: true
+            action_type_id: .workflows
+            uuid: b8bc90a9-2112-41c4-a797-bb6cbb52f5da
+        enabled: true
+`;
+
+const getTriggerAlertWorkflowYaml = (name: string) => `
+name: ${name}
+description: Add timestamp ingest pipeline, ingest docs, which will trigger the alert
+enabled: true
+triggers:
+  - type: manual
+consts:
+  pipeline_name: add_timestamp_if_missing
+  alerts_index_name: test-security-alerts-index
+  alerts:
+    - severity: high
+      alert_id: bruteforce_login_attempt
+      description: Multiple failed login attempts detected from IP 192.168.1.45 targeting admin account. 15 failures in 3 minutes exceeding threshold.
+      category: authentication
+      timestamp: 2023-11-15T08:23:45Z
+    - severity: critical
+      alert_id: suspicious_data_transfer
+      description: Unusual outbound data transfer of 2.3GB to unrecognized external domain detected from workstation WS-0023. Transfer occurred outside business hours.
+      category: data_exfiltration
+      timestamp: 2023-11-15T09:17:32Z
+steps:
+  - name: create_ingest_pipeline
+    type: elasticsearch.request
+    on-failure:
+      continue: true
+    with:
+      method: PUT
+      path: _ingest/pipeline/add_timestamp_if_missing
+      body:
+        processors:
+          - set:
+              if: ctx['@timestamp'] == null
+              field: "@timestamp"
+              value: "{% raw %}{{_ingest.timestamp}}{% endraw %}"
+  - name: index
+    type: elasticsearch.request
+    foreach: "{{consts.alerts}}"
+    with:
+      method: POST
+      path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}
+      body: \${{foreach.item}}
+`;
+
 test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
@@ -427,5 +556,123 @@ steps:
     // Scroll the execution panel to see the last step
     await lastStep.scrollIntoViewIfNeeded();
     await expect(lastStep).toBeVisible();
+  });
+
+  // TODO: delete the alert rule, and workflows after the test
+  test('should trigger workflow from alert', async ({ pageObjects, page, browserAuth }) => {
+    // we need admin privileges to write to the test index
+    await browserAuth.loginAsAdmin();
+
+    const singleWorkflowName = `Handle single alert ${Math.floor(Math.random() * 10000)}`;
+    const multipleWorkflowName = `Handle multiple alerts ${Math.floor(Math.random() * 10000)}`;
+    const createAlertRuleWorkflowName = `Create alert rule workflow ${Math.floor(
+      Math.random() * 10000
+    )}`;
+    const triggerAlertWorkflowName = `Trigger alert workflow ${Math.floor(Math.random() * 10000)}`;
+    // Step 1: Create workflow with alert trigger
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getPrintAlertsWorkflowYaml(singleWorkflowName)
+    );
+    await pageObjects.workflowEditor.saveWorkflow();
+
+    const singleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
+
+    // Step 2: Create workflow with alert trigger, which print all alerts in context for multiple setting
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getPrintAlertsWorkflowYaml(multipleWorkflowName)
+    );
+    await pageObjects.workflowEditor.saveWorkflow();
+
+    const multipleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
+
+    // Step 3: Create an alert rule via a workflow (FIX: not working, can't see the created alert rule in the Security/Alerts page)
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getCreateAlertRuleWorkflowYaml(createAlertRuleWorkflowName)
+    );
+    await pageObjects.workflowEditor.saveWorkflow();
+    // Run the workflow to create the alert rule, specifying the workflow IDs to trigger
+    await pageObjects.workflowEditor.executeWorkflowWithInputs({
+      wf_single_alert: singleWorkflowId,
+      wf_multiple_alerts: multipleWorkflowId,
+    });
+
+    // Wait for execution to complete
+    const statusBadge = page.testSubj.locator('workflowExecutionStatus');
+    await expect(statusBadge).toContainText(/success|completed/i, { timeout: 60000 });
+
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getTriggerAlertWorkflowYaml(triggerAlertWorkflowName)
+    );
+    await pageObjects.workflowEditor.saveWorkflow();
+    await pageObjects.workflowEditor.clickRunButton();
+
+    // Wait for execution to complete
+    const statusBadge2 = page.testSubj.locator('workflowExecutionStatus');
+    await expect(statusBadge2).toContainText(/success|completed/i, { timeout: 60000 });
+
+    // Step 2: Go to workflows list
+    await page.gotoApp('workflows');
+    await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+
+    await page.testSubj
+      .locator('workflowListTable')
+      .getByRole('link', { name: singleWorkflowName })
+      .click();
+    await page.getByRole('button', { name: 'Executions' }).click();
+
+    await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+
+    const executionItems = page.testSubj.locator('workflowExecutionListItem');
+    await expect(executionItems).toHaveCount(2, { timeout: 60000 });
+
+    // await executionItems.first().click();
+    // await pageObjects.workflowEditor.expandStepsTree();
+
+    // const logEachAlertStep1 = await pageObjects.workflowEditor.getStep(
+    //   'foreach_log_each_alert > 0 > log_each_alert'
+    // );
+    // await logEachAlertStep1.click();
+    // const output1 = await pageObjects.workflowEditor.getStepResultJson('output');
+    // expect(output1).toContain({
+    //   description:
+    //     'Unusual outbound data transfer of 2.3GB to unrecognized external domain detected from workstation WS-0023. Transfer occurred outside business hours.',
+    // });
+
+    // await page.testSubj.locator('backToExecutionsLink').click();
+
+    // await executionItems.last().click();
+
+    // const logEachAlertStep2 = await pageObjects.workflowEditor.getStep('log_each_alert');
+    // await logEachAlertStep2.click();
+    // const output2 = await pageObjects.workflowEditor.getStepResultJson('output');
+    // expect(output2).toContain({
+    //   description:
+    //     'Multiple failed login attempts detected from IP 192.168.1.45 targeting admin account. 15 failures in 3 minutes exceeding threshold.',
+    // });
+
+    // await page.testSubj.waitForSelector('workflowExecutionPanel', { state: 'visible' });
+
+    // const logEachExecutions = page.testSubj
+    //   .locator('workflowExecutionPanel')
+    //   .getByRole('button', { name: 'log_each_alert' });
+    // await expect(logEachExecutions).toHaveCount(1);
+
+    await page.gotoApp('workflows');
+    await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+
+    await page.testSubj
+      .locator('workflowListTable')
+      .getByRole('link', { name: multipleWorkflowName })
+      .click();
+    await page.getByRole('button', { name: 'Executions' }).click();
+
+    await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+
+    const executionItems2 = page.testSubj.locator('workflowExecutionListItem');
+    await expect(executionItems2).toHaveCount(1, { timeout: 60000 });
   });
 });
