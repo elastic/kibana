@@ -10,6 +10,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
+import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
 
 const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
@@ -49,6 +50,10 @@ steps:
 test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
   });
 
   test('Create, save, run and view a dummy workflow', async ({ pageObjects, page }) => {

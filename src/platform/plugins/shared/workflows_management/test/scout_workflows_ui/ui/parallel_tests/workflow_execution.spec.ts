@@ -10,6 +10,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
+import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
 
 const getTestRunWorkflowYaml = (name: string) => `
 name: ${name}
@@ -94,7 +95,7 @@ inputs:
 consts:
   alerts_index_name: test-security-alerts-index
 steps:
-  - name: hello_world_step
+  - name: create_security_alert_rule
     type: kibana.request
     with:
       method: POST
@@ -190,6 +191,10 @@ steps:
 test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
   });
 
   test('should run unsaved workflow as test run with isTestRun: true', async ({
@@ -558,7 +563,6 @@ steps:
     await expect(lastStep).toBeVisible();
   });
 
-  // TODO: delete the alert rule, and workflows after the test
   test('should trigger workflow from alert', async ({ pageObjects, page, browserAuth }) => {
     // we need admin privileges to write to the test index
     await browserAuth.loginAsAdmin();
@@ -587,7 +591,6 @@ steps:
 
     const multipleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
 
-    // Step 3: Create an alert rule via a workflow (FIX: not working, can't see the created alert rule in the Security/Alerts page)
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
       getCreateAlertRuleWorkflowYaml(createAlertRuleWorkflowName)
@@ -629,37 +632,7 @@ steps:
     const executionItems = page.testSubj.locator('workflowExecutionListItem');
     await expect(executionItems).toHaveCount(2, { timeout: 60000 });
 
-    // await executionItems.first().click();
-    // await pageObjects.workflowEditor.expandStepsTree();
-
-    // const logEachAlertStep1 = await pageObjects.workflowEditor.getStep(
-    //   'foreach_log_each_alert > 0 > log_each_alert'
-    // );
-    // await logEachAlertStep1.click();
-    // const output1 = await pageObjects.workflowEditor.getStepResultJson('output');
-    // expect(output1).toContain({
-    //   description:
-    //     'Unusual outbound data transfer of 2.3GB to unrecognized external domain detected from workstation WS-0023. Transfer occurred outside business hours.',
-    // });
-
-    // await page.testSubj.locator('backToExecutionsLink').click();
-
-    // await executionItems.last().click();
-
-    // const logEachAlertStep2 = await pageObjects.workflowEditor.getStep('log_each_alert');
-    // await logEachAlertStep2.click();
-    // const output2 = await pageObjects.workflowEditor.getStepResultJson('output');
-    // expect(output2).toContain({
-    //   description:
-    //     'Multiple failed login attempts detected from IP 192.168.1.45 targeting admin account. 15 failures in 3 minutes exceeding threshold.',
-    // });
-
-    // await page.testSubj.waitForSelector('workflowExecutionPanel', { state: 'visible' });
-
-    // const logEachExecutions = page.testSubj
-    //   .locator('workflowExecutionPanel')
-    //   .getByRole('button', { name: 'log_each_alert' });
-    // await expect(logEachExecutions).toHaveCount(1);
+    // TODO: validate the output is matching the alerts, first execution should show the last alert and the second execution should show the first alert
 
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
@@ -674,5 +647,7 @@ steps:
 
     const executionItems2 = page.testSubj.locator('workflowExecutionListItem');
     await expect(executionItems2).toHaveCount(1, { timeout: 60000 });
+
+    // TODO: validate the output show both alerts
   });
 });

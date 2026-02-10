@@ -10,10 +10,15 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
+import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 
 test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
   });
 
   test('should enable disabled workflows', async ({ page, pageObjects }) => {

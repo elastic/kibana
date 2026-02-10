@@ -10,10 +10,15 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
+import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 
 test.describe('WorkflowsList/FilterSortSearch', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
   });
 
   test('should filter workflows by enabling state', async ({ page, pageObjects }) => {

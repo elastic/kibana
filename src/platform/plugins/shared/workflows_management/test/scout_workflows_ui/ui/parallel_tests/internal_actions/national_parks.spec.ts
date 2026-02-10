@@ -10,11 +10,16 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
+import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { nationalParksWorkflow } from '../../fixtures/workflows';
 
 test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
+  });
+
+  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
   });
 
   test('should run national park workflow successfully', async ({ page, pageObjects }) => {
