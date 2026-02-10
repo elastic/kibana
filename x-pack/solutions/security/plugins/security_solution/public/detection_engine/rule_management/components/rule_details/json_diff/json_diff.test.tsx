@@ -253,11 +253,11 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
 
     renderRuleDiffComponent({ oldRule, newRule });
     expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(0);
-    expect(screen.queryAllByText('Expand 35 unchanged lines')).toHaveLength(1);
+    expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(1);
 
-    await userEvent.click(screen.getByText('Expand 35 unchanged lines'));
+    await userEvent.click(screen.getByText('Expand 44 unchanged lines'));
 
-    expect(screen.queryAllByText('Expand 35 unchanged lines')).toHaveLength(0);
+    expect(screen.queryAllByText('Expand 44 unchanged lines')).toHaveLength(0);
     expect(screen.queryAllByText('"author":', { exact: false })).toHaveLength(2);
   });
 
@@ -296,7 +296,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
     const arePropertiesSortedInConciseView = checkRenderedPropertyNamesAreSorted();
     expect(arePropertiesSortedInConciseView).toBe(true);
 
-    await userEvent.click(screen.getByText('Expand 35 unchanged lines'));
+    await userEvent.click(screen.getByText('Expand 44 unchanged lines'));
     const arePropertiesSortedInExpandedView = checkRenderedPropertyNamesAreSorted();
     expect(arePropertiesSortedInExpandedView).toBe(true);
   });
