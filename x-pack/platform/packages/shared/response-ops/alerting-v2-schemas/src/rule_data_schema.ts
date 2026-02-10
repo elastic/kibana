@@ -104,7 +104,16 @@ export const createRuleDataSchema = z
     stateTransition: stateTransitionSchema,
   })
   .strip()
-  .refine((data) => !(data.kind !== 'alert' && data.stateTransition != null), {
+  /**
+   *
+   * The `.refine` method adds a custom validation to the schema.
+   * In this case, it enforces that the `stateTransition` property is only allowed when `kind` is "alert".
+   * The predicate `data.kind === 'alert' || data.stateTransition == null` means:
+   * - If the rule kind is "alert", `stateTransition` may be present (or absent).
+   * - For any other `kind`, `stateTransition` must be `null` or `undefined`.
+   * If validation fails, the specified error message will be associated with the `stateTransition` field.
+   */
+  .refine((data) => data.kind === 'alert' || data.stateTransition == null, {
     message: 'stateTransition is only allowed when kind is "alert".',
     path: ['stateTransition'],
   });

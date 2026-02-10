@@ -393,7 +393,6 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      // 1 + 1 = 2, still below threshold of 3
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
@@ -430,10 +429,10 @@ describe('DirectorService', () => {
         alertEvents: [alertEvent],
       });
 
-      // 2 + 1 = 3, meets threshold of 3
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
+        status_count: 1,
       });
     });
   });

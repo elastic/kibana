@@ -6,44 +6,39 @@
  */
 
 import { TransitionStrategyFactory } from './strategy_resolver';
-import { BasicTransitionStrategy } from './basic_strategy';
-import { CountTimeframeStrategy } from './count_timeframe_strategy';
+import { createTransitionStrategyFactory } from './strategy_resolver.mock';
 import { createRuleResponse } from '../../test_utils';
 
 describe('TransitionStrategyFactory', () => {
   let factory: TransitionStrategyFactory;
-  let basicStrategy: BasicTransitionStrategy;
-  let countTimeframeStrategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    basicStrategy = new BasicTransitionStrategy();
-    countTimeframeStrategy = new CountTimeframeStrategy();
-    factory = new TransitionStrategyFactory([countTimeframeStrategy, basicStrategy]);
+    factory = createTransitionStrategyFactory();
   });
 
   describe('getStrategy', () => {
     it('returns the basic (fallback) strategy when rule has no stateTransition', () => {
       const rule = createRuleResponse({ stateTransition: undefined });
       const resolved = factory.getStrategy(rule);
-      expect(resolved).toBe(basicStrategy);
+      expect(resolved.name).toBe('basic');
     });
 
     it('returns the basic (fallback) strategy when stateTransition is null', () => {
       const rule = createRuleResponse({ stateTransition: null });
       const resolved = factory.getStrategy(rule);
-      expect(resolved).toBe(basicStrategy);
+      expect(resolved.name).toBe('basic');
     });
 
     it('returns the count_timeframe strategy when rule has stateTransition', () => {
       const rule = createRuleResponse({ stateTransition: { pendingCount: 3 } });
       const resolved = factory.getStrategy(rule);
-      expect(resolved).toBe(countTimeframeStrategy);
+      expect(resolved.name).toBe('count_timeframe');
     });
 
     it('returns the count_timeframe strategy when stateTransition is an empty object', () => {
       const rule = createRuleResponse({ stateTransition: {} });
       const resolved = factory.getStrategy(rule);
-      expect(resolved).toBe(countTimeframeStrategy);
+      expect(resolved.name).toBe('count_timeframe');
     });
   });
 

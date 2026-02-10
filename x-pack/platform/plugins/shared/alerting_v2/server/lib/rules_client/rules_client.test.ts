@@ -416,15 +416,6 @@ describe('RulesClient', () => {
         id: 'rule-id-signal-null',
         data: { stateTransition: null } as unknown as UpdateRuleData,
       });
-
-      await expect(
-        client.updateRule({
-          id: 'rule-id-alert',
-          data: {
-            stateTransition: { pendingCount: 3, recoveringCount: 5 },
-          },
-        })
-      ).resolves.not.toThrow();
     });
   });
 

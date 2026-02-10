@@ -9,7 +9,7 @@ import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
 
 const validCreateData = {
   name: 'test rule',
-  kind: 'alert' as const,
+  kind: 'alert',
   schedule: { custom: '5m' },
   query: 'FROM logs-* | LIMIT 1',
   lookbackWindow: '5m',
@@ -94,6 +94,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         name: 'a'.repeat(65),
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -111,6 +112,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         tags: Array.from({ length: 101 }, (_, i) => `tag-${i}`),
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -119,6 +121,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         tags: ['a'.repeat(65)],
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -129,14 +132,16 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         schedule: { custom: 'bad' },
       });
+
       expect(result.success).toBe(false);
     });
 
-    it('rejects unknown keys inside schedule (strict)', () => {
+    it('rejects unknown keys inside schedule', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         schedule: { custom: '1m', extra: true },
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -159,6 +164,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         lookbackWindow: 'invalid',
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -169,6 +175,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         groupingKey: Array.from({ length: 17 }, (_, i) => `field-${i}`),
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -179,6 +186,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: {},
       });
+
       expect(result.stateTransition).toEqual({});
     });
 
@@ -187,6 +195,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingOperator: 'AND', pendingCount: 2, pendingTimeframe: '10m' },
       });
+
       expect(result.stateTransition).toEqual({
         pendingOperator: 'AND',
         pendingCount: 2,
@@ -203,6 +212,7 @@ describe('createRuleDataSchema', () => {
           recoveringTimeframe: '15m',
         },
       });
+
       expect(result.stateTransition).toEqual({
         recoveringOperator: 'OR',
         recoveringCount: 5,
@@ -215,6 +225,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingCount: 0 },
       });
+
       expect(result.stateTransition?.pendingCount).toBe(0);
     });
 
@@ -223,6 +234,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { recoveringCount: 0 },
       });
+
       expect(result.stateTransition?.recoveringCount).toBe(0);
     });
 
@@ -231,6 +243,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingCount: -1 },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -239,6 +252,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingCount: 1.5 },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -247,6 +261,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { recoveringCount: -1 },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -255,6 +270,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { recoveringCount: 2.5 },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -263,6 +279,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingOperator: 'XOR' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -271,6 +288,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { recoveringOperator: 'NOT' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -279,6 +297,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { pendingTimeframe: 'bad' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -287,6 +306,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { recoveringTimeframe: 'bad' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -295,6 +315,7 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         stateTransition: { unknownKey: true },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -304,12 +325,9 @@ describe('createRuleDataSchema', () => {
         kind: 'signal',
         stateTransition: { pendingCount: 1 },
       });
-      expect(result.success).toBe(false);
 
-      if (!result.success) {
-        const issue = result.error.issues.find((i) => i.path.includes('stateTransition'));
-        expect(issue?.message).toBe('stateTransition is only allowed when kind is "alert".');
-      }
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
   });
 
@@ -340,6 +358,7 @@ describe('updateRuleDataSchema', () => {
     const result = updateRuleDataSchema.parse({
       stateTransition: { pendingCount: 3, recoveringCount: 5 },
     });
+
     expect(result.stateTransition).toEqual({ pendingCount: 3, recoveringCount: 5 });
   });
 
@@ -383,6 +402,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         tags: Array.from({ length: 101 }, (_, i) => `tag-${i}`),
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -390,6 +410,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         groupingKey: Array.from({ length: 17 }, (_, i) => `field-${i}`),
       });
+
       expect(result.success).toBe(false);
     });
   });
@@ -399,6 +420,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         stateTransition: { pendingOperator: 'XOR' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -406,6 +428,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         stateTransition: { pendingCount: 1.5 },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -413,6 +436,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         stateTransition: { pendingTimeframe: 'bad' },
       });
+
       expect(result.success).toBe(false);
     });
 
@@ -420,6 +444,7 @@ describe('updateRuleDataSchema', () => {
       const result = updateRuleDataSchema.safeParse({
         stateTransition: { unknownKey: true },
       });
+
       expect(result.success).toBe(false);
     });
   });

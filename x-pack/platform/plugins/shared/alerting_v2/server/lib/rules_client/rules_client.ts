@@ -146,7 +146,7 @@ export class RulesClient {
       throw e;
     }
 
-    if (existingAttrs.kind === 'signal' && parsed.data.stateTransition != null) {
+    if (existingAttrs.kind !== 'alert' && parsed.data.stateTransition != null) {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
     }
 
