@@ -86,6 +86,7 @@
     "snoozeSchedule.skipRecurrences",
     "tags",
     "throttle",
+    "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
