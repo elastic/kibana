@@ -13,16 +13,21 @@ import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components/fi
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { SelectBasicFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-export const SelectBasic = (props: z.infer<typeof SelectBasicFieldSchema>) => {
+export const SelectBasic = ({
+  label,
+  metadata,
+  name,
+  type,
+}: z.infer<typeof SelectBasicFieldSchema>) => {
   return (
     <UseField
-      key={props.name}
-      path={`${CASE_EXTENDED_FIELDS}.${props.name}_as_${props.type}`}
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
       component={SelectField}
       componentProps={{
-        label: props.label,
+        label,
         euiFieldProps: {
-          options: props.metadata.options.map((option) => ({
+          options: metadata.options.map((option) => ({
             value: option,
             text: option,
           })),

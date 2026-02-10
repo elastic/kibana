@@ -12,14 +12,14 @@ import { NumericField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { InputNumberFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-export const InputNumber = (props: z.infer<typeof InputNumberFieldSchema>) => {
+export const InputNumber = ({ label, name, type }: z.infer<typeof InputNumberFieldSchema>) => {
   return (
     <UseField
-      key={props.name}
-      path={`${CASE_EXTENDED_FIELDS}.${props.name}_as_${props.type}`}
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
       component={NumericField}
       componentProps={{
-        label: props.label,
+        label,
       }}
     />
   );

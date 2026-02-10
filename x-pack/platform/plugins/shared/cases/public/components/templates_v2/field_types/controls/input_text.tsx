@@ -12,14 +12,14 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components/fiel
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { type InputTextFieldSchema } from '../../../../../common/types/domain/template/fields';
 
-export const InputText = (props: z.infer<typeof InputTextFieldSchema>) => {
+export const InputText = ({ label, name, type }: z.infer<typeof InputTextFieldSchema>) => {
   return (
     <UseField
-      key={props.name}
-      path={`${CASE_EXTENDED_FIELDS}.${props.name}_as_${props.type}`}
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
       component={TextField}
       componentProps={{
-        label: props.label,
+        label,
       }}
     />
   );
