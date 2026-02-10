@@ -75,10 +75,9 @@ export class DatePicker {
     if (await showBtn.isVisible()) {
       // Click to show start/end time pickers
       await showBtn.click();
-      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
-      await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
+      return;
     } else {
-      await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
+      await getTestSubjLocator('superDatePickerendDatePopoverButton').waitFor();
     }
   }
 
@@ -98,8 +97,69 @@ export class DatePicker {
         ? containerLocator.getByTestId(selector)
         : this.page.testSubj.locator(selector);
 
+    const endButton = getTestSubjLocator('superDatePickerendDatePopoverButton');
+    const startButton = getTestSubjLocator('superDatePickerstartDatePopoverButton');
+    const isPopoverVisible = async (locator: Locator) => {
+      try {
+        return await locator.isVisible();
+      } catch {
+        return false;
+      }
+    };
+
+    if (!(await isPopoverVisible(endButton)) && !(await isPopoverVisible(startButton))) {
+      await getTestSubjLocator('superDatePickerToggleQuickMenuButton').click();
+      await this.openAbsoluteTab();
+
+      const labeledStartInput = this.page.locator(
+        '[data-test-subj="superDatePickerAbsoluteDateInput"][aria-label="Start date"]'
+      );
+      const labeledEndInput = this.page.locator(
+        '[data-test-subj="superDatePickerAbsoluteDateInput"][aria-label="End date"]'
+      );
+      const visibleInputs = this.page.testSubj
+        .locator('superDatePickerAbsoluteDateInput')
+        .filter({ visible: true });
+      const parseButton = this.page.testSubj.locator('parseAbsoluteDateFormat');
+
+      let inputFrom: Locator;
+      let inputTo: Locator;
+
+      if (
+        (await isPopoverVisible(labeledStartInput)) &&
+        (await isPopoverVisible(labeledEndInput))
+      ) {
+        inputFrom = labeledStartInput;
+        inputTo = labeledEndInput;
+      } else {
+        const inputs = await visibleInputs.all();
+        inputFrom = inputs[0];
+        inputTo = inputs[1] ?? inputs[0];
+      }
+
+      await inputTo.clear();
+      await inputTo.fill(to);
+      if (await isPopoverVisible(parseButton)) {
+        await parseButton.click();
+      }
+
+      await inputFrom.clear();
+      await inputFrom.fill(from);
+      if (await isPopoverVisible(parseButton)) {
+        await parseButton.click();
+      }
+
+      const applyButton = getTestSubjLocator('superDatePickerApplyTimeButton');
+      if (await isPopoverVisible(applyButton)) {
+        await applyButton.click();
+      } else {
+        await getTestSubjLocator('querySubmitButton').click();
+      }
+      return;
+    }
+
     // we start with end date
-    await getTestSubjLocator('superDatePickerendDatePopoverButton').click();
+    await endButton.click();
     await this.openAbsoluteTab();
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
@@ -107,7 +167,7 @@ export class DatePicker {
     await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
     await this.page.keyboard.press('Escape');
     // and later change start date
-    await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
+    await startButton.click();
     await this.openAbsoluteTab();
     const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputTo.clear();
