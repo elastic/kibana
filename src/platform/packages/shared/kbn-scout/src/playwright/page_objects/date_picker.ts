@@ -75,26 +75,10 @@ export class DatePicker {
     if (await showBtn.isVisible()) {
       // Click to show start/end time pickers
       await showBtn.click();
-      const startButton = getTestSubjLocator('superDatePickerstartDatePopoverButton');
-      const endButton = getTestSubjLocator('superDatePickerendDatePopoverButton');
-      try {
-        await expect
-          .poll(async () => (await startButton.isVisible()) || (await endButton.isVisible()), {
-            timeout: 5000,
-            intervals: [500],
-          })
-          .toBe(true);
-      } catch {
-        await getTestSubjLocator('superDatePickerToggleQuickMenuButton').click();
-        await expect
-          .poll(async () => (await startButton.isVisible()) || (await endButton.isVisible()), {
-            timeout: 5000,
-            intervals: [500],
-          })
-          .toBe(true);
-      }
+      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
+      await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
     } else {
-      await getTestSubjLocator('superDatePickerendDatePopoverButton').waitFor();
+      await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
     }
   }
 
