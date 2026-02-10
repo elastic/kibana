@@ -2516,7 +2516,7 @@
               "tags": [],
               "label": "searchSpec",
               "description": [
-                "Provide the settings neccessary to create a new Search Service"
+                "Provide the settings necessary to create a new Search Service"
               ],
               "signature": [
                 {
@@ -2564,7 +2564,7 @@
               "tags": [],
               "label": "searchSpec",
               "description": [
-                "Provide the settings neccessary to create a new Search Service"
+                "Provide the settings necessary to create a new Search Service"
               ],
               "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/plugin.ts",
               "lineNumber": 110,
