@@ -18,10 +18,7 @@ export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
   const productFeatureKeys = useProductFeatureKeys();
   const hasEnterpriseLicense = license.isEnterprise();
-  const {
-    edit: canEditRules,
-    read: canReadRules,
-  } = useUserPrivileges().rulesPrivileges.rules;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
   const canAccessRulesManagementSettings =
     useUserPrivileges().rulesPrivileges.rulesManagementSettings?.edit ?? false;
   const hasRuleGapsAutoFillFeature = productFeatureKeys.has(

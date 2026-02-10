@@ -53,7 +53,6 @@ export const calculateRulesAuthz = async ({
     canManualRunRules: capabilities[MANUAL_RUN_RULES_UI] as boolean,
     canEditCustomHighlightedFields: capabilities[CUSTOM_HIGHLIGHTED_FIELDS_UI_EDIT] as boolean,
     canEditInvestigationGuides: capabilities[INVESTIGATION_GUIDE_UI_EDIT] as boolean,
-    canAccessRulesManagementSettings:
-      capabilities[RULES_MANAGEMENT_SETTINGS_UI] as boolean,
+    canAccessRulesManagementSettings: capabilities[RULES_MANAGEMENT_SETTINGS_UI] as boolean,
   };
 };
