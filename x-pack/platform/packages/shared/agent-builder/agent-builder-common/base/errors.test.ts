@@ -241,14 +241,14 @@ describe('AgentBuilder errors', () => {
       const meta = { foo: 'bar' };
       const error = createHooksExecutionError(
         'hook failed',
-        HookLifecycle.afterConversationRound,
+        HookLifecycle.afterAgent,
         'my-hook',
         HookExecutionMode.nonBlocking,
         meta
       );
       expect(error.meta).toEqual({
         foo: 'bar',
-        hookLifecycle: HookLifecycle.afterConversationRound,
+        hookLifecycle: HookLifecycle.afterAgent,
         hookId: 'my-hook',
         hookMode: HookExecutionMode.nonBlocking,
       });
@@ -257,12 +257,12 @@ describe('AgentBuilder errors', () => {
     it('should use empty object as default metadata when meta is omitted', () => {
       const error = createHooksExecutionError(
         'hook failed',
-        HookLifecycle.beforeConversationRound,
+        HookLifecycle.beforeAgent,
         'my-hook',
         HookExecutionMode.blocking
       );
       expect(error.meta).toEqual({
-        hookLifecycle: HookLifecycle.beforeConversationRound,
+        hookLifecycle: HookLifecycle.beforeAgent,
         hookId: 'my-hook',
         hookMode: HookExecutionMode.blocking,
       });

@@ -10,10 +10,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { HooksService } from './hooks_service';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type {
-  BeforeConversationRoundHookContext,
+  BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
-  AfterConversationRoundHookContext,
+  AfterAgentHookContext,
 } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { type ConversationRound } from '@kbn/agent-builder-common';
@@ -52,20 +52,19 @@ describe('HooksService', () => {
 
   const flushEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
 
-  const baseContext = {
-    agentId: TEST_AGENT_ID,
-    conversationId: TEST_CONVERSATION_ID,
-    conversation: {
-      id: TEST_CONVERSATION_ID,
-      agent_id: TEST_AGENT_ID,
-      user: { id: 'u-1', name: 'User', username: 'user' },
-      title: 't',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      rounds: [],
-    },
-    nextInput: { message: 'hello' },
+  const baseContext: BeforeAgentHookContext = {
+    nextInput: { message: 'hello', attachments: [] },
     request: {} as any,
+  };
+
+  const baseConversation = {
+    id: TEST_CONVERSATION_ID,
+    agent_id: TEST_AGENT_ID,
+    user: { id: 'u-1', name: 'User', username: 'user' },
+    title: 't',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    rounds: [],
   };
 
   it('runs blocking hooks in priority order (desc) and applies nextInput mutation', async () => {
@@ -76,7 +75,7 @@ describe('HooksService', () => {
       id: 'h1',
       priority: 5,
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
           handler: async () => {
             calls.push('h1');
@@ -89,16 +88,16 @@ describe('HooksService', () => {
       id: 'h2',
       priority: 10,
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
-          handler: async (ctx: BeforeConversationRoundHookContext) => {
+          handler: async (ctx: BeforeAgentHookContext) => {
             calls.push(`h2:${ctx.nextInput.message}`);
           },
         },
       },
     });
 
-    const result = await start.run(HookLifecycle.beforeConversationRound, baseContext);
+    const result = await start.run(HookLifecycle.beforeAgent, baseContext);
     expect(calls).toEqual(['h2:hello', 'h1']);
     expect(result.nextInput.message).toBe('mutated');
   });
@@ -356,7 +355,7 @@ describe('HooksService', () => {
     setup.register({
       id: 'error-hook',
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
           handler: async () => {
             throw new Error('error');
@@ -366,7 +365,7 @@ describe('HooksService', () => {
     });
 
     try {
-      await start.run(HookLifecycle.beforeConversationRound, baseContext);
+      await start.run(HookLifecycle.beforeAgent, baseContext);
       throw new Error('Expected hook execution to throw');
     } catch (e) {
       expect(e).toMatchObject({ message: 'error' });
@@ -380,7 +379,7 @@ describe('HooksService', () => {
     setup.register({
       id: 'slow-hook',
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
           timeout: 50,
           handler: () =>
@@ -391,13 +390,11 @@ describe('HooksService', () => {
       },
     });
 
-    await expect(
-      start.run(HookLifecycle.beforeConversationRound, baseContext)
-    ).rejects.toMatchObject({
+    await expect(start.run(HookLifecycle.beforeAgent, baseContext)).rejects.toMatchObject({
       message: expect.stringContaining('timed out after 50ms'),
       meta: expect.objectContaining({
-        hookId: 'slow-hook-beforeConversationRound',
-        hookLifecycle: HookLifecycle.beforeConversationRound,
+        hookId: 'slow-hook-beforeAgent',
+        hookLifecycle: HookLifecycle.beforeAgent,
       }),
     });
   });
@@ -412,30 +409,31 @@ describe('HooksService', () => {
     setup.register({
       id: 'p1',
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.nonBlocking,
           handler,
         },
       },
     });
 
-    expect(() => start.run(HookLifecycle.beforeConversationRound, baseContext)).not.toThrow();
+    expect(() => start.run(HookLifecycle.beforeAgent, baseContext)).not.toThrow();
   });
 
-  it('applies afterConversationRound mutation and returns modified round', async () => {
+  it('applies afterAgent mutation and returns modified round', async () => {
     const { setup, start } = createService();
     const baseRound = {
       id: 'round-1',
     } as unknown as ConversationRound;
-    const baseAfterRoundContext: AfterConversationRoundHookContext = {
-      ...baseContext,
+    const baseAfterRoundContext: AfterAgentHookContext = {
+      request: baseContext.request,
+      conversation: { ...baseConversation, rounds: [baseRound] },
       round: baseRound,
     };
 
     setup.register({
       id: 'round-mutator',
       hooks: {
-        [HookLifecycle.afterConversationRound]: {
+        [HookLifecycle.afterAgent]: {
           mode: HookExecutionMode.blocking,
           handler: async (ctx) => ({
             round: {
@@ -447,7 +445,7 @@ describe('HooksService', () => {
       },
     });
 
-    const result = await start.run(HookLifecycle.afterConversationRound, baseAfterRoundContext);
+    const result = await start.run(HookLifecycle.afterAgent, baseAfterRoundContext);
     expect(result.round.response).toEqual({ message: 'modified-by-hook' });
   });
 
@@ -493,19 +491,21 @@ describe('HooksService', () => {
     setup.register({
       id: 'other',
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
           handler: async (ctx) => ctx,
         },
       },
     });
 
-    const contextForAfterRound: AfterConversationRoundHookContext = {
-      ...baseContext,
-      round: { id: 'r1' } as unknown as ConversationRound,
+    const roundR1 = { id: 'r1' } as unknown as ConversationRound;
+    const contextForAfterRound: AfterAgentHookContext = {
+      request: baseContext.request,
+      conversation: { ...baseConversation, rounds: [roundR1] },
+      round: roundR1,
     };
 
-    const result = await start.run(HookLifecycle.afterConversationRound, contextForAfterRound);
+    const result = await start.run(HookLifecycle.afterAgent, contextForAfterRound);
     expect(result).toBe(contextForAfterRound);
   });
 
@@ -518,7 +518,7 @@ describe('HooksService', () => {
     setup.register({
       id: 'signal-check',
       hooks: {
-        [HookLifecycle.beforeConversationRound]: {
+        [HookLifecycle.beforeAgent]: {
           mode: HookExecutionMode.blocking,
           handler: async (ctx) => {
             receivedSignal = ctx.abortSignal;
@@ -528,7 +528,7 @@ describe('HooksService', () => {
       },
     });
 
-    await start.run(HookLifecycle.beforeConversationRound, contextWithSignal);
+    await start.run(HookLifecycle.beforeAgent, contextWithSignal);
     expect(receivedSignal).toBe(controller.signal);
   });
 });

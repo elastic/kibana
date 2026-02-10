@@ -11,8 +11,8 @@
  * Note: this is intentionally scoped to server-side agent execution lifecycle.
  */
 export enum HookLifecycle {
-  beforeConversationRound = 'beforeConversationRound',
-  afterConversationRound = 'afterConversationRound',
+  beforeAgent = 'beforeAgent',
+  afterAgent = 'afterAgent',
   beforeToolCall = 'beforeToolCall',
   afterToolCall = 'afterToolCall',
 }

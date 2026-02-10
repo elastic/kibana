@@ -137,11 +137,11 @@ A **conversation round** is one turn in the chat: the user sends a message and t
 
 | Order | Hook | Layer | When it runs | What you can mutate |
 |-------|------|--------|----------------|---------------------|
-| 1 | `beforeConversationRound` | Chat | Right after the user sends a message, before any agent execution | `nextInput` (user message, attachments, etc.) |
+| 1 | `beforeAgent` | Agent | After conversation transformation (e.g. HITL), before agent execution | `nextInput` (user message, attachments, etc.) |
 | 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
 | 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
 | 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
-| 5 | `afterConversationRound` | Chat | When the round is complete and the user sees the response | `round` (round summary) |
+| 5 | `afterAgent` | Agent | When the round is complete, before it is persisted/emitted | `round` (round summary) |
 
 Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
 
@@ -155,10 +155,10 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
   agentBuilder.hooks.register({
     id: 'example-hooks',
     hooks: {
-      [HookLifecycle.beforeConversationRound]: {
+      [HookLifecycle.beforeAgent]: {
         mode: HookExecutionMode.blocking,
         handler: (context) => {
-          console.log('beforeConversationRound');
+          console.log('beforeAgent');
           return {
             nextInput: {
               ...context.nextInput,
@@ -169,10 +169,10 @@ export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup
           };
         },
       },
-      [HookLifecycle.afterConversationRound]: {
+      [HookLifecycle.afterAgent]: {
         mode: HookExecutionMode.blocking,
         handler: (context) => {
-          console.log('afterConversationRound');
+          console.log('afterAgent');
         },
       },
       [HookLifecycle.beforeToolCall]: {
@@ -209,9 +209,9 @@ The hook execution respects the priority field  and after that the registration 
 ```
 Before hooks run in order:
 
-    hook_1 beforeConversationRound
-    hook_2 beforeConversationRound
-    hook_3 beforeConversationRound
+    hook_1 beforeAgent
+    hook_2 beforeAgent
+    hook_3 beforeAgent
 
     hook_1 beforeToolCall
     hook_2 beforeToolCall
@@ -223,9 +223,9 @@ After hooks run in reverse order:
     hook_2 afterToolCall
     hook_1.afterToolCall
 
-    hook_3 afterConversationRound
-    hook_2 afterConversationRound
-    hook_1.afterConversationRound
+    hook_3 afterAgent
+    hook_2 afterAgent
+    hook_1.afterAgent
 ```
 
 ## MCP Server

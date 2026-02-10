@@ -34,8 +34,6 @@ import {
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
 import { isConversationIdSetEvent, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat';
-import type { HooksServiceStart } from '@kbn/agent-builder-server';
-import { HookLifecycle } from '../hooks';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 const createChatModel = (): InferenceChatModel => {
@@ -55,8 +53,6 @@ describe('ChatService', () => {
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
 
   let chatService: ChatService;
-  let hooks: HooksServiceStart;
-  let hooksRunMock: jest.MockedFunction<HooksServiceStart['run']>;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -66,10 +62,6 @@ describe('ChatService', () => {
     conversationService = createConversationServiceMock();
     uiSettings = uiSettingsServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
-    hooksRunMock = jest.fn(async (_event, context) => context) as jest.MockedFunction<
-      HooksServiceStart['run']
-    >;
-    hooks = { run: hooksRunMock };
 
     chatService = createChatService({
       inference,
@@ -78,7 +70,6 @@ describe('ChatService', () => {
       conversationService,
       uiSettings,
       savedObjects,
-      hooks,
     });
 
     const conversation = createEmptyConversation();
@@ -164,13 +155,7 @@ describe('ChatService', () => {
     );
   });
 
-  it('beforeConversationRound is called and effectiveNextInput from hook is passed to executeAgent$', async () => {
-    hooksRunMock.mockImplementation(async (event, context) =>
-      event === HookLifecycle.beforeConversationRound
-        ? { ...context, nextInput: { message: 'mutated-by-hook' } }
-        : context
-    );
-
+  it('passes nextInput through to executeAgent$', async () => {
     const obs$ = chatService.converse({
       agentId: 'my-agent',
       request,
@@ -179,27 +164,19 @@ describe('ChatService', () => {
 
     await firstValueFrom(obs$.pipe(toArray()));
 
-    expect(hooksRunMock).toHaveBeenCalledWith(
-      HookLifecycle.beforeConversationRound,
-      expect.objectContaining({
-        agentId: 'my-agent',
-        nextInput: { message: 'hello' },
-        request,
-      })
-    );
     expect(executeAgentMock$).toHaveBeenCalledWith(
       expect.objectContaining({
-        nextInput: { message: 'mutated-by-hook' },
+        nextInput: { message: 'hello' },
       })
     );
   });
 
-  it('afterConversationRound is called on round-complete and modified round is emitted', async () => {
-    const originalRound = {
+  it('emits round-complete events from executeAgent$', async () => {
+    const round = {
       id: 'round-1',
       trace_id: 'trace-1',
       steps: [],
-      response: { message: 'Original response' },
+      response: { message: 'Response' },
       status: ConversationRoundStatus.completed,
       input: { message: 'hi' },
       started_at: new Date().toISOString(),
@@ -212,20 +189,10 @@ describe('ChatService', () => {
         output_tokens: 0,
       },
     };
-    const modifiedRound = {
-      ...originalRound,
-      response: { message: 'Modified by hook' },
-    };
     const mockRoundCompleteEvent = {
       type: ChatEventType.roundComplete,
-      data: { round: originalRound },
+      data: { round },
     };
-
-    hooksRunMock.mockImplementation(async (event, context) =>
-      event === HookLifecycle.afterConversationRound
-        ? { ...context, round: modifiedRound }
-        : context
-    );
 
     executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
 
@@ -239,14 +206,7 @@ describe('ChatService', () => {
 
     const roundCompleteEvents = events.filter(isRoundCompleteEvent);
     expect(roundCompleteEvents).toHaveLength(1);
-    expect(roundCompleteEvents[0].data.round).toEqual(modifiedRound);
-    expect(hooksRunMock).toHaveBeenCalledWith(
-      HookLifecycle.afterConversationRound,
-      expect.objectContaining({
-        agentId: 'my-agent',
-        round: originalRound,
-      })
-    );
+    expect(roundCompleteEvents[0].data.round).toEqual(round);
   });
 
   describe('autoCreateConversationWithId', () => {

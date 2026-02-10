@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  ConverseInput,
+  ProcessedRoundInput,
+  RoundInput,
+} from '@kbn/agent-builder-common';
 import { createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
@@ -38,11 +43,6 @@ export interface ProcessedAttachment {
 export interface ProcessedAttachmentType {
   type: string;
   description?: string;
-}
-
-export interface ProcessedRoundInput {
-  message: string;
-  attachments: ProcessedAttachment[];
 }
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {

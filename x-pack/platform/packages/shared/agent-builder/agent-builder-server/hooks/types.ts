@@ -8,31 +8,28 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   type Conversation,
-  type ConverseInput,
   type ConversationRound,
+  type ProcessedRoundInput,
   HookLifecycle,
   HookExecutionMode,
 } from '@kbn/agent-builder-common';
 import type { RunToolReturn } from '../runner';
 
 export { HookLifecycle, HookExecutionMode };
+export type { ProcessedRoundInput };
 
 interface AgentHookContextBase {
   request: KibanaRequest;
   abortSignal?: AbortSignal;
 }
 
-interface ConversationRoundHookContextBase extends AgentHookContextBase {
-  agentId: string;
-  conversation: Conversation;
+export interface BeforeAgentHookContext extends AgentHookContextBase {
+  nextInput: ProcessedRoundInput;
 }
 
-export interface BeforeConversationRoundHookContext extends ConversationRoundHookContextBase {
-  nextInput: ConverseInput;
-}
-
-export interface AfterConversationRoundHookContext extends ConversationRoundHookContextBase {
+export interface AfterAgentHookContext extends AgentHookContextBase {
   round: ConversationRound;
+  conversation?: Conversation;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -48,8 +45,8 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
 }
 
 export interface HookContextByLifecycle {
-  [HookLifecycle.beforeConversationRound]: BeforeConversationRoundHookContext;
-  [HookLifecycle.afterConversationRound]: AfterConversationRoundHookContext;
+  [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
+  [HookLifecycle.afterAgent]: AfterAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
 }
@@ -60,10 +57,10 @@ export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextBy
  * Define which return type each hook lifecycle supports.
  */
 export interface HookHandlerResultByLifecycle {
-  [HookLifecycle.beforeConversationRound]: {
-    nextInput?: ConverseInput;
+  [HookLifecycle.beforeAgent]: {
+    nextInput?: ProcessedRoundInput;
   };
-  [HookLifecycle.afterConversationRound]: {
+  [HookLifecycle.afterAgent]: {
     round?: ConversationRound;
   };
   [HookLifecycle.beforeToolCall]: {

@@ -33,10 +33,7 @@ export interface HooksServiceSetupDeps {
 const DEFAULT_HOOK_TIMEOUT_MS = 5 * 60 * 1000;
 
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
-const AFTER_EVENTS: HookLifecycle[] = [
-  HookLifecycle.afterConversationRound,
-  HookLifecycle.afterToolCall,
-];
+const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterAgent, HookLifecycle.afterToolCall];
 
 const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
 

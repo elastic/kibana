@@ -137,7 +137,6 @@ export class ServiceManager {
       savedObjects,
       trackingService,
       analyticsService,
-      hooks,
     });
 
     this.internalStart = {

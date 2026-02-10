@@ -8,54 +8,48 @@
 import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import {
-  applyBeforeConversationRoundResult,
-  applyAfterConversationRoundResult,
+  applyBeforeAgentResult,
+  applyAfterAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
 } from './apply_result';
 import type {
-  BeforeConversationRoundHookContext,
-  AfterConversationRoundHookContext,
+  BeforeAgentHookContext,
+  AfterAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
 } from './types';
 import type { RunToolReturn } from '../runner/runner';
 
-const createMockRequest = () => ({ headers: {} } as BeforeConversationRoundHookContext['request']);
+const createMockRequest = () => ({ headers: {} } as BeforeAgentHookContext['request']);
 
 describe('apply_result', () => {
-  describe('applyBeforeConversationRoundResult', () => {
-    const baseContext: BeforeConversationRoundHookContext = {
+  describe('applyBeforeAgentResult', () => {
+    const baseContext: BeforeAgentHookContext = {
       request: createMockRequest(),
-      agentId: 'agent-1',
-      conversation: { id: 'conv-1', rounds: [] } as unknown as Conversation,
-      nextInput: { message: 'original' },
+      nextInput: { message: 'original', attachments: [] },
     };
 
     it('returns context unchanged when result is undefined', () => {
-      expect(applyBeforeConversationRoundResult(baseContext, undefined)).toBe(baseContext);
+      expect(applyBeforeAgentResult(baseContext, undefined)).toBe(baseContext);
     });
 
     it('returns context unchanged when result object has no nextInput', () => {
-      expect(applyBeforeConversationRoundResult(baseContext, {})).toBe(baseContext);
-      expect(applyBeforeConversationRoundResult(baseContext, { nextInput: undefined })).toBe(
-        baseContext
-      );
+      expect(applyBeforeAgentResult(baseContext, {})).toBe(baseContext);
+      expect(applyBeforeAgentResult(baseContext, { nextInput: undefined })).toBe(baseContext);
     });
 
     it('returns new context with nextInput when result has nextInput', () => {
-      const newInput = { message: 'overridden' };
-      const result = applyBeforeConversationRoundResult(baseContext, { nextInput: newInput });
+      const newInput = { message: 'overridden', attachments: [] };
+      const result = applyBeforeAgentResult(baseContext, { nextInput: newInput });
       expect(result).not.toBe(baseContext);
       expect(result.nextInput).toEqual(newInput);
-      expect(result.agentId).toBe(baseContext.agentId);
     });
   });
 
-  describe('applyAfterConversationRoundResult', () => {
-    const baseContext: AfterConversationRoundHookContext = {
+  describe('applyAfterAgentResult', () => {
+    const baseContext: AfterAgentHookContext = {
       request: createMockRequest(),
-      agentId: 'agent-1',
       conversation: { id: 'conv-1', rounds: [] } as unknown as Conversation,
       round: {
         id: 'round-1',
@@ -66,11 +60,11 @@ describe('apply_result', () => {
     };
 
     it('returns context unchanged when result is undefined', () => {
-      expect(applyAfterConversationRoundResult(baseContext, undefined)).toBe(baseContext);
+      expect(applyAfterAgentResult(baseContext, undefined)).toBe(baseContext);
     });
 
     it('returns context unchanged when result object has no round', () => {
-      expect(applyAfterConversationRoundResult(baseContext, {})).toBe(baseContext);
+      expect(applyAfterAgentResult(baseContext, {})).toBe(baseContext);
     });
 
     it('returns new context with round when result has round', () => {
@@ -80,10 +74,9 @@ describe('apply_result', () => {
         input: { message: 'hi' },
         steps: [],
       } as unknown as ConversationRound;
-      const result = applyAfterConversationRoundResult(baseContext, { round: newRound });
+      const result = applyAfterAgentResult(baseContext, { round: newRound });
       expect(result).not.toBe(baseContext);
       expect(result.round).toEqual(newRound);
-      expect(result.agentId).toBe(baseContext.agentId);
     });
   });
 

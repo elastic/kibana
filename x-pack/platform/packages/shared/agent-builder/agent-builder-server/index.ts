@@ -82,16 +82,17 @@ export type {
   HookRegistration,
   HooksServiceSetup,
   HooksServiceStart,
-  BeforeConversationRoundHookContext,
-  AfterConversationRoundHookContext,
+  BeforeAgentHookContext,
+  AfterAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  ProcessedRoundInput,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
   applyHookResultByLifecycle as applyHookResultByEvent,
-  applyBeforeConversationRoundResult,
-  applyAfterConversationRoundResult,
+  applyBeforeAgentResult,
+  applyAfterAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
 } from './hooks/apply_result';

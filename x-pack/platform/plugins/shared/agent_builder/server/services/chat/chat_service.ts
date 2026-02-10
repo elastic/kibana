@@ -7,14 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
-import { filter, of, defer, shareReplay, switchMap, merge, mergeMap, EMPTY, from } from 'rxjs';
+import { filter, of, defer, switchMap, merge, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   type ChatEvent,
-  type ConverseInput,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
@@ -37,8 +36,6 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import type { HooksServiceStart } from '../hooks';
-import { HookLifecycle } from '../hooks';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -49,7 +46,6 @@ interface ChatServiceDeps {
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
-  hooks?: HooksServiceStart;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -101,21 +97,12 @@ class ChatServiceImpl implements ChatService {
           conversationClient: services.conversationClient,
         });
 
-        const effectiveNextInput = await runBeforeConversationRoundHook({
-          agentId,
-          request,
-          abortSignal,
-          conversation,
-          nextInput: initialNextInput,
-          hooks: this.dependencies.hooks,
-        });
-
         return {
           conversation,
           conversationClient: services.conversationClient,
           chatModel: services.chatModel,
           selectedConnectorId: services.selectedConnectorId,
-          effectiveNextInput,
+          nextInput: initialNextInput,
         };
       }).pipe(
         switchMap((context) => {
@@ -129,7 +116,7 @@ class ChatServiceImpl implements ChatService {
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            nextInput: context.effectiveNextInput,
+            nextInput: context.nextInput,
             capabilities,
             structuredOutput,
             outputSchema,
@@ -139,19 +126,7 @@ class ChatServiceImpl implements ChatService {
             agentService: this.dependencies.agentService,
             browserApiTools,
             configurationOverrides,
-          })
-            .pipe(
-              mergeMap(
-                runAfterConversationRoundHook({
-                  agentId,
-                  request,
-                  abortSignal,
-                  conversation: context.conversation,
-                  hooks: this.dependencies.hooks,
-                })
-              )
-            )
-            .pipe(shareReplay());
+          });
 
           // Generate title (for CREATE) or use existing title (for UPDATE)
           const title$ =
@@ -159,7 +134,7 @@ class ChatServiceImpl implements ChatService {
               ? generateTitle({
                   chatModel: context.chatModel,
                   conversation: context.conversation,
-                  nextInput: context.effectiveNextInput,
+                  nextInput: context.nextInput,
                 })
               : of(context.conversation.title);
 
@@ -218,77 +193,6 @@ class ChatServiceImpl implements ChatService {
     });
   }
 }
-
-/**
- * Runs beforeConversationRound hook and returns the effective nextInput (from hook or original).
- */
-const runBeforeConversationRoundHook = async ({
-  agentId,
-  request,
-  abortSignal,
-  conversation,
-  nextInput,
-  hooks,
-}: {
-  agentId: string;
-  request: ChatConverseParams['request'];
-  abortSignal: AbortSignal | undefined;
-  conversation: ConversationWithOperation;
-  nextInput: ConverseInput;
-  hooks: HooksServiceStart | undefined;
-}): Promise<ConverseInput> => {
-  if (hooks) {
-    const hookContext = await hooks.run(HookLifecycle.beforeConversationRound, {
-      agentId,
-      request,
-      abortSignal,
-      conversation,
-      nextInput,
-    });
-    return hookContext.nextInput ?? nextInput;
-  }
-  return nextInput;
-};
-
-/**
- * Runs afterConversationRound hook on round-complete events and overwrites the round with the hook result.
- */
-const runAfterConversationRoundHook =
-  ({
-    agentId,
-    request,
-    abortSignal,
-    conversation,
-    hooks,
-  }: {
-    agentId: string;
-    request: ChatConverseParams['request'];
-    abortSignal: AbortSignal | undefined;
-    conversation: ConversationWithOperation;
-    hooks: HooksServiceStart | undefined;
-  }) =>
-  (event: ChatEvent): Observable<ChatEvent> => {
-    if (isRoundCompleteEvent(event) && hooks) {
-      return from(
-        hooks
-          .run(HookLifecycle.afterConversationRound, {
-            agentId,
-            request,
-            abortSignal,
-            conversation,
-            round: event.data.round,
-          })
-          .then(({ round }) => ({
-            ...event,
-            data: {
-              ...event.data,
-              round,
-            },
-          }))
-      );
-    }
-    return of(event);
-  };
 
 /**
  * Creates events for conversation persistence (create/update)

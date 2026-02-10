@@ -8,8 +8,8 @@
 import type { HookContextByLifecycle } from './types';
 import {
   HookLifecycle,
-  type BeforeConversationRoundHookContext,
-  type AfterConversationRoundHookContext,
+  type BeforeAgentHookContext,
+  type AfterAgentHookContext,
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
   type HookHandlerResult,
@@ -21,18 +21,18 @@ function isResultObject(
   return result != null && typeof result === 'object';
 }
 
-export function applyBeforeConversationRoundResult(
-  context: BeforeConversationRoundHookContext,
-  result: void | HookHandlerResult<HookLifecycle.beforeConversationRound>
-): BeforeConversationRoundHookContext {
+export function applyBeforeAgentResult(
+  context: BeforeAgentHookContext,
+  result: void | HookHandlerResult<HookLifecycle.beforeAgent>
+): BeforeAgentHookContext {
   if (!isResultObject(result) || result.nextInput === undefined) return context;
   return { ...context, nextInput: result.nextInput };
 }
 
-export function applyAfterConversationRoundResult(
-  context: AfterConversationRoundHookContext,
-  result: void | HookHandlerResult<HookLifecycle.afterConversationRound>
-): AfterConversationRoundHookContext {
+export function applyAfterAgentResult(
+  context: AfterAgentHookContext,
+  result: void | HookHandlerResult<HookLifecycle.afterAgent>
+): AfterAgentHookContext {
   if (!isResultObject(result) || result.round === undefined) return context;
   return { ...context, round: result.round };
 }
@@ -59,8 +59,8 @@ export const applyHookResultByLifecycle: {
     result: void | HookHandlerResult<K>
   ) => HookContextByLifecycle[K];
 } = {
-  [HookLifecycle.beforeConversationRound]: applyBeforeConversationRoundResult,
-  [HookLifecycle.afterConversationRound]: applyAfterConversationRoundResult,
+  [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
+  [HookLifecycle.afterAgent]: applyAfterAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
 };

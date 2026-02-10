@@ -8,6 +8,7 @@
 export {
   ConversationRoundStatus,
   type RoundInput,
+  type ProcessedRoundInput,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,

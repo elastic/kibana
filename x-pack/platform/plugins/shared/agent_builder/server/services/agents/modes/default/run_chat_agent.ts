@@ -9,9 +9,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ChatAgentEvent,
+  Conversation,
+  ConversationRound,
+  RoundInput,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
@@ -103,9 +110,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-  const processedConversation = await prepareConversation({
+  let processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
+    context,
+  });
+
+  processedConversation = await runBeforeAgentHook({
+    processedConversation,
+    request,
+    abortSignal,
     context,
   });
 
@@ -244,11 +258,75 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
-  const round = await extractRound(events$);
+  let round = await extractRound(events$);
+
+  round = await runAfterAgentHook({
+    round,
+    conversation,
+    request,
+    abortSignal,
+    context,
+  });
 
   return {
     round,
   };
+};
+
+const runBeforeAgentHook = async ({
+  processedConversation,
+  request,
+  abortSignal,
+  context,
+}: {
+  processedConversation: ProcessedConversation;
+  request: AgentHandlerContext['request'];
+  abortSignal: AbortSignal | undefined;
+  context: AgentHandlerContext;
+}): Promise<ProcessedConversation> => {
+  if (!context.hooks) {
+    return processedConversation;
+  }
+
+  const beforeHookContext = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+  });
+
+  return {
+    ...processedConversation,
+    nextInput: beforeHookContext.nextInput ?? processedConversation.nextInput,
+  };
+};
+
+/**
+ * Runs afterAgent hook so hooks can mutate the round before it is persisted/emitted.
+ */
+const runAfterAgentHook = async ({
+  round,
+  conversation,
+  request,
+  abortSignal,
+  context,
+}: {
+  round: ConversationRound;
+  conversation: Conversation | undefined;
+  request: AgentHandlerContext['request'];
+  abortSignal: AbortSignal | undefined;
+  context: AgentHandlerContext;
+}): Promise<ConversationRound> => {
+  if (!context.hooks) {
+    return round;
+  }
+
+  const afterHookContext = await context.hooks.run(HookLifecycle.afterAgent, {
+    request,
+    abortSignal,
+    conversation,
+    round,
+  });
+  return afterHookContext.round;
 };
 
 const getConversationState = ({

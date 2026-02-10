@@ -100,6 +100,7 @@ export {
 } from './agents';
 export {
   type RoundInput,
+  type ProcessedRoundInput,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
