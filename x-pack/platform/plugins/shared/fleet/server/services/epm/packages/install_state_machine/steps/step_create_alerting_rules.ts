@@ -7,18 +7,21 @@
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import pMap from 'p-map';
 
 import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
+import type { InstallablePackage } from '../../../../../../common/types';
 import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
 import { saveKibanaAssetsRefs } from '../../install';
 import { MAX_CONCURRENT_RULE_CREATION_OPERATIONS } from '../../../../../constants';
+import { generateTemplateIndexPattern } from '../../../elasticsearch/template/template';
 
 function getRuleId({
   pkgName,
@@ -105,6 +108,111 @@ export async function createAlertingRuleFromTemplate(
   }
 }
 
+function getInactivityMonitoringTemplateId(pkgName: string): string {
+  return `fleet-${pkgName}-inactivity-monitoring`;
+}
+
+function getDataStreamPatterns(packageInfo: InstallablePackage): string[] {
+  const { data_streams: dataStreams } = packageInfo;
+  if (!dataStreams || dataStreams.length === 0) {
+    return [];
+  }
+  return dataStreams.map((ds) => generateTemplateIndexPattern(ds));
+}
+
+export async function createInactivityMonitoringTemplate(
+  deps: { logger: Logger; savedObjectsClient: SavedObjectsClientContract },
+  params: {
+    packageInfo: InstallablePackage;
+  }
+): Promise<KibanaAssetReference | undefined> {
+  const { logger, savedObjectsClient } = deps;
+  const { packageInfo } = params;
+  const { name: pkgName, title: pkgTitle } = packageInfo;
+
+  if (!appContextService.getExperimentalFeatures().enableIntegrationInactivityAlerting) {
+    return;
+  }
+
+  if (packageInfo.type !== 'integration') {
+    return;
+  }
+
+  const dataStreamPatterns = getDataStreamPatterns(packageInfo);
+  if (dataStreamPatterns.length === 0) {
+    logger.debug(`Skipping inactivity monitoring template for ${pkgName}: no data streams defined`);
+    return;
+  }
+
+  const templateId = getInactivityMonitoringTemplateId(pkgName);
+  const templateRef: KibanaAssetReference = {
+    id: templateId,
+    type: KibanaSavedObjectType.alertingRuleTemplate,
+  };
+
+  return withPackageSpan(`Create inactivity monitoring template for ${pkgName}`, async () => {
+    try {
+      const internalSoClient = appContextService.getInternalUserSOClient();
+
+      // Check if the template already exists
+      const existing = await internalSoClient
+        .get(KibanaSavedObjectType.alertingRuleTemplate, templateId)
+        .catch((err) => {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return undefined;
+          }
+          throw err;
+        });
+
+      if (existing) {
+        logger.debug(
+          `Inactivity monitoring template ${templateId} already exists for package ${pkgName}`
+        );
+        // Re-register the asset ref (it may have been overwritten by stepInstallKibanaAssets)
+        await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [templateRef], false, true);
+        return templateRef;
+      }
+
+      logger.debug(`Creating inactivity monitoring template ${templateId} for package ${pkgName}`);
+
+      await internalSoClient.create(
+        KibanaSavedObjectType.alertingRuleTemplate,
+        {
+          name: `[${pkgTitle}] Inactivity monitoring`,
+          ruleTypeId: '.es-query',
+          tags: [],
+          schedule: { interval: '24h' },
+          params: {
+            searchType: 'esQuery',
+            esQuery: JSON.stringify({ query: { match_all: {} } }),
+            index: dataStreamPatterns,
+            timeField: '@timestamp',
+            timeWindowSize: 24,
+            timeWindowUnit: 'h',
+            threshold: [1],
+            thresholdComparator: '<',
+            size: 0,
+            aggType: 'count',
+            groupBy: 'all',
+            excludeHitsFromPreviousRun: true,
+          },
+        },
+        { id: templateId }
+      );
+
+      await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [templateRef], false, true);
+
+      return templateRef;
+    } catch (e) {
+      logger.error(
+        `Error creating inactivity monitoring template for package ${pkgName}: ${e.message}`,
+        { error: e }
+      );
+      return;
+    }
+  });
+}
+
 export async function stepCreateAlertingRules(
   context: Pick<
     InstallContext,
@@ -115,6 +223,10 @@ export async function stepCreateAlertingRules(
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
+  // Create or re-create inactivity monitoring template for integration packages
+  await createInactivityMonitoringTemplate({ logger, savedObjectsClient }, { packageInfo });
+
+  // Create alerting rules templates from archive assets
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
     return;
   }

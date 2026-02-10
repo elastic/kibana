@@ -15,12 +15,39 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveKibanaAssetsRefs } from '../../install';
 
+import type { InstallablePackage } from '../../../../../../common/types';
+
+import { createSavedObjectClientMock } from '../../../../../mocks';
+
 import {
   createAlertingRuleFromTemplate,
+  createInactivityMonitoringTemplate,
   stepCreateAlertingRules,
 } from './step_create_alerting_rules';
 
 jest.mock('../../install');
+
+const logger = loggingSystemMock.createLogger();
+const savedObjectsClient = savedObjectsClientMock.create();
+
+let internalSoClientMock: ReturnType<typeof createSavedObjectClientMock>;
+
+beforeEach(() => {
+  internalSoClientMock = createSavedObjectClientMock();
+  appContextService.start(
+    createAppContextStartContractMock(
+      {},
+      false,
+      { internal: internalSoClientMock },
+      { enableIntegrationInactivityAlerting: true }
+    )
+  );
+  jest.mocked(saveKibanaAssetsRefs).mockReset();
+});
+
+afterEach(() => {
+  appContextService.stop();
+});
 
 describe('createAlertingRuleFromTemplate', () => {
   it('should create a rule if the rule does not exist', async () => {
@@ -38,8 +65,6 @@ describe('createAlertingRuleFromTemplate', () => {
       get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
-
-    const logger = loggingSystemMock.createLogger();
 
     const result = await createAlertingRuleFromTemplate(
       { rulesClient, logger },
@@ -79,8 +104,6 @@ describe('createAlertingRuleFromTemplate', () => {
       create: jest.fn().mockRejectedValue(new Error('No access to alerts')),
     } as unknown as RulesClientApi;
 
-    const logger = loggingSystemMock.createLogger();
-
     const result = await createAlertingRuleFromTemplate(
       { rulesClient, logger },
       {
@@ -116,8 +139,6 @@ describe('createAlertingRuleFromTemplate', () => {
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    const logger = loggingSystemMock.createLogger();
-
     const result = await createAlertingRuleFromTemplate(
       { rulesClient, logger },
       {
@@ -135,6 +156,215 @@ describe('createAlertingRuleFromTemplate', () => {
       deferred: false,
       type: 'alert',
     });
+  });
+});
+
+describe('createInactivityMonitoringTemplate', () => {
+  const mockIntegrationPackage: InstallablePackage = {
+    name: 'nginx',
+    title: 'Nginx',
+    version: '1.0.0',
+    type: 'integration',
+    description: 'Nginx integration',
+    format_version: '1.0.0',
+    release: 'ga',
+    owner: { github: 'elastic/integrations' },
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'ga',
+        package: 'nginx',
+        path: 'access',
+      },
+      {
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stubstatus metrics',
+        release: 'ga',
+        package: 'nginx',
+        path: 'stubstatus',
+      },
+    ],
+  };
+
+  it('should create an inactivity monitoring template for an integration package on fresh install', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(internalSoClientMock.create).toHaveBeenCalledWith(
+      'alerting_rule_template',
+      expect.objectContaining({
+        name: '[Nginx] Inactivity monitoring',
+        ruleTypeId: '.es-query',
+        tags: [],
+        schedule: { interval: '24h' },
+        params: expect.objectContaining({
+          searchType: 'esQuery',
+          index: ['logs-nginx.access-*', 'metrics-nginx.stubstatus-*'],
+          timeField: '@timestamp',
+          timeWindowSize: 24,
+          timeWindowUnit: 'h',
+          threshold: [1],
+          thresholdComparator: '<',
+          size: 0,
+          aggType: 'count',
+          groupBy: 'all',
+        }),
+      }),
+      { id: 'fleet-nginx-inactivity-monitoring' }
+    );
+
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      false,
+      true
+    );
+
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+    });
+  });
+
+  it('should skip when feature flag is disabled', async () => {
+    appContextService.stop();
+    appContextService.start(
+      createAppContextStartContractMock(
+        {},
+        false,
+        { internal: internalSoClientMock },
+        { enableIntegrationInactivityAlerting: false }
+      )
+    );
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(result).toBeUndefined();
+    expect(internalSoClientMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should recreate the template on upgrade when it was deleted', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(internalSoClientMock.create).toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+    });
+  });
+
+  it('should skip when package type is not integration', async () => {
+    const inputPackage: InstallablePackage = {
+      ...mockIntegrationPackage,
+      type: 'input',
+    };
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: inputPackage }
+    );
+
+    expect(result).toBeUndefined();
+    expect(internalSoClientMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should skip when package has no data streams', async () => {
+    const noDataStreamsPackage: InstallablePackage = {
+      ...mockIntegrationPackage,
+      data_streams: undefined,
+    };
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: noDataStreamsPackage }
+    );
+
+    expect(result).toBeUndefined();
+    expect(internalSoClientMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should not recreate but re-register asset ref if template already exists (e.g. on upgrade)', async () => {
+    internalSoClientMock.get.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {},
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(internalSoClientMock.create).not.toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+    });
+  });
+
+  it('should return undefined and log error on failure', async () => {
+    internalSoClientMock.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    internalSoClientMock.create.mockRejectedValue(new Error('SO creation failed'));
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(result).toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error creating inactivity monitoring template for package nginx'),
+      expect.objectContaining({ error: expect.any(Error) })
+    );
   });
 });
 
@@ -176,11 +406,9 @@ describe('stepCreateAlertingRules', () => {
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    appContextService.start(createAppContextStartContractMock());
     jest
       .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequest)
       .mockResolvedValue(rulesClient);
-    const savedObjectsClient = savedObjectsClientMock.create();
 
     const context = {
       savedObjectsClient,
