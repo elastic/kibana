@@ -1,0 +1,18 @@
+version: '1'
+name: 'sources.servicenow.get_knowledge_article'
+description: 'Retrieve a ServiceNow knowledge article with its full body content, including the article text, topic, category, author, and publication status.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sys_id
+    type: string
+    required: true
+    description: 'The sys_id of the knowledge article to retrieve'
+steps:
+  - name: get-knowledge-article
+    type: servicenow_search.getKnowledgeArticle
+    connector-id: <%= stackConnectorId %>
+    with:
+      sysId: "${{ inputs.sys_id }}"
