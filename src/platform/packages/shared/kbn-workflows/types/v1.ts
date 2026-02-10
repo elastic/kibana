@@ -483,6 +483,8 @@ export interface StepPropertyHandler<T = unknown> {
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
+   *
+   * **Note**: This handler is currently only supported for the `connector-id` property in the config schema.
    */
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
