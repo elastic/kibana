@@ -78,8 +78,9 @@ export const ContentListProvider = ({
   const supports: ContentListSupports = useMemo(
     () => ({
       sorting: features.sorting !== false,
+      pagination: features.pagination !== false,
     }),
-    [features.sorting]
+    [features.sorting, features.pagination]
   );
 
   // Create context value.

@@ -38,19 +38,23 @@ export const useContentListItemsQuery = (
 
   // Build query parameters from client state.
   // Only include sort if sorting is supported; otherwise, let the data source use its natural order.
+  // Only include page if pagination is supported; otherwise, use a sensible default.
   const queryParams = useMemo(
     () => ({
       searchQuery: clientState.filters.search ?? '',
       filters: clientState.filters,
       sort: supports.sorting ? clientState.sort : undefined,
-      page: DEFAULT_PAGE,
+      page: supports.pagination ? clientState.page : DEFAULT_PAGE,
     }),
-    [clientState.filters, clientState.sort, supports.sorting]
+    [clientState.filters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
   );
 
   // React Query for data fetching.
+  // `keepPreviousData` keeps the previous page visible while the next page loads,
+  // preventing the table from collapsing to zero rows and causing a scroll-to-top.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
+    keepPreviousData: true,
     queryFn: async ({ signal }) => {
       const result = await dataSource.findItems({ ...queryParams, signal });
 
