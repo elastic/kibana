@@ -71,7 +71,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () 
     expect(panelSchema).toBeDefined();
 
     const configSchema = panelSchema.properties.config;
-    expect(configSchema.anyOf).toHaveLength(2);
+    expect(configSchema.anyOf).toHaveLength(4);
     expect(configSchema.anyOf).toStrictEqual(snapshot);
   });
 });
