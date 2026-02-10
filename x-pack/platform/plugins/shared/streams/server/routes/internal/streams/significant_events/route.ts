@@ -168,7 +168,8 @@ const readAllSignificantEventsRoute = createServerRoute({
           (val) => (typeof val === 'string' ? [val] : val),
           z.array(z.string()).optional()
         )
-        .describe('Stream names to filter significant events'),
+        .describe('Stream names to filter significant events')
+        .optional(),
     }),
   }),
   options: {

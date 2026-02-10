@@ -10,7 +10,7 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
-  Object.values(EntityType.Values).forEach((type) => {
+  Object.values(EntityType.enum).forEach((type) => {
     it(`generates the expected query for ${type} entity description`, () => {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],

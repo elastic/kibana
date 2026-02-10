@@ -292,7 +292,7 @@ export const SiemMigrationResourceContent = z.object({
   /**
    * The resource arbitrary metadata.
    */
-  metadata: z.object({}).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**

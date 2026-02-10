@@ -11,7 +11,7 @@ import type { Prompt, PromptFactory, PromptVersion } from './types';
 export function createPrompt<TInput>(init: {
   name: string;
   description?: string;
-  input: z.Schema<TInput>;
+  input: z.Schema<unknown, TInput>;
 }): PromptFactory<TInput, []> {
   function inner<TVersions extends PromptVersion[], TNextVersions extends PromptVersion[]>(
     source: Prompt<TInput, TVersions>,

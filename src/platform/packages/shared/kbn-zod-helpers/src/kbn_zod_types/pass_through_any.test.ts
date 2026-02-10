@@ -30,7 +30,7 @@ describe('PassThroughAny', () => {
 
   it('has the correct zod and kbn type', () => {
     expect(PassThroughAny instanceof z.ZodAny).toBe(true);
-    expect(PassThroughAny._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodAny);
+    expect(PassThroughAny.def.type).toBe('any');
     expect(isPassThroughAny(PassThroughAny)).toBe(true);
   });
 });

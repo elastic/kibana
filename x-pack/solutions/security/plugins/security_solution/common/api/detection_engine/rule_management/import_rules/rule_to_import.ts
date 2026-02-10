@@ -26,7 +26,7 @@ import {
  *   - updated_by is optional (but ignored in the import code)
  */
 export type RuleToImport = z.infer<typeof RuleToImport>;
-export type RuleToImportInput = z.input<typeof RuleToImport>;
+export type RuleToImportInput = z.infer<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,

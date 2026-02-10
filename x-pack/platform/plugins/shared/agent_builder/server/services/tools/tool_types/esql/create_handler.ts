@@ -49,7 +49,10 @@ export const createHandler = (
     const client = esClient.asCurrentUser;
 
     // Apply default values for parameters that weren't provided by the LLM
-    const resolvedParams = resolveToolParameters(configuration.params, params);
+    const resolvedParams = resolveToolParameters(
+      configuration.params,
+      params as Record<string, EsqlToolParamValue>
+    );
 
     const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
 

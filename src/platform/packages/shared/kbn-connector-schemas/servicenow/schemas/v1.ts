@@ -120,4 +120,4 @@ export const ExecutorSubActionCloseIncidentParamsSchema = z
 
 // Reserved for future implementation
 export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = z.record(z.string(), z.unknown());

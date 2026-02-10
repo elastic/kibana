@@ -42,7 +42,10 @@ export const prepareIncident = (
     {}
   );
 
-  return { ...additionalFields, ...baseFields };
+  return {
+    ...(additionalFields && typeof additionalFields === 'object' ? additionalFields : {}),
+    ...baseFields,
+  };
 };
 
 const createErrorMessage = (errorResponse?: ServiceNowError): string => {

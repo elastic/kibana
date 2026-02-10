@@ -10,7 +10,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z3 as z } from '@kbn/zod';
 import type { estypes } from '@elastic/elasticsearch';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
 
@@ -112,7 +112,7 @@ export function fetchUniqueKeysTool(): DynamicStructuredTool {
       }
 
       const uniqueKeySamples = new Map<string, JsonValue>();
-      docs.forEach((doc) => {
+      docs.forEach((doc: estypes.IngestSimulateDocumentResult) => {
         const source = extractSource(doc);
         collectKeysWithSamples(source, uniqueKeySamples);
       });

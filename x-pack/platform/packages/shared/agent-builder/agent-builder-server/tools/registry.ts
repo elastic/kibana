@@ -73,7 +73,7 @@ export interface ToolRegistry {
   /**
    * Execute a tool.
    */
-  execute<TParams extends object = Record<string, unknown>>(
+  execute<TParams extends Record<string, unknown> = Record<string, unknown>>(
     params: ScopedRunnerRunToolsParams<TParams>
   ): Promise<RunToolReturn>;
 }

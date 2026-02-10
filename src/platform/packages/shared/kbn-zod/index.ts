@@ -8,5 +8,7 @@
  */
 
 export * from 'zod';
+// Exporting v3 for backwards compatibility
+export * as z3 from 'zod/v3';
 export { isZod } from './util';
 export type { ZodEsque } from './types';

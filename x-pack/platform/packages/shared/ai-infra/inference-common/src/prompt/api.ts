@@ -73,6 +73,6 @@ export type PromptStreamResponse<TPromptOptions extends PromptOptions = PromptOp
 /**
  * Type for the `prompt` API
  */
-export type PromptAPI = <TPrompt extends Prompt, TPromptOptions extends PromptOptions<Prompt>>(
-  options: PromptOptions<TPrompt> & TPromptOptions
+export type PromptAPI = <TPrompt extends Prompt, TPromptOptions extends PromptOptions<TPrompt>>(
+  options: TPromptOptions
 ) => PromptAPIResponse<TPromptOptions>;

@@ -163,7 +163,6 @@ describe('createPromptRestApi', () => {
 
     const response = await promptApi({
       ...params,
-      // @ts-expect-error input type doesn't match schema type
       input: {
         anotherWrongKey: 'foo',
       },
@@ -172,7 +171,7 @@ describe('createPromptRestApi', () => {
     });
 
     expect(response).toBeInstanceOf(ZodError);
-    expect((response as ZodError).errors[0].path).toContain('question');
+    expect((response as ZodError).issues[0].path).toContain('question');
     expect(http.fetch).not.toHaveBeenCalled();
   });
 });

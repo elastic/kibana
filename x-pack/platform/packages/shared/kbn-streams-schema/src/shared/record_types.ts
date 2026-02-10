@@ -22,14 +22,18 @@ export interface RecursiveRecord {
 }
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord]))
+  z.record(
+    z.string(),
+    z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord])
+  )
 );
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
+  z.string(),
   z.union([primitive, z.array(primitive), z.array(z.unknown())])
-);
+) as z.ZodType<FlattenRecord>;
 
 export const sampleDocument = recursiveRecord;
 

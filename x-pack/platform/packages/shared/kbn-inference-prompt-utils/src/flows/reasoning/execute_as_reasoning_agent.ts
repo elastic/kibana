@@ -221,7 +221,7 @@ export async function executeAsReasoningAgent(
         ),
       },
       input: {
-        ...promptOptions.input,
+        ...(promptOptions.input as Record<string, unknown>),
         power: {
           low: power === 'low',
           medium: power === 'medium',

@@ -229,7 +229,7 @@ export const checkIfRemediationExists = async ({
   exceptionListsClient: ExceptionListClient;
   endpointMetadataClient: EndpointMetadataService;
 }): Promise<boolean> => {
-  if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
+  if (insight.type !== DefendInsightType.enum.incompatible_antivirus) {
     return false;
   }
 

@@ -112,7 +112,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         case 'config':
@@ -126,7 +126,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
 
           break;
@@ -141,7 +141,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         default:

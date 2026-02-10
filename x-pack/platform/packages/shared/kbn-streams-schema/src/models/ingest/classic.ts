@@ -70,12 +70,12 @@ type OmitClassicStreamUpsertProps<
 };
 
 type ClassicStreamDefaults = {
-  Source: z.input<IClassicStreamSchema['Definition']>;
+  Source: z.infer<IClassicStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IClassicStreamSchema['Definition']>;
+    stream: z.infer<IClassicStreamSchema['Definition']>;
   };
   UpsertRequest: {
-    stream: OmitClassicStreamUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
+    stream: OmitClassicStreamUpsertProps<{} & z.infer<IClassicStreamSchema['Definition']>>;
   };
 } & ModelOfSchema<IClassicStreamSchema>;
 
@@ -125,11 +125,14 @@ const ClassicStreamSchema = {
 };
 type IClassicStreamSchema = typeof ClassicStreamSchema;
 
-export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Model> =
-  modelValidation<BaseStream.Model, IClassicStreamSchema, ClassicStreamDefaults>(
-    BaseStream,
-    ClassicStreamSchema
-  );
+export const ClassicStream = modelValidation<
+  BaseStream.Model,
+  IClassicStreamSchema,
+  ClassicStreamDefaults
+>(BaseStream, ClassicStreamSchema) as unknown as ModelValidation<
+  BaseStream.Model,
+  ClassicStream.Model
+>;
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 ClassicStream.Definition.is = (

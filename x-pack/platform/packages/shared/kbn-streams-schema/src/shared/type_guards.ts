@@ -26,20 +26,20 @@ export function createAsSchemaOrThrow<TBaseSchema extends z.Schema, TNarrowSchem
     value: TValue
   ): Extract<TValue, z.input<TNarrowSchema>> => {
     narrow.parse(value);
-    return value;
+    return value as Extract<TValue, z.input<TNarrowSchema>>;
   };
 }
 
 export function isSchema<TSchema extends z.Schema>(
   schema: TSchema,
   value: unknown
-): value is z.input<TSchema> {
+): value is z.infer<TSchema> {
   return schema.safeParse(value).success;
 }
 
 export function assertsSchema<TSchema extends ZodSchema>(
   schema: TSchema,
   subject: any
-): asserts subject is z.input<TSchema> {
+): asserts subject is z.infer<TSchema> {
   schema.parse(subject);
 }

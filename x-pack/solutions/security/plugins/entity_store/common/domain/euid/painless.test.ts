@@ -10,7 +10,7 @@ import { getEuidPainlessEvaluation } from './painless';
 
 describe('getEuidPainlessEvaluation', () => {
   describe('snapshots per entity type', () => {
-    Object.values(EntityType.Values).forEach((entityType) => {
+    Object.values(EntityType.enum).forEach((entityType) => {
       it(`generates the expected Painless script for ${entityType}`, () => {
         const script = getEuidPainlessEvaluation(entityType);
         expect(script).toMatchSnapshot();

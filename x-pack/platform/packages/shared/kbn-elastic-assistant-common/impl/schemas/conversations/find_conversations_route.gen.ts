@@ -28,7 +28,7 @@ export const FindConversationsSortField = z.enum(['created_at', 'title', 'update
 export type FindConversationsSortFieldEnum = typeof FindConversationsSortField.enum;
 export const FindConversationsSortFieldEnum = FindConversationsSortField.enum;
 
-export type FindConversationsRequestQuery = z.infer<typeof FindConversationsRequestQuery>;
+export type FindConversationsRequestQuery = z.input<typeof FindConversationsRequestQuery>;
 export const FindConversationsRequestQuery = z.object({
   /**
    * A list of fields to include in the response. If omitted, all fields are returned.

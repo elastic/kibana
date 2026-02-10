@@ -195,7 +195,7 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodSchema<unknown, Record<string, any>>
     ? MaybeOptional<{
         params: z.input<TRouteParamsRT>;
       }>
@@ -206,7 +206,7 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodSchema<Record<string, any>>
     ? MaybeOptional<{
         params: z.output<TRouteParamsRT>;
       }>

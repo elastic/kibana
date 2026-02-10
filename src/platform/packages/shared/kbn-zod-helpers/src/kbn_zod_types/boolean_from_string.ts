@@ -17,32 +17,20 @@ import { KbnZodTypes } from './kbn_zod_type';
  *
  * Accepts "true" or "false" as strings, or a boolean.
  */
-class KbnZodBooleanFromString extends z.ZodUnion<any> implements KbnZodType {
-  readonly kbnTypeName = KbnZodTypes.BooleanFromString;
+type KbnZodBooleanFromString = z.ZodType<boolean, 'true' | 'false' | boolean> & KbnZodType;
 
-  static create() {
-    return new KbnZodBooleanFromString({
-      typeName: z.ZodFirstPartyTypeKind.ZodUnion,
-      options: [z.enum(['true', 'false']), z.boolean()],
-    }).describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
-  }
+function createBooleanFromString(): KbnZodBooleanFromString {
+  const schema = z
+    .union([z.enum(['true', 'false']), z.boolean()])
+    .transform((val) => (val === 'true' ? true : val === 'false' ? false : val))
+    .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
 
-  override _parse(input: z.ParseInput): z.ParseReturnType<this['_output']> {
-    const result = super._parse(input); // Use ZodUnion's default parsing
-
-    if (z.isValid(result)) {
-      const value = result.value;
-      return {
-        status: 'valid',
-        value: value === 'true' ? true : value === 'false' ? false : value,
-      };
-    }
-
-    return result;
-  }
+  return Object.assign(schema, {
+    kbnTypeName: KbnZodTypes.BooleanFromString as const,
+  }) as unknown as KbnZodBooleanFromString;
 }
 
-export const BooleanFromString = KbnZodBooleanFromString.create();
+export const BooleanFromString = createBooleanFromString();
 
 export const isBooleanFromString = (val: unknown): val is KbnZodBooleanFromString => {
   return (val as KbnZodBooleanFromString).kbnTypeName === KbnZodTypes.BooleanFromString;

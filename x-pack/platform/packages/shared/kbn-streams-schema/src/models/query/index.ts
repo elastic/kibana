@@ -67,25 +67,22 @@ export namespace QueryStream {
   }
 }
 
-export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> = modelValidation(
-  BaseStream,
-  {
-    Source: z.object({}),
-    Definition: z.object({
-      query: QueryWithEsql.right,
-    }),
-    GetResponse: z.object({
-      inherited_fields: inheritedFieldDefinitionSchema,
-    }),
-    UpsertRequest: z.object({
-      stream: z
-        .object({
-          query: QueryWithEsql.right,
-        })
-        .passthrough(),
-    }),
-  }
-);
+export const QueryStream = modelValidation(BaseStream, {
+  Source: z.object({}),
+  Definition: z.object({
+    query: QueryWithEsql.right,
+  }),
+  GetResponse: z.object({
+    inherited_fields: inheritedFieldDefinitionSchema,
+  }),
+  UpsertRequest: z.object({
+    stream: z
+      .object({
+        query: QueryWithEsql.right,
+      })
+      .passthrough(),
+  }),
+}) as unknown as ModelValidation<BaseStream.Model, QueryStream.Model>;
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 QueryStream.Definition.is = (

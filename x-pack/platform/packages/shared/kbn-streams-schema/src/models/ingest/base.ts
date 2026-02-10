@@ -104,12 +104,12 @@ type OmitIngestBaseStreamUpsertProps<
 };
 
 type IngestBaseStreamDefaults = {
-  Source: z.input<IIngestBaseStreamSchema['Definition']>;
+  Source: z.infer<IIngestBaseStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IIngestBaseStreamSchema['Definition']>;
+    stream: z.infer<IIngestBaseStreamSchema['Definition']>;
   };
   UpsertRequest: {
-    stream: OmitIngestBaseStreamUpsertProps<{} & z.input<IIngestBaseStreamSchema['Definition']>>;
+    stream: OmitIngestBaseStreamUpsertProps<{} & z.infer<IIngestBaseStreamSchema['Definition']>>;
   };
 } & ModelOfSchema<IIngestBaseStreamSchema>;
 
@@ -164,8 +164,11 @@ const IngestBaseStreamSchema = {
 };
 type IIngestBaseStreamSchema = typeof IngestBaseStreamSchema;
 
-export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
-  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, IngestBaseStreamDefaults>(
-    BaseStream,
-    IngestBaseStreamSchema
-  );
+export const IngestBaseStream = modelValidation<
+  BaseStream.Model,
+  IIngestBaseStreamSchema,
+  IngestBaseStreamDefaults
+>(BaseStream, IngestBaseStreamSchema) as unknown as ModelValidation<
+  BaseStream.Model,
+  IngestBaseStream.Model
+>;

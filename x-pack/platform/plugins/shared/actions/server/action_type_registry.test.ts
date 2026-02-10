@@ -317,15 +317,14 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"string\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 1,
-              \\"type\\": \\"string\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"String must contain at least 1 character(s)\\",
               \\"path\\": [
                 \\"text\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected string to have >=1 characters\\"
             }
           ]"
         `);
@@ -336,13 +335,12 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_type\\",
               \\"expected\\": \\"string\\",
-              \\"received\\": \\"undefined\\",
+              \\"code\\": \\"invalid_type\\",
               \\"path\\": [
                 \\"text\\"
               ],
-              \\"message\\": \\"Required\\"
+              \\"message\\": \\"Invalid input: expected string, received undefined\\"
             }
           ]"
         `);
@@ -356,16 +354,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"number\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 5,
-              \\"type\\": \\"number\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"Number must be greater than or equal to 5\\",
               \\"path\\": [
                 \\"subActionParams\\",
                 \\"value\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);
@@ -380,45 +377,40 @@ describe('actionTypeRegistry', () => {
           "[
             {
               \\"code\\": \\"invalid_union\\",
-              \\"unionErrors\\": [
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction1\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction1\\\\\\"\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                },
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction2\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction2\\\\\\"\\"
-                    },
-                    {
-                      \\"code\\": \\"invalid_type\\",
-                      \\"expected\\": \\"string\\",
-                      \\"received\\": \\"undefined\\",
-                      \\"path\\": [
-                        \\"subActionParams\\",
-                        \\"message\\"
-                      ],
-                      \\"message\\": \\"Required\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                }
+              \\"errors\\": [
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction1\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction1\\\\\\"\\"
+                  }
+                ],
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction2\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
+                  },
+                  {
+                    \\"expected\\": \\"string\\",
+                    \\"code\\": \\"invalid_type\\",
+                    \\"path\\": [
+                      \\"subActionParams\\",
+                      \\"message\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
+                  }
+                ]
               ],
               \\"path\\": [],
               \\"message\\": \\"Invalid input\\"

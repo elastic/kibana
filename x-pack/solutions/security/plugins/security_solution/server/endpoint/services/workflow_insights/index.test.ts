@@ -69,7 +69,7 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
     '@timestamp': moment(),
     message: 'This is a test message',
     category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    type: DefendInsightType.enum.incompatible_antivirus,
     source: {
       type: SourceType.LlmConnector,
       id: 'openai-connector-id',
@@ -413,7 +413,7 @@ describe('SecurityWorkflowInsightsService', () => {
         from: 50,
         ids: ['id1', 'id2'],
         categories: [Category.Endpoint],
-        types: [DefendInsightType.Enum.incompatible_antivirus],
+        types: [DefendInsightType.enum.incompatible_antivirus],
         sourceTypes: [SourceType.LlmConnector],
         sourceIds: ['source-id1', 'source-id2'],
         targetTypes: [TargetType.Endpoint],

@@ -45,10 +45,14 @@ const incidentSchemaObject = {
   priority: z.string().nullable().default(null),
   labels: z
     .array(
-      z.string().refine(
-        (val) => !val.match(/\s/g),
-        (val) => ({ message: `The label ${val} cannot contain spaces` })
-      )
+      z.string().superRefine((val, ctx) => {
+        if (val.match(/\s/g)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `The label ${val} cannot contain spaces`,
+          });
+        }
+      })
     )
     .nullable()
     .default(null),
@@ -98,7 +102,7 @@ export const ExecutorSubActionGetIncidentParamsSchema = z
   .strict();
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = z.record(z.string(), z.unknown());
 export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
 export const ExecutorSubActionGetCapabilitiesParamsSchema = z.object({}).strict();
 export const ExecutorSubActionGetIssueTypesParamsSchema = z.object({}).strict();

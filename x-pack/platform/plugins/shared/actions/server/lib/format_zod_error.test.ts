@@ -11,20 +11,20 @@ import { formatZodError } from './format_zod_error';
 
 describe('formatZodError', () => {
   it('formats a zod error with a single issue', () => {
-    const issue: ZodIssue = {
+    const issue = {
       code: 'invalid_type',
       expected: 'string',
       received: 'boolean',
       path: ['routingKey'],
       message: 'Expected string, received boolean',
-    };
+    } as unknown as ZodIssue;
     expect(formatZodError(new ZodError([issue]))).toMatchInlineSnapshot(
       `"Field \\"routingKey\\": Expected string, received boolean"`
     );
   });
 
   it('formats a zod error with a multiple issues', () => {
-    const issues: ZodIssue[] = [
+    const issues = [
       {
         code: 'invalid_type',
         expected: 'string',
@@ -38,7 +38,7 @@ describe('formatZodError', () => {
         path: [],
         message: `Unrecognized key(s) in object: 'extraKey'`,
       },
-    ];
+    ] as unknown as ZodIssue[];
     expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
       "2 errors:
        [1]: Unrecognized key(s) in object: 'extraKey';
@@ -49,7 +49,7 @@ describe('formatZodError', () => {
   it('formats a zod error with greater than max issues', () => {
     const issues: ZodIssue[] = [
       {
-        code: 'invalid_enum_value',
+        code: 'invalid_value',
         options: ['option1', 'option2'],
         received: 'option3',
         path: ['enumField'],
@@ -91,7 +91,7 @@ describe('formatZodError', () => {
         path: [],
         message: `Unrecognized key(s) in object: 'extraKey'`,
       },
-    ];
+    ] as unknown as ZodIssue[];
     expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
       "6 errors:
        [1]: error parsing timestamp \\"1963-09-55 90:23:45\\";
@@ -104,10 +104,10 @@ describe('formatZodError', () => {
   });
 
   it('formats a zod error with nested issues', () => {
-    const issues: ZodIssue[] = [
+    const issues = [
       {
         code: 'invalid_union',
-        unionErrors: [
+        errors: [
           new ZodError([
             {
               code: 'invalid_literal',
@@ -116,7 +116,7 @@ describe('formatZodError', () => {
               path: ['subAction'],
               message: `Invalid literal value, expected 'subaction1'`,
             },
-          ]),
+          ] as unknown as ZodIssue[]),
           new ZodError([
             {
               code: 'invalid_literal',
@@ -132,12 +132,12 @@ describe('formatZodError', () => {
               path: ['subActionParams', 'message'],
               message: `Required`,
             },
-          ]),
+          ] as unknown as ZodIssue[]),
         ],
         path: [],
         message: `Invalid input`,
       },
-    ];
+    ] as unknown as ZodIssue[];
     expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
       "2 errors:
        [1]: Field \\"subAction\\": Invalid literal value, expected 'subaction1', Invalid literal value, expected 'subaction2';
@@ -177,7 +177,7 @@ describe('formatZodError', () => {
         ],
         message: 'Expected string, received boolean',
       },
-    ];
+    ] as unknown as ZodIssue[];
     expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(
       `"Field \\"path1.path2.path3.path4.path5.path6.path7.path8.path9.path10.path11.path12.path13.path14.path15.path16.path17.path18.path19.path20.path21...\\": Unable to parse ZodError - too many levels deep"`
     );

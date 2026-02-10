@@ -87,11 +87,11 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
-        action.params = getServiceNowActionParams(translations);
+        action.params = getServiceNowActionParams(translations) as RuleAction['params'];
         // Recovery action for service now is not implemented yet
         break;
       case JIRA_ACTION_ID:
-        action.params = getJiraActionParams(translations);
+        action.params = getJiraActionParams(translations) as RuleAction['params'];
         // Recovery action for Jira is not implemented yet
         break;
       case WEBHOOK_ACTION_ID:

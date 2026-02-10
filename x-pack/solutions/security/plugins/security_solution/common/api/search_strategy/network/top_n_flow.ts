@@ -14,7 +14,7 @@ import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
 export const networkTopNFlowSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().nullish(),
+  ip: z.union([z.ipv4(), z.ipv6()]).nullish(),
   flowTarget,
   sort,
   timerange,
@@ -25,7 +25,7 @@ export type NetworkTopNFlowRequestOptionsInput = z.input<typeof networkTopNFlowS
 export type NetworkTopNFlowRequestOptions = z.infer<typeof networkTopNFlowSchema>;
 
 export const networkTopNFlowCountSchema = requestBasicOptionsSchema.extend({
-  ip: z.string().ip().nullish(),
+  ip: z.union([z.ipv4(), z.ipv6()]).nullish(),
   flowTarget,
   timerange,
   factoryQueryType: z.literal(NetworkQueries.topNFlowCount),

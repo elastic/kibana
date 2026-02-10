@@ -13,19 +13,18 @@ import { KbnZodTypes } from './kbn_zod_type';
 
 /**
  * This is a helper schema to pass through any value without validation.
- * KbnZodTypes.PassThroughAny heps identify that it is a deliberate pass through of any value without validation.
+ * KbnZodTypes.PassThroughAny helps identify that it is a deliberate pass through of any value without validation.
  */
-class KbnPassThroughAny extends z.ZodAny implements KbnZodType {
-  readonly kbnTypeName = KbnZodTypes.PassThroughAny;
+type KbnPassThroughAny = z.ZodAny & KbnZodType;
 
-  static create() {
-    return new KbnPassThroughAny({ typeName: z.ZodFirstPartyTypeKind.ZodAny }).describe(
-      'Pass through any value without validation.'
-    );
-  }
+function createPassThroughAny(): KbnPassThroughAny {
+  const schema = z.any().describe('Pass through any value without validation.');
+  return Object.assign(schema, {
+    kbnTypeName: KbnZodTypes.PassThroughAny as const,
+  });
 }
 
-export const PassThroughAny = KbnPassThroughAny.create();
+export const PassThroughAny = createPassThroughAny();
 
 export const isPassThroughAny = (val: unknown): val is KbnPassThroughAny => {
   return (val as KbnPassThroughAny).kbnTypeName === KbnZodTypes.PassThroughAny;

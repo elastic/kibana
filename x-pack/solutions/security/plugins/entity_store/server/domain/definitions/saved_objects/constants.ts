@@ -34,7 +34,7 @@ export const LogExtractionState = z.object({
   frequency: z
     .string()
     .regex(/[smdh]$/)
-    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval),
+    .default(TasksConfig[EntityStoreTaskType.enum.extractEntity].interval),
   paginationTimestamp: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
 });

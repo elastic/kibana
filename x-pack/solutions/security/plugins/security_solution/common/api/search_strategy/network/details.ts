@@ -10,7 +10,7 @@ import { NetworkQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const networkDetailsSchema = requestBasicOptionsSchema.extend({
-  ip: z.string().ip(),
+  ip: z.union([z.ipv4(), z.ipv6()]),
   factoryQueryType: z.literal(NetworkQueries.details),
 });
 

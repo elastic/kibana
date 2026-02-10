@@ -371,7 +371,7 @@ export const useTimelineEventsHandler = ({
       fieldRequested: timelineRequest?.fieldRequested ?? fields,
       fields: timelineRequest?.fieldRequested ?? fields,
       pagination: refetchPagination,
-    };
+    } as TimelineRequest<typeof language>;
 
     setTimelineRequest(newTimelineRequest);
 

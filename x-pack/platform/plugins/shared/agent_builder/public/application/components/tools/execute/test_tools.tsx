@@ -130,7 +130,13 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
   return Object.entries(properties).map(([paramName, paramSchema]) => {
     let type = 'string'; // default fallback
 
-    if (paramSchema && 'type' in paramSchema && paramSchema.type) {
+    // In JSON Schema, properties can be `true` (any value allowed) or a schema object
+    if (
+      paramSchema &&
+      typeof paramSchema === 'object' &&
+      'type' in paramSchema &&
+      paramSchema.type
+    ) {
       if (Array.isArray(paramSchema.type)) {
         type = paramSchema.type[0];
       } else if (typeof paramSchema.type === 'string') {
@@ -138,13 +144,23 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       }
     }
 
+    const schemaObj = typeof paramSchema === 'object' && paramSchema !== null ? paramSchema : {};
+
     return {
       name: paramName,
-      label: paramSchema?.title || paramName,
+      label:
+        ('title' in schemaObj && typeof schemaObj.title === 'string' ? schemaObj.title : null) ||
+        paramName,
       value: '',
-      description: paramSchema?.description || '',
+      description:
+        ('description' in schemaObj && typeof schemaObj.description === 'string'
+          ? schemaObj.description
+          : '') || '',
       type,
-      format: (paramSchema && 'format' in paramSchema && paramSchema.format) || undefined,
+      format:
+        ('format' in schemaObj && typeof schemaObj.format === 'string'
+          ? schemaObj.format
+          : undefined) || undefined,
       optional: !requiredParams.has(paramName),
     };
   });

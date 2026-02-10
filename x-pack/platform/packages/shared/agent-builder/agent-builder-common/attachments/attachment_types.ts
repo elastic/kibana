@@ -58,7 +58,7 @@ export const screenContextAttachmentDataSchema = z
     url: z.string().optional(),
     app: z.string().optional(),
     description: z.string().optional(),
-    additional_data: z.record(z.string()).optional(),
+    additional_data: z.record(z.string(), z.string()).optional(),
   })
   .refine((data) => {
     // at least one of the fields must be present

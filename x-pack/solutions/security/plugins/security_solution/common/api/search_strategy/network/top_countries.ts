@@ -14,7 +14,7 @@ import { timerange } from '../model/timerange';
 import { flowTarget } from './model/flow_target';
 
 export const networkTopCountriesSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().optional(),
+  ip: z.union([z.ipv4(), z.ipv6()]).optional(),
   flowTarget,
   sort,
   filterQuery,

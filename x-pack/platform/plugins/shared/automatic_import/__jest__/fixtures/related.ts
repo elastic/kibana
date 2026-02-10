@@ -166,7 +166,7 @@ export const relatedTestState = {
   initialPipeline: relatedInitialPipeline,
   results: { test: 'testresults' },
   lastExecutedChain: 'testchain',
-  samplesFormat: { name: SamplesFormatName.Values.json },
+  samplesFormat: { name: SamplesFormatName.enum.json },
 };
 
 export const relatedMockProcessors = [
