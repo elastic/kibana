@@ -8,8 +8,10 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { ResolvedConfiguration } from '../../types';
 import type { ProcessedConversation } from '../../utils/prepare_conversation';
+import type { ToolCallResultTransformer } from '../../utils/create_result_transformer';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 
 export interface PromptFactoryParams {
@@ -17,17 +19,21 @@ export interface PromptFactoryParams {
   capabilities: ResolvedAgentCapabilities;
   processedConversation: ProcessedConversation;
   filestore: IFileStore;
+  /**
+   * Transformer for tool call results in conversation history.
+   * Used to summarize/substitute large results to optimize context.
+   */
+  resultTransformer: ToolCallResultTransformer;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface ResearchAgentPromptRuntimeParams {
-  initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
 }
 
 export interface AnswerAgentPromptRuntimeParams {
-  initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
 }
