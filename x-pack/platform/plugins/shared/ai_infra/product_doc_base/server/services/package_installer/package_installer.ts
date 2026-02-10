@@ -122,13 +122,13 @@ export class PackageInstaller {
   async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
     const { inferenceId, forceUpdate } = params;
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
-    const [repositoryVersions, installStatuses] = await Promise.all([
+    const [repositoryVersions, installStatuses, openapiSpecInstallStatus] = await Promise.all([
       fetchArtifactVersions({
         artifactRepositoryUrl: this.artifactRepositoryUrl,
       }),
       this.productDocClient.getInstallationStatus({ inferenceId }),
+      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-
     const toUpdate: Array<{
       productName: ProductName;
       productVersion: string;
@@ -165,6 +165,24 @@ export class PackageInstaller {
         productName,
         productVersion,
         customInference: inferenceInfo,
+      });
+    }
+
+    const openAPISpecVersionToUpgradeTo = selectVersion(
+      this.currentVersion,
+      repositoryVersions.openapi,
+      this.isServerless
+    );
+
+    // Upgrade to newest version of OpenAPI Spec if possile
+    if (
+      forceUpdate ||
+      openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo ||
+      openAPISpecVersionToUpgradeTo === LATEST_PRODUCT_VERSION
+    ) {
+      await this.installOpenAPISpec({
+        version: openAPISpecVersionToUpgradeTo,
+        inferenceId,
       });
     }
   }
@@ -629,6 +647,7 @@ export class PackageInstaller {
 
         await this.productDocClient.setOpenapiSpecInstallationStarted({
           productName,
+          productVersion: stackVersion,
           inferenceId: effectiveInferenceId,
         });
 
@@ -690,6 +709,7 @@ export class PackageInstaller {
 
         await this.productDocClient.setOpenapiSpecInstallationSuccessful({
           productName,
+          productVersion: stackVersion,
           indexName,
           inferenceId: effectiveInferenceId,
         });
@@ -715,6 +735,7 @@ export class PackageInstaller {
       for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
         await this.productDocClient.setOpenapiSpecInstallationFailed({
           productName: productName as 'elasticsearch' | 'kibana',
+          productVersion: stackVersion,
           failureReason: message,
           inferenceId: effectiveInferenceId,
         });

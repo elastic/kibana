@@ -18,7 +18,7 @@ import { parseString } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
 import { getFetchOptions } from '../../proxy';
 import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
-type ArtifactAvailableVersions = Record<ProductName, string[]>;
+type ArtifactAvailableVersions = Record<ProductName | 'openapi', string[]>;
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
@@ -51,11 +51,12 @@ export const fetchArtifactVersions = async ({
         throw new Error('bucket content is truncated, cannot retrieve all versions');
       }
 
-      const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
+      const allowedProductNames: (ProductName | 'openapi')[] = Object.values(DocumentationProduct);
+      allowedProductNames.push('openapi');
 
       const record: ArtifactAvailableVersions = {} as ArtifactAvailableVersions;
       allowedProductNames.forEach((product) => {
-        record[product] = [];
+        record[product as ProductName] = [];
       });
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {

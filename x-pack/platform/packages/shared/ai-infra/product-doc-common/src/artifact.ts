@@ -9,7 +9,10 @@ import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoin
 import { type ProductName, DocumentationProduct } from './product';
 import { type ResourceType, ResourceTypes } from './resource_type';
 
-const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
+const allowedProductNames: (ProductName | 'openapi')[] = [
+  ...Object.values(DocumentationProduct),
+  'openapi',
+];
 
 export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 

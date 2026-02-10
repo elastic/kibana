@@ -305,13 +305,14 @@ export class ProductDocInstallClient {
 
   async setOpenapiSpecInstallationStarted(fields: {
     productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
     inferenceId: string;
   }) {
-    const { productName, inferenceId } = fields;
+    const { productName, productVersion, inferenceId } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
     const attributes: TypeAttributes = {
       product_name: productName,
-      product_version: 'latest', // to be included later
+      product_version: productVersion,
       installation_status: 'installing',
       last_installation_failure_reason: '',
       inference_id: inferenceId,
@@ -324,14 +325,15 @@ export class ProductDocInstallClient {
 
   async setOpenapiSpecInstallationSuccessful(fields: {
     productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
     indexName: string;
     inferenceId: string;
   }) {
-    const { productName, indexName, inferenceId } = fields;
+    const { productName, productVersion, indexName, inferenceId } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       product_name: productName,
-      product_version: 'latest', // to be included later
+      product_version: productVersion,
       installation_status: 'installed',
       index_name: indexName,
       inference_id: inferenceId,
@@ -341,10 +343,11 @@ export class ProductDocInstallClient {
 
   async setOpenapiSpecInstallationFailed(fields: {
     productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
     failureReason: string;
     inferenceId: string;
   }) {
-    const { productName, failureReason, inferenceId } = fields;
+    const { productName, productVersion, failureReason, inferenceId } = fields;
     const objectId = getOpenAPISpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'error',
@@ -352,7 +355,7 @@ export class ProductDocInstallClient {
       inference_id: inferenceId,
       resource_type: ResourceTypes.openapiSpec,
       product_name: productName,
-      product_version: 'latest', // to be included later
+      product_version: productVersion,
     });
   }
 
