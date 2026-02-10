@@ -117,6 +117,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleAriaLabel,
 }) => {
   const styles = useStyles(border, height);
+  const { euiTheme } = useEuiTheme();
   const toggle = useCallback(() => {
     if (toggleQuery) {
       toggleQuery(!toggleStatus);
@@ -172,16 +173,17 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                         <h2 data-test-subj="header-section-title">
                           <span className="eui-textBreakNormal">{title}</span>
                           {tooltip && (
-                            <>
-                              <EuiIconTip
-                                color="subdued"
-                                title={tooltipTitle}
-                                content={tooltip}
-                                iconProps={tooltipIconProps}
-                                size="l"
-                                type="info"
-                              />
-                            </>
+                            <EuiIconTip
+                              color="subdued"
+                              title={tooltipTitle}
+                              content={tooltip}
+                              iconProps={{
+                                ...tooltipIconProps,
+                                style: { marginInlineStart: euiTheme.size.xs },
+                              }}
+                              size="m"
+                              type="info"
+                            />
                           )}
                         </h2>
                       </EuiTitle>
