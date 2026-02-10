@@ -17,10 +17,9 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
-import { hasTimestampFields } from '../utils/utils';
+import { hasTimestampFields, checkForNoReadableIndices } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
-const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
@@ -30,7 +29,10 @@ jest.mock('../utils/utils', () => ({
       warningMessage: undefined,
     };
   }),
-  hasReadIndexPrivileges: jest.fn(async () => undefined),
+  checkForNoReadableIndices: jest.fn(async () => ({
+    foundNoIndices: false,
+    warningMessage: undefined,
+  })),
   checkForFrozenIndices: jest.fn(async () => []),
 }));
 
@@ -119,7 +121,11 @@ describe('Custom Query Alerts', () => {
   });
 
   it('short-circuits and writes a warning if no indices are found', async () => {
-    (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
+    (checkForNoReadableIndices as jest.Mock).mockImplementationOnce(async () => ({
+      foundNoIndices: true,
+      warningMessage:
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+    }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
@@ -156,8 +162,9 @@ describe('Custom Query Alerts', () => {
     expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+        message: expect.stringContaining(
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+        ),
       })
     );
   });
