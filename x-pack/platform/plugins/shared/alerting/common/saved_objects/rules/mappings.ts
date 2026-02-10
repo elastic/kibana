@@ -136,6 +136,25 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
+    mutedAlerts: {
+      type: 'nested',
+      properties: {
+        alertInstanceId: { type: 'keyword' },
+        mutedAt: { type: 'date' },
+        mutedBy: { type: 'keyword' },
+        expiresAt: { type: 'date' },
+        conditionOperator: { type: 'keyword' },
+        conditions: {
+          type: 'nested',
+          properties: {
+            type: { type: 'keyword' },
+            field: { type: 'keyword' },
+            value: { type: 'keyword' },
+            snapshotValue: { type: 'keyword' },
+          },
+        },
+      },
+    },
     // NO NEED TO BE INDEXED
     // meta: {
     //   properties: {
