@@ -1,6 +1,6 @@
 # SUM
 
-The `SUM` function calculates the total of a numeric expression.
+The SUM function calculates the total of a numeric expression.
 
 ## Syntax
 
@@ -8,26 +8,20 @@ The `SUM` function calculates the total of a numeric expression.
 
 ### Parameters
 
-#### `number`
+#### number
 
-A numeric expression to be summed.
+The numeric expression to be summed. Inline functions can be used within this parameter.
 
 ## Examples
 
-#Summing a field
-
+Calculates the total sum of all values in the `languages` column from the `employees` data.
 ```esql
 FROM employees
 | STATS SUM(languages)
 ```
 
-Calculate the total number of languages across all employees.
-
-#Using inline functions
-
+Calculates the sum of each employee’s maximum salary change by first finding the maximum value in the `salary_change` array for each employee, then summing those maximums across all employees.
 ```esql
 FROM employees
 | STATS total_salary_changes = SUM(MV_MAX(salary_change))
 ```
-
-Calculate the total of each employee’s maximum salary changes by applying the `MV_MAX` function to each row and summing the results.

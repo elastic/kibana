@@ -317,7 +317,7 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
+          const [, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
 
           // Retrieve and validate state
           const oauthStateClient = new OAuthStateClient({
@@ -344,16 +344,20 @@ export const oauthCallbackRoute = (
             });
           }
 
-          // Get connector with decrypted secrets
+          // Get connector with decrypted secrets using the spaceId from the OAuth state
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
           });
+          const namespace =
+            spaces && oauthState.spaceId
+              ? spaces.spacesService.spaceIdToNamespace(oauthState.spaceId)
+              : undefined;
           const rawAction = await connectorEncryptedClient.getDecryptedAsInternalUser<{
             actionTypeId: string;
             name: string;
             config: OAuthConnectorConfig;
             secrets: OAuthConnectorSecrets;
-          }>('action', oauthState.connectorId);
+          }>('action', oauthState.connectorId, { namespace });
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
