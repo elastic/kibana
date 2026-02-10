@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 - product: observability
   target: 9.3.0
-title: '[OBS-UX-MGMT] Rule condition chart parser replaces metric names inside filter values (e.g., A in "Accounts")'
+title: Rule condition chart parser replaces metric names inside filter values (e.g., A in "Accounts")

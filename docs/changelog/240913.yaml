@@ -88,4 +88,4 @@ products:
   target: 9.3.0
 areas:
 - Machine learning
-title: '[AI Connector] Ensures all auth fields show up correctly'
+title: Ensures all auth fields show up correctly

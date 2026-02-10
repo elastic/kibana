@@ -88,4 +88,4 @@ products:
   target: 9.3.0
 areas:
 - Discover
-title: '[Advanced Settings] Fix missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting'
+title: Fix missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting

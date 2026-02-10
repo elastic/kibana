@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Risk Score] Use ESQL for calculating risk scores'
+title: Use ESQL for calculating risk scores

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Alert details] show session view in full height'
+title: show session view in full height

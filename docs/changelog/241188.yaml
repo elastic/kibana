@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Machine learning
-title: '[AI Connector] Anthropic Connector: ensure max tokens parameter is passed as expected by service'
+title: 'Anthropic Connector: ensure max tokens parameter is passed as expected by service'

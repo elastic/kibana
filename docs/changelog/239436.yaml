@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Endpoint] Add free-text popup to `runscript` argument that provides input to the selected script'
+title: Add free-text popup to `runscript` argument that provides input to the selected script

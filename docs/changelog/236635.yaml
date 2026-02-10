@@ -88,4 +88,4 @@ type: enhancement
 products:
 - product: kibana
   target: 9.3.0
-title: '[Traces] Replace current doc count chart by RED metrics'
+title: Replace current doc count chart by RED metrics

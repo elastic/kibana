@@ -86,4 +86,4 @@ type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-title: '[Infra] Hide filtering capabilities in Hosts Metrics'
+title: Hide filtering capabilities in Hosts Metrics

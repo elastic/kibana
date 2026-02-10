@@ -92,4 +92,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: '[Endpoint] Fix artifacts spaces migration (`v9.1`) to ensure all artifacts are processed'
+title: Fix artifacts spaces migration (`v9.1`) to ensure all artifacts are processed

@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 - product: observability
   target: 9.3.0
-title: '[Alert details] Fix error when Observability AI Assistant is disabled'
+title: Fix error when Observability AI Assistant is disabled

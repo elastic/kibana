@@ -91,4 +91,3 @@ products:
 areas:
 - Elastic Security solution
 title: Add file download relative URI to response actions that provide file output
-feature-id: test_feature2

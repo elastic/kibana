@@ -86,4 +86,4 @@ type: enhancement
 products:
 - product: kibana
   target: 9.3.0
-title: '[Traces] Adding error marks to unified trace waterfall'
+title: Adding error marks to unified trace waterfall

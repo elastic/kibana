@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: "[Timeline] Fix rule link in timeline's flyout"
+title: Fix rule link in timeline's flyout

@@ -88,5 +88,5 @@ products:
   target: 9.3.0
 areas:
 - Search
-title: '[Fix] pass retriever query via body param instead of query in JS tutorial'
+title: pass retriever query via body param instead of query in JS tutorial
 description: Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed via the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed via the body parameter to ensure they are serialized correctly.

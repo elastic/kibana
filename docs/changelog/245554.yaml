@@ -91,4 +91,4 @@ products:
 areas:
 - Discover
 - ES|QL
-title: '[Discover] Supports filtering for multivalue fields'
+title: Supports filtering for multivalue fields

@@ -86,4 +86,4 @@ type: feature
 products:
 - product: kibana
   target: 9.3.0
-title: '[Logs][Flyout] New "Similar errors" section with Occurrences chart'
+title: New "Similar errors" section with Occurrences chart

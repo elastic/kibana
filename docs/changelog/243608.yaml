@@ -90,5 +90,5 @@ products:
   target: 9.3.0
 areas:
 - Dashboards and Visualizations
-title: '[Metric] Improve "Supporting visualization" section'
+title: Improve "Supporting visualization" section
 description: 'The color settings in the Primary Metric editor have been reorganized and renamed. For numeric metrics, the "Color by value" and "Color mapping" / "Color" settings are now located under the chart type field. The settings have been renamed as follows: "Color by value" is now "Color mode", "Color mapping" is now "Dynamic color mapping", and "Color" is now "Select color".'

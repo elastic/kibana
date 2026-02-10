@@ -90,4 +90,4 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
-title: "[Detection Engine] fixes \"Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill.\""
+title: fixes "Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill."
