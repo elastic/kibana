@@ -6,6 +6,8 @@
  */
 
 import { useRef, useMemo, useState, useCallback } from 'react';
+import type { TriggerMatchResult } from './inline_actions';
+import { useInlineActionTrigger } from './inline_actions';
 
 export interface MessageEditorInstance {
   _internal: {
@@ -17,6 +19,10 @@ export interface MessageEditorInstance {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  /** Current inline action trigger state */
+  triggerMatch: TriggerMatchResult;
+  /** Dismiss the active trigger menu */
+  cancelTrigger: () => void;
 }
 
 /**
@@ -35,6 +41,7 @@ export interface MessageEditorInstance {
 export const useMessageEditor = (): MessageEditorInstance => {
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const triggerState = useInlineActionTrigger();
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
@@ -55,6 +62,9 @@ export const useMessageEditor = (): MessageEditorInstance => {
         ref,
         onChange: () => {
           syncIsEmpty();
+          if (ref.current) {
+            triggerState.handleInput(ref.current);
+          }
         },
       },
       focus: () => {
@@ -81,8 +91,10 @@ export const useMessageEditor = (): MessageEditorInstance => {
         }
       },
       isEmpty,
+      triggerMatch: triggerState.match,
+      cancelTrigger: triggerState.dismiss,
     }),
-    [isEmpty, syncIsEmpty]
+    [isEmpty, syncIsEmpty, triggerState]
   );
 
   return instance;

@@ -28,6 +28,8 @@ const createMockMessageEditor = (): MessageEditorInstance => {
     getContent: jest.fn(() => ''),
     setContent: jest.fn(),
     isEmpty: false,
+    triggerMatch: { isActive: false, activeTrigger: null },
+    cancelTrigger: jest.fn(),
   };
 };
 
@@ -152,5 +154,22 @@ describe('MessageEditor', () => {
       shiftKey: false,
     });
     expect(mockOnSubmit).toHaveBeenCalled();
+  });
+
+  it('calls cancelTrigger when Escape is pressed', () => {
+    const messageEditor = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'Escape' });
+
+    expect(messageEditor.cancelTrigger).toHaveBeenCalled();
+    expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });

@@ -94,7 +94,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       onCompositionStart={handleCompositionStart}
       onCompositionEnd={handleCompositionEnd}
       onKeyDown={(event) => {
-        if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
+        if (event.key === keys.ESCAPE) {
+          messageEditor.cancelTrigger();
+        } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
           event.preventDefault();
           onSubmit();
         }
