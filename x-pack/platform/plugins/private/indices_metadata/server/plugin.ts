@@ -71,7 +71,8 @@ export class IndicesMetadataPlugin
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
 
-      if (pluginConfig.enabled && this.telemetryConfigProvider.getIsOptedIn()) {
+
+      if (pluginConfig.enabled) {
         this.logger.info('Updating indices metadata configuration');
 
         const cdnConfig = this.effectiveCdnConfig(pluginConfig);

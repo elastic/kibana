@@ -16,7 +16,8 @@
       "indicesMetadata"
     ],
     "requiredPlugins": [
-      "taskManager"
+      "taskManager",
+      "telemetry"
     ],
     "requiredBundles": [],
     "optionalPlugins": [],

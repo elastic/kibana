@@ -42,8 +42,9 @@ export class ConfigurationService {
     telemetryConfigProvider: TelemetryConfigProvider
   ) {
     this.artifactService = artifactService;
+    this.telemetryConfigProvider = telemetryConfigProvider;
     this.indicesMetadataConfiguration$ = timer(0, REFRESH_CONFIG_INTERVAL_MS).pipe(
-      exhaustMap(() => this.getConfiguration(telemetryConfigProvider)),
+      exhaustMap(() => this.getConfiguration()),
       takeUntil(this.stop$),
       startWith(defaultConfiguration),
       filter((config) => config !== undefined),
@@ -63,13 +64,12 @@ export class ConfigurationService {
     return this.indicesMetadataConfiguration$;
   }
 
-  private async getConfiguration(
-    telemetryConfigProvider: TelemetryConfigProvider
-  ): Promise<IndicesMetadataConfiguration | undefined> {
+  private async getConfiguration(): Promise<IndicesMetadataConfiguration | undefined> {
     this.ensureStarted();
 
     try {
-      if (!telemetryConfigProvider.getIsOptedIn()) {
+      if (!this.telemetryConfigProvider.getIsOptedIn()) {
+        this.logger.debug('Skipping configuration retrieval, telemetry opted out');
         return undefined;
       }
       this.logger.debug('Getting indices metadata configuration');

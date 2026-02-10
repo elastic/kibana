@@ -196,6 +196,8 @@ export class IndicesMetadataService {
               const { state } = taskInstance;
               if (service.telemetryConfigProvider.getIsOptedIn()) {
                 await service.publishIndicesMetadata();
+              } else {
+                service.logger.debug('Telemetry opted out, skipping task run');
               }
               return { state };
             },
