@@ -28,10 +28,9 @@ import {
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import moment from 'moment';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -40,7 +39,6 @@ import { useSloDetailsTabs } from '../hooks/use_slo_details_tabs';
 import { SloDetails } from '../components/slo_details';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SloTagsBadge } from '../../../components/slo/slo_badges/slo_tags_badge';
-import { SloInstanceComboBox } from '../components/instance_selector/slo_instance_combo_box';
 
 export interface SLODetailsFlyoutProps {
   sloId: string;
@@ -84,12 +82,6 @@ export default function SLODetailsFlyout({
     prefix: 'sloDetailsFlyout',
   });
 
-  const [instanceId, setInstanceId] = useState<string>(sloInstanceId ?? ALL_VALUE);
-
-  useEffect(() => {
-    setInstanceId(sloInstanceId ?? ALL_VALUE);
-  }, [sloInstanceId]);
-
   const {
     data: slo,
     isLoading,
@@ -97,7 +89,6 @@ export default function SLODetailsFlyout({
     isSuccess,
   } = useFetchSloDetails({
     sloId,
-    instanceId,
     shouldRefetch: false,
   });
 
@@ -131,9 +122,6 @@ export default function SLODetailsFlyout({
     }
 
     if (slo && sloDetailsUrl) {
-      const groupBy = [slo.groupBy].flat();
-      const isDefinedWithGroupBy = !groupBy.includes(ALL_VALUE);
-
       return (
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={true}>
@@ -179,16 +167,6 @@ export default function SLODetailsFlyout({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={true}>
               <SloTagsBadge slo={slo} color="hollow" />
             </EuiFlexGroup>
-          )}
-          {isDefinedWithGroupBy && (
-            <>
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="none" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <SloInstanceComboBox slo={slo} setInstanceId={setInstanceId} />
-              </EuiFlexItem>
-            </>
           )}
           <EuiFlexItem>
             <EuiHorizontalRule margin="none" />
