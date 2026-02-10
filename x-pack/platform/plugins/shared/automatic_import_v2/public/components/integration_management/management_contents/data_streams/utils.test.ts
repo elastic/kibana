@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getIconFromType, getFieldType, flattenPipelineObject } from './utils';
+import { getIconFromType, getFieldType, flattenPipelineObject, isValidIp } from './utils';
 
 describe('data stream utils', () => {
   describe('getIconFromType', () => {
@@ -33,8 +33,8 @@ describe('data stream utils', () => {
       expect(getIconFromType('date')).toBe('tokenDate');
     });
 
-    it('should return tokenGeo for ip type', () => {
-      expect(getIconFromType('ip')).toBe('tokenGeo');
+    it('should return tokenIP for ip type', () => {
+      expect(getIconFromType('ip')).toBe('tokenIP');
     });
 
     it('should return tokenGeo for geo_point type', () => {
@@ -118,6 +118,67 @@ describe('data stream utils', () => {
       expect(getFieldType('not-a-date')).toBe('string');
       expect(getFieldType('01-01-2024')).toBe('string');
     });
+
+    it('should return "ip" for valid IPv4 addresses', () => {
+      expect(getFieldType('192.0.2.1')).toBe('ip');
+      expect(getFieldType('198.51.100.1')).toBe('ip');
+      expect(getFieldType('203.0.113.1')).toBe('ip');
+      expect(getFieldType('127.0.0.1')).toBe('ip');
+      expect(getFieldType('10.0.0.1')).toBe('ip');
+      expect(getFieldType('172.16.0.1')).toBe('ip');
+      expect(getFieldType('192.168.0.1')).toBe('ip');
+    });
+
+    it('should return "ip" for valid IPv6 addresses', () => {
+      expect(getFieldType('2001:db8::1')).toBe('ip');
+      expect(getFieldType('2001:0db8:85a3::8a2e:0370:7334')).toBe('ip');
+      expect(getFieldType('::1')).toBe('ip');
+      expect(getFieldType('fe80::1')).toBe('ip');
+      expect(getFieldType('::')).toBe('ip');
+    });
+
+    it('should return "string" for invalid IP addresses', () => {
+      expect(getFieldType('256.1.1.1')).toBe('string');
+      expect(getFieldType('192.0.2')).toBe('string');
+      expect(getFieldType('192.0.2.1.1')).toBe('string');
+      expect(getFieldType('999.999.999.999')).toBe('string');
+      expect(getFieldType('not-an-ip')).toBe('string');
+    });
+
+    it('should prioritize IP detection over date detection', () => {
+      expect(getFieldType('192.0.2.1')).toBe('ip');
+      expect(getFieldType('198.51.100.1')).toBe('ip');
+    });
+  });
+
+  describe('isValidIp', () => {
+    it('should validate IPv4 addresses correctly', () => {
+      expect(isValidIp('192.0.2.1')).toBe(true);
+      expect(isValidIp('198.51.100.1')).toBe(true);
+      expect(isValidIp('203.0.113.1')).toBe(true);
+      expect(isValidIp('127.0.0.1')).toBe(true);
+      expect(isValidIp('10.0.0.1')).toBe(true);
+      expect(isValidIp('172.16.0.1')).toBe(true);
+      expect(isValidIp('192.168.0.1')).toBe(true);
+    });
+
+    it('should validate IPv6 addresses correctly', () => {
+      expect(isValidIp('2001:db8::1')).toBe(true);
+      expect(isValidIp('2001:0db8:85a3::8a2e:0370:7334')).toBe(true);
+      expect(isValidIp('::1')).toBe(true);
+      expect(isValidIp('fe80::1')).toBe(true);
+      expect(isValidIp('::')).toBe(true);
+    });
+
+    it('should reject invalid IP addresses', () => {
+      expect(isValidIp('256.1.1.1')).toBe(false);
+      expect(isValidIp('192.0.2')).toBe(false);
+      expect(isValidIp('192.0.2.1.1')).toBe(false);
+      expect(isValidIp('999.999.999.999')).toBe(false);
+      expect(isValidIp('not-an-ip')).toBe(false);
+      expect(isValidIp('')).toBe(false);
+      expect(isValidIp('hello world')).toBe(false);
+    });
   });
 
   describe('flattenPipelineObject', () => {
@@ -192,7 +253,7 @@ describe('data stream utils', () => {
         },
         metadata: {
           source: {
-            ip: '127.0.0.1',
+            ip: '192.0.2.1',
           },
         },
       };
@@ -214,8 +275,8 @@ describe('data stream utils', () => {
       });
       expect(result).toContainEqual({
         field: 'metadata.source.ip',
-        value: '127.0.0.1',
-        type: 'string',
+        value: '192.0.2.1',
+        type: 'ip',
       });
     });
 

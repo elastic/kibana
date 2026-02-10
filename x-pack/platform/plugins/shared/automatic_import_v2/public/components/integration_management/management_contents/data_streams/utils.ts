@@ -6,6 +6,7 @@
  */
 
 import type { EuiTokenProps } from '@elastic/eui';
+import ipaddr from 'ipaddr.js';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   string: 'tokenString',
@@ -26,13 +27,30 @@ export const getIconFromType = (type: string | null | undefined): EuiTokenProps[
   return TYPE_TO_ICON_MAP[type] ?? 'tokenQuestion';
 };
 
+export const isValidIp = (value: string): boolean => {
+  try {
+    return ipaddr.IPv4.isValidFourPartDecimal(value) || ipaddr.IPv6.isValid(value);
+  } catch {
+    return false;
+  }
+};
+
 export const getFieldType = (value: unknown): string => {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
   if (typeof value === 'boolean') return 'boolean';
   if (Array.isArray(value)) return 'nested';
   if (typeof value === 'object') return 'object';
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
+  if (typeof value === 'string') {
+    const looksLikeIPv4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(value);
+    const looksLikeIPv6 = /^[0-9a-fA-F:]+$/.test(value);
+    if (looksLikeIPv4 || looksLikeIPv6) {
+      if (isValidIp(value)) {
+        return 'ip';
+      }
+    }
+    if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
+  }
   return 'string';
 };
 
