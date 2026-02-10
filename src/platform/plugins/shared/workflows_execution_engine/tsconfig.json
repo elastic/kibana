@@ -29,6 +29,7 @@
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
+    "@kbn/server-http-tools",
   ],
   "exclude": [
     "target/**/*"
