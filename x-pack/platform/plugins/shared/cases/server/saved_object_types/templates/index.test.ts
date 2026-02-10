@@ -20,10 +20,28 @@ describe('caseTemplateSavedObjectType', () => {
       Object {
         "dynamic": false,
         "properties": Object {
+          "author": Object {
+            "type": "keyword",
+          },
           "definition": Object {
             "type": "text",
           },
           "deletedAt": Object {
+            "type": "date",
+          },
+          "description": Object {
+            "type": "text",
+          },
+          "fieldCount": Object {
+            "type": "integer",
+          },
+          "fieldNames": Object {
+            "type": "keyword",
+          },
+          "isDefault": Object {
+            "type": "boolean",
+          },
+          "lastUsedAt": Object {
             "type": "date",
           },
           "name": Object {
@@ -32,10 +50,16 @@ describe('caseTemplateSavedObjectType', () => {
           "owner": Object {
             "type": "keyword",
           },
+          "tags": Object {
+            "type": "keyword",
+          },
           "templateId": Object {
             "type": "keyword",
           },
           "templateVersion": Object {
+            "type": "integer",
+          },
+          "usageCount": Object {
             "type": "integer",
           },
         },
