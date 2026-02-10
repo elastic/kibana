@@ -80,7 +80,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             name: newName,
             enabled: false, // Always disable copy to prevent unexpected deployments
             policy_ids: [],
-            shards: {},
+            shards: [],
             created_by: username,
             created_at: now,
             updated_by: username,
