@@ -84,6 +84,8 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     enableDisable: { edit: false },
     investigationGuide: { edit: false },
     customHighlightedFields: { edit: false },
+    manualRun: { edit: false },
+    rulesManagementSettings: { edit: false },
   },
   alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
 };
