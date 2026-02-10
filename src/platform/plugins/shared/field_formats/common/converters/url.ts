@@ -134,9 +134,21 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
-  textConvert: TextContextTypeConvert = (value: string) => this.formatLabel(value);
+  textConvert: TextContextTypeConvert = (value: string) => {
+    const missing = this.checkForMissingValueText(value);
+    if (missing) {
+      return missing;
+    }
+
+    return this.formatLabel(value);
+  };
 
   htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
+    const missing = this.checkForMissingValueHtml(rawValue);
+    if (missing) {
+      return missing;
+    }
+
     const { field, hit } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
