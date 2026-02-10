@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -27,6 +27,7 @@ import { HostPanelHeader } from './header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
+import { useObservedHostHeaderLastSeen } from './hooks/use_observed_host_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
@@ -132,7 +133,7 @@ export const HostPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
-  const [lastSeenDate, setLastSeenDate] = useState<string | null | undefined>(null);
+  const lastSeenDate = useObservedHostHeaderLastSeen(hostName, scopeId);
 
   return (
     <>
@@ -149,7 +150,6 @@ export const HostPanel = ({
       />
       <HostPanelHeader hostName={hostName} lastSeenDate={lastSeenDate} />
       <HostPanelContent
-        setLastSeenDate={setLastSeenDate}
         hostName={hostName}
         riskScoreState={riskScoreState}
         contextID={contextID}

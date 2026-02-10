@@ -28,13 +28,11 @@ const OPEN = 'open' as const;
 
 export const ObservedDataSection = memo(
   ({
-    setLastSeenDate,
     userName,
     contextID,
     scopeId,
     queryId,
   }: {
-    setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
     userName: string;
     contextID: string;
     scopeId: string;
@@ -87,7 +85,6 @@ export const ObservedDataSection = memo(
         >
           {renderContent && (
             <ObservedDataSectionContent
-              setLastSeenDate={setLastSeenDate}
               userName={userName}
               contextID={contextID}
               scopeId={scopeId}
@@ -105,7 +102,6 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 
 const ObservedDataSectionContent = memo(
   ({
-    setLastSeenDate,
     userName,
     contextID,
     scopeId,
@@ -113,7 +109,6 @@ const ObservedDataSectionContent = memo(
     setIsLoading,
     setExtraAction,
   }: {
-    setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
     userName: string;
     contextID: string;
     scopeId: string;
@@ -123,7 +118,7 @@ const ObservedDataSectionContent = memo(
   }) => {
     const { to, from, isInitializing } = useGlobalTime();
 
-    const observedUser = useObservedUser(userName, scopeId, setLastSeenDate);
+    const observedUser = useObservedUser(userName, scopeId);
 
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);

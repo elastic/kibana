@@ -6,7 +6,7 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
-import React, { type Dispatch, type SetStateAction } from 'react';
+import React from 'react';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -29,11 +29,9 @@ interface UserPanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
-  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
 }
 
 export const UserPanelContent = ({
-  setLastSeenDate,
   userName,
   riskScoreState,
   recalculatingScore,
@@ -76,7 +74,6 @@ export const UserPanelContent = ({
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
-        setLastSeenDate={setLastSeenDate}
         userName={userName}
         contextID={contextID}
         scopeId={scopeId}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -28,6 +28,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { useObservedUserHeaderLastSeen } from './hooks/use_observed_user_header_last_seen';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
@@ -75,7 +76,7 @@ export const UserPanel = ({
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
-  const [lastSeenDate, setLastSeenDate] = useState<string | null | undefined>(null);
+  const lastSeenDate = useObservedUserHeaderLastSeen(userName, scopeId);
 
   const managedUser = useManagedUser();
 
@@ -149,7 +150,6 @@ export const UserPanel = ({
       />
       <UserPanelHeader userName={userName} lastSeenDate={lastSeenDate} managedUser={managedUser} />
       <UserPanelContent
-        setLastSeenDate={setLastSeenDate}
         userName={userName}
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}

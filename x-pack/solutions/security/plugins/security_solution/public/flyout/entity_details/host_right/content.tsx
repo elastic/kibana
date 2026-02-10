@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { ObservedDataSection } from './components/observed_data_section';
@@ -29,11 +28,9 @@ interface HostPanelContentProps {
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
-  setLastSeenDate: Dispatch<SetStateAction<string | null | undefined>>;
 }
 
 export const HostPanelContent = ({
-  setLastSeenDate,
   hostName,
   riskScoreState,
   recalculatingScore,
@@ -76,7 +73,6 @@ export const HostPanelContent = ({
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
-        setLastSeenDate={setLastSeenDate}
         hostName={hostName}
         contextID={contextID}
         scopeId={scopeId}
