@@ -1,0 +1,51 @@
+version: '1'
+name: 'sources.servicenow.list_records'
+description: 'List records from a ServiceNow table with optional filtering using encoded queries. Supports pagination and ordering. Useful for browsing incidents, knowledge articles, change requests, and other ServiceNow records.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: choice
+    required: true
+    options:
+      - "incident"
+      - "kb_knowledge"
+      - "sc_req_item"
+      - "change_request"
+      - "problem"
+      - "sc_task"
+    description: 'The ServiceNow table to list records from'
+  - name: encoded_query
+    type: string
+    required: false
+    description: 'ServiceNow encoded query for filtering (e.g., active=true^priority=1, state=2^assigned_to=current_user)'
+  - name: fields
+    type: string
+    required: false
+    description: 'Comma-separated list of fields to return'
+  - name: limit
+    type: number
+    required: false
+    default: 20
+    description: 'Maximum number of results to return'
+  - name: offset
+    type: number
+    required: false
+    description: 'Offset for pagination'
+  - name: order_by
+    type: string
+    required: false
+    description: 'Field to order results by (prefix with - for descending, e.g., -sys_created_on)'
+steps:
+  - name: list-records
+    type: servicenow_search.listRecords
+    connector-id: <%= stackConnectorId %>
+    with:
+      table: "${{ inputs.table }}"
+      encodedQuery: "${{ inputs.encoded_query }}"
+      fields: "${{ inputs.fields }}"
+      limit: ${{ inputs.limit }}
+      offset: ${{ inputs.offset }}
+      orderBy: "${{ inputs.order_by }}"

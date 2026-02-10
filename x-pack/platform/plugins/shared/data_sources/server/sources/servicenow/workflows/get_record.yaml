@@ -1,0 +1,28 @@
+version: '1'
+name: 'sources.servicenow.get_record'
+description: 'Retrieve a specific ServiceNow record by its sys_id from any table. Returns full record details including all metadata fields.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: string
+    required: true
+    description: 'The ServiceNow table containing the record (e.g., incident, kb_knowledge, sc_req_item, change_request)'
+  - name: sys_id
+    type: string
+    required: true
+    description: 'The sys_id of the record to retrieve'
+  - name: fields
+    type: string
+    required: false
+    description: 'Comma-separated list of fields to return'
+steps:
+  - name: get-record
+    type: servicenow_search.getRecord
+    connector-id: <%= stackConnectorId %>
+    with:
+      table: "${{ inputs.table }}"
+      sysId: "${{ inputs.sys_id }}"
+      fields: "${{ inputs.fields }}"

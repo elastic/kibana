@@ -73,4 +73,14 @@ export const ConnectorIconsMap: Map<
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
+
+  [
+    '.servicenow_search',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
+  ],
 ]);

@@ -1,0 +1,46 @@
+version: '1'
+name: 'sources.servicenow.search'
+description: 'Search ServiceNow records using full-text search. Searches across a specified table (e.g., incident, kb_knowledge, sc_req_item, change_request) and returns matching records with high-level metadata.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: choice
+    required: true
+    options:
+      - "incident"
+      - "kb_knowledge"
+      - "sc_req_item"
+      - "change_request"
+      - "problem"
+      - "sc_task"
+    description: 'The ServiceNow table to search'
+  - name: query
+    type: string
+    required: true
+    description: 'Full-text search query string'
+  - name: fields
+    type: string
+    required: false
+    description: 'Comma-separated list of fields to return (e.g., sys_id,number,short_description,state,priority,assigned_to,sys_created_on)'
+  - name: limit
+    type: number
+    required: false
+    default: 20
+    description: 'Maximum number of results to return'
+  - name: offset
+    type: number
+    required: false
+    description: 'Offset for pagination'
+steps:
+  - name: search-records
+    type: servicenow_search.search
+    connector-id: <%= stackConnectorId %>
+    with:
+      table: "${{ inputs.table }}"
+      query: "${{ inputs.query }}"
+      fields: "${{ inputs.fields }}"
+      limit: ${{ inputs.limit }}
+      offset: ${{ inputs.offset }}
