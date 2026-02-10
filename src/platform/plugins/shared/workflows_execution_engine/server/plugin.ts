@@ -31,11 +31,8 @@ import {
   runWorkflow,
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
-<<<<<<< HEAD
-import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
-=======
 import { getAuthenticatedUser } from './lib/get_user';
->>>>>>> 505763b9519ae5244881e71af7397d3e4249b6bc
+import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
