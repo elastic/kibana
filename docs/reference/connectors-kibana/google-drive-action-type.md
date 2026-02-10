@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Google Drive connectors have the following configuration properties:
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Google Drive API scopes. See [Get API credentials](#google-drive-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Google Drive API scopes. Check the [Get API credentials](#google-drive-api-credentials) for instructions.
 
 ## Test connectors [google-drive-action-configuration]
 
