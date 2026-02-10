@@ -18,7 +18,7 @@ export type IndexPatternAdapterParams = IndexAdapterParams & {
 export class IndexPatternAdapter extends IndexAdapter {
   protected installationPromises: Map<string, Promise<void>>;
   protected installIndexPromise?: Promise<InstallIndex>;
-  private readonly expandIndexPattern: boolean;
+  protected readonly expandIndexPattern: boolean;
 
   constructor(protected readonly prefix: string, options: IndexPatternAdapterParams) {
     const { expandIndexPattern = false, ...restOptions } = options;
