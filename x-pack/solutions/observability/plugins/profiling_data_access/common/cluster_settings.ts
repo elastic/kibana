@@ -59,3 +59,14 @@ export async function validateResourceManagement({
     };
   }
 }
+
+export async function validateProfilingStatus({
+  client,
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
+  const statusResponse = await client.profilingStatus();
+  return {
+    profiling: {
+      enabled: statusResponse.profiling.enabled,
+    },
+  };
+}

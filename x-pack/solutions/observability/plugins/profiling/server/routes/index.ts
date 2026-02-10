@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchCapabilities,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { ProfilingConfig } from '..';
@@ -39,6 +42,7 @@ export interface RouteRegisterParameters {
     config: ProfilingConfig;
     stackVersion: string;
     telemetryUsageCounter?: TelemetryUsageCounter;
+    esCapabilities: ElasticsearchCapabilities;
   };
   services: {
     createProfilingEsClient: (params: {
