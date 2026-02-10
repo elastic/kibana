@@ -18,6 +18,7 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
+  GRAPH_NODES_LIMIT,
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
@@ -31,12 +32,7 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import {
-  DOC_ID,
-  EVENT_ID,
-  GRAPH_NODES_LIMIT,
-  TOGGLE_SEARCH_BAR_STORAGE_KEY,
-} from '../../common/constants';
+import { DOC_ID, EVENT_ID, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import {

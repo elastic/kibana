@@ -117,6 +117,9 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
  */
 export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
 
+// Graph visualization limits
+export const GRAPH_NODES_LIMIT = 300;
+
 /**
  * ECS entity actor fields used for graph visualization.
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
