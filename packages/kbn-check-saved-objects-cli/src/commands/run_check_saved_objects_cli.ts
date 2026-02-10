@@ -11,14 +11,7 @@ import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
 import type { TaskContext } from './types';
-import {
-  automatedRollbackTests,
-  checkRemovedTypes,
-  getSnapshots,
-  validateNewTypes,
-  validateUpdatedTypes,
-} from './tasks';
-import { getTestSnapshots, TEST_TYPES } from './test';
+import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -90,41 +83,38 @@ export function runCheckSavedObjectsCli() {
           },
           /**
            * ==================================================================
-           * The following tasks only run in "--test mode".
+           * Validate SO changes.
            *
-           * Instead of starting Kibana and getting the actual typeRegistry
-           * we use a test registry with a bunch of fake SO types.
+           * Checks for removed types, new types, and updated types.
            * ==================================================================
            */
           {
-            title: 'Obtain type registry (test mode)',
-            task: async (ctx) => (ctx.registeredTypes = TEST_TYPES),
-            enabled: !server && test,
+            title: 'Validate SO changes',
+            task: validateSOChanges,
+            enabled: !server && !test,
+            skip: test,
           },
           {
-            title: 'Get type registry snapshots (test mode)',
-            task: getTestSnapshots,
-            enabled: !server && test,
+            title: 'Fallback to test mode (no updated types detected)',
+            task: (ctx) => {
+              ctx.test = true;
+            },
+            enabled: !server && !test,
+            skip: (ctx) => ctx.updatedTypes.length > 0,
           },
           /**
            * ==================================================================
-           * The following tasks run systematically
+           * Validate test flow (runs in test mode or after fallback).
+           *
+           * Sets up a test type registry and test snapshots, then runs
+           * the same validation pipeline with test data.
            * ==================================================================
            */
           {
-            title: 'Check removed SO types',
-            task: checkRemovedTypes,
+            title: 'Validate test flow',
+            task: validateTestFlow,
             enabled: !server,
-          },
-          {
-            title: 'Validate new SO types',
-            task: validateNewTypes,
-            enabled: !server,
-          },
-          {
-            title: 'Validate existing SO types',
-            task: validateUpdatedTypes,
-            enabled: !server,
+            skip: (ctx) => !ctx.test,
           },
           {
             title: 'Automated rollback tests',
