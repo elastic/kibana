@@ -67,17 +67,62 @@ export const JiraDataCenter: ConnectorSpec = {
       isTool: false,
       input: z.object({
         maxResults: z.number().optional(),
-        query: z.string(),
+        query: z.string().optional(),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { maxResults?: number; query: string };
+        const typedInput = input as { maxResults?: number; query?: string };
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(`${baseUrl}/rest/api/2/project`, {
           params: {
             ...(typedInput.maxResults != null && { maxResults: typedInput.maxResults }),
-            query: typedInput.query,
+            ...(typedInput.query != null && typedInput.query !== '' && { query: typedInput.query }),
           },
         });
+        return response.data;
+      },
+    },
+    getProject: {
+      isTool: false,
+      input: z.object({
+        projectId: z.string(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { projectId: string };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/2/project/${typedInput.projectId}`
+        );
+        return response.data;
+      },
+    },
+    getIssue: {
+      isTool: false,
+      input: z.object({
+        issueId: z.string(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { issueId: string };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/2/issue/${typedInput.issueId}`
+        );
+        return response.data;
+      },
+    },
+    searchIssuesWithJql: {
+      isTool: false,
+      input: z.object({
+        jql: z.string(),
+        maxResults: z.number().optional(),
+        startAt: z.number().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { jql: string; maxResults?: number; startAt?: number };
+        const baseUrl = buildBaseUrl(ctx);
+        const body: Record<string, unknown> = { jql: typedInput.jql };
+        if (typedInput.maxResults != null) body.maxResults = typedInput.maxResults;
+        if (typedInput.startAt != null) body.startAt = typedInput.startAt;
+        const response = await ctx.client.post(`${baseUrl}/rest/api/2/search`, body);
         return response.data;
       },
     },

@@ -1,0 +1,31 @@
+version: '1'
+name: 'sources.jira_data_center.get_resource'
+description: 'Get a Jira Data Center issue or project by ID/key'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: resourceType
+    type: choice
+    options:
+      - 'issue'
+      - 'project'
+  - name: id
+    type: string
+steps:
+  - name: route-by-type
+    type: if
+    condition: "${{ inputs.resourceType == 'issue' }}"
+    steps:
+      - name: get-issue
+        type: jira-data-center.getIssue
+        connector-id: <%= stackConnectorId %>
+        with:
+          issueId: "${{ inputs.id }}"
+    else:
+      - name: get-project
+        type: jira-data-center.getProject
+        connector-id: <%= stackConnectorId %>
+        with:
+          projectId: "${{ inputs.id }}"

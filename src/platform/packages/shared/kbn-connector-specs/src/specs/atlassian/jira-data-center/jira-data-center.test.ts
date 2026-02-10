@@ -13,6 +13,7 @@ import { JiraDataCenter } from './jira-data-center';
 describe('JiraDataCenter', () => {
   const mockClient = {
     get: jest.fn(),
+    post: jest.fn(),
   };
 
   const mockContext = {
@@ -30,18 +31,28 @@ describe('JiraDataCenter', () => {
   });
 
   describe('getProjects action', () => {
-    it('should call the correct URL with query and return response data', async () => {
+    it('should call the correct URL without query when not provided', async () => {
       const mockResponse = { data: [{ id: '10000', key: 'PROJ', name: 'My Project' }] };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await JiraDataCenter.actions.getProjects.handler(mockContext, {
-        query: 'PROJ',
-      });
+      const result = await JiraDataCenter.actions.getProjects.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/project',
+        { params: {} }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include query in params when provided', async () => {
+      const mockResponse = { data: [{ id: '10000', key: 'PROJ', name: 'My Project' }] };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraDataCenter.actions.getProjects.handler(mockContext, { query: 'PROJ' });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://jira.example.com/rest/api/2/project', {
         params: { query: 'PROJ' },
       });
-      expect(result).toEqual(mockResponse.data);
     });
 
     it('should build base URL from config url', async () => {
@@ -63,7 +74,18 @@ describe('JiraDataCenter', () => {
       );
     });
 
-    it('should include optional maxResults in params', async () => {
+    it('should include optional maxResults in params when provided', async () => {
+      const mockResponse = { data: [] };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraDataCenter.actions.getProjects.handler(mockContext, { maxResults: 50 });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://jira.example.com/rest/api/2/project', {
+        params: { maxResults: 50 },
+      });
+    });
+
+    it('should include both query and maxResults when provided', async () => {
       const mockResponse = { data: [] };
       mockClient.get.mockResolvedValue(mockResponse);
 
@@ -75,6 +97,103 @@ describe('JiraDataCenter', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://jira.example.com/rest/api/2/project', {
         params: { maxResults: 50, query: 'MYPROJ' },
       });
+    });
+  });
+
+  describe('getProject action', () => {
+    it('should GET project by key and return response data', async () => {
+      const mockResponse = {
+        data: { id: '10000', key: 'PROJ', name: 'My Project', projectTypeKey: 'software' },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraDataCenter.actions.getProject.handler(mockContext, {
+        projectId: 'PROJ',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/project/PROJ'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should GET project by numeric id', async () => {
+      const mockResponse = { data: { id: '10000', key: 'PROJ', name: 'My Project' } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraDataCenter.actions.getProject.handler(mockContext, { projectId: '10000' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/project/10000'
+      );
+    });
+  });
+
+  describe('getIssue action', () => {
+    it('should GET issue by key and return response data', async () => {
+      const mockResponse = {
+        data: {
+          id: '10001',
+          key: 'HSP-123',
+          fields: { summary: 'Fix login bug', status: { name: 'In Progress' } },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraDataCenter.actions.getIssue.handler(mockContext, {
+        issueId: 'HSP-123',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/issue/HSP-123'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should GET issue by numeric id', async () => {
+      const mockResponse = { data: { id: '10001', key: 'HSP-1', fields: {} } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraDataCenter.actions.getIssue.handler(mockContext, { issueId: '10001' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/issue/10001'
+      );
+    });
+  });
+
+  describe('searchIssuesWithJql action', () => {
+    it('should POST to search endpoint with jql and return response data', async () => {
+      const mockResponse = {
+        data: { issues: [{ id: '10001', key: 'HSP-1', fields: { summary: 'Bug' } }], total: 1 },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JiraDataCenter.actions.searchIssuesWithJql.handler(mockContext, {
+        jql: 'project = HSP',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/search',
+        { jql: 'project = HSP' }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include maxResults and startAt in request body when provided', async () => {
+      const mockResponse = { data: { issues: [], total: 0 } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await JiraDataCenter.actions.searchIssuesWithJql.handler(mockContext, {
+        jql: 'status = Done',
+        maxResults: 15,
+        startAt: 0,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/search',
+        { jql: 'status = Done', maxResults: 15, startAt: 0 }
+      );
     });
   });
 });

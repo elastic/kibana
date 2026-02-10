@@ -1,9 +1,0 @@
-version: '1'
-name: 'sources.jira_data_center.placeholder'
-description: 'Placeholder workflow for Jira Data Center scaffolding. Replace with real workflows when ready.'
-tags: []
-enabled: false
-triggers:
-  - type: 'manual'
-inputs: []
-steps: []

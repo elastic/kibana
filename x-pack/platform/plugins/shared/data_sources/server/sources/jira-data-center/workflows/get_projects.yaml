@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.jira_data_center.get_projects'
+description: 'Get Jira Data Center projects'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: false
+  - name: maxResults
+    type: number
+    required: false
+steps:
+  - name: get-projects
+    type: jira-data-center.getProjects
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{inputs.query}}"
+      maxResults: ${{inputs.maxResults}}
