@@ -7,6 +7,7 @@
 
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
+// eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
   testDir: './tests/',
   // Sequential: AI Assistant tests share connector + conversation state
