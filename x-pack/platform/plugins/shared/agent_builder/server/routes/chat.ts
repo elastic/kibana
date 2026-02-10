@@ -171,7 +171,7 @@ export function registerChatRoutes({
       schema.oneOf([schema.literal('regenerate')], {
         meta: {
           description:
-            'The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).',
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
         },
       })
     ),
