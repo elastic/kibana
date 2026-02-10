@@ -14,10 +14,10 @@ import {
   type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { getEsqlControls } from '@kbn/controls-renderer';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlState } from '@kbn/esql-types';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { getEsqlControls } from '@kbn/esql-utils';
 import type { DiscoverAppLocatorParams } from '../../../common';
 import { type PublishesSavedSearch } from '../types';
 

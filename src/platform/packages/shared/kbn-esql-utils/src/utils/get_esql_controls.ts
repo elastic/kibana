@@ -10,11 +10,11 @@
 import type { Serializable } from '@kbn/utility-types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { ESQLControlState } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiHasSerializableState, apiHasType, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export function getEsqlControls(
   presentationContainer: PresentationContainer,
@@ -38,7 +38,7 @@ export function getEsqlControls(
       }
 
       const controlState = api.serializeState() as ESQLControlState;
-      const variableName = 'variableName' in controlState && (controlState.variableName as string);
+      const variableName = controlState.variableName;
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);
       if (!isUsed) return acc;

@@ -68,6 +68,7 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { getEsqlControls } from './utils/get_esql_controls';
 
 // Callback functions
 export * from './utils/callbacks';
