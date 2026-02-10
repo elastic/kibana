@@ -137,15 +137,14 @@ describe('ScriptsLibraryTable', () => {
       );
     });
 
-    it('shows script name as a button for opening details flyout', () => {
+    it('shows script name as a link for opening details flyout', () => {
       act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const nameButton = getByTestId('test-column-name-script-1-name-button');
+      const nameButton = getByTestId('test-column-name-script-1-name-link');
       expect(nameButton).toHaveTextContent('Script One');
-      // should be a button element
-      expect(nameButton.tagName).toBe('BUTTON');
+      expect(nameButton.tagName).toBe('A');
     });
 
     it('shows platform badges for each script', () => {
@@ -296,9 +295,9 @@ describe('ScriptsLibraryTable', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const nameButton = getByTestId('test-column-name-script-1-name-button');
+      const nameLink = getByTestId('test-column-name-script-1-name-link');
 
-      await fireEvent.click(nameButton);
+      await fireEvent.click(nameLink);
 
       expect(defaultProps.onClickAction).toHaveBeenCalledWith(
         expect.objectContaining({

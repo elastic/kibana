@@ -70,6 +70,7 @@ const ScriptRowActions = memo<{
 ScriptRowActions.displayName = 'ScriptRowActions';
 
 interface GetScriptsLibraryTableColumnsProps {
+  queryParams: ScriptsLibraryTableProps['queryParams'];
   formatBytes: (bytes: number) => string;
   getTestId: (suffix?: string | undefined) => string | undefined;
   onClickAction: ScriptsLibraryTableProps['onClickAction'];
@@ -77,6 +78,7 @@ interface GetScriptsLibraryTableColumnsProps {
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
+  queryParams,
   getTestId,
   onClickAction,
 }: GetScriptsLibraryTableColumnsProps) => {
@@ -92,6 +94,8 @@ const getScriptsLibraryTableColumns = ({
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <ScriptNameNavLink
               name={name}
+              queryParams={queryParams}
+              scriptId={item.id}
               onClick={() => onClickAction({ show: 'details', script: item })}
               data-test-subj={`${getTestId('column-name')}-${item.id}`}
             />
@@ -303,10 +307,11 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
       () =>
         getScriptsLibraryTableColumns({
           formatBytes,
+          queryParams,
           getTestId,
           onClickAction,
         }),
-      [formatBytes, getTestId, onClickAction]
+      [formatBytes, queryParams, getTestId, onClickAction]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

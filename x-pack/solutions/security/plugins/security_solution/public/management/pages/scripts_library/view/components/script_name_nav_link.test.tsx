@@ -23,6 +23,8 @@ describe('ScriptNameNavLink component', () => {
 
     defaultProps = {
       name: 'Test Script',
+      queryParams: { page: 1, pageSize: 10, sortField: 'name', sortDirection: 'asc' },
+      scriptId: 'script-1',
       onClick: jest.fn(),
       'data-test-subj': 'test',
     };
@@ -36,14 +38,35 @@ describe('ScriptNameNavLink component', () => {
 
   it('should render correctly', () => {
     const { getByTestId } = render();
-    const nameElement = getByTestId('test-name-button');
+    const nameElement = getByTestId('test-name-link');
     expect(nameElement).toHaveTextContent('Test Script');
   });
 
   it('should call onClick when name is clicked', () => {
     const { getByTestId } = render();
-    const nameElement = getByTestId('test-name-button');
+    const nameElement = getByTestId('test-name-link');
     nameElement.click();
     expect(defaultProps.onClick).toHaveBeenCalled();
+  });
+
+  it('should have correct href for navigation', () => {
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-link');
+    expect(nameElement).toHaveAttribute(
+      'href',
+      '/app/security/administration/scripts_library?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details'
+    );
+  });
+
+  it('should update the href for navigation when queryParams change', () => {
+    const { getByTestId } = render({
+      ...defaultProps,
+      queryParams: { page: 2, pageSize: 20, sortField: 'updatedAt', sortDirection: 'desc' },
+    });
+    const nameElement = getByTestId('test-name-link');
+    expect(nameElement).toHaveAttribute(
+      'href',
+      '/app/security/administration/scripts_library?page=2&pageSize=20&sortField=updatedAt&sortDirection=desc&selectedScriptId=script-1&show=details'
+    );
   });
 });
