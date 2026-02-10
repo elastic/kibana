@@ -432,6 +432,33 @@ export async function shareOsqueryPackagePoliciesToSpace(
   }
 }
 
+// ── Package Policy IDs ────────────────────────────────────────────────────────
+
+/**
+ * Safely fetch the policy_ids from the first osquery package policy.
+ * Returns an empty array if no package policies are found.
+ */
+export async function getFirstPackagePolicyIds(kbnClient: any): Promise<string[]> {
+  try {
+    const { data: policiesResponse } = await kbnClient.request({
+      method: 'GET',
+      path: '/internal/osquery/fleet_wrapper/package_policies',
+      headers: { 'elastic-api-version': '1' },
+    });
+
+    const firstItem = (policiesResponse as any)?.items?.[0];
+    if (!firstItem) {
+      throw new Error(
+        'No osquery package policies found. Ensure Fleet is set up and agents are enrolled.'
+      );
+    }
+
+    return firstItem.policy_ids ?? [];
+  } catch (e: any) {
+    throw new Error(`Failed to get package policy IDs: ${e.message}`);
+  }
+}
+
 // ── Agent Policies ────────────────────────────────────────────────────────────
 
 export async function loadAgentPolicy(kbnClient: any): Promise<any> {

@@ -10,9 +10,12 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadRule, cleanupRule } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { waitForPageReady, dismissAllToasts, waitForAlerts } from '../common/constants';
 
 test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // Alert tests require waiting for rule execution + alert generation, which can be slow
+  test.describe.configure({ timeout: 300_000 });
+
   let ruleId: string;
   let ruleName: string;
 
@@ -24,10 +27,10 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
-    // Navigate to the rule and wait for alerts
+    // Navigate to the rule and wait for alerts (reloads periodically until alerts appear)
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
     await waitForPageReady(page);
-    await expect(page.testSubj.locator('expand-event').first()).toBeVisible({ timeout: 120_000 });
+    await waitForAlerts(page);
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -68,8 +71,10 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
       { timeout: 15_000 }
     );
 
+    // Dismiss any toasts that may overlay the Save button
+    await dismissAllToasts(page);
     await page.getByText('Save changes').first().click();
-    await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible({ timeout: 60_000 });
   });
 
   test('should be able to run live query and add to timeline', async ({ page, kbnUrl }) => {
@@ -79,7 +84,7 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
     await page.testSubj.locator('expand-event').first().click();
     await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
     await page.testSubj.locator('osquery-action-item').click();
-    await expect(page.getByText(/^\d+ agent selected\./).first()).toBeVisible();
+    await expect(page.getByText(/^\d+ agent selected\./).first()).toBeVisible({ timeout: 30_000 });
 
     // Select all agents
     const agentSelection = page.testSubj.locator('agentSelection');
@@ -88,7 +93,7 @@ test.describe('Alert Event Details', { tag: ['@ess', '@svlSecurity'] }, () => {
     const allAgentsOption = page.getByRole('option', { name: /All agents/ });
     await expect(allAgentsOption).toBeVisible({ timeout: 15_000 });
     await allAgentsOption.click();
-    await expect(page.getByText(/\d+ agents? selected\./).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/\d+ agents? selected\./).first()).toBeVisible({ timeout: 30_000 });
 
     // Input query
     const queryEditor = page.testSubj

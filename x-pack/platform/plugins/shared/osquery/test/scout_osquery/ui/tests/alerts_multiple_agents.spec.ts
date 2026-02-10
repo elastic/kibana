@@ -10,9 +10,12 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadRule, cleanupRule } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { waitForPageReady, waitForAlerts } from '../common/constants';
 
 test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // Alert tests require waiting for rule execution + alert generation, which can be slow
+  test.describe.configure({ timeout: 300_000 });
+
   let ruleId: string;
 
   test.beforeAll(async ({ kbnClient }) => {
@@ -22,10 +25,10 @@ test.describe('Alert Event Details - dynamic params', { tag: ['@ess', '@svlSecur
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
-    // Navigate to the rule and wait for alerts
+    // Navigate to the rule and wait for alerts (reloads periodically until alerts appear)
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
     await waitForPageReady(page);
-    await expect(page.testSubj.locator('expand-event').first()).toBeVisible({ timeout: 120_000 });
+    await waitForAlerts(page);
   });
 
   test.afterAll(async ({ kbnClient }) => {

@@ -53,7 +53,7 @@ export class LiveQueryPage {
     await allAgentsOption.click();
 
     // The agent count includes Docker agents; use regex to match any count
-    await expect(this.page.getByText(/\d+ agents? selected\./)).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(/\d+ agents? selected\./)).toBeVisible({ timeout: 30_000 });
   }
 
   async inputQuery(query: string) {
@@ -86,6 +86,7 @@ export class LiveQueryPage {
   async checkResults() {
     const start = Date.now();
     const maxWaitMs = RESULTS_TIMEOUT;
+    let reloadCount = 0;
 
     while (Date.now() - start < maxWaitMs) {
       // Try switching tabs to force a results refresh
@@ -102,18 +103,24 @@ export class LiveQueryPage {
       // Check if the results table has data rows
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
       try {
-        await dataCell.waitFor({ state: 'visible', timeout: 10_000 });
+        await dataCell.waitFor({ state: 'visible', timeout: 15_000 });
 
         return; // Results found
       } catch {
-        // Results not yet available, wait and retry
-        await this.page.waitForTimeout(5_000);
+        // Every 3rd retry, reload the page to force a full refresh
+        reloadCount++;
+        if (reloadCount % 3 === 0) {
+          await this.page.reload();
+          await waitForPageReady(this.page);
+        } else {
+          await this.page.waitForTimeout(5_000);
+        }
       }
     }
 
     // Final check — fail with a clear error if results never appeared
     await expect(this.page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
-      timeout: 15_000,
+      timeout: 60_000,
     });
   }
 

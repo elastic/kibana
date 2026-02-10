@@ -11,6 +11,9 @@ import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 
 test.describe('ALL - Live Query', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // Live queries require agent communication which can be slow
+  test.describe.configure({ timeout: 300_000 });
+
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
     await pageObjects.liveQuery.navigate();

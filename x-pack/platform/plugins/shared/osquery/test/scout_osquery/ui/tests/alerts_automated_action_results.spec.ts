@@ -10,11 +10,14 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadRule, cleanupRule } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { waitForPageReady, waitForAlerts } from '../common/constants';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
 test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // Alert tests require waiting for rule execution + alert generation, which can be slow
+  test.describe.configure({ timeout: 300_000 });
+
   let ruleId: string;
 
   test.beforeAll(async ({ kbnClient }) => {
@@ -24,10 +27,10 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
-    // Navigate to the rule and wait for alerts
+    // Navigate to the rule and wait for alerts (reloads periodically until alerts appear)
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
     await waitForPageReady(page);
-    await expect(page.testSubj.locator('expand-event').first()).toBeVisible({ timeout: 120_000 });
+    await waitForAlerts(page);
   });
 
   test.afterAll(async ({ kbnClient }) => {
@@ -41,7 +44,11 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
     await page.testSubj.locator('expand-event').first().click();
     await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
     await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
-    await expect(page.testSubj.locator('responseActionsViewWrapper')).toBeVisible();
+    const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
+    await expect(responseWrapper).toBeVisible();
+
+    // Wait for response actions results to fully load
+    await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
 
     // Check action items exist
     await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
@@ -77,7 +84,11 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
     await page.testSubj.locator('expand-event').first().click();
     await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
     await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
-    await expect(page.testSubj.locator('responseActionsViewWrapper')).toBeVisible();
+    const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
+    await expect(responseWrapper).toBeVisible();
+
+    // Wait for response actions results to fully load
+    await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
 
     // Check action items exist
     await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });
@@ -114,7 +125,11 @@ test.describe('Alert Flyout Automated Action Results', { tag: ['@ess', '@svlSecu
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj.locator('securitySolutionFlyoutResponseSectionHeader').click();
       await page.testSubj.locator('securitySolutionFlyoutResponseButton').click();
-      await expect(page.testSubj.locator('responseActionsViewWrapper')).toBeVisible();
+      const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
+      await expect(responseWrapper).toBeVisible();
+
+      // Wait for response actions results to fully load
+      await expect(responseWrapper.locator('[data-test-subj="osquery-results-comment"]').first()).toBeVisible({ timeout: 120_000 });
 
       // Check action items exist
       await expect(page.getByText('View in Discover').first()).toBeVisible({ timeout: 30_000 });

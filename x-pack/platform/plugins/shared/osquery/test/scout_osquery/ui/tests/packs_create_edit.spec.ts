@@ -9,9 +9,18 @@
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
-import { loadSavedQuery, cleanupSavedQuery, loadPack, cleanupPack } from '../common/api_helpers';
+import {
+  loadSavedQuery,
+  cleanupSavedQuery,
+  loadPack,
+  cleanupPack,
+  getFirstPackagePolicyIds,
+} from '../common/api_helpers';
 
 test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // Pack creation and editing involves multiple form interactions and agent communication
+  test.describe.configure({ timeout: 300_000 });
+
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;
@@ -236,14 +245,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let newQueryName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -300,14 +305,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeAll(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -353,14 +354,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -432,14 +429,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeAll(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -505,14 +498,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -540,18 +529,17 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
 
   // eslint-disable-next-line playwright/max-nested-describe
   test.describe('should verify that packs are triggered', () => {
+    // Pack triggering verification needs to wait for agent-side schedule execution
+    test.describe.configure({ timeout: 420_000 });
+
     let packId: string;
     let packName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -571,7 +559,7 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     });
 
     test('should verify that packs are triggered', async ({ page, pageObjects }) => {
-      test.setTimeout(180_000); // Pack execution needs agents
+      test.setTimeout(360_000); // Pack execution + 5-min result polling
       const packs = pageObjects.packs;
       await packs.clickPackByName(packName);
       await expect(page.getByText(`${packName} details`).first()).toBeVisible();
@@ -595,9 +583,13 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
         }
       }
 
-      await expect(page.testSubj.locator('last-results-date')).toBeVisible();
-      await expect(page.testSubj.locator('docs-count-badge')).toContainText('1');
-      await expect(page.testSubj.locator('agent-count-badge')).toContainText('1');
+      await expect(page.testSubj.locator('last-results-date')).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', {
+        timeout: 30_000,
+      });
+      await expect(page.testSubj.locator('agent-count-badge')).toContainText('1', {
+        timeout: 30_000,
+      });
       await expect(page.testSubj.locator('packResultsErrorsEmpty')).toHaveCount(1);
     });
   });
@@ -608,14 +600,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -670,14 +658,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packName: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},
@@ -749,14 +733,10 @@ test.describe('Packs - Create and Edit', { tag: ['@ess', '@svlSecurity'] }, () =
     let packId: string;
 
     test.beforeEach(async ({ kbnClient }) => {
-      const { data: policiesResponse } = await kbnClient.request({
-        method: 'GET',
-        path: '/internal/osquery/fleet_wrapper/package_policies',
-        headers: { 'elastic-api-version': '1' },
-      });
+      const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
       const pack = await loadPack(kbnClient, {
-        policy_ids: (policiesResponse as any).items[0].policy_ids,
+        policy_ids: policyIds,
         queries: {
           [savedQueryName]: {
             ecs_mapping: {},

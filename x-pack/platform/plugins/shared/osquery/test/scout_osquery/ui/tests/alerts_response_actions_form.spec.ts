@@ -17,12 +17,15 @@ import {
   packFixture,
   multiQueryPackFixture,
 } from '../common/api_helpers';
-import { waitForPageReady } from '../common/constants';
+import { waitForPageReady, dismissAllToasts } from '../common/constants';
 
 test.describe(
   'Alert Event Details - Response Actions Form',
   { tag: ['@ess', '@svlSecurity'] },
   () => {
+    // Alert response action tests involve complex form interactions that can be slow
+    test.describe.configure({ timeout: 300_000 });
+
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
@@ -78,7 +81,7 @@ test.describe(
       const errorsContainer = page.testSubj.locator('response-actions-error');
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
       ).not.toBeVisible();
 
       // Test that changing one error doesn't clear others
@@ -87,7 +90,7 @@ test.describe(
       const timeoutInput = responseAction0.locator('[data-test-subj="timeout-input"]');
       await timeoutInput.clear();
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
       ).toBeVisible();
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
@@ -98,7 +101,7 @@ test.describe(
 
       await timeoutInput.fill('66');
       await expect(
-        errorsContainer.getByText('The timeout value must be 60 seconds or higher.')
+        errorsContainer.getByText('The timeout value must be 60 seconds or higher.').first()
       ).not.toBeVisible();
       await expect(errorsContainer.getByText('Query is a required field').first()).toBeVisible();
 
@@ -156,7 +159,8 @@ test.describe(
       await daysOption.waitFor({ state: 'visible', timeout: 15_000 });
       await daysOption.click();
 
-      // Save rule
+      // Save rule - dismiss any toasts that may overlay the button
+      await dismissAllToasts(page);
       await page.testSubj.locator('ruleEditSubmitButton').click();
       await expect(page.getByText(`${ruleName} was saved`).first()).toBeVisible();
 
@@ -221,6 +225,7 @@ test.describe(
         { timeout: 15_000 }
       );
 
+      await dismissAllToasts(page);
       await page.testSubj.locator('ruleEditSubmitButton').click();
       const saveResponse = await savePromise;
       const requestBody = saveResponse.request().postDataJSON();
@@ -280,6 +285,8 @@ test.describe(
         { timeout: 15_000 }
       );
 
+      // Dismiss any toasts that may overlay the Save button
+      await dismissAllToasts(page);
       await page.getByText('Save changes').first().click();
       const finalResponse = await finalSavePromise;
       const finalRequestBody = finalResponse.request().postDataJSON();

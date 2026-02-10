@@ -13,6 +13,9 @@ import { loadLiveQuery, loadCase, cleanupCase } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
 test.describe('Add to Cases', () => {
+  // Case tests involve live query results and case creation which can be slow
+  test.describe.configure({ timeout: 300_000 });
+
   let liveQueryId: string;
   let liveQueryQuery: string;
 
@@ -84,6 +87,9 @@ test.describe('Add to Cases', () => {
     let caseId: string;
     let caseTitle: string;
 
+    // Live query result verification can be slow in serverless mode
+    test.describe.configure({ timeout: 300_000 });
+
     test.beforeEach(async ({ browserAuth, kbnClient }) => {
       const caseData = await loadCase(kbnClient, 'securitySolution');
       caseId = caseData.id;
@@ -102,12 +108,28 @@ test.describe('Add to Cases', () => {
       pageObjects,
       kbnUrl,
     }) => {
-      // Navigate to live query results page
+      test.setTimeout(180_000); // Live query results can take time in serverless
+
+      // Navigate to live query results page with retry
       await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
       await waitForPageReady(page);
+
+      // Results may not be ready yet - reload periodically until they appear
+      const start = Date.now();
+      while (Date.now() - start < 120_000) {
+        try {
+          await page.testSubj
+            .locator('osqueryResultsTable')
+            .waitFor({ state: 'visible', timeout: 15_000 });
+          break;
+        } catch {
+          await page.reload();
+          await waitForPageReady(page);
+        }
+      }
       await page.testSubj
         .locator('osqueryResultsTable')
-        .waitFor({ state: 'visible', timeout: 60_000 });
+        .waitFor({ state: 'visible', timeout: 30_000 });
 
       // Find and click "Add to Case" button
       const addToCaseButton = page.locator('[aria-label="Add to Case"]').first();

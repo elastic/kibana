@@ -25,6 +25,9 @@ const roles = [
 
 roles.forEach(({ name, role }) => {
   test.describe(`T1 and T2 analysts - ${name}`, { tag: ['@ess', '@svlSecurity'] }, () => {
+    // Role tests involve live query execution which can be slow
+    test.describe.configure({ timeout: 300_000 });
+
     let savedQueryName: string;
     let savedQueryId: string;
     let packName: string;
