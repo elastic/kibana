@@ -133,7 +133,6 @@ export function setupSavedObjects(
     },
     modelVersions: getConnectorTokenModelVersions(encryptedSavedObjects),
   });
-
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token', 'refreshToken']),
@@ -167,16 +166,9 @@ export function setupSavedObjects(
       };
     },
   });
-
   encryptedSavedObjects.registerType({
     type: OAUTH_STATE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['codeVerifier']),
-    attributesToIncludeInAAD: new Set([
-      'state',
-      'connectorId',
-      'redirectUri',
-      'spaceId',
-      'expiresAt',
-    ]),
+    attributesToIncludeInAAD: new Set(['state', 'connectorId', 'spaceId', 'expiresAt']),
   });
 }
