@@ -81,7 +81,6 @@ export const EntityConfig: FC<EntityConfigProps> = ({
   return (
     <EuiPopover
       ownFocus
-      style={{ height: '40px' }}
       button={
         <EuiFormPrepend
           element="button"
