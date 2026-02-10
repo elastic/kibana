@@ -17,9 +17,10 @@ interface Props {
   initialSlo?: SLODefinitionResponse;
   errors?: string[];
   onSelected: (slo: SLODefinitionResponse | undefined) => void;
+  setHasInteracted?: (hasInteracted: boolean) => void;
 }
 
-function SloSelector({ initialSlo, onSelected, errors }: Props) {
+function SloSelector({ initialSlo, onSelected, errors, setHasInteracted }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -39,6 +40,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   }, [isLoading, data]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
+    setHasInteracted?.(true);
     setSelectedOptions(opts);
     const selectedSlo =
       opts.length === 1 ? data?.results?.find((slo) => slo.id === opts[0].value) : undefined;
@@ -67,6 +69,9 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
         selectedOptions={selectedOptions}
         async
         isLoading={isLoading}
+        onBlur={() => {
+          setHasInteracted?.(true);
+        }}
         onChange={onChange}
         fullWidth
         onSearchChange={onSearchChange}

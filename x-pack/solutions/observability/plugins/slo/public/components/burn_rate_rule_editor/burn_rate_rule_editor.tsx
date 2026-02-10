@@ -39,6 +39,7 @@ export function BurnRateRuleEditor(props: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
   const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const { isLoading, data } = useFetchSloDefinitions({});
 
   useEffect(() => {
@@ -77,7 +78,12 @@ export function BurnRateRuleEditor(props: Props) {
     }
 
     return (
-      <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
+      <SloSelector
+        initialSlo={selectedSlo}
+        onSelected={onSelectedSlo}
+        errors={hasInteracted ? errors.sloId : undefined}
+        setHasInteracted={setHasInteracted}
+      />
     );
   };
 
