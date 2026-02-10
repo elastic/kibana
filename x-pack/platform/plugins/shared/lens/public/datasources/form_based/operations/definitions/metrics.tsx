@@ -151,7 +151,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
-        label: labelLookup(field.displayName, previousColumn),
+        label: '',
         dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,
@@ -172,7 +172,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
-        label: labelLookup(field.displayName, oldColumn),
+        label: '',
         dataType: field.type,
         sourceField: field.name,
       };

@@ -192,7 +192,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: '',
       sourceField: field.name,
       params: newParams,
       filter:
@@ -243,7 +243,7 @@ export const lastValueOperation: OperationDefinition<
     const showArrayValues = setDefaultShowArrayValues(field, lastValueParams);
 
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
+      label: '',
       dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
       isBucketed: false,

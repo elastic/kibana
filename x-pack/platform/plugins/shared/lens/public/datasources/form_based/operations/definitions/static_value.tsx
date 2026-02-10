@@ -117,7 +117,7 @@ export const staticValueOperation: OperationDefinition<
       ...columnParams,
     };
     return {
-      label: ofName(previousParams.value),
+      label: '',
       dataType: 'number',
       operationType: 'static_value',
       isBucketed: false,
@@ -174,7 +174,7 @@ export const staticValueOperation: OperationDefinition<
               ...newLayer.columns,
               [columnId]: {
                 ...newColumn,
-                label: newColumn?.customLabel ? newColumn.label : ofName(newValue),
+                label: newColumn?.customLabel ? newColumn.label : '',
                 params: {
                   ...newColumn.params,
                   value: newValue,

@@ -173,12 +173,7 @@ export const percentileOperation: OperationDefinition<
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
     return {
-      label: ofName(
-        getSafeName(field.name, indexPattern),
-        newPercentileParam,
-        previousColumn?.timeShift,
-        previousColumn?.reducedTimeRange
-      ),
+      label: '',
       dataType: 'number',
       operationType: PERCENTILE_ID,
       sourceField: field.name,
@@ -195,12 +190,7 @@ export const percentileOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(
-        field.displayName,
-        oldColumn.params.percentile,
-        oldColumn.timeShift,
-        oldColumn.reducedTimeRange
-      ),
+      label: '',
       sourceField: field.name,
     };
   },

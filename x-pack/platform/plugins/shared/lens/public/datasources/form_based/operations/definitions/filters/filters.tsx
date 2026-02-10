@@ -94,7 +94,7 @@ export const filtersOperation: OperationDefinition<
     }
 
     return {
-      label: filtersLabel,
+      label: '',
       dataType: 'string',
       operationType: OPERATION_NAME,
       isBucketed: true,

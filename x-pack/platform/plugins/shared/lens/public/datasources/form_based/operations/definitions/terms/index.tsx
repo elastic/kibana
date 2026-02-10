@@ -35,7 +35,7 @@ import type {
   IndexPatternField,
 } from '@kbn/lens-common';
 import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
-import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import { insertOrReplaceColumn, updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
@@ -235,7 +235,7 @@ export const termsOperation: OperationDefinition<
       .map(([id]) => id)[0];
 
     return {
-      label: ofName(field.displayName),
+      label: '',
       dataType: field.type as DataType,
       operationType: 'terms',
       sourceField: field.name,
@@ -407,15 +407,7 @@ export const termsOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: oldColumn.customLabel
-        ? oldColumn.label
-        : ofName(
-            field.displayName,
-            newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare',
-            newParams.orderBy.type === 'significant',
-            newParams.size
-          ),
+      label: oldColumn.customLabel ? oldColumn.label : '',
       sourceField: field.name,
       params: newParams,
     };
@@ -784,15 +776,12 @@ The top values of a specified field ranked by the chosen metric.
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newOrderByValue = fromValue(e.target.value);
-              let updatedLayer = updateDefaultLabels(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'orderBy',
-                  value: newOrderByValue,
-                }),
-                indexPattern
-              );
+              let updatedLayer = updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'orderBy',
+                value: newOrderByValue,
+              });
               if (newOrderByValue.type === 'custom') {
                 const initialOperation = (
                   operationDefinitionMap.count as OperationDefinition<

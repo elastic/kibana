@@ -39,7 +39,6 @@ import {
   insertOrReplaceColumn,
   replaceColumn,
   updateColumnParam,
-  updateDefaultLabels,
   resetIncomplete,
   canTransition,
   adjustColumnReferencesForChangedColumn,
@@ -306,15 +305,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
       const value = props.activeData?.[layerId]?.rows[0]?.[columnId];
       // replace the default value with the one from the active data
       if (value != null) {
-        return updateDefaultLabels(
-          updateColumnParam({
-            layer,
-            columnId,
-            paramName: 'value',
-            value: props.activeData?.[layerId]?.rows[0]?.[columnId],
-          }),
-          currentIndexPattern
-        );
+        return updateColumnParam({
+          layer,
+          columnId,
+          paramName: 'value',
+          value: props.activeData?.[layerId]?.rows[0]?.[columnId],
+        });
       }
       return layer;
     }
@@ -1198,12 +1194,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       [columnId]: {
                         ...selectedColumn,
                         label: value,
-                        customLabel:
-                          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                            selectedColumn,
-                            state.layers[layerId].columns,
-                            props.indexPatterns[state.layers[layerId].indexPatternId]
-                          ) !== value,
                       },
                     },
                   });

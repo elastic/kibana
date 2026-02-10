@@ -116,12 +116,7 @@ export const percentileRanksOperation: OperationDefinition<
     const newPercentileRanksParam =
       columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
     return {
-      label: ofName(
-        getSafeName(field.name, indexPattern),
-        newPercentileRanksParam,
-        previousColumn?.timeShift,
-        previousColumn?.reducedTimeRange
-      ),
+      label: '',
       dataType: 'number',
       operationType: 'percentile_rank',
       sourceField: field.name,
@@ -138,12 +133,7 @@ export const percentileRanksOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(
-        field.displayName,
-        oldColumn.params.value,
-        oldColumn.timeShift,
-        oldColumn.reducedTimeRange
-      ),
+      label: '',
       sourceField: field.name,
     };
   },
@@ -184,22 +174,14 @@ export const percentileRanksOperation: OperationDefinition<
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.customLabel
-            ? currentColumn.label
-            : ofName(
-                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                  currentColumn.sourceField,
-                Number(value),
-                currentColumn.timeShift,
-                currentColumn.reducedTimeRange
-              ),
+          label: currentColumn.customLabel ? currentColumn.label : '',
           params: {
             ...currentColumn.params,
             value: Number(value),
           },
         } as PercentileRanksIndexPatternColumn);
       },
-      [isInline, currentColumn, paramEditorUpdater, indexPattern]
+      [isInline, currentColumn, paramEditorUpdater]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
