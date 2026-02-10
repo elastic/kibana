@@ -301,7 +301,7 @@ export type LoadExistingSuggestionResult =
 /**
  * Load existing pipeline suggestion state from the task status endpoint.
  * - If completed: returns the pipeline
- * - If in_progress: polls until complete or timeout
+ * - If in_progress: returns in_progress (caller can decide whether to poll)
  * - If failed/stale/not_started: returns appropriate state
  */
 export async function loadExistingSuggestionLogic(
@@ -332,33 +332,8 @@ export async function loadExistingSuggestionLogic(
     throw error;
   }
 
-  // If in progress, poll until complete or terminal state
-  while (
-    taskResult.status === TaskStatus.InProgress ||
-    taskResult.status === TaskStatus.BeingCanceled
-  ) {
-    // Check for abort
-    if (signal.aborted) {
-      return { type: 'none' };
-    }
-
-    // Wait before next poll
-    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
-
-    // Check for abort again after waiting
-    if (signal.aborted) {
-      return { type: 'none' };
-    }
-
-    try {
-      taskResult = await getStatus();
-    } catch (error) {
-      // If aborted during network request, return 'none' gracefully
-      if (isRequestAbortedError(error)) {
-        return { type: 'none' };
-      }
-      throw error;
-    }
+  if (taskResult.status === TaskStatus.InProgress || taskResult.status === TaskStatus.BeingCanceled) {
+    return { type: 'in_progress' };
   }
 
   // Handle terminal states
@@ -401,6 +376,119 @@ export const createLoadExistingSuggestionActor = ({
   return fromPromise<LoadExistingSuggestionResult, LoadExistingSuggestionInputMinimal>(
     async ({ input, signal }) =>
       loadExistingSuggestionLogic({
+        ...input,
+        signal,
+        streamsRepositoryClient,
+      })
+  );
+};
+
+// --- Poll Existing Suggestion Actor ---
+
+/**
+ * Input for polling an existing in-progress suggestion task.
+ */
+export interface PollExistingSuggestionInputMinimal {
+  streamName: string;
+}
+
+export interface PollExistingSuggestionInput extends PollExistingSuggestionInputMinimal {
+  signal: AbortSignal;
+  streamsRepositoryClient: StreamsRepositoryClient;
+}
+
+/**
+ * Result from polling an existing suggestion task.
+ */
+export type PollExistingSuggestionResult =
+  | { type: 'completed'; pipeline: StreamlangDSL }
+  | { type: 'none' };
+
+/**
+ * Poll the task status endpoint until the existing task completes or transitions to a terminal state.
+ * This is used when the initial status check reported an in-progress task.
+ */
+export async function pollExistingSuggestionLogic(
+  input: PollExistingSuggestionInput
+): Promise<PollExistingSuggestionResult> {
+  const { streamName, signal, streamsRepositoryClient } = input;
+
+  const getStatus = async () => {
+    return streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+      {
+        signal,
+        params: {
+          path: { name: streamName },
+        },
+      }
+    );
+  };
+
+  const startTime = Date.now();
+
+  let taskResult = await getStatus();
+
+  while (
+    taskResult.status === TaskStatus.InProgress ||
+    taskResult.status === TaskStatus.BeingCanceled
+  ) {
+    if (signal.aborted) {
+      return { type: 'none' };
+    }
+
+    if (Date.now() - startTime > MAX_POLLING_TIME_MS) {
+      return { type: 'none' };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
+
+    if (signal.aborted) {
+      return { type: 'none' };
+    }
+
+    try {
+      taskResult = await getStatus();
+    } catch (error) {
+      if (isRequestAbortedError(error)) {
+        return { type: 'none' };
+      }
+      throw error;
+    }
+  }
+
+  switch (taskResult.status) {
+    case TaskStatus.Completed:
+      if (taskResult.pipeline) {
+        return {
+          type: 'completed',
+          pipeline: streamlangDSLSchema.parse(taskResult.pipeline),
+        };
+      }
+      return { type: 'none' };
+
+    case TaskStatus.Acknowledged:
+    case TaskStatus.NotStarted:
+    case TaskStatus.Stale:
+    case TaskStatus.Canceled:
+    case TaskStatus.Failed:
+    default:
+      return { type: 'none' };
+  }
+}
+
+/**
+ * Actor factory for polling an existing suggestion state.
+ * Used when the initial status check reported an in-progress task.
+ */
+export const createPollExistingSuggestionActor = ({
+  streamsRepositoryClient,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+}) => {
+  return fromPromise<PollExistingSuggestionResult, PollExistingSuggestionInputMinimal>(
+    async ({ input, signal }) =>
+      pollExistingSuggestionLogic({
         ...input,
         signal,
         streamsRepositoryClient,

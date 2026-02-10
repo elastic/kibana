@@ -42,6 +42,7 @@ import {
   createNotifySuggestionFailureNotifier,
   createSuggestPipelineActor,
   createLoadExistingSuggestionActor,
+  createPollExistingSuggestionActor,
 } from './suggest_pipeline_actor';
 import type {
   InteractiveModeContext,
@@ -72,6 +73,7 @@ export const interactiveModeMachine = setup({
     stepMachine,
     suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
     loadExistingSuggestion: getPlaceholderFor(createLoadExistingSuggestionActor),
+    pollExistingSuggestion: getPlaceholderFor(createPollExistingSuggestionActor),
   },
   actions: {
     notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
@@ -440,7 +442,7 @@ export const interactiveModeMachine = setup({
                 // Only continue polling if stream has no initial steps
                 guard: ({ context, event }) =>
                   event.output.type === 'in_progress' && context.initialStepRefs.length === 0,
-                target: 'generatingSuggestion',
+                target: 'pollingExistingSuggestion',
               },
               {
                 // For 'none', 'failed', or when stream already has steps - go to idle
@@ -460,6 +462,57 @@ export const interactiveModeMachine = setup({
                   params: ({ context }) => ({ streamName: context.streamName }),
                 },
                 { type: 'clearSuggestion' },
+              ],
+            },
+          },
+        },
+        pollingExistingSuggestion: {
+          invoke: {
+            id: 'pollExistingSuggestionActor',
+            src: 'pollExistingSuggestion',
+            input: ({ context }) => ({
+              streamName: context.streamName,
+            }),
+            onDone: [
+              {
+                guard: ({ context, event }) =>
+                  event.output.type === 'completed' && context.initialStepRefs.length === 0,
+                target: 'viewingSuggestion',
+                actions: enqueueActions(({ event, enqueue }) => {
+                  const output = event.output as { type: 'completed'; pipeline: StreamlangDSL };
+                  enqueue({
+                    type: 'storeSuggestedPipeline',
+                    params: { pipeline: output.pipeline },
+                  });
+                  enqueue({
+                    type: 'overwriteSteps',
+                    params: { steps: output.pipeline.steps },
+                  });
+                }),
+              },
+              {
+                target: 'idle',
+              },
+            ],
+            onError: {
+              target: 'idle',
+            },
+          },
+          on: {
+            'suggestion.cancel': {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'cancelSuggestionTask',
+                  params: ({ context }) => ({ streamName: context.streamName }),
+                },
+                { type: 'clearSuggestion' },
+                {
+                  type: 'overwriteSteps',
+                  params: () => ({ steps: [] }),
+                },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator' },
               ],
             },
           },
@@ -746,6 +799,9 @@ export const createInteractiveModeMachineImplementations = ({
       notifications,
     }),
     loadExistingSuggestion: createLoadExistingSuggestionActor({
+      streamsRepositoryClient,
+    }),
+    pollExistingSuggestion: createPollExistingSuggestionActor({
       streamsRepositoryClient,
     }),
   },
