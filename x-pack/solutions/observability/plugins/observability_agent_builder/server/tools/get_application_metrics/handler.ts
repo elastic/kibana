@@ -25,7 +25,7 @@ export async function getToolHandler({
   start: string;
   end: string;
   kqlFilter?: string;
-}): Promise<{ nodes: JvmMetricsNode[] | undefined }> {
+}): Promise<{ nodes: JvmMetricsNode[] }> {
   const nodes = await dataRegistry.getData('apmApplicationMetrics', {
     request,
     serviceName,
@@ -34,6 +34,10 @@ export async function getToolHandler({
     end,
     kuery: kqlFilter,
   });
+
+  if (!nodes) {
+    throw new Error('Application metrics data is not available.');
+  }
 
   return { nodes };
 }
