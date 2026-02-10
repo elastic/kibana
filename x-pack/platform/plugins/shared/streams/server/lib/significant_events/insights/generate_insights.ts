@@ -35,10 +35,11 @@ export async function generateInsights({
   streamNames?: string[];
 }): Promise<InsightsResult> {
   const allStreams = await streamsClient.listStreams();
-  const streams =
-    streamNames !== undefined && streamNames.length > 0
-      ? allStreams.filter((s) => streamNames.includes(s.name))
-      : allStreams;
+  let streams = allStreams;
+  if (streamNames !== undefined && streamNames.length > 0) {
+    const streamNamesSet = new Set(streamNames);
+    streams = allStreams.filter((s) => streamNamesSet.has(s.name));
+  }
   const streamInsightsResults = await Promise.all(
     streams.map(async (stream) => {
       const streamInsightResult = await generateStreamInsights({
