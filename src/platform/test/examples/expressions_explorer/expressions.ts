@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
