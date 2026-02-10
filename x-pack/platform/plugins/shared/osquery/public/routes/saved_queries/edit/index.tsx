@@ -28,6 +28,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const euiCalloutCss = {
   margin: '10px',
@@ -37,6 +38,7 @@ const EditSavedQueryPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
@@ -127,7 +129,7 @@ const EditSavedQueryPageComponent = () => {
   const RightColumn = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s">
-        {permissions.writeSavedQueries && (
+        {queryHistoryRework && permissions.writeSavedQueries && (
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={handleDuplicateClick}
@@ -153,6 +155,7 @@ const EditSavedQueryPageComponent = () => {
       </EuiFlexGroup>
     ),
     [
+      queryHistoryRework,
       permissions.writeSavedQueries,
       handleDuplicateClick,
       copySavedQueryMutation.isLoading,
@@ -194,7 +197,9 @@ const EditSavedQueryPageComponent = () => {
   return (
     <WithHeaderLayout
       leftColumn={LeftColumn}
-      rightColumn={permissions.writeSavedQueries ? RightColumn : undefined}
+      rightColumn={
+        permissions.writeSavedQueries && (queryHistoryRework || !viewMode) ? RightColumn : undefined
+      }
       rightColumnGrow={false}
     >
       {!isLoading &&

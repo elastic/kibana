@@ -17,7 +17,9 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createSavedQueryRoute(router, context);
-  copySavedQueryRoute(router, context);
+  if (context.experimentalFeatures.queryHistoryRework) {
+    copySavedQueryRoute(router, context);
+  }
   deleteSavedQueryRoute(router, context);
   findSavedQueryRoute(router, context);
   readSavedQueryRoute(router, context);

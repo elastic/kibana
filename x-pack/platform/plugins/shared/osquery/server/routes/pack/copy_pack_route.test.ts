@@ -227,6 +227,53 @@ describe('copyPackRoute', () => {
     expect(createArgs.enabled).toBe(false);
   });
 
+  it('filters out prebuilt asset references from copy', async () => {
+    const prebuiltPackSOWithAssetRef = {
+      ...sourcePackSO,
+      references: [
+        ...sourcePackSO.references,
+        { id: 'asset-123', name: 'Prebuilt Pack', type: 'osquery-pack-asset' },
+      ],
+    };
+
+    const mockSavedObjectsClient = {
+      get: jest.fn().mockResolvedValue(prebuiltPackSOWithAssetRef),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      create: jest.fn().mockResolvedValue({
+        id: 'new-pack-id',
+        attributes: {
+          name: 'my-pack_copy',
+          enabled: false,
+          created_at: '2025-06-01T00:00:00.000Z',
+          created_by: 'tester',
+          updated_at: '2025-06-01T00:00:00.000Z',
+          updated_by: 'tester',
+        },
+      }),
+    };
+
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+      mockSavedObjectsClient
+    );
+    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { id: 'source-pack-id' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler({} as any, mockRequest, mockResponse);
+
+    // Verify osquery-pack-asset references were filtered out
+    const createOptions = mockSavedObjectsClient.create.mock.calls[0][2];
+    expect(createOptions.references).toEqual(sourcePackSO.references);
+    expect(createOptions.references).not.toContainEqual(
+      expect.objectContaining({ type: 'osquery-pack-asset' })
+    );
+  });
+
   it('strips version and read_only from prebuilt pack copy', async () => {
     const prebuiltPackSO = {
       ...sourcePackSO,

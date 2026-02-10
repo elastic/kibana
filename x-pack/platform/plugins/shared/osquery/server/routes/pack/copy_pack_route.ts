@@ -11,7 +11,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { packSavedObjectType } from '../../../common/types';
+import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
@@ -60,6 +60,13 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
         const { client, sourceAttributes, sourceReferences, newName, username, now } = copyContext;
 
+        // Filter out prebuilt asset references — the copy is user-created, not prebuilt.
+        // Without this, the assets status endpoint would detect the copy as a stale prebuilt
+        // pack (no version field) and incorrectly show the "Update Elastic prebuilt packs" button.
+        const copyReferences = sourceReferences.filter(
+          (ref) => ref.type !== packAssetSavedObjectType
+        );
+
         const {
           name: _name,
           version: _version,
@@ -83,7 +90,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_at: now,
           },
           {
-            references: sourceReferences,
+            references: copyReferences,
             refresh: 'wait_for',
           }
         );

@@ -28,11 +28,13 @@ import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
 import { useCopyPack } from '../../../packs/use_copy_pack';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const { packId } = useParams<{ packId: string }>();
   const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
@@ -101,17 +103,19 @@ const EditPackPageComponent = () => {
   const RightColumn = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={handleDuplicateClick}
-            iconType="copy"
-            isLoading={copyPackMutation.isLoading}
-          >
-            {i18n.translate('xpack.osquery.editPack.duplicatePackButtonLabel', {
-              defaultMessage: 'Duplicate pack',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {queryHistoryRework && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={handleDuplicateClick}
+              iconType="copy"
+              isLoading={copyPackMutation.isLoading}
+            >
+              {i18n.translate('xpack.osquery.editPack.duplicatePackButtonLabel', {
+                defaultMessage: 'Duplicate pack',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
             <FormattedMessage
@@ -122,7 +126,7 @@ const EditPackPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [handleDuplicateClick, copyPackMutation.isLoading, handleDeleteClick]
+    [queryHistoryRework, handleDuplicateClick, copyPackMutation.isLoading, handleDeleteClick]
   );
 
   const HeaderContent = useMemo(

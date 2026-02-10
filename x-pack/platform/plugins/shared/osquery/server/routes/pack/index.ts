@@ -17,7 +17,9 @@ import { updatePackRoute } from './update_pack_route';
 
 export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createPackRoute(router, context);
-  copyPackRoute(router, context);
+  if (context.experimentalFeatures.queryHistoryRework) {
+    copyPackRoute(router, context);
+  }
   deletePackRoute(router, context);
   findPackRoute(router, context);
   readPackRoute(router, context);
