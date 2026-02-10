@@ -12,6 +12,7 @@ export const TASK_STATUSES = {
   pending: 'pending',
   processing: 'processing',
   completed: 'completed',
+  approved: 'approved',
   failed: 'failed',
   cancelled: 'cancelled',
 } as const;

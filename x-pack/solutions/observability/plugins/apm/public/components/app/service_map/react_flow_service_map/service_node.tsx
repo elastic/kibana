@@ -10,9 +10,11 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { ServiceNodeData } from '../../../../../common/service_map/react_flow_types';
 import {
   getServiceHealthStatusColor,
+  getServiceHealthStatusLabel,
   ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
 import { SERVICE_NODE_CIRCLE_SIZE } from '../../../../../common/service_map/constants';
@@ -54,6 +56,54 @@ export const ServiceNode = memo(
       return null;
     }, [data.agentName, isDarkMode]);
 
+    // Build accessible label for screen readers
+    const ariaLabel = useMemo(() => {
+      const parts = [
+        i18n.translate('xpack.apm.serviceMap.serviceNode.ariaLabel', {
+          defaultMessage: 'Service: {serviceName}',
+          values: { serviceName: data.label },
+        }),
+      ];
+
+      if (data.agentName) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.agentInfo', {
+            defaultMessage: 'Agent: {agentName}',
+            values: { agentName: data.agentName },
+          })
+        );
+      }
+
+      if (data.serviceAnomalyStats?.healthStatus) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.healthInfo', {
+            defaultMessage: 'Health status: {status}',
+            values: {
+              status: getServiceHealthStatusLabel(
+                data.serviceAnomalyStats.healthStatus
+              ).toLowerCase(),
+            },
+          })
+        );
+      }
+
+      if (selected) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.selected', {
+            defaultMessage: 'Selected',
+          })
+        );
+      }
+
+      parts.push(
+        i18n.translate('xpack.apm.serviceMap.serviceNode.instructions', {
+          defaultMessage: 'Press Enter or Space to view details',
+        })
+      );
+
+      return parts.join('. ');
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, selected]);
+
     const containerStyles = css`
       position: relative;
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
@@ -76,6 +126,17 @@ export const ServiceNode = memo(
       box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
       cursor: pointer;
       pointer-events: all;
+
+      &:focus-visible {
+        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+        outline-offset: ${euiTheme.size.xxs};
+      }
+
+      [data-id]:focus &,
+      [data-id]:focus-visible & {
+        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+        outline-offset: ${euiTheme.size.xxs};
+      }
     `;
 
     const iconStyles = css`
@@ -95,8 +156,16 @@ export const ServiceNode = memo(
       >
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
-          <div css={circleStyles}>
-            {iconUrl && <img src={iconUrl} alt={data.agentName} css={iconStyles} />}
+          <div
+            css={circleStyles}
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabel}
+            aria-pressed={selected}
+          >
+            {iconUrl && (
+              <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
+            )}
           </div>
           <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
         </EuiFlexItem>

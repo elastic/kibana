@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
@@ -19,10 +20,17 @@ type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimePar
 export const getAnswerAgentPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions, answerActions } = params;
+  const { actions, answerActions, processedConversation, resultTransformer } = params;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
+
   return [
     ['system', getAnswerSystemMessage(params)],
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
@@ -89,14 +97,21 @@ export const getStructuredAnswerPrompt = async (
     configuration: {
       answer: { instructions: customInstructions },
     },
-    initialMessages,
     conversationTimestamp,
     actions,
     answerActions,
     capabilities,
-    processedConversation: { attachmentTypes },
+    processedConversation,
+    resultTransformer,
   } = params;
+  const { attachmentTypes } = processedConversation;
   const visEnabled = capabilities.visualizations;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
 
   return [
     [
@@ -143,7 +158,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];

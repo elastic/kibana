@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/connector-schemas'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod

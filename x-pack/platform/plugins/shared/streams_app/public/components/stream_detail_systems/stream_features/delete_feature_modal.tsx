@@ -46,7 +46,13 @@ export function DeleteFeatureModal({
         name: FEATURE_COLUMN_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          return Object.values(feature.value).join(', ');
+          return Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ));
         },
       },
       {
