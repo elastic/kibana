@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -30,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
       await testBed.ingest(indexName, docs, processors);
@@ -59,7 +59,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // Not including 'message' field
       await testBed.ingest(indexName, docs, processors);
@@ -84,7 +84,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // 'message' field is missing
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -104,7 +104,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'not_an_ip' }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -134,7 +134,7 @@ apiTest.describe(
               } as GrokProcessor,
             ],
           };
-          transpileIngestPipeline(streamlangDSL);
+          transpile(streamlangDSL);
         }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
       });
     });

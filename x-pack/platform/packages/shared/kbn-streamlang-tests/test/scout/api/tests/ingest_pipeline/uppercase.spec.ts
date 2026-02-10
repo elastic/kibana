@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { StreamlangDSL, UppercaseProcessor } from '@kbn/streamlang';
-import { transpileIngestPipeline as transpile } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(

@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { DropDocumentProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileEsql } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -31,7 +30,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
         const docs = [
@@ -79,7 +78,7 @@ apiTest.describe(
       };
 
       // Both transpilers should throw validation errors with no where clause
-      expect(() => transpile(streamlangDSL)).toThrow(
+      expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
         'where clause is required in drop_document.'
       );
       expect(() => transpileEsql(streamlangDSL)).toThrow(

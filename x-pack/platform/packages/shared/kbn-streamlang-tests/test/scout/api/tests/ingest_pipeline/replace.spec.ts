@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
       await testBed.ingest(indexName, docs, processors);
@@ -54,7 +54,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'An error occurred' }];
       await testBed.ingest(indexName, docs, processors);
@@ -79,7 +79,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
       await testBed.ingest(indexName, docs, processors);
@@ -103,7 +103,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
       await testBed.ingest(indexName, docs, processors);
@@ -129,7 +129,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -153,7 +153,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       await testBed.ingest(indexName, docs, processors);
@@ -183,7 +183,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { message: 'An error occurred', event: { kind: 'test' } },
@@ -226,7 +226,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
         const docs = [
           { message: 'An error occurred', event: { kind: 'test' } },
@@ -273,7 +273,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

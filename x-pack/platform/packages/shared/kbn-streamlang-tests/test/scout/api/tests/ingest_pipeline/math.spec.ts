@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { MathProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ price: 10, quantity: 5 }];
       await testBed.ingest(indexName, docs, processors);
@@ -51,7 +51,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ a: 15, b: 25 }];
       await testBed.ingest(indexName, docs, processors);
@@ -73,7 +73,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ a: 100, b: 30 }];
       await testBed.ingest(indexName, docs, processors);
@@ -95,7 +95,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ total: 100, count: 4 }];
       await testBed.ingest(indexName, docs, processors);
@@ -118,7 +118,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [{ attributes: { price: 25, quantity: 4 } }];
       await testBed.ingest(indexName, docs, processors);
@@ -142,7 +142,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       // log(e) = 1
       const docs = [{ value: 2.718281828459045 }];
@@ -167,7 +167,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 5, b: 3 },
@@ -193,7 +193,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 10, b: 5 },
@@ -219,7 +219,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 3, b: 7 },
@@ -245,7 +245,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 5, b: 5 },
@@ -276,7 +276,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, price: 10, quantity: 5, active: true },
@@ -308,7 +308,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
 
         const docs = [
           { order_id: 1, price: 10, quantity: 5 },
@@ -344,7 +344,7 @@ apiTest.describe(
           const streamlangDSL: StreamlangDSL = {
             steps: [{ action: 'math', expression, to: 'result' } as MathProcessor],
           };
-          const { processors } = transpileIngestPipeline(streamlangDSL);
+          const { processors } = transpile(streamlangDSL);
           const { errors } = await testBed.ingest(`math-reject-${i}`, [doc], processors);
 
           expect(errors.length).toBeGreaterThan(0);
