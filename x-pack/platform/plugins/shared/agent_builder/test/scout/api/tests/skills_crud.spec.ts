@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 
 const SKILLS_API_BASE = '/api/agent_builder/skills';

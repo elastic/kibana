@@ -44,10 +44,7 @@ export interface SkillProvider {
   get(skillId: string): MaybePromise<PublicSkillDefinition | undefined>;
   list(): MaybePromise<PublicSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): MaybePromise<PublicSkillDefinition>;
-  update(
-    skillId: string,
-    update: PersistedSkillUpdateRequest
-  ): MaybePromise<PublicSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): MaybePromise<PublicSkillDefinition>;
   delete(skillId: string): MaybePromise<boolean>;
 }
 
@@ -186,11 +183,7 @@ class SkillRegistryImpl implements SkillRegistry {
   private readonly persistedProvider: SkillProvider;
   private readonly toolRegistry: ToolRegistry;
 
-  constructor({
-    builtinSkills,
-    persistedProvider,
-    toolRegistry,
-  }: CreateSkillRegistryParams) {
+  constructor({ builtinSkills, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
     this.builtinSkillsMap = new Map(builtinSkills.map((skill) => [skill.id, skill]));
     this.persistedProvider = persistedProvider;
     this.toolRegistry = toolRegistry;

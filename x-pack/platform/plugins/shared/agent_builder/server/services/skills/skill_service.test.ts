@@ -31,9 +31,7 @@ jest.mock('../../utils/spaces', () => ({
   getCurrentSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
-const createMockSkillDefinition = (
-  overrides: Partial<SkillDefinition> = {}
-): SkillDefinition => ({
+const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
   id: 'test-skill-1',
   name: 'test-skill' as any,
   basePath: 'skills/platform' as any,
@@ -558,9 +556,7 @@ describe('createSkillRegistry', () => {
         toolRegistry: createMockToolRegistry(),
       });
 
-      const result = await registry.resolveSkillSelection([
-        { skill_ids: ['custom-with-tools'] },
-      ]);
+      const result = await registry.resolveSkillSelection([{ skill_ids: ['custom-with-tools'] }]);
       expect(result).toHaveLength(1);
       expect(result[0].getAllowedTools?.()).toEqual(['tool-a', 'tool-b']);
     });
