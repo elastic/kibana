@@ -19,7 +19,7 @@ import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_
 import { buildApiDeclarationTopNode } from './build_api_declaration';
 import { isNamedNode } from '../tsmorph_utils';
 import { getTypeKind } from './get_type_kind';
-import { getSignature } from './get_signature';
+import { getSignature, normalizeVerboseSignatures } from './get_signature';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildVariableDec } from './build_variable_dec';
 import { buildCallSignatureDec } from './build_call_signature_dec';
@@ -659,6 +659,63 @@ describe('getSignature edge cases', () => {
 
     // The signature should have the ReactElement hack applied if present
     expect(signature).toBeDefined();
+  });
+});
+
+describe('normalizeVerboseSignatures', () => {
+  it('collapses ReactNode expansion back to React.ReactNode', () => {
+    const input =
+      'string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactNode');
+  });
+
+  it('collapses ReactNode expansion when embedded in a larger signature', () => {
+    const input =
+      '(children: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined) => void';
+    expect(normalizeVerboseSignatures(input)).toBe('(children: React.ReactNode) => void');
+  });
+
+  it('strips the second generic from ReactElement', () => {
+    const input = 'React.ReactElement<MyProps, string | React.JSXElementConstructor<any>>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactElement<MyProps>');
+  });
+
+  it('strips the second generic from ReactElement without the React. prefix', () => {
+    const input = 'ReactElement<any, string | React.JSXElementConstructor<any>>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactElement<any>');
+  });
+
+  it('collapses ComponentClass | FunctionComponent to ComponentType', () => {
+    const input = 'React.ComponentClass<{}, any> | React.FunctionComponent<{}>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType');
+  });
+
+  it('strips empty props default from ComponentType', () => {
+    const input = 'React.ComponentType<{}>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType');
+  });
+
+  it('strips ComponentType<{}> when embedded in a union', () => {
+    const input = 'React.ComponentType<{}> | undefined';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType | undefined');
+  });
+
+  it('preserves ComponentType with non-empty props', () => {
+    const input = 'React.ComponentType<MyProps>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType<MyProps>');
+  });
+
+  it('applies multiple rules in a single signature', () => {
+    const input =
+      '{ node: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; component: React.ComponentType<{}> }';
+    expect(normalizeVerboseSignatures(input)).toBe(
+      '{ node: React.ReactNode; component: React.ComponentType }'
+    );
+  });
+
+  it('returns the input unchanged when no patterns match', () => {
+    const input = '(a: string, b: number) => boolean';
+    expect(normalizeVerboseSignatures(input)).toBe(input);
   });
 });
 

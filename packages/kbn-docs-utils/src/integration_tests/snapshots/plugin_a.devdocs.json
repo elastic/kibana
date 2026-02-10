@@ -82,7 +82,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentType<{}> | undefined"
+              "React.ComponentType | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "lineNumber": 50,
@@ -1263,7 +1263,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "React.ComponentType"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/classes.ts",
             "lineNumber": 117,
