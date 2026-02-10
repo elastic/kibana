@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -25,7 +26,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Connection from 192.168.1.1 established' }];
@@ -55,7 +56,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
@@ -85,7 +86,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
@@ -117,7 +118,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Request from 172.16.0.1' }];
@@ -147,7 +148,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
@@ -181,7 +182,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -231,7 +232,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Hello world, no IP here' }];
@@ -261,7 +262,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
@@ -291,7 +292,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'Visited https://example.com/path?query=value today' }];
@@ -332,7 +333,7 @@ apiTest.describe('Cross-compatibility - Redact Processor', { tag: ['@ess', '@svl
         };
 
         // Both transpilers should reject Mustache template syntax
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(

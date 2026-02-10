@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL, TrimProcessor } from '@kbn/streamlang';
-import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -21,7 +22,7 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [
@@ -59,7 +60,7 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ message: '   test message 1   ' }, { message: '   test message 2   ' }];
@@ -92,7 +93,7 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [

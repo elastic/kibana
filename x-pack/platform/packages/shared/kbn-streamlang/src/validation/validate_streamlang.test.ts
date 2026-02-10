@@ -714,43 +714,6 @@ describe('validateStreamlang', () => {
         expect(nameTypes?.get('attributes.enabled')).toBe('boolean');
       });
 
-      it('should only infer uri_parts .original when keep_original is enabled', () => {
-        const dsl: StreamlangDSL = {
-          steps: [
-            {
-              action: 'set',
-              to: 'attributes.url',
-              value: 'https://user:pass@example.com:8080/path?query#fragment',
-            },
-            {
-              action: 'uri_parts',
-              from: 'attributes.url',
-              to: 'attributes.parsed',
-              keep_original: false,
-            },
-            {
-              action: 'replace',
-              from: 'attributes.parsed.scheme',
-              pattern: 'https',
-              replacement: 'http',
-            },
-          ],
-        };
-
-        const result = validateStreamlang(dsl, {
-          reservedFields: [],
-          streamType: 'wired',
-        });
-
-        expect(result.isValid).toBe(true);
-        expect(result.errors).toHaveLength(0);
-
-        const typesBeforeThirdStep = result.fieldTypesByProcessor.get('replace_2');
-        expect(typesBeforeThirdStep?.get('attributes.parsed.scheme')).toBe('string');
-        expect(typesBeforeThirdStep?.get('attributes.parsed.port')).toBe('number');
-        expect(typesBeforeThirdStep?.get('attributes.parsed.original')).toBeUndefined();
-      });
-
       it('should track type changes through convert processor', () => {
         const dsl: StreamlangDSL = {
           steps: [

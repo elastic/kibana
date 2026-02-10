@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -24,7 +25,7 @@ apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svl
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
@@ -57,7 +58,7 @@ apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
@@ -102,7 +103,7 @@ apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svl
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(
@@ -126,7 +127,7 @@ apiTest.describe('Cross-compatibility - Rename Processor', { tag: ['@ess', '@svl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'some_value' }];

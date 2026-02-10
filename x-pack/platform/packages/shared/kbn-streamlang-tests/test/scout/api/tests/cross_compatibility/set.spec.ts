@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -23,7 +24,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ attributes: { size: 4096 } }];
@@ -50,7 +51,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ message: 'should-be-copied' }];
@@ -78,7 +79,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ attributes: { status: 'active' } }];
@@ -108,7 +109,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ attributes: { status: 'active' } }];
@@ -152,7 +153,7 @@ apiTest.describe('Cross-compatibility - Set Processor', { tag: ['@ess', '@svlObl
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(

@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { LowercaseProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -23,7 +24,7 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -62,7 +63,7 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ message: 'TEST MESSAGE 1' }, { message: 'TEST MESSAGE 2' }];
@@ -95,7 +96,7 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [

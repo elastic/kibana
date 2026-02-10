@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { MathProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -24,7 +25,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ price: 10, quantity: 5 }];
@@ -49,7 +50,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ attributes: { price: 25, quantity: 4 } }];
@@ -81,7 +82,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       // Use integer values - both engines will do integer division
@@ -118,7 +119,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     // log(e) = 1
@@ -151,7 +152,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [
@@ -185,7 +186,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [
@@ -219,7 +220,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
       ],
     };
 
-    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { processors } = transpile(streamlangDSL);
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [
@@ -273,7 +274,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       // Use values that work for all functions:
@@ -330,7 +331,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         };
 
         // Ingest pipeline: generates error-throwing script, error at runtime
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
         const { errors } = await testBed.ingest(`cross-reject-${i}`, [doc], processors);
         expect(errors.length).toBeGreaterThan(0);
         expect(errors[0].caused_by?.reason).toMatch(pattern);
@@ -372,7 +373,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ numerator: 10, denominator: 0 }];
@@ -417,7 +418,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ value: 0 }];

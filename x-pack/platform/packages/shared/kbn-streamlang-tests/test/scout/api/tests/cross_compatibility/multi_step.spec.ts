@@ -18,7 +18,8 @@ import type {
   ReplaceProcessor,
   MathProcessor,
 } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -294,7 +295,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { processors } = transpile(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
         // Test documents covering different scenarios

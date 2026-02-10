@@ -7,7 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { transpileEsql } from '@kbn/streamlang';
+import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -27,7 +28,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043', client: { ip: null } }]; // Pre-map the field, ES|QL requires it
@@ -58,7 +59,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [
@@ -114,7 +115,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         };
 
         // Both transpilers should throw validation errors for Mustache templates
-        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+        expect(() => transpile(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed'
         );
         expect(() => transpileEsql(streamlangDSL)).toThrow(
@@ -137,7 +138,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       // Example log from COMMONAPACHELOG pattern
       const docs = [
@@ -184,7 +185,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [{ message: '1.2.3.4 5.6.7.8' }];
       await testBed.ingest('ingest-grok-multi', docs, processors);
@@ -213,7 +214,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [{ message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK' }];
       await testBed.ingest('ingest-grok-special', docs, processors);
@@ -247,7 +248,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [{ message: '1.2.3.4', untouched: 'preserved' }];
       await testBed.ingest('ingest-grok-source', docs, processors);
@@ -280,7 +281,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [{ message: '1.2.3.4 This is the extracted message', untouched: 'preserved' }];
 
@@ -319,7 +320,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       // Pre-map
@@ -401,7 +402,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [
         { id: 1, message: '1.2.3.4', flag: 'yes' },
@@ -437,7 +438,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }];
@@ -468,7 +469,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [
         { message: '1.2.3.4 GET' }, // missing size
@@ -511,7 +512,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
           } as GrokProcessor,
         ],
       };
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
       const docs = [{ message: 'no match here at all' }];
 
@@ -549,7 +550,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'I love burmese cats!' }];
@@ -583,7 +584,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'I love burmese cats!' }];
@@ -618,7 +619,7 @@ apiTest.describe('Cross-compatibility - Grok Processor', { tag: ['@ess', '@svlOb
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { processors } = transpile(streamlangDSL);
       const { query } = transpileEsql(streamlangDSL);
 
       const docs = [{ message: '127.0.0.1 [Jan 11, 2011]' }];
