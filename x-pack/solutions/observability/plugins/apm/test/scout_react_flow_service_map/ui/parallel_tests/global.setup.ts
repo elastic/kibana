@@ -9,8 +9,6 @@ import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { testData } from '../fixtures';
 
-globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
-
 globalSetupHook(
   'Ingest data to Elasticsearch for React Flow Service Map tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },

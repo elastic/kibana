@@ -14,7 +14,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { resolve } from 'path';
+import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import {
   preCreateSecurityIndexesViaSamlAuth,
@@ -38,6 +38,22 @@ export const getPlaywrightProject = (
     default:
       throw new Error(`Unable to determine Playwright project for test target '${testTarget}'`);
   }
+};
+
+const getScoutRunCommandForReporting = (argv: string[]): string => {
+  const [nodeBin, scriptPath, ...rest] = argv;
+  const nodeDisplay =
+    typeof nodeBin === 'string' && basename(nodeBin) === 'node' ? 'node' : nodeBin;
+
+  if (typeof scriptPath !== 'string') {
+    return [nodeDisplay, ...rest].filter(Boolean).join(' ');
+  }
+
+  const relativeScriptPath = isAbsolute(scriptPath) ? relative(REPO_ROOT, scriptPath) : scriptPath;
+  const scriptDisplay =
+    relativeScriptPath && !relativeScriptPath.startsWith('..') ? relativeScriptPath : scriptPath;
+
+  return [nodeDisplay, scriptDisplay, ...rest].filter(Boolean).join(' ');
 };
 
 async function runPlaywrightTest(
@@ -150,6 +166,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
+  const scoutRunCommandForReporting = getScoutRunCommandForReporting(process.argv);
+
   const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
   const pwConfigPath = options.configPath;
   const pwTestFiles = options.testFiles || [];
@@ -182,6 +200,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       SCOUT_TARGET_LOCATION: options.testTarget.location,
       SCOUT_TARGET_ARCH: options.testTarget.arch,
       SCOUT_TARGET_DOMAIN: options.testTarget.domain,
+      SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 
     if (exitCode !== 0) {

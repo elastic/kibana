@@ -30,10 +30,10 @@ import {
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
+  getRunCommand,
   getTestTargetFromProcessArguments,
   parseStdout,
   stripFilePath,
-  stripRunCommand,
 } from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
@@ -62,7 +62,7 @@ export class ScoutFailedTestReporter implements Reporter {
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
     this.testTarget =
       (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
