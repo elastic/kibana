@@ -274,6 +274,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/babel-register'
   - '@kbn/core-security-common'
+  - '@kbn/entity-store'
 tags:
   - plugin
   - prod
