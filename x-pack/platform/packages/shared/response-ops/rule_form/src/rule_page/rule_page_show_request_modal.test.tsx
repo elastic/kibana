@@ -66,6 +66,8 @@ describe('rulePageShowRequestModal', () => {
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
       'This Kibana request will create this rule.'
     );
+    expect(screen.queryByTestId('showRequestCreateTab')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('showRequestUpdateTab')).not.toBeInTheDocument();
     expect(screen.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
       "POST kbn:/api/alerting/rule
       {
@@ -101,6 +103,22 @@ describe('rulePageShowRequestModal', () => {
         \\"actions\\": []
       }"
     `);
+  });
+
+  test('renders tabs and defaults to create view when id is present', () => {
+    useRuleFormState.mockReturnValue({
+      formData,
+      multiConsumerSelection: 'logs',
+      id: 'test-id',
+    });
+
+    render(<RulePageShowRequestModal />);
+
+    expect(screen.getByTestId('showRequestCreateTab')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestUpdateTab')).toBeInTheDocument();
+    expect(screen.getByTestId('showRequestCreateTab')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('showRequestUpdateTab')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
   });
 
   test('renders update request correctly for existing rule', async () => {
