@@ -3186,7 +3186,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/platform/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/platform/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/fixtures/kbn_archives/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux

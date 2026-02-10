@@ -28,6 +28,7 @@ plugins:
     - dashboard
     - workflows_extensions
     - global_search
+    - advanced_settings
   disabled:
 
 packages:
