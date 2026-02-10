@@ -29,6 +29,7 @@ plugins:
     - streams
     - streams_app
     - transform
+    - vis_types/timelion
     - workflows_extensions
     - global_search
     - banners

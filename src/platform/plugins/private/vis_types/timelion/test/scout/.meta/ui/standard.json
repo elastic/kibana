@@ -1,0 +1,201 @@
+{
+  "lastModified": "2026-02-10T20:24:57.554Z",
+  "sha1": "",
+  "tests": [
+    {
+      "id": "8f8b232240c76a2-66cefcc86795670",
+      "title": "Timelion visualization - chart data should display correct data for specified index pattern and timefield",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-7d06f1033dce9c7",
+      "title": "Timelion visualization - chart data should display correct chart colors for multiple expressions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-dd3778343f92e4b",
+      "title": "Timelion visualization - chart data should display correct chart data for average, min, max and cardinality aggregations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-642bb5f42324f12",
+      "title": "Timelion visualization - chart data should display correct chart data for expressions using functions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-bb1a0e1a5c3e6af",
+      "title": "Timelion visualization - chart data should display correct chart title, data and labels for expressions with custom labels, yaxis and offset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-378deed362f0db6",
+      "title": "Timelion visualization - chart data should display correct chart data for split expression",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f8b232240c76a2-d2db9a1bfcd5689",
+      "title": "Timelion visualization - chart data should display two areas and one bar chart items",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_chart_data.spec.ts",
+        "line": 176,
+        "column": 7
+      }
+    },
+    {
+      "id": "2104740ec25b2fc-2b6168ba7bfcddb",
+      "title": "Timelion visualization - expression typeahead should display function suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_expression_typeahead.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "2104740ec25b2fc-2dd2221e03ff96a",
+      "title": "Timelion visualization - expression typeahead should show index pattern suggestions for index argument",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_expression_typeahead.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "2104740ec25b2fc-72dcc51a0045d47",
+      "title": "Timelion visualization - expression typeahead should show field suggestions for timefield argument when index pattern set",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_expression_typeahead.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    },
+    {
+      "id": "2104740ec25b2fc-c1628c3b33dda6d",
+      "title": "Timelion visualization - expression typeahead should show field suggestions for split argument when index pattern set",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_expression_typeahead.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "2104740ec25b2fc-d6abcf1643f50e4",
+      "title": "Timelion visualization - expression typeahead should show field suggestions for metric argument when index pattern set",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_expression_typeahead.spec.ts",
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "77f97e52d81ce77-1bba8986ac6a33e",
+      "title": "Timelion visualization - Legend should correctly display the legend items names and position",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_legend.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "77f97e52d81ce77-764bc24ed5fc8d8",
+      "title": "Timelion visualization - Legend should correctly display the legend position",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_legend.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "77f97e52d81ce77-c87948d077c0ce0",
+      "title": "Timelion visualization - Legend should not display the legend",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/timelion/test/scout/ui/tests/timelion_legend.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    }
+  ]
+}
