@@ -14,7 +14,7 @@ const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   long: 'tokenNumber',
   float: 'tokenNumber',
   date: 'tokenDate',
-  ip: 'tokenGeo',
+  ip: 'tokenIP',
   geo_point: 'tokenGeo',
   object: 'tokenQuestion',
   nested: 'tokenNested',
