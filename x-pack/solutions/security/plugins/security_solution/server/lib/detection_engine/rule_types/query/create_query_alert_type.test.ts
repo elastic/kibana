@@ -220,6 +220,14 @@ describe('Custom Query Alerts', () => {
     (hasTimestampFields as jest.Mock).mockImplementationOnce(async () => {
       throw Error('hastTimestampFields test error');
     });
+
+    services.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue({
+      indices: ['some-index'],
+      fields: {},
+      // @ts-expect-error body does not exist on FieldCapsResponse but is needed for TransportResult shape used by hasTimestampFields
+      body: { indices: ['some-index'], fields: {} },
+    });
+
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
