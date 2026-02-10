@@ -3260,10 +3260,21 @@ x-pack/platform/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
-# Leads approval
+# These files influence agent behavior and are loaded into every new agent session.
+# Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
+# tech lead review by default.
 /AGENTS.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
+/.agent/skills/ @elastic/kibana-tech-leads
+
+# Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
+# codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
+/.agent/skills/ftr-testing/** @elastic/appex-qa
+/.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agent/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agent/skills/scout-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
