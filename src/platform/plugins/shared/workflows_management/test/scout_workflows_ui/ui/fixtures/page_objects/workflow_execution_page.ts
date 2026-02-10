@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Locator, ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
+
+/**
+ * Page object for the workflow execution detail view.
+ *
+ * Although editing and execution currently live on the same page,
+ * this class isolates execution-specific interactions (step tree,
+ * step results, execution status) from editor interactions so tests
+ * can express intent clearly and the code is future-proof for when
+ * the execution view becomes a separate page.
+ */
+export class WorkflowExecutionPage {
+  public executionPanel: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+  }
+
+  /**
+   * Wait for the workflow execution panel to show the specified status.
+   * @param status - The execution status to wait for ('completed' or 'failed')
+   * @param timeout - The timeout in milliseconds
+   */
+  async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
+    const panelWithStatus = this.page.locator(
+      `[data-test-subj="workflowExecutionPanel"][data-execution-status="${status}"]`
+    );
+    await panelWithStatus.waitFor({ state: 'visible', timeout });
+  }
+
+  /**
+   * Expands all collapsed steps in the workflow execution panel tree view.
+   * Iterates through collapsed nodes and clicks their expansion arrows until all steps are expanded.
+   */
+  async expandStepsTree() {
+    while (true) {
+      const collapsedLocators = await this.executionPanel
+        .locator('button[aria-expanded="false"]')
+        .all();
+
+      if (!collapsedLocators.length) {
+        break;
+      }
+      await collapsedLocators[0].scrollIntoViewIfNeeded();
+      await collapsedLocators[0].locator('.euiTreeView__expansionArrow[role=presentation]').click();
+    }
+  }
+
+  /**
+   * Selects a step in the execution tree by navigating through a hierarchical path.
+   *
+   * @param path - The hierarchical path to the step, using '>' as separator
+   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > 0 > process-item")
+   * @returns A promise that resolves to the locator for the target step button
+   * @throws Error if any node in the path is not found
+   */
+  async getStep(path: string): Promise<Locator> {
+    const nodes = path.split('>').map((substring) => substring.trim());
+    let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+
+    for (let i = 0; i < nodes.length; i++) {
+      const currentNode = nodes[i];
+      const allListItems = await parentLocator.locator('> li').all();
+      let found = false;
+
+      for (const listItem of allListItems) {
+        const buttonLocator = listItem.locator('> button');
+        const buttonText = await buttonLocator
+          .locator('span[data-test-subj="stepName"]')
+          .textContent();
+
+        if (buttonText?.trim() === currentNode) {
+          found = true;
+
+          if (i === nodes.length - 1) {
+            return buttonLocator;
+          }
+
+          parentLocator = listItem.locator('> div > ul');
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Error(
+          `Step not found: "${currentNode}" in path "${path}" (failed at level ${i + 1})`
+        );
+      }
+    }
+
+    throw new Error(`Failed to navigate step path: ${path}`);
+  }
+
+  /**
+   * Retrieves and parses the step result JSON from the workflow step execution details panel.
+   *
+   * @template TOutput - The expected type of the parsed JSON output
+   * @param type - The type of result to retrieve: 'input', 'output', or 'error'
+   * @returns A promise that resolves to the parsed JSON result
+   */
+  async getStepResultJson<TOutput = unknown>(type: 'input' | 'output' | 'error'): Promise<TOutput> {
+    const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+
+    await workflowStepExecutionDetails.locator(`button[data-test-subj="${type}"]`).click();
+
+    await workflowStepExecutionDetails.locator('button[data-test-subj="json"]').click();
+    const jsonEditorNthIndex = 1; // step output json editor index is 1, magic number, but this is the only way
+    const stringValue = await new KibanaCodeEditorWrapper(this.page).getCodeEditorValue(
+      jsonEditorNthIndex
+    );
+    return JSON.parse(stringValue);
+  }
+}

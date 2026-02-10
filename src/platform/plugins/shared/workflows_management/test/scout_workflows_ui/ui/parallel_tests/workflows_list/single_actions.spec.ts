@@ -22,8 +22,9 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
   });
 
   test('should run enabled workflow', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const enabledWorkflow = {
-      name: 'ThreeDotsTest Enabled Workflow 1',
+      name: `ThreeDotsTest Enabled Workflow 1 ${suffix}`,
       description: 'This is bulk workflow number 1',
       enabled: true,
     };
@@ -31,9 +32,9 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
 
     // verify run via direct action button
     await pageObjects.workflowList.navigate();
-    (
-      await pageObjects.workflowList.getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
-    ).click();
+    await pageObjects.workflowList
+      .getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
+      .click();
     await page.waitForURL('**/workflows/*?executionId=*');
     await expect(
       page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
@@ -51,8 +52,9 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
   });
 
   test('should not run disabled workflow', async ({ pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const disabledWorkflow = {
-      name: 'ThreeDotsTest Disabled Workflow 1',
+      name: `ThreeDotsTest Disabled Workflow 1 ${suffix}`,
       description: 'This is bulk workflow number 1',
       enabled: false,
     };
@@ -60,11 +62,9 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await pageObjects.workflowList.navigate();
 
     // verify disabled via direct action button
-    const runAction = await pageObjects.workflowList.getWorkflowAction(
-      disabledWorkflow.name,
-      'runWorkflowAction'
-    );
-    await expect(runAction).toBeDisabled();
+    await expect(
+      pageObjects.workflowList.getWorkflowAction(disabledWorkflow.name, 'runWorkflowAction')
+    ).toBeDisabled();
 
     // verify disabled via three dots menu action
     const runThreeDotsAction = await pageObjects.workflowList.getThreeDotsMenuAction(
@@ -75,52 +75,51 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
   });
 
   test('should enable disabled workflow via toggle', async ({ pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const disabledWorkflow = {
-      name: 'Toggle Enable Workflow',
+      name: `Toggle Enable Workflow ${suffix}`,
       description: 'This workflow starts disabled and should be enabled via toggle',
       enabled: false,
     };
     await pageObjects.workflowList.createDummyWorkflows([disabledWorkflow]);
     await pageObjects.workflowList.navigate();
 
-    const toggle = await pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflow.name);
+    const toggle = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflow.name);
     await expect(toggle).not.toBeChecked();
 
     await toggle.click();
     await expect(toggle).toBeChecked();
 
-    const runAction = await pageObjects.workflowList.getWorkflowAction(
-      disabledWorkflow.name,
-      'runWorkflowAction'
-    );
-    await expect(runAction).toBeEnabled();
+    await expect(
+      pageObjects.workflowList.getWorkflowAction(disabledWorkflow.name, 'runWorkflowAction')
+    ).toBeEnabled();
   });
 
   test('should disable enabled workflow via toggle', async ({ pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const enabledWorkflow = {
-      name: 'Toggle Disable Workflow',
+      name: `Toggle Disable Workflow ${suffix}`,
       description: 'This workflow starts enabled and should be disabled via toggle',
       enabled: true,
     };
     await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow]);
     await pageObjects.workflowList.navigate();
 
-    const toggle = await pageObjects.workflowList.getWorkflowStateToggle(enabledWorkflow.name);
+    const toggle = pageObjects.workflowList.getWorkflowStateToggle(enabledWorkflow.name);
     await expect(toggle).toBeChecked();
 
     await toggle.click();
     await expect(toggle).not.toBeChecked();
 
-    const runAction = await pageObjects.workflowList.getWorkflowAction(
-      enabledWorkflow.name,
-      'runWorkflowAction'
-    );
-    await expect(runAction).toBeDisabled();
+    await expect(
+      pageObjects.workflowList.getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
+    ).toBeDisabled();
   });
 
   test('should open workflow for editing via edit action', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflow = {
-      name: 'Edit Action Test Workflow',
+      name: `Edit Action Test Workflow ${suffix}`,
       description: 'This workflow should be opened for editing',
       enabled: true,
     };
@@ -128,11 +127,7 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await pageObjects.workflowList.navigate();
 
     // verify edit via direct action button
-    const editAction = await pageObjects.workflowList.getWorkflowAction(
-      workflow.name,
-      'editWorkflowAction'
-    );
-    await editAction.click();
+    await pageObjects.workflowList.getWorkflowAction(workflow.name, 'editWorkflowAction').click();
 
     await page.waitForURL('**/workflows/*');
     await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
@@ -150,8 +145,9 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
   });
 
   test('should clone workflow via three dots menu', async ({ pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflow = {
-      name: 'Clone Action Test Workflow',
+      name: `Clone Action Test Workflow ${suffix}`,
       description: 'This workflow should be cloned',
       enabled: true,
     };
@@ -166,12 +162,13 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
 
     // Verify the cloned workflow appears in the list with " Copy" suffix
     const clonedWorkflowName = `${workflow.name} Copy`;
-    await expect(await pageObjects.workflowList.getWorkflowRow(clonedWorkflowName)).toBeVisible();
+    await expect(pageObjects.workflowList.getWorkflowRow(clonedWorkflowName)).toBeVisible();
   });
 
   test('should delete workflow via three dots menu', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflow = {
-      name: 'Delete Action Test Workflow',
+      name: `Delete Action Test Workflow ${suffix}`,
       description: 'This workflow should be deleted',
       enabled: true,
     };
@@ -191,6 +188,6 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await deleteAction.click();
 
     // Verify the workflow is removed from the list
-    await expect(await pageObjects.workflowList.getWorkflowRow(workflow.name)).toBeHidden();
+    await expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toBeHidden();
   });
 });

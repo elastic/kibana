@@ -22,14 +22,15 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
   });
 
   test('should enable disabled workflows', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflows = [
       {
-        name: 'BulkTest Enabled Workflow 1',
+        name: `BulkTest Enabled Workflow 1 ${suffix}`,
         description: 'This is bulk workflow number 1',
         enabled: false,
       },
       {
-        name: 'BulkTest Enabled Workflow 2',
+        name: `BulkTest Enabled Workflow 2 ${suffix}`,
         description: 'This is bulk workflow number 2',
         enabled: false,
       },
@@ -41,8 +42,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     );
     const checkEnabled = async () => {
       for (const workflow of workflows) {
-        const toggle = await pageObjects.workflowList.getWorkflowStateToggle(workflow.name);
-        await expect(toggle).toBeChecked();
+        await expect(pageObjects.workflowList.getWorkflowStateToggle(workflow.name)).toBeChecked();
       }
     };
     await checkEnabled();
@@ -51,14 +51,15 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
   });
 
   test('should disable enabled workflows', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflows = [
       {
-        name: 'BulkTest Disabled Workflow 1',
+        name: `BulkTest Disabled Workflow 1 ${suffix}`,
         description: 'This is bulk workflow number 1',
         enabled: true,
       },
       {
-        name: 'BulkTest Disabled Workflow 2',
+        name: `BulkTest Disabled Workflow 2 ${suffix}`,
         description: 'This is bulk workflow number 2',
         enabled: true,
       },
@@ -70,8 +71,9 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     );
     const checkDisabled = async () => {
       for (const workflow of workflows) {
-        const toggle = await pageObjects.workflowList.getWorkflowStateToggle(workflow.name);
-        await expect(toggle).not.toBeChecked();
+        await expect(
+          pageObjects.workflowList.getWorkflowStateToggle(workflow.name)
+        ).not.toBeChecked();
       }
     };
     await checkDisabled();
@@ -80,14 +82,15 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
   });
 
   test('should delete workflows', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflows = [
       {
-        name: 'BulkTest Delete Workflow 1',
+        name: `BulkTest Delete Workflow 1 ${suffix}`,
         description: 'This is bulk workflow number 1 to be deleted',
         enabled: true,
       },
       {
-        name: 'BulkTest Delete Workflow 2',
+        name: `BulkTest Delete Workflow 2 ${suffix}`,
         description: 'This is bulk workflow number 2 to be deleted',
         enabled: true,
       },
@@ -100,8 +103,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     await page.testSubj.click('confirmModalConfirmButton');
     const checkDeleted = async () => {
       for (const workflow of workflows) {
-        const workflowRow = page.locator('tr').filter({ hasText: workflow.name });
-        await expect(workflowRow).toHaveCount(0);
+        await expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toHaveCount(0);
       }
     };
     await checkDeleted();
@@ -110,14 +112,15 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
   });
 
   test('should clear selection', async ({ page, pageObjects }) => {
+    const suffix = Math.floor(Math.random() * 10000);
     const workflows = [
       {
-        name: 'BulkTest Clear Selection Workflow 1',
+        name: `BulkTest Clear Selection Workflow 1 ${suffix}`,
         description: 'This is bulk workflow number 1',
         enabled: true,
       },
       {
-        name: 'BulkTest Clear Selection Workflow 2',
+        name: `BulkTest Clear Selection Workflow 2 ${suffix}`,
         description: 'This is bulk workflow number 2',
         enabled: true,
       },
@@ -134,7 +137,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
 
     for (const workflow of workflows) {
       await expect(
-        await pageObjects.workflowList.getSelectCheckboxForWorkflow(workflow.name)
+        pageObjects.workflowList.getSelectCheckboxForWorkflow(workflow.name)
       ).not.toBeChecked();
     }
   });

@@ -663,8 +663,9 @@ steps:
 
       const executionPanel = page.testSubj.locator('workflowExecutionPanel');
       await expect(executionPanel).toBeVisible();
+      await pageObjects.workflowExecution.waitForExecutionStatus('completed', 30000);
 
-      await pageObjects.workflowEditor.expandStepsTree();
+      await pageObjects.workflowExecution.expandStepsTree();
 
       // Verify log_each_alert has exactly 1 iteration (single alert per execution)
       // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
@@ -675,7 +676,7 @@ steps:
       // eslint-disable-next-line playwright/no-nth-methods
       await logEachAlertButtons.first().click();
 
-      const stepOutput = await pageObjects.workflowEditor.getStepResultJson<unknown>('output');
+      const stepOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
       expect(JSON.stringify(stepOutput)).toContain(expectedSingleAlertDescriptions[i]);
 
       // Navigate back to the executions list
@@ -705,8 +706,9 @@ steps:
 
     const executionPanel2 = page.testSubj.locator('workflowExecutionPanel');
     await expect(executionPanel2).toBeVisible();
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', 30000);
 
-    await pageObjects.workflowEditor.expandStepsTree();
+    await pageObjects.workflowExecution.expandStepsTree();
 
     // Verify log_each_alert has 2 iterations (both alerts in single execution)
     // Use regex to match only the leaf step, not the foreach wrapper (foreach_log_each_alert)
@@ -721,7 +723,7 @@ steps:
       // eslint-disable-next-line playwright/no-nth-methods -- iterating over foreach iterations by index
       await logEachAlertButtons2.nth(i).click();
 
-      const alertOutput = await pageObjects.workflowEditor.getStepResultJson<unknown>('output');
+      const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
       expect(JSON.stringify(alertOutput)).toContain(expectedAlertIds[i]);
     }
   });

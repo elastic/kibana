@@ -37,14 +37,14 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
     await foreachLoopNodeLocator.locator('.euiTreeView__expansionArrow').click();
 
-    await pageObjects.workflowEditor.expandStepsTree();
+    await pageObjects.workflowExecution.expandStepsTree();
 
     // verify output of create_parks_index
-    await pageObjects.workflowEditor
+    await pageObjects.workflowExecution
       .getStep('create_parks_index')
       .then((locator) => locator.click());
     expect(
-      await pageObjects.workflowEditor.getStepResultJson<Record<string, unknown>>('output')
+      await pageObjects.workflowExecution.getStepResultJson<Record<string, unknown>>('output')
     ).toStrictEqual({
       acknowledged: true,
       shards_acknowledged: true,
@@ -52,18 +52,20 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     });
 
     // verify output of bulk_index_park_data
-    await pageObjects.workflowEditor
+    await pageObjects.workflowExecution
       .getStep('bulk_index_park_data')
       .then((locator) => locator.click());
-    const bulkIndexOutput = await pageObjects.workflowEditor.getStepResultJson<
+    const bulkIndexOutput = await pageObjects.workflowExecution.getStepResultJson<
       Record<string, unknown>
     >('output');
     expect(bulkIndexOutput.errors).toBe(false);
     expect(bulkIndexOutput.items).toHaveLength(5);
 
     // verify output of search_park_data
-    await pageObjects.workflowEditor.getStep('search_park_data').then((locator) => locator.click());
-    const searchParkOutput = await pageObjects.workflowEditor.getStepResultJson<{
+    await pageObjects.workflowExecution
+      .getStep('search_park_data')
+      .then((locator) => locator.click());
+    const searchParkOutput = await pageObjects.workflowExecution.getStepResultJson<{
       hits: {
         total: { value: number };
         hits: unknown[];
@@ -77,11 +79,11 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     const requiredOutputs = ['Grand Canyon National Park', 'Zion National Park'];
 
     for (let i = 0; i < requiredOutputs.length; i++) {
-      await pageObjects.workflowEditor
+      await pageObjects.workflowExecution
         .getStep(`loop_over_results > ${i} > process-item`)
         .then((locator) => locator.click());
 
-      const stepOutput = await pageObjects.workflowEditor.getStepResultJson<string>('output');
+      const stepOutput = await pageObjects.workflowExecution.getStepResultJson<string>('output');
       expect(stepOutput).toBe(requiredOutputs[i]);
     }
   });

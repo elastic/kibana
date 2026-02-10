@@ -10,10 +10,12 @@
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { WorkflowEditorPage } from './workflow_editor_page';
+import { WorkflowExecutionPage } from './workflow_execution_page';
 import { WorkflowListPage } from './workflow_list_page';
 
 export interface WorkflowsPageObjects extends PageObjects {
   workflowEditor: WorkflowEditorPage;
+  workflowExecution: WorkflowExecutionPage;
   workflowList: WorkflowListPage;
 }
 
@@ -21,6 +23,7 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Wo
   return {
     ...pageObjects,
     workflowEditor: createLazyPageObject(WorkflowEditorPage, page),
+    workflowExecution: createLazyPageObject(WorkflowExecutionPage, page),
     workflowList: createLazyPageObject(WorkflowListPage, page),
   };
 }

@@ -51,36 +51,33 @@ steps:
   }
 
   // Workflow Locators
+  // NOTE: These methods return Locator synchronously (not Promise<Locator>).
+  // This preserves Playwright's auto-retry behavior when used with expect() assertions.
+  // Do NOT wrap the return values with `await` when passing to `expect()`.
 
   /** Returns the table row locator for the specified workflow. */
-  async getWorkflowRow(workflowName: string) {
+  getWorkflowRow(workflowName: string): Locator {
     return this.page.locator('tr').filter({ hasText: workflowName });
   }
 
   /** Returns the state toggle switch locator for the specified workflow. */
-  async getWorkflowStateToggle(workflowName: string): Promise<Locator> {
-    return this.getWorkflowRow(workflowName).then((row) =>
-      row.locator('[data-test-subj^="workflowToggleSwitch-"]')
-    );
+  getWorkflowStateToggle(workflowName: string): Locator {
+    return this.getWorkflowRow(workflowName).locator('[data-test-subj^="workflowToggleSwitch-"]');
   }
 
   /** Returns the checkbox locator for selecting the specified workflow. */
-  async getSelectCheckboxForWorkflow(workflowName: string) {
-    return this.getWorkflowRow(workflowName).then((row) =>
-      row.locator('td:first-child input[type="checkbox"]')
-    );
+  getSelectCheckboxForWorkflow(workflowName: string): Locator {
+    return this.getWorkflowRow(workflowName).locator('td:first-child input[type="checkbox"]');
   }
 
   // Single Workflow Actions
 
   /** Returns the direct action button locator (run or edit) for the specified workflow. */
-  async getWorkflowAction(
+  getWorkflowAction(
     workflowName: string,
     action: 'runWorkflowAction' | 'editWorkflowAction'
-  ) {
-    return this.getWorkflowRow(workflowName).then((row) =>
-      row.locator(`[data-test-subj="${action}"]`)
-    );
+  ): Locator {
+    return this.getWorkflowRow(workflowName).locator(`[data-test-subj="${action}"]`);
   }
 
   /** Opens the three dots menu and returns the specified action button locator. */
@@ -91,8 +88,8 @@ steps:
       | 'editWorkflowAction'
       | 'cloneWorkflowAction'
       | 'deleteWorkflowAction'
-  ) {
-    (await this.getWorkflowRow(workflowName))
+  ): Promise<Locator> {
+    await this.getWorkflowRow(workflowName)
       .locator('[data-test-subj="euiCollapsedItemActionsButton"]')
       .click();
     return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
@@ -105,7 +102,7 @@ steps:
     await this.navigate();
 
     for (const workflowName of workflowNamesToCheck) {
-      await this.getSelectCheckboxForWorkflow(workflowName).then((locator) => locator.click());
+      await this.getSelectCheckboxForWorkflow(workflowName).click();
     }
   }
 
@@ -125,7 +122,8 @@ steps:
     return this.page.locator('.euiSelectable li').filter({ hasText: optionName });
   }
 
-  async getSearchField() {
+  /** Returns the search field locator. */
+  getSearchField(): Locator {
     return this.page.testSubj.locator('workflowSearchField');
   }
 }

@@ -57,16 +57,16 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     // Execute the workflow
     await page.testSubj.click('executeWorkflowButton');
 
-    await pageObjects.workflowEditor.waitForExecutionStatus('completed', 20000);
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', 20000);
 
     // Expand all steps in the tree
-    await pageObjects.workflowEditor.expandStepsTree();
+    await pageObjects.workflowExecution.expandStepsTree();
 
     // Verify create_case step output
-    const createCaseStep = await pageObjects.workflowEditor.getStep('create_case');
+    const createCaseStep = await pageObjects.workflowExecution.getStep('create_case');
     await createCaseStep.click();
 
-    const createCaseOutput = await pageObjects.workflowEditor.getStepResultJson<{
+    const createCaseOutput = await pageObjects.workflowExecution.getStepResultJson<{
       id: string;
       version: string;
       title: string;
@@ -85,12 +85,12 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     // Verify add_case_comment step outputs
     for (let i = 0; i < workflowInput.comments.length; i++) {
       const comment = workflowInput.comments[i];
-      const createCaseCommentStep = await pageObjects.workflowEditor.getStep(
+      const createCaseCommentStep = await pageObjects.workflowExecution.getStep(
         `loop_through_comments > ${i} > create_case_comment`
       );
       await createCaseCommentStep.click();
 
-      const createCaseCommentOutput = await pageObjects.workflowEditor.getStepResultJson<{
+      const createCaseCommentOutput = await pageObjects.workflowExecution.getStepResultJson<{
         comments: {
           owner: string;
           type: string;
@@ -104,10 +104,10 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     }
 
     // Verify update_case step output
-    const updateCaseStep = await pageObjects.workflowEditor.getStep('update_case');
+    const updateCaseStep = await pageObjects.workflowExecution.getStep('update_case');
     await updateCaseStep.click();
 
-    const updateCaseOutput = await pageObjects.workflowEditor.getStepResultJson<
+    const updateCaseOutput = await pageObjects.workflowExecution.getStepResultJson<
       Array<{
         id: string;
         version: string;
@@ -122,10 +122,10 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     expect(updateCaseOutput[0].version).not.toBe(initialVersion);
 
     // Verify get_case step output
-    const getCaseStep = await pageObjects.workflowEditor.getStep('get_case');
+    const getCaseStep = await pageObjects.workflowExecution.getStep('get_case');
     await getCaseStep.click();
 
-    const getCaseOutput = await pageObjects.workflowEditor.getStepResultJson<{
+    const getCaseOutput = await pageObjects.workflowExecution.getStepResultJson<{
       id: string;
       version: string;
       title: string;
