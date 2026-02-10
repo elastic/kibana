@@ -73,6 +73,18 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'uri_parts') {
+      const targetPrefix = step.to && step.to.length > 0 ? step.to : 'url';
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.uriPartsProcessorDescription',
+        {
+          defaultMessage: 'Parses URI from "{from}" into "{targetPrefix}.*"',
+          values: {
+            from: step.from,
+            targetPrefix,
+          },
+        }
+      );
     } else if (step.action === 'rename') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.renameProcessorDescription',
