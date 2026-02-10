@@ -503,7 +503,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'grok',
-          where: 'where' in formState ? formState.where : undefined,
+          where: formState.where,
           description,
           // Convert { value: string }[] to flat string[]
           patterns: patterns.map((p) => p.value.trim()).filter((pattern) => !isEmpty(pattern)),
@@ -521,7 +521,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'dissect',
-          where: 'where' in formState ? formState.where : undefined,
+          where: formState.where,
           description,
           from,
           pattern,
@@ -538,7 +538,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'manual_ingest_pipeline',
-          where: 'where' in formState ? formState.where : undefined,
+          where: formState.where,
           description,
           processors,
           ignore_failure,
@@ -552,7 +552,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'date',
-          where: 'where' in formState ? formState.where : undefined,
+          where: formState.where,
           description,
           from,
           formats,
@@ -593,7 +593,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'set',
-          where: 'where' in formState ? formState.where : undefined,
+          where: formState.where,
           description,
           to,
           ...getValueOrCopyFrom(),
