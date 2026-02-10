@@ -2,45 +2,49 @@
 
 exports[`DateRangePicker renders 1`] = `
 <div
-  class="css-zekgly-DateRangePicker"
+  class="euiPopover emotion-euiPopover-block-DateRangePickerDialog"
 >
   <div
-    class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
+    style="display: flex; align-items: center; gap: 8px; max-inline-size: 400px;"
   >
     <div
-      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
     >
-      <button
-        class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
-        data-test-subj="dateRangePickerControlButton"
-        type="button"
-        value="Last 20 minutes"
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
       >
-        <span
-          class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
+        <button
+          class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
+          data-test-subj="dateRangePickerControlButton"
+          type="button"
+          value="Last 20 minutes"
         >
           <span
-            class="eui-textTruncate css-z3gg36-textContent"
-          >
-            Last 20 minutes
-          </span>
-           
-          <span
-            class="euiBadge emotion-euiBadge-default"
-            title="20min"
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
           >
             <span
-              class="euiBadge__content emotion-euiBadge__content"
+              class="eui-textTruncate css-z3gg36-textContent"
+            >
+              Last 20 minutes
+            </span>
+             
+            <span
+              class="euiBadge emotion-euiBadge-default"
+              title="20min"
             >
               <span
-                class="euiBadge__text emotion-euiBadge__text"
+                class="euiBadge__content emotion-euiBadge__content"
               >
-                20min
+                <span
+                  class="euiBadge__text emotion-euiBadge__text"
+                >
+                  20min
+                </span>
               </span>
             </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>

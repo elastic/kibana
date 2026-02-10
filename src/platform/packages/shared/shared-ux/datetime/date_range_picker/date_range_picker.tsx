@@ -7,27 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  type KeyboardEvent,
-  type ChangeEvent,
-} from 'react';
+import React from 'react';
 
-import {
-  EuiBadge,
-  EuiFieldText,
-  EuiFormControlButton,
-  EuiFormControlLayout,
-  EuiOutsideClickDetector,
-  useEuiTheme,
-} from '@elastic/eui';
-
-import type { TimeRangeBounds, TimeRange } from './types';
-import { textToTimeRange } from './parse';
-import { durationToDisplayShortText, timeRangeToDisplayText } from './format';
+import type { TimeRangeBounds } from './types';
+import { DateRangePickerProvider } from './date_range_picker_context';
+import { DateRangePickerDialog } from './date_range_picker_dialog';
 
 export interface DateRangePickerProps {
   /** Text representation of the time range */
@@ -64,99 +48,9 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
  * A date range picker component that accepts natural language and date math input.
  */
 export function DateRangePicker(props: DateRangePickerProps) {
-  const { value, onChange, dateFormat, isInvalid, compressed = true } = props;
-  const { euiTheme } = useEuiTheme();
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const lastValidText = useRef('');
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => value ?? '');
-  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
-  const displayText = useMemo(
-    () => timeRangeToDisplayText(timeRange, { dateFormat }),
-    [dateFormat, timeRange]
-  );
-  const duration =
-    timeRange.startDate && timeRange.endDate
-      ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
-      : null;
-  const displayDuration = duration
-    ? durationToDisplayShortText(duration.startDate, duration.endDate)
-    : null;
-
-  useEffect(() => {
-    if (!isEditing && text.trim() === '' && lastValidText.current) {
-      setText(lastValidText.current);
-      lastValidText.current = '';
-    }
-  }, [text, isEditing]);
-
-  const onButtonClick = () => {
-    setIsEditing(true);
-    if (text) {
-      lastValidText.current = text;
-    }
-  };
-  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
-  };
-  const onInputKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && isEditing && text) {
-      onChange?.({
-        start: timeRange.start,
-        end: timeRange.end,
-        startDate: timeRange.startDate,
-        endDate: timeRange.endDate,
-        value: timeRange.value,
-        isInvalid: timeRange.isInvalid,
-      });
-      setIsEditing(false);
-    }
-    if (event.key === 'Escape' && isEditing) {
-      setIsEditing(false);
-    }
-  };
-  const onInputClear = () => {
-    setText('');
-    inputRef.current?.focus();
-  };
-  const onOutsideClick = () => {
-    if (isEditing) setIsEditing(false);
-  };
-
   return (
-    <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-      <div css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
-        <EuiFormControlLayout
-          compressed={compressed}
-          isInvalid={isInvalid}
-          clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
-        >
-          {isEditing ? (
-            <EuiFieldText
-              data-test-subj="dateRangePickerInput"
-              autoFocus
-              inputRef={inputRef}
-              controlOnly
-              value={text}
-              isInvalid={isInvalid}
-              onChange={onInputChange}
-              onKeyDown={onInputKeyDown}
-              compressed={compressed}
-            />
-          ) : (
-            <EuiFormControlButton
-              data-test-subj="dateRangePickerControlButton"
-              value={displayText}
-              onClick={onButtonClick}
-              isInvalid={isInvalid}
-              compressed={compressed}
-            >
-              {displayDuration && <EuiBadge>{displayDuration}</EuiBadge>}
-            </EuiFormControlButton>
-          )}
-        </EuiFormControlLayout>
-      </div>
-    </EuiOutsideClickDetector>
+    <DateRangePickerProvider {...props}>
+      <DateRangePickerDialog />
+    </DateRangePickerProvider>
   );
 }

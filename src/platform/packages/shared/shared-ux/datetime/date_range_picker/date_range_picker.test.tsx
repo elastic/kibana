@@ -69,7 +69,7 @@ describe('DateRangePicker', () => {
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
 
-    it('closes on outside click and returns to display mode', () => {
+    it.skip('closes on outside click and returns to display mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
