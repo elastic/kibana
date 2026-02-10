@@ -49,10 +49,12 @@ interface UpdateOrReplaceOptions {
 }
 
 export class ConnectorTokenClient {
+  private readonly logger: Logger;
   private readonly sharedClient: SharedConnectorTokenClient;
   private readonly userClient: UserConnectorTokenClient;
 
   constructor(options: ConstructorOptions) {
+    this.logger = options.logger.get('connector_token_client');
     this.sharedClient = new SharedConnectorTokenClient(options);
     this.userClient = new UserConnectorTokenClient(options);
   }
@@ -67,10 +69,27 @@ export class ConnectorTokenClient {
     return { scope: 'shared', actualId: id };
   }
 
+  private log({
+    method,
+    scope,
+    fields,
+  }: {
+    method: string;
+    scope: 'personal' | 'shared';
+    fields: Record<string, string | boolean>;
+  }): void {
+    const parts = Object.entries(fields).map(([key, value]) =>
+      typeof value === 'string' ? `${key}="${value}"` : `${key}=${value}`
+    );
+    this.logger.debug(`Delegating to ${scope} client: method=${method}, ${parts.join(', ')}`);
+  }
+
   /**
    * Create new token for connector (delegates to shared or user client)
    */
   public async create(options: CreateOptions): Promise<ConnectorToken | UserConnectorToken> {
+    const scope = options.profileUid ? 'personal' : 'shared';
+    this.log({ method: 'create', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.create(options as Parameters<typeof this.userClient.create>[0]);
     }
@@ -82,6 +101,7 @@ export class ConnectorTokenClient {
    */
   public async update(options: UpdateOptions): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
+    this.log({ method: 'update', scope, fields: { id: actualId } });
     if (scope === 'personal') {
       return this.userClient.update({ ...options, id: actualId });
     }
@@ -108,6 +128,8 @@ export class ConnectorTokenClient {
     hasErrors: boolean;
     connectorToken: ConnectorToken | UserConnectorToken | null;
   }> {
+    const scope = options.profileUid ? 'personal' : 'shared';
+    this.log({ method: 'get', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.get(options as Parameters<typeof this.userClient.get>[0]);
     }
@@ -124,6 +146,11 @@ export class ConnectorTokenClient {
     hasErrors: boolean;
     connectorToken: UserConnectorOAuthToken | null;
   }> {
+    this.log({
+      method: 'getOAuthPersonalToken',
+      scope: 'personal',
+      fields: { connectorId: options.connectorId },
+    });
     return this.userClient.getOAuthPersonalToken(options);
   }
 
@@ -136,6 +163,12 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }) {
+    const scope = options.profileUid ? 'personal' : 'shared';
+    this.log({
+      method: 'deleteConnectorTokens',
+      scope,
+      fields: { connectorId: options.connectorId },
+    });
     if (options.profileUid) {
       return this.userClient.deleteConnectorTokens(
         options as Parameters<typeof this.userClient.deleteConnectorTokens>[0]
@@ -147,6 +180,8 @@ export class ConnectorTokenClient {
   }
 
   public async updateOrReplace(options: UpdateOrReplaceOptions) {
+    const scope = options.profileUid ? 'personal' : 'shared';
+    this.log({ method: 'updateOrReplace', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.updateOrReplace(
         options as Parameters<typeof this.userClient.updateOrReplace>[0]
@@ -170,6 +205,12 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<ConnectorToken | UserConnectorToken> {
+    const scope = options.profileUid ? 'personal' : 'shared';
+    this.log({
+      method: 'createWithRefreshToken',
+      scope,
+      fields: { connectorId: options.connectorId },
+    });
     if (options.profileUid) {
       return this.userClient.createWithRefreshToken(
         options as Parameters<typeof this.userClient.createWithRefreshToken>[0]
@@ -193,6 +234,7 @@ export class ConnectorTokenClient {
     credentialType?: string;
   }): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
+    this.log({ method: 'updateWithRefreshToken', scope, fields: { id: actualId } });
     if (scope === 'personal') {
       return this.userClient.updateWithRefreshToken({ ...options, id: actualId });
     }

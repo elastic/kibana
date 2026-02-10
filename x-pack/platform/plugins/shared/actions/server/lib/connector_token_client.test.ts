@@ -13,7 +13,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const rootLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = {
+  ...rootLogger,
+  get: () => rootLogger,
+} as unknown as Logger;
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
   return {
