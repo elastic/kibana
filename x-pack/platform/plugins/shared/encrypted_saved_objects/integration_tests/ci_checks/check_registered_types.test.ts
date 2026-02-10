@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 19 as const;
+export const ESO_TYPES_COUNT = 20 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -70,13 +70,14 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert": "d961ff113e2b7995a49483b8937fcbdccfe425ac82b59a050931cd620b043ed1",
         "api_key_pending_invalidation": "ce3641d95c31bcc2880a294f0123060dcc5026f0a493befdda74924a7ea5c4a0",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
-        "connector_token": "16ca2154c13c5ee3d3a45b55d4ea6cd33aeaceaef3dc229b002d25470bfc9b3b",
+        "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
         "entity-discovery-api-key": "cd3b5230a513d2d3503583223e48362fbbbc7812aa4710579a62acfa5bbc30e6",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "23eb3cf789fe13b4899215c6f919705b8a44b89f8feba7181e1f5db3c7699d40",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
+        "oauth_state": "a7f039d0d00612a4228213d3983c86245c09ef7683efed147ea0b3511cfa2f66",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
         "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
@@ -125,6 +126,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|1",
         "api_key_pending_invalidation|1",
         "cloud-connect-api-key|1",
+        "connector_token|2",
         "connector_token|1",
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
@@ -138,6 +140,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|3",
         "ingest-outputs|2",
         "ingest-outputs|1",
+        "oauth_state|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
         "task|7",

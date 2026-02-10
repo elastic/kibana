@@ -217,3 +217,20 @@ export const AllIntegrationsResponseIntegration = z.object({
    */
   status: TaskStatus,
 });
+
+/**
+ * The LangSmith options object.
+ */
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z
+  .object({
+    /**
+     * The project name.
+     */
+    projectName: z.string(),
+    /**
+     * The apiKey to use for tracing.
+     */
+    apiKey: z.string(),
+  })
+  .strict();
