@@ -436,3 +436,135 @@ describe('#adHocRunAuditEvent', () => {
     `);
   });
 });
+
+describe('new per-alert audit actions', () => {
+  test('SNOOZE_ALERT creates correct event', () => {
+    expect(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE_ALERT,
+        outcome: 'unknown',
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'RULE_ID', name: 'my_rule' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_snooze",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "RULE_ID",
+            "name": "my_rule",
+            "type": "alert",
+          },
+        },
+        "message": "User is snoozing alert of rule [id=RULE_ID] [name=my_rule]",
+      }
+    `);
+  });
+
+  test('UNSNOOZE_ALERT creates correct event', () => {
+    expect(
+      ruleAuditEvent({
+        action: RuleAuditAction.UNSNOOZE_ALERT,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'RULE_ID', name: 'my_rule' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_unsnooze",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "RULE_ID",
+            "name": "my_rule",
+            "type": "alert",
+          },
+        },
+        "message": "User has auto-unsnoozed alert of rule [id=RULE_ID] [name=my_rule]",
+      }
+    `);
+  });
+
+  test('ACKNOWLEDGE_ALERT creates correct event', () => {
+    expect(
+      ruleAuditEvent({
+        action: RuleAuditAction.ACKNOWLEDGE_ALERT,
+        outcome: 'unknown',
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'RULE_ID', name: 'my_rule' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_acknowledge",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "RULE_ID",
+            "name": "my_rule",
+            "type": "alert",
+          },
+        },
+        "message": "User is acknowledging alert of rule [id=RULE_ID] [name=my_rule]",
+      }
+    `);
+  });
+
+  test('SNOOZE_ALERT failure creates correct event', () => {
+    expect(
+      ruleAuditEvent({
+        action: RuleAuditAction.SNOOZE_ALERT,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'RULE_ID', name: 'my_rule' },
+        error: new Error('Unauthorized'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "Unauthorized",
+        },
+        "event": Object {
+          "action": "rule_alert_snooze",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "RULE_ID",
+            "name": "my_rule",
+            "type": "alert",
+          },
+        },
+        "message": "Failed attempt to snooze alert of rule [id=RULE_ID] [name=my_rule]",
+      }
+    `);
+  });
+});

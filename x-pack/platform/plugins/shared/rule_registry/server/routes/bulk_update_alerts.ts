@@ -81,6 +81,24 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
           });
         }
 
+        // Emit audit event for workflow status changes (ACK, close, reopen)
+        const coreContext = await context.core;
+        const auditLogger = coreContext.audit;
+        if (auditLogger) {
+          const alertDesc = ids
+            ? `alerts [ids=${ids.join(',')}]`
+            : 'alerts matching query';
+          auditLogger.log({
+            message: `User has updated workflow status to '${status}' for ${alertDesc} in index ${index}`,
+            event: {
+              action: 'alert_update',
+              category: ['database'],
+              type: ['change'],
+              outcome: 'success',
+            },
+          });
+        }
+
         return response.ok({ body: { success: true, ...updatedAlert } });
       } catch (exc) {
         const err = transformError(exc);
