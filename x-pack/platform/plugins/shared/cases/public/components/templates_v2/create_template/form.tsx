@@ -6,21 +6,24 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useConfigureCasesNavigation } from '../../../common/navigation';
 import { useCreateTemplate } from '../hooks/use_create_template';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../create/utils';
 
+import * as i18n from '../translations';
+
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      height: '75vh',
+      height: '50vh',
       width: '100%',
       padding: euiTheme.size.xs,
     }),
@@ -38,6 +41,7 @@ export const CreateTemplateForm = () => {
   const { owner } = useCasesContext();
   const availableOwners = useAvailableCasesOwners();
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
+  const { navigateToConfigureCases } = useConfigureCasesNavigation();
 
   const onSubmit = useCallback(
     async (data: { name: string; owner: string; definition: string }) => {
@@ -47,15 +51,14 @@ export const CreateTemplateForm = () => {
           definition: data.definition,
         },
       });
+      // TODO: navigate to all templates page
+      navigateToConfigureCases();
     },
-    [defaultOwnerValue, mutateAsync]
+    [defaultOwnerValue, mutateAsync, navigateToConfigureCases]
   );
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      css={{ width: '100%', height: '70vh', overflowY: 'scroll' }}
-    >
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div css={styles.editorContainer(euiTheme)}>
         <Controller
           control={control}
@@ -75,8 +78,12 @@ export const CreateTemplateForm = () => {
         />
       </div>
 
+      <EuiSpacer />
+
       <div>
-        <EuiButton type="submit" isLoading={isLoading}>{`Save`}</EuiButton>
+        <EuiButton type="submit" isLoading={isLoading}>
+          {i18n.SAVE_TEMPLATE}
+        </EuiButton>
       </div>
     </form>
   );

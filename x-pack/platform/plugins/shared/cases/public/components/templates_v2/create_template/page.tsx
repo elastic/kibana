@@ -22,10 +22,10 @@ import { CreateTemplatePreview } from './preview';
 import { exampleTemplateDefinition } from '../field_types/constants';
 import { GENERAL_CASES_OWNER } from '../../../../common/constants';
 
+import * as i18n from '../translations';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}
-
-// TODO: introduce backend service and a hook to store the templates
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const form = useForm({
@@ -46,13 +46,13 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   return (
     <FormProvider {...form}>
       <EuiPageSection restrictWidth={false}>
-        <HeaderPage data-test-subj="case-configure-title" title={'Add template'} />
+        <HeaderPage data-test-subj="case-configure-title" title={i18n.ADD_TEMPLATE_TITLE} />
         <EuiPageBody>
           <EuiSpacer size="xs" />
           <EuiFlexGroup>
             <EuiFlexItem grow={3}>
               <EuiText>
-                <h3>{`YAML Editor`}</h3>
+                <h3>{i18n.YAML_EDITOR_TITLE}</h3>
               </EuiText>
               <EuiSpacer size="m" />
               <CreateTemplateForm />
@@ -60,7 +60,7 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiText>
-                <h3>{`Interactive editor / Preview`}</h3>
+                <h3>{i18n.INTERACTIVE_EDITOR_TITLE}</h3>
               </EuiText>
               <EuiSpacer size="m" />
               <CreateTemplatePreview />
