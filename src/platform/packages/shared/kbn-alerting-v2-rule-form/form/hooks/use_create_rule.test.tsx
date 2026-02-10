@@ -40,6 +40,7 @@ const createMockNotifications = () => ({
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
     name: 'Test Rule',
+    description: 'Test Description',
     tags: ['tag1', 'tag2'],
     schedule: { custom: '5m' },
     enabled: true,
@@ -177,6 +178,7 @@ describe('useCreateRule', () => {
 
     const formData: FormValues = {
       name: 'Complex Rule',
+      description: 'Complex Rule Description',
       tags: ['production', 'critical'],
       schedule: { custom: '1m' },
       enabled: false,
@@ -194,6 +196,7 @@ describe('useCreateRule', () => {
       const callBody = JSON.parse(http.post.mock.calls[0][1].body);
       expect(callBody).toEqual({
         name: 'Complex Rule',
+        description: 'Complex Rule Description',
         tags: ['production', 'critical'],
         schedule: { custom: '1m' },
         enabled: false,

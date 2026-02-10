@@ -16,7 +16,7 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
@@ -40,11 +40,6 @@ export class CreateRuleRoute implements RouteHandler {
     request: {
       body: buildRouteValidationWithZod(createRuleDataSchema),
       params: createRuleParamsSchema,
-    },
-    response: {
-      200: {
-        body: buildRouteValidationWithZod(ruleResponseSchema),
-      },
     },
   } as const;
 

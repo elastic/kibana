@@ -23,4 +23,4 @@ export const ESQLRuleFormFlyout: React.FC<ESQLRuleFormFlyoutProps> = (props) => 
   </Suspense>
 );
 
-export * from '../form/types';
+export type * from '../form/types';

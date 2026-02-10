@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -45,14 +45,18 @@ export function CreateESQLRuleFlyout({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
+  // Track the initial pathname to detect actual navigation (not just query param changes)
+  const initialPathnameRef = useRef(history.location.pathname);
+
+  // Create the app state observable once and memoize it
+  const appState$ = useMemo(() => stateContainer.createAppStateObservable(), [stateContainer]);
+
   useEffect(() => {
-    const querySubscription = createAppStateObservable(stateContainer.appState$).subscribe(
-      (changes) => {
-        if (changes.query) {
-          setQuery((changes.query as AggregateQuery)?.esql || '');
-        }
+    const querySubscription = createAppStateObservable(appState$).subscribe((changes) => {
+      if (changes.query) {
+        setQuery((changes.query as AggregateQuery)?.esql || '');
       }
-    );
+    });
     const queryErrorSubscription = createDataStateObservable(
       stateContainer.dataState.data$.main$
     ).subscribe((changes) => {
@@ -60,8 +64,11 @@ export function CreateESQLRuleFlyout({
     });
 
     // Listen for route changes to close the flyout
-    const unlisten = history.listen(() => {
-      onCloseRef.current();
+    // Only close on actual navigation (pathname change), not query param changes
+    const unlisten = history.listen((location) => {
+      if (location.pathname !== initialPathnameRef.current) {
+        onCloseRef.current();
+      }
     });
 
     return () => {
@@ -69,7 +76,7 @@ export function CreateESQLRuleFlyout({
       queryErrorSubscription.unsubscribe();
       unlisten();
     };
-  }, [stateContainer.appState$, stateContainer.dataState.data$.main$, history]);
+  }, [appState$, stateContainer.dataState.data$.main$, history]);
 
   return (
     <ESQLRuleFormFlyout
