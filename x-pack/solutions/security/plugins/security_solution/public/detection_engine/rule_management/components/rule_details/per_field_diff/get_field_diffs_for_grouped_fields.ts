@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
@@ -20,6 +19,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
+import { stringifyWithExpandedEmpties } from '../three_way_diff/comparison_side/utils';
 
 export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (!fieldValue) {
@@ -29,7 +29,7 @@ export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (typeof fieldValue === 'string') {
     return fieldValue;
   }
-  return stringify(fieldValue, { space: 2 });
+  return stringifyWithExpandedEmpties(fieldValue);
 };
 
 export const getFieldDiffsForDataSource = (
