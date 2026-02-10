@@ -116,7 +116,11 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
               {showCancelButton && execution ? (
-                <CancelExecutionButton executionId={execution.id} />
+                <CancelExecutionButton
+                  executionId={execution.id}
+                  workflowId={execution.workflowId}
+                  startedAt={execution.startedAt}
+                />
               ) : (
                 <>
                   {showDoneButton && (

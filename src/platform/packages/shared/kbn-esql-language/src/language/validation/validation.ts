@@ -135,12 +135,17 @@ async function validateAst(
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
-      currentCommand.name === 'join'
+      currentCommand.name === 'join' || currentCommand.name === 'promql'
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
+    const queryForColumns =
+      currentCommand.name === 'promql'
+        ? queryString.slice(0, currentCommand.location.max + 1)
+        : queryString;
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
