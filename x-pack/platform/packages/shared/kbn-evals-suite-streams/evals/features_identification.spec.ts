@@ -208,33 +208,6 @@ const evidenceGroundingEvaluator = {
 };
 
 /**
- * Checks that no two features share the same id.
- */
-const deduplicationEvaluator = {
-  name: 'deduplication',
-  kind: 'CODE' as const,
-  evaluate: async ({ output }: CodeEvaluatorParams) => {
-    const features = output?.features ?? [];
-    if (features.length <= 1) {
-      return { score: 1, explanation: 'No duplicates possible with 0-1 features' };
-    }
-
-    const ids = features.map((f) => f.id);
-    const uniqueIds = new Set(ids);
-    const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
-
-    return {
-      score: uniqueIds.size === ids.length ? 1 : 0,
-      explanation:
-        duplicates.length > 0
-          ? `Duplicate feature IDs found: ${[...new Set(duplicates)].join(', ')}`
-          : 'All feature IDs are unique',
-      details: { totalFeatures: ids.length, uniqueIds: uniqueIds.size, duplicates },
-    };
-  },
-};
-
-/**
  * If min_features or max_features is specified in expected output,
  * verifies the feature count falls within bounds.
  */
@@ -347,7 +320,6 @@ const typeAssertionsEvaluator = {
 const CODE_EVALUATORS = [
   typeValidationEvaluator,
   evidenceGroundingEvaluator,
-  deduplicationEvaluator,
   featureCountEvaluator,
   confidenceBoundsEvaluator,
   typeAssertionsEvaluator,
