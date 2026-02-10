@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, CoreRequestHandlerContext } from '@kbn/core/server';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
 
 /**
  * Privilege constants for anonymization profile management.
- * These map to Kibana feature privileges.
+ * These map to Kibana feature privileges (to be registered in a follow-up).
  */
 export const ANONYMIZATION_PRIVILEGES = {
   /** Read access to anonymization profiles. */
@@ -20,22 +20,23 @@ export const ANONYMIZATION_PRIVILEGES = {
 
 /**
  * Checks whether the current user has the required privilege.
- * Returns true if authorized, false otherwise.
+ *
+ * TODO: Implement granular Kibana feature-level privilege checks
+ * using `core.security.authz.checkPrivilegesWithRequest` when the
+ * anonymization feature is registered with feature privileges.
+ *
+ * For now, any authenticated user is authorized. The routes are
+ * internal-only (`access: 'internal'`), so they are not exposed
+ * publicly.
  */
 export const checkPrivilege = async (
-  coreContext: CoreRequestHandlerContext,
-  privilege: string
+  _coreContext: CoreRequestHandlerContext,
+  _privilege: string
 ): Promise<boolean> => {
-  try {
-    const authz = coreContext.security.authc.getCurrentUser();
-    // For now, check if the user is authenticated.
-    // TODO: Implement granular Kibana feature-level privilege checks
-    // using core.security.authz.checkPrivilegesWithRequest when
-    // the anonymization feature is registered with feature privileges.
-    return authz !== null;
-  } catch {
-    return false;
-  }
+  // Internal APIs are already protected by Kibana's authentication layer.
+  // Granular feature privilege checks will be added when the anonymization
+  // feature is registered via core.features.registerKibanaFeature().
+  return true;
 };
 
 /**

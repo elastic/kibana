@@ -14,5 +14,8 @@ export const ANONYMIZATION_API_VERSION = '1';
 /** Base path for all anonymization profile APIs. */
 export const ANONYMIZATION_PROFILES_API_BASE = '/internal/anonymization/profiles';
 
-/** System index name for anonymization profiles. */
-export const ANONYMIZATION_PROFILES_INDEX = '.anonymization-profiles';
+/**
+ * System index name for anonymization profiles.
+ * Uses `.kibana-` prefix so that `kibana_system` role has access.
+ */
+export const ANONYMIZATION_PROFILES_INDEX = '.kibana-anonymization-profiles';
