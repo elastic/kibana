@@ -8,17 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 
-export const notionDataSource: DataSource = {
-  id: 'notion',
-  name: 'Notion',
-  description: i18n.translate('xpack.dataSources.notion.description', {
-    defaultMessage: 'Connect to Notion to pull data from your workspace.',
+export const googleDriveDataSource: DataSource = {
+  id: 'google_drive',
+  name: 'Google Drive',
+  description: i18n.translate('xpack.dataSources.googleDrive.description', {
+    defaultMessage: 'Connect to Google Drive to access files and folders.',
   }),
-
-  iconType: '.notion',
+  iconType: '.google_drive',
 
   stackConnector: {
-    type: '.notion',
+    type: '.google_drive',
     config: {},
   },
 
