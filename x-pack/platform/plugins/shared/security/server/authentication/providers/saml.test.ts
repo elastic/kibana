@@ -1758,10 +1758,9 @@ describe('SAMLAuthenticationProvider', () => {
         authentication: mockUser,
         in_response_to: mockSAMLSet1.requestId,
       });
-      mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
-        type: 'uiamAccessToken',
-        accessToken: 'essu_dev_some-token',
-        sharedSecret: 'some-secret',
+      mockOptions.uiam?.getClientAuthentication.mockReturnValue({
+        scheme: 'SharedSecret',
+        value: 'some-secret',
       });
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1789,7 +1788,7 @@ describe('SAMLAuthenticationProvider', () => {
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_some-token',
-              sharedSecret: 'some-secret',
+              clientAuthentication: { scheme: 'SharedSecret', value: 'some-secret' },
             },
             state: {
               accessToken: 'essu_dev_some-token',
@@ -1800,8 +1799,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         );
 
-        expect(mockOptions.uiam?.getUserProfileGrant).toHaveBeenCalledTimes(1);
-        expect(mockOptions.uiam?.getUserProfileGrant).toHaveBeenCalledWith('essu_dev_some-token');
+        expect(mockOptions.uiam?.getClientAuthentication).toHaveBeenCalledTimes(1);
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/authenticate',
@@ -1918,19 +1916,18 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken: 'essu_dev_new-refresh-token',
         });
 
-        mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
-          accessToken: 'essu_dev_new-access-token',
-          sharedSecret: 'some-secret',
-          type: 'uiamAccessToken',
+        mockOptions.uiam?.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'some-secret',
         });
 
         await expect(provider.authenticate(request, state)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
             authHeaders: { authorization: 'Bearer essu_dev_new-access-token' },
             userProfileGrant: {
-              accessToken: 'essu_dev_new-access-token',
-              sharedSecret: 'some-secret',
               type: 'uiamAccessToken',
+              accessToken: 'essu_dev_new-access-token',
+              clientAuthentication: { scheme: 'SharedSecret', value: 'some-secret' },
             },
             state: {
               accessToken: 'essu_dev_new-access-token',
@@ -2030,7 +2027,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         );
 
-        expect(mockOptions.uiam?.getUserProfileGrant).not.toHaveBeenCalled();
+        expect(mockOptions.uiam?.getClientAuthentication).not.toHaveBeenCalled();
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
           method: 'POST',
           path: '/_security/saml/authenticate',
