@@ -10,8 +10,9 @@
 import type { Observable } from 'rxjs';
 import type { MaybePromise } from '@kbn/utility-types';
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
-import type { PublishesUnsavedChanges, StateComparators } from '../../..';
-import { areComparatorsEqual, getTitle } from '../../..';
+import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
+import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
+import { getTitle } from '../../titles/publishes_title';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 const UNSAVED_CHANGES_DEBOUNCE = 100;
