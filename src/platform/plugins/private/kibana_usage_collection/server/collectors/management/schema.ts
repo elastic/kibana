@@ -722,6 +722,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Content packs in Streams',
     },
   },
+  'observability:streamsEnableQueryStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Query streams in Streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
