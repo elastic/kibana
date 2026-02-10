@@ -6,13 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand, ESQLMessage } from '../../../types';
-import { Walker } from '../../../ast/walker';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLMessage,
+} from '../../../toolkit/types';
+import { Walker } from '../../../toolkit/ast/walker';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { esqlCommandRegistry } from '..';
 import { errors } from '../../definitions/utils';
-import { isSubQuery } from '../../../ast/is';
+import { isSubQuery } from '../../../toolkit/ast/is';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;

@@ -13,8 +13,8 @@ import type {
   ESQLAstAllCommands,
   ESQLAstChangePointCommand,
   ESQLMessage,
-} from '../../../types';
-import { isColumn, isOptionNode } from '../../../ast/is';
+} from '../../../toolkit/types';
+import { isColumn, isOptionNode } from '../../../toolkit/ast/is';
 import type { SupportedDataType } from '../../definitions/types';
 import { isNumericType } from '../../definitions/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';

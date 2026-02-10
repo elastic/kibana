@@ -8,10 +8,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLColumn, ESQLIdentifier } from '../../../types';
+import type { ESQLColumn, ESQLIdentifier } from '../../../toolkit/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
-import type { ESQLAstItem } from '../../../types';
+import type { ESQLAstItem } from '../../../toolkit/types';
 import type { SupportedDataType } from '../types';
 
 export const techPreviewLabel = i18n.translate(

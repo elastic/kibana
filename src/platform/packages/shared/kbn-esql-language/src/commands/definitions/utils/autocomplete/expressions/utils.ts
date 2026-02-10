@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '../../../../../types';
+import type { ESQLFunction } from '../../../../../toolkit/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';

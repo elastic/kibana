@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within, Walker } from '../../ast';
-import type { ESQLAstBaseItem, ESQLFunction } from '../../types';
-import type { PromQLFunction } from '../../promql/types';
+import { within, Walker } from '../../toolkit/ast';
+import type { ESQLAstBaseItem, ESQLFunction } from '../../toolkit/types';
+import type { PromQLFunction } from '../../toolkit/embedded_languages/promql/types';
 import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
 import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
 

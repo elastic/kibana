@@ -12,8 +12,8 @@ import type {
   ESQLMessage,
   ESQLCommandOption,
   ESQLSource,
-} from '../../../types';
-import { isColumn, isOptionNode, isSource } from '../../../ast/is';
+} from '../../../toolkit/types';
+import { isColumn, isOptionNode, isSource } from '../../../toolkit/ast/is';
 import type { ICommandContext } from '../types';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';

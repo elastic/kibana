@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../definitions/constants';
-import type { ESQLAstAllCommands, ESQLAstField } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstField } from '../../../toolkit/types';
 import type { ICommandCallbacks } from '../types';
 import { type ICommandContext, type ISuggestionItem } from '../types';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';

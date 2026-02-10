@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSingleAstItem } from '../../../../types';
+import type { ESQLMessage, ESQLSingleAstItem } from '../../../../toolkit/types';
 import type { SupportedDataType } from '../../..';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
-import { isMap } from '../../../../ast/is';
+import { isMap } from '../../../../toolkit/ast/is';
 import { parseMapParams } from '../maps';
 
 // the setting 'approximation' uses 'map_param' as a type,

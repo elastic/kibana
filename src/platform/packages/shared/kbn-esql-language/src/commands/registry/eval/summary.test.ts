@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { summary } from './summary';
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 
 describe('EVAL > summary', () => {
   it('identifies user-defined columns from EVAL command', async () => {

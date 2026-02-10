@@ -8,8 +8,8 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import { type ESQLAstCompletionCommand, type ESQLCommand } from '../../../types';
+import { LeafPrinter } from '../../../toolkit/pretty_print/leaf_printer';
+import { type ESQLAstCompletionCommand, type ESQLCommand } from '../../../toolkit/types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 
 export const columnsAfter = (

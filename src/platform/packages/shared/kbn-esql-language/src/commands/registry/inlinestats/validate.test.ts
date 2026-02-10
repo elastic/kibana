@@ -8,7 +8,7 @@
  */
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from '../stats/validate';
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { getNoValidCallSignatureError } from '../../definitions/utils/validation/utils';
 

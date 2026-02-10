@@ -27,7 +27,7 @@ import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,

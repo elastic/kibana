@@ -8,7 +8,7 @@
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
 import { getMessageFromId } from '../../definitions/utils/errors';
-import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../toolkit/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 

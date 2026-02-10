@@ -8,7 +8,7 @@
  */
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../toolkit/types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
@@ -19,7 +19,7 @@ import {
 } from '../../definitions/utils/promql';
 import { getFunctionParamIndexAtCursor } from './utils';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../shared/sorting';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import {
   ESQL_NUMBER_TYPES,
   ESQL_STRING_TYPES,

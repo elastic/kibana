@@ -11,7 +11,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isEqual, uniqWith } from 'lodash';
 import type { ParameterHint } from '../../..';
 import { walk } from '../../..';
-import type { ESQLAstAllCommands } from '../../types';
+import type { ESQLAstAllCommands } from '../../toolkit/types';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { parametersFromHintsResolvers } from '../../commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '../../commands/registry/types';

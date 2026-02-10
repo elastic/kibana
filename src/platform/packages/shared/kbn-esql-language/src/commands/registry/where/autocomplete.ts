@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../toolkit/types';
 import { pipeCompleteItem } from '../complete_items';
 import { suggestForExpression } from '../../definitions/utils';
 import type { ICommandCallbacks } from '../types';

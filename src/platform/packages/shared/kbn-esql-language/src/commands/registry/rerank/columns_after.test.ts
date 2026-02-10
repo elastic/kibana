@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { cmd } from '../../../composer/synth';
+import { cmd } from '../../../toolkit/composer/synth';
 import { columnsAfter } from './columns_after';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
-import type { ESQLAstRerankCommand } from '../../../types';
+import type { ESQLAstRerankCommand } from '../../../toolkit/types';
 
 describe('RERANK columnsAfter', () => {
   const previousColumns: ESQLColumnData[] = [

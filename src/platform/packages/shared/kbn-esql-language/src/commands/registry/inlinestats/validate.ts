@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLMessage, ESQLAst } from '../../../types';
-import { Walker } from '../../../ast/walker';
+import type { ESQLAstAllCommands, ESQLMessage, ESQLAst } from '../../../toolkit/types';
+import { Walker } from '../../../toolkit/ast/walker';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { errors } from '../../definitions/utils';
-import { isSubQuery } from '../../../ast/is';
+import { isSubQuery } from '../../../toolkit/ast/is';
 
 export const validate = (
   command: ESQLAstAllCommands,

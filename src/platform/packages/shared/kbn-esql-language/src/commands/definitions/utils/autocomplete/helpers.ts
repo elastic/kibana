@@ -14,7 +14,7 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isLiteral } from '../../../../ast/is';
+import { isLiteral } from '../../../../toolkit/ast/is';
 import type {
   GetColumnsByTypeFn,
   ICommandCallbacks,
@@ -22,13 +22,13 @@ import type {
   ISuggestionItem,
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
-import type { ESQLAstItem, ESQLFunction } from '../../../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../../../toolkit/types';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 

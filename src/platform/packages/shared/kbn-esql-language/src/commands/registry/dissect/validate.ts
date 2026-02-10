@@ -8,14 +8,14 @@
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
 import { getMessageFromId } from '../../definitions/utils/errors';
-import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/is';
+import { isLiteral, isInlineCast, isOptionNode } from '../../../toolkit/ast/is';
 import type {
   ESQLColumn,
   ESQLAstAllCommands,
   ESQLMessage,
   ESQLCommandOption,
   ESQLAst,
-} from '../../../types';
+} from '../../../toolkit/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 

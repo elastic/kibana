@@ -8,8 +8,8 @@
  */
 import { uniqBy } from 'lodash';
 import { esqlCommandRegistry } from '..';
-import { isSubQuery } from '../../../ast/is';
-import { type ESQLCommand, type ESQLAstQueryExpression } from '../../../types';
+import { isSubQuery } from '../../../toolkit/ast/is';
+import { type ESQLCommand, type ESQLAstQueryExpression } from '../../../toolkit/types';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
 import type { ESQLColumnData } from '../../registry/types';

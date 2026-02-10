@@ -14,14 +14,14 @@ import type {
   StatsCommandVisitorContext,
   InlineStatsCommandVisitorContext,
   SharedData,
-} from '../../../ast/visitor';
-import { Visitor } from '../../../ast/visitor';
-import { singleItems } from '../../../ast';
-import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../../../ast/is';
-import type { ESQLColumn, ESQLCommand } from '../../../types';
+} from '../../../toolkit/ast/visitor';
+import { Visitor } from '../../../toolkit/ast/visitor';
+import { singleItems } from '../../../toolkit/ast';
+import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../../../toolkit/ast/is';
+import type { ESQLColumn, ESQLCommand } from '../../../toolkit/types';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { getColumnName } from '../../definitions/utils/columns';
-import type { VisitorMethods } from '../../../ast/visitor/types';
+import type { VisitorMethods } from '../../../toolkit/ast/visitor/types';
 
 interface SummaryData extends SharedData {
   newColumns: string[];

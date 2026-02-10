@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../types';
+import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '../../../toolkit/types';
 import {
   isBinaryExpression,
   isIdentifier,
@@ -16,7 +16,7 @@ import {
   withAutoSuggest,
 } from '../../../..';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { EsqlSettingNames, settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {

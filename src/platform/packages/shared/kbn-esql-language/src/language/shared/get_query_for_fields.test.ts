@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../../parser';
-import { BasicPrettyPrinter } from '../../pretty_print';
+import { parse } from '../../toolkit/parser';
+import { BasicPrettyPrinter } from '../../toolkit/pretty_print';
 import { getQueryForFields } from './get_query_for_fields';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 

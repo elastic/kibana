@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../toolkit/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem } from '../complete_items';

@@ -21,7 +21,7 @@ import {
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../types';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../toolkit/types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';

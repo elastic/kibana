@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import { type ESQLAstChangePointCommand, type ESQLCommand } from '../../../types';
+import { LeafPrinter } from '../../../toolkit/pretty_print/leaf_printer';
+import { type ESQLAstChangePointCommand, type ESQLCommand } from '../../../toolkit/types';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (

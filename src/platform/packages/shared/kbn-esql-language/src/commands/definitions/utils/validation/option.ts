@@ -11,9 +11,9 @@ import type {
   ESQLAstAllCommands,
   ESQLCommandOption,
   ESQLMessage,
-} from '../../../../types';
+} from '../../../../toolkit/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
-import { isColumn, isFunctionExpression } from '../../../../ast/is';
+import { isColumn, isFunctionExpression } from '../../../../toolkit/ast/is';
 import { validateColumnForCommand } from './column';
 import { validateFunction } from './function';
 

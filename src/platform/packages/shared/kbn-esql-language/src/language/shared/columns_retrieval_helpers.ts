@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../toolkit/types';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import type { ESQLColumnData, GetColumnsByTypeFn } from '../../commands/registry/types';
 import { buildFieldsDefinitionsWithMetadata } from '../../commands/definitions/utils';

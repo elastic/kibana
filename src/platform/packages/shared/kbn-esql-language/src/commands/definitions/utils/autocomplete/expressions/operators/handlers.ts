@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isList } from '../../../../../../ast/is';
+import { isColumn, isList } from '../../../../../../toolkit/ast/is';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   listCompleteItem,
@@ -15,7 +15,7 @@ import {
   likePatternItems,
   rlikePatternItems,
 } from '../../../../../registry/complete_items';
-import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '../../../../../../types';
+import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '../../../../../../toolkit/types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
 import type { ExpressionContext } from '../types';
 import {

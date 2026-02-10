@@ -8,8 +8,8 @@
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLPolicy } from '../../commands/registry/types';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../types';
-import { Walker } from '../../ast';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../toolkit/types';
+import { Walker } from '../../toolkit/ast';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {

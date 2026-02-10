@@ -18,10 +18,10 @@ import {
 } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { EDITOR_MARKER } from '../../definitions/constants';
-import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../toolkit/ast/is';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../toolkit/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {

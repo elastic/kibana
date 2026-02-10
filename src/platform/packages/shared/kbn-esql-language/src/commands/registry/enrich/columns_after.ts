@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
-import type { ESQLCommandOption } from '../../../types';
-import { type ESQLCommand } from '../../../types';
+import { isAssignment, isColumn, isOptionNode } from '../../../toolkit/ast/is';
+import type { ESQLCommandOption } from '../../../toolkit/types';
+import { type ESQLCommand } from '../../../toolkit/types';
 import type { ESQLColumnData } from '../types';
 import type { IAdditionalFields } from '../registry';
 

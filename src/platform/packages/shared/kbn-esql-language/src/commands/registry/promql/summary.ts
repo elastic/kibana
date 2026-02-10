@@ -8,9 +8,9 @@
  */
 
 import type { ESQLCommandSummary } from '../..';
-import type { ESQLAstPromqlCommand, ESQLCommand } from '../../../types';
+import type { ESQLAstPromqlCommand, ESQLCommand } from '../../../toolkit/types';
 import { PromqlParamName } from './utils';
-import { isBinaryExpression, isIdentifier } from '../../../ast';
+import { isBinaryExpression, isIdentifier } from '../../../toolkit/ast';
 
 /** Returns true if PROMQL has the specified parameter */
 const hasParam = (command: ESQLAstPromqlCommand, paramName: PromqlParamName): boolean => {

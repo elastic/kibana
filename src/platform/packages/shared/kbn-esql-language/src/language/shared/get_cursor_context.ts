@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, within } from '../../ast';
+import { Walker, within } from '../../toolkit/ast';
 import { pipePrecedesCurrentWord } from '../../commands/definitions/utils';
 import { findAstPosition } from '../../commands/definitions/utils/ast';
-import type { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../toolkit/types';
 import { findSubquery } from './subqueries_helpers';
 
 /**

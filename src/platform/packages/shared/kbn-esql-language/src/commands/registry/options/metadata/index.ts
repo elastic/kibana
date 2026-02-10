@@ -8,13 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../../types';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../../toolkit/types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isColumn, isOptionNode } from '../../../../ast/is';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { isColumn, isOptionNode } from '../../../../toolkit/ast/is';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 
 export const METADATA_FIELDS = [
   '_version',

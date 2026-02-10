@@ -9,7 +9,7 @@
 
 import type { ISuggestionItem } from '../../../../../../registry/types';
 import type { ExpressionContext, PartialOperatorDetection } from '../../types';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../../../types';
+import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../../../toolkit/types';
 import { getFunctionDefinition } from '../../../../functions';
 import { createSyntheticListOperatorNode, createSyntheticLikeOperatorNode } from './utils';
 import { dispatchOperators } from '../dispatcher';

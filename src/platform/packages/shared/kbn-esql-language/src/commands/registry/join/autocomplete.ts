@@ -13,7 +13,7 @@ import {
   getLookupIndexCreateSuggestion,
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '../../../toolkit/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';

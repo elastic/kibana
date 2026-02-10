@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../types';
+import type { ESQLCommand } from '../../../toolkit/types';
 import type { ESQLCommandSummary } from '../types';
-import { isColumn, isFunctionExpression } from '../../../ast/is';
+import { isColumn, isFunctionExpression } from '../../../toolkit/ast/is';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const newColumns: string[] = [];

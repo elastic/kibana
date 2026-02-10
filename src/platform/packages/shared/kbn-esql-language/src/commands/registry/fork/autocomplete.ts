@@ -12,7 +12,7 @@ import type {
   ESQLAstAllCommands,
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
-} from '../../../types';
+} from '../../../toolkit/types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../complete_items';
 import { pipePrecedesCurrentWord } from '../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../types';

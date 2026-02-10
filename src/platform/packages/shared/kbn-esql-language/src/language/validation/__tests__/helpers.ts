@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { EditorError, ESQLMessage } from '../../../types';
+import type { EditorError, ESQLMessage } from '../../../toolkit/types';
 import { getCallbackMocks } from '../../../__tests__/language/helpers';
 import { validateQuery } from '../validation';
 

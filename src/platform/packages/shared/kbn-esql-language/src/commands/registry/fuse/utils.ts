@@ -15,7 +15,7 @@ import type {
   ESQLCommandOption,
   ESQLIdentifier,
   ESQLMessage,
-} from '../../../types';
+} from '../../../toolkit/types';
 
 export const FUSE_OPTIONS = ['score by', 'key by', 'group by', 'with'] as const;
 export type FuseOption = (typeof FUSE_OPTIONS)[number];

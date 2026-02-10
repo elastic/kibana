@@ -35,7 +35,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
 

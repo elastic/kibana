@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isSubQuery } from '../../ast';
-import type { ESQLAstForkCommand, ESQLAstHeaderCommand, ESQLCommand } from '../../types';
+import { Builder, isSubQuery } from '../../toolkit/ast';
+import type { ESQLAstForkCommand, ESQLAstHeaderCommand, ESQLCommand } from '../../toolkit/types';
 import { expandEvals } from '../shared/expand_evals';
 /**
  * Returns a list of subqueries to validate

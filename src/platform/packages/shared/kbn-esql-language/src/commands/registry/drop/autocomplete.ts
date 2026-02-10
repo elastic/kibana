@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../toolkit/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../toolkit/ast/is';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import {
   getLastNonWhitespaceChar,

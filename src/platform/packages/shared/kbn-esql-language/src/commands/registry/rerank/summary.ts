@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import type { ESQLCommand, ESQLAstRerankCommand } from '../../../types';
+import { LeafPrinter } from '../../../toolkit/pretty_print/leaf_printer';
+import type { ESQLCommand, ESQLAstRerankCommand } from '../../../toolkit/types';
 import type { ESQLCommandSummary } from '../types';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {

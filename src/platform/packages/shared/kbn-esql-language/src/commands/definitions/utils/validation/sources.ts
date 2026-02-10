@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSource } from '../../../../types';
+import type { ESQLMessage, ESQLSource } from '../../../../toolkit/types';
 import type { ICommandContext } from '../../../registry/types';
 import { sourceExists } from '../sources';
 import { errors } from '../errors';

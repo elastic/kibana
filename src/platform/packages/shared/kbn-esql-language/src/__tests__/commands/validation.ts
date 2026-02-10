@@ -8,8 +8,8 @@
  */
 
 import type { ESQLColumnData } from '../../commands/registry/types';
-import { Parser } from '../../parser';
-import type { ESQLCommand, ESQLMessage } from '../../types';
+import { Parser } from '../../toolkit/parser';
+import type { ESQLCommand, ESQLMessage } from '../../toolkit/types';
 import { mockContext } from './context_fixtures';
 /**
  * This function is used to assert that a query produces the expected errors.

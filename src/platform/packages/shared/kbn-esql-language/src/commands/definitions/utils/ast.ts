@@ -8,7 +8,7 @@
  */
 
 import { EDITOR_MARKER } from '../constants';
-import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../ast/is';
+import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../toolkit/ast/is';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
@@ -18,7 +18,7 @@ import type {
   ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
-} from '../../../types';
+} from '../../../toolkit/types';
 import { Walker } from '../../../..';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {

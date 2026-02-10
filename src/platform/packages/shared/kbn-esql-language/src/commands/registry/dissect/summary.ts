@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../types';
+import type { ESQLCommand } from '../../../toolkit/types';
 import type { ESQLCommandSummary } from '../types';
-import { walk } from '../../../ast/walker';
+import { walk } from '../../../toolkit/ast/walker';
 import { unquoteTemplate, extractDissectColumnNames } from './utils';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {

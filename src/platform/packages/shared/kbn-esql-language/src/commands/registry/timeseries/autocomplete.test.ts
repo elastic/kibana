@@ -11,7 +11,7 @@ import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '../../../toolkit/parser';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getRecommendedQueriesTemplatesFromExtensions } from '../options/recommended_queries';
 

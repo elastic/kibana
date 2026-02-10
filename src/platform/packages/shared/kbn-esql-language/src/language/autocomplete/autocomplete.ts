@@ -14,12 +14,12 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../types';
-import { EsqlQuery } from '../../composer';
+} from '../../toolkit/types';
+import { EsqlQuery } from '../../toolkit/composer';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../ast';
-import { parse } from '../../parser';
-import { SuggestionOrderingEngine } from '../../shared';
+import { isHeaderCommand, Walker } from '../../toolkit/ast';
+import { parse } from '../../toolkit/parser';
+import { SuggestionOrderingEngine } from './utils';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
