@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import type { GlobalSearchTestPluginStart } from './plugin';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export type GlobalSearchTestApi = GlobalSearchTestPluginStart;
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

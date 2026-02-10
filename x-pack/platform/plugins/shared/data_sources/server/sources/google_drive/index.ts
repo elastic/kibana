@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-import type { services } from './services';
-import type { pageObjects } from './page_objects';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export { googleDriveDataSource } from './data_type';
