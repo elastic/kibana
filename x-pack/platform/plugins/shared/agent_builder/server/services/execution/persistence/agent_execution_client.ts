@@ -119,9 +119,28 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   }
 
   async updateStatus(executionId: string, status: ExecutionStatus): Promise<void> {
-    await this.storage.getClient().update({
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [{ term: { _id: executionId } }],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0] as Document | undefined;
+    if (!hit?._source) {
+      throw new Error(`Execution ${executionId} not found`);
+    }
+
+    await this.storage.getClient().index({
       id: executionId,
-      doc: { status },
+      document: {
+        ...hit._source,
+        status,
+      },
     });
   }
 }
