@@ -270,7 +270,7 @@ function createNavTree({
         : [
             {
               link: 'agent_builder' as const,
-              icon: 'robot',
+              icon: 'productAgent',
             },
           ]),
       {

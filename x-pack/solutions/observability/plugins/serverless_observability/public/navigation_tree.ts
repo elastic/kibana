@@ -190,7 +190,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'agent_builder',
-          icon: 'robot',
+          icon: 'productAgent',
         },
         !showAiAssistant
       ),

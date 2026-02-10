@@ -83,7 +83,7 @@ export const getNavigationTreeDefinition = ({
               icon: 'productDashboard',
             },
             {
-              icon: 'robot',
+              icon: 'productAgent',
               link: 'agent_builder',
             },
             {

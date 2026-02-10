@@ -76,7 +76,7 @@ export function createNavigationTree({
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
-        icon: 'robot',
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
