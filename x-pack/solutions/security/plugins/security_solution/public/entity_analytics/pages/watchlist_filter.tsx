@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionOption } from '@elastic/eui';
 import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
@@ -38,6 +38,7 @@ type WatchlistOption = WatchlistGroupLabel | WatchlistItem;
 
 interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
+  defaultSelectedId?: string;
 }
 
 const WATCHLIST_QUERY_PARAM = 'watchlist_id';
@@ -67,7 +68,10 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
   { id: 'custom-3', label: 'Custom watchlist #3' },
 ];
 
-export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
+export const WatchlistFilter = ({
+  onChangeSelectedId,
+  defaultSelectedId,
+}: WatchlistFilterProps) => {
   // hook this up to real data
   const options = WATCHLIST_OPTIONS;
   const [selected, setSelected] = useState<WatchlistItem | null>(null);
@@ -85,21 +89,34 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     return value ?? undefined;
   }, [search]);
 
+  const getItemById = useCallback(
+    (id?: string) =>
+      options.find(
+        (option): option is WatchlistItem => !option.isGroupLabelOption && option.id === id
+      ) ?? null,
+    [options]
+  );
+
   const selectedFromUrl = useMemo(() => {
     if (!selectedIdFromUrl) {
       return null;
     }
-    return (
-      options.find(
-        (option): option is WatchlistItem =>
-          !option.isGroupLabelOption && option.id === selectedIdFromUrl
-      ) ?? null
-    );
-  }, [options, selectedIdFromUrl]);
+    return getItemById(selectedIdFromUrl);
+  }, [getItemById, selectedIdFromUrl]);
 
   useEffect(() => {
     setSelected(selectedFromUrl);
   }, [selectedFromUrl]);
+
+  useEffect(() => {
+    if (!selectedIdFromUrl && defaultSelectedId) {
+      const defaultSelection = getItemById(defaultSelectedId);
+      if (defaultSelection) {
+        setSelected(defaultSelection);
+        navigateToWatchlist(defaultSelectedId);
+      }
+    } 
+  }, [defaultSelectedId, getItemById, selectedIdFromUrl]);
 
   const navigateToWatchlist = useCallback(
     (watchlistId?: string) => {
@@ -117,7 +134,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
   );
 
   const onChangeComboBox = useCallback(
-    (nextOptions: WatchlistOption[]) => {
+    (nextOptions: EuiComboBoxOptionOption<WatchlistOption>[]) => {
       const newlySelected = nextOptions.find(
         (o) => o && !o.isGroupLabelOption
       ) as WatchlistItem | undefined;

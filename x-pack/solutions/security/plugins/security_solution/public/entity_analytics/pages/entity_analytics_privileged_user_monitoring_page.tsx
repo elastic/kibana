@@ -328,7 +328,9 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                     defaultMessage="Manage data sources"
                   />
                 </EuiButtonEmpty>,
-                ...(watchlistFilterFlag ? [<WatchlistFilter />] : []),
+                ...(watchlistFilterFlag
+                  ? [<WatchlistFilter defaultSelectedId="prebuilt-priv" />]
+                  : []),
               ]}
             />
             <EuiFlexGroup direction="column">
