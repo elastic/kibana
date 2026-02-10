@@ -170,6 +170,28 @@ async function createOpenAPIIndex({
   logger.info(`Index ${indexName} created successfully.`);
 }
 
+function removeEmptyTextFields(document: Record<string, any>): Record<string, any> {
+  const cleanedDoc = { ...document };
+
+  // List of text fields that should be removed if empty
+  const textFields = [
+    'description',
+    'summary',
+    'endpoint',
+    'description_text',
+    'summary_text',
+    'operationId',
+  ];
+
+  for (const field of textFields) {
+    if (cleanedDoc[field] === '' || cleanedDoc[field] === null || cleanedDoc[field] === undefined) {
+      delete cleanedDoc[field];
+    }
+  }
+
+  return cleanedDoc;
+}
+
 function transformDocumentsToIndexFormat(documents: Document[]): Array<Record<string, any>> {
   return documents.map((doc) => {
     const payload: Record<string, any> = {
@@ -191,7 +213,7 @@ function transformDocumentsToIndexFormat(documents: Document[]): Array<Record<st
     if (doc.method && doc.path) {
       payload.endpoint = `${doc.method.toUpperCase()} ${doc.path}`;
     }
-    return payload;
+    return removeEmptyTextFields(payload);
   });
 }
 

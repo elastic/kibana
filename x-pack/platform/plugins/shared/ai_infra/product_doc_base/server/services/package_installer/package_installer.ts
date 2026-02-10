@@ -6,14 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { readFile } from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   getArtifactName,
   getProductDocIndexName,
   getSecurityLabsArtifactName,
   getSecurityLabsIndexName,
-  getOpenApiSpecIndexName,
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
@@ -22,7 +20,6 @@ import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
-import type { OpenAPIV3 } from 'openapi-types';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
@@ -33,7 +30,7 @@ import {
   ensureDefaultElserDeployed,
   type ZipArchive,
   ensureInferenceDeployed,
-  ingestOpenApiSpec,
+  isLegacySemanticTextVersion,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -569,7 +566,7 @@ export class PackageInstaller {
   // OpenAPI Spec methods
 
   /**
-   * Install OpenAPI Spec content from the CDN.
+   * Install OpenAPI Spec content from the artifact repository.
    */
   async installOpenAPISpec({
     version,
@@ -579,76 +576,219 @@ export class PackageInstaller {
     inferenceId?: string;
   }): Promise<void> {
     const effectiveInferenceId = inferenceId || this.elserInferenceId;
+    const stackVersion = version || this.currentVersion;
 
     this.log.info(
-      `Starting OpenAPI Spec installation${
-        version ? ` for version [${version}]` : ''
-      } with inference ID [${effectiveInferenceId}]`
+      `Starting OpenAPI Spec installation for version [${stackVersion}] with inference ID [${effectiveInferenceId}]`
     );
 
-    // Uninstall existing OpenAPI Spec content first
-    // await this.uninstallOpenApiSpec({ inferenceId: effectiveInferenceId });
-
     let zipArchive: ZipArchive | undefined;
-    let selectedVersion: string | undefined;
     try {
       // Ensure ELSER is deployed
       await ensureDefaultElserDeployed({
         client: this.esClient,
       });
 
-      await this.productDocClient.setOpenapiSpecInstallationStarted({
-        productName: 'elasticsearch',
-        inferenceId: effectiveInferenceId,
-      });
+      // Build artifact name
+      const inferenceIdSuffix = isImpliedDefaultElserInferenceId(effectiveInferenceId)
+        ? ''
+        : `--${effectiveInferenceId}`;
+      const artifactFileName = `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
-      const url = 'https://www.elastic.co/docs/api/doc/elasticsearch.json';
-      const pathAtVolume = `${this.artifactsFolder}/elasticsearch.json`;
+      this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
+      const downloadedFullPath = await downloadToDisk(artifactUrl, artifactPath);
 
-      this.log.debug(`Downloading OpenAPI Spec from [${url}] to [${pathAtVolume}]`);
-      const downloadedFullPath = await downloadToDisk(url, pathAtVolume);
-      const openApiSpec: OpenAPIV3.Document = JSON.parse(
-        await readFile(downloadedFullPath, 'utf8')
-      );
+      zipArchive = await openZipArchive(downloadedFullPath);
+      validateArtifactArchive(zipArchive);
 
-      const indexName = getOpenApiSpecIndexName(effectiveInferenceId);
+      // Process each product (elasticsearch and kibana)
+      const products: Array<{
+        productName: 'elasticsearch' | 'kibana';
+        indexName: string;
+      }> = [
+        {
+          productName: DocumentationProduct.elasticsearch as 'elasticsearch',
+          indexName: '.kibana_ai_openapi_spec_elasticsearch',
+        },
+        {
+          productName: DocumentationProduct.kibana as 'kibana',
+          indexName: '.kibana_ai_openapi_spec_kibana',
+        },
+      ];
 
-      await ingestOpenApiSpec({
-        openApiSpec,
-        indexName,
-        esClient: this.esClient,
-        logger: this.log,
-      });
+      for (const { productName, indexName } of products) {
+        this.log.info(`Installing OpenAPI spec for ${productName}`);
 
-      await this.productDocClient.setOpenapiSpecInstallationSuccessful({
-        productName: 'elasticsearch',
-        indexName,
-        inferenceId: effectiveInferenceId,
-      });
+        await this.productDocClient.setOpenapiSpecInstallationStarted({
+          productName,
+          inferenceId: effectiveInferenceId,
+        });
 
-      this.log.info(`OpenAPI Spec installation successful for version [${selectedVersion}]`);
+        // Load manifest and mappings from product folder
+        const manifestPath = `${productName}/manifest.json`;
+        const mappingsPath = `${productName}/mappings.json`;
+
+        if (!zipArchive.hasEntry(manifestPath) || !zipArchive.hasEntry(mappingsPath)) {
+          throw new Error(
+            `Missing required files for ${productName}: ${manifestPath} or ${mappingsPath} not found in archive`
+          );
+        }
+
+        const [manifestBuffer, mappingsBuffer] = await Promise.all([
+          zipArchive.getEntryContent(manifestPath),
+          zipArchive.getEntryContent(mappingsPath),
+        ]);
+
+        const manifest = JSON.parse(manifestBuffer.toString('utf-8'));
+        const mappings = JSON.parse(mappingsBuffer.toString('utf-8'));
+
+        const manifestVersion = manifest.formatVersion;
+        const modifiedMappings = cloneDeep(mappings);
+        overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+        // Create index
+        await createIndex({
+          indexName,
+          mappings: modifiedMappings,
+          manifestVersion,
+          esClient: this.esClient,
+          log: this.log,
+        });
+
+        // Populate index from product's content folder
+        const contentPrefix = `${productName}/content/`;
+        const contentEntries = zipArchive
+          .getEntryPaths()
+          .filter(
+            (path) =>
+              path.startsWith(contentPrefix) && path.match(/^.*\/content\/content-[0-9]+\.ndjson$/)
+          );
+
+        if (contentEntries.length === 0) {
+          throw new Error(`No content files found for ${productName} in archive`);
+        }
+
+        for (const entryPath of contentEntries) {
+          this.log.debug(`Indexing content for entry ${entryPath}`);
+          const contentBuffer = await zipArchive.getEntryContent(entryPath);
+          await this.indexContentFile({
+            indexName,
+            esClient: this.esClient,
+            contentBuffer,
+            manifestVersion,
+            inferenceId: effectiveInferenceId,
+          });
+        }
+
+        await this.productDocClient.setOpenapiSpecInstallationSuccessful({
+          productName,
+          indexName,
+          inferenceId: effectiveInferenceId,
+        });
+
+        this.log.info(`OpenAPI Spec installation successful for ${productName}`);
+      }
+
+      this.log.info(`OpenAPI Spec installation successful for version [${stackVersion}]`);
     } catch (e) {
       let message = e.message;
       if (message.includes('End of central directory record signature not found.')) {
         message = i18n.translate(
           'aiInfra.productDocBase.packageInstaller.noOpenApiSpecArtifactAvailable',
           {
-            values: { inferenceId: effectiveInferenceId },
+            values: { inferenceId: effectiveInferenceId, version: stackVersion },
             defaultMessage:
-              'No OpenAPI Spec artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+              'No OpenAPI Spec artifact available for version [{version}] and Inference ID [{inferenceId}]. Please contact your administrator.',
           }
         );
       }
       this.log.error(`Error during OpenAPI Spec installation: ${message}`);
-      await this.productDocClient.setOpenapiSpecInstallationFailed({
-        productName: 'elasticsearch',
-        failureReason: message,
-        inferenceId: effectiveInferenceId,
-      });
+      // Mark both products as failed
+      for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
+        await this.productDocClient.setOpenapiSpecInstallationFailed({
+          productName: productName as 'elasticsearch' | 'kibana',
+          failureReason: message,
+          inferenceId: effectiveInferenceId,
+        });
+      }
       throw e;
     } finally {
       zipArchive?.close();
     }
+  }
+
+  private async indexContentFile({
+    indexName,
+    esClient,
+    contentBuffer,
+    manifestVersion,
+    inferenceId,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+    contentBuffer: Buffer;
+    manifestVersion: string;
+    inferenceId: string;
+  }): Promise<void> {
+    const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
+
+    const fileContent = contentBuffer.toString('utf-8');
+    const lines = fileContent.split('\n');
+
+    const documents = lines
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((line) => JSON.parse(line))
+      .map((doc) => this.rewriteInferenceId(doc, inferenceId, legacySemanticText));
+
+    const operations: Array<{ index: { _index: string } } | Record<string, any>> = [];
+    for (const document of documents) {
+      operations.push({ index: { _index: indexName } }, document);
+    }
+
+    const response = await esClient.bulk({
+      refresh: false,
+      operations,
+    });
+
+    if (response.errors) {
+      const error =
+        response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';
+      throw new Error(`Error indexing documents: ${JSON.stringify(error)}`);
+    }
+  }
+
+  private rewriteInferenceId(
+    document: Record<string, any>,
+    inferenceId: string,
+    legacySemanticText: boolean
+  ): Record<string, any> {
+    // Clone the document to avoid mutating the original
+    const clonedDoc = { ...document };
+
+    if (legacySemanticText) {
+      // For legacy semantic text, modify fields directly on the document
+      Object.values(clonedDoc).forEach((field: any) => {
+        if (field?.inference) {
+          field.inference.inference_id = inferenceId;
+        }
+      });
+    } else {
+      // For non-legacy semantic text, modify fields within _inference_fields
+      if (clonedDoc._inference_fields) {
+        // Clone _inference_fields to avoid mutation issues
+        clonedDoc._inference_fields = { ...clonedDoc._inference_fields };
+        Object.values(clonedDoc._inference_fields).forEach((field: any) => {
+          if (field?.inference) {
+            field.inference = { ...field.inference, inference_id: inferenceId };
+          }
+        });
+      }
+    }
+
+    return clonedDoc;
   }
 
   /**
