@@ -23,6 +23,7 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { forwardRef, useEffect, useState } from 'react';
 import type { DefaultValues, SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { useGrokCollection } from '@kbn/grok-ui';
 import type { ActionBlockProps } from '.';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
@@ -54,6 +55,7 @@ import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ReplaceProcessorForm } from './replace';
+import { RedactProcessorForm } from './redact';
 import { SetProcessorForm } from './set';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
@@ -64,14 +66,14 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
-  const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const [defaultValues] = useState(() =>
     getFormStateFromActionStep(
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection },
+      { grokCollection: grokCollection! },
       step as StreamlangProcessorDefinitionWithUIAttributes
     )
   );
@@ -88,13 +90,10 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const { processorDefinition, processorResources } = convertFormStateToProcessor(
-        value as ProcessorFormState
-      );
+      const { processorDefinition } = convertFormStateToProcessor(value as ProcessorFormState);
       stepRef.send({
         type: 'step.changeProcessor',
         step: processorDefinition,
-        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -149,6 +148,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 <EuiSpacer size="m" />
                 {type === 'convert' && <ConvertProcessorForm />}
                 {type === 'replace' && <ReplaceProcessorForm />}
+                {type === 'redact' && <RedactProcessorForm />}
                 {type === 'date' && <DateProcessorForm />}
                 {type === 'grok' && <GrokProcessorForm />}
                 {type === 'dissect' && <DissectProcessorForm />}
