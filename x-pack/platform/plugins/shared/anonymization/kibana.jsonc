@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/anonymization-plugin",
+  "owner": ["@elastic/security-generative-ai"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "anonymization",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "anonymization"],
+    "requiredPlugins": ["encryptedSavedObjects"],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
