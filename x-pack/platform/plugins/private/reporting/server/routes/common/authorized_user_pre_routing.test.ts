@@ -40,6 +40,7 @@ const getMockResponseFactory = () =>
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
+    customError: (obj: unknown) => obj,
   } as unknown as KibanaResponseFactory);
 
 describe('authorized_user_pre_routing', function () {
