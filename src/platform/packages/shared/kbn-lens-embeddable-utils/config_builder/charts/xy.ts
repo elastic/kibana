@@ -32,6 +32,12 @@ import type {
 
 const ACCESSOR = 'metric_formula_accessor';
 
+function normalizeBreakdown(
+  breakdown: LensBreakdownConfig | LensBreakdownConfig[] | undefined
+): LensBreakdownConfig[] {
+  return breakdown ? (Array.isArray(breakdown) ? breakdown : [breakdown]) : [];
+}
+
 function buildVisualizationState(config: LensXYConfig): XYState {
   return {
     axisTitlesVisibilitySettings: {
@@ -123,11 +129,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
             })),
           } satisfies XYReferenceLineLayerConfig;
         case 'series': {
-          const layerBreakdown = layer.breakdown
-            ? Array.isArray(layer.breakdown)
-              ? layer.breakdown
-              : [layer.breakdown]
-            : [];
+          const layerBreakdown = normalizeBreakdown(layer.breakdown);
           return {
             layerId: `layer_${i}`,
             layerType: 'data',
@@ -160,11 +162,7 @@ function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
 }
 
 function getValueColumns(layer: LensSeriesLayer, i: number) {
-  const layerBreakdown = layer.breakdown
-    ? Array.isArray(layer.breakdown)
-      ? layer.breakdown
-      : [layer.breakdown]
-    : [];
+  const layerBreakdown = normalizeBreakdown(layer.breakdown);
 
   // For ES|QL queries, breakdown must be field names (strings)
   if (layerBreakdown.some((bd) => typeof bd !== 'string')) {
@@ -252,8 +250,8 @@ function buildFormulaLayer(
       addLayerColumn(resultLayer, columnName, breakdownColumn, true);
     }
 
-    if (layer.breakdown) {
-      const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
+    const layerBreakdown = normalizeBreakdown(layer.breakdown);
+    if (layerBreakdown.length > 0) {
       layerBreakdown.forEach((breakdown, breakdownIndex) => {
         const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
         const breakdownColumn = getBreakdownColumn({
