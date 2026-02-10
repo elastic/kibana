@@ -15,6 +15,7 @@ import { useGetNBA } from './hooks/use_get_nba';
 import { NBA_TODO_LIST } from './nba_translations';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import type { Milestone } from '../../common/trial_companion/types';
+import { useProductFeatureKeys } from '../common/hooks/use_product_feature_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -34,10 +35,14 @@ const TrialCompanionImpl: React.FC<Props> = () => {
   const [count, setCount] = useState(0);
   const [previouslyLoaded, setPreviouslyLoaded] = useState<Milestone[] | undefined>(undefined);
   const response = useGetNBA([count]);
+  const productFeatureKeys = useProductFeatureKeys();
   const value = response?.value;
   const openTODOs = value?.openTODOs;
   const loading = response?.loading;
   const dismiss = value?.dismiss;
+  const todoItems = NBA_TODO_LIST.filter(
+    (item) => !item.features || item.features.every((k) => productFeatureKeys.has(k))
+  );
 
   useInterval(() => {
     if (response?.error || loading || (openTODOs && !dismiss)) {
@@ -59,5 +64,5 @@ const TrialCompanionImpl: React.FC<Props> = () => {
 
   if (!result || dismiss) return null;
 
-  return <YourTrialCompanion open={result} todoItems={NBA_TODO_LIST} />;
+  return <YourTrialCompanion open={result} todoItems={todoItems} />;
 };

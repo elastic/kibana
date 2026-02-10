@@ -21,12 +21,21 @@ import { NBA_TODO_LIST } from './nba_translations';
 import { TestProviders } from '../common/mock';
 import userEvent from '@testing-library/user-event';
 import { postNBADismiss } from './api';
+import { useProductFeatureKeys } from '../common/hooks/use_product_feature_keys';
+import {
+  ProductFeatureKey,
+  type ProductFeatureKeyType,
+} from '@kbn/security-solution-features/src/product_features_keys';
+import { difference } from 'lodash';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./hooks/use_get_nba');
 jest.mock('../common/hooks/use_experimental_features');
 jest.mock('./api', () => ({
   postNBADismiss: jest.fn(),
+}));
+jest.mock('../common/hooks/use_product_feature_keys', () => ({
+  useProductFeatureKeys: jest.fn(),
 }));
 
 interface NBAResponse {
@@ -46,6 +55,7 @@ jest.mock('react-use/lib/useInterval', () => {
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetNBA = useGetNBA as jest.Mock;
 const mockPostNBADismiss = postNBADismiss as jest.Mock;
+const mockUseProductFeatureKeys = useProductFeatureKeys as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('TrialCompanion', () => {
@@ -54,6 +64,12 @@ describe('TrialCompanion', () => {
       isInTrial: jest.fn().mockReturnValue(true),
     },
   };
+
+  const fullFeatureSet = new Set([
+    ProductFeatureKey.detections,
+    ProductFeatureKey.attackDiscovery,
+    ProductFeatureKey.assistant,
+  ]);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,6 +80,7 @@ describe('TrialCompanion', () => {
     });
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseProductFeatureKeys.mockReturnValue(fullFeatureSet);
   });
 
   describe('should not show Get set up panel', () => {
@@ -235,27 +252,88 @@ describe('TrialCompanion', () => {
   });
 
   describe('dismiss button', () => {
-    it('should be when all items are done and hide the pannel', async () => {
-      mockUseGetNBA.mockReturnValue({
-        value: { openTODOs: [] },
-        error: undefined,
-        loading: false,
-      });
+    it.each<{
+      product: string;
+      openTODOs: Milestone[];
+      features: Set<ProductFeatureKeyType>;
+    }>([
+      {
+        product: 'complete',
+        openTODOs: [],
+        features: fullFeatureSet,
+      },
+      {
+        product: 'essential',
+        openTODOs: [Milestone.M5],
+        features: new Set([ProductFeatureKey.detections]),
+      },
+      {
+        product: 'search_ai_lake',
+        openTODOs: [Milestone.M3, Milestone.M5],
+        features: new Set([]),
+      },
+    ])(
+      '$product: should show when all items from TODO are done and hide the panel',
+      async ({ openTODOs, features }) => {
+        mockUseGetNBA.mockReturnValue({
+          value: { openTODOs },
+          error: undefined,
+          loading: false,
+        });
+        mockUseProductFeatureKeys.mockReturnValue(features);
 
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <TrialCompanion />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(getByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeInTheDocument();
-        expect(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID)).toBeInTheDocument();
-      });
-      await userEvent.click(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID));
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <TrialCompanion />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          expect(getByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeInTheDocument();
+          expect(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID)).toBeInTheDocument();
+        });
+        await userEvent.click(getByTestId(GET_SET_UP_DISMISS_BUTTON_TEST_ID));
 
-      expect(mockPostNBADismiss).toHaveBeenCalled();
+        expect(mockPostNBADismiss).toHaveBeenCalled();
 
-      expect(queryByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeNull();
+        expect(queryByTestId(GET_SET_UP_ACCORDION_TEST_ID)).toBeNull();
+      }
+    );
+  });
+
+  describe('samples of lodash difference behaviour', () => {
+    it.each<{
+      scenario: string;
+      firstArray: number[];
+      secondArray: number[];
+      expectedResult: number[];
+    }>([
+      {
+        scenario: 'should return empty array when both arrays are empty',
+        firstArray: [],
+        secondArray: [],
+        expectedResult: [],
+      },
+      {
+        scenario: 'should return empty array when both arrays are the same',
+        firstArray: [1, 2, 3],
+        secondArray: [1, 2, 3],
+        expectedResult: [],
+      },
+      {
+        scenario: 'should return elements from the first array when, different',
+        firstArray: [1, 2, 3],
+        secondArray: [1, 3],
+        expectedResult: [2],
+      },
+      {
+        scenario: 'should return empty, even if second array has more elements',
+        firstArray: [1, 3],
+        secondArray: [1, 2, 3],
+        expectedResult: [],
+      },
+    ])('$scenario', ({ firstArray, secondArray, expectedResult }) => {
+      const result = difference(firstArray, secondArray);
+      expect(result).toEqual(expectedResult);
     });
   });
 });
