@@ -94,7 +94,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
-  let buttonArgs =
+  let buttonArgs: any =
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
   if (agent.type === 'OPAMP') {
     buttonArgs = { href: link, external: true, target: '_blank' };
