@@ -25,8 +25,8 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
+import type { AgentExecutionService, AgentExecutionParams } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -209,19 +209,13 @@ export function registerChatRoutes({
     }
   };
 
-  const callConverse = ({
+  const buildExecutionParams = ({
     payload,
     attachments,
-    request,
-    chatService,
-    abortSignal,
   }: {
     payload: Omit<ChatRequestBodyPayload, 'attachments'>;
     attachments: AttachmentInput[];
-    request: KibanaRequest;
-    chatService: ChatService;
-    abortSignal: AbortSignal;
-  }) => {
+  }): AgentExecutionParams => {
     const {
       agent_id: agentId,
       connector_id: connectorId,
@@ -233,21 +227,43 @@ export function registerChatRoutes({
       configuration_overrides: configurationOverrides,
     } = payload;
 
-    return chatService.converse({
+    return {
       agentId,
       connectorId,
       conversationId,
       capabilities,
       browserApiTools,
       configurationOverrides,
-      abortSignal,
       nextInput: {
         message: input,
         prompts,
         attachments,
       },
-      request,
+    };
+  };
+
+  const executeAndFollow = async ({
+    payload,
+    attachments,
+    request,
+    executionService,
+  }: {
+    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
+    attachments: AttachmentInput[];
+    request: KibanaRequest;
+    executionService: AgentExecutionService;
+  }) => {
+    const params = buildExecutionParams({ payload, attachments });
+    const { executionId } = await executionService.executeAgent({ request, params });
+
+    // When the request is aborted, abort the execution
+    request.events.aborted$.subscribe(() => {
+      executionService.abortExecution(executionId).catch(() => {
+        // best effort abort
+      });
     });
+
+    return executionService.followExecution(executionId);
   };
 
   router.versioned
@@ -281,13 +297,9 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService, attachments: attachmentsService } =
+          getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
-
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
 
         const attachments = payload.attachments
           ? await validateAttachments({
@@ -298,12 +310,11 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAndFollow({
           payload,
           attachments,
-          chatService,
           request,
-          abortSignal: abortController.signal,
+          executionService,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -361,13 +372,9 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService, attachments: attachmentsService } =
+          getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
-
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
 
         const attachments = payload.attachments
           ? await validateAttachments({
@@ -378,12 +385,16 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAndFollow({
           payload,
           attachments,
           request,
-          chatService,
-          abortSignal: abortController.signal,
+          executionService,
+        });
+
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
         });
 
         return response.ok({

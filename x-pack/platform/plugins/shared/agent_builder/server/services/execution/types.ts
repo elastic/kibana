@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Observable } from 'rxjs';
+import type {
+  AgentCapabilities,
+  ChatEvent,
+  ConverseInput,
+  AgentConfigurationOverrides,
+} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+
+/**
+ * Possible statuses for an agent execution.
+ */
+export enum ExecutionStatus {
+  scheduled = 'scheduled',
+  running = 'running',
+  completed = 'completed',
+  failed = 'failed',
+  aborted = 'aborted',
+}
+
+/**
+ * Serializable execution parameters.
+ * This is the serializable subset of {@link ChatConverseParams},
+ * omitting `request` (reconstructed from fakeRequest on TM node)
+ * and `abortSignal` (replaced by the abort polling mechanism).
+ */
+export interface AgentExecutionParams {
+  /** Id of the conversational agent to converse with. */
+  agentId?: string;
+  /** Id of the genAI connector to use. */
+  connectorId?: string;
+  /** Id of the conversation to continue. */
+  conversationId?: string;
+  /** Set of capabilities to use for this round. */
+  capabilities?: AgentCapabilities;
+  /** Whether to use structured output mode. */
+  structuredOutput?: boolean;
+  /** Optional JSON schema for structured output. */
+  outputSchema?: Record<string, unknown>;
+  /** When false, the conversation will not be persisted. Defaults to true. */
+  storeConversation?: boolean;
+  /** Create conversation with specified ID if not found. */
+  autoCreateConversationWithId?: boolean;
+  /** Next user input to start the round. */
+  nextInput: ConverseInput;
+  /** Browser API tools to make available to the agent. */
+  browserApiTools?: BrowserApiToolMetadata[];
+  /** Runtime configuration overrides for this execution only. */
+  configurationOverrides?: AgentConfigurationOverrides;
+}
+
+/**
+ * The agent execution document persisted in the agent-executions index.
+ */
+export interface AgentExecution {
+  /** Unique id of the execution. */
+  executionId: string;
+  /** Timestamp of the execution creation. */
+  '@timestamp': string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** Id of the agent being executed. */
+  agentId: string;
+  /** Id of the space the execution was performed in. */
+  spaceId: string;
+  /** Serialized execution parameters. */
+  agentParams: AgentExecutionParams;
+}
+
+/**
+ * A single event document persisted in the agent-execution-events data stream.
+ */
+export interface AgentExecutionEventDoc {
+  /** Timestamp of the event. */
+  '@timestamp': number;
+  /** Id of the agent execution this event belongs to. */
+  agentExecutionId: string;
+  /** Sequential number of the event within the execution (used for ordering and `since` filtering). */
+  eventNumber: number;
+  /** Id of the agent this event belongs to. */
+  agentId: string;
+  /** Id of the space the execution was performed in. */
+  spaceId: string;
+  /** The actual event object. */
+  event: ChatEvent;
+}
+
+/**
+ * Parameters for {@link AgentExecutionService.executeAgent}.
+ */
+export interface ExecuteAgentParams {
+  /** The request that initiated the execution (used to carry the API key for TM scheduling). */
+  request: KibanaRequest;
+  /** Execution parameters (serializable). */
+  params: AgentExecutionParams;
+}
+
+/**
+ * Options for {@link AgentExecutionService.followExecution}.
+ */
+export interface FollowExecutionOptions {
+  /** Only return events with event_number greater than this value. */
+  since?: number;
+}
+
+/**
+ * The agent execution service - entry point for deferred agent execution.
+ * Replaces the direct call to ChatService.converse in the request flow.
+ */
+export interface AgentExecutionService {
+  /**
+   * Schedule an agent execution on a task manager node.
+   * Creates an execution document and schedules the TM task.
+   * @returns The execution ID.
+   */
+  executeAgent(params: ExecuteAgentParams): Promise<{ executionId: string }>;
+
+  /**
+   * Abort an ongoing execution.
+   * Sets the execution status to 'aborted', which the TM handler will detect via polling.
+   */
+  abortExecution(executionId: string): Promise<void>;
+
+  /**
+   * Follow an execution by polling for events.
+   * Returns an observable that emits events as they are written to the data stream.
+   * The observable completes when the execution reaches a terminal status.
+   */
+  followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent>;
+}

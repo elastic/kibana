@@ -20,6 +20,7 @@ import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
+import { createAgentExecutionService, createTaskHandler } from './execution';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -59,7 +60,9 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    dataStreams,
     actions,
+    taskManager,
     trackingService,
     analyticsService,
   }: ServicesStartDeps): InternalStartServices {
@@ -138,6 +141,28 @@ export class ServiceManager {
       analyticsService,
     });
 
+    const taskHandler = createTaskHandler({
+      logger: logger.get('task-handler'),
+      elasticsearch,
+      inference,
+      conversationService: conversations,
+      agentService: agents,
+      uiSettings,
+      savedObjects,
+      dataStreams,
+      spaces,
+      trackingService,
+      analyticsService,
+    });
+
+    const execution = createAgentExecutionService({
+      logger: logger.get('execution'),
+      elasticsearch,
+      dataStreams,
+      taskManager,
+      spaces,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -147,6 +172,8 @@ export class ServiceManager {
       runnerFactory,
       auditLogService,
       chat,
+      execution,
+      taskHandler,
     };
 
     return this.internalStart;
