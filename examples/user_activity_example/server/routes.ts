@@ -29,8 +29,9 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
       // Track the user action
       coreStart.userActivity.trackUserAction({
         event: {
-          action: 'example_button_click',
-          type: 'user',
+          // using as any so we can create a testing action id
+          action: 'example_button_click' as any,
+          type: 'change',
         },
         object: {
           id: 'example-object-1',

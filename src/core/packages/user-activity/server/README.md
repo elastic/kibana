@@ -23,6 +23,21 @@ core.userActivity.trackUserAction({
 });
 ```
 
+## Registering new actions
+
+Every action must be registered in `userActivityActions` (`src/user_activity_actions.ts`).
+Each entry requires a `description` and an `ownerTeam` (GitHub team handle):
+
+```ts
+export const userActivityActions = {
+  // ... existing actions ...
+  archive_case: {
+    description: 'Archive a case',
+    ownerTeam: '@elastic/kibana-security',
+  },
+} as const satisfies Record<string, UserActivityActionDefinition>;
+```
+
 ## Configuration
 
 Configure the service in `kibana.yml`:
