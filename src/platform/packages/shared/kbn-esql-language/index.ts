@@ -32,13 +32,10 @@ export type {
   ESQLAstForkCommand,
   ESQLForkParens,
   ESQLAstPromqlCommand,
-} from './src/toolkit/types';
+} from './src/toolkit';
 
+export * from './src/toolkit';
 export * from './src/constants';
-export * from './src/toolkit/parser';
-export * from './src/toolkit/ast';
-export * from './src/toolkit/composer';
-export * from './src/toolkit/pretty_print';
 export * from './src/commands';
 export * from './src/language';
 

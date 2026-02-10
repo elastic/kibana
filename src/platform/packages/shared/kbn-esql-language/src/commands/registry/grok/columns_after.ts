@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { type ESQLCommand } from '../../../toolkit/types';
-import { walk } from '../../../toolkit/ast/walker';
+import { type ESQLCommand } from '../../../toolkit';
+import { walk } from '../../../toolkit';
 import type { ESQLColumnData } from '../types';
 import { extractSemanticsFromGrok, unquoteTemplate, type GrokColumn } from './utils';
 

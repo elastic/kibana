@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isColumn } from '../../../toolkit/ast/is';
+import { isAssignment, isColumn } from '../../../toolkit';
 import { getExpressionType } from '../../definitions/utils';
-import type { ESQLAstItem, ESQLCommand } from '../../../toolkit/types';
+import type { ESQLAstItem, ESQLCommand } from '../../../toolkit';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 
 export const columnsAfter = (

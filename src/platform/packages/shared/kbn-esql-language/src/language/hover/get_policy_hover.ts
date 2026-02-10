@@ -8,7 +8,7 @@
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { type ESQLSource } from '../../toolkit/types';
+import { type ESQLSource } from '../../toolkit';
 import { ENRICH_MODES, modeDescription } from '../../commands/registry/enrich/util';
 import { fromCache, setToCache } from './hover_cache';
 import { getPolicyHelper } from '../shared/resources_helpers';

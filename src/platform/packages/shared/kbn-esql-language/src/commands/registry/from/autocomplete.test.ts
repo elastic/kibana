@@ -13,7 +13,7 @@ import { getRecommendedQueriesTemplates } from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../toolkit/parser';
+import { Parser } from '../../../toolkit';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 

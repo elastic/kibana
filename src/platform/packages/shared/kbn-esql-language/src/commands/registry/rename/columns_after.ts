@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { isColumn, isFunctionExpression } from '../../../toolkit/ast/is';
-import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../toolkit/types';
+import { isColumn, isFunctionExpression } from '../../../toolkit';
+import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../toolkit';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (

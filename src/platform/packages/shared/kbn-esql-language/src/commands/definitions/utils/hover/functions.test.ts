@@ -8,9 +8,9 @@
  */
 import { type FunctionDefinition, FunctionDefinitionTypes } from '../../types';
 import { getFormattedFunctionSignature } from './functions';
-import type { ESQLFunction } from '../../../../toolkit/types';
+import type { ESQLFunction } from '../../../../toolkit';
 import type { ESQLColumnData } from '../../../registry/types';
-import { exp } from '../../../../toolkit/composer/synth';
+import { exp } from '../../../../toolkit';
 
 describe('getFormattedFunctionSignature', () => {
   describe('basic function formatting', () => {

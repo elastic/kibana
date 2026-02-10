@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../toolkit/types';
+import type { ESQLCommand } from '../../../toolkit';
 import type { ESQLCommandSummary } from '../types';
 import { summary as summaryStats } from '../stats/summary';
 

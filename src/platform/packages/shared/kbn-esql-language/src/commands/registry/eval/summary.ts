@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn, isFunctionExpression } from '../../../toolkit/ast/is';
-import type { ESQLColumn, ESQLCommand } from '../../../toolkit/types';
+import { isAssignment, isColumn, isFunctionExpression } from '../../../toolkit';
+import type { ESQLColumn, ESQLCommand } from '../../../toolkit';
 import type { ESQLCommandSummary } from '../types';
 
 // The enrich command can add new columns with the assignment or without

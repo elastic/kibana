@@ -14,9 +14,9 @@ import type {
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
-} from '../../../toolkit/types';
-import { Walker } from '../../../toolkit/ast';
-import { isIdentifier, isList, isSource } from '../../../toolkit/ast/is';
+} from '../../../toolkit';
+import { Walker } from '../../../toolkit';
+import { isIdentifier, isList, isSource } from '../../../toolkit';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
@@ -33,11 +33,7 @@ import {
   getPromqlMatchingSignatures,
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
-import type {
-  PromQLFunction,
-  PromQLLabelName,
-  PromQLSelector,
-} from '../../../toolkit/embedded_languages/promql/types';
+import type { PromQLFunction, PromQLLabelName, PromQLSelector } from '../../../toolkit';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,

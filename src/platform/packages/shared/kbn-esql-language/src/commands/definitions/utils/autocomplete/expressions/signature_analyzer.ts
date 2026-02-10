@@ -16,7 +16,7 @@ import type {
 import { argMatchesParamType } from '../../expressions';
 import type { FunctionParameterContext } from './types';
 import { getValidSignaturesAndTypesToSuggestNext } from '../helpers';
-import type { ESQLFunction } from '../../../../../toolkit/types';
+import type { ESQLFunction } from '../../../../../toolkit';
 import type { ICommandContext } from '../../../../registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';

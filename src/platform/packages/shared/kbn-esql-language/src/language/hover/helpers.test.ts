@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { WalkerAstNode } from '../../toolkit/ast';
+import type { WalkerAstNode } from '../../toolkit';
 import { getVariablesHoverContent } from './helpers';
 
 describe('getVariablesHoverContent', () => {

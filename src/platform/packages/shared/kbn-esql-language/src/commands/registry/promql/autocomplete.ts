@@ -8,7 +8,7 @@
  */
 
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../toolkit';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';

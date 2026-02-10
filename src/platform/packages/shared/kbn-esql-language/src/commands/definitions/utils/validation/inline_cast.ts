@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WalkerAstNode } from '../../../../toolkit/ast';
-import { isLiteral, walk } from '../../../../toolkit/ast';
-import type { ESQLInlineCast, ESQLMessage } from '../../../../toolkit/types';
+import type { WalkerAstNode } from '../../../../toolkit';
+import { isLiteral, walk } from '../../../../toolkit';
+import type { ESQLInlineCast, ESQLMessage } from '../../../../toolkit';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getExpressionType, getMatchingSignatures } from '../expressions';

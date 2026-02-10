@@ -6,15 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../toolkit/types';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../toolkit';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier } from '../../../toolkit/ast/is';
+import { isBinaryExpression, isIdentifier } from '../../../toolkit';
 import { PromqlParamName } from './utils';
-import {
-  collectMetricsAndLabels,
-  findPromqlExpression,
-} from '../../../toolkit/embedded_languages/promql/traversal';
+import { collectMetricsAndLabels, findPromqlExpression } from '../../../toolkit';
 
 export const columnsAfter = async (
   command: ESQLCommand,

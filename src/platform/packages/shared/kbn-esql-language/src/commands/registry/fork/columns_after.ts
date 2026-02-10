@@ -9,7 +9,7 @@
 import { uniqBy } from 'lodash';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../toolkit';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';

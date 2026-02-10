@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../toolkit';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
@@ -16,7 +16,7 @@ import {
   getLastNonWhitespaceChar,
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../toolkit/ast/is';
+import { isColumn } from '../../../toolkit';
 
 export async function autocomplete(
   query: string,

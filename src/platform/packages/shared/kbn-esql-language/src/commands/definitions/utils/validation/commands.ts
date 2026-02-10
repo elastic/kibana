@@ -6,17 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  isFunctionExpression,
-  isOptionNode,
-  isColumn,
-  isIdentifier,
-} from '../../../../toolkit/ast/is';
+import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '../../../../toolkit';
 import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../../toolkit/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../../toolkit';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import { validateInlineCasts } from './inline_cast';
 

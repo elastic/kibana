@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../toolkit/types';
-import { Builder } from '../../toolkit/ast';
+import type { ESQLCommand } from '../../toolkit';
+import { Builder } from '../../toolkit';
 
 /**
  * Expands EVAL commands into separate single-expression EVAL commands.

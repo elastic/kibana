@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteral } from '../../../../toolkit/ast/is';
+import { isLiteral } from '../../../../toolkit';
 import { getExpressionType } from '..';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';
-import type { ESQLFunction } from '../../../../toolkit/types';
+import type { ESQLFunction } from '../../../../toolkit';
 import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
 import { getMatchingSignatures } from '../expressions';
 

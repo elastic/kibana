@@ -12,7 +12,7 @@ import type {
   ESQLMessage,
   ESQLAst,
   ESQLAstRerankCommand,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';

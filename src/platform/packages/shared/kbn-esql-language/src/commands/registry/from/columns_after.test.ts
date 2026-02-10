@@ -8,7 +8,7 @@
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { synth } from '../../../..';
-import { isSource } from '../../../toolkit/ast/is';
+import { isSource } from '../../../toolkit';
 import { columnsAfter } from './columns_after';
 
 describe('FROM columnsAfter', () => {

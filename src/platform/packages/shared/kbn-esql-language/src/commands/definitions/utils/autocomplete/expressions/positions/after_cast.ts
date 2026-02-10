@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SupportedDataType } from '../../../../..';
-import type { ESQLInlineCast } from '../../../../../../toolkit/types';
-import { Walker, within } from '../../../../../../toolkit/ast';
+import type { ESQLInlineCast } from '../../../../../../toolkit';
+import { Walker, within } from '../../../../../../toolkit';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';

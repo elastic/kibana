@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '../../../toolkit/composer';
+import { synth } from '../../../toolkit';
 import { UnmappedFieldsStrategy } from '../../registry/types';
 import { getUnmappedFieldsStrategy } from './settings';
 

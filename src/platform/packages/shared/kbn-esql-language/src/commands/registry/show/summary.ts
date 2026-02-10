@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../toolkit/types';
+import type { ESQLCommand } from '../../../toolkit';
 import type { ESQLCommandSummary } from '../types';
 import { SHOW_INFO_FIELDS } from './columns_after';
 

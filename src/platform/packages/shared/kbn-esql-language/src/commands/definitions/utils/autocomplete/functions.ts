@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isFunctionExpression } from '../../../../toolkit/ast/is';
+import { isAssignment, isFunctionExpression } from '../../../../toolkit';
 
-import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../../toolkit';
 import type { FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes } from '../../types';
 import { getFunctionDefinition } from '../functions';

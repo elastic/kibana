@@ -8,14 +8,14 @@
  */
 import { getExpressionType, getMessageFromId } from '../../definitions/utils';
 import { settings } from '../../definitions/generated/settings';
-import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '../../../toolkit/ast/is';
+import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '../../../toolkit';
 import type {
   ESQLAstAllCommands,
   ESQLCommand,
   ESQLIdentifier,
   ESQLMessage,
   ESQLSingleAstItem,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 import type { SupportedDataType } from '../..';
 import { TypeMap, validateMap } from '../../definitions/utils/validation/map';
 

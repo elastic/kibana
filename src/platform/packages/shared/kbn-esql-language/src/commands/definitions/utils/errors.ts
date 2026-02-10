@@ -17,7 +17,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 import type {
   ErrorTypes,
   ErrorValues,

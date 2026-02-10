@@ -8,7 +8,7 @@
  */
 
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLCommand, ESQLAstForkCommand } from '../../../toolkit/types';
+import type { ESQLCommand, ESQLAstForkCommand } from '../../../toolkit';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {

@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isSubQuery, within, Walker } from '../../toolkit/ast';
-import type { ESQLAstQueryExpression } from '../../toolkit/types';
+import { isSubQuery, within, Walker } from '../../toolkit';
+import type { ESQLAstQueryExpression } from '../../toolkit';
 
 /**
  * Finds the innermost subquery containing the cursor position and determines if the query contains subqueries.

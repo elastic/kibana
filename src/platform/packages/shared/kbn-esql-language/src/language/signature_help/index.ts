@@ -8,9 +8,9 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Parser } from '../../toolkit/parser';
-import { within, Walker } from '../../toolkit/ast';
-import type { ESQLAstPromqlCommand, ESQLFunction } from '../../toolkit/types';
+import { Parser } from '../../toolkit';
+import { within, Walker } from '../../toolkit';
+import type { ESQLAstPromqlCommand, ESQLFunction } from '../../toolkit';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,

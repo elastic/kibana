@@ -11,7 +11,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import { type ESQLSingleAstItem, isColumn } from '../../../..';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import type { ISuggestionItem } from '../types';
 
 export type SortPosition =

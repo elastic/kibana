@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLColumn } from '../../toolkit/types';
+import type { ESQLColumn } from '../../toolkit';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 
 export async function getColumnHover(

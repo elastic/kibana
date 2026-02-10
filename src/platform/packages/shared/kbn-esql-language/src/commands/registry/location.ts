@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../toolkit/ast/is';
-import { within } from '../../toolkit/ast/location';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../toolkit/types';
-import { Walker } from '../../toolkit/ast/walker';
+import { isFunctionExpression, isOptionNode } from '../../toolkit';
+import { within } from '../../toolkit';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../toolkit';
+import { Walker } from '../../toolkit';
 import { Location } from './types';
 
 const commandOptionNameToLocation: Record<string, Location> = {

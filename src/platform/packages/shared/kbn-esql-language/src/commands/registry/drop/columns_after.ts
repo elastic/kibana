@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { walk } from '../../../toolkit/ast/walker';
-import { type ESQLCommand } from '../../../toolkit/types';
+import { walk } from '../../../toolkit';
+import { type ESQLCommand } from '../../../toolkit';
 import type { ESQLColumnData } from '../types';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {

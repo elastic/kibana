@@ -11,9 +11,9 @@ import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext, FunctionParameterContext } from '../types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLFunction, ESQLSingleAstItem } from '../../../../../../toolkit/types';
+import type { ESQLFunction, ESQLSingleAstItem } from '../../../../../../toolkit';
 import { SignatureAnalyzer } from '../signature_analyzer';
-import { within } from '../../../../../../toolkit/ast/location';
+import { within } from '../../../../../../toolkit';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;

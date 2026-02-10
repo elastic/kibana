@@ -11,7 +11,7 @@ import { findFinalWord, findPreviousWord } from '../../definitions/utils/autocom
 import { buildFieldsDefinitions } from '../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../definitions/utils/operators';
 import { unescapeColumnName } from '../../definitions/utils/shared';
-import type { ESQLAstAllCommands, ESQLSource } from '../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLSource } from '../../../toolkit';
 import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,

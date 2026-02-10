@@ -8,13 +8,9 @@
  */
 
 import { esqlCommandRegistry } from '../../../..';
-import type {
-  ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
-} from '../../../toolkit/types';
+import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '../../../toolkit';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
-import { isColumn, isOptionNode, isSubQuery } from '../../../toolkit/ast';
+import { isColumn, isOptionNode, isSubQuery } from '../../../toolkit';
 
 function aggregateSummary(source: ESQLCommandSummary, target: ESQLCommandSummary) {
   source.newColumns?.forEach((col) => target.newColumns?.add(col));

@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 import { getStaticPosition, getPosition, markCommonFields } from './utils';
 import { ISuggestionItem } from '../types';
-import { ESQLAstJoinCommand } from '../../../toolkit/types';
+import { ESQLAstJoinCommand } from '../../../toolkit';
 
 describe('getStaticPosition()', () => {
   test('returns correct position on complete modifier matches', () => {

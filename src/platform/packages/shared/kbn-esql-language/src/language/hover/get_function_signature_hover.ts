@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLFunction } from '../../toolkit/types';
+import { type ESQLFunction } from '../../toolkit';
 import {
   getFunctionDefinition,
   getFormattedFunctionSignature,

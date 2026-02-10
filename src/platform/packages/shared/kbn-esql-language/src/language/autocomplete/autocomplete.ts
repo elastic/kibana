@@ -14,11 +14,11 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../toolkit/types';
-import { EsqlQuery } from '../../toolkit/composer';
+} from '../../toolkit';
+import { EsqlQuery } from '../../toolkit';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../toolkit/ast';
-import { parse } from '../../toolkit/parser';
+import { isHeaderCommand, Walker } from '../../toolkit';
+import { parse } from '../../toolkit';
 import { SuggestionOrderingEngine } from './utils';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression } from '../../../../../../toolkit/ast/is';
+import { isFunctionExpression } from '../../../../../../toolkit';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ExpressionContext } from '../types';

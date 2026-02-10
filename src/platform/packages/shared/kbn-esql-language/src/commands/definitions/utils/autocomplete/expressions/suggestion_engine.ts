@@ -8,8 +8,8 @@
  */
 
 import { getExpressionType, getFunctionDefinition } from '../..';
-import { isFunctionExpression } from '../../../../../toolkit/ast/is';
-import { within } from '../../../../../toolkit/ast/location';
+import { isFunctionExpression } from '../../../../../toolkit';
+import { within } from '../../../../../toolkit';
 import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';

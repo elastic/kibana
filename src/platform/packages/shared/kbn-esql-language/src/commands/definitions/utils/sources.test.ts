@@ -17,7 +17,7 @@ import {
   buildSourcesDefinitions,
   getLookupJoinSource,
 } from './sources';
-import { EsqlQuery, synth } from '../../../toolkit/composer';
+import { EsqlQuery, synth } from '../../../toolkit';
 import { Walker, type ESQLAstJoinCommand } from '../../../..';
 
 describe('specialIndicesToSuggestions()', () => {

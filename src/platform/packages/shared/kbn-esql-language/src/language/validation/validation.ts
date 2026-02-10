@@ -8,14 +8,14 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLMessage } from '../../toolkit/types';
-import { EsqlQuery } from '../../toolkit/composer';
+import type { ESQLCommand, ESQLMessage } from '../../toolkit';
+import { EsqlQuery } from '../../toolkit';
 import { esqlCommandRegistry } from '../../commands/registry';
-import { walk } from '../../toolkit/ast';
+import { walk } from '../../toolkit';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
-import type { ESQLAstAllCommands } from '../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../toolkit';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';

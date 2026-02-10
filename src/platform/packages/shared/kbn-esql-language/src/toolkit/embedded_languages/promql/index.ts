@@ -18,3 +18,12 @@ export type { PromQLAstNodeTemplate } from './builder/types';
 export { PromQLParser, type PromQLParseOptions } from './parser';
 export { PromQLErrorListener } from './parser/promql_error_listener';
 export { PromQLCstToAstConverter } from './parser/cst_to_ast_converter';
+
+// Traversal
+export * from './traversal';
+
+// Type guards
+export * from './is';
+
+// Walker
+export * from './walker';

@@ -11,13 +11,13 @@ import type {
   ESQLAstAllCommands,
   ESQLAstForkCommand,
   ESQLMessage,
-} from '../../../toolkit/types';
-import { Walker } from '../../../toolkit/ast/walker';
+} from '../../../toolkit';
+import { Walker } from '../../../toolkit';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { esqlCommandRegistry } from '..';
 import { errors } from '../../definitions/utils';
-import { isSubQuery } from '../../../toolkit/ast/is';
+import { isSubQuery } from '../../../toolkit';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;

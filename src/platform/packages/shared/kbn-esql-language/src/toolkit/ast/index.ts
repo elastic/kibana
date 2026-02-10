@@ -17,3 +17,6 @@ export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './build
 export { singleItems, resolveItem, lastItem, firstItem } from './visitor/utils';
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './walker';
 export * as mutate from './mutate';
+
+// Visitor
+export * from './visitor';

@@ -16,7 +16,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../../toolkit/ast/is';
+} from '../../../../toolkit';
 import { getLocationInfo } from '../../../registry/location';
 import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
 import type {
@@ -25,7 +25,7 @@ import type {
   ESQLAstItem,
   ESQLFunction,
   ESQLMessage,
-} from '../../../../toolkit/types';
+} from '../../../../toolkit';
 import type {
   FunctionDefinition,
   PromQLFunctionDefinition,
@@ -35,7 +35,7 @@ import type {
 } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
-import type { PromQLFunction } from '../../../../toolkit/embedded_languages/promql/types';
+import type { PromQLFunction } from '../../../../toolkit';
 
 export function validateFunction({
   fn,

@@ -13,9 +13,9 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../toolkit/ast/is';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../toolkit/types';
-import { lastItem } from '../../../toolkit/ast/visitor/utils';
+} from '../../../toolkit';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../toolkit';
+import { lastItem } from '../../../toolkit';
 import type {
   FunctionDefinition,
   FunctionParameterType,
@@ -32,7 +32,7 @@ import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
-import type { PromQLAstExpression } from '../../../toolkit/embedded_languages/promql/types';
+import type { PromQLAstExpression } from '../../../toolkit';
 
 // #region type detection
 

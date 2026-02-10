@@ -34,8 +34,8 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../commands/definitions/all_operators';
-import { Parser } from '../../toolkit/parser';
-import type { ESQLAstAllCommands } from '../../toolkit/types';
+import { Parser } from '../../toolkit';
+import type { ESQLAstAllCommands } from '../../toolkit';
 import type {
   FunctionParameterType,
   FunctionReturnType,

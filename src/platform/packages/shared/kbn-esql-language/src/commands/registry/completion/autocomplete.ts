@@ -8,13 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isFunctionExpression, isLiteral } from '../../../toolkit/ast/is';
+import { isFunctionExpression, isLiteral } from '../../../toolkit';
 import { suggestForExpression } from '../../definitions/utils';
-import type * as ast from '../../../toolkit/types';
+import type * as ast from '../../../toolkit';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../definitions/constants';
-import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '../../../toolkit';
 import {
   pipeCompleteItem,
   assignCompletionItem,

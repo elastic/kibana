@@ -14,13 +14,13 @@ import type {
   ESQLSource,
   ESQLIdentifier,
   ESQLAst,
-} from '../../../toolkit/types';
-import { isBinaryExpression, isIdentifier, isSource } from '../../../toolkit/ast/is';
+} from '../../../toolkit';
+import { isBinaryExpression, isIdentifier, isSource } from '../../../toolkit';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { getOnOption } from './utils';
-import type { ESQLSingleAstItem } from '../../../toolkit/types';
+import type { ESQLSingleAstItem } from '../../../toolkit';
 
 export const validate = (
   command: ESQLAstAllCommands,

@@ -7,20 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../toolkit/ast/location';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../toolkit/types';
+import { within } from '../../../toolkit';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../toolkit';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
-import {
-  childrenOfPromqlNode,
-  findPromqlAstPosition,
-} from '../../../toolkit/embedded_languages/promql/traversal';
-import { PromQLParser } from '../../../toolkit/embedded_languages/promql';
+import { childrenOfPromqlNode, findPromqlAstPosition } from '../../../toolkit';
+import { PromQLParser } from '../../../toolkit';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLFunction,
   PromQLPositionResult,
-} from '../../../toolkit/embedded_languages/promql/types';
+} from '../../../toolkit';
 import {
   getPromqlFunctionDefinition,
   isPromqlAcrossSeriesFunction,

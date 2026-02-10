@@ -8,13 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import type { ISuggestionItem, ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { Parser } from '../../../toolkit/parser';
+import { Parser } from '../../../toolkit';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 
 export async function autocomplete(

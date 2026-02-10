@@ -8,7 +8,7 @@
  */
 
 import type { ICommandContext } from '../../registry/types';
-import type { ESQLColumn, ESQLIdentifier } from '../../../toolkit/types';
+import type { ESQLColumn, ESQLIdentifier } from '../../../toolkit';
 import { fuzzySearch } from './shared';
 
 export function getColumnExists(

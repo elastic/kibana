@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression, ESQLAstForkCommand } from '../../toolkit/types';
+import type { ESQLAstQueryExpression, ESQLAstForkCommand } from '../../toolkit';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { expandEvals } from './expand_evals';
 

@@ -12,7 +12,7 @@ import type {
   ESQLSingleAstItem,
   ESQLAstAllCommands,
   ESQLCommandOption,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 
 export interface PositionContext {
   expressionRoot?: ESQLSingleAstItem;

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import type { ESQLPolicy, ISuggestionItem } from '../types';
 import { getSafeInsertText } from '../../definitions/utils/autocomplete/helpers';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';

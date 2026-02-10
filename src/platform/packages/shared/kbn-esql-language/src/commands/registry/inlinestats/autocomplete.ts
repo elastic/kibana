@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
 

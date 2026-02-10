@@ -12,7 +12,7 @@ import type {
   ESQLList,
   ESQLUnknownItem,
   ESQLSingleAstItem,
-} from '../../../../../../../toolkit/types';
+} from '../../../../../../../toolkit';
 import type { PartialOperatorDetection } from '../../types';
 import {
   endsWithInOrNotInToken,
@@ -22,7 +22,7 @@ import {
   NOT_IN_REGEX,
   IS_NOT_REGEX,
 } from '../utils';
-import { Builder } from '../../../../../../../toolkit/ast/builder';
+import { Builder } from '../../../../../../../toolkit';
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis

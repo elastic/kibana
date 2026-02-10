@@ -8,14 +8,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import type { ICommandCallbacks } from '../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../toolkit/parser';
+import { Parser } from '../../../toolkit';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.appendSeparatorDoc', {

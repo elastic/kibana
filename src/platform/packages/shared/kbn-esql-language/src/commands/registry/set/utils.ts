@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import type { ESQLAstItem } from '../../../toolkit/types';
+import type { ESQLAstItem } from '../../../toolkit';
 import { isMap, SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';

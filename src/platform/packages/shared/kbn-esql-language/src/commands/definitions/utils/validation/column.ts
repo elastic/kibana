@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../toolkit/types';
+import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../toolkit';
 import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
-import { isParametrized } from '../../../../toolkit/ast/is';
+import { isParametrized } from '../../../../toolkit';
 
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,

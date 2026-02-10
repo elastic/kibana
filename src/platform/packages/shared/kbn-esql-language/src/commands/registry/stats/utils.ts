@@ -14,7 +14,7 @@ import type {
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 import {
   isFunctionExpression,
   isFieldExpression,
@@ -24,8 +24,8 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
-} from '../../../toolkit/ast/is';
-import { Walker } from '../../../toolkit/ast/walker';
+} from '../../../toolkit';
+import { Walker } from '../../../toolkit';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';

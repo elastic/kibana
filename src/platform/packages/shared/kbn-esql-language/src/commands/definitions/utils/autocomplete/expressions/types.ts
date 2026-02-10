@@ -14,7 +14,7 @@ import type {
   ISuggestionItem,
   Location,
 } from '../../../../registry/types';
-import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../../../toolkit/types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../../../toolkit';
 import type {
   FunctionDefinition,
   FunctionDefinitionTypes,

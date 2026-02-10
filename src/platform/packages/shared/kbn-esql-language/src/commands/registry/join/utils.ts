@@ -8,8 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../toolkit/ast/location';
-import { isOptionNode } from '../../../toolkit/ast/is';
+import { within } from '../../../toolkit';
+import { isOptionNode } from '../../../toolkit';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 import type {
   ESQLAstAllCommands,
@@ -17,7 +17,7 @@ import type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLSingleAstItem,
-} from '../../../toolkit/types';
+} from '../../../toolkit';
 
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ISuggestionItem } from '../../registry/types';
-import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../toolkit/types';
+import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../toolkit';
 import { EDITOR_MARKER } from '../constants';
 import {
   PromQLFunctionDefinitionTypes,
@@ -17,7 +17,7 @@ import {
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isList, isSource } from '../../../toolkit/ast/is';
+import { isIdentifier, isList, isSource } from '../../../toolkit';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import { techPreviewLabel } from './shared';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../toolkit/types';
+import type { ESQLAstAllCommands } from '../../../toolkit';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import {
   isBinaryExpression,

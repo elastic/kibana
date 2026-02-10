@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { validate } from './validate';
-import { Parser } from '../../../toolkit/parser';
-import type { ESQLMessage } from '../../../toolkit/types';
+import { Parser } from '../../../toolkit';
+import type { ESQLMessage } from '../../../toolkit';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);
