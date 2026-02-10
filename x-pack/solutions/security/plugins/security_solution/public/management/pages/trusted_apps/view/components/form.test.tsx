@@ -412,7 +412,11 @@ describe('Trusted apps form', () => {
       it('should add a new condition entry when `AND` is clicked with no column labels', () => {
         const condition2 = getCondition(1);
         expect(condition2.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
-        expect(renderResult.getByTestId(`trustedApps-form-conditionsBuilder-group1-entry1`).querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0)
+        expect(
+          renderResult
+            .getByTestId(`trustedApps-form-conditionsBuilder-group1-entry1`)
+            .querySelectorAll('.euiFormRow__labelWrapper')
+        ).toHaveLength(0);
       });
 
       it('should have remove buttons enabled when multiple conditions are present', () => {
@@ -769,10 +773,9 @@ describe('Trusted apps form', () => {
       latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
 
-      /*setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      /* setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
       rerenderWithLatestProps();*/
-    
-    
+
       console.log(renderResult.container.innerHTML);
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
@@ -803,7 +806,7 @@ describe('Trusted apps form', () => {
       render();
       // get around formChanged check
       await userEvent.type(getNameField(), ' ');
-      
+
       expect(getAllValidationErrors()).toHaveLength(0);
       const expected = createOnChangeArgs({
         isValid: true,
@@ -820,7 +823,7 @@ describe('Trusted apps form', () => {
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
-      
+
       expect(getAllValidationErrors()).toHaveLength(0);
       expect(getAllValidationWarnings()).toHaveLength(0);
 
@@ -830,7 +833,7 @@ describe('Trusted apps form', () => {
       act(() => {
         fireEvent.blur(getNameField());
       });
-      
+
       expect(getAllValidationErrors()).toHaveLength(1);
       expect(getAllValidationWarnings()).toHaveLength(0);
       expect(formProps.onChange).toHaveBeenLastCalledWith({
