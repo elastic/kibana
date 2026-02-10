@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, renderHook, act } from '@testing-library/react';
+import { render, screen, renderHook, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -35,7 +35,7 @@ jest.mock('@kbn/workflows-management-plugin/public', () => ({
   })),
 }));
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('@kbn/workflows-ui/src/components', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
@@ -214,7 +214,7 @@ describe('useRunAlertWorkflowPanel', () => {
   });
 
   describe('panel content', () => {
-    it('renders the workflow panel with selector and execute button', () => {
+    it('renders the workflow panel with selector and execute button', async () => {
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
@@ -222,7 +222,9 @@ describe('useRunAlertWorkflowPanel', () => {
       const panels = result.current.runAlertWorkflowPanel;
       const { getByTestId, getByRole } = renderContextMenu(items, panels);
 
-      expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      });
       expect(getByTestId('execute-alert-workflow-button')).toBeInTheDocument();
       expect(getByRole('button', { name: i18n.RUN_WORKFLOW_BUTTON })).toBeInTheDocument();
     });

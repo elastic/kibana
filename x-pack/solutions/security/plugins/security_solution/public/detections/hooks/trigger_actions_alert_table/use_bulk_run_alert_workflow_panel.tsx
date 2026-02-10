@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import React, { useCallback, useMemo } from 'react';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import {
@@ -27,7 +28,7 @@ export const useBulkRunAlertWorkflowPanel = (): {
 } => {
   const {
     services: { uiSettings, application },
-  } = useKibana<{ application: ApplicationStart }>();
+  } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
 
   const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
   const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
