@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
@@ -27,7 +27,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ log: { time: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -56,7 +56,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -84,7 +84,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '01/01/2025:12:34:56' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -111,7 +111,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       ],
     };
 
-    const { processors } = transpile(streamlangDSL);
+    const { processors } = transpileIngestPipeline(streamlangDSL);
 
     const docs = [
       { event: { created: '01/01/2025:12:34:56' } },
@@ -143,7 +143,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '2025-01-01T12:34:56.789Z' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -170,7 +170,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '01-01-2025' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -203,7 +203,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
             } as DateProcessor,
           ],
         };
-        transpile(streamlangDSL);
+        transpileIngestPipeline(streamlangDSL);
       }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
     });
   });
@@ -227,7 +227,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -258,7 +258,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -288,7 +288,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ event: { created: '10 septembre 2025' } }];
       await testBed.ingest(indexName, docs, processors);

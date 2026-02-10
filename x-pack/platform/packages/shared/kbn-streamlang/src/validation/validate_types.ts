@@ -128,6 +128,7 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
 
     case 'uri_parts': {
       const prefix = processor.to ?? 'url';
+      const keepOriginal = processor.keep_original ?? true;
       const outputFields = [
         'scheme',
         'domain',
@@ -139,8 +140,10 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
         'user_info',
         'username',
         'password',
-        'original',
       ];
+      if (keepOriginal) {
+        outputFields.push('original');
+      }
       outputFields.forEach((suffix) => fields.push(`${prefix}.${suffix}`));
       break;
     }

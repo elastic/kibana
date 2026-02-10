@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(

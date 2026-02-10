@@ -678,7 +678,6 @@ export const convertFormStateToProcessor = (
         remove_if_successful,
         ignore_failure,
         ignore_missing,
-        where,
       } = formState;
       return {
         processorDefinition: {
@@ -690,7 +689,7 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           ignore_missing,
           description,
-          where,
+          where: 'where' in formState ? formState.where : undefined,
         } as UriPartsProcessor,
       };
     }

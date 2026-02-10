@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'Connection from 192.168.1.1 established' }];
       await testBed.ingest(indexName, docs, processors);
@@ -52,7 +52,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
       await testBed.ingest(indexName, docs, processors);
@@ -77,7 +77,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -104,7 +104,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'Request from 172.16.0.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -129,7 +129,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
       await testBed.ingest(indexName, docs, processors);
@@ -157,7 +157,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = transpileIngestPipeline(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         await testBed.ingest(indexName, docs, processors);
@@ -183,7 +183,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -208,7 +208,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [
         { message: 'Connection from 192.168.1.1', environment: 'production' },
@@ -243,7 +243,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
       await testBed.ingest(indexName, docs, processors);
@@ -268,7 +268,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ message: 'Hello world, no IP here' }];
       await testBed.ingest(indexName, docs, processors);
@@ -301,7 +301,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

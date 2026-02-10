@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { ConcatProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -33,7 +33,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [{ first_name: 'john', last_name: 'doe', email_domain: 'example.com' }];
       await testBed.ingest(indexName, docs, processors);
@@ -66,7 +66,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [
         { first_name: 'john', last_name: 'doe', email_domain: 'example.com', has_email: true },
@@ -100,7 +100,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = transpileIngestPipeline(streamlangDSL);
 
       const docs = [
         { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
@@ -136,7 +136,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = transpileIngestPipeline(streamlangDSL);
 
         const docs = [
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
