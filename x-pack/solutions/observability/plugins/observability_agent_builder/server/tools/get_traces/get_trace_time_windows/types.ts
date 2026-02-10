@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface AnchorDocTopHitsAgg {
+interface SampleDocTopHitsAgg {
   hits: {
     hits: Array<{
       _id: string;
@@ -20,7 +20,7 @@ interface TraceIdsTermsAgg {
   buckets: Array<{
     key: string;
     doc_count: number;
-    anchor_doc: AnchorDocTopHitsAgg;
+    sample_doc: SampleDocTopHitsAgg;
   }>;
 }
 

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-export interface Correlation {
+export interface TraceTimeWindow {
   start: number;
   end: number;
-  identifier: {
-    field: string;
-    value: string;
-  };
+  traceId: string;
 }
-export interface Anchor {
-  '@timestamp': string | undefined;
-  correlation: Correlation['identifier'];
+
+export interface TraceIdSample {
+  timestamp: string | undefined;
+  traceId: string;
 }

@@ -9,7 +9,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { TRACE_ID } from '@kbn/apm-types';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
-import type { Anchor } from '../types';
+import type { TraceIdSample } from '../types';
 import type { TraceIdAggregations } from './types';
 
 export async function getTraceIds({
@@ -28,7 +28,7 @@ export async function getTraceIds({
   kqlFilter: string | undefined;
   logger: Logger;
   maxTraceSize: number;
-}): Promise<Anchor[]> {
+}): Promise<TraceIdSample[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
   // `traceIdBucketSize` controls the number of unique `trace.id` values returned (terms `size`).
@@ -68,7 +68,7 @@ export async function getTraceIds({
             },
             aggs: {
               // Fetch a representative timestamp for each trace.id so we can build the +/- 1h window.
-              anchor_doc: {
+              sample_doc: {
                 top_hits: {
                   size: 1,
                   _source: ['@timestamp'],
@@ -86,19 +86,16 @@ export async function getTraceIds({
   const aggregations = response.aggregations as TraceIdAggregations | undefined;
   const buckets = aggregations?.sample?.trace_ids?.buckets ?? [];
 
-  const anchors: Anchor[] = buckets.map((bucket) => {
-    const firstHit = bucket.anchor_doc.hits.hits[0];
+  const traceIdSamples: TraceIdSample[] = buckets.map((bucket) => {
+    const firstHit = bucket.sample_doc.hits.hits[0];
 
     return {
-      '@timestamp': firstHit?._source?.['@timestamp'],
-      correlation: {
-        field: TRACE_ID,
-        value: String(bucket.key),
-      },
+      timestamp: firstHit?._source?.['@timestamp'],
+      traceId: String(bucket.key),
     };
   });
 
-  logger.debug(`Found ${anchors.length} unique anchors across correlation fields`);
+  logger.debug(`Found ${traceIdSamples.length} trace.id samples`);
 
-  return anchors;
+  return traceIdSamples;
 }

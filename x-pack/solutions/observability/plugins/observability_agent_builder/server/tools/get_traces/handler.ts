@@ -7,6 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
+import { TRACE_ID } from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -16,13 +17,12 @@ import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
-import { getCorrelationIdentifiers } from './get_correlation_identifiers/get_correlation_identifiers';
-import type { Correlation } from './types';
+import { getTraceTimeWindows } from './get_trace_time_windows/get_trace_time_windows';
 import { getTotalHits } from '../../utils/get_total_hits';
 
-export async function getDocuments({
+export async function fetchTraceDocuments({
   esClient,
-  correlationIdentifier,
+  traceId,
   index,
   startTime,
   endTime,
@@ -30,7 +30,7 @@ export async function getDocuments({
   fields,
 }: {
   esClient: IScopedClusterClient;
-  correlationIdentifier: Correlation['identifier'];
+  traceId: string;
   index: string[];
   startTime: number;
   endTime: number;
@@ -50,7 +50,7 @@ export async function getDocuments({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...termFilter(correlationIdentifier.field, correlationIdentifier.value),
+          ...termFilter(TRACE_ID, traceId),
         ],
       },
     },
@@ -96,7 +96,7 @@ export async function getToolHandler({
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 
-  const correlationIdentifiers = await getCorrelationIdentifiers({
+  const traceTimeWindows = await getTraceTimeWindows({
     esClient,
     indices,
     startTime,
@@ -106,15 +106,15 @@ export async function getToolHandler({
     maxTraceSize,
   });
 
-  // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
+  // For each trace time window, find the full distributed trace (transactions, spans, errors, and logs)
   const traces = await Promise.all(
-    correlationIdentifiers.map(async (correlation) => {
-      return await getDocuments({
+    traceTimeWindows.map(async (traceTimeWindow) => {
+      return await fetchTraceDocuments({
         esClient,
-        correlationIdentifier: correlation.identifier,
+        traceId: traceTimeWindow.traceId,
         index: indices,
-        startTime: correlation.start,
-        endTime: correlation.end,
+        startTime: traceTimeWindow.start,
+        endTime: traceTimeWindow.end,
         size: maxTraces,
         fields,
       });

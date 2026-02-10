@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { Correlation } from '../types';
+import type { TraceTimeWindow } from '../types';
 import { getTraceIds } from './get_trace_ids';
 
-export async function getCorrelationIdentifiers({
+export async function getTraceTimeWindows({
   esClient,
   indices,
   startTime,
@@ -26,7 +26,7 @@ export async function getCorrelationIdentifiers({
   kqlFilter: string | undefined;
   logger: Logger;
   maxTraceSize: number;
-}): Promise<Correlation[]> {
+}): Promise<TraceTimeWindow[]> {
   const traceIds = await getTraceIds({
     esClient,
     indices,
@@ -37,12 +37,12 @@ export async function getCorrelationIdentifiers({
     maxTraceSize,
   });
 
-  return traceIds.map((traceId) => {
-    const { correlation, '@timestamp': timestamp } = traceId;
+  return traceIds.map((traceIdSample) => {
+    const { traceId, timestamp } = traceIdSample;
     const start = moment(timestamp).subtract(1, 'hour').valueOf();
     const end = moment(timestamp).add(1, 'hour').valueOf();
     return {
-      identifier: correlation,
+      traceId,
       start,
       end,
     };

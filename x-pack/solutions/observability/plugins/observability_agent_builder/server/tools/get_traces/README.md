@@ -2,7 +2,7 @@
 
 Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
 
-This tool is KQL-driven: it finds one or more anchor documents (logs or APM events) within the time range, extracts one or more `trace.id` values from those documents, then fetches APM events and logs for each trace.
+This tool is KQL-driven: it finds one or more seed documents (logs or APM events) within the time range, extracts one or more `trace.id` values from those documents, then fetches APM events and logs for each trace.
 
 If a matching document does not contain `trace.id`, it cannot be used to fetch a trace.
 
@@ -36,7 +36,7 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
-### Anchor from a query (`kqlFilter`)
+### Find traces from a query (`kqlFilter`)
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
@@ -46,14 +46,14 @@ POST kbn://api/agent_builder/tools/_execute
     "start": "now-30m",
     "end": "now",
     "kqlFilter": "service.name: payment-service",
-    "maxSequences": 5
+    "maxTraceSize": 5
   }
 }
 ```
 
-### Use custom indices for anchor discovery
+### Use custom indices for trace.id discovery
 
-The optional `index` parameter applies to the anchor discovery step (finding documents matching `kqlFilter`). APM/log results are fetched from the configured Observability data sources.
+The optional `index` parameter applies to the trace.id discovery step (finding documents matching `kqlFilter`). APM/log results are fetched from the configured Observability data sources.
 
 ```jsonc
 POST kbn://api/agent_builder/tools/_execute
@@ -70,5 +70,5 @@ POST kbn://api/agent_builder/tools/_execute
 
 ## Notes
 
-- Results are returned as sequences. Each sequence contains `traceItems` (APM events) and `logs` (log events).
-- Each array is sorted by `@timestamp`, but the tool does not merge APM + logs into a single timeline.
+- Results are returned as `traces` (one entry per discovered `trace.id`).
+- Each trace contains `items` (sorted by `@timestamp`) and an `isTruncated` flag.

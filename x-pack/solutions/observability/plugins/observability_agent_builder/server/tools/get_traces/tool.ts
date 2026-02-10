@@ -27,7 +27,7 @@ const getTracesSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'KQL filter used to find anchor documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxTraceSize`) and returns APM trace events and logs for each discovered trace.id.'
+      'KQL filter used to find seed documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxTraceSize`) and returns APM trace events and logs for each discovered trace.id.'
     ),
   maxTraceSize: z
     .number()
@@ -65,7 +65,7 @@ export function createGetTracesTool({
   - Retrieve a specific trace: kqlFilter: "trace.id: abc123"
   - Expand from a specific document id: kqlFilter: "_id: a1b2c3" (only works if that document has a trace.id)
 
-  Note: The optional "index" parameter is used for anchor discovery. The returned APM/log documents are fetched from the configured Observability data sources.
+  Note: The optional "index" parameter is used for trace.id discovery. The returned APM/log documents are fetched from the configured Observability data sources.
 
   Do NOT use for:
   - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
