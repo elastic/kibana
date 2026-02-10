@@ -516,9 +516,16 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml'));
     }
 
-    // Always run Saved Objects checks.
-    // If there aren't any SO types modified, the check will run with test data as a smoke test for migration logic
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
+    // Run Saved Objects checks conditionally
+    if (
+      await doAnyChangesMatch([
+        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
+        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
+        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
+    }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
