@@ -23,6 +23,7 @@ function hasAgentBuilderToolTag(yamlContent: string): boolean {
  * Loads workflow YAML files from a directory and converts them to WorkflowInfo objects.
  *
  * @param config - Workflow configuration containing directory path and template inputs
+ * @param stackConnectorIds - Stack connector IDs to inject into the workflows
  * @returns Array of WorkflowInfo objects
  *
  * @throws Error if the directory doesn't exist or can't be read
@@ -33,14 +34,13 @@ export async function loadWorkflows(
 ): Promise<WorkflowInfo[]> {
   const { directory, templateInputs } = config;
 
-  const workflowInfos: WorkflowInfo[] = [];
   try {
     const typedTemplateInputs = {
       ...templateInputs,
       ...stackConnectorIds,
     };
 
-    const files = await fs.readdir(join(directory));
+    const files = await fs.readdir(directory);
 
     // Filter for YAML files
     const yamlFiles = files.filter((file) => {
@@ -53,7 +53,7 @@ export async function loadWorkflows(
     }
 
     // Load and process each YAML file
-    const workflowInfo = await Promise.all(
+    return await Promise.all(
       yamlFiles.map(async (fileName) => {
         const filePath = join(directory, fileName);
         const rawContent = await fs.readFile(filePath, 'utf-8');
@@ -71,9 +71,6 @@ export async function loadWorkflows(
         };
       })
     );
-    workflowInfos.push(...workflowInfo);
-
-    return workflowInfos;
   } catch (error) {
     if (error instanceof Error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {

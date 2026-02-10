@@ -156,6 +156,7 @@ export async function createDataSourceAndRelatedResources(
       const stackConnector: ActionResult = await createStackConnector(
         actions,
         request,
+        name,
         stackConnectorConfig,
         credentials
       );

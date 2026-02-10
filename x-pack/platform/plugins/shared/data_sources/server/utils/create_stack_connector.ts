@@ -100,6 +100,7 @@ function buildSecretsFromMCPConnectorConfig(
 export const createStackConnector = async (
   actions: ActionsPluginStart,
   request: KibanaRequest,
+  name: string,
   stackConnectorConfig: StackConnectorConfig,
   credentials: string
 ) => {
@@ -118,7 +119,7 @@ export const createStackConnector = async (
 
   const stackConnector: ActionResult = await actionsClient.create({
     action: {
-      name: connectorType,
+      name,
       actionTypeId: connectorType,
       config: connectorConfig,
       secrets,
