@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useForm } from 'react-hook-form';
+import { FieldGroup } from '@kbn/alerting-v2-rule-form/form/field_groups/field_group';
 import type { HttpStart } from '@kbn/core/public';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -16,12 +17,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from '@kbn/alerting-v2-rule-form/form/types';
 import { RuleFields } from '@kbn/alerting-v2-rule-form';
 import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
 import type { RulesApi } from '../../services/rules_api';
 import { QueryEditor } from './query_editor';
 import { RuleFooter } from './rule_footer';
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
   name: '',
+  kind: 'alert',
   tags: [],
   schedule: { custom: '5m' },
   enabled: true,
@@ -199,6 +202,45 @@ export const FormTab: React.FC<FormTabProps> = ({
         </>
       ) : null}
 
+      <FieldGroup
+        title={i18n.translate('xpack.alertingV2.createRuleForm.ruleData', {
+          defaultMessage: 'Rule data',
+        })}
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.alertingV2.createRule.queryLabel"
+              defaultMessage="ES|QL Query"
+            />
+          }
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.alertingV2.createRule.queryHelpText"
+              defaultMessage="Define the ES|QL query to execute for this rule."
+            />
+          }
+          isInvalid={!!errors.query}
+          error={errors.query?.message}
+        >
+          <Controller
+            control={control}
+            name="query"
+            render={({ field }) => (
+              <QueryEditor
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                isReadOnly={isReadOnly}
+              />
+            )}
+          />
+        </EuiFormRow>
+      </FieldGroup>
+
+      <EuiSpacer size="m" />
+
       <RuleFields
         control={control}
         errors={errors}
@@ -208,39 +250,6 @@ export const FormTab: React.FC<FormTabProps> = ({
       />
 
       <EuiSpacer size="m" />
-
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.alertingV2.createRule.queryLabel"
-            defaultMessage="ES|QL Query"
-          />
-        }
-        fullWidth
-        helpText={
-          <FormattedMessage
-            id="xpack.alertingV2.createRule.queryHelpText"
-            defaultMessage="Define the ES|QL query to execute for this rule."
-          />
-        }
-        isInvalid={!!errors.query}
-        error={errors.query?.message}
-      >
-        <Controller
-          control={control}
-          name="query"
-          render={({ field }) => (
-            <QueryEditor
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              isReadOnly={isReadOnly}
-            />
-          )}
-        />
-      </EuiFormRow>
-
-      <EuiSpacer />
 
       <RuleFooter
         onSave={handleSubmitForm(onSubmit)}

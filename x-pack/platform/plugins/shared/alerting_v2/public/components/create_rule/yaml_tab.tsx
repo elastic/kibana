@@ -32,6 +32,7 @@ groupingKey: []`;
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
   name: 'Example rule',
+  kind: 'alert',
   tags: [],
   schedule: { custom: '1m' },
   enabled: true,

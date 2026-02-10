@@ -45,7 +45,7 @@ export const CreateRulePage = () => {
           );
           history.push('/');
         } catch (error) {
-          notifications.toasts.addError(error, {
+          notifications.toasts.addError(error as Error, {
             title: i18n.translate('xpack.alertingV2.createRule.editErrorToast', {
               defaultMessage: 'Error updating rule',
             }),
@@ -63,7 +63,7 @@ export const CreateRulePage = () => {
           );
           history.push('/');
         } catch (error) {
-          notifications.toasts.addError(error, {
+          notifications.toasts.addError(error as Error, {
             title: i18n.translate('xpack.alertingV2.createRule.createErrorToast', {
               defaultMessage: 'Error creating rule',
             }),

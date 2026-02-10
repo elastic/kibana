@@ -9,7 +9,8 @@
 
 export interface FormValues {
   name: string;
-  description: string;
+  description?: string;
+  kind: 'alert' | 'signal';
   tags: string[];
   schedule: {
     custom: string;

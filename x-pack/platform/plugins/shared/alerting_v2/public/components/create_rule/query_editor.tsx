@@ -19,7 +19,6 @@ interface QueryEditorProps {
 export const QueryEditor: React.FC<QueryEditorProps> = ({
   value,
   onChange,
-  onBlur,
   isReadOnly = false,
 }) => {
   const query: AggregateQuery = { esql: value };
@@ -32,12 +31,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
     <ESQLLangEditor
       query={query}
       onTextLangQueryChange={handleQueryChange}
-      onTextLangQuerySubmit={async () => {
-        // Submit is handled by the form
-        if (onBlur) {
-          onBlur();
-        }
-      }}
+      onTextLangQuerySubmit={async () => {}}
       isDisabled={isReadOnly}
       hideRunQueryText={true}
       hideRunQueryButton={true}
