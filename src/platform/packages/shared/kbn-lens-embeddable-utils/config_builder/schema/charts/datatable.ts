@@ -414,22 +414,18 @@ export const datatableStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...datatableStateSharedOptionsSchema,
-    /**
-     * Metric columns configuration, must define operation.
-     */
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-        meta: { id: 'datatableESQLMetric' },
-      }),
-      {
-        minSize: 1,
-        maxSize: 1000,
-        meta: { description: 'Array of metrics to display as columns in the datatable' },
-      }
+    metrics: schema.maybe(
+      schema.arrayOf(
+        esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+          meta: { id: 'datatableESQLMetric' },
+        }),
+        {
+          minSize: 1,
+          maxSize: 1000,
+          meta: { description: 'Array of metrics to display as columns in the datatable' },
+        }
+      )
     ),
-    /**
-     * Row configuration, optional operations.
-     */
     rows: schema.maybe(
       schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsESQLSchema), {
         minSize: 1,
@@ -437,9 +433,6 @@ export const datatableStateSchemaESQL = schema.object(
         meta: { description: 'Array of operations to split the datatable rows by' },
       })
     ),
-    /**
-     * Split metrics by configuration, optional operations.
-     */
     split_metrics_by: schema.maybe(
       schema.arrayOf(esqlColumnSchema, {
         minSize: 1,
@@ -449,7 +442,16 @@ export const datatableStateSchemaESQL = schema.object(
     ),
   },
   {
-    validate: validateSortBy,
+    validate: (value) => {
+      const sortByError = validateSortBy(value);
+      if (sortByError) return sortByError;
+
+      const hasMetrics = value.metrics?.length > 0;
+      const hasRows = value.rows?.length > 0;
+      if (!hasMetrics && !hasRows) {
+        return 'At least one metric or one row must be defined';
+      }
+    },
     meta: {
       id: 'datatableESQL',
       description: 'Datatable state configuration for ES|QL queries',
