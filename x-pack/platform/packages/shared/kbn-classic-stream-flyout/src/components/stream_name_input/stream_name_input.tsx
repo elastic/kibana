@@ -82,8 +82,7 @@ export const StreamNameInput = ({
       }
 
       /* Remove border radius on connected sides */
-      .euiFormControlLayout,
-      .euiFieldText {
+      .euiFormControlLayout {
         ${!isLast ? 'border-top-right-radius: 0 ; border-bottom-right-radius: 0 ;' : ''}
         ${!isFirst ? 'border-top-left-radius: 0 ; border-bottom-left-radius: 0 ;' : ''}
       }
@@ -95,7 +94,7 @@ export const StreamNameInput = ({
 
       /* Ensure the focused element is on top */
       &:focus-within {
-        z-index: 1;
+        z-index: ${Number(euiTheme.levels.content) + 1};
       }
 
       /* Prevent truncation on labels */
@@ -103,11 +102,56 @@ export const StreamNameInput = ({
       .euiFormControlLayout__append {
         max-width: none;
       }
+
+      /* removes default form layout border in favor of custom border to ensure concatenated form layouts look like a single element */
+      &:not(:last-child) .euiFormControlLayout {
+        &::after {
+          border-inline-end: none;
+        }
+      }
+
+      /* Add custom border between concatenated form layout elements that mimic the divider border on append/prepend elements */
+      & + .euiFlexItem .euiFormControlLayout {
+        margin-inline-start: -${euiTheme.border.width.thin};
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset-inline-start: 0;
+          inset-block-start: 50%;
+          block-size: ${euiTheme.size.l};
+          inline-size: ${euiTheme.border.width.thin};
+          pointer-events: none;
+          border-inline-start: ${euiTheme.border.width.thin} solid
+            ${euiTheme.components.forms.border};
+          transform: translateY(-50%);
+        }
+
+        &::after {
+          border-inline-start: none;
+        }
+      }
+
+      /* ensure borders are layered correctly when focus or invalid styles are applied */
+      &:has(:invalid),
+      &:focus-within {
+        z-index: ${Number(euiTheme.levels.content) + 1};
+
+        & + .euiFlexItem {
+          z-index: ${euiTheme.levels.content};
+        }
+      }
     `;
   };
 
   const getInputGroupStyles = () => css`
     row-gap: ${euiTheme.size.xs};
+
+    &:hover .euiFormControlLayout {
+      &::after {
+        border-color: ${euiTheme.components.forms.borderHovered};
+      }
+    }
   `;
 
   // If there are no wildcards, show the index pattern as a read-only field
