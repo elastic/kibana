@@ -17,9 +17,7 @@ var pkg =
 
 // Detect AI coding agent sandboxes that may not have the correct Node.js version available.
 var isAiSandbox =
-  !!process.env.CLAUDECODE ||
-  !!process.env.CURSOR_AGENT ||
-  !!process.env.CODEX_SANDBOX;
+  !!process.env.CLAUDECODE || !!process.env.CURSOR_AGENT || !!process.env.CODEX_SANDBOX;
 
 if (!process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION) {
   // Note: This is written in ES5 so we can run this before anything else
