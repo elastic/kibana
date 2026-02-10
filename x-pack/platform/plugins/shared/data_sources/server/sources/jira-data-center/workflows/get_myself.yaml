@@ -1,0 +1,12 @@
+version: '1'
+name: 'sources.jira_data_center.get_myself'
+description: 'Get the authenticated user profile (current user)'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs: []
+steps:
+  - name: get-myself
+    type: jira-data-center.getMyself
+    connector-id: <%= stackConnectorId %>

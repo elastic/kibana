@@ -129,6 +129,27 @@ describe('JiraDataCenter', () => {
     });
   });
 
+  describe('getMyself action', () => {
+    it('should GET myself and return current user data', async () => {
+      const mockResponse = {
+        data: {
+          key: 'user',
+          name: 'Jane Doe',
+          emailAddress: 'jane@example.com',
+          displayName: 'Jane Doe',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraDataCenter.actions.getMyself.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://jira.example.com/rest/api/2/myself'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('getIssue action', () => {
     it('should GET issue by key and return response data', async () => {
       const mockResponse = {

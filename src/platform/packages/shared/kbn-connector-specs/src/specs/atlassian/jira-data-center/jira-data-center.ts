@@ -95,6 +95,15 @@ export const JiraDataCenter: ConnectorSpec = {
         return response.data;
       },
     },
+    getMyself: {
+      isTool: false,
+      input: z.object({}),
+      handler: async (ctx) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/rest/api/2/myself`);
+        return response.data;
+      },
+    },
     getIssue: {
       isTool: false,
       input: z.object({
