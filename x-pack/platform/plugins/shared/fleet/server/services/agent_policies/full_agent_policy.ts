@@ -676,7 +676,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;
