@@ -231,8 +231,19 @@ export function convertDatatableColumnsToAPI(
   const rows: NonNullable<DatatableStateESQL['rows']> = [];
   const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
 
-  // Preserve ES|QL column order based on the datasource layer columns
-  const orderedColumnIds = layer.columns.map(({ columnId }) => columnId);
+  // Column ordering: non-metric columns (rows + split_metrics_by) before metrics
+  const nonMetricColumnIds: string[] = [];
+  const metricColumnIds: string[] = [];
+  for (const { columnId } of layer.columns) {
+    const column = columnStateMap.get(columnId);
+    if (!column) continue;
+    if (isMetricColumnESQL(column, layer.columns)) {
+      metricColumnIds.push(columnId);
+    } else {
+      nonMetricColumnIds.push(columnId);
+    }
+  }
+  const orderedColumnIds = [...nonMetricColumnIds, ...metricColumnIds];
 
   for (const columnId of orderedColumnIds) {
     const column = columnStateMap.get(columnId);
