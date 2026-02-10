@@ -10,7 +10,7 @@ import { omitBy, isUndefined } from 'lodash';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { escape } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 const STATE_EXPIRATION_MS = 10 * 60 * 1000; // 10 minutes
@@ -135,15 +135,17 @@ export class OAuthStateClient {
    */
   public async get(stateParam: string): Promise<OAuthState | null> {
     try {
-      const sanitisedFilter = escape(stateParam);
+      const sanitisedStateParam = escapeQuotes(stateParam);
       const result = await this.unsecuredSavedObjectsClient.find<OAuthStateAttributes>({
         type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-        filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.state: "${sanitisedFilter}"`,
+        filter: `${OAUTH_STATE_SAVED_OBJECT_TYPE}.attributes.state: "${sanitisedStateParam}"`,
         perPage: 1,
       });
 
       if (result.saved_objects.length === 0) {
-        this.logger.warn(`OAuth state not found for state parameter: ${sanitisedFilter}`);
+        this.logger.warn(
+          `OAuth state not found for state parameter: ${stateParam}. Sanitised parameter: ${sanitisedStateParam}`
+        );
         return null;
       }
 
