@@ -51,11 +51,11 @@ export const EntityDetailsHighlightsResponse = z.object({
    * The highlights of the entity.
    */
   summary: z.object({
-    assetCriticality: z.array(z.object({})).optional(),
-    riskScore: z.array(z.object({})).optional(),
-    vulnerabilities: z.array(z.object({})).optional(),
+    assetCriticality: z.array(z.object({}).catchall(z.unknown())).optional(),
+    riskScore: z.array(z.object({}).catchall(z.unknown())).optional(),
+    vulnerabilities: z.array(z.object({}).catchall(z.unknown())).optional(),
     vulnerabilitiesTotal: z.object({}).catchall(z.number()).optional(),
-    anomalies: z.array(z.object({})).optional(),
+    anomalies: z.array(z.object({}).catchall(z.unknown())).optional(),
   }),
   replacements: Replacements,
   /**

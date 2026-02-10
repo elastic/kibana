@@ -268,6 +268,7 @@ components:
         metadata:
           type: object
           description: The resource arbitrary metadata.
+          additionalProperties: true
 
     SiemMigrationResourceData:
       description: The rule migration resource data.
