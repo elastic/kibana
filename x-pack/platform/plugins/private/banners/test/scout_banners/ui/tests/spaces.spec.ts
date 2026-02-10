@@ -59,6 +59,7 @@ test.describe('per-spaces banners', { tag: tags.ESS_ONLY }, () => {
   }) => {
     await context.clearCookies();
     await page.goto(kbnUrl.get('/login'));
+    expect(await pageObjects.banners.isLoginButtonVisible()).toBe(true);
 
     expect(await pageObjects.banners.isTopBannerVisible()).toBe(true);
     expect(await pageObjects.banners.getTopBannerText()).toBe('global banner text');

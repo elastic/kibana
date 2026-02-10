@@ -12,6 +12,7 @@ import { test } from '../fixtures';
 test.describe('global pages', { tag: tags.ESS_ONLY }, () => {
   test('displays the global banner on the login page', async ({ page, pageObjects, kbnUrl }) => {
     await page.goto(kbnUrl.get('/login'));
+    expect(await pageObjects.banners.isLoginButtonVisible()).toBe(true);
 
     expect(await pageObjects.banners.isTopBannerVisible()).toBe(true);
     expect(await pageObjects.banners.getTopBannerText()).toBe('global banner text');

@@ -10,6 +10,18 @@ import type { ScoutPage } from '@kbn/scout';
 export class BannersPageObject {
   constructor(private readonly page: ScoutPage) {}
 
+  async isLoginButtonVisible(): Promise<boolean> {
+    try {
+      await this.page.testSubj.waitForSelector('loginSubmit', {
+        state: 'visible',
+        timeout: 10000,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async isTopBannerVisible(): Promise<boolean> {
     try {
       await this.page.testSubj.waitForSelector('bannerInnerWrapper', {
