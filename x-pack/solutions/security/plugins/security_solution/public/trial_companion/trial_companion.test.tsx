@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
-import { TrialCompanion } from './trial_companion';
+import { filterAvailableTODOs, sameArrays, TrialCompanion } from './trial_companion';
 import { useKibana } from '../common/lib/kibana';
 import { useGetNBA } from './hooks/use_get_nba';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
@@ -17,6 +17,7 @@ import {
   GET_SET_UP_DISMISS_BUTTON_TEST_ID,
   TEST_SUBJ_PREFIX,
 } from './nba_get_setup_panel';
+import type { NBA, NBATODOItem } from './nba_translations';
 import { NBA_TODO_LIST } from './nba_translations';
 import { TestProviders } from '../common/mock';
 import userEvent from '@testing-library/user-event';
@@ -26,7 +27,6 @@ import {
   ProductFeatureKey,
   type ProductFeatureKeyType,
 } from '@kbn/security-solution-features/src/product_features_keys';
-import { difference } from 'lodash';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./hooks/use_get_nba');
@@ -300,40 +300,105 @@ describe('TrialCompanion', () => {
     );
   });
 
-  describe('samples of lodash difference behaviour', () => {
+  describe('filterAvailableTODOs', () => {
+    const mockNBA: NBA = {
+      message: 'test',
+      title: 'test',
+      apps: [],
+    };
+
     it.each<{
       scenario: string;
-      firstArray: number[];
-      secondArray: number[];
-      expectedResult: number[];
+      todoList: NBATODOItem[];
+      features: Set<ProductFeatureKeyType>;
+      expected: Milestone[];
     }>([
       {
-        scenario: 'should return empty array when both arrays are empty',
-        firstArray: [],
-        secondArray: [],
-        expectedResult: [],
+        scenario: 'all disabled',
+        todoList: [
+          {
+            milestoneId: Milestone.M1,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+          {
+            milestoneId: Milestone.M2,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+          {
+            milestoneId: Milestone.M3,
+            translate: mockNBA,
+            features: [ProductFeatureKey.detections],
+          },
+        ],
+        features: new Set(),
+        expected: [],
       },
       {
-        scenario: 'should return empty array when both arrays are the same',
-        firstArray: [1, 2, 3],
-        secondArray: [1, 2, 3],
-        expectedResult: [],
+        scenario: 'enabled by default',
+        todoList: NBA_TODO_LIST,
+        features: new Set(),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M6],
       },
       {
-        scenario: 'should return elements from the first array when, different',
-        firstArray: [1, 2, 3],
-        secondArray: [1, 3],
-        expectedResult: [2],
+        scenario: 'soc ai',
+        todoList: NBA_TODO_LIST,
+        features: new Set([ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant]),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M5, Milestone.M6],
       },
       {
-        scenario: 'should return empty, even if second array has more elements',
-        firstArray: [1, 3],
-        secondArray: [1, 2, 3],
-        expectedResult: [],
+        scenario: 'only detections',
+        todoList: NBA_TODO_LIST,
+        features: new Set([ProductFeatureKey.detections]),
+        expected: [Milestone.M1, Milestone.M2, Milestone.M3, Milestone.M6],
       },
-    ])('$scenario', ({ firstArray, secondArray, expectedResult }) => {
-      const result = difference(firstArray, secondArray);
-      expect(result).toEqual(expectedResult);
+      {
+        scenario: 'full',
+        todoList: NBA_TODO_LIST,
+        features: fullFeatureSet,
+        expected: NBA_TODO_LIST.map((i) => i.milestoneId),
+      },
+    ])('$scenario', ({ todoList, features, expected }) => {
+      const result = filterAvailableTODOs(todoList, features);
+      expect(result.map((v) => v.milestoneId)).toEqual(expected);
+    });
+  });
+
+  describe('sameArrays', () => {
+    it.each<{
+      scenario: string;
+      first: Milestone[];
+      second: Milestone[];
+      expected: boolean;
+    }>([
+      {
+        scenario: 'empty',
+        first: [],
+        second: [],
+        expected: true,
+      },
+      {
+        scenario: 'first different',
+        first: [Milestone.M1, Milestone.M2, Milestone.M3],
+        second: [Milestone.M3, Milestone.M1],
+        expected: false,
+      },
+      {
+        scenario: 'second different',
+        first: [Milestone.M3, Milestone.M1, Milestone.M5],
+        second: [Milestone.M1, Milestone.M2, Milestone.M3],
+        expected: false,
+      },
+      {
+        scenario: 'same with different order',
+        first: [Milestone.M3, Milestone.M1, Milestone.M5],
+        second: [Milestone.M1, Milestone.M5, Milestone.M3],
+        expected: true,
+      },
+    ])('$scenario', ({ first, second, expected }) => {
+      const result = sameArrays(first, second);
+      expect(result).toEqual(expected);
     });
   });
 });
