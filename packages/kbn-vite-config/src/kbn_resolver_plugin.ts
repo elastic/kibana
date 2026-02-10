@@ -25,6 +25,17 @@ export function readPackageMap(repoRoot: string): Map<string, string> {
   return new Map(JSON.parse(content) as Array<[string, string]>);
 }
 
+export interface GenerateKbnAliasesOptions {
+  /**
+   * When true, check each package's package.json for a "browser" field
+   * and use it as the alias target instead of the package directory.
+   * This ensures that packages like @kbn/i18n which have separate
+   * browser entry points (without Node.js-only imports like fs/promises)
+   * resolve correctly in browser builds.
+   */
+  preferBrowser?: boolean;
+}
+
 /**
  * Generate Vite-compatible aliases from the Kibana package map.
  *
@@ -35,15 +46,20 @@ export function readPackageMap(repoRoot: string): Map<string, string> {
  * `@kbn/i18n`.
  *
  * @param repoRoot - The root directory of the Kibana repository
+ * @param options - Optional configuration
  * @returns An object mapping package IDs to their absolute paths
  */
-export function generateKbnAliases(repoRoot: string): Record<string, string> {
+export function generateKbnAliases(
+  repoRoot: string,
+  options?: GenerateKbnAliasesOptions
+): Record<string, string> {
   if (!repoRoot) {
     throw new Error(
       `generateKbnAliases requires a valid repoRoot, but received: ${JSON.stringify(repoRoot)}`
     );
   }
 
+  const { preferBrowser = false } = options ?? {};
   const packageMap = readPackageMap(repoRoot);
   const aliases: Record<string, string> = {};
 
@@ -53,7 +69,26 @@ export function generateKbnAliases(repoRoot: string): Record<string, string> {
   const sorted = [...packageMap.entries()].sort((a, b) => b[0].length - a[0].length);
 
   for (const [pkgId, relDir] of sorted) {
-    aliases[pkgId] = Path.resolve(repoRoot, relDir);
+    const absolutePkgDir = Path.resolve(repoRoot, relDir);
+
+    if (preferBrowser) {
+      // Check the package's package.json for a "browser" field.
+      // Vite's resolve.mainFields only applies to node_modules resolution,
+      // not directory aliases, so we need to resolve browser entries here.
+      try {
+        const pkgJsonPath = Path.join(absolutePkgDir, 'package.json');
+        const pkgJson = JSON.parse(Fs.readFileSync(pkgJsonPath, 'utf8'));
+        if (typeof pkgJson.browser === 'string') {
+          const browserEntry = Path.resolve(absolutePkgDir, pkgJson.browser);
+          aliases[pkgId] = browserEntry;
+          continue;
+        }
+      } catch {
+        // No package.json or parse error — fall through to directory alias
+      }
+    }
+
+    aliases[pkgId] = absolutePkgDir;
   }
 
   return aliases;
@@ -69,6 +104,14 @@ export interface KbnResolverPluginOptions {
    * Additional aliases to add (will be merged with @kbn/* aliases)
    */
   additionalAliases?: Record<string, string>;
+
+  /**
+   * When true, check each package's package.json for a "browser" field
+   * and prefer it over the default entry point. Use this for browser
+   * builds where packages like @kbn/i18n have separate browser entries
+   * that exclude Node.js-only modules (e.g. fs/promises).
+   */
+  preferBrowser?: boolean;
 }
 
 /**
@@ -110,31 +153,48 @@ function resolveFileOnDisk(targetPath: string): string | null {
 }
 
 /**
- * Cache of package.json entry points. Keyed by absolute package directory.
+ * Cache of package.json entry points. Keyed by `${absolutePkgDir}:${preferBrowser}`.
  * Value is the resolved entry file path, or null if not determinable.
  */
 const pkgEntryCache = new Map<string, string | null>();
 
-function resolvePackageEntry(absolutePkgDir: string): string | null {
-  if (pkgEntryCache.has(absolutePkgDir)) {
-    return pkgEntryCache.get(absolutePkgDir)!;
+function resolvePackageEntry(
+  absolutePkgDir: string,
+  options?: { preferBrowser?: boolean }
+): string | null {
+  const preferBrowser = options?.preferBrowser ?? false;
+  const cacheKey = `${absolutePkgDir}:${preferBrowser}`;
+
+  if (pkgEntryCache.has(cacheKey)) {
+    return pkgEntryCache.get(cacheKey)!;
   }
 
   // Try reading the package's package.json for its entry point
   const pkgJsonPath = Path.join(absolutePkgDir, 'package.json');
   try {
     const pkgJson = JSON.parse(Fs.readFileSync(pkgJsonPath, 'utf8'));
+
+    // When preferBrowser is true, check the "browser" field first.
+    // Packages like @kbn/i18n use this field to provide a browser-safe
+    // entry point that excludes Node.js-only modules (e.g. fs/promises).
+    if (preferBrowser && typeof pkgJson.browser === 'string') {
+      const browserPath = Path.resolve(absolutePkgDir, pkgJson.browser);
+      const resolved = resolveFileOnDisk(browserPath);
+      if (resolved) {
+        pkgEntryCache.set(cacheKey, resolved);
+        return resolved;
+      }
+    }
+
     // Prefer: exports["."] > main > module, then fall back to index resolution
     const exportsEntry =
-      pkgJson.exports?.['.']?.import ??
-      pkgJson.exports?.['.']?.default ??
-      pkgJson.exports?.['.'];
+      pkgJson.exports?.['.']?.import ?? pkgJson.exports?.['.']?.default ?? pkgJson.exports?.['.'];
     const entry = exportsEntry ?? pkgJson.main ?? pkgJson.module;
     if (entry && typeof entry === 'string') {
       const entryPath = Path.resolve(absolutePkgDir, entry);
       try {
         if (Fs.statSync(entryPath).isFile()) {
-          pkgEntryCache.set(absolutePkgDir, entryPath);
+          pkgEntryCache.set(cacheKey, entryPath);
           return entryPath;
         }
       } catch {
@@ -147,7 +207,7 @@ function resolvePackageEntry(absolutePkgDir: string): string | null {
 
   // Fall back to index file resolution
   const resolved = resolveFileOnDisk(absolutePkgDir);
-  pkgEntryCache.set(absolutePkgDir, resolved);
+  pkgEntryCache.set(cacheKey, resolved);
   return resolved;
 }
 
@@ -160,7 +220,7 @@ function resolvePackageEntry(absolutePkgDir: string): string | null {
  * (which was causing 15-40% of total build time).
  */
 export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
-  const { repoRoot, additionalAliases: _additionalAliases = {} } = options;
+  const { repoRoot, additionalAliases: _additionalAliases = {}, preferBrowser = false } = options;
 
   if (!repoRoot) {
     throw new Error(
@@ -217,7 +277,7 @@ export function kbnResolverPlugin(options: KbnResolverPluginOptions): Plugin {
           resolved = resolveFileOnDisk(Path.join(absolutePkgDir, subPath));
         } else {
           // Bare import: @kbn/foo → resolve via package.json entry or index
-          resolved = resolvePackageEntry(absolutePkgDir);
+          resolved = resolvePackageEntry(absolutePkgDir, { preferBrowser });
         }
 
         resolveCache.set(source, resolved);

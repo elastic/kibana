@@ -12,7 +12,7 @@ import Fs from 'fs';
 import FsPromises from 'fs/promises';
 import type { Plugin } from 'vite';
 
-import { createViteLogger, type ViteServerLog } from './types.ts';
+import { createViteLogger, type ViteServerLog } from './types';
 
 // Prevent duplicate log messages when multiple Vite instances run in
 // the same process (parent runtime, optimizer, child runtime).

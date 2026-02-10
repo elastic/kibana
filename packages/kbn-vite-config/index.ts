@@ -23,6 +23,7 @@ export {
   readPackageMap,
   generateKbnAliases,
   type KbnResolverPluginOptions,
+  type GenerateKbnAliasesOptions,
 } from './src/kbn_resolver_plugin.js';
 
 // Externals and bundle remotes

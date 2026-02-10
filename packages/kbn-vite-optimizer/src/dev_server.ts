@@ -9,7 +9,6 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { getPackages } from '@kbn/repo-packages';
 import { transformSync } from 'rolldown/experimental';
 import type { Connect } from 'vite';
 import { discoverUiPlugins, type PluginInfo } from './discover_plugins';
@@ -83,12 +82,18 @@ function kbnBrowserTransformPlugin(): Plugin {
         lang,
         sourcemap: true, // Browser always needs source maps for devtools
 
-        // JSX settings — uses @emotion/react for css prop support
+        // JSX settings — uses @emotion/react for css prop support.
+        // React Fast Refresh (refresh: true) injects $RefreshReg$ and
+        // $RefreshSig$ calls so the refresh wrapper plugin can add
+        // import.meta.hot.accept() for HMR instead of full-reload.
+        // This is needed because we remove vite:oxc (which would normally
+        // handle refresh when configured by @vitejs/plugin-react).
         jsx: needsJsx
           ? {
               runtime: 'automatic',
               importSource: '@emotion/react',
               development: true,
+              refresh: true,
             }
           : undefined,
 
@@ -137,53 +142,6 @@ export interface DevServer {
   /** Map of plugin ID to its required plugin IDs */
   pluginDependencies: Record<string, string[]>;
   getImportMap(): Record<string, string>;
-}
-
-/**
- * Generate @kbn/* package aliases pointing to source.
- * Uses parallel async I/O to check candidate paths concurrently,
- * which is faster than sequential Fs.existsSync for hundreds of packages.
- */
-async function generateKbnAliases(repoRoot: string): Promise<Record<string, string>> {
-  const packages = getPackages(repoRoot);
-  const aliases: Record<string, string> = {};
-  const fsPromises = Fs.promises;
-
-  // Helper: check if a path exists (async, non-throwing)
-  const exists = async (p: string): Promise<boolean> => {
-    try {
-      await fsPromises.access(p);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  // Resolve all @kbn/* aliases in parallel
-  const kbnPackages = packages.filter((pkg) => pkg.manifest.id.startsWith('@kbn/'));
-  const results = await Promise.all(
-    kbnPackages.map(async (pkg) => {
-      const srcDir = Path.resolve(pkg.directory, 'src');
-      const indexTs = Path.resolve(pkg.directory, 'index.ts');
-      const indexTsx = Path.resolve(pkg.directory, 'index.tsx');
-
-      if (await exists(srcDir)) {
-        return [pkg.manifest.id, srcDir] as const;
-      } else if (await exists(indexTs)) {
-        return [pkg.manifest.id, indexTs] as const;
-      } else if (await exists(indexTsx)) {
-        return [pkg.manifest.id, indexTsx] as const;
-      } else {
-        return [pkg.manifest.id, pkg.directory] as const;
-      }
-    })
-  );
-
-  for (const [id, path] of results) {
-    aliases[id] = path;
-  }
-
-  return aliases;
 }
 
 /**
@@ -408,7 +366,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
 
   log.info(`Discovered ${plugins.length} UI plugins for ESM serving`);
 
-  const kbnAliases = await generateKbnAliases(repoRoot);
+  const kbnAliases = kbnViteConfig.generateKbnAliases(repoRoot, { preferBrowser: true });
 
   // Create plugin path aliases and collect entry points for pre-bundling
   const pluginAliases: Record<string, string> = {};
@@ -754,7 +712,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
       kbnPluginRoutesPlugin(plugins, repoRoot, log),
 
       // Kibana-specific plugins from @kbn/vite-config
-      kbnViteConfig.kbnResolverPlugin({ repoRoot }),
+      kbnViteConfig.kbnResolverPlugin({ repoRoot, preferBrowser: true }),
       kbnViteConfig.kbnStylesPlugin({
         repoRoot,
         themeTags: ['borealislight', 'borealisdark'],
