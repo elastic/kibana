@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useConfigureCasesNavigation } from '../../../common/navigation';
+import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useCreateTemplate } from '../hooks/use_create_template';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
@@ -41,7 +41,7 @@ export const CreateTemplateForm = () => {
   const { owner } = useCasesContext();
   const availableOwners = useAvailableCasesOwners();
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
-  const { navigateToConfigureCases } = useConfigureCasesNavigation();
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const onSubmit = useCallback(
     async (data: { name: string; owner: string; definition: string }) => {
@@ -51,10 +51,9 @@ export const CreateTemplateForm = () => {
           definition: data.definition,
         },
       });
-      // TODO: navigate to all templates page
-      navigateToConfigureCases();
+      navigateToCasesTemplates();
     },
-    [defaultOwnerValue, mutateAsync, navigateToConfigureCases]
+    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates]
   );
 
   return (
