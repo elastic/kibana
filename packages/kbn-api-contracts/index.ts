@@ -8,22 +8,14 @@
  */
 
 export { loadOas } from './src/input/load_oas';
-export { normalizeOas } from './src/input/normalize_oas';
-export { selectBaseline } from './src/baseline/select_baseline';
-export { loadBaseline } from './src/baseline/load_baseline';
-export { diffOas } from './src/diff/diff_oas';
-export { filterBreakingChanges } from './src/diff/breaking_rules';
+export { runBumpDiff } from './src/diff/run_bump_diff';
+export { parseBumpDiff } from './src/diff/parse_bump_diff';
+export { applyAllowlist } from './src/diff/breaking_rules';
 export { formatFailure } from './src/report/format_failure';
-export { DOCS_LINK, ESCALATION_LINK } from './src/report/links';
+export { ESCALATION_LINK } from './src/report/links';
+export { loadAllowlist } from './src/allowlist/load_allowlist';
+export { checkTerraformImpact } from './src/terraform/check_terraform_impact';
 
 export type { OpenAPISpec } from './src/input/load_oas';
-export type { NormalizedSpec, NormalizedOperation } from './src/input/normalize_oas';
-export type { Distribution, BaselineSelection } from './src/baseline/select_baseline';
-export type {
-  OasDiff,
-  PathDiff,
-  MethodDiff,
-  OperationDiff,
-  OperationChange,
-} from './src/diff/diff_oas';
-export type { BreakingChange } from './src/diff/breaking_rules';
+export type { BumpDiffEntry } from './src/diff/parse_bump_diff';
+export type { BreakingChange, FilterResult } from './src/diff/breaking_rules';

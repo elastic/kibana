@@ -1,90 +1,53 @@
 # @kbn/api-contracts
 
-Kibana API contract validation tooling that detects breaking changes in public REST APIs by comparing current OpenAPI specifications against versioned baselines.
+Detects breaking changes in Kibana's public REST APIs that affect the Terraform provider, by comparing OpenAPI specs between the PR branch and the base branch using [bump-cli](https://docs.bump.sh/help/continuous-integration/cli/).
 
 ## Overview
 
-This package provides CLI tools and validation logic to prevent unintentional breaking changes to Kibana's public REST APIs. It runs automatically in CI pipelines before code is merged.
+This package runs in CI on every PR. It compares the current branch's OAS files against the base branch (e.g. `main`) to detect breaking API changes, then filters to only those affecting Terraform provider APIs.
 
-**When checks run:**
-- **Pull Request CI:** Validates that proposed API changes don't break existing contracts
-- **Post-promotion (Serverless):** Updates serverless baseline after version promotion
-- **Release branch creation (Stack):** Creates new minor version baseline
-
-**What it protects:**
-- API endpoint availability (paths and HTTP methods)
-- Request/response contracts (required fields, types, structure)
-- Backward compatibility for existing API consumers
-
-## Architecture
-
-The validation pipeline follows this data flow:
-
+**Flow:**
 ```
-Load Spec → Normalize → Load Baseline → Diff → Filter Breaking → Report
+git show base OAS → bump diff → parse → filter to TF APIs → apply allowlist → report
 ```
 
 **Key components:**
 
-1. **`src/input/`** - Load and normalize OpenAPI specs
-   - `load_oas.ts` - Parses YAML specs from disk
-   - `normalize_oas.ts` - Strips non-contract elements (descriptions, examples, metadata)
+1. **`src/diff/`** - Breaking change detection via bump-cli
+   - `run_bump_diff.ts` - Shells out to `bump-cli diff` with two OAS files
+   - `parse_bump_diff.ts` - Converts bump-cli JSON output to `BreakingChange[]`
+   - `breaking_rules.ts` - Allowlist filtering
 
-2. **`src/baseline/`** - Baseline selection and loading
-   - `select_baseline.ts` - Determines which baseline to compare against
-   - `load_baseline.ts` - Reads baseline from disk (with graceful missing file handling)
+2. **`src/terraform/`** - Terraform impact analysis
+   - `check_terraform_impact.ts` - Matches breaking changes against TF provider APIs
+   - `load_terraform_apis.ts` - Loads TF API inventory from `terraform_provider_apis.yaml`
 
-3. **`src/diff/`** - Comparison and breaking change detection
-   - `diff_oas.ts` - Deep comparison of normalized specs
-   - `breaking_rules.ts` - Filters diffs for breaking changes
-
-4. **`src/report/`** - Error formatting and user guidance
-   - `format_failure.ts` - Generates actionable error reports with escalation paths
+3. **`src/report/`** - Error formatting and user guidance
+   - `format_failure.ts` - Generates actionable error reports
    - `links.ts` - Documentation and support links
 
-5. **`scripts/`** - CLI entry points
-   - `check_contracts.ts` - Validates current spec against baseline
-   - `update_baseline.ts` - Creates/updates baseline files
+4. **`src/allowlist/`** - Escape hatch for approved breaking changes
+   - `load_allowlist.ts` - Loads and validates `allowlist.json`
+
+5. **`scripts/`** - CLI entry point
+   - `check_contracts.ts` - Orchestrates the full pipeline
 
 ## Breaking Change Rules
 
-The following changes are considered **breaking** and will fail CI:
+bump-cli detects these as breaking:
 
-| Change Type | Why Breaking | Example |
-|-------------|--------------|---------|
-| **Path removed** | Endpoint no longer exists | `DELETE /api/saved_objects/{type}/{id}` |
-| **Method removed** | HTTP verb no longer supported | Removing `POST` from `/api/fleet/agents` |
-| **Response property removed** | Consumers may depend on the field | Removing `name` from response |
-| **Required request property added** | Existing callers won't send new required field | Adding required `email` to POST body |
-| **Required parameter added** | Existing calls won't include new required param | Adding required `version` query param |
-| **Optional parameter made required** | Existing calls may not include the param | Making `filter` query param required |
-| **Type changed** | Consumers expect the original type | Changing `id` from string to number |
-
-**Non-breaking changes** (allowed):
-- Adding new paths or methods
-- Adding optional fields to requests/responses
-- Updating descriptions, examples, or metadata
-- Adding new response status codes
-
-## Current Limitations
-
-This implementation distinguishes between breaking and non-breaking changes at the schema level:
-
-**What's detected correctly:**
-- Adding optional properties to responses (non-breaking)
-- Adding required properties to requests (breaking)
-- Removing properties (breaking)
-- Making optional parameters required (breaking)
-
-**Known limitations:**
-- `$ref` changes are treated as breaking even if semantically equivalent
-- `allOf`/`oneOf`/`anyOf` compositions are compared structurally, not semantically
-- No support for semantic versioning of individual endpoints yet
-- No deprecation-aware logic yet
+| Change Type | Example |
+|-------------|---------|
+| **Path removed** | `DELETE /api/spaces/space` removed entirely |
+| **Method removed** | `POST` removed from `/api/fleet/agents` |
+| **Required property added** | New required `email` field on request body |
+| **Optional made required** | `filter` query param becomes required |
+| **Property removed** | Response field `name` removed |
+| **Type changed** | `id` changed from string to number |
 
 ## Allowlist
 
-For approved breaking changes that should be ignored, add entries to `packages/kbn-api-contracts/allowlist.json`:
+For approved breaking changes, add entries to `allowlist.json`:
 
 ```json
 {
@@ -95,293 +58,84 @@ For approved breaking changes that should be ignored, add entries to `packages/k
       "reason": "Intentional removal as part of saved objects migration",
       "approvedBy": "elastic/kibana-core",
       "prUrl": "https://github.com/elastic/kibana/pull/12345",
-      "expiresAt": "2025-12-31"
+      "expiresAt": "2026-12-31"
     }
   ]
 }
 ```
 
-**Required fields:**
-- `path` - API path (must match exactly)
-- `method` - HTTP method (lowercase) or `ALL` for path-level changes
-- `reason` - Explanation for why this is approved
-- `approvedBy` - GitHub username or team
+**Required fields:** `path`, `method`, `reason`, `approvedBy`
+**Optional fields:** `prUrl`, `expiresAt`
 
-**Optional fields:**
-- `prUrl` - Link to approval PR
-- `expiresAt` - ISO date after which the entry should be reviewed (auto-filtered when expired)
+## Usage
 
-## Usage Examples
+### CI (automatic)
 
-### Check Contracts (CI/Local Development)
+Runs via `.buildkite/scripts/steps/checks/api_contracts.sh` on every PR. Compares against `$BUILDKITE_PULL_REQUEST_BASE_BRANCH` (defaults to `main`).
 
-**Serverless:**
+### Local development
+
 ```bash
-# Check serverless API contracts against latest baseline
-node packages/kbn-api-contracts/scripts/check_contracts \
-  --distribution serverless \
-  --specPath oas_docs/output/kibana.serverless.yaml
-
-# Exit codes:
-# 0 = No breaking changes (CI passes)
-# 1 = Breaking changes detected (CI fails)
-```
-
-**Stack:**
-```bash
-# Check stack API contracts for current version
-node packages/kbn-api-contracts/scripts/check_contracts \
+# Check stack contracts against main
+node scripts/check_api_contracts.js \
   --distribution stack \
-  --specPath oas_docs/output/kibana.yaml \
-  --version 9.2.0
-
-# Version is extracted from package.json in CI
-KIBANA_VERSION=$(jq -r '.version' package.json)
-node packages/kbn-api-contracts/scripts/check_contracts \
-  --distribution stack \
-  --version "$KIBANA_VERSION" \
-  --specPath oas_docs/output/kibana.yaml
-```
-
-**Override baseline for testing:**
-```bash
-# Test against specific baseline file
-node packages/kbn-api-contracts/scripts/check_contracts \
-  --distribution stack \
-  --version 9.2.0 \
-  --baselinePath /tmp/test-baseline.yaml
-```
-
-### Update Baseline
-
-**Serverless (Post-Promotion Pipeline Only):**
-```bash
-# Update serverless baseline after version promotion
-# Blocked by default - requires explicit flag
-node packages/kbn-api-contracts/scripts/update_baseline \
-  --distribution serverless \
-  --allowServerless \
-  --specPath oas_docs/output/kibana.serverless.yaml
-```
-
-**Stack (Release Branch Creation):**
-```bash
-# Create baseline for new minor version (e.g., 9.2.0)
-node packages/kbn-api-contracts/scripts/update_baseline \
-  --distribution stack \
-  --version 9.2.0 \
   --specPath oas_docs/output/kibana.yaml
 
-# Creates: baselines/stack/9.2.yaml
-```
-
-## Baseline Management
-
-### Directory Structure
-
-```
-packages/kbn-api-contracts/
-└── baselines/
-    ├── serverless/
-    │   └── current.yaml          # Updated post-promotion
-    └── stack/
-        ├── 9.2.yaml               # Minor version baselines
-        ├── 9.1.yaml
-        └── 8.19.yaml
-```
-
-### Purpose of Baselines
-
-Baselines are **normalized OpenAPI specifications** that represent the committed API contract for a version. They serve as the source of truth for what API consumers can depend on.
-
-**Baseline characteristics:**
-- Stored as YAML files (~hundreds of KB each)
-- Version-controlled in the repository (similar to `kbn-checks-saved-objects-cli` storing field mappings)
-- Stripped of non-contract metadata (descriptions, examples, tags)
-- Deeply sorted for deterministic diffs
-
-### Baseline Creation & Updates
-
-**Stack (Minor Version Strategy):**
-
-Each minor version gets its own baseline file (`baselines/stack/{major}.{minor}.yaml`):
-
-1. **When created:** During release branch creation (e.g., `9.2` branch cutoff)
-2. **How created:** Run `update_baseline.ts` with `--distribution stack --version 9.2.0`
-3. **Version selection:** Automatically uses `{major}.{minor}` from semver (ignores patch)
-4. **When updated:** Only if backporting intentional API changes (rare)
-5. **Patch versions:** 9.2.1, 9.2.2, etc. all compare against `9.2.yaml`
-
-**Example flow:**
-```bash
-# Release engineer creates 9.2 branch
-git checkout -b 9.2
-node packages/kbn-api-contracts/scripts/update_baseline --distribution stack --version 9.2.0
-git add baselines/stack/9.2.yaml
-git commit -m "Create API baseline for 9.2"
-```
-
-**Serverless (Current Snapshot Strategy):**
-
-Single rolling baseline (`baselines/serverless/current.yaml`):
-
-1. **When updated:** Post-promotion pipeline after each serverless release
-2. **How updated:** Automated pipeline runs `update_baseline.ts --allowServerless`
-3. **Protection:** Manual updates blocked without `--allowServerless` flag
-4. **Frequency:** Every serverless promotion (~weekly)
-
-**Serverless pipeline example:**
-```yaml
-# .buildkite/pipelines/serverless_promote.yml
-- command: |
-    node packages/kbn-api-contracts/scripts/update_baseline \
-      --distribution serverless \
-      --allowServerless
-  label: "Update serverless API baseline"
-```
-
-### Baseline File Format
-
-Baselines are normalized YAML matching this structure:
-
-```yaml
-openapi: 3.0.0
-info:
-  title: Kibana API
-  version: 9.2.0
-paths:
-  /api/saved_objects/{type}/{id}:
-    get:
-      operationId: getSavedObject
-      parameters: [...]
-      responses: {...}
-    delete:
-      operationId: deleteSavedObject
-      [...]
-```
-
-**What's normalized out:**
-- Descriptions and summaries
-- Examples and default values
-- Tags and external docs
-- x-extension metadata
-
-**What's preserved:**
-- All paths and methods
-- Parameter definitions (required/optional, types, names)
-- Request/response schemas
-- Required fields and types
-
-## CI Integration
-
-### Buildkite Pipeline
-
-**Location:** `.buildkite/scripts/steps/checks/api_contracts.sh`
-
-**When it runs:**
-- Every PR CI build
-- Pre-merge validation
-- Post-promotion pipelines (serverless baseline updates)
-
-**What it does:**
-```bash
-# 1. Bootstrap dependencies
-.buildkite/scripts/bootstrap.sh
-
-# 2. Check stack contracts
-node packages/kbn-api-contracts/scripts/check_contracts \
-  --distribution stack \
-  --version "$KIBANA_VERSION" \
-  --specPath oas_docs/output/kibana.yaml
-
-# 3. Check serverless contracts
-node packages/kbn-api-contracts/scripts/check_contracts \
+# Check serverless contracts against a specific branch
+node scripts/check_api_contracts.js \
   --distribution serverless \
-  --specPath oas_docs/output/kibana.serverless.yaml
+  --specPath oas_docs/output/kibana.serverless.yaml \
+  --baseBranch 9.3
 ```
 
-### Handling Failures
+**Flags:**
+- `--distribution` (required) - `stack` or `serverless`
+- `--specPath` - Path to current OAS file (auto-detected from distribution)
+- `--baseBranch` - Branch to compare against (default: `main`)
+- `--allowlistPath` - Override allowlist path
+- `--terraformApisPath` - Override TF API inventory path
 
-**If the check fails in CI:**
+**Prerequisites:** bump-cli must be installed in `oas_docs/`:
+```bash
+cd oas_docs && npm install && cd ..
+```
 
-1. **Review the failure report** - Identifies specific breaking changes
-2. **Determine if change is intentional:**
-   - **Unintentional break:** Fix the code to maintain compatibility
-   - **Intentional break:** Follow API versioning process (requires label approval)
+## Handling CI Failures
 
-3. **For intentional breaking changes:**
-   - Add `breaking-change-approved` label to PR
-   - Document the breaking change in PR description
-   - Update consumer documentation
-   - Consider deprecation period if possible
+1. **Review the report** - identifies which endpoints and what changed
+2. **If unintentional:** fix the code to maintain compatibility
+3. **If intentional:** add an allowlist entry with team approval
 
 ## Troubleshooting
 
-### "No baseline found - skipping check"
+### "No base OAS found on origin/{branch} - skipping check"
 
-**Cause:** Baseline file doesn't exist for the version/distribution  
-**Solution:**
-- Stack: Ensure baseline exists for minor version (`baselines/stack/{major}.{minor}.yaml`)
-- Serverless: Ensure `baselines/serverless/current.yaml` exists
-- Check baseline was committed to repository
+The base branch OAS file isn't available. This happens on:
+- First PR to a new branch before `oas_docs/output/` is committed
+- Shallow clones missing the base ref
 
-### "Invalid semver version: X"
+The script tries `git fetch origin {branch} --depth=1` as a fallback.
 
-**Cause:** Version string doesn't parse as valid semver  
-**Solution:**
-- Stack requires valid semver (e.g., `9.2.0`, `8.19.1`)
-- Snapshots are automatically handled (`9.2.0-SNAPSHOT` → `9.2.0`)
-- Verify `package.json` version is valid
+### bump-cli not found
 
-### "Version is required for stack baseline selection"
-
-**Cause:** Missing `--version` flag for stack distribution  
-**Solution:**
+Ensure `oas_docs/node_modules` is populated:
 ```bash
-# Always provide version for stack
-node packages/kbn-api-contracts/scripts/check_contracts \
-  --distribution stack \
-  --version 9.2.0 \
-  --specPath oas_docs/output/kibana.yaml
+cd oas_docs && npm install && cd ..
 ```
-
-### "Serverless baseline updates are blocked"
-
-**Cause:** Attempted manual serverless baseline update without override  
-**Solution:**
-- Serverless baselines are updated by post-promotion pipeline only
-- For testing: use `--allowServerless` flag (not for production)
-- For production: wait for automated pipeline update
 
 ### Type errors or module resolution failures
 
-**Cause:** Dependencies not installed or stale build  
-**Solution:**
 ```bash
-# Re-bootstrap dependencies
 yarn kbn bootstrap
-
-# Type check the package
 yarn test:type_check --project packages/kbn-api-contracts/tsconfig.json
 ```
-
-## Documentation & Support
-
-- **Package Documentation:** This README
-- **Report Issues:** [GitHub Issues](https://github.com/elastic/kibana/issues/new)
 
 ## Testing
 
 ```bash
-# Run all unit tests
-yarn test:jest --config packages/kbn-api-contracts/jest.config.js packages/kbn-api-contracts --maxWorkers=2
-
-# Run integration tests (CLI scripts)
-yarn test:jest --config packages/kbn-api-contracts/jest.config.js packages/kbn-api-contracts/scripts/ --maxWorkers=2
+# Unit tests
+yarn test:jest packages/kbn-api-contracts
 
 # Type check
 yarn test:type_check --project packages/kbn-api-contracts/tsconfig.json
-
-# Lint
-node scripts/eslint --fix packages/kbn-api-contracts/
 ```

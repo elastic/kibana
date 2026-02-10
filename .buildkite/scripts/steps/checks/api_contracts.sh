@@ -8,15 +8,19 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check API Contracts
 
-KIBANA_VERSION="$(jq -r '.version' package.json)"
+echo "Installing bump-cli dependencies..."
+cd oas_docs && npm install --no-save && cd ..
 
-echo "Checking stack API contracts..."
+BASE_BRANCH="${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}"
+
+echo "Checking stack API contracts against ${BASE_BRANCH}..."
 node scripts/check_api_contracts.js \
   --distribution stack \
   --specPath oas_docs/output/kibana.yaml \
-  --version "$KIBANA_VERSION"
+  --baseBranch "$BASE_BRANCH"
 
-echo "Checking serverless API contracts..."
+echo "Checking serverless API contracts against ${BASE_BRANCH}..."
 node scripts/check_api_contracts.js \
   --distribution serverless \
-  --specPath oas_docs/output/kibana.serverless.yaml
+  --specPath oas_docs/output/kibana.serverless.yaml \
+  --baseBranch "$BASE_BRANCH"

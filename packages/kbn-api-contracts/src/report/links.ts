@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DOCS_LINK = 'https://docs.elastic.dev/kibana-dev/api-contracts';
 export const ESCALATION_LINK = 'https://github.com/elastic/kibana/issues/new';

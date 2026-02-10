@@ -100,7 +100,7 @@ describe('formatFailure', () => {
     const changes = [pathRemovedBreaking('/api/test')];
     const output = formatFailure(changes);
 
-    expectOutputContains(output, 'Documentation:', 'Need help?');
+    expectOutputContains(output, 'Need help?');
   });
 
   describe('terraform impact', () => {

@@ -9,38 +9,36 @@
 
 import type { BreakingChange } from '../diff/breaking_rules';
 import type { TerraformImpactResult, TerraformImpact } from '../terraform/check_terraform_impact';
-import { DOCS_LINK, ESCALATION_LINK } from './links';
+import { ESCALATION_LINK } from './links';
 
-const HEADER = [
-  '╔════════════════════════════════════════════════════════════════════════════╗',
-  '║                     API CONTRACT BREAKING CHANGES DETECTED                 ║',
-  '╚════════════════════════════════════════════════════════════════════════════╝',
-  '',
-];
+const HEADER = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                     API CONTRACT BREAKING CHANGES DETECTED                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
 
-const TERRAFORM_HEADER = [
-  '╔════════════════════════════════════════════════════════════════════════════╗',
-  '║                        TERRAFORM PROVIDER IMPACT                           ║',
-  '╚════════════════════════════════════════════════════════════════════════════╝',
-  '',
-  '⚠️  The following breaking changes affect Terraform Provider APIs:',
-  '',
-];
+`.split('\n');
 
-const FOOTER = [
-  '────────────────────────────────────────────────────────────────────────────',
-  '',
-  'What to do next:',
-  '',
-  '1. Review the breaking changes above',
-  '2. If intentional, update the baseline after approval',
-  '3. If unintentional, revert the changes',
-  '',
-  `Documentation: ${DOCS_LINK}`,
-  `Need help? ${ESCALATION_LINK}`,
-  '',
-];
+const TERRAFORM_HEADER = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                        TERRAFORM PROVIDER IMPACT                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
 
+⚠️  The following breaking changes affect Terraform Provider APIs:
+
+`.split('\n');
+
+const FOOTER = `
+────────────────────────────────────────────────────────────────────────────
+
+What to do next:
+
+1. Review the breaking changes above
+2. If intentional, add an allowlist entry with approval
+3. If unintentional, revert the changes
+
+Need help? ${ESCALATION_LINK}
+
+`.split('\n');
 const formatBreakingChange = (change: BreakingChange, idx: number): string[] => {
   const lines = [`${idx + 1}. ${change.reason}`, `   Path: ${change.path}`];
 
