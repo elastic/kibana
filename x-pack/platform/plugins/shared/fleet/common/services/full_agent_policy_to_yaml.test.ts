@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { stringify } from 'yaml';
-
 import type { FullAgentPolicy } from '../types';
 
 import { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
@@ -47,10 +45,7 @@ describe('fullAgentPolicyToYaml', () => {
       fleet: {},
     } as unknown as FullAgentPolicy;
 
-    // Mock stringify function that returns JSON for easier testing
-    const mockStringify: typeof stringify = ((value: any) =>
-      JSON.stringify(value)) as typeof stringify;
-    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets, mockStringify);
+    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets);
 
     expect(yaml).toMatchInlineSnapshot(`
       "id: \\"1234\\"
