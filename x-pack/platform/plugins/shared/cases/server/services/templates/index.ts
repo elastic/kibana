@@ -147,13 +147,15 @@ export class TemplatesService {
   }
 
   async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
+    const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
+
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: 1,
         deletedAt: null,
         definition: input.definition,
-        name: input.name,
+        name: parsedDefinition.name,
         owner: input.owner,
         templateId: v4(),
       } as Template,
