@@ -1,0 +1,63 @@
+version: '1'
+name: 'sources.microsoft-teams.list'
+description: 'List/browse Microsoft Teams resources. Actions and inputs: listJoinedTeams (no inputs); listChannels (team_id); listChannelMessages (team_id, channel_id, optional top); listChats (optional top); listChatMessages (chat_id, optional top).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "listJoinedTeams"
+      - "listChannels"
+      - "listChannelMessages"
+      - "listChats"
+      - "listChatMessages"
+    required: true
+  - name: team_id
+    type: string
+    required: false
+  - name: channel_id
+    type: string
+    required: false
+  - name: chat_id
+    type: string
+    required: false
+  - name: top
+    type: number
+    required: false
+    description: "Number of items to return (max 50)"
+steps:
+  - name: list-joined-teams
+    type: microsoft-teams.listJoinedTeams
+    if: "${{ inputs.list_action == 'listJoinedTeams' }}"
+    connector-id: <%= stackConnectorId %>
+    with: {}
+  - name: list-channels
+    type: microsoft-teams.listChannels
+    if: "${{ inputs.list_action == 'listChannels' and inputs.team_id }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      teamId: "${{ inputs.team_id }}"
+  - name: list-channel-messages
+    type: microsoft-teams.listChannelMessages
+    if: "${{ inputs.list_action == 'listChannelMessages' and inputs.team_id and inputs.channel_id }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      teamId: "${{ inputs.team_id }}"
+      channelId: "${{ inputs.channel_id }}"
+      top: ${{ inputs.top }}
+  - name: list-chats
+    type: microsoft-teams.listChats
+    if: "${{ inputs.list_action == 'listChats' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      top: ${{ inputs.top }}
+  - name: list-chat-messages
+    type: microsoft-teams.listChatMessages
+    if: "${{ inputs.list_action == 'listChatMessages' and inputs.chat_id }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      chatId: "${{ inputs.chat_id }}"
+      top: ${{ inputs.top }}
