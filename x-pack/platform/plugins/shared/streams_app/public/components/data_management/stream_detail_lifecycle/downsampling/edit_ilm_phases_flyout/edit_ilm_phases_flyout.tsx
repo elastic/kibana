@@ -208,8 +208,8 @@ export const EditIlmPhasesFlyout = ({
       return;
     }
 
-    const ok = ensurePhaseEnabledWithDefaults(selectedPhase);
-    if (!ok) {
+    const isPhaseCorrectlyEnabled = ensurePhaseEnabledWithDefaults(selectedPhase);
+    if (!isPhaseCorrectlyEnabled) {
       setSelectedPhase(enabledPhases[0]);
     }
   }, [enabledPhases, ensurePhaseEnabledWithDefaults, isMetaReady, selectedPhase, setSelectedPhase]);
