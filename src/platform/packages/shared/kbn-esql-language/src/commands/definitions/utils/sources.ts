@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '../../../types';
@@ -97,7 +97,7 @@ export const buildSourcesDefinitions = (
  * Builds suggestion items for ES|QL views (GET _query/view).
  */
 export const buildViewsDefinitions = (
-  views: Array<{ name: string; query: string }>,
+  views: EsqlView[],
   alreadyUsed: string[] = [],
   queryString?: string
 ): ISuggestionItem[] =>
@@ -179,7 +179,7 @@ export async function additionalSourcesSuggestions(
   sources: ESQLSourceResult[],
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
-  views: Array<{ name: string; query: string }> = []
+  views: EsqlView[] = []
 ) {
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),

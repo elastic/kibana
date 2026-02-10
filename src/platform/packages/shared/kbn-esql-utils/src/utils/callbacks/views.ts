@@ -8,11 +8,8 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { EsqlViewsResult } from '@kbn/esql-types';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
-
-export interface EsqlViewsResult {
-  views: Array<{ name: string; query: string }>;
-}
 
 /**
  * Fetches all ES|QL views from the cluster (GET _query/view).

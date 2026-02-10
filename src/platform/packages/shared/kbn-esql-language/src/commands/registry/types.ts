@@ -14,6 +14,7 @@ import type {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
   ESQLCallbacks,
+  EsqlView,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -193,7 +194,7 @@ export interface ICommandContext {
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
-  views?: Array<{ name: string; query: string }>;
+  views?: EsqlView[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
