@@ -318,4 +318,4 @@ Version formatting rules (important for vulnerability analysis):
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
 - Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
 
-Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
+Extract all features that meet the confidence threshold and have supporting evidence. Call the **finalize_features** tool exactly once to return the results.
