@@ -6,16 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ClusterPutComponentTemplateRequest,
-  IndicesPutIndexTemplateRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { isResponseError } from '@kbn/es-errors';
+import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
+import { Logger as LoggerToken } from '@kbn/core-di';
+import type { Logger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
+import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/types';
 import { EsServiceInternalToken } from '../es_service/tokens';
-import type { LoggerServiceContract } from '../logger_service/logger_service';
-import { LoggerServiceToken } from '../logger_service/logger_service';
 
 export interface IResourceInitializer {
   initialize(): Promise<void>;
@@ -31,7 +28,7 @@ const TOTAL_FIELDS_LIMIT = 2500;
 @injectable()
 export class ResourceInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerToken) private readonly logger: Logger,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}
@@ -42,56 +39,39 @@ export class ResourceInitializer implements IResourceInitializer {
       policy: this.resourceDefinition.ilmPolicy.policy,
     });
 
-    const componentTemplateName = `${this.resourceDefinition.dataStreamName}-schema@component`;
-    const indexTemplateName = `${this.resourceDefinition.dataStreamName}-schema@index-template`;
-
-    const componentTemplate: ClusterPutComponentTemplateRequest = {
-      name: componentTemplateName,
+    const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
+      name: this.resourceDefinition.dataStreamName,
+      hidden: true,
+      version: this.resourceDefinition.version,
       template: {
+        aliases: {},
+        priority: 500,
         mappings: this.resourceDefinition.mappings,
-      },
-      _meta: {
-        managed: true,
-        description: `${this.resourceDefinition.dataStreamName} schema component template`,
-      },
-    };
-
-    const indexTemplate: IndicesPutIndexTemplateRequest = {
-      name: indexTemplateName,
-      index_patterns: [this.resourceDefinition.dataStreamName],
-      data_stream: { hidden: true },
-      composed_of: [componentTemplateName],
-      priority: 500,
-      template: {
         settings: {
           'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
-      },
-      _meta: {
-        managed: true,
-        description: `${this.resourceDefinition.dataStreamName} index template`,
+        _meta: {
+          managed: true,
+          description: `${this.resourceDefinition.dataStreamName} index template`,
+        },
       },
     };
 
-    await this.esClient.cluster.putComponentTemplate(componentTemplate);
-    await this.esClient.indices.putIndexTemplate(indexTemplate);
-
     try {
-      await this.esClient.indices.createDataStream({
-        name: this.resourceDefinition.dataStreamName,
+      await DataStreamClient.initialize({
+        logger: this.logger,
+        dataStream: dataStreamDefinition,
+        elasticsearchClient: this.esClient,
       });
     } catch (error) {
       if (!isResponseError(error)) {
         throw error;
       }
 
-      if (isResourceAlreadyExistsException(error)) {
-        this.logger.debug({
-          message: `Data stream already exists: ${this.resourceDefinition.dataStreamName}`,
-        });
-
+      if (error.statusCode === 409) {
+        this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
         return;
       }
 
@@ -99,11 +79,3 @@ export class ResourceInitializer implements IResourceInitializer {
     }
   }
 }
-
-const isResourceAlreadyExistsException = (error: unknown): boolean => {
-  return (
-    isResponseError(error) &&
-    ((error.statusCode === 400 && error.body?.error.type === 'resource_already_exists_exception') ||
-      error.statusCode === 409)
-  );
-};
