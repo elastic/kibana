@@ -30,6 +30,7 @@ export const archive = {
         -E                Additional key=value settings to pass to Elasticsearch
         --skip-ready-check  Disable the ready check,
         --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+        --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
 
       Example:
 
@@ -45,9 +46,10 @@ export const archive = {
         esArgs: 'E',
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
+        esLogLevel: 'es-log-level',
       },
 
-      string: ['ready-timeout'],
+      string: ['ready-timeout', 'es-log-level'],
       boolean: ['skip-ready-check'],
 
       default: defaults,
@@ -67,6 +69,7 @@ export const archive = {
     });
     await cluster.run(installPath, {
       ...options,
+      esStdoutLogLevel: options.esLogLevel || 'info',
       readyTimeout: parseTimeoutToMs(options.readyTimeout),
     });
   },
