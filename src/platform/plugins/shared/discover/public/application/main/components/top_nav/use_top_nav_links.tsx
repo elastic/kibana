@@ -307,6 +307,7 @@ export const useTopNavLinks = ({
                     }),
                     iconType: 'save',
                     testId: 'interactiveSaveMenuItem',
+                    disableButton: !persistedDiscoverSession,
                   },
                   {
                     run: async () => {
