@@ -141,6 +141,7 @@ export class ChromeService {
       stop$: this.stop$,
       http,
       uiSettings,
+      logger: this.logger,
     });
 
     // 3. Show CSP warning if needed

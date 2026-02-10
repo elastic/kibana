@@ -217,6 +217,7 @@ describe('start', () => {
       'coreStart',
       'getNotifications',
       'http',
+      'logger',
       'stop$',
       'uiSettings',
     ]);
@@ -227,6 +228,7 @@ describe('start', () => {
       uiSettings: expect.any(Object),
       getNotifications: expect.any(Function),
       stop$: expect.any(Object),
+      logger: expect.any(Object),
     });
   });
 
