@@ -49,6 +49,7 @@ export const dashboardDrilldown: DrilldownDefinition<
   isStateValid: (state: Partial<DashboardDrilldownState>) => {
     return Boolean(state.dashboard_id);
   },
+  order: 100,
   supportedTriggers: DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS,
 };
 
