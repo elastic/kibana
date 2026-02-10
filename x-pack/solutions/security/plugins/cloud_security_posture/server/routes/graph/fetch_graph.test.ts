@@ -830,12 +830,12 @@ describe('fetchEntityRelationships', () => {
       });
 
       // Verify aggregation structure
-      expect(query).toContain('STATS count = COUNT(*)');
-      expect(query).toContain('sourceIds = VALUES(entity.id)');
+      expect(query).toContain('STATS badge = COUNT(*)');
+      expect(query).toContain('actorIds = VALUES(entity.id)');
       expect(query).toContain('targetIds = VALUES(_target_id)');
     });
 
-    it('should include sourceDocData and targetDocData in query', async () => {
+    it('should include actorDocData and targetDocData in query', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
       (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
@@ -870,8 +870,8 @@ describe('fetchEntityRelationships', () => {
       const query = esqlCallArgs[0].query;
 
       // Verify doc data fields are generated
-      expect(query).toContain('sourceDocData');
-      expect(query).toContain('targetDocData');
+      expect(query).toContain('actorsDocData');
+      expect(query).toContain('targetsDocData');
       expect(query).toContain('availableInEntityStore');
       expect(query).toContain('ecsParentField');
     });

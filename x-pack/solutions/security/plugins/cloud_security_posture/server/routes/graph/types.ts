@@ -20,14 +20,39 @@ export const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
 
 export type LabelNodeId = string;
 
+/**
+ * Base interface for graph edges with shared actor/target fields.
+ * Extended by EventEdge and RelationshipEdge.
+ */
 export interface GraphEdge {
-  // event/alert attributes
+  badge: number;
+  // Actor attributes (shared)
+  actorNodeId: string;
+  actorIdsCount: number;
+  actorEntityType?: string | null;
+  actorEntitySubType?: string | null;
+  actorEntityName?: string | string[] | null;
+  actorsDocData?: Array<string | null> | string;
+  // Target attributes (shared)
+  targetNodeId: string | null;
+  targetIdsCount: number;
+  targetEntityType?: string | null;
+  targetEntitySubType?: string | null;
+  targetEntityName?: string | string[] | null;
+  targetsDocData?: Array<string | null> | string;
+}
+
+/**
+ * Represents an event/alert edge from logs and alerts indices.
+ * Contains event-specific fields like action, docs, isAlert, etc.
+ */
+export interface EventEdge extends GraphEdge {
+  // Event/alert attributes
   action: string;
   docs: string[] | string;
   isAlert: boolean;
   isOrigin: boolean;
   isOriginAlert: boolean;
-  badge: number;
   uniqueEventsCount: number;
   uniqueAlertsCount: number;
   sourceIps?: string[] | string;
@@ -39,47 +64,25 @@ export interface GraphEdge {
    * they should share the same label node because they originate from the same document(s).
    */
   labelNodeId: LabelNodeId;
-  // actor attributes
-  actorNodeId: string;
-  actorIdsCount: number;
-  actorsDocData?: Array<string | null> | string;
-  actorEntityType?: string | null;
-  actorEntitySubType?: string | null;
-  actorEntityName?: string | string[] | null;
+  // Actor attributes (event-specific)
   actorHostIps?: string[] | string;
-  // target attributes
-  targetNodeId: string | null;
-  targetIdsCount: number;
-  targetsDocData?: Array<string | null> | string;
-  targetEntityType?: string | null;
-  targetEntitySubType?: string | null;
-  targetEntityName?: string | string[] | null;
+  // Target attributes (event-specific)
   targetHostIps?: string[] | string;
 }
 
 /**
  * Represents a relationship edge from the entity store.
  * Used for static/configuration-based relationships between entities.
- * Source and target entities are grouped by type/subtype similar to event actors/targets.
+ * Actor and target entities are grouped by type/subtype similar to event actors/targets.
  */
-export interface RelationshipEdge {
+export interface RelationshipEdge extends GraphEdge {
   relationship: string; // "Owns", "Supervised_by", "Depends_on", etc.
-  relationshipNodeId: string; // Unique ID for deduplication (sourceId-relationship)
-  count: number; // Count of relationships
-  // Source entity grouping (like actors in events)
-  sourceNodeId: string; // Grouped source node ID (single ID or MD5 hash)
-  sourceIds: string[]; // All source entity IDs in this group
-  sourceIdsCount: number; // Count of unique source entities
-  sourceEntityType?: string; // Source entity type
-  sourceEntitySubType?: string; // Source entity sub_type
-  sourceDocData?: string[]; // Source entities metadata as JSON strings
-  // Target entity grouping (like targets in events)
-  targetNodeId: string; // Grouped target node ID (single ID or MD5 hash)
+  relationshipNodeId: string; // Unique ID for deduplication (actorId-relationship)
+  // Actor entity grouping (relationship-specific)
+  actorIds: string[]; // All actor entity IDs in this group
+  // Target entity grouping (relationship-specific)
+  targetNodeId: string; // Override to make non-nullable for relationships
   targetIds: string[]; // All target entity IDs in this group
-  targetIdsCount: number; // Count of unique target entities
-  targetEntityType?: string; // Target entity type
-  targetEntitySubType?: string; // Target entity sub_type
-  targetDocData?: string[]; // Target entities metadata as JSON strings
 }
 
 /**

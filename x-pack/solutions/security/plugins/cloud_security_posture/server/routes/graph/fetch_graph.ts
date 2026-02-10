@@ -30,7 +30,7 @@ import {
   buildLookupJoinEsql,
   buildEnrichPolicyEsql,
 } from './utils';
-import type { EsQuery, EntityId, GraphEdge, OriginEventId, RelationshipEdge } from './types';
+import type { EsQuery, EntityId, EventEdge, OriginEventId, RelationshipEdge } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -66,7 +66,7 @@ export const fetchEvents = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
-}): Promise<EsqlToRecords<GraphEdge>> => {
+}): Promise<EsqlToRecords<EventEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
@@ -116,7 +116,7 @@ export const fetchEvents = async ({
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
       ],
     })
-    .toRecords<GraphEdge>();
+    .toRecords<EventEdge>();
 };
 
 export interface FetchGraphParams {
@@ -133,7 +133,7 @@ export interface FetchGraphParams {
 }
 
 export interface FetchGraphResult {
-  events: GraphEdge[];
+  events: EventEdge[];
   relationships: RelationshipEdge[];
 }
 
@@ -168,14 +168,6 @@ export const fetchGraph = async ({
 
   // Optionally fetch relationships in parallel when entityIds are provided
   const hasEntityIds = entityIds && entityIds.length > 0;
-  // const relationshipsPromise = true
-  //   ? fetchEntityRelationships({
-  //       esClient,
-  //       logger,
-  //       entityIds:[{id: 'asd1', isOrigin: false},{id: 'asd4', isOrigin: false}, {id: 'asd7', isOrigin: false}, {id: 'asd8', isOrigin: false}],
-  //       spaceId,
-  //     })
-  //   : Promise.resolve([]);
 
   const relationshipsPromise = hasEntityIds
     ? fetchEntityRelationships({
@@ -622,15 +614,15 @@ ${coalesceStatements}
 ${forkBranches}
 | WHERE _target_id != ""
 ${enrichmentSection}
-// Build enriched source doc data with entity metadata (from the queried entity)
-| EVAL sourceDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
+// Build enriched actors doc data with entity metadata (from the queried entity)
+| EVAL actorDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
     CASE(entity.name IS NOT NULL, CONCAT("\\"name\\":\\"", entity.name, "\\","), ""),
     CASE(entity.type IS NOT NULL, CONCAT("\\"type\\":\\"", entity.type, "\\","), ""),
     CASE(entity.sub_type IS NOT NULL, CONCAT("\\"sub_type\\":\\"", entity.sub_type, "\\","), ""),
     "\\"availableInEntityStore\\":true",
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
   "}}")
-// Build enriched target doc data with entity metadata
+// Build enriched targets doc data with entity metadata
 | EVAL targetDocData = CONCAT("{\\"id\\":\\"", _target_id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
     CASE(_target_name IS NOT NULL, CONCAT("\\"name\\":\\"", _target_name, "\\","), ""),
     CASE(_target_type IS NOT NULL, CONCAT("\\"type\\":\\"", _target_type, "\\","), ""),
@@ -638,19 +630,20 @@ ${enrichmentSection}
     "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
   "}}")
-// Group by source entity, relationship, and target type/subtype (for target grouping)
+// Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together
-| STATS count = COUNT(*),
-  // Source entity grouping
-  sourceIds = VALUES(entity.id),
-  sourceNodeId = CASE(
+| STATS badge = COUNT(*),
+  // Actor entity grouping
+  actorIds = VALUES(entity.id),
+  actorNodeId = CASE(
     MV_COUNT(VALUES(entity.id)) == 1, TO_STRING(VALUES(entity.id)),
     MD5(MV_CONCAT(MV_SORT(VALUES(entity.id)), ","))
   ),
-  sourceIdsCount = COUNT_DISTINCT(entity.id),
-  sourceDocData = VALUES(sourceDocData),
-  sourceEntityType = VALUES(entity.type),
-  sourceEntitySubType = VALUES(entity.sub_type),
+  actorIdsCount = COUNT_DISTINCT(entity.id),
+  actorsDocData = VALUES(actorDocData),
+  actorEntityType = VALUES(entity.type),
+  actorEntitySubType = VALUES(entity.sub_type),
+  actorEntityName = VALUES(entity.name),
   // Target entity grouping - targets with same type/subtype are grouped
   targetIds = VALUES(_target_id),
   targetNodeId = CASE(
@@ -658,7 +651,8 @@ ${enrichmentSection}
     MD5(MV_CONCAT(MV_SORT(VALUES(_target_id)), ","))
   ),
   targetIdsCount = COUNT_DISTINCT(_target_id),
-  targetDocData = VALUES(targetDocData)
+  targetsDocData = VALUES(targetDocData),
+  targetEntityName = VALUES(_target_name)
     BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
 // Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
 // Multiple records with different target types share the same relationshipNodeId

@@ -23,7 +23,7 @@ import type {
 import type { Writable } from '@kbn/utility-types';
 import { createHash } from 'node:crypto';
 import {
-  type GraphEdge,
+  type EventEdge,
   type RelationshipEdge,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
@@ -58,7 +58,7 @@ interface NodeVisualProps {
 
 export const parseRecords = (
   logger: Logger,
-  records: GraphEdge[],
+  records: EventEdge[],
   relationshipRecords: RelationshipEdge[],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
@@ -77,10 +77,23 @@ export const parseRecords = (
     }] [nodesLimit: ${nodesLimit ?? 'none'}]`
   );
 
-  createNodes(records, ctx);
+  // Process event records
+  for (const record of records) {
+    if (isAboveAPINodesLimit(ctx)) {
+      emitAPINodesLimitMessage(ctx);
+      break;
+    }
+    processEventRecord(record, ctx);
+  }
 
-  // Process relationships
-  createRelationshipNodes(relationshipRecords, ctx);
+  // Process relationship records (shared limit with events)
+  for (const record of relationshipRecords) {
+    if (isAboveAPINodesLimit(ctx)) {
+      emitAPINodesLimitMessage(ctx);
+      break;
+    }
+    processRelationshipRecord(record, ctx);
+  }
 
   // Create edges and groups for both
   createEdgesAndGroups(ctx);
@@ -159,8 +172,48 @@ const generateEntityLabel = (
   return '';
 };
 
+/**
+ * Creates or updates an entity node in the nodesMap.
+ * Shared by both event and relationship record processing.
+ */
+const createEntityNode = (
+  nodesMap: Record<string, NodeDataModel>,
+  params: {
+    nodeId: string;
+    idsCount: number;
+    entityType?: string | null;
+    entitySubType?: string | null;
+    entityName?: string | string[] | null;
+    docData?: Array<string | null> | string;
+    hostIps?: string[];
+  }
+): void => {
+  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+
+  if (nodesMap[nodeId] !== undefined) return;
+
+  const resolvedType = resolveEntityType(entityType, idsCount);
+  const label = generateEntityLabel(idsCount, nodeId, resolvedType, entityName, entitySubType);
+
+  const documentsData: NodeDocumentDataModel[] = docData
+    ? castArray(docData)
+        .filter((d): d is string => d != null)
+        .map((d) => JSON.parse(d))
+    : [];
+
+  nodesMap[nodeId] = {
+    id: nodeId,
+    color: 'primary' as const,
+    ...(label ? { label } : {}),
+    documentsData,
+    ...deriveEntityAttributesFromType(resolvedType),
+    ...(idsCount > 1 ? { count: idsCount } : {}),
+    ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+  };
+};
+
 const createGroupedActorAndTargetNodes = (
-  record: GraphEdge,
+  record: EventEdge,
   context: ParseContext
 ): {
   actorId: string;
@@ -168,124 +221,64 @@ const createGroupedActorAndTargetNodes = (
 } => {
   const { nodesMap } = context;
   const {
-    // actor attributes
     actorNodeId,
     actorIdsCount,
     actorsDocData,
-    actorEntityType: rawActorEntityType,
+    actorEntityType,
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
-    // target attributes
     targetNodeId,
     targetIdsCount,
     targetsDocData,
-    targetEntityType: rawTargetEntityType,
+    targetEntityType,
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
   } = record;
 
-  const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
-  const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
-
-  // Resolve entity types and labels using utility functions
-  const actorEntityType = resolveEntityType(rawActorEntityType, actorIdsCount);
-  const targetEntityType = resolveEntityType(rawTargetEntityType, targetIdsCount);
-
-  const actorLabel = generateEntityLabel(
-    actorIdsCount,
-    actorNodeId,
-    actorEntityType,
-    actorEntityName,
-    actorEntitySubType
-  );
-
-  const targetLabel = generateEntityLabel(
-    targetIdsCount,
-    targetNodeId || '',
-    targetEntityType,
-    targetEntityName,
-    targetEntitySubType
-  );
-
-  const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
-    ? castArray(actorsDocData)
-        .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
-        .map((actorData) => JSON.parse(actorData))
-    : [];
-
-  const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
-    ? castArray(targetsDocData)
-        .filter(
-          (targetData): targetData is string => targetData !== null && targetData !== undefined
-        )
-        .map((targetData) => JSON.parse(targetData))
-    : [];
-
-  const actorGroup: {
-    id: string;
-    type: string;
-    count?: number;
-    docData: NodeDocumentDataModel[];
-    hostIps: string[];
-    label?: string;
-  } = {
-    id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
-    type: actorEntityType,
-    docData: actorsDocDataArray,
-    hostIps: actorHostIpsArray,
-    ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
-    ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
-  };
-
-  const targetGroup: {
-    id: string;
-    type: string;
-    count?: number;
-    docData: NodeDocumentDataModel[];
-    hostIps: string[];
-    label?: string;
-  } =
-    targetIdsCount > 0 && targetNodeId
-      ? {
-          id: targetNodeId,
-          type: targetEntityType,
-          docData: targetsDocDataArray,
-          hostIps: targetHostIpsArray,
-          ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
-          ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
-        }
-      : {
-          // Unknown target
-          id: `unknown-${uuidv4()}`,
-          type: '',
-          label: 'Unknown',
-          docData: [],
-          hostIps: [],
-        };
-
-  [actorGroup, targetGroup].forEach(({ id, label, type, count, docData, hostIps }) => {
-    if (nodesMap[id] === undefined) {
-      nodesMap[id] = {
-        id,
-        color: 'primary' as const,
-        ...(label ? { label } : {}),
-        documentsData: docData,
-        ...deriveEntityAttributesFromType(type),
-        ...(count && count > 1 ? { count } : {}),
-        ...(hostIps.length > 0 ? { ips: hostIps } : {}),
-      };
-    }
+  // Create actor entity node
+  createEntityNode(nodesMap, {
+    nodeId: actorNodeId,
+    idsCount: actorIdsCount,
+    entityType: actorEntityType,
+    entitySubType: actorEntitySubType,
+    entityName: actorEntityName,
+    docData: actorsDocData,
+    hostIps: actorHostIps ? castArray(actorHostIps) : [],
   });
 
+  // Create target entity node (or unknown target)
+  const targetId = targetIdsCount > 0 && targetNodeId ? targetNodeId : `unknown-${uuidv4()}`;
+
+  if (targetIdsCount > 0 && targetNodeId) {
+    createEntityNode(nodesMap, {
+      nodeId: targetNodeId,
+      idsCount: targetIdsCount,
+      entityType: targetEntityType,
+      entitySubType: targetEntitySubType,
+      entityName: targetEntityName,
+      docData: targetsDocData,
+      hostIps: targetHostIps ? castArray(targetHostIps) : [],
+    });
+  } else if (nodesMap[targetId] === undefined) {
+    // Unknown target
+    nodesMap[targetId] = {
+      id: targetId,
+      color: 'primary' as const,
+      label: 'Unknown',
+      documentsData: [],
+      ...deriveEntityAttributesFromType(''),
+    };
+  }
+
   return {
-    actorId: actorGroup.id,
-    targetId: targetGroup.id,
+    actorId: actorNodeId,
+    targetId,
   };
 };
 
-const createLabelNode = (record: GraphEdge): LabelNodeDataModel => {
+const createLabelNode = (record: EventEdge): LabelNodeDataModel => {
   const {
     labelNodeId,
     action,
@@ -370,22 +363,15 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
   messages.push(ApiMessageCode.ReachedNodesLimit);
 };
 
-const createNodes = (records: GraphEdge[], context: ParseContext) => {
-  for (const record of records) {
-    if (isAboveAPINodesLimit(context)) {
-      emitAPINodesLimitMessage(context);
-      break;
-    }
+const processEventRecord = (record: EventEdge, context: ParseContext) => {
+  const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+  const labelNode = createLabelNode(record);
 
-    const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-    const labelNode = createLabelNode(record);
-
-    processConnectorNode(context, {
-      sourceId: actorId,
-      targetId,
-      connectorNode: labelNode,
-    });
-  }
+  processConnectorNode(context, {
+    sourceId: actorId,
+    targetId,
+    connectorNode: labelNode,
+  });
 };
 
 /**
@@ -404,174 +390,38 @@ const createRelationshipNode = (
   };
 };
 
-/**
- * Parses entity doc data JSON and creates an enriched entity node.
- * Used for both source and target entities from relationship records.
- */
-const parseEntityDocData = (
-  targetId: string,
-  targetDocDataJson: string | undefined
-): EntityNodeDataModel => {
-  let entityData: NodeDocumentDataModel | undefined;
-  let label = targetId;
-  let entityType: string | undefined;
+const processRelationshipRecord = (record: RelationshipEdge, context: ParseContext) => {
+  const actorNodeId = record.actorNodeId;
+  const targetNodeId = record.targetNodeId;
 
-  if (targetDocDataJson) {
-    try {
-      entityData = JSON.parse(targetDocDataJson) as NodeDocumentDataModel;
-      // Use entity name as label if available
-      if (entityData?.entity?.name) {
-        label = entityData.entity.name;
-      }
-      entityType = entityData?.entity?.type;
-    } catch {
-      // If parsing fails, use targetId as label
-    }
-  }
+  // Create actor and target entity nodes using shared helper
+  createEntityNode(context.nodesMap, {
+    nodeId: actorNodeId,
+    idsCount: record.actorIdsCount,
+    entityType: record.actorEntityType,
+    entitySubType: record.actorEntitySubType,
+    entityName: record.actorEntityName,
+    docData: record.actorsDocData,
+  });
 
-  // Derive visual properties from entity type
-  const visualProps = entityType
-    ? deriveEntityAttributesFromType(entityType)
-    : { shape: 'rectangle' as const };
+  createEntityNode(context.nodesMap, {
+    nodeId: targetNodeId,
+    idsCount: record.targetIdsCount,
+    entityType: record.targetEntityType,
+    entitySubType: record.targetEntitySubType,
+    entityName: record.targetEntityName,
+    docData: record.targetsDocData,
+  });
 
-  return {
-    id: targetId,
-    label,
-    color: 'primary',
-    ...visualProps,
-    ...(entityType && { tag: entityType }),
-    documentsData: entityData ? [entityData] : undefined,
-  } as EntityNodeDataModel;
-};
+  // Create relationship node - ID is based on actor + relationship (relationshipNodeId)
+  // so each actor+relationship combination gets one node that connects to all target groups
+  const relationshipNode = createRelationshipNode(record.relationshipNodeId, record.relationship);
 
-/**
- * Creates relationship nodes from relationship records.
- * Source entities are grouped by type/subtype (similar to event actors).
- */
-const createRelationshipNodes = (
-  relationshipRecords: RelationshipEdge[],
-  context: ParseContext
-) => {
-  for (const record of relationshipRecords) {
-    if (isAboveAPINodesLimit(context)) {
-      emitAPINodesLimitMessage(context);
-      break;
-    }
-
-    // Create or update source entity node (may be grouped)
-    // Use sourceNodeId for the node key (can be a single ID or MD5 hash for grouped entities)
-    const sourceNodeId = record.sourceNodeId;
-
-    if (!context.nodesMap[sourceNodeId]) {
-      // For grouped entities (count > 1), create a grouped node
-      if (record.sourceIdsCount > 1) {
-        // Parse all source doc data to collect documents and entity names
-        const documentsData: NodeDocumentDataModel[] = [];
-        const entityNames: string[] = [];
-        castArray(record.sourceDocData).forEach((docDataJson) => {
-          try {
-            const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
-            documentsData.push(docData);
-            if (docData.entity?.name) {
-              entityNames.push(docData.entity.name);
-            }
-          } catch {
-            // Skip invalid JSON
-          }
-        });
-
-        // Get visual props from entity type with fallback
-        const visualProps = transformEntityTypeToIconAndShape(record.sourceEntityType ?? '');
-        const shape = visualProps.shape ?? 'recantgle';
-
-        // Generate label using same logic as events
-        const label = generateEntityLabel(
-          record.sourceIdsCount,
-          sourceNodeId,
-          record.sourceEntityType ?? '',
-          entityNames.length > 0 ? entityNames : null,
-          record.sourceEntitySubType ?? null
-        );
-
-        context.nodesMap[sourceNodeId] = {
-          id: sourceNodeId,
-          label,
-          color: 'primary',
-          shape,
-          ...(visualProps.icon && { icon: visualProps.icon }),
-          ...(record.sourceEntityType && { tag: record.sourceEntityType }),
-          ...(record.sourceIdsCount > 1 && { count: record.sourceIdsCount }),
-          documentsData,
-        } as EntityNodeDataModel;
-      } else {
-        // Single entity - use the first source doc data
-        const sourceDocDataJson = castArray(record.sourceDocData)[0];
-        context.nodesMap[sourceNodeId] = parseEntityDocData(sourceNodeId, sourceDocDataJson);
-      }
-    }
-
-    // Create or update target entity node (may be grouped by type/subtype)
-    // Use targetNodeId for the node key (can be a single ID or MD5 hash for grouped entities)
-    const targetNodeId = record.targetNodeId;
-
-    if (!context.nodesMap[targetNodeId]) {
-      // For grouped entities (count > 1), create a grouped node
-      if (record.targetIdsCount > 1) {
-        // Parse all target doc data to collect documents and entity names
-        const documentsData: NodeDocumentDataModel[] = [];
-        const entityNames: string[] = [];
-        castArray(record.targetDocData).forEach((docDataJson) => {
-          try {
-            const docData = JSON.parse(docDataJson) as NodeDocumentDataModel;
-            documentsData.push(docData);
-            if (docData.entity?.name) {
-              entityNames.push(docData.entity.name);
-            }
-          } catch {
-            // Skip invalid JSON
-          }
-        });
-
-        // Get visual props from entity type with fallback
-        const visualProps = transformEntityTypeToIconAndShape(record.targetEntityType ?? '');
-        const shape = visualProps.shape ?? 'rectangle';
-
-        // Generate label using same logic as events
-        const label = generateEntityLabel(
-          record.targetIdsCount,
-          targetNodeId,
-          record.targetEntityType ?? '',
-          entityNames.length > 0 ? entityNames : null,
-          record.targetEntitySubType ?? null
-        );
-
-        context.nodesMap[targetNodeId] = {
-          id: targetNodeId,
-          label,
-          color: 'primary',
-          shape,
-          ...(visualProps.icon && { icon: visualProps.icon }),
-          ...(record.targetEntityType && { tag: record.targetEntityType }),
-          ...(record.targetIdsCount > 1 && { count: record.targetIdsCount }),
-          documentsData,
-        } as EntityNodeDataModel;
-      } else {
-        // Single entity - use the first target doc data
-        const targetDocDataJson = castArray(record.targetDocData)[0];
-        context.nodesMap[targetNodeId] = parseEntityDocData(targetNodeId, targetDocDataJson);
-      }
-    }
-
-    // Create relationship node - ID is based on source + relationship (relationshipNodeId)
-    // so each source+relationship combination gets one node that connects to all target groups
-    const relationshipNode = createRelationshipNode(record.relationshipNodeId, record.relationship);
-
-    processConnectorNode(context, {
-      sourceId: sourceNodeId,
-      targetId: targetNodeId,
-      connectorNode: relationshipNode,
-    });
-  }
+  processConnectorNode(context, {
+    sourceId: actorNodeId,
+    targetId: targetNodeId,
+    connectorNode: relationshipNode,
+  });
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
