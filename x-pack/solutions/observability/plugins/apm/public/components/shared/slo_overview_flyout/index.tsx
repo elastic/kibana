@@ -122,7 +122,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
-  const [selectedSloInstanceId, setSelectedSloInstanceId] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
   const minItemsPerPage = ITEMS_PER_PAGE_OPTIONS[0];
@@ -179,12 +178,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
     setSelectedSloTabId(undefined);
     setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
 
     requestAnimationFrame(() => {
       setSelectedSloTabId(ALERTS_TAB_ID);
       setSelectedSloId(sloItem.id);
-      setSelectedSloInstanceId(sloItem.instanceId === ALL_VALUE ? undefined : sloItem.instanceId);
     });
   }, []);
 
@@ -281,20 +278,17 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleSloClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+  const handleSloClick = useCallback((sloId: string) => {
     setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
     setSelectedSloTabId(undefined);
 
     requestAnimationFrame(() => {
-      setSelectedSloId(sloItem.id);
-      setSelectedSloInstanceId(sloItem.instanceId === ALL_VALUE ? undefined : sloItem.instanceId);
+      setSelectedSloId(sloId);
     });
   }, []);
 
   const handleCloseSloDetails = useCallback(() => {
     setSelectedSloId(null);
-    setSelectedSloInstanceId(undefined);
     setSelectedSloTabId(undefined);
   }, []);
 
@@ -366,7 +360,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
             <EuiLink
               data-test-subj="apmSloNameLink"
-              onClick={() => handleSloClick(sloItem)}
+              onClick={() => handleSloClick(sloItem.id)}
               css={{
                 display: 'flex',
                 alignItems: 'center',
@@ -620,7 +614,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
         <sloPlugin.getSLODetailsFlyout
           sloId={selectedSloId}
-          sloInstanceId={selectedSloInstanceId}
           onClose={handleCloseSloDetails}
           size="m"
           hideFooter
