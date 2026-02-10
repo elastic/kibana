@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import type { ParsedMetricItem } from '../../types';
 import { OverviewTab, EsqlQueryTab } from './tabs';
 
@@ -45,9 +46,15 @@ interface MetricFlyoutBodyProps {
   metricItem: ParsedMetricItem;
   description?: string;
   esqlQuery?: string;
+  services: UnifiedHistogramServices;
 }
 
-export const MetricFlyoutBody = ({ metricItem, esqlQuery, description }: MetricFlyoutBodyProps) => {
+export const MetricFlyoutBody = ({
+  metricItem,
+  esqlQuery,
+  description,
+  services,
+}: MetricFlyoutBodyProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
 
   const onSelectedTabChanged = (id: TabId) => {

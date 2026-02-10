@@ -166,6 +166,7 @@ export const MetricsGrid = ({
           metricItem={expandedMetric.metricItem}
           esqlQuery={expandedMetric.esqlQuery}
           onClose={handleCloseFlyout}
+          services={services}
         />
       )}
     </FieldsMetadataProvider>

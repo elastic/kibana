@@ -37,5 +37,8 @@
     "@kbn/es-types",
     "@kbn/inspector-plugin",
     "@kbn/esql-language",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/discover-shared-plugin"
   ]
 }
