@@ -248,7 +248,7 @@ export class SharedConnectorTokenClient {
   }: {
     connectorId: string;
     tokenType?: string;
-  }) {
+  }): Promise<void> {
     const tokenTypeFilter = tokenType
       ? ` AND ${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.tokenType: "${tokenType}"`
       : '';
@@ -257,7 +257,7 @@ export class SharedConnectorTokenClient {
         type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
       });
-      return Promise.all(
+      await Promise.all(
         result.saved_objects.map(
           async (obj) =>
             await this.unsecuredSavedObjectsClient.delete(CONNECTOR_TOKEN_SAVED_OBJECT_TYPE, obj.id)
@@ -278,7 +278,7 @@ export class SharedConnectorTokenClient {
     expiresInSec,
     tokenRequestDate,
     deleteExisting,
-  }: UpdateOrReplaceOptions) {
+  }: UpdateOrReplaceOptions): Promise<void> {
     expiresInSec = expiresInSec ?? 3600;
     tokenRequestDate = tokenRequestDate ?? Date.now();
     if (token === null) {
@@ -296,8 +296,14 @@ export class SharedConnectorTokenClient {
         tokenType: 'access_token',
       });
     } else {
+      const tokenId = token.id;
+      if (tokenId == null || tokenId === '') {
+        throw new Error(
+          `Cannot update connector token for connectorId "${connectorId}": token id is missing`
+        );
+      }
       await this.update({
-        id: token.id!,
+        id: tokenId,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
         tokenType: 'access_token',

@@ -404,7 +404,7 @@ export class UserConnectorTokenClient {
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
-  }) {
+  }): Promise<void> {
     const context = this.getContextString(profileUid, connectorId);
 
     const credentialTypeFilter = credentialType
@@ -418,7 +418,7 @@ export class UserConnectorTokenClient {
         type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         filter: `${profileUidFilter}${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${credentialTypeFilter}`,
       });
-      return Promise.all(
+      await Promise.all(
         result.saved_objects.map(
           async (obj) =>
             await this.unsecuredSavedObjectsClient.delete(
@@ -443,7 +443,7 @@ export class UserConnectorTokenClient {
     expiresInSec,
     tokenRequestDate,
     deleteExisting,
-  }: UpdateOrReplaceOptions) {
+  }: UpdateOrReplaceOptions): Promise<void> {
     expiresInSec = expiresInSec ?? 3600;
     tokenRequestDate = tokenRequestDate ?? Date.now();
     if (token === null) {
@@ -463,8 +463,14 @@ export class UserConnectorTokenClient {
         credentialType: 'oauth',
       });
     } else {
+      const tokenId = token.id;
+      if (tokenId == null || tokenId === '') {
+        throw new Error(
+          `Cannot update user connector token for connectorId "${connectorId}", profileUid "${profileUid}": token id is missing`
+        );
+      }
       await this.update({
-        id: token.id!,
+        id: tokenId,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
         credentialType: 'oauth',
@@ -602,8 +608,9 @@ export class UserConnectorTokenClient {
         const credentials: Record<string, string> = {
           accessToken: token,
         };
-        if (refreshToken ?? existingCreds.refreshToken) {
-          credentials.refreshToken = refreshToken ?? existingCreds.refreshToken!;
+        const resolvedRefreshToken = refreshToken ?? existingCreds.refreshToken;
+        if (resolvedRefreshToken) {
+          credentials.refreshToken = resolvedRefreshToken;
         }
 
         this.logger.debug(

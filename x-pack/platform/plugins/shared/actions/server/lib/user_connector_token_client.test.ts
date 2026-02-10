@@ -584,4 +584,51 @@ describe('UserConnectorTokenClient', () => {
       );
     });
   });
+
+  describe('updateOrReplace()', () => {
+    test('throws when existing token has no id', async () => {
+      const tokenWithoutId = {
+        profileUid: 'user-profile-123',
+        connectorId: '123',
+        credentialType: 'oauth',
+        credentials: { accessToken: 'old' },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await expect(
+        userClient.updateOrReplace({
+          profileUid: 'user-profile-123',
+          connectorId: '123',
+          token: tokenWithoutId as UserConnectorToken,
+          newToken: 'newtoken',
+          tokenRequestDate: Date.now(),
+          deleteExisting: false,
+        })
+      ).rejects.toThrow('token id is missing');
+    });
+
+    test('throws when existing token has empty string id', async () => {
+      const tokenWithEmptyId = {
+        id: '',
+        profileUid: 'user-profile-123',
+        connectorId: '123',
+        credentialType: 'oauth',
+        credentials: { accessToken: 'old' },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await expect(
+        userClient.updateOrReplace({
+          profileUid: 'user-profile-123',
+          connectorId: '123',
+          token: tokenWithEmptyId as UserConnectorToken,
+          newToken: 'newtoken',
+          tokenRequestDate: Date.now(),
+          deleteExisting: false,
+        })
+      ).rejects.toThrow('token id is missing');
+    });
+  });
 });

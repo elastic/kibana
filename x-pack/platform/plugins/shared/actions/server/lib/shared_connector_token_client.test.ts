@@ -223,8 +223,7 @@ describe('SharedConnectorTokenClient', () => {
         ],
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-      const result = await sharedClient.deleteConnectorTokens({ connectorId: '1' });
-      expect(JSON.stringify(result)).toEqual(JSON.stringify([Symbol(), Symbol()]));
+      await sharedClient.deleteConnectorTokens({ connectorId: '1' });
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     });
   });
@@ -303,6 +302,49 @@ describe('SharedConnectorTokenClient', () => {
         token: 'newtoken',
         refreshToken: 'newrefresh',
       });
+    });
+  });
+
+  describe('updateOrReplace()', () => {
+    test('throws when existing token has no id', async () => {
+      const tokenWithoutId = {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'old',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await expect(
+        sharedClient.updateOrReplace({
+          connectorId: '123',
+          token: tokenWithoutId as ConnectorToken,
+          newToken: 'newtoken',
+          tokenRequestDate: Date.now(),
+          deleteExisting: false,
+        })
+      ).rejects.toThrow('token id is missing');
+    });
+
+    test('throws when existing token has empty string id', async () => {
+      const tokenWithEmptyId = {
+        id: '',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'old',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await expect(
+        sharedClient.updateOrReplace({
+          connectorId: '123',
+          token: tokenWithEmptyId as ConnectorToken,
+          newToken: 'newtoken',
+          tokenRequestDate: Date.now(),
+          deleteExisting: false,
+        })
+      ).rejects.toThrow('token id is missing');
     });
   });
 });
