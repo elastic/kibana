@@ -6,7 +6,8 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
-import { dashboardElement, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { dashboardElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { DASHBOARD_AGENT_ID } from '@kbn/dashboard-agent-common';
 import { dashboardTools } from '../common';
