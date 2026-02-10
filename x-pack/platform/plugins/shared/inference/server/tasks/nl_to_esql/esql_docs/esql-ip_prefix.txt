@@ -1,6 +1,6 @@
 # IP_PREFIX
 
-Truncates an IP address to a specified prefix length.
+The IP_PREFIX function truncates an IP address to a specified prefix length, supporting both IPv4 and IPv6 formats.
 
 ## Syntax
 
@@ -8,25 +8,23 @@ Truncates an IP address to a specified prefix length.
 
 ### Parameters
 
-#### `ip`
+#### ip
 
-The IP address to truncate. Supports both IPv4 and IPv6 addresses and must be of type `ip`.
+IP address of type `ip`. Both IPv4 and IPv6 addresses are supported.
 
-#### `prefixLengthV4`
+#### prefixLengthV4
 
-The prefix length to apply for IPv4 addresses.
+Prefix length to use for truncating IPv4 addresses.
 
-#### `prefixLengthV6`
+#### prefixLengthV6
 
-The prefix length to apply for IPv6 addresses.
+Prefix length to use for truncating IPv6 addresses.
 
 ## Examples
 
-Truncating IPv4 and IPv6 addresses
+Truncates an IPv4 address to a /24 prefix and an IPv6 address to a /112 prefix, showing the original and truncated values for each.
 
 ```esql
-ROW ip4 = TO_IP("1.2.3.4"), ip6 = TO_IP("fe80::cae2:65ff:fece:feb9")
-| EVAL ip4_prefix = IP_PREFIX(ip4, 24, 0), ip6_prefix = IP_PREFIX(ip6, 0, 112)
+ROW ip4 = to_ip("1.2.3.4"), ip6 = TO_IP("fe80::cae2:65ff:fece:feb9")
+| EVAL ip4_prefix = IP_PREFIX(ip4, 24, 0), ip6_prefix = IP_PREFIX(ip6, 0, 112);
 ```
-
-This example truncates the IPv4 address `1.2.3.4` to a `/24` prefix and the IPv6 address `fe80::cae2:65ff:fece:feb9` to a `/112` prefix.
