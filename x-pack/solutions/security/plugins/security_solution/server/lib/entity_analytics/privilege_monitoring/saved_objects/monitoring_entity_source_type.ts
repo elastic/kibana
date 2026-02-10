@@ -51,6 +51,27 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
       dynamic: false,
       type: 'object',
     },
+    integrations: {
+      type: 'object',
+      dynamic: false,
+      properties: {
+        syncMarkerIndex: {
+          type: 'keyword',
+        },
+        syncData: {
+          type: 'object',
+          dynamic: false,
+          properties: {
+            lastFullSync: {
+              type: 'date',
+            },
+            lastUpdateProcessed: {
+              type: 'date',
+            },
+          },
+        },
+      },
+    },
   },
 };
 
@@ -65,6 +86,22 @@ const matcherSchema = schema.object(
 
 // matchers size 50 is generous, should never really be this large.
 const matchersSchema = schema.arrayOf(matcherSchema, { maxSize: 50 });
+
+const integrationsSyncDataSchema = schema.object(
+  {
+    lastFullSync: schema.maybe(schema.string()),
+    lastUpdateProcessed: schema.maybe(schema.string()),
+  },
+  { unknowns: 'ignore' }
+);
+
+const integrationsSchema = schema.object(
+  {
+    syncMarkerIndex: schema.maybe(schema.string()),
+    syncData: schema.maybe(integrationsSyncDataSchema),
+  },
+  { unknowns: 'ignore' }
+);
 
 const baseEntitySourceSchema = {
   type: schema.maybe(schema.string()),
@@ -81,6 +118,7 @@ const baseEntitySourceSchemaV2 = {
   ...baseEntitySourceSchema,
   matchersModifiedByUser: schema.boolean({ defaultValue: false }),
   managedVersion: schema.maybe(schema.number()),
+  integrations: schema.maybe(integrationsSchema),
 };
 
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
@@ -98,6 +136,21 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
       addedMappings: {
         matchersModifiedByUser: { type: 'boolean' },
         managedVersion: { type: 'integer' },
+        integrations: {
+          type: 'object',
+          dynamic: false,
+          properties: {
+            syncMarkerIndex: { type: 'keyword' },
+            syncData: {
+              type: 'object',
+              dynamic: false,
+              properties: {
+                lastFullSync: { type: 'date' },
+                lastUpdateProcessed: { type: 'date' },
+              },
+            },
+          },
+        },
       },
     },
     {
