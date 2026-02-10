@@ -19,7 +19,7 @@ import React, {
   type RefObject,
 } from 'react';
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { TimeRangeBounds, TimeRange } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
@@ -43,6 +43,13 @@ export interface DateRangePickerContextValue {
   applyRange: (range?: TimeRangeBounds) => void;
 }
 
+/**
+ * Determines which element receives focus when ArrowDown is pressed from the input.
+ * A string is treated as a CSS selector resolved against the panel; a ref points
+ * to the element directly. When unset, defaults to the panel div itself.
+ */
+export type InitialFocus = RefObject<HTMLElement | null> | string;
+
 /** Internal context value used by sub-components. */
 interface DateRangePickerInternalContextValue extends DateRangePickerContextValue {
   isEditing: boolean;
@@ -52,6 +59,12 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   displayText: string;
   displayDuration: string | null;
   inputRef: RefObject<HTMLInputElement>;
+  buttonRef: RefObject<HTMLButtonElement>;
+  panelRef: RefObject<HTMLDivElement>;
+  /** Generated HTML id for the dialog panel, used for ARIA `aria-controls`. */
+  panelId: string;
+  /** Optional initial focus target for the dialog panel. */
+  initialFocus?: InitialFocus;
   timeRange: TimeRange;
 }
 
@@ -84,6 +97,9 @@ export function DateRangePickerProvider({
   const maxWidth = euiTheme.components.forms.maxWidth;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [text, setText] = useState<string>(() => value ?? '');
@@ -160,6 +176,9 @@ export function DateRangePickerProvider({
       displayText,
       displayDuration,
       inputRef,
+      buttonRef,
+      panelRef,
+      panelId,
       timeRange,
     }),
     [
@@ -172,6 +191,7 @@ export function DateRangePickerProvider({
       maxWidth,
       displayText,
       displayDuration,
+      panelId,
       timeRange,
     ]
   );
