@@ -174,6 +174,7 @@ export function setupSavedObjects(
     attributesToIncludeInAAD: new Set([
       'state',
       'connectorId',
+      'spaceId',
       'createdAt',
       'expiresAt',
       'createdBy',
