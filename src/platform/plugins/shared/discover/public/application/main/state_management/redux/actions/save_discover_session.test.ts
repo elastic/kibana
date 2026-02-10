@@ -109,9 +109,6 @@ describe('saveDiscoverSession', () => {
             initialInternalState: {
               serializedSearchSource: { index: dataViewMock.id },
             },
-            appState: {
-              columns: [],
-            },
           }),
           timeRestore: false,
           services,
@@ -194,7 +191,6 @@ describe('saveDiscoverSession', () => {
       'resetOnSavedSearchChange'
     );
     const { toolkit, saveDiscoverSessionSpy } = await setup();
-    resetOnSavedSearchChangeSpy.mockClear();
     const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockResolvedValueOnce(undefined);
@@ -213,7 +209,6 @@ describe('saveDiscoverSession', () => {
       'resetOnSavedSearchChange'
     );
     const { toolkit, saveDiscoverSessionSpy } = await setup();
-    resetOnSavedSearchChangeSpy.mockClear();
     const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockRejectedValueOnce(new Error('boom'));

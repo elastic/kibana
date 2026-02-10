@@ -46,9 +46,6 @@ const setup = async () => {
   const persistedTab = getPersistedTabMock({
     dataView: dataViewMockWithTimeField,
     services,
-    appStateOverrides: {
-      query: { language: 'kuery', query: 'test' },
-    },
   });
 
   await toolkit.initializeTabs({
