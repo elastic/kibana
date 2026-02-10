@@ -87,7 +87,6 @@ export class SyncGlobalParamsPrivateLocationsTask {
             soClient,
             encryptedSavedObjects,
             spaceIdToSync: paramsSpaceToSync,
-            filterByGlobalParams: true,
             modifiedParamKeys,
           });
           this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
