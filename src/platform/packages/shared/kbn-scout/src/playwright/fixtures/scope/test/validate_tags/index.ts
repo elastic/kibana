@@ -9,7 +9,7 @@
 
 import { test as base } from '@playwright/test';
 import { testTargets } from '@kbn/scout-info';
-import { tags } from '../../../..';
+import { tags } from '../../../../tags';
 
 const supportedTags = [
   ...testTargets.all.map((target) => target.playwrightTag),
