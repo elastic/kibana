@@ -37,7 +37,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { css } from '@emotion/css';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -185,6 +184,7 @@ const RuleFieldsSectionWrapper = styled.div`
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   min-width: 0px;
+  flex-basis: ${({ flexBasis }) => (flexBasis ? `${flexBasis}%` : 'auto')};
 `;
 
 const defaultGroupingOptions = [
@@ -746,9 +746,7 @@ export const RuleDetailsPage = connector(
                             data-test-subj="aboutRule"
                             component="section"
                             grow={2}
-                            css={css`
-                              flex-basis: 60%;
-                            `}
+                            flexBasis={60}
                           >
                             {rule !== null && (
                               <StepAboutRuleToggleDetails
@@ -759,12 +757,7 @@ export const RuleDetailsPage = connector(
                               />
                             )}
                           </StyledEuiFlexItem>
-                          <StyledEuiFlexItem
-                            grow={1}
-                            css={css`
-                              flex-basis: 40%;
-                            `}
-                          >
+                          <StyledEuiFlexItem grow={1} component="section" flexBasis={40}>
                             <EuiFlexGroup direction="column">
                               <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
                                 <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>

@@ -11,7 +11,7 @@ import type { CreateRulePropsRewrites } from '../../../../objects/types';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { goToAlertsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { login } from '../../../../tasks/login';
 import { selectSuppressionBehaviorOnAlertClosure } from '../../../../tasks/stack_management';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
@@ -51,10 +51,9 @@ describe(
       }
       deleteAlertsAndRules();
       createRule(getCustomQueryRuleParams(params)).then((rule) =>
-        visitRuleDetailsPage(rule.body.id)
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
       );
 
-      goToAlertsTab();
       waitForAlertsToPopulate();
     };
 
