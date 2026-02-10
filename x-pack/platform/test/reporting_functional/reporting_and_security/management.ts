@@ -90,7 +90,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.exports.clickExportTopNavButton();
         await (await testSubjects.find('scheduleExport')).click();
-        await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
+        await testSubjects.existOrFail('exportItemDetailsFlyout');
 
         await retry.try(async () => {
           await (await testSubjects.find('scheduleExportSubmitButton')).click();
