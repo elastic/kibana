@@ -671,14 +671,8 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'uri_parts') {
-      const {
-        from,
-        to,
-        keep_original,
-        remove_if_successful,
-        ignore_failure,
-        ignore_missing,
-      } = formState;
+      const { from, to, keep_original, remove_if_successful, ignore_failure, ignore_missing } =
+        formState;
       return {
         processorDefinition: {
           action: 'uri_parts',
