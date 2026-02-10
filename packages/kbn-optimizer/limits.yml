@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardEnhanced: 12159
+  dashboardEnhanced: 11961
   dashboardMarkdown: 4994
   data: 500179
   dataQuality: 11469
@@ -50,10 +50,10 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17521
+  embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
-  enterpriseSearch: 40244
+  enterpriseSearch: 40158
   entityStore: 1755
   esql: 19247
   esqlDataGrid: 10209
@@ -83,7 +83,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13338
   imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522
@@ -109,7 +109,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 8783
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -209,6 +209,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 53333
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 21318
-  workplaceAIApp: 65731
+  workplaceAIApp: 65529
