@@ -285,7 +285,7 @@ export class ProductDocInstallClient {
   }: {
     inferenceId: string;
   }): Promise<SecurityLabsStatusResponse> {
-    const objectId = getOpenapiSpecObjectId(inferenceId);
+    const objectId = getOpenAPISpecObjectId(inferenceId);
     try {
       const so = await this.soClient.get<TypeAttributes>(typeName, objectId);
       return {
@@ -308,7 +308,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, inferenceId } = fields;
-    const objectId = getOpenapiSpecObjectId(inferenceId);
+    const objectId = getOpenAPISpecObjectId(inferenceId);
     const attributes: TypeAttributes = {
       product_name: productName,
       product_version: 'latest', // to be included later
@@ -328,7 +328,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, indexName, inferenceId } = fields;
-    const objectId = getOpenapiSpecObjectId(inferenceId);
+    const objectId = getOpenAPISpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       product_name: productName,
       product_version: 'latest', // to be included later
@@ -345,7 +345,7 @@ export class ProductDocInstallClient {
     inferenceId: string;
   }) {
     const { productName, failureReason, inferenceId } = fields;
-    const objectId = getOpenapiSpecObjectId(inferenceId);
+    const objectId = getOpenAPISpecObjectId(inferenceId);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
@@ -357,7 +357,7 @@ export class ProductDocInstallClient {
   }
 
   async setOpenapiSpecUninstalled(inferenceId: string | undefined) {
-    const objectId = getOpenapiSpecObjectId(inferenceId);
+    const objectId = getOpenAPISpecObjectId(inferenceId);
     try {
       await this.soClient.update<TypeAttributes>(typeName, objectId, {
         installation_status: 'uninstalled',
@@ -373,17 +373,16 @@ export class ProductDocInstallClient {
   }
 }
 
-const getOpenapiSpecObjectId = (inferenceId: string | undefined) => {
+const getObjectId = (
+  sourceId: 'security-labs' | 'openapi-spec' | `product-doc-${ProductName}`,
+  inferenceId?: string
+) => {
   const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
-  return `kb-openapi-spec${inferenceIdPart}-status`.toLowerCase();
+  return `kb-${sourceId}${inferenceIdPart}-status`.toLowerCase();
 };
+const getOpenAPISpecObjectId = (inferenceId?: string) => getObjectId('openapi-spec', inferenceId);
 
-const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) => {
-  const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
-  return `kb-product-doc-${productName}${inferenceIdPart}-status`.toLowerCase();
-};
+const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) =>
+  getObjectId(`product-doc-${productName}`, inferenceId);
 
-const getSecurityLabsObjectId = (inferenceId: string | undefined) => {
-  const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
-  return `kb-security-labs${inferenceIdPart}-status`.toLowerCase();
-};
+const getSecurityLabsObjectId = (inferenceId?: string) => getObjectId('security-labs', inferenceId);
