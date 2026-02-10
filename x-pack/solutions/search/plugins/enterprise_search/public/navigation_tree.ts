@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-
 import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
@@ -17,10 +15,6 @@ import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -87,7 +81,7 @@ export const getNavigationTreeDefinition = ({
               link: 'dashboards',
             },
             {
-              icon: LazyIconAgents,
+              icon: 'productRobot',
               link: 'agent_builder',
             },
             {

@@ -8,7 +8,6 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { DATA_SOURCES_SHORT_TITLE } from '@kbn/data-sources-plugin/common';
-import { iconRobot } from './assets/robot';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -20,7 +19,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         breadcrumbStatus: 'hidden',
       },
       {
-        icon: iconRobot,
+        icon: 'productRobot',
         link: 'agent_builder',
       },
       {
