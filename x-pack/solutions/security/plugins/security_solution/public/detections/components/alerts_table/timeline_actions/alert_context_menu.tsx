@@ -238,7 +238,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
     closePopover,
     ecsRowData,
-    refetch: refetchAll,
   });
 
   const items: AlertTableContextMenuItem[] = useMemo(

@@ -13,7 +13,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
-  type UseAlertTagsActionsProps,
+  type UseRunAlertWorkflowPanelProps,
 } from './use_run_alert_workflow_panel';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -59,7 +59,7 @@ const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKib
 
 const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
 
-const defaultProps: UseAlertTagsActionsProps = {
+const defaultProps: UseRunAlertWorkflowPanelProps = {
   closePopover: jest.fn(),
   ecsRowData: {
     _id: 'alert-123',
@@ -133,9 +133,12 @@ const renderContextMenu = (
 
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useKibanaMock.mockReturnValue(createMockKibana());
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('hook return values', () => {
@@ -206,6 +209,7 @@ describe('useRunAlertWorkflowPanel', () => {
       });
 
       expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runAlertWorkflowPanel).toEqual([]);
     });
   });
 
@@ -227,7 +231,6 @@ describe('useRunAlertWorkflowPanel', () => {
 
 describe('AlertWorkflowsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useKibanaMock.mockReturnValue(
       createMockKibana({
@@ -235,6 +238,10 @@ describe('AlertWorkflowsPanel', () => {
         rendering: {},
       })
     );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('execute button is disabled when no workflow is selected', () => {
