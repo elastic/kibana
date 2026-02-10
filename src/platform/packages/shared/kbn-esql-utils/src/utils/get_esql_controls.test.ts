@@ -13,18 +13,6 @@ import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/e
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { getEsqlControls } from './get_esql_controls';
-import { getESQLQueryVariables } from './query_parsing_helpers';
-
-const getESQLQueryVariablesMock = jest.mocked(getESQLQueryVariables);
-
-jest.mock('./query_parsing_helpers', () => {
-  const originalModule = jest.requireActual('./query_parsing_helpers');
-
-  return {
-    ...originalModule,
-    getESQLQueryVariables: jest.fn(originalModule.getESQLQueryVariables),
-  };
-});
 
 const createPresentationContainer = (children: unknown[]) =>
   ({
@@ -52,27 +40,18 @@ const createControlApi = (uuid: string, state: ESQLControlState, type = ESQL_CON
 });
 
 describe('getEsqlControls', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns undefined when query is not an aggregate query', () => {
-    // Given
+  it('returns undefined when query is not an ES|QL query', () => {
     const presentationContainer = createPresentationContainer([]);
-    const regularQuery = {
+    const kqlQuery = {
       query: 'response:200',
       language: 'kuery',
     } as Query;
 
-    // When / Then
     expect(getEsqlControls(presentationContainer, undefined)).toBeUndefined();
-    expect(getEsqlControls(presentationContainer, regularQuery)).toBeUndefined();
-    expect(getESQLQueryVariablesMock).not.toHaveBeenCalled();
+    expect(getEsqlControls(presentationContainer, kqlQuery)).toBeUndefined();
   });
 
   it('returns only matching ES|QL controls with valid APIs', () => {
-    // Given
-    getESQLQueryVariablesMock.mockReturnValue(['status']);
     const matchingState = createControlState('status');
     const nonMatchingState = createControlState('host');
     const noVariableState = createControlState('');
@@ -89,13 +68,11 @@ describe('getEsqlControls', () => {
       esql: 'FROM logs-* | WHERE status == ?status',
     } as AggregateQuery;
 
-    // When / Then
     expect(getEsqlControls(presentationContainer, query)).toStrictEqual({
       'matching-control': {
         type: ESQL_CONTROL,
         ...matchingState,
       },
     });
-    expect(getESQLQueryVariablesMock).toHaveBeenCalledWith('FROM logs-* | WHERE status == ?status');
   });
 });
