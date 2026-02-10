@@ -119,6 +119,11 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to snooze a rule. |
 | `rule_unsnooze` | `unknown` | User is unsnoozing a rule. |
 | | `failure` | User is not authorized to unsnooze a rule. |
+| `rule_alert_snooze` | `unknown` | User is snoozing an alert of a rule (per-alert conditional snooze). |
+| | `failure` | User is not authorized to snooze an alert. |
+| `rule_alert_unsnooze` | `success` | An alert was auto-unsnoozed because its conditions were met. |
+| `rule_alert_acknowledge` | `unknown` | User is acknowledging an alert (updating workflow status). |
+| | `failure` | User is not authorized to acknowledge an alert. |
 | `case_update` | `unknown` | User is updating a case. |
 | | `failure` | User is not authorized to update a case. |
 | `case_push` | `unknown` | User is pushing a case to an external service. |

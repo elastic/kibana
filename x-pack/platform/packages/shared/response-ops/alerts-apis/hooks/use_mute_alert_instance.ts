@@ -30,8 +30,15 @@ export const useMuteAlertInstance = ({
   notifications: { toasts },
 }: UseMuteAlertInstanceParams) => {
   return useMutation(
-    ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
-      muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
+    ({ ruleId, alertInstanceId, expiresAt, conditions, conditionOperator }: ToggleAlertParams) =>
+      muteAlertInstance({
+        http,
+        id: ruleId,
+        instanceId: alertInstanceId,
+        expiresAt,
+        conditions,
+        conditionOperator,
+      }),
     {
       mutationKey: getKey(),
       context: AlertsQueryContext,
