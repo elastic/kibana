@@ -92,7 +92,7 @@ describe('useInlineActionTrigger', () => {
     expect(result.current.match.isActive).toBe(false);
   });
 
-  it('dismissed trigger stays dismissed on subsequent input', () => {
+  it('dismissed trigger re-activates on next input', () => {
     const { result } = renderHook(() => useInlineActionTrigger());
 
     mockGetTextBeforeCursor.mockReturnValue('@john');
@@ -103,34 +103,15 @@ describe('useInlineActionTrigger', () => {
     act(() => {
       result.current.dismiss();
     });
+    expect(result.current.match.isActive).toBe(false);
 
-    // User continues typing but same trigger — stays dismissed
+    // User continues typing — trigger re-activates
     mockGetTextBeforeCursor.mockReturnValue('@johnny');
     act(() => {
       result.current.handleInput(mockElement);
     });
-    expect(result.current.match.isActive).toBe(false);
-  });
-
-  it('dismissed trigger re-activates when a different trigger fires', () => {
-    const { result } = renderHook(() => useInlineActionTrigger());
-
-    mockGetTextBeforeCursor.mockReturnValue('@john');
-    act(() => {
-      result.current.handleInput(mockElement);
-    });
-
-    act(() => {
-      result.current.dismiss();
-    });
-
-    // User types a different trigger
-    mockGetTextBeforeCursor.mockReturnValue('/p');
-    act(() => {
-      result.current.handleInput(mockElement);
-    });
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeTrigger?.trigger.id).toBe('command-prompt');
+    expect(result.current.match.activeTrigger?.query).toBe('johnny');
   });
 
   it('disabled option prevents trigger detection', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { TriggerDefinition, TriggerMatchResult } from './types';
 import { matchTrigger, getTextBeforeCursor } from './trigger_matcher';
 import { createTriggerRegistry } from './trigger_registry';
@@ -46,10 +46,6 @@ export const useInlineActionTrigger = (
 
   const [match, setMatch] = useState<TriggerMatchResult>(INACTIVE_MATCH);
 
-  // Track which trigger the user manually dismissed.
-  // Reset when the trigger context changes or goes inactive.
-  const dismissedTriggerIdRef = useRef<string | null>(null);
-
   const handleInput = useCallback(
     (element: HTMLElement) => {
       if (!enabled) {
@@ -58,39 +54,14 @@ export const useInlineActionTrigger = (
       }
 
       const textBeforeCursor = getTextBeforeCursor(element);
-      const result = matchTrigger(textBeforeCursor, registry);
-
-      // If the user previously dismissed this trigger and hasn't
-      // changed the trigger context, keep it dismissed
-      if (
-        result.isActive &&
-        result.activeTrigger &&
-        dismissedTriggerIdRef.current === result.activeTrigger.trigger.id
-      ) {
-        return;
-      }
-
-      // If the trigger changed or went inactive, clear the dismissed state
-      if (
-        !result.isActive ||
-        (result.activeTrigger &&
-          dismissedTriggerIdRef.current !== null &&
-          dismissedTriggerIdRef.current !== result.activeTrigger.trigger.id)
-      ) {
-        dismissedTriggerIdRef.current = null;
-      }
-
-      setMatch(result);
+      setMatch(matchTrigger(textBeforeCursor, registry));
     },
     [enabled, registry]
   );
 
   const dismiss = useCallback(() => {
-    if (match.isActive && match.activeTrigger) {
-      dismissedTriggerIdRef.current = match.activeTrigger.trigger.id;
-      setMatch(INACTIVE_MATCH);
-    }
-  }, [match]);
+    setMatch(INACTIVE_MATCH);
+  }, []);
 
   return { match, dismiss, handleInput };
 };
