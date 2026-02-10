@@ -7,6 +7,7 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useTableData } from './use_table_data';
 import type { FilterOptions } from '../components/all_inference_endpoints/types';
 
@@ -54,7 +55,10 @@ describe('useTableData', () => {
   });
 
   it('should filter data by provider', () => {
-    const filterOptions: FilterOptions = { provider: ['elasticsearch'], type: [] };
+    const filterOptions: FilterOptions = {
+      provider: [ServiceProviderKeys.elasticsearch],
+      type: [],
+    };
     const { result } = renderHook(() => useTableData(inferenceEndpoints, filterOptions, ''));
 
     expect(result.current.length).toBe(2);
@@ -71,7 +75,7 @@ describe('useTableData', () => {
 
   it('should filter data by both provider and type', () => {
     const filterOptions: FilterOptions = {
-      provider: ['elasticsearch'],
+      provider: [ServiceProviderKeys.elasticsearch],
       type: ['sparse_embedding'],
     };
     const { result } = renderHook(() => useTableData(inferenceEndpoints, filterOptions, ''));
@@ -116,7 +120,7 @@ describe('useTableData', () => {
 
   it('should combine provider, type, and search filters', () => {
     const filterOptions: FilterOptions = {
-      provider: ['elasticsearch'],
+      provider: [ServiceProviderKeys.elasticsearch],
       type: ['sparse_embedding'],
     };
     const { result } = renderHook(() =>
@@ -128,7 +132,7 @@ describe('useTableData', () => {
   });
 
   it('should return empty array when no endpoints match filters', () => {
-    const filterOptions: FilterOptions = { provider: ['nonexistent'], type: [] };
+    const filterOptions: FilterOptions = { provider: [ServiceProviderKeys.cohere], type: [] };
     const { result } = renderHook(() => useTableData(inferenceEndpoints, filterOptions, ''));
 
     expect(result.current.length).toBe(0);
