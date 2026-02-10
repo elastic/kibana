@@ -31,7 +31,7 @@ import { useBasePath } from '../../../../common/lib/kibana';
 import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
-import type { SiemReadinessTabSelectedCategoriesProps } from '../../components/configuration_panel';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 
 const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
@@ -42,8 +42,8 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   checkedAt: number | undefined;
 }
 
-export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
-  selectedCategories,
+export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
@@ -58,12 +58,12 @@ export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
 
-  // Prepare categories data with computed status field, filtered by selected categories
+  // Prepare categories data with computed status field, filtered by active categories
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
     return getReadinessCategoriesData.mainCategoriesMap
-      .filter((category) => selectedCategories.includes(category.category as MainCategories))
+      .filter((category) => activeCategories.includes(category.category as MainCategories))
       .map((category) => ({
         category: category.category,
         items: category.indices.map((index) => {
@@ -79,7 +79,7 @@ export const QualityTab: React.FC<SiemReadinessTabSelectedCategoriesProps> = ({
           };
         }),
       }));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, selectedCategories]);
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
   // Calculate total incompatible indices
   const totalIncompatibleIndices = useMemo(() => {

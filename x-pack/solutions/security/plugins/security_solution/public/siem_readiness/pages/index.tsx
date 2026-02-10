@@ -9,19 +9,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageHeader, EuiPageSection, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MainCategories } from '@kbn/siem-readiness';
+import { ALL_CATEGORIES } from '@kbn/siem-readiness';
 import { SIEM_READINESS_PATH } from '../../../common/constants';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
-import { CategoryConfigurationPanel } from './components/configuration_panel';
-
-const ALL_CATEGORIES: MainCategories[] = [
-  'Endpoint',
-  'Identity',
-  'Network',
-  'Cloud',
-  'Application/SaaS',
-];
+import {
+  CategoryConfigurationPanel,
+  ACTIVE_CATEGORIES_STORAGE_KEY,
+} from './components/configuration_panel';
 
 const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
@@ -30,8 +27,11 @@ const SiemReadinessDashboard = () => {
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
 
-  // State for category filtering (shared across all tabs)
-  const [selectedCategories, setSelectedCategories] = useState<MainCategories[]>(ALL_CATEGORIES);
+  // Persistent state for category filtering (shared with configuration panel)
+  const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
+    ACTIVE_CATEGORIES_STORAGE_KEY,
+    ALL_CATEGORIES
+  );
 
   // State for showing configuration modal
   const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
@@ -81,14 +81,13 @@ const SiemReadinessDashboard = () => {
         <VisibilitySectionTabs
           selectedTabId={selectedTabId}
           onTabSelect={handleTabSelect}
-          selectedCategories={selectedCategories}
+          activeCategories={activeCategories ?? ALL_CATEGORIES}
         />
       </EuiPageSection>
       <CategoryConfigurationPanel
         isVisible={isConfigModalVisible}
         onClose={() => setIsConfigModalVisible(false)}
-        selectedCategories={selectedCategories}
-        onSelectionChange={setSelectedCategories}
+        onSave={setActiveCategories}
       />
     </div>
   );

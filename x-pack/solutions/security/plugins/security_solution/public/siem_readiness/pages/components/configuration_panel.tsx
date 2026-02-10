@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiCheckbox,
@@ -24,34 +24,17 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MainCategories } from '@kbn/siem-readiness';
+import { ALL_CATEGORIES } from '@kbn/siem-readiness';
 
-// Props interface for tabs that use selectedCategories
-export interface SiemReadinessTabSelectedCategoriesProps {
-  selectedCategories: MainCategories[];
+export const ACTIVE_CATEGORIES_STORAGE_KEY = 'siem_readiness_configurations:active_categories';
+
+export interface SiemReadinessTabActiveCategoriesProps {
+  activeCategories: MainCategories[];
 }
 
-// Type for checkbox state mapping
-type CategorySelectionMap = Record<MainCategories, boolean>;
-
-const CATEGORY_OPTIONS: MainCategories[] = [
-  'Endpoint',
-  'Identity',
-  'Network',
-  'Cloud',
-  'Application/SaaS',
-];
-
 const MAX_COLUMNS_PER_ROW = 3;
-
-// Helper function to convert category array to selection map
-const getMapFromCategories = (selected: MainCategories[]): CategorySelectionMap => {
-  const map: CategorySelectionMap = {} as CategorySelectionMap;
-  CATEGORY_OPTIONS.forEach((category) => {
-    map[category] = selected.includes(category);
-  });
-  return map;
-};
 
 // Category labels for i18n
 const CATEGORY_LABELS: Record<MainCategories, string> = {
@@ -83,47 +66,48 @@ const CATEGORY_ROWS: MainCategories[][] = [
 ];
 
 interface CategoryConfigurationPanelProps {
-  selectedCategories?: MainCategories[];
-  onSelectionChange?: (selectedCategories: MainCategories[]) => void;
   isVisible: boolean;
   onClose: () => void;
+  /** Notifies parent to re-render since useLocalStorage doesn't sync across components in the same tab */
+  onSave?: (categories: MainCategories[]) => void;
 }
 
 export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProps> = ({
-  selectedCategories = CATEGORY_OPTIONS, // Default to all categories selected
-  onSelectionChange,
   isVisible,
   onClose,
+  onSave,
 }) => {
-  // Convert array to checkbox group format
-  const [idToSelectedMap, setIdToSelectedMap] = useState<CategorySelectionMap>(() =>
-    getMapFromCategories(selectedCategories)
+  // Read/write to localStorage
+  const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
+    ACTIVE_CATEGORIES_STORAGE_KEY,
+    ALL_CATEGORIES
   );
 
-  // Reset checkbox state when selectedCategories prop changes or modal opens
+  // Draft state for pending changes (before Save)
+  const [draftCategories, setDraftCategories] = useState<MainCategories[]>(
+    activeCategories ?? ALL_CATEGORIES
+  );
+
+  // Reset draft when modal opens
   useEffect(() => {
-    setIdToSelectedMap(getMapFromCategories(selectedCategories));
-  }, [selectedCategories, isVisible]);
-
-  // Handle checkbox changes using functional update to avoid stale closure
-  const handleCheckboxChange = useCallback((optionId: MainCategories) => {
-    setIdToSelectedMap((prev) => ({
-      ...prev,
-      [optionId]: !prev[optionId],
-    }));
-  }, []);
-
-  const handleApply = useCallback(() => {
-    if (onSelectionChange) {
-      const selectedCategoryArray = CATEGORY_OPTIONS.filter(
-        (category) => idToSelectedMap[category]
-      );
-      onSelectionChange(selectedCategoryArray);
+    if (isVisible) {
+      setDraftCategories(activeCategories ?? ALL_CATEGORIES);
     }
-    onClose();
-  }, [idToSelectedMap, onSelectionChange, onClose]);
+  }, [isVisible, activeCategories]);
 
-  const selectedCount = Object.values(idToSelectedMap).filter(Boolean).length;
+  const toggleCategory = (category: MainCategories) => {
+    setDraftCategories((prev) =>
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    );
+  };
+
+  const handleApply = () => {
+    setActiveCategories(draftCategories);
+    onSave?.(draftCategories);
+    onClose();
+  };
+
+  const hasNoSelection = draftCategories.length === 0;
 
   if (!isVisible) {
     return null;
@@ -185,8 +169,8 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
                       <EuiCheckbox
                         id={category}
                         label={CATEGORY_LABELS[category]}
-                        checked={idToSelectedMap[category] || false}
-                        onChange={() => handleCheckboxChange(category)}
+                        checked={draftCategories.includes(category)}
+                        onChange={() => toggleCategory(category)}
                       />
                     </EuiFlexItem>
                   ))}
@@ -196,7 +180,7 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
             ))}
           </EuiFlexGroup>
           <div style={{ height: '120px' }} />
-          {selectedCount === 0 && (
+          {hasNoSelection && (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -243,7 +227,7 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
           onClick={handleApply}
           fill
           data-test-subj="configurationModalSaveButton"
-          disabled={selectedCount === 0}
+          disabled={hasNoSelection}
         >
           {i18n.translate(
             'xpack.securitySolution.siemReadiness.coverage.configuration.modalSaveButton',

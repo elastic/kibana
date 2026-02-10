@@ -18,13 +18,13 @@ import { RetentionTab } from './tabs/retention/retention_tab';
 interface VisibilitySectionTabsProps {
   selectedTabId: VisibilityTabId;
   onTabSelect: (tabId: VisibilityTabId) => void;
-  selectedCategories: MainCategories[];
+  activeCategories: MainCategories[];
 }
 
 export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
   selectedTabId,
   onTabSelect,
-  selectedCategories,
+  activeCategories,
 }) => {
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -40,7 +40,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.tab.title', {
         defaultMessage: 'Quality',
       }),
-      content: <QualityTab selectedCategories={selectedCategories} />,
+      content: <QualityTab activeCategories={activeCategories} />,
     },
     {
       id: 'continuity',
