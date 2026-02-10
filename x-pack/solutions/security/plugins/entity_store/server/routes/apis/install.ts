@@ -15,7 +15,7 @@ import {
 } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_schema';
+import { EntityType, ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
