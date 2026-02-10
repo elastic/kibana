@@ -13,6 +13,7 @@ import {
   getExceptionsSubFeature,
   getInvestigationGuideSubFeature,
   getManualRunRulesSubFeature,
+  getRulesManagementSettingsSubFeature,
 } from '../kibana_sub_features';
 
 export const getRulesBaseKibanaSubFeatureIdsV4 = (): RulesSubFeatureId[] => [
@@ -21,6 +22,7 @@ export const getRulesBaseKibanaSubFeatureIdsV4 = (): RulesSubFeatureId[] => [
   RulesSubFeatureId.customHighlightedFields,
   RulesSubFeatureId.enableDisableRules,
   RulesSubFeatureId.manualRunRules,
+  RulesSubFeatureId.rulesManagementSettings,
 ];
 
 /**
@@ -34,5 +36,6 @@ export const getRulesSubFeaturesMapV4 = () => {
     [RulesSubFeatureId.customHighlightedFields, getCustomHighlightedFieldsSubFeature()],
     [RulesSubFeatureId.enableDisableRules, getEnableDisableRulesSubFeature()],
     [RulesSubFeatureId.manualRunRules, getManualRunRulesSubFeature()],
+    [RulesSubFeatureId.rulesManagementSettings, getRulesManagementSettingsSubFeature()],
   ]);
 };

@@ -36,4 +36,7 @@ export interface DetectionRulesAuthz {
 
   /** Whether the user can modify the investigation guide (note) on rules */
   canEditInvestigationGuides: boolean;
+
+  /** Whether the user can access rules management settings (e.g. gap autofill scheduler) */
+  canAccessRulesManagementSettings: boolean;
 }

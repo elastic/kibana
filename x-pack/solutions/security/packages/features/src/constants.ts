@@ -66,6 +66,8 @@ export const CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID =
   'security_solution_custom_highlighted_fields_edit' as const;
 export const ENABLE_DISABLE_RULES_SUBFEATURE_ID = 'security_solution_enable_disable_rules' as const;
 export const MANUAL_RUN_RULES_SUBFEATURE_ID = 'security_solution_manual_run_rules' as const;
+export const RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID =
+  'security_solution_rules_management_settings' as const;
 
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;
@@ -108,6 +110,10 @@ export const ENABLE_DISABLE_RULES_API_PRIVILEGE = 'enable-disable-rules-privileg
 // Manual run rules
 export const MANUAL_RUN_RULES_API_PRIVILEGE = 'manual-run-rules-privilege' as const;
 
+// Rules management settings
+export const RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE =
+  'rules-management-settings-privilege' as const;
+
 /**
  * Rules UI subfeatures privileges
  */
@@ -139,6 +145,11 @@ export const ENABLE_DISABLE_RULES_UI_PRIVILEGES =
 export const MANUAL_RUN_RULES_UI = 'manualRunRulesPrivilege' as const;
 export const MANUAL_RUN_RULES_UI_PRIVILEGES =
   `${RULES_FEATURE_ID_V4}.${MANUAL_RUN_RULES_UI}` as const;
+
+// Rules management settings
+export const RULES_MANAGEMENT_SETTINGS_UI = 'rulesManagementSettingsPrivilege' as const;
+export const RULES_MANAGEMENT_SETTINGS_UI_PRIVILEGES =
+  `${RULES_FEATURE_ID_V4}.${RULES_MANAGEMENT_SETTINGS_UI}` as const;
 
 /**
  * Alerts feature constants
