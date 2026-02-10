@@ -40,11 +40,6 @@ export interface INpreClient {
   putNpre(expressionName: string, expression: string): Promise<{ acknowledged: boolean }>;
 
   /**
-   * Checks if the current user has permission to delete named project routing expressions.
-   */
-  canDeleteNpre(): Promise<boolean>;
-
-  /**
    * Deletes a project routing expression.
    * @param expressionName the name of the expression to delete.
    */
@@ -89,17 +84,13 @@ export class NpreClient implements INpreClient {
       });
   }
 
-  private async canWriteNpre(): Promise<boolean> {
+  public async canPutNpre(): Promise<boolean> {
     return this.getClient()
       .asScoped(this.request)
       .asCurrentUser.security.hasPrivileges({
-        cluster: ['manage'],
+        cluster: ['cluster:admin/project_routing/put'],
       })
       .then((response) => response.has_all_requested);
-  }
-
-  public async canPutNpre(): Promise<boolean> {
-    return this.canWriteNpre();
   }
 
   public async putNpre(
@@ -125,16 +116,11 @@ export class NpreClient implements INpreClient {
       });
   }
 
-  public async canDeleteNpre(): Promise<boolean> {
-    return this.canWriteNpre();
-  }
-
   public async deleteNpre(expressionName: string): Promise<{ acknowledged: boolean }> {
     this.logger.debug(`Deleting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
-      .asScoped(this.request)
-      .asCurrentUser.transport.request<{ acknowledged: boolean }>({
+      .asInternalUser.transport.request<{ acknowledged: boolean }>({
         method: 'DELETE',
         path: `/_project_routing/${expressionName}`,
       })

@@ -126,7 +126,7 @@ describe('NpreClient', () => {
   });
 
   describe('canPutNpre', () => {
-    it('should return true when user has manage cluster privilege', async () => {
+    it("should return true when user has 'cluster:admin/project_routing/put' privilege", async () => {
       mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as any);
@@ -135,7 +135,7 @@ describe('NpreClient', () => {
 
       expect(result).toBe(true);
       expect(mockScopedClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        cluster: ['manage'],
+        cluster: ['cluster:admin/project_routing/put'],
       });
     });
 
@@ -189,42 +189,17 @@ describe('NpreClient', () => {
     });
   });
 
-  describe('canDeleteNpre', () => {
-    it('should return true when user has manage cluster privilege', async () => {
-      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: true,
-      } as any);
-
-      const result = await service.canDeleteNpre();
-
-      expect(result).toBe(true);
-      expect(mockScopedClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        cluster: ['manage'],
-      });
-    });
-
-    it('should return false when user does not have manage cluster privilege', async () => {
-      mockScopedClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: false,
-      } as any);
-
-      const result = await service.canDeleteNpre();
-
-      expect(result).toBe(false);
-    });
-  });
-
   describe('deleteNpre', () => {
     it('should delete a project routing expression', async () => {
       const expressionName = 'test-expression';
       const mockResponse = { acknowledged: true };
 
-      mockScopedClient.asCurrentUser.transport.request.mockResolvedValue(mockResponse);
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValue(mockResponse);
 
       const result = await service.deleteNpre(expressionName);
 
       expect(result).toEqual(mockResponse);
-      expect(mockScopedClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
         path: '/_project_routing/test-expression',
       });
@@ -237,7 +212,7 @@ describe('NpreClient', () => {
       const expressionName = 'test-expression';
       const error = new Error('Elasticsearch error');
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.deleteNpre(expressionName)).rejects.toThrow('Elasticsearch error');
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -260,7 +235,7 @@ describe('NpreClient', () => {
         meta: {} as any,
       });
 
-      mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(error);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValue(error);
 
       await expect(service.deleteNpre(expressionName)).rejects.toThrow();
       expect(mockLogger.error).toHaveBeenCalledWith(

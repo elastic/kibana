@@ -150,11 +150,11 @@ describe('Spaces plugin', () => {
         id: 'project_routing',
         privileges: [
           {
-            requiredClusterPrivileges: ['manage'],
+            requiredClusterPrivileges: ['cluster:admin/project_routing/put'],
             ui: ['manage_space_default'],
           },
           {
-            requiredClusterPrivileges: ['monitor'],
+            requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
             ui: ['read_space_default'],
           },
         ],
@@ -214,7 +214,6 @@ describe('Spaces plugin', () => {
           putNpre: jest.fn(),
           deleteNpre: jest.fn(),
           canPutNpre: jest.fn(),
-          canDeleteNpre: jest.fn(),
         }),
       };
 

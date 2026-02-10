@@ -33,7 +33,6 @@ const createMockNpreClient = (): INpreClient => {
     putNpre: jest.fn().mockResolvedValue(undefined),
     deleteNpre: jest.fn().mockResolvedValue(undefined),
     canPutNpre: jest.fn().mockResolvedValue(true),
-    canDeleteNpre: jest.fn().mockResolvedValue(true),
   } as unknown as INpreClient;
 };
 
@@ -1601,38 +1600,6 @@ describe('projectRouting functionality', () => {
       );
     });
 
-    test('throws error when user is not authorized to update projectRouting', async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-      const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
-      const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(false);
-
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        [],
-        'traditional',
-        featuresStart,
-        mockCpsSetup,
-        mockNpreClient
-      );
-
-      const spaceToUpdate = {
-        id: 'foo',
-        name: 'foo-name',
-        disabledFeatures: [],
-        projectRouting: 'project:updated-project',
-      };
-
-      await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, unauthorized to update projectRouting"`
-      );
-    });
-
     test('throws error when projectRouting update is provided but cpsSetup is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1725,7 +1692,6 @@ describe('projectRouting functionality', () => {
       const mockCpsSetup = createMockCpsSetup();
       (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canDeleteNpre as jest.Mock).mockResolvedValue(true);
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
 
       const client = new SpacesClient(
@@ -1781,44 +1747,6 @@ describe('projectRouting functionality', () => {
       expect(mockNpreClient.deleteNpre).not.toHaveBeenCalled();
     });
 
-    test('throws error when user is not authorized to delete projectRouting and npre exists', async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-      mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
-        type: 'space',
-        references: [],
-        attributes: {
-          name: 'foo-name',
-          disabledFeatures: [],
-        },
-      } as any);
-      const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
-      const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canDeleteNpre as jest.Mock).mockResolvedValue(false);
-      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
-
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        [],
-        'traditional',
-        featuresStart,
-        mockCpsSetup,
-        mockNpreClient
-      );
-
-      await expect(client.delete('foo')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to delete Space, unauthorized to delete default projectRouting expression."`
-      );
-
-      expect(mockCallWithRequestRepository.delete).not.toHaveBeenCalled();
-      expect(mockCallWithRequestRepository.deleteByNamespace).not.toHaveBeenCalled();
-    });
-
     test('allows delete when user is not authorized but no npre exists', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
@@ -1837,7 +1765,6 @@ describe('projectRouting functionality', () => {
       const mockCpsSetup = createMockCpsSetup();
       (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
-      (mockNpreClient.canDeleteNpre as jest.Mock).mockResolvedValue(false);
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
 
       const client = new SpacesClient(

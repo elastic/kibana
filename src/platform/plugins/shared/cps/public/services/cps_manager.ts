@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 import { type ICPSManager, type ProjectsData, ProjectRoutingAccess } from '@kbn/cps-utils';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { ProjectFetcher } from './project_fetcher';
 
 /**
@@ -94,16 +95,19 @@ export class CPSManager implements ICPSManager {
 
   /**
    * Initialize the default project routing from the active space.
-   * Fetches the active space and sets the defaultProjectRouting field.
+   * Fetches the default project routing for the current space from the CPS plugin.
    */
   private async initializeDefaultProjectRouting() {
     try {
-      const activeSpace = await this.http.get<{ projectRouting?: ProjectRouting }>(
-        '/internal/spaces/_active_space'
+      const basePath = this.http.basePath.get();
+      const { spaceId } = getSpaceIdFromPath(basePath, this.http.basePath.serverBasePath);
+
+      const response = await this.http.get<{ projectRouting?: ProjectRouting }>(
+        `/api/spaces/space/${spaceId}`
       );
-      this.updateDefaultProjectRouting(activeSpace.projectRouting);
+      this.updateDefaultProjectRouting(response.projectRouting);
     } catch (error) {
-      this.logger.warn('Failed to fetch active space for default project routing', error);
+      this.logger.warn('Failed to fetch default project routing for space', error);
     }
   }
 

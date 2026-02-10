@@ -711,59 +711,16 @@ describe('EditSpaceSettings', () => {
       color: '#aabbcc',
       initials: 'AB',
       disabledFeatures: [],
-      projectRouting: 'project:test-project',
+      projectRouting: '_alias:_origin',
     };
 
-    const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
-      return (
-        <IntlProvider locale="en">
-          <KibanaContextProvider
-            services={{
-              application: {
-                capabilities: {
-                  navLinks: {},
-                  management: {},
-                  catalogue: {},
-                  spaces: { manage: true },
-                  project_routing: { read_space_default: true },
-                },
-              },
-            }}
-          >
-            <EditSpaceProviderRoot
-              capabilities={{
-                navLinks: {},
-                management: {},
-                catalogue: {},
-                spaces: { manage: true },
-                project_routing: { read_space_default: true },
-              }}
-              getUrlForApp={getUrlForApp}
-              navigateToUrl={navigateToUrl}
-              serverBasePath=""
-              spacesManager={spacesManager}
-              getRolesAPIClient={getRolesAPIClient}
-              http={http}
-              notifications={notifications}
-              overlays={overlays}
-              getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
-              getPrivilegesAPIClient={getPrivilegeAPIClient}
-              getSecurityLicense={getSecurityLicenseMock}
-              userProfile={userProfile}
-              theme={theme}
-              i18n={i18n}
-              logger={logger}
-              enableSecurityLink=""
-            >
-              {children}
-            </EditSpaceProviderRoot>
-          </KibanaContextProvider>
-        </IntlProvider>
-      );
-    };
+    // Mock getActiveSpace to return the space being edited
+    const getActiveSpaceSpy = jest
+      .spyOn(spacesManager, 'getActiveSpace')
+      .mockResolvedValue(spaceToUpdate);
 
     render(
-      <TestComponentWithCapability>
+      <TestComponent>
         <EditSpaceSettingsTab
           space={spaceToUpdate}
           history={history}
@@ -772,7 +729,7 @@ describe('EditSpaceSettings', () => {
           allowSolutionVisibility={false}
           reloadWindow={reloadWindow}
         />
-      </TestComponentWithCapability>
+      </TestComponent>
     );
 
     await waitFor(() => {
@@ -794,10 +751,13 @@ describe('EditSpaceSettings', () => {
       expect(callArgs).toMatchObject({
         id: 'existing-space',
         name: 'Updated Space Name',
-        projectRouting: 'project:test-project',
+        projectRouting: '_alias:_origin',
       });
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
+
+    // Clean up
+    getActiveSpaceSpy.mockRestore();
   });
 });

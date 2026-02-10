@@ -107,7 +107,6 @@ describe('Spaces Public API', () => {
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(true),
-      canDeleteNpre: jest.fn().mockResolvedValue(options.canDelete),
     };
 
     const mockCpsStart = {
@@ -247,31 +246,7 @@ describe('Spaces Public API', () => {
       const { status } = response;
 
       expect(status).toEqual(204);
-      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
       expect(npreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
-    });
-
-    it('returns 403 if the user does not have permission to delete the NPRE', async () => {
-      const { routeHandler, npreClient } = await setupWithCps({
-        cpsEnabled: true,
-        canDelete: false,
-        expression: 'some-expression',
-      });
-
-      const request = httpServerMock.createKibanaRequest({
-        params: {
-          id: 'a-space',
-        },
-        method: 'delete',
-      });
-
-      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-      const { status } = response;
-
-      expect(status).toEqual(403);
-      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
-      expect(npreClient.deleteNpre).not.toHaveBeenCalled();
     });
 
     it('returns 204 when user does not have permission to delete the NPRE but it does not exist', async () => {
@@ -292,7 +267,6 @@ describe('Spaces Public API', () => {
       const { status } = response;
 
       expect(status).toEqual(204);
-      expect(npreClient.canDeleteNpre).toHaveBeenCalled();
       expect(npreClient.getNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
       expect(npreClient.deleteNpre).not.toHaveBeenCalled();
     });
@@ -314,7 +288,6 @@ describe('Spaces Public API', () => {
       const { status } = response;
 
       expect(status).toEqual(204);
-      expect(npreClient.canDeleteNpre).not.toHaveBeenCalled();
       expect(npreClient.deleteNpre).not.toHaveBeenCalled();
     });
   });

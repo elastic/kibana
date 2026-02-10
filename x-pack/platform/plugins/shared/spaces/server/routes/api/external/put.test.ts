@@ -106,7 +106,6 @@ describe('PUT /api/spaces/space', () => {
       putNpre: jest.fn().mockResolvedValue(undefined),
       deleteNpre: jest.fn().mockResolvedValue(undefined),
       canPutNpre: jest.fn().mockResolvedValue(options.canPut),
-      canDeleteNpre: jest.fn().mockResolvedValue(true),
     };
 
     const mockCpsStart = {

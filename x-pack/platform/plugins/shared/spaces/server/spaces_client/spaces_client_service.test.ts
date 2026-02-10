@@ -29,7 +29,6 @@ const createMockCpsStart = (): CPSServerStart => ({
     putNpre: jest.fn().mockResolvedValue(undefined),
     deleteNpre: jest.fn().mockResolvedValue(undefined),
     canPutNpre: jest.fn().mockResolvedValue(true),
-    canDeleteNpre: jest.fn().mockResolvedValue(true),
   }),
 });
 

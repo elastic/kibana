@@ -213,11 +213,11 @@ export class SpacesPlugin
         id: 'project_routing',
         privileges: [
           {
-            requiredClusterPrivileges: ['manage'],
+            requiredClusterPrivileges: ['cluster:admin/project_routing/put'],
             ui: ['manage_space_default'],
           },
           {
-            requiredClusterPrivileges: ['monitor'],
+            requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
             ui: ['read_space_default'],
           },
         ],

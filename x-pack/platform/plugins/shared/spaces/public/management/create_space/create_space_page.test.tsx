@@ -13,6 +13,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { CreateSpacePage } from './create_space_page';
@@ -54,6 +55,30 @@ describe('ManageSpacePage', () => {
   const history = scopedHistoryMock.create();
   const notifications = notificationServiceMock.createStartContract();
 
+  // Mock CPS manager for projectRouting tests
+  const mockFetchProjects = jest.fn().mockResolvedValue({
+    origin: {
+      _alias: 'local_project',
+      _id: 'abcde1234567890',
+      _organization: 'org1234567890',
+      _type: 'observability',
+      env: 'local',
+    },
+    linkedProjects: [
+      {
+        _alias: 'linked_local_project',
+        _id: 'badce1234567890',
+        _organization: 'org1234567890',
+        _type: 'observability',
+        env: 'local',
+      },
+    ],
+  });
+
+  const mockCpsManager = {
+    fetchProjects: mockFetchProjects,
+  };
+
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: { reload: jest.fn() },
@@ -64,6 +89,7 @@ describe('ManageSpacePage', () => {
   beforeEach(() => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    jest.clearAllMocks();
   });
 
   it('allows a space to be created', async () => {
@@ -397,22 +423,39 @@ describe('ManageSpacePage', () => {
 
   it('includes projectRouting in createSpace call when provided', async () => {
     renderWithI18n(
-      <CreateSpacePage
-        spacesManager={spacesManager as unknown as SpacesManager}
-        getFeatures={featuresStart.getFeatures}
-        notifications={notifications}
-        history={history}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-          project_routing: { manage_space_default: true },
+      <KibanaContextProvider
+        services={{
+          cps: {
+            cpsManager: mockCpsManager,
+          },
+          application: {
+            capabilities: {
+              navLinks: {},
+              management: {},
+              catalogue: {},
+              spaces: { manage: true },
+              project_routing: { manage_space_default: true },
+            },
+          },
         }}
-        eventTracker={eventTracker}
-        allowFeatureVisibility
-        allowSolutionVisibility
-      />
+      >
+        <CreateSpacePage
+          spacesManager={spacesManager as unknown as SpacesManager}
+          getFeatures={featuresStart.getFeatures}
+          notifications={notifications}
+          history={history}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+            project_routing: { manage_space_default: true },
+          }}
+          eventTracker={eventTracker}
+          allowFeatureVisibility
+          allowSolutionVisibility
+        />
+      </KibanaContextProvider>
     );
 
     expect(await screen.findByRole('textbox', { name: /name/i })).toBeInTheDocument();
@@ -428,6 +471,19 @@ describe('ManageSpacePage', () => {
 
     await updateSpace(false, 'oblt');
 
+    // Wait for project picker to load and show projects
+    await waitFor(
+      () => {
+        expect(mockCpsManager.fetchProjects).toHaveBeenCalled();
+        expect(screen.getByText('local_project')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Interact with project picker to set projectRouting - click "This project" button
+    const thisProjectButton = await screen.findByRole('button', { name: /This project/i });
+    await userEvent.click(thisProjectButton);
+
     const createButton = screen.getByTestId('save-space-button');
     await userEvent.click(createButton);
 
@@ -441,8 +497,9 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
+      projectRouting: '_alias:_origin',
     });
-  });
+  }, 10000);
 });
 
 async function updateSpace(updateFeature = true, solution?: SolutionView) {
