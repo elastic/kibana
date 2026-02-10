@@ -10,21 +10,20 @@ import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
-import type { SkillRegistry } from '../../skills';
+import type { CreateRunnerDeps } from '../runner';
 
-export const createStore = async ({
+export const createStore = ({
   conversation,
-  skillRegistry,
+  runnerDeps,
 }: {
   conversation?: Conversation;
-  skillRegistry: SkillRegistry;
+  runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'>;
 }) => {
+  const { skillServiceStart } = runnerDeps;
   const filesystem = new VirtualFileSystem();
 
-  const skills = await skillRegistry.listSkillDefinitions();
-
   const resultStore = createResultStore({ conversation });
-  const skillsStore = createSkillsStore({ skills });
+  const skillsStore = createSkillsStore({ skills: skillServiceStart.listSkills() });
   filesystem.mount(resultStore.getVolume());
   filesystem.mount(skillsStore.getVolume());
 

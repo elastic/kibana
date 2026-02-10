@@ -46,7 +46,7 @@ import { createPromptManager, getAgentPromptStorageState } from './utils/prompts
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
-import type { SkillServiceStart, SkillRegistry } from '../skills';
+import type { SkillServiceStart } from '../skills';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -72,7 +72,7 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
-  skillRegistry: SkillRegistry;
+  skillServiceStart: SkillServiceStart;
   toolManager: ToolManager;
   filestore: IFileStore;
 }
@@ -88,10 +88,8 @@ export type CreateRunnerDeps = Omit<
   | 'stateManager'
   | 'filestore'
   | 'toolManager'
-  | 'skillRegistry'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
-  skillServiceStart: SkillServiceStart;
 };
 
 export class RunnerManager {
@@ -157,9 +155,9 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, skillServiceStart, ...runnerDeps } = deps;
+  const { modelProviderFactory, ...runnerDeps } = deps;
 
-  const createScopedRunnerWithDeps = async ({
+  const createScopedRunnerWithDeps = ({
     request,
     defaultConnectorId,
     conversation,
@@ -171,12 +169,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
-  }): Promise<ScopedRunner> => {
-    const skillRegistry = await skillServiceStart.getRegistry({ request });
-    const { resultStore, skillsStore, filestore } = await createStore({
-      conversation,
-      skillRegistry,
-    });
+  }): ScopedRunner => {
+    const { resultStore, skillsStore, filestore } = createStore({ conversation, runnerDeps });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -195,7 +189,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       resultStore,
       skillsStore,
       attachmentStateManager,
-      skillRegistry,
       stateManager,
       promptManager,
       filestore,
@@ -205,20 +198,20 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   };
 
   return {
-    runTool: async (runToolParams) => {
+    runTool: (runToolParams) => {
       const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = await createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runTool(otherParams);
     },
-    runInternalTool: async (runToolParams) => {
+    runInternalTool: (runToolParams) => {
       const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = await createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runInternalTool(otherParams);
     },
-    runAgent: async (params) => {
+    runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
-      const runner = await createScopedRunnerWithDeps({
+      const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         conversation,

@@ -143,6 +143,8 @@ export const createStateManagerMock = (): StateManagerMock => {
 
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
+    getSkillDefinition: jest.fn(),
+    listSkills: jest.fn().mockReturnValue([]),
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
   };
 };
@@ -215,7 +217,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   logger: MockedLogger;
   request: KibanaRequest;
   toolManager: ToolManagerMock;
-  skillRegistry: SkillRegistryMock;
+  skillServiceStart: SkillServiceStartMock;
 }
 
 export interface CreateRunnerDepsMock extends CreateRunnerDeps {
@@ -333,7 +335,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     filestore: createFileSystemStoreMock(),
-    skillRegistry: createSkillRegistryMock(),
+    skillServiceStart: createSkillServiceStartMock(),
     toolManager: createToolManagerMock(),
   };
 };

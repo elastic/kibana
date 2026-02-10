@@ -181,7 +181,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     promptManager,
     stateManager,
     filestore,
-    skillRegistry,
+    skillServiceStart,
     toolManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -207,7 +207,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     resultStore: resultStore.asReadonly(),
     attachments: attachmentStateManager,
     skills: createSkillsService({
-      skillRegistry,
+      skillServiceStart,
       toolsServiceStart: toolsService,
       request,
       spaceId,

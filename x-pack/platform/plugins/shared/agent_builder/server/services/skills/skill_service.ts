@@ -47,7 +47,16 @@ export interface SkillServiceSetup {
 
 export interface SkillServiceStart {
   /**
+   * Returns the list of registered built-in skill definitions.
+   */
+  listSkills(): SkillDefinition[];
+  /**
+   * Returns the built-in skill definition for a given skill id, or undefined.
+   */
+  getSkillDefinition(skillId: string): SkillDefinition | undefined;
+  /**
    * Create a skill registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted skills.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
 }
@@ -100,6 +109,8 @@ class SkillServiceImpl implements SkillService {
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
     return {
+      listSkills: () => [...this.skills.values()],
+      getSkillDefinition: (skillId) => this.skills.get(skillId),
       getRegistry: async ({ request }) => {
         const space = getCurrentSpaceId({ request, spaces });
         const esClient = elasticsearch.client.asInternalUser;
