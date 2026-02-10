@@ -93,13 +93,29 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.time_zone",
+            "type": "string",
+            "tags": [],
+            "label": "time_zone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "lineNumber": 678,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.query",
             "type": "string",
             "tags": [],
             "label": "query",
             "description": [],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 682,
+            "lineNumber": 679,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -115,7 +131,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 683,
+            "lineNumber": 680,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -131,7 +147,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 684,
+            "lineNumber": 681,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -147,7 +163,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 685,
+            "lineNumber": 682,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -163,7 +179,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 686,
+            "lineNumber": 683,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -179,7 +195,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 687,
+            "lineNumber": 684,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -196,7 +212,7 @@
               "[] | Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
-            "lineNumber": 688,
+            "lineNumber": 685,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -1468,7 +1468,7 @@
           " extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 162,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1483,7 +1483,7 @@
               "Optional id, if not passed a \"link\" must be provided."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1501,7 +1501,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1516,7 +1516,7 @@
               "Path in the tree of the node"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1535,7 +1535,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1554,7 +1554,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1572,7 +1572,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1823,7 +1823,7 @@
         "label": "ChromeSetProjectBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 191,
+        "lineNumber": 192,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1836,7 +1836,41 @@
             "label": "absolute",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.ChromeSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeSetup",
+        "description": [],
+        "path": "src/core/packages/chrome/browser/src/contracts.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeSetup.sidebar",
+            "type": "Object",
+            "tags": [],
+            "label": "sidebar",
+            "description": [
+              "\n{@link SidebarSetup}"
+            ],
+            "signature": [
+              "SidebarSetup"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1854,7 +1888,7 @@
           "\nChromeSetup exposes APIs available during the setup phase."
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 27,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1871,7 +1905,7 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 34,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1889,7 +1923,7 @@
               "ChromeNavLinks"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 61,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1907,7 +1941,7 @@
               "ChromeNavControls"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 63,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1925,7 +1959,7 @@
               "ChromeRecentlyAccessed"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 65,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1943,7 +1977,7 @@
               "ChromeDocTitle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 67,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1963,7 +1997,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 70,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1983,7 +2017,7 @@
               "(isVisible: boolean) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 75,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1999,7 +2033,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 80,
+                "lineNumber": 88,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2025,7 +2059,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2047,7 +2081,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 87,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2064,7 +2098,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 90,
+                "lineNumber": 98,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2086,7 +2120,7 @@
               "(node: React.ReactNode) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 92,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2102,7 +2136,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 95,
+                "lineNumber": 103,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2128,7 +2162,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 97,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2152,7 +2186,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 102,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2169,7 +2203,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 105,
+                "lineNumber": 113,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2187,7 +2221,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 105,
+                "lineNumber": 113,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2213,7 +2247,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 107,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2235,7 +2269,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 112,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2252,7 +2286,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 135,
+                "lineNumber": 144,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2278,7 +2312,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 137,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2300,7 +2334,7 @@
               ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 142,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2316,7 +2350,7 @@
                   "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 146,
+                "lineNumber": 155,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2340,7 +2374,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 149,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2359,7 +2393,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 173,
+                "lineNumber": 182,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2385,7 +2419,7 @@
               "> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 175,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2407,7 +2441,7 @@
               "> | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 180,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2425,7 +2459,7 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 183,
+                "lineNumber": 192,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2449,7 +2483,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 185,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2466,7 +2500,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 188,
+                "lineNumber": 197,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2492,7 +2526,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 190,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2514,7 +2548,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 195,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2530,7 +2564,7 @@
                   "ChromeGlobalHelpExtensionMenuLink"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 199,
+                "lineNumber": 208,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2556,7 +2590,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 202,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2578,7 +2612,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 207,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2595,7 +2629,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 210,
+                "lineNumber": 219,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2617,7 +2651,7 @@
               "(url: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 212,
+            "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2635,7 +2669,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 216,
+                "lineNumber": 225,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2659,7 +2693,7 @@
               "<string>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 218,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2681,7 +2715,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 223,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2698,7 +2732,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 228,
+                "lineNumber": 237,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2722,7 +2756,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 230,
+            "lineNumber": 239,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2744,7 +2778,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 235,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2762,7 +2796,7 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 239,
+                "lineNumber": 248,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2788,7 +2822,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 241,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2810,7 +2844,25 @@
               "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 246,
+            "lineNumber": 255,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.sidebar",
+            "type": "Object",
+            "tags": [],
+            "label": "sidebar",
+            "description": [
+              "\n{@link SidebarStart}"
+            ],
+            "signature": [
+              "SidebarStart"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 279,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2827,14 +2879,52 @@
             "signature": [
               "() => ",
               "Observable",
-              "<\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | null>"
+              "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 270,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.withProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "withProvider",
+            "description": [
+              "\nUsed only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers"
+            ],
+            "signature": [
+              "(component: React.ReactNode) => React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 289,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.ChromeStart.withProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "component",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 292,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -2900,7 +2990,7 @@
         "label": "CloudLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 99,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2913,7 +3003,7 @@
             "label": "title",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2926,7 +3016,7 @@
             "label": "href",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2942,7 +3032,7 @@
         "label": "CloudURLs",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 89,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2958,7 +3048,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2974,7 +3064,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2990,7 +3080,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3006,7 +3096,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3022,7 +3112,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3038,7 +3128,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3054,7 +3144,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3074,7 +3164,7 @@
           "<LinkId, Id, ChildrenId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 221,
+        "lineNumber": 222,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3093,7 +3183,7 @@
               "<LinkId, Id, ChildrenId>[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 231,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3112,7 +3202,7 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 235,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3128,7 +3218,7 @@
         "label": "NavigationTreeDefinitionUI",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 243,
+        "lineNumber": 244,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3141,10 +3231,10 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 252,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3161,7 +3251,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 253,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3178,7 +3268,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 254,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3198,7 +3288,7 @@
           "<LinkId, Id, ChildrenId> extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 196,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3216,7 +3306,7 @@
               "Id | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 209,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3234,7 +3324,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 211,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3252,7 +3342,7 @@
               "LinkId | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 213,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3271,7 +3361,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 215,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3290,10 +3380,630 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 217,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarApp",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarApp",
+        "description": [
+          "\nApp-bound API obtained via `sidebar.getApp(appId)`.\nAll methods are present regardless of whether the app has a store.\nFor stateless apps, `actions` is undefined and `getState()` returns undefined."
+        ],
+        "signature": [
+          "SidebarApp",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.open",
+            "type": "Function",
+            "tags": [],
+            "label": "open",
+            "description": [
+              "Open sidebar to this app"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.actions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "Bound actions to modify state. Undefined for stateless apps."
+            ],
+            "signature": [
+              "TActions"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "Get current state. Returns undefined for stateless apps."
+            ],
+            "signature": [
+              "() => TState"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getState$",
+            "type": "Function",
+            "tags": [],
+            "label": "getState$",
+            "description": [
+              "Observable of state. Emits undefined for stateless apps."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<TState>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarAppDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarAppDefinition",
+        "description": [
+          "App definition for sidebar registration"
+        ],
+        "signature": [
+          "SidebarAppDefinition",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppDefinition.appId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "appId",
+            "description": [
+              "Unique identifier"
+            ],
+            "signature": [
+              "`sidebarExample${string}`"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppDefinition.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "Accessibility status. Defaults to `accessible`. Use the returned updater for async checks."
+            ],
+            "signature": [
+              "SidebarAppStatus",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppDefinition.restoreOnReload",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "restoreOnReload",
+            "description": [
+              "\nWhether to restore on page reload. Defaults to true.\nUse as last resort. Apps should use store state for restoration."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppDefinition.loadComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "loadComponent",
+            "description": [
+              "Async component loader"
+            ],
+            "signature": [
+              "() => Promise<",
+              "SidebarComponentType",
+              "<TState, TActions>>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppDefinition.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [
+              "\nOptional store for state management. Created via `createSidebarStore`.\nIf omitted, the app is stateless and only receives `onClose` prop.\nState persists to localStorage."
+            ],
+            "signature": [
+              "SidebarStoreConfig",
+              "<TState, TActions> | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarSetup",
+        "description": [
+          "Sidebar setup contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarSetup.registerApp",
+            "type": "Function",
+            "tags": [],
+            "label": "registerApp",
+            "description": [
+              "Register a sidebar app"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(app: ",
+              "SidebarAppDefinition",
+              "<TState, TActions>) => ",
+              "SidebarAppUpdater"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarSetup.registerApp.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "app",
+                "description": [],
+                "signature": [
+                  "SidebarAppDefinition",
+                  "<TState, TActions>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarStart",
+        "description": [
+          "Sidebar start contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.isOpen$",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen$",
+            "description": [
+              "Observable of open state"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.isOpen",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen",
+            "description": [
+              "Whether sidebar is open"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getWidth$",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth$",
+            "description": [
+              "Observable of width"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<number>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth",
+            "description": [
+              "Get width"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.setWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "setWidth",
+            "description": [
+              "Set width"
+            ],
+            "signature": [
+              "(width: number) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.setWidth.$1",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 141,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getCurrentAppId$",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId$",
+            "description": [
+              "Observable of current app ID"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<`sidebarExample${string}` | null>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getCurrentAppId",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId",
+            "description": [
+              "Get current app ID"
+            ],
+            "signature": [
+              "() => `sidebarExample${string}` | null"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.hasApp",
+            "type": "Function",
+            "tags": [],
+            "label": "hasApp",
+            "description": [
+              "Check if app is registered"
+            ],
+            "signature": [
+              "(appId: `sidebarExample${string}`) => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.hasApp.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 147,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getApp",
+            "type": "Function",
+            "tags": [],
+            "label": "getApp",
+            "description": [
+              "Get app-bound API"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(appId: `sidebarExample${string}`) => ",
+              "SidebarApp",
+              "<TState, TActions>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.getApp.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 150,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getAppDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppDefinition",
+            "description": [
+              "Get app definition"
+            ],
+            "signature": [
+              "(appId: `sidebarExample${string}`) => ",
+              "SidebarAppDefinition",
+              "<undefined, undefined>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.getAppDefinition.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 153,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3310,7 +4020,7 @@
           "<LinkId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 257,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3325,10 +4035,10 @@
               "Unique id for the solution navigation."
             ],
             "signature": [
-              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 267,
+            "lineNumber": 268,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3343,7 +4053,7 @@
               "Title for the solution navigation."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 269,
+            "lineNumber": 270,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3364,7 +4074,7 @@
               "<LinkId, string, string>>"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 271,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3383,7 +4093,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 273,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3401,7 +4111,7 @@
               "LinkId | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 275,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3419,7 +4129,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 277,
+            "lineNumber": 278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3438,10 +4148,10 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"rules\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:ai_rule_creation\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3482,7 +4192,7 @@
           " | \"securitySolutionUI\" | \"workplace_ai\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3578,7 +4288,7 @@
           "\"projects\" | \"deployment\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployments\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3607,7 +4317,7 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3630,7 +4340,7 @@
           "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 285,
+        "lineNumber": 286,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3647,7 +4357,7 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 110,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3664,7 +4374,7 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 110,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3681,7 +4391,7 @@
           "\"hidden\" | \"visible\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3695,10 +4405,10 @@
         "label": "SolutionId",
         "description": [],
         "signature": [
-          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3716,6 +4426,10 @@
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
+          "> | undefined; es?: ",
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
           "> | undefined; workplaceai?: ",
           "SolutionNavigationDefinition",
           "<",
@@ -3724,14 +4438,10 @@
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
-          "> | undefined; es?: ",
-          "SolutionNavigationDefinition",
-          "<",
-          "AppDeepLinkId",
           "> | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 281,
+        "lineNumber": 282,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

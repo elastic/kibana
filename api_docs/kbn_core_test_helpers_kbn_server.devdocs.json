@@ -853,7 +853,7 @@
         "signature": [
           "Pick<",
           "TestElasticsearchUtils",
-          ", \"stop\" | \"es\"> & { getClient: () => ",
+          ", \"es\" | \"stop\"> & { getClient: () => ",
           "default",
           "; }"
         ],

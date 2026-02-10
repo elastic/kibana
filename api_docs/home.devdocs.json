@@ -1574,6 +1574,8 @@
               "section": "def-public.AddDataTab",
               "text": "AddDataTab"
             },
+            ") => void; registerCloudConnectStatusHook: (hook: ",
+            "CloudConnectStatusHook",
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",

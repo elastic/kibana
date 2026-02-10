@@ -1205,7 +1205,7 @@
           "<T>>"
         ],
         "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-        "lineNumber": 92,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1216,7 +1216,9 @@
             "type": "Object",
             "tags": [],
             "label": "log",
-            "description": [],
+            "description": [
+              "- logger instance"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/logging",
@@ -1227,7 +1229,7 @@
               }
             ],
             "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-            "lineNumber": 100,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1249,7 +1251,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-            "lineNumber": 101,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1269,7 +1271,7 @@
               "<T>"
             ],
             "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-            "lineNumber": 102,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1281,12 +1283,14 @@
             "type": "boolean",
             "tags": [],
             "label": "disableEmbedding",
-            "description": [],
+            "description": [
+              "- whether embedding is disabled"
+            ],
             "signature": [
               "boolean"
             ],
             "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-            "lineNumber": 103,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1298,12 +1302,14 @@
             "type": "string",
             "tags": [],
             "label": "basePath",
-            "description": [],
+            "description": [
+              "- optional base path for the Kibana server"
+            ],
             "signature": [
               "string | undefined"
             ],
             "path": "src/core/packages/http/server-internal/src/cookie_session_storage.ts",
-            "lineNumber": 104,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

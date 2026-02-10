@@ -72,7 +72,7 @@
           "() => void"
         ],
         "path": "packages/kbn-check-saved-objects-cli/src/commands/run_check_saved_objects_cli.ts",
-        "lineNumber": 23,
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

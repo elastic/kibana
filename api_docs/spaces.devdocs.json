@@ -5281,7 +5281,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "lineNumber": 12,

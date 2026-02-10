@@ -8931,6 +8931,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type.ts"
           },
           {
@@ -11238,6 +11246,10 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/attachments/index.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
               },
@@ -12049,12 +12061,24 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/attachments/index.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/templates/index.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/templates/index.test.ts"
               },
               {
                 "plugin": "visualizations",
