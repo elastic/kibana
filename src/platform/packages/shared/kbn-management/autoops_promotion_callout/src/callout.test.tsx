@@ -19,9 +19,7 @@ const renderWithI18n = (component: React.ReactElement) => {
 };
 
 describe('AutoOpsPromotionCallout', () => {
-  const defaultProps = {
-    learnMoreLink: 'https://www.elastic.co/cloud/autoops',
-  };
+  const defaultProps = {};
 
   beforeEach(() => {
     localStorage.clear();
@@ -38,25 +36,25 @@ describe('AutoOpsPromotionCallout', () => {
 
       expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
       expect(
-        screen.getByText('New! Connect AutoOps to this self-managed cluster')
+        screen.getByText('New! Connect this cluster to AutoOps')
       ).toBeInTheDocument();
-      expect(screen.getByTestId('autoOpsPromotionCalloutConnectButton')).toBeInTheDocument();
+    });
+
+    test('renders Cloud Connect link with default url', () => {
+      renderWithI18n(<AutoOpsPromotionCallout {...defaultProps} />);
+
+      const cloudConnectLink = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      expect(cloudConnectLink).toBeInTheDocument();
+      expect(cloudConnectLink).toHaveAttribute('href', '/app/cloud_connect');
     });
 
     test('renders with custom cloudConnectUrl', () => {
       renderWithI18n(<AutoOpsPromotionCallout {...defaultProps} cloudConnectUrl="/custom/path" />);
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      expect(button).toHaveAttribute('href', '/custom/path');
+      const cloudConnectLink = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      expect(cloudConnectLink).toHaveAttribute('href', '/custom/path');
     });
 
-    test('renders learn more link', () => {
-      renderWithI18n(<AutoOpsPromotionCallout {...defaultProps} />);
-
-      const learnMoreLink = screen.getByText('Learn more');
-      expect(learnMoreLink).toBeInTheDocument();
-      expect(learnMoreLink.closest('a')).toHaveAttribute('href', defaultProps.learnMoreLink);
-    });
   });
 
   describe('Dismissal functionality', () => {
@@ -79,7 +77,7 @@ describe('AutoOpsPromotionCallout', () => {
     });
   });
 
-  describe('Button behavior with permissions', () => {
+  describe('Cloud Connect link behavior with permissions', () => {
     test('renders internal navigation when hasCloudConnectPermission is true', () => {
       const onConnectClick = jest.fn();
       renderWithI18n(
@@ -91,8 +89,8 @@ describe('AutoOpsPromotionCallout', () => {
         />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      expect(button).toHaveAttribute('href', '/app/cloud_connect');
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      expect(link).toHaveAttribute('href', '/app/cloud_connect');
     });
 
     test('renders internal navigation when hasCloudConnectPermission is undefined (backward compatible)', () => {
@@ -105,8 +103,8 @@ describe('AutoOpsPromotionCallout', () => {
         />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      expect(button).toHaveAttribute('href', '/app/cloud_connect');
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      expect(link).toHaveAttribute('href', '/app/cloud_connect');
     });
 
     test('renders external link when hasCloudConnectPermission is false', () => {
@@ -114,8 +112,8 @@ describe('AutoOpsPromotionCallout', () => {
         <AutoOpsPromotionCallout {...defaultProps} hasCloudConnectPermission={false} />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      expect(button).toHaveAttribute(
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      expect(link).toHaveAttribute(
         'href',
         'https://cloud.elastic.co/connect-cluster-services-portal'
       );
@@ -123,7 +121,7 @@ describe('AutoOpsPromotionCallout', () => {
   });
 
   describe('Click handler', () => {
-    test('calls onConnectClick and preventDefault when user has permission', () => {
+    test('calls onConnectClick when user has permission and clicks Cloud Connect link', () => {
       const onConnectClick = jest.fn();
       renderWithI18n(
         <AutoOpsPromotionCallout
@@ -134,8 +132,8 @@ describe('AutoOpsPromotionCallout', () => {
         />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      fireEvent.click(button);
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      fireEvent.click(link);
 
       expect(onConnectClick).toHaveBeenCalled();
       expect(onConnectClick).toHaveBeenCalledWith(expect.any(Object));
@@ -151,9 +149,9 @@ describe('AutoOpsPromotionCallout', () => {
         />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
 
-      expect(button.onclick).toBeNull();
+      expect(link.onclick).toBeNull();
     });
 
     test('calls onConnectClick when hasCloudConnectPermission is undefined', () => {
@@ -166,8 +164,8 @@ describe('AutoOpsPromotionCallout', () => {
         />
       );
 
-      const button = screen.getByTestId('autoOpsPromotionCalloutConnectButton');
-      fireEvent.click(button);
+      const link = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
+      fireEvent.click(link);
 
       expect(onConnectClick).toHaveBeenCalled();
     });

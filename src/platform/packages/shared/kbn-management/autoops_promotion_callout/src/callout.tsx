@@ -10,10 +10,9 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 export interface AutoOpsPromotionCalloutProps {
-  learnMoreLink: string;
   cloudConnectUrl?: string;
   onConnectClick?: (e: React.MouseEvent) => void;
   hasCloudConnectPermission?: boolean;
@@ -23,7 +22,6 @@ export interface AutoOpsPromotionCalloutProps {
 export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
 
 export const AutoOpsPromotionCallout = ({
-  learnMoreLink,
   cloudConnectUrl = '/app/cloud_connect',
   onConnectClick,
   hasCloudConnectPermission,
@@ -47,13 +45,14 @@ export const AutoOpsPromotionCallout = ({
     return null;
   }
 
-  // Determine button behavior based on cloudConnect permission
-  const buttonProps =
+  // Determine Cloud Connect link behavior based on cloudConnect permission
+  const cloudConnectLinkProps =
     hasCloudConnectPermission === false
       ? {
           href: 'https://cloud.elastic.co/connect-cluster-services-portal',
           target: '_blank' as const,
-          rel: 'noopener noreferrer',
+          rel: 'noopener noreferrer' as const,
+          external: true,
         }
       : {
           href: cloudConnectUrl,
@@ -65,11 +64,11 @@ export const AutoOpsPromotionCallout = ({
       title={
         <FormattedMessage
           id="management.autoOpsPromotionCallout.title"
-          defaultMessage="New! Connect AutoOps to this self-managed cluster"
+          defaultMessage="New! Connect this cluster to AutoOps"
         />
       }
-      color="accent"
-      iconType="alert"
+      color="info"
+      iconType="iInCircle"
       data-test-subj="autoOpsPromotionCallout"
       onDismiss={handleDismiss}
       {...overrideCalloutProps}
@@ -77,31 +76,22 @@ export const AutoOpsPromotionCallout = ({
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Connect this cluster to AutoOps on Elastic Cloud for simplified monitoring, real-time issue detection, and performance recommendations. {learnMoreLink}"
+          defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
           values={{
-            learnMoreLink: (
-              <a href={learnMoreLink} target="_blank" rel="noopener noreferrer">
+            cloudConnectLink: (
+              <EuiLink
+                {...cloudConnectLinkProps}
+                data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
+              >
                 <FormattedMessage
-                  id="management.autoOpsPromotionCallout.learnMore"
-                  defaultMessage="Learn more"
+                  id="management.autoOpsPromotionCallout.cloudConnectLink"
+                  defaultMessage="Cloud Connect"
                 />
-              </a>
+              </EuiLink>
             ),
           }}
         />
       </p>
-      <EuiButton
-        color="accent"
-        fill
-        size="s"
-        {...buttonProps}
-        data-test-subj="autoOpsPromotionCalloutConnectButton"
-      >
-        <FormattedMessage
-          id="management.autoOpsPromotionCallout.openButton"
-          defaultMessage="Connect this cluster"
-        />
-      </EuiButton>
     </EuiCallOut>
   );
 };
