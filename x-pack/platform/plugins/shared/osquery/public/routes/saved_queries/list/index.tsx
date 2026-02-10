@@ -233,7 +233,13 @@ const SavedQueriesPageComponent = () => {
           ]
         : []),
     ],
-    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt, queryHistoryRework]
+    [
+      renderDescriptionColumn,
+      renderEditAction,
+      renderPlayAction,
+      renderUpdatedAt,
+      queryHistoryRework,
+    ]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
