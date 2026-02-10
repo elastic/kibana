@@ -1104,7 +1104,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     ).toBe(false);
   });
 
-  it('throws error when agentInputs is not provided for dynamic_signal_types package', async () => {
+  it('returns no permissions when agentInputs is not provided for dynamic_signal_types package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-no-inputs',
@@ -1136,10 +1136,19 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    // No agentInputs provided
-    expect(() =>
-      storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies)
-    ).toThrow('Cannot determine signal types for OTel package policy package-policy-no-inputs');
+    // No agentInputs provided - should not throw, should return empty permissions
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'default',
+      packagePolicies
+    );
+
+    // Should return empty indices array when no pipelines are found
+    expect(permissions).toMatchObject({
+      'package-policy-no-inputs': {
+        indices: [],
+      },
+    });
   });
 });
 

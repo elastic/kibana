@@ -164,11 +164,8 @@ export function storedPackagePoliciesToAgentPermissions(
             // Use pipelines if available
             signalTypes = extractSignalTypesFromPipelines(otelcolPipelines);
           } else {
-            // For packages with dynamic_signal_types, pipelines are required to determine permissions
-            // This should not happen in production as compiled_input.service.pipelines should always be present
-            throw new PackagePolicyRequestError(
-              `Cannot determine signal types for OTel package policy ${packagePolicy.id}: no pipelines found.`
-            );
+            // If no pipelines found, return empty array
+            signalTypes = [];
           }
 
           const baseMeta: DataStreamMeta = {
