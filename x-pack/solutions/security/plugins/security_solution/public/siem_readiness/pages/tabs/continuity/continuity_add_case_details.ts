@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CategoryData } from '../../components/category_accordion_table';
+import { isCriticalFailureRate } from './continuity_tab';
 import type { PipelineInfoWithStatus } from './continuity_tab';
 
 export const buildContinuityCaseDescription = (
@@ -18,7 +19,9 @@ export const buildContinuityCaseDescription = (
   // Build the list of failing pipelines grouped by category
   const categoryDetails = categories
     .map((category) => {
-      const failingPipelines = category.items.filter((item) => Number(item.failureRate) > 1);
+      const failingPipelines = category.items.filter((item) =>
+        isCriticalFailureRate(item.failureRate)
+      );
 
       if (failingPipelines.length === 0) {
         return null;
@@ -39,7 +42,8 @@ export const buildContinuityCaseDescription = (
     .join('\n\n');
 
   const totalFailingPipelines = categories.reduce(
-    (sum, category) => sum + category.items.filter((item) => Number(item.failureRate) > 1).length,
+    (sum, category) =>
+      sum + category.items.filter((item) => isCriticalFailureRate(item.failureRate)).length,
     0
   );
 

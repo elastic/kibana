@@ -36,10 +36,29 @@ import { ViewCasesButton } from '../../components/view_cases_button';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
+
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
 }
+
+export const getDocInjectionFailRate = (failedDocsCount: number, docsCount: number): string => {
+  return docsCount > 0 ? ((failedDocsCount / docsCount) * 100).toFixed(1) : '0.0';
+};
+
+export const isCriticalFailureRate = (failureRate: string): boolean => {
+  return Number(failureRate) >= 1;
+};
+
+export const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
+  return isCriticalFailureRate(failureRate) ? 'critical' : 'healthy';
+};
+
+export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
+  return `${basePath}/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
+    pipelineName
+  )}`;
+};
 
 export const ContinuityTab: React.FC = () => {
   const basePath = useBasePath();
@@ -71,15 +90,12 @@ export const ContinuityTab: React.FC = () => {
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
-      const failureRate =
-        pipeline.docsCount > 0
-          ? ((pipeline.failedDocsCount / pipeline.docsCount) * 100).toFixed(1)
-          : '0.0';
+      const failureRate = getDocInjectionFailRate(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
         ...pipeline,
         failureRate,
-        status: Number(failureRate) > 1 ? 'critical' : 'healthy',
+        status: getDocInjectionStatus(failureRate),
       };
 
       // Get unique categories for this pipeline
@@ -105,7 +121,7 @@ export const ContinuityTab: React.FC = () => {
 
       result.push({
         category,
-        items: items.sort((a, b) => b.docsCount - a.docsCount),
+        items,
       });
     });
 
@@ -113,9 +129,9 @@ export const ContinuityTab: React.FC = () => {
   }, [pipelinesData, indexToCategoryMap]);
 
   // Check if any pipeline has failures
-  const hasDocFailures = useMemo(() => {
+  const hasDocCriticalFailures = useMemo(() => {
     return categorizedPipelines.some((category) =>
-      category.items.some((pipeline) => pipeline.failedDocsCount > 0)
+      category.items.some((pipeline) => pipeline.status === 'critical')
     );
   }, [categorizedPipelines]);
 
@@ -207,12 +223,10 @@ export const ContinuityTab: React.FC = () => {
         render: (pipelineName: string, item: PipelineInfoWithStatus) => (
           <EuiButtonEmpty
             size="s"
-            href={`${basePath}/app/management/ingest/ingest_pipelines?pipeline=${encodeURIComponent(
-              pipelineName
-            )}`}
+            href={getIngestPipelineUrl(basePath, pipelineName)}
             target="_blank"
           >
-            {Number(item.failureRate) > 1
+            {isCriticalFailureRate(item.failureRate)
               ? i18n.translate(
                   'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
                   {
@@ -238,8 +252,8 @@ export const ContinuityTab: React.FC = () => {
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
-    const overallFailureRate = totalDocs > 0 ? ((totalFailed / totalDocs) * 100).toFixed(1) : '0.0';
-    const isCritical = Number(overallFailureRate) > 1;
+    const overallFailureRate = getDocInjectionFailRate(totalFailed, totalDocs);
+    const isCritical = isCriticalFailureRate(overallFailureRate);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -358,7 +372,7 @@ export const ContinuityTab: React.FC = () => {
   return (
     <>
       <EuiSpacer size="m" />
-      {hasDocFailures && (
+      {hasDocCriticalFailures && (
         <>
           <ContinuityWarningPrompt />
           <EuiSpacer size="m" />
@@ -373,7 +387,7 @@ export const ContinuityTab: React.FC = () => {
             })}
           </EuiText>
         </EuiFlexItem>
-        {hasDocFailures && (
+        {hasDocCriticalFailures && (
           <>
             <EuiFlexItem grow={false}>
               <ViewCasesButton caseTagsArray={DATA_CONTINUITY_CASE_TAGS} />
@@ -435,6 +449,8 @@ export const ContinuityTab: React.FC = () => {
         itemName={i18n.translate('xpack.securitySolution.siemReadiness.continuity.itemName', {
           defaultMessage: 'pipelines',
         })}
+        defaultSortField="docsCount"
+        defaultSortDirection="desc"
       />
     </>
   );
