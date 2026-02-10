@@ -70,10 +70,10 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {userNames.map((userName) => (
+        {userNames.map((userName, index) => (
           <>
             <UserDetails
-              key={userName}
+              key={`user-${index}-${userName}`}
               showTitle={false}
               userName={userName}
               timestamp={timestampOrFallback}
@@ -94,10 +94,10 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {hostNames.map((hostName) => (
+        {hostNames.map((hostName, index) => (
           <>
             <HostDetails
-              key={hostName}
+              key={`hostName-${index}-${hostName}`}
               showTitle={false}
               hostName={hostName}
               timestamp={timestampOrFallback}
