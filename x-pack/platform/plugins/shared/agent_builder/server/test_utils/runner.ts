@@ -44,9 +44,10 @@ import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
-import type { SkillServiceStart } from '../services/skills';
+import type { SkillServiceStart, SkillRegistry } from '../services/skills';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
+export type SkillRegistryMock = jest.Mocked<SkillRegistry>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
@@ -142,8 +143,20 @@ export const createStateManagerMock = (): StateManagerMock => {
 
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
-    getSkillDefinition: jest.fn(),
-    listSkills: jest.fn(),
+    getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
+  };
+};
+
+export const createSkillRegistryMock = (): SkillRegistryMock => {
+  return {
+    has: jest.fn().mockResolvedValue(false),
+    get: jest.fn().mockResolvedValue(undefined),
+    list: jest.fn().mockResolvedValue([]),
+    listSkillDefinitions: jest.fn().mockResolvedValue([]),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    resolveSkillSelection: jest.fn().mockResolvedValue([]),
   };
 };
 
@@ -203,7 +216,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   logger: MockedLogger;
   request: KibanaRequest;
   toolManager: ToolManagerMock;
-  skillServiceStart: SkillServiceStartMock;
+  skillRegistry: SkillRegistryMock;
 }
 
 export interface CreateRunnerDepsMock extends CreateRunnerDeps {
@@ -321,7 +334,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     filestore: createFileSystemStoreMock(),
-    skillServiceStart: createSkillServiceStartMock(),
+    skillRegistry: createSkillRegistryMock(),
     toolManager: createToolManagerMock(),
   };
 };

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { createSkillRegistry, type SkillRegistry } from './skill_registry';
-export { type SkillService, createSkillService } from './skill_service';
-export type { SkillServiceSetup, SkillServiceStart } from './types';
+export {
+  type SkillService,
+  type SkillServiceStartDeps,
+  type SkillServiceSetup,
+  type SkillServiceStart,
+  type SkillRegistry,
+  type SkillProvider,
+  createSkillService,
+} from './skill_service';

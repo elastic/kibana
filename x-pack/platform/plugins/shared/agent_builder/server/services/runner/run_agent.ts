@@ -47,7 +47,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     promptManager,
     stateManager,
     filestore,
-    skillServiceStart,
+    skillRegistry,
     toolManager,
   } = manager.deps;
 
@@ -92,7 +92,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     skills: createSkillsService({
-      skillServiceStart,
+      skillRegistry,
       toolsServiceStart: toolsService,
       request,
       spaceId,
