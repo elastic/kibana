@@ -18,6 +18,17 @@ const mockMaintenanceWindow = {
     freq: 2 as const,
     count: 2,
   },
+  schedule: {
+    custom: {
+      start: '2023-02-26T00:00:00.000Z',
+      duration: '1h',
+      timezone: 'UTC',
+      recurring: {
+        every: '1w',
+        occurrences: 2,
+      },
+    },
+  },
   status: MaintenanceWindowStatus.Running,
   eventStartTime: '2023-03-05T00:00:00.000Z',
   eventEndTime: '2023-03-05T01:00:00.000Z',
