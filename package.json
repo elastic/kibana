@@ -68,6 +68,7 @@
     "test:jest": "node --experimental-transform-types --no-warnings scripts/jest.ts",
     "test:jest_integration": "node --experimental-transform-types --no-warnings scripts/jest_integration.ts",
     "test:type_check": "node --experimental-transform-types --no-warnings scripts/type_check.ts",
+    "test:type_check:tsgo": "node --experimental-transform-types --no-warnings scripts/type_check.ts --tsgo",
     "test:vitest": "node scripts/vitest.mts"
   },
   "repository": {
@@ -1920,6 +1921,7 @@
     "@typescript-eslint/eslint-plugin": "8.46.3",
     "@typescript-eslint/parser": "8.46.3",
     "@typescript-eslint/typescript-estree": "8.46.3",
+    "@typescript/native-preview": "7.0.0-dev.20260209.1",
     "@vitejs/plugin-react": "5.1.3",
     "@vitest/coverage-v8": "4.0.18",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.7",
