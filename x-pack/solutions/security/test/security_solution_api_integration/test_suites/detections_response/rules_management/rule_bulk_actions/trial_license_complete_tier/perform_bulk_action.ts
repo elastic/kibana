@@ -27,7 +27,6 @@ import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-service
 import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type TestAgent from 'supertest/lib/agent';
-import type { Response } from 'supertest';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
@@ -555,15 +554,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('Duplicate bulk action with Response Actions', () => {
       let superTestResponseActionsNoAuthz: TestAgent;
-      let dataCleanup: Array<() => Promise<void>>;
       let id: string;
-
-      const checkCleanupResponse = async (response: Response) => {
-        if (response.error) throw response.error;
-      };
-      const logCleanupError = (e: Error) => {
-        log.warning(`Failed to clean up test data`, e);
-      };
 
       before(async () => {
         superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
@@ -585,20 +576,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         id = body.id;
-
-        dataCleanup = [
-          async () => {
-            log.info(`Cleaning up test data: rule id [${id}]`);
-            await detectionsApi
-              .deleteRule({ query: { id } })
-              .then(checkCleanupResponse)
-              .catch(logCleanupError);
-          },
-        ];
       });
 
       afterEach(async () => {
-        await Promise.allSettled(dataCleanup.splice(0).map((cleanupFn) => cleanupFn()));
+        await deleteAllRules(supertest, log);
       });
 
       it('should duplicate rules with response actions when user has authz', async () => {
@@ -610,19 +591,6 @@ export default ({ getService }: FtrProviderContext): void => {
             duplicate: { include_exceptions: false, include_expired_exceptions: false },
           })
           .expect(200);
-
-        if (body.attributes?.results?.created?.[0]?.rule_id) {
-          dataCleanup.push(async () => {
-            const ruleId = body.attributes.results.created[0].rule_id;
-
-            log.info(`Cleaning up test data: rule_id [${ruleId}]`);
-
-            await detectionsApi
-              .deleteRule({ query: { rule_id: ruleId } })
-              .then(checkCleanupResponse)
-              .catch(logCleanupError);
-          });
-        }
 
         expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
         expect(body.attributes.results.created[0].response_actions).toEqual([

@@ -22,7 +22,6 @@ import type {
 import { createRule } from '@kbn/detections-response-ftr-services';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type TestAgent from 'supertest/lib/agent';
-import type { Response } from 'supertest';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
@@ -1447,15 +1446,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('importing with endpoint response actions', () => {
       let superTestResponseActionsNoAuthz: TestAgent;
-      let dataCleanup: Array<() => Promise<void>>;
       let rulesToImport: unknown[];
-
-      const checkCleanupResponse = async (response: Response) => {
-        if (response.error) throw response.error;
-      };
-      const logCleanupError = (e: Error) => {
-        log.warning(`Failed to clean up test data`, e);
-      };
 
       before(async () => {
         superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
@@ -1481,12 +1472,10 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           }),
         ];
-
-        dataCleanup = [];
       });
 
       afterEach(async () => {
-        await Promise.allSettled(dataCleanup.splice(0).map((cleanupFn) => cleanupFn()));
+        await deleteAllRules(supertest, log);
       });
 
       it('should import rules with response actions when user has authz', async () => {
@@ -1494,16 +1483,6 @@ export default ({ getService }: FtrProviderContext): void => {
           getService,
           rules: rulesToImport,
           overwrite: false,
-        });
-
-        dataCleanup.push(async () => {
-          // @ts-expect-error due to array of `unknown` items
-          const ruleId = rulesToImport[0].rule_id;
-          log.info(`Cleaning up test data: rule_id [${ruleId}]`);
-          await detectionsApi
-            .deleteRule({ query: { rule_id: ruleId } })
-            .then(checkCleanupResponse)
-            .catch(logCleanupError);
         });
 
         expect(importResponse).toMatchObject({

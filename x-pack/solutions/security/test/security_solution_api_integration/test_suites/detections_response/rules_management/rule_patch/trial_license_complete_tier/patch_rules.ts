@@ -27,7 +27,6 @@ import {
 } from '@kbn/detections-response-ftr-services';
 
 import type TestAgent from 'supertest/lib/agent';
-import type { Response } from 'supertest';
 import { v4 as uuidV4 } from 'uuid';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
@@ -738,15 +737,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('path action with endpoint response actions', () => {
         let superTestResponseActionsNoAuthz: TestAgent;
-        let dataCleanup: Array<() => Promise<void>>;
         let ruleToUpdate: RuleResponse;
-
-        const checkCleanupResponse = async (response: Response) => {
-          if (response.error) throw response.error;
-        };
-        const logCleanupError = (e: Error) => {
-          log.warning(`Failed to clean up test data`, e);
-        };
 
         before(async () => {
           superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
@@ -771,20 +762,10 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             })
           );
-
-          dataCleanup = [
-            async () => {
-              log.info(`Cleaning up rule with id: [${ruleToUpdate.id}]`);
-              await detectionsApi
-                .deleteRule({ query: { id: ruleToUpdate.id } })
-                .then(checkCleanupResponse)
-                .catch(logCleanupError);
-            },
-          ];
         });
 
         afterEach(async () => {
-          await Promise.allSettled(dataCleanup.splice(0).map((cleanupFn) => cleanupFn()));
+          await deleteAllRules(supertest, log);
         });
 
         it('should update rule response actions when user has authz', async () => {
