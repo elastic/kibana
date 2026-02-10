@@ -63,11 +63,11 @@ export function validateLimitsForAllBundles(
 
         To automatically update the limits file locally run:
 
-          node scripts/build_kibana_platform_plugins.js --update-limits
+          node scripts/build_kibana_platform_plugins.mts --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_kibana_platform_plugins.js --validate-limits
+          node scripts/build_kibana_platform_plugins.mts --validate-limits
       ` + '\n'
     );
   }
@@ -85,11 +85,11 @@ export function validateLimitsForAllBundles(
 
         Please sort the keys alphabetically or, to automatically update the limits file locally run:
 
-          node scripts/build_kibana_platform_plugins.js --update-limits
+          node scripts/build_kibana_platform_plugins.mts --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_kibana_platform_plugins.js --validate-limits
+          node scripts/build_kibana_platform_plugins.mts --validate-limits
       ` + '\n'
     );
   }

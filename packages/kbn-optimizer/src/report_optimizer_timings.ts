@@ -48,7 +48,7 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
         await reporter.timings({
           timings: [
             {
-              group: 'scripts/build_kibana_platform_plugins',
+              group: 'scripts/build_kibana_platform_plugins.mts',
               id: 'total',
               ms: time,
               meta: {

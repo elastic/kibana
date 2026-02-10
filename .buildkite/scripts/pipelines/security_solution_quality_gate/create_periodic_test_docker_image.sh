@@ -27,7 +27,7 @@ fi
 docker_with_retry pull $KIBANA_BASE_IMAGE:latest
 
 echo "--- Build images"
-node scripts/build \
+node scripts/build.mts \
   --debug \
   --release \
   --docker-cross-compile \

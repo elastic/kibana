@@ -113,7 +113,7 @@ failures locally, etc.
 
 ```shell
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins.mts
 
 # launch the cypress test runner against ESS
 yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:run
@@ -128,7 +128,7 @@ This is the preferred mode for developing new tests against mocked data
 
 ```shell
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins.mts
 
 # launch the cypress test runner against ESS
 yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:open

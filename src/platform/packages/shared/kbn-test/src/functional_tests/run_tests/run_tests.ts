@@ -32,7 +32,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning(
-      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins.mts` to build plugins you plan on testing"
     );
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');

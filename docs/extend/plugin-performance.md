@@ -44,7 +44,7 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
 {{kib}} Platform plugins are pre-built with `@kbn/optimizer` and distributed as package artifacts. This means that it is no longer necessary for us to include the `optimizer` in the distributable version of {{kib}}. Every plugin artifact contains all plugin dependencies required to run the plugin, except some stateful dependencies shared across plugin bundles via `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`. This means that plugin artifacts *tend to be larger* than they were in the legacy platform. To understand the current size of your plugin artifact, run `@kbn/optimizer` with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
+node scripts/build_kibana_platform_plugins.mts --dist --profile --focus=my_plugin
 ```
 
 and check the output in the `target` sub-folder of your plugin folder:
@@ -61,7 +61,7 @@ ls -lh plugins/my_plugin/target/public/
 You might see at least one js bundle - `my_plugin.plugin.js`. This is the *only* artifact loaded by {{kib}} during bootstrap in the browser. The rule of thumb is to keep its size as small as possible. Other lazily loaded parts of your plugin will be present in the same folder as separate chunks under `{{number}}.myplugin.js` names. If you want to investigate what your plugin bundle consists of, you need to run `@kbn/optimizer` with `--profile` flag to generate a [webpack stats file](https://webpack.js.org/api/stats/).
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
+node scripts/build_kibana_platform_plugins.mts --dist --no-examples --profile
 ```
 
 Many OSS tools allow you to analyze the generated stats file:

@@ -28,7 +28,7 @@ describe('cli invalid config support', () => {
       // will finish the start lifecycle without a running Elasticsearch instance.
       const { error, status, stdout, stderr } = spawnSync(
         process.execPath,
-        ['scripts/kibana', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        ['--experimental-transform-types', '--no-warnings', 'scripts/kibana.mts', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
         {
           cwd: REPO_ROOT,
         }

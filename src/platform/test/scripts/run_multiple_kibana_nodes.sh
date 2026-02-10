@@ -71,7 +71,7 @@ if [ "${FN}" == "start" ]; then
   if test ! "${NUM-}"; then
     NUM=3
   fi
-  node scripts/build_kibana_platform_plugins --no-examples
+  node scripts/build_kibana_platform_plugins.mts --no-examples
   rm processes.out
   for i in $(seq 0 $(expr $NUM - 1))
   do

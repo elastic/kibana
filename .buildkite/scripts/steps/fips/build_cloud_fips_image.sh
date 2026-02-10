@@ -17,7 +17,7 @@ download_artifact "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBA
 
 echo "--- Build Cloud FIPS Distribution"
 
-node scripts/build \
+node scripts/build.mts \
   --skip-initialize \
   --skip-generic-folders \
   --skip-platform-folders \

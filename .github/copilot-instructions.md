@@ -239,10 +239,10 @@ yarn kbn bootstrap --force-install
 
 ```bash
 # Build ALL platform plugins (needed for Cypress/E2E tests, NOT needed for FTR)
-node scripts/build_kibana_platform_plugins
+node scripts/build_kibana_platform_plugins.mts
 
 # Build specific plugins by name + dependencies (faster for targeted testing)
-node scripts/build_kibana_platform_plugins --focus securitySolution
+node scripts/build_kibana_platform_plugins.mts --focus securitySolution
 ```
 
 **When to build plugins manually:**
@@ -389,7 +389,7 @@ Deleted tests, ignored types, and disabled linters represent lost validation of 
 - **Unit tests:** Co-located with source (`*.test.ts`) - Run: `yarn test:jest`
 - **Integration tests:** `**/integration_tests/**/*.test.{js,mjs,ts,tsx}` - Run: `yarn test:jest_integration`
 - **FTR tests:** `x-pack/platform/test/` and solution-specific `test/` directories (functional tests in `functional/` subdirs, API tests in `api_integration/` subdirs)
-- **Cypress tests:** Require `node scripts/build_kibana_platform_plugins` before running
+- **Cypress tests:** Require `node scripts/build_kibana_platform_plugins.mts` before running
 
 See `dev_docs/` for complete test directory structure details.
 

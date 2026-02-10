@@ -60,7 +60,7 @@ export function parseStats(path: string): Stats {
         unable to find stats file at [${path}]. Make sure you run the following
         before running this script:
 
-          node scripts/build_kibana_platform_plugins --dist --profile
+          node scripts/build_kibana_platform_plugins.mts --dist --profile
       `);
     }
 

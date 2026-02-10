@@ -15,8 +15,8 @@ is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
 is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 
-echo "> node scripts/build" "${BUILD_ARGS[@]}"
-node scripts/build "${BUILD_ARGS[@]}"
+echo "> node scripts/build.mts" "${BUILD_ARGS[@]}"
+node scripts/build.mts "${BUILD_ARGS[@]}"
 
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"

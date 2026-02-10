@@ -6,7 +6,7 @@ set -euo pipefail
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-node scripts/build_kibana_platform_plugins.js --dist --profile
+node scripts/build_kibana_platform_plugins.mts --dist --profile
 
 mkdir -p built_assets/webpack_bundle_analyzer
 find . -path "*target/public/*" -name "stats.json" | while read line; do

@@ -67,7 +67,7 @@ fi
 
 if [[ "$SKIP_BUILD" == "false" ]]; then
   echo "--- Build Kibana"
-  node scripts/build \
+  node scripts/build.mts \
     --debug \
     --release \
     --serverless \

@@ -6,4 +6,4 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Check Bundle Limits
 
-node scripts/build_kibana_platform_plugins --validate-limits
+node scripts/build_kibana_platform_plugins.mts --validate-limits

@@ -71,7 +71,7 @@ In most cases the limit should be high enough that PRs shouldn’t trigger overa
 1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{{pluginId}}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we [reduce the size of page load chunks](/extend/plugin-performance.md).
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginid} --profile
+    node scripts/build_kibana_platform_plugins.mts --focus {pluginid} --profile
     # builds and creates {pluginDir}target/public/stats.json files for {pluginId} and any plugin it depends on
     ```
 
@@ -91,7 +91,7 @@ In most cases the limit should be high enough that PRs shouldn’t trigger overa
 5. As a last resort you might want to try comparing the bundle source directly. It’s usually best to do this using the production source so that you’re inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle run it through prettier and then dropping it into Beyond Compare along with the chunk from upstream:
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+    node scripts/build_kibana_platform_plugins.mts --focus {pluginId} --dist
     npm install -g prettier
     prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
     # repeat these steps for upstream and then compare the two {pluginId}.plugin.js files in Beyond Compare
@@ -104,7 +104,7 @@ Once you’ve identified the files which were added to the build you likely just
 In the case that the bundle size is not being bloated by anything obvious, but it’s still larger than the limit, you can raise the limit in your PR. Do this either by editing the [`limits.yml` file](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) manually or by running the following to have the limit updated to the current size + 15kb
 
 ```shell
-node scripts/build_kibana_platform_plugins --focus {pluginId} --update-limits
+node scripts/build_kibana_platform_plugins.mts --focus {pluginId} --update-limits
 ```
 
 This command has to run the optimizer in distributable mode so it will take a lot longer and spawn one worker for each CPU on your machine.
@@ -117,7 +117,7 @@ Changes to the [`limits.yml` file](https://github.com/elastic/kibana/blob/master
 While you’re trying to track down changes which will improve the bundle size, try running the following command locally:
 
 ```shell
-node scripts/build_kibana_platform_plugins --dist --watch --focus {pluginId}
+node scripts/build_kibana_platform_plugins.mts --dist --watch --focus {pluginId}
 ```
 
 This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make changes the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load asset size` enough.
@@ -125,7 +125,7 @@ This will build the front-end bundles for your plugin and only the plugins your 
 If you only want to run the build once you can run:
 
 ```shell
-node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
+node scripts/build_kibana_platform_plugins.mts --validate-limits --focus {pluginId}
 ```
 
 This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developer machines will consume all of your machines resources for 20 minutes or more. If you’d like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.

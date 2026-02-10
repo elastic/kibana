@@ -31,7 +31,7 @@ Initialization:
 yarn kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+node scripts/build_kibana_platform_plugins.mts
 ```
 
 You can either run all the tests:

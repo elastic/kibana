@@ -11,7 +11,7 @@ mkdir -p target
 download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build FIPS image"
-node scripts/build \
+node scripts/build.mts \
     --skip-initialize \
     --skip-generic-folders \
     --skip-platform-folders \

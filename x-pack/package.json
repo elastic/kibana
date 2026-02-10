@@ -7,7 +7,7 @@
   "scripts": {
     "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
-    "start": "node ../scripts/kibana --dev",
+    "start": "node --experimental-transform-types --no-warnings ../scripts/kibana.mts --dev",
     "test:jest": "node ../scripts/jest"
   },
   "kibana": {

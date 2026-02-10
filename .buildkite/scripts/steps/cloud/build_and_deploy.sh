@@ -71,7 +71,7 @@ set -e
 if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
   echo "Distribution already exists, skipping build"
 else
-  node scripts/build \
+  node scripts/build.mts \
     --skip-initialize \
     --skip-generic-folders \
     --skip-platform-folders \

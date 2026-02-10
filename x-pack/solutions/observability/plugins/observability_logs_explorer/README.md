@@ -95,5 +95,5 @@ node scripts/synthtrace logs_and_metrics.ts --clean [--live]
 The limit is done to protect us in case we add some dependency that heavily impacts the bundle size, so this is not to be intended as a fix, but as a conscious update after double-checking the bundle size increase and see if it can be reduced
 
 ```
-node scripts/build_kibana_platform_plugins --focus logsExplorer --update-limits
+node scripts/build_kibana_platform_plugins.mts --focus logsExplorer --update-limits
 ```

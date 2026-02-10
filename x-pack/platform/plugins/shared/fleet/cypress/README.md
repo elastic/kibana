@@ -48,7 +48,7 @@ Since this is how tests are run on CI, this will likely be the configuration you
 yarn kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+node scripts/build_kibana_platform_plugins.mts
 
 # launch the cypress test runner
 cd x-pack/platform/plugins/shared/fleet
@@ -64,7 +64,7 @@ This is the preferred mode for developing new tests.
 yarn kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+node scripts/build_kibana_platform_plugins.mts
 
 # launch the cypress test runner
 cd x-pack/platform/plugins/shared/fleet

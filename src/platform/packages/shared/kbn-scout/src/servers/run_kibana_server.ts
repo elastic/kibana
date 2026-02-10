@@ -46,7 +46,11 @@ export async function runKibanaServer(options: {
   };
 
   const prefixArgs = devMode
-    ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    ? [
+        '--experimental-transform-types',
+        '--no-warnings',
+        Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana.mts')),
+      ]
     : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];

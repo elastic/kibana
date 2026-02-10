@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo "--- Create Kibana Docker contexts"
 mkdir -p target
-node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives
+node scripts/build.mts --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives
 
 echo "--- Build default context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)

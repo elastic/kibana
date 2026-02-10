@@ -45,7 +45,7 @@ describe.skip('cli serverless project type', () => {
     () => {
       const { error, status, stdout } = spawnSync(
         process.execPath,
-        ['scripts/kibana', '--serverless=non-existing-project-type'],
+        ['--experimental-transform-types', '--no-warnings', 'scripts/kibana.mts', '--serverless=non-existing-project-type'],
         {
           cwd: REPO_ROOT,
         }
@@ -64,7 +64,7 @@ describe.skip('cli serverless project type', () => {
   it.each(['es', 'oblt', 'security'])(
     'Kibana does not crash when running project type %s',
     async (mode) => {
-      child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
+      child = spawn(process.execPath, ['--experimental-transform-types', '--no-warnings', 'scripts/kibana.mts', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
 
