@@ -383,7 +383,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [selectedFormType]
     );
 
-    // Stabilized processChanged callback with minimal dependencies
     const processChanged = useCallback(
       (updatedFormValues?: ArtifactFormComponentProps['item']) => {
         const updatedItem = updatedFormValues
@@ -968,15 +967,23 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               )}
             </>
           ) : (
-            <LogicalConditionBuilder
-              entries={trustedApp.entries as NewTrustedApp['entries']}
-              os={selectedOs}
-              onAndClicked={handleAndClick}
-              onEntryRemove={handleEntryRemove}
-              onEntryChange={handleEntryChange}
-              onVisited={handleConditionBuilderOnVisited}
-              data-test-subj={getTestId('conditionsBuilder')}
-            />
+            <>
+              <LogicalConditionBuilder
+                entries={trustedApp.entries as NewTrustedApp['entries']}
+                os={selectedOs}
+                onAndClicked={handleAndClick}
+                onEntryRemove={handleEntryRemove}
+                onEntryChange={handleEntryChange}
+                onVisited={handleConditionBuilderOnVisited}
+                data-test-subj={getTestId('conditionsBuilder')}
+              />
+              {conditionsState.hasWildcardWithWrongOperator && (
+                <>
+                  <EuiSpacer size="s" />
+                  <WildCardWithWrongOperatorCallout />
+                </>
+              )}
+            </>
           )}
         </EuiFormRow>
         {showAssignmentSection ? (

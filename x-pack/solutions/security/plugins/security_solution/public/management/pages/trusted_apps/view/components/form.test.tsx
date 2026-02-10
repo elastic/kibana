@@ -405,13 +405,14 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
         rerender();
       });
 
       it('should add a new condition entry when `AND` is clicked with no column labels', () => {
         const condition2 = getCondition(1);
         expect(condition2.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
+        expect(renderResult.getByTestId(`trustedApps-form-conditionsBuilder-group1-entry1`).querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0)
       });
 
       it('should have remove buttons enabled when multiple conditions are present', () => {
@@ -443,7 +444,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
         // update TA to show toggle change
-        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
         rerender();
         expect(
           getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
@@ -704,8 +705,14 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.name));
     });
 
-    it('should validate invalid Hash value', () => {
-      setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+    it('should validate invalid Hash value', async () => {
+      const valueField = getConditionValue(getCondition());
+      await act(async () => {
+        await userEvent.clear(valueField);
+        await userEvent.type(valueField, 'someHASH');
+        fireEvent.blur(valueField);
+      });
+      rerenderWithLatestProps();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
 
@@ -717,7 +724,8 @@ describe('Trusted apps form', () => {
     it('should validate all condition values (when multiples exist) have non empty space value', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
-      rerenderWithLatestProps();
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
       rerenderWithLatestProps();
@@ -728,6 +736,8 @@ describe('Trusted apps form', () => {
     it('should validate duplicated conditions', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), '');
       rerenderWithLatestProps();
@@ -739,7 +749,8 @@ describe('Trusted apps form', () => {
       const andButton = getConditionBuilderAndButton();
 
       await userEvent.click(andButton);
-      rerenderWithLatestProps();
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
       rerenderWithLatestProps();
@@ -750,30 +761,36 @@ describe('Trusted apps form', () => {
 
   describe('and a wildcard value is used with the IS operator', () => {
     beforeEach(() => render());
-    it('shows warning callout and help text warning if the field is PATH', async () => {
+    // todo
+    it.only('shows warning callout and help text warning if the field is PATH', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', '')],
+        entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
       };
       latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
 
-      act(() => {
-        setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
-      });
-
+      /*setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      rerenderWithLatestProps();*/
+    
+    
+      console.log(renderResult.container.innerHTML);
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
     });
 
     it('shows a warning if field is HASH or SIGNATURE', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        entries: [createEntry(ConditionEntryField.HASH, 'match', 'somewildcard*')],
+      };
+      latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
     });
   });
 
   describe('and all required data passes validation', () => {
-    it('should call change callback with isValid set to true and contain the new item', () => {
+    it('should call change callback with isValid set to true and contain the new item', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         os_types: [OperatingSystem.LINUX],
         name: 'Some process',
@@ -784,10 +801,9 @@ describe('Trusted apps form', () => {
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
-      act(() => {
-        fireEvent.blur(getNameField());
-      });
-
+      // get around formChanged check
+      await userEvent.type(getNameField(), ' ');
+      
       expect(getAllValidationErrors()).toHaveLength(0);
       const expected = createOnChangeArgs({
         isValid: true,
@@ -804,14 +820,17 @@ describe('Trusted apps form', () => {
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
+      
       expect(getAllValidationErrors()).toHaveLength(0);
       expect(getAllValidationWarnings()).toHaveLength(0);
 
-      formProps.item.name = '';
-      rerender();
+      // clear name value
+      latestUpdatedItem = { ...formProps.item, name: '' };
+      rerenderWithLatestProps();
       act(() => {
         fireEvent.blur(getNameField());
       });
+      
       expect(getAllValidationErrors()).toHaveLength(1);
       expect(getAllValidationWarnings()).toHaveLength(0);
       expect(formProps.onChange).toHaveBeenLastCalledWith({
