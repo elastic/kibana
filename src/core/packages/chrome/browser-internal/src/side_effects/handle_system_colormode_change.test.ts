@@ -32,6 +32,7 @@ jest.mock('@kbn/core-theme-browser-internal', () => {
 });
 
 describe('handleSystemColorModeChange', () => {
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
   const originalMatchMedia = window.matchMedia;
 
   afterAll(() => {
