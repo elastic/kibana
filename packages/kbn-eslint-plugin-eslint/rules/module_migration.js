@@ -34,7 +34,7 @@ function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   // support for toRelative added to migrate away from X-Pack being bundled
   // within node modules. after that migration, this can be removed.
   if (mapping.toRelative) {
-    const sourceDirectory = path.dirname(context.getFilename());
+    const sourceDirectory = path.dirname(context.filename);
     const localModulePath = node.value.replace(new RegExp(`^${mapping.from}\/`), '');
     const modulePath = path.resolve(KIBANA_ROOT, mapping.toRelative, localModulePath);
     const relativePath = path.relative(sourceDirectory, modulePath);
@@ -108,7 +108,7 @@ module.exports = {
     ],
   },
   create: (context) => {
-    const filename = path.relative(KIBANA_ROOT, context.getFilename());
+    const filename = path.relative(KIBANA_ROOT, context.filename);
 
     const mappings = context.options[0].filter((mapping) => {
       // exclude mapping rule if it is explicitly excluded from this file

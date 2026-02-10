@@ -86,7 +86,7 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
     },
   },
   create(context) {
-    const source = context.getSourceCode();
+    const source = context.sourceCode;
 
     function getRange(
       nodeA: { loc?: AST.SourceLocation | null },

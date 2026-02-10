@@ -181,7 +181,7 @@ module.exports = {
         }
 
         // Skip reporting if there is an eslint-disable comment for this rule
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
         const comments = sourceCode.getCommentsBefore(node);
         if (
           comments.some((c) =>

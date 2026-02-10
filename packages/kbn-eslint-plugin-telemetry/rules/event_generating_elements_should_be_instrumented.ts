@@ -35,7 +35,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { getCwd, getFilename, sourceCode, report } = context;
+    const { sourceCode, report } = context;
 
     return {
       JSXIdentifier: (node: TSESTree.Node) => {
@@ -67,8 +67,8 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         // Start building the suggestion.
 
         // 1. The app name
-        const cwd = getCwd();
-        const fileName = getFilename();
+        const cwd = context.cwd;
+        const fileName = context.filename;
         const appName = getAppName(fileName, cwd);
 
         // 2. Component name

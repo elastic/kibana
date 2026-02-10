@@ -7,151 +7,214 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
+import glob from 'glob';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
-const batchSize = 250;
-const maxParallelism = 8;
+/**
+ * Run a command and stream its output in real-time.
+ */
+function streamExec(
+  cmd: string,
+  args: string[],
+  opts: execa.Options & { label?: string; log?: { info(msg: string): void } }
+): Promise<{ exitCode: number }> {
+  const { label = cmd, log: logger, ...execaOpts } = opts;
+
+  return new Promise((resolve) => {
+    const child = execa(cmd, args, { ...execaOpts, stdio: 'pipe', reject: false });
+    const startTime = Date.now();
+
+    child.stdout?.pipe(process.stdout);
+    child.stderr?.pipe(process.stderr);
+
+    const heartbeat = setInterval(() => {
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      if (logger) {
+        logger.info(`  ${label}: still running... (${elapsed}s elapsed)`);
+      }
+    }, 10_000);
+
+    child.then((result) => {
+      clearInterval(heartbeat);
+      resolve({ exitCode: result.exitCode ?? 1 });
+    });
+  });
+}
+
+/**
+ * Group an array of file paths by their top-level directory (relative to the
+ * repo root).  Files at the root level are grouped under ".".
+ */
+function groupByTopDir(files: string[]): Map<string, string[]> {
+  const groups = new Map<string, string[]>();
+  for (const file of files) {
+    const rel = path.relative(REPO_ROOT, file);
+    const topDir = rel.split(path.sep)[0] || '.';
+    let list = groups.get(topDir);
+    if (!list) {
+      list = [];
+      groups.set(topDir, list);
+    }
+    list.push(file);
+  }
+  return groups;
+}
 
 run(
   async ({ log, flags }) => {
-    const bail = !!(flags.bail || false);
+    const skipOxlint = !!(flags['skip-oxlint'] || false);
 
-    const { batches, files } = getLintableFileBatches(flags._);
-    log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
+    // ── Step 1: oxlint (fast pass, ~5 s for the whole repo) ──────────────
+    if (!skipOxlint) {
+      log.info('Running oxlint...');
+      const t0 = Date.now();
+      const oxlintResult = await streamExec('npx', ['oxlint', '--quiet', '--config', '.oxlintrc.json'], {
+        cwd: REPO_ROOT,
+        label: 'oxlint',
+        log,
+      });
+      const dt = Date.now() - t0;
 
-    const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
+      if (oxlintResult.exitCode !== 0) {
+        log.error(`oxlint found errors (${dt}ms) ❌`);
+        process.exit(1);
+      } else {
+        log.info(`oxlint passed (${dt}ms) ✅`);
+      }
+    }
 
-    // ESLint has no cache by default
-    log.info(
-      `Running ESLint with args: ${pretty({
-        args: eslintArgs.concat(flags._),
-        batchSize,
-        maxParallelism,
-      })}`
-    );
+    // ── Step 2: ESLint (Node API, linted per directory for progress) ─────
+    const useCache = !!(flags.cache ?? true);
+    const fix = !!flags.fix;
+    const filePatterns = flags._.length > 0 ? (flags._ as string[]) : ['.'];
 
-    const lintPromiseThunks = batches.map(
-      (batch, idx) => () =>
-        lintFileBatch({ batch, idx, eslintArgs, batchCount: batches.length, bail, log })
-    );
-    const results = await runBatchedPromises(lintPromiseThunks, maxParallelism);
+    log.info(`Running ESLint (cache: ${useCache}, fix: ${fix})...`);
+    const eslintStart = Date.now();
 
-    const failedBatches = results.filter((result) => !result.success);
-    if (failedBatches.length > 0) {
-      log.error(`Linting errors found ❌`);
+    const { ESLint } = await import('eslint');
+    const eslint = new ESLint({ cwd: REPO_ROOT, cache: useCache, fix });
+
+    // Discover all lintable files, then filter out ignored ones
+    log.info('  Discovering files...');
+    const allFiles: string[] = [];
+    for (const pattern of filePatterns) {
+      if (pattern === '.') {
+        const found = glob.sync('**/*.{js,mjs,ts,tsx}', {
+          cwd: REPO_ROOT,
+          absolute: true,
+          ignore: ['**/node_modules/**', '**/target/**', '**/build/**'],
+        });
+        allFiles.push(...found);
+      } else {
+        allFiles.push(path.resolve(REPO_ROOT, pattern));
+      }
+    }
+
+    // Filter out files ESLint would ignore
+    const files: string[] = [];
+    for (const file of allFiles) {
+      if (!(await eslint.isPathIgnored(file))) {
+        files.push(file);
+      }
+    }
+
+    log.info(`  Found ${files.length} files to lint`);
+
+    // Group files by top-level directory so we can report per-directory progress
+    const groups = groupByTopDir(files);
+    const dirNames = [...groups.keys()].sort();
+
+    let totalErrors = 0;
+    let totalWarnings = 0;
+    let totalFiles = 0;
+    const allResults: import('eslint').ESLint.LintResult[] = [];
+
+    for (const dir of dirNames) {
+      const dirFiles = groups.get(dir)!;
+      const dirStart = Date.now();
+
+      log.info(
+        `  [${totalFiles}/${files.length}] Linting ${dir}/ (${dirFiles.length} files)...`
+      );
+
+      let results: import('eslint').ESLint.LintResult[];
+      try {
+        results = await eslint.lintFiles(dirFiles);
+      } catch (err: any) {
+        // Some plugins (e.g. eslint-plugin-formatjs) throw on certain AST
+        // patterns instead of reporting a lint error.  Log and continue so
+        // the rest of the repo can still be linted.
+        const dirTime = ((Date.now() - dirStart) / 1000).toFixed(1);
+        log.error(
+          `  [${totalFiles}/${files.length}] ${dir}/ CRASHED after ${dirTime}s — ${err.message.split('\n')[0]}`
+        );
+        totalErrors++;
+        continue;
+      }
+
+      allResults.push(...results);
+
+      let dirErrors = 0;
+      let dirWarnings = 0;
+      for (const r of results) {
+        dirErrors += r.errorCount;
+        dirWarnings += r.warningCount;
+      }
+
+      totalErrors += dirErrors;
+      totalWarnings += dirWarnings;
+      totalFiles += results.length;
+
+      const dirTime = ((Date.now() - dirStart) / 1000).toFixed(1);
+
+      if (dirErrors > 0 || dirWarnings > 0) {
+        log.info(
+          `  [${totalFiles}/${files.length}] ${dir}/ done in ${dirTime}s — ${dirErrors} errors, ${dirWarnings} warnings`
+        );
+      }
+    }
+
+    // Apply fixes if requested
+    if (fix) {
+      await ESLint.outputFixes(allResults);
+    }
+
+    // Format and print results (only files with issues)
+    const formatter = await eslint.loadFormatter('stylish');
+    const output = await formatter.format(allResults);
+    if (output.trim()) {
+      process.stdout.write(output + '\n');
+    }
+
+    const eslintTime = ((Date.now() - eslintStart) / 1000).toFixed(1);
+
+    if (totalErrors > 0) {
+      log.error(
+        `ESLint: ${totalErrors} errors, ${totalWarnings} warnings across ${totalFiles} files (${eslintTime}s) ❌`
+      );
       process.exit(1);
     } else {
-      log.info('Linting successful ✅');
+      log.info(
+        `ESLint: ${totalWarnings} warnings across ${totalFiles} files (${eslintTime}s) ✅`
+      );
     }
   },
   {
-    description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
+    description: 'Lint all JavaScript/TypeScript files with oxlint + ESLint',
     flags: {
-      boolean: ['bail', 'cache', 'fix'],
+      boolean: ['cache', 'fix', 'skip-oxlint'],
       default: {
-        bail: false,
-        cache: true, // Enable caching by default
+        cache: true,
+        'skip-oxlint': false,
       },
       help: `
-        --bail            Stop on the first linting error
         --no-cache        Disable ESLint caching
-        --fix             Fix files
+        --fix             Auto-fix problems
+        --skip-oxlint     Skip the oxlint pass
       `,
     },
   }
 );
-
-function getLintableFileBatches(filePatterns: string[]) {
-  const files = execa
-    .sync('git', ['ls-files', ...filePatterns], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    })
-    .stdout.trim()
-    .split('\n')
-    .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
-  const batches = [];
-  for (let i = 0; i < files.length; i += batchSize) {
-    batches.push(files.slice(i, i + batchSize));
-  }
-
-  return { batches, files };
-}
-
-async function lintFileBatch({
-  batch,
-  bail,
-  idx,
-  eslintArgs,
-  batchCount,
-  log,
-}: {
-  batch: string[];
-  bail: boolean;
-  idx: number;
-  eslintArgs: string[];
-  batchCount: number;
-  log: ToolingLog;
-}) {
-  log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
-
-  const timeBefore = Date.now();
-  const args = ['scripts/eslint'].concat(eslintArgs).concat(batch);
-  const { stdout, stderr, exitCode } = await execa('node', args, {
-    cwd: REPO_ROOT,
-    env: {
-      // Disable CI stats for individual runs, to avoid overloading ci-stats
-      CI_STATS_DISABLED: 'true',
-    },
-    reject: bail, // Don't throw on non-zero exit code
-  });
-
-  const time = Date.now() - timeBefore;
-  if (exitCode !== 0) {
-    const errorMessage = stderr?.toString() || stdout?.toString();
-    log.error(`Batch ${idx + 1}/${batchCount} failed (${time}ms) ❌: ${errorMessage}`);
-    return {
-      success: false,
-      idx,
-      time,
-      error: errorMessage,
-    };
-  } else {
-    log.info(`Batch ${idx + 1}/${batchCount} success (${time}ms) ✅: ${stdout.toString()}`);
-    return {
-      success: true,
-      idx,
-      time,
-    };
-  }
-}
-
-function runBatchedPromises<T>(
-  promiseCreators: Array<() => Promise<T>>,
-  maxParallel: number
-): Promise<T[]> {
-  const results: T[] = [];
-  let i = 0;
-
-  const next: () => Promise<any> = () => {
-    if (i >= promiseCreators.length) {
-      return Promise.resolve();
-    }
-
-    const promiseCreator = promiseCreators[i++];
-    return Promise.resolve(promiseCreator()).then((result) => {
-      results.push(result);
-      return next();
-    });
-  };
-
-  const tasks = Array.from({ length: maxParallel }, () => next());
-  return Promise.all(tasks).then(() => results);
-}
-
-function pretty(obj: any) {
-  return JSON.stringify(obj, null, 2);
-}

@@ -29,7 +29,7 @@ module.exports = {
     let createHashName = 'createHash';
     let cryptoLocalName = 'crypto';
     let usedFunctionName = '';
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
 
     const disallowedAlgorithmNodes = new Set();
 

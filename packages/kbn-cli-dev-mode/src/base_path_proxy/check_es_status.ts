@@ -41,9 +41,7 @@ export function getElasticsearchHosts(): string[] {
       // Pattern 1: elasticsearch.hosts: ["http://..."]  (inline array)
       // Pattern 2: elasticsearch.hosts:\n  - http://...  (block array)
       // Pattern 3: elasticsearch.hosts: http://...       (single value)
-      const inlineMatch = content.match(
-        /elasticsearch\.hosts\s*:\s*\[([^\]]+)\]/
-      );
+      const inlineMatch = content.match(/elasticsearch\.hosts\s*:\s*\[([^\]]+)\]/);
       if (inlineMatch) {
         const hosts = inlineMatch[1]
           .split(',')
@@ -53,21 +51,22 @@ export function getElasticsearchHosts(): string[] {
       }
 
       // Block array: lines starting with "  - " after elasticsearch.hosts:
-      const blockMatch = content.match(
-        /elasticsearch\.hosts\s*:\s*\n((?:\s+-\s+.+\n?)+)/
-      );
+      const blockMatch = content.match(/elasticsearch\.hosts\s*:\s*\n((?:\s+-\s+.+\n?)+)/);
       if (blockMatch) {
         const hosts = blockMatch[1]
           .split('\n')
-          .map((line) => line.replace(/^\s+-\s+/, '').trim().replace(/^["']|["']$/g, ''))
+          .map((line) =>
+            line
+              .replace(/^\s+-\s+/, '')
+              .trim()
+              .replace(/^["']|["']$/g, '')
+          )
           .filter(Boolean);
         if (hosts.length > 0) return hosts;
       }
 
       // Single value
-      const singleMatch = content.match(
-        /elasticsearch\.hosts\s*:\s+(?![\[\n])(.+)/
-      );
+      const singleMatch = content.match(/elasticsearch\.hosts\s*:\s+(?![\[\n])(.+)/);
       if (singleMatch) {
         const host = singleMatch[1].trim().replace(/^["']|["']$/g, '');
         if (host) return [host];

@@ -6,6 +6,10 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
+echo '--- Lint: oxlint'
+oxlint
+echo "oxlint ✅"
+
 echo '--- Lint: stylelint'
 node scripts/stylelint
 echo "stylelint ✅"

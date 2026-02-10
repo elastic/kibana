@@ -13,9 +13,7 @@ import type { Rule } from 'eslint';
  * Get the path of the sourcefile being linted
  */
 export function getSourcePath(context: Rule.RuleContext) {
-  const sourceFilename = context.getPhysicalFilename
-    ? context.getPhysicalFilename()
-    : context.getFilename();
+  const sourceFilename = context.physicalFilename ?? context.filename;
 
   if (!sourceFilename) {
     throw new Error('unable to determine sourceFilename for file being linted');

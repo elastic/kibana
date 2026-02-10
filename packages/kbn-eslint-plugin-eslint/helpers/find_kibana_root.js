@@ -25,18 +25,20 @@ module.exports = function findKibanaRoot() {
   // process.argv[1] would be the eslint binary, a correctly-set editor
   // will use a local eslint inside the repo node_modules and its value
   // should be `ACTUAL_KIBANA_ROOT/node_modules/.bin/eslint`
-  let maybeKibanaRoot = path.resolve(process.argv[1], '../../../');
-  if (isKibanaRoot(maybeKibanaRoot)) {
-    return maybeKibanaRoot;
+  if (process.argv[1]) {
+    let maybeKibanaRoot = path.resolve(process.argv[1], '../../../');
+    if (isKibanaRoot(maybeKibanaRoot)) {
+      return maybeKibanaRoot;
+    }
   }
 
   // eslint should run on the repo root level
   // try to use process.cwd as the kibana root
-  maybeKibanaRoot = process.cwd();
-  if (isKibanaRoot(maybeKibanaRoot)) {
-    return maybeKibanaRoot;
+  const cwd = process.cwd();
+  if (isKibanaRoot(cwd)) {
+    return cwd;
   }
 
-  // fallback to the first predicted path (original script)
-  return maybeKibanaRoot;
+  // fallback to cwd
+  return cwd;
 };

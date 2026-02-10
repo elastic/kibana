@@ -26,7 +26,6 @@ import { eslintBinPath } from './eslint_bin_path';
 export function runEslintWithTypes() {
   run(
     async ({ log, flags }) => {
-      const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
         Path.resolve(__dirname, 'types.eslint.config.template.cjs'),
         'utf8'
@@ -85,12 +84,10 @@ export function runEslintWithTypes() {
                 ),
                 ...(project.config.exclude ?? []).flatMap((p) => ['--ignore-pattern', p]),
                 ...['--ignore-pattern', '**/*.json'],
-                ...['--ext', '.ts,.tsx'],
                 '--no-error-on-unmatched-pattern',
                 '--no-inline-config',
-                '--no-eslintrc',
+                '--no-config-lookup',
                 ...['--config', Path.relative(project.directory, configFilePath)],
-                ...['--ignore-path', Path.relative(project.directory, ignoreFilePath)],
                 ...(flags.verbose ? ['--debug'] : []),
                 ...(flags.fix ? ['--fix'] : []),
               ],

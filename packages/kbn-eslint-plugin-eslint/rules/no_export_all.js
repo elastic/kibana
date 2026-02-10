@@ -52,7 +52,7 @@ module.exports = {
           return sourceFile;
         };
 
-        const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);
+        const exportSet = getExportNamesDeep(parser, context.filename, tsnode);
         const isTypeExport = esNode.exportKind === 'type';
         const isNamespaceExportWithTypes =
           tsnode.exportClause &&

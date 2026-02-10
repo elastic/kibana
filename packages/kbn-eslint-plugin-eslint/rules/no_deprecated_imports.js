@@ -9,7 +9,7 @@
 
 const Linter = require('eslint').Linter;
 
-const coreRule = new Linter().getRules().get('no-restricted-imports');
+const coreRule = new Linter({ configType: 'eslintrc' }).getRules().get('no-restricted-imports');
 
 /**
  * This rule is used to prevent the use of deprecated imports in Kibana code.

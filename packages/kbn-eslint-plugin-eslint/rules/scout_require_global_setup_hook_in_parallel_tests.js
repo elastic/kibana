@@ -45,7 +45,7 @@ module.exports = {
     schema: [],
   },
   create: (context) => {
-    const filename = context.getFilename();
+    const filename = context.filename;
 
     if (!isGlobalSetupFile(filename)) {
       return {};

@@ -152,7 +152,7 @@ module.exports = {
           message: ERROR_MSG,
           loc: func.loc,
           fix(fixer) {
-            const source = context.getSourceCode();
+            const source = context.sourceCode;
             return fixer.replaceText(func, wrapFunctionInTryCatch(source.getText(func)));
           },
         });

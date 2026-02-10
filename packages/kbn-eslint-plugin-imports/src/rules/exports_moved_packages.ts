@@ -232,7 +232,7 @@ export const ExportsMovedPackagesRule: Rule.RuleModule = {
 
   create(context) {
     const rules: MovedExportsRule[] = context.options[0];
-    const source = context.getSourceCode();
+    const source = context.sourceCode;
 
     // get the range for the entire "import", expanding require()/import() to their
     // entire variable declaration and including the trailing newline if we can

@@ -32,7 +32,7 @@ export const NoDirectHandlebarsImportRule: Rule.RuleModule = {
       }
 
       // Skip the rule for files within the kbn-handlebars package itself
-      const filename = context.getFilename();
+      const filename = context.filename;
       if (filename.includes('/kbn-handlebars/') || filename.includes('\\kbn-handlebars\\')) {
         return;
       }

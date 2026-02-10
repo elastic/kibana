@@ -26,7 +26,7 @@ function getImportedVariableValue(context, name, propertyName) {
   if (!importDeclaration) return;
 
   const absoluteImportPath = require.resolve(importDeclaration.source.value, {
-    paths: [path.dirname(context.getFilename())],
+    paths: [path.dirname(context.filename)],
   });
 
   const program = ts.createProgram([absoluteImportPath], {});
@@ -156,7 +156,7 @@ module.exports = {
 
         const scopedVariables = new Map();
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
 
         const parent = sourceCode
           .getAncestors(node)

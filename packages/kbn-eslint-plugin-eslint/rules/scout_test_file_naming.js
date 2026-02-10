@@ -81,7 +81,7 @@ module.exports = {
     schema: [],
   },
   create: (context) => {
-    const filename = context.getFilename();
+    const filename = context.filename;
 
     // Only process TypeScript files in test/scout directories
     if (!filename.includes('/test/scout')) {

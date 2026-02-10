@@ -56,7 +56,7 @@ module.exports = {
           return;
         }
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
         const comment = sourceCode
           .getAllComments()
           .find((node) => normalizeWhitespace(node.value) === license.nodeValue);

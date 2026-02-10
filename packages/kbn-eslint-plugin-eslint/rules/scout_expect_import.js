@@ -63,7 +63,7 @@ module.exports = {
   },
 
   create(context) {
-    const filePath = context.getFilename();
+    const filePath = context.filename;
     const testType = getTestType(filePath);
 
     if (!testType) {

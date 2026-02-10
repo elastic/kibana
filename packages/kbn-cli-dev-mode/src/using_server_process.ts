@@ -25,10 +25,12 @@ function stripInspectFromNodeOptions(nodeOptions: string | undefined): string | 
     return nodeOptions;
   }
 
-  return nodeOptions
-    .replace(/--inspect(-brk|-wait)?(=\S+)?/g, '')
-    .replace(/\s+/g, ' ')
-    .trim() || undefined;
+  return (
+    nodeOptions
+      .replace(/--inspect(-brk|-wait)?(=\S+)?/g, '')
+      .replace(/\s+/g, ' ')
+      .trim() || undefined
+  );
 }
 
 /**
@@ -61,9 +63,7 @@ export function usingServerProcess<T>(
       const proc = execa.node(options.script, options.argv, {
         stdio: 'pipe',
         nodeOptions: [
-          ...(ACTIVE_INSPECT_FLAG
-            ? stripInspectFromExecArgv(process.execArgv)
-            : process.execArgv),
+          ...(ACTIVE_INSPECT_FLAG ? stripInspectFromExecArgv(process.execArgv) : process.execArgv),
           ...(ACTIVE_INSPECT_FLAG ? [`${ACTIVE_INSPECT_FLAG}=${process.debugPort + 1}`] : []),
         ],
         env: {
