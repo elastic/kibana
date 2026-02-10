@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { ToolType } from '@kbn/agent-builder-common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ToolType } from '@kbn/agent-builder-common';
-import { WorkflowPicker } from './workflow_picker';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
+import { WorkflowPicker } from './workflow_picker';
 
 const mockWorkflows = [
   {
@@ -84,9 +84,8 @@ describe('WorkflowPicker', () => {
     const input = comboBox.querySelector('input')!;
 
     await userEvent.click(input);
-    await userEvent.type(input, 'Alert');
 
-    const option = await screen.findByTitle('Alert Triage Workflow');
+    const option = await screen.findByRole('option', { name: /Alert Triage Workflow/i });
     await userEvent.click(option);
 
     expect(screen.getByTestId('description-value')).toHaveTextContent(
@@ -101,9 +100,8 @@ describe('WorkflowPicker', () => {
     const input = comboBox.querySelector('input')!;
 
     await userEvent.click(input);
-    await userEvent.type(input, 'Empty');
 
-    const option = await screen.findByTitle('Empty Description Workflow');
+    const option = await screen.findByRole('option', { name: /Empty Description Workflow/i });
     await userEvent.click(option);
 
     // Description should remain empty since the workflow has no description
@@ -120,6 +118,20 @@ describe('WorkflowPicker', () => {
 
     const comboBox = screen.getByTestId('agentBuilderWorkflowPicker');
     expect(comboBox).toBeInTheDocument();
+  });
+
+  it('clears description when the workflow selection is removed', async () => {
+    render(<TestWrapper defaultWorkflowId="workflow-1" />);
+
+    // Verify the workflow is selected
+    expect(screen.getByText('Alert Triage Workflow')).toBeInTheDocument();
+
+    // Click the clear button on the combo box
+    const clearButton = screen.getByTestId('comboBoxClearButton');
+    await userEvent.click(clearButton);
+
+    // Description should be cleared
+    expect(screen.getByTestId('description-value')).toHaveTextContent('');
   });
 
   it('displays the pre-selected workflow when defaultWorkflowId is provided', () => {
