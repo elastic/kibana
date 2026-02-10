@@ -85,18 +85,17 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   let toolParams = initialToolParams as unknown as Record<string, unknown>;
   const hooks = manager.deps.hooks;
-  if (hooks) {
-    const hookContext: BeforeToolCallHookContext = {
-      toolId: tool.id,
-      toolCallId,
-      toolParams,
-      source,
-      request: manager.deps.request,
-      abortSignal: manager.deps.abortSignal,
-    };
-    const updated = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
-    toolParams = updated.toolParams;
-  }
+
+  const hookContext: BeforeToolCallHookContext = {
+    toolId: tool.id,
+    toolCallId,
+    toolParams,
+    source,
+    request: manager.deps.request,
+    abortSignal: manager.deps.abortSignal,
+  };
+  const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
+  toolParams = beforeToolHooksResult.toolParams;
 
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
@@ -172,19 +171,17 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     runToolReturn = { prompt: toolReturn.prompt };
   }
 
-  if (hooks) {
-    const postContext: AfterToolCallHookContext = {
-      toolId: tool.id,
-      toolCallId,
-      toolParams,
-      source,
-      request: manager.deps.request,
-      toolReturn: runToolReturn,
-      abortSignal: manager.deps.abortSignal,
-    };
-    const updated = await hooks.run(HookLifecycle.afterToolCall, postContext);
-    runToolReturn = updated.toolReturn;
-  }
+  const postContext: AfterToolCallHookContext = {
+    toolId: tool.id,
+    toolCallId,
+    toolParams,
+    source,
+    request: manager.deps.request,
+    toolReturn: runToolReturn,
+    abortSignal: manager.deps.abortSignal,
+  };
+  const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
+  runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results) {
     runToolReturn.results.forEach((result) => {

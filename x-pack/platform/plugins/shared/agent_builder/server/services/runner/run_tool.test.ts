@@ -223,37 +223,6 @@ describe('runTool', () => {
     });
   });
 
-  it('runs successfully when hooks are undefined', async () => {
-    const depsWithoutHooks = { ...runnerDeps, hooks: {} as HooksServiceStart };
-    const managerWithoutHooks = new RunnerManager(depsWithoutHooks);
-
-    const params: ScopedRunnerRunToolsParams = {
-      toolId: 'test-tool',
-      toolParams: { foo: 'bar' },
-    };
-
-    toolHandler.mockReturnValue({
-      results: [{ type: ToolResultType.other, data: { from: 'tool' } }],
-    });
-
-    const results = await runTool({
-      toolExecutionParams: params,
-      parentManager: managerWithoutHooks,
-    });
-
-    expect(toolHandler).toHaveBeenCalledTimes(1);
-    expect(toolHandler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
-    expect(results).toEqual({
-      results: [
-        {
-          tool_result_id: 'some-result-id',
-          type: ToolResultType.other,
-          data: { from: 'tool' },
-        },
-      ],
-    });
-  });
-
   it('when hooks are present: beforeToolCall is called and updated toolParams are passed to the tool handler', async () => {
     hooksRunMock.mockImplementation(async (lifecycle, context) =>
       lifecycle === HookLifecycle.beforeToolCall

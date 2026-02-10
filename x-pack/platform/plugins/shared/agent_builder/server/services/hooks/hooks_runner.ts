@@ -21,7 +21,7 @@ import {
 import { orderBy } from 'lodash';
 
 /** Default maximum execution time for a hook when timeout is not configured (5 minutes). */
-const DEFAULT_HOOK_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
+const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
 const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterToolCall];
