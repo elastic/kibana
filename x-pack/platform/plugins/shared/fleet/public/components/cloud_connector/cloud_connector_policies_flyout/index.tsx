@@ -392,7 +392,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON}
             >
               <FormattedMessage
-                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.closeButton"
+                id="xpack.fleet.cloudConnector.policiesFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -424,7 +424,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                     }
                   >
                     <FormattedMessage
-                      id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteConnectorButton"
+                      id="xpack.fleet.cloudConnector.policiesFlyout.deleteConnectorButton"
                       defaultMessage="Delete Connector"
                     />
                   </EuiButtonEmpty>
@@ -440,7 +440,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                   data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON}
                 >
                   <FormattedMessage
-                    id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.footerSaveButton"
+                    id="xpack.fleet.cloudConnector.policiesFlyout.footerSaveButton"
                     defaultMessage="Save"
                   />
                 </EuiButton>
@@ -453,7 +453,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       {isDeleteModalVisible && (
         <EuiConfirmModal
           title={i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteModalTitle',
+            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalTitle',
             {
               defaultMessage: "You're about to delete a connector",
             }
@@ -463,13 +463,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           onCancel={handleCancelDelete}
           onConfirm={handleConfirmDelete}
           cancelButtonText={i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteModalCancel',
+            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalCancel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           confirmButtonText={i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteModalConfirm',
+            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalConfirm',
             {
               defaultMessage: 'Delete connector',
             }
@@ -484,7 +484,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_MODAL_CALLOUT}
           >
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteModalCallout"
+              id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalCallout"
               defaultMessage="Deleting {connectorName} will stop data ingestion and it cannot be re-used in other integrations."
               values={{
                 connectorName: <strong>{cloudConnectorName}</strong>,
@@ -494,7 +494,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.deleteModalBody"
+              id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalBody"
               defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
             />
           </EuiText>
