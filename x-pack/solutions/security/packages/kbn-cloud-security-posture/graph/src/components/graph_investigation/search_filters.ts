@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
 import {
   BooleanRelation,
   FilterStateStore,
@@ -179,11 +178,10 @@ const getFilterValue = (
   keys: string[]
 ): PhraseFilterValue[] | PhraseFilterValue | null => {
   if (isCombinedFilter(filter)) {
-    return flatten(
-      filter.meta.params
-        .map((param) => getFilterValue(param, keys))
-        .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
-    );
+    return filter.meta.params
+      .map((param) => getFilterValue(param, keys))
+      .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
+      .flat();
   }
 
   return filter.meta.key && keys.includes(filter.meta.key)
@@ -206,10 +204,9 @@ export const getFilterValues = (
 ): PhraseFilterValue[] => {
   const keys = Array.isArray(key) ? key : [key];
 
-  return flatten(
-    filters
-      .filter((filter) => !filter.meta.disabled)
-      .map((filter) => getFilterValue(filter, keys as string[]))
-      .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
-  );
+  return filters
+    .filter((filter) => !filter.meta.disabled)
+    .map((filter) => getFilterValue(filter, keys as string[]))
+    .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
+    .flat();
 };
