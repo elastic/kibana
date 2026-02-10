@@ -20,6 +20,7 @@ interface OAuthStateAttributes {
   connectorId: string;
   redirectUri: string;
   kibanaReturnUrl: string;
+  spaceId: string;
   createdAt: string;
   expiresAt: string;
   createdBy?: string;
@@ -39,6 +40,7 @@ interface CreateStateOptions {
   connectorId: string;
   redirectUri: string;
   kibanaReturnUrl: string;
+  spaceId: string;
   createdBy?: string;
 }
 
@@ -78,6 +80,7 @@ export class OAuthStateClient {
     connectorId,
     redirectUri,
     kibanaReturnUrl,
+    spaceId,
     createdBy,
   }: CreateStateOptions): Promise<{
     state: OAuthState;
@@ -101,6 +104,7 @@ export class OAuthStateClient {
             connectorId,
             redirectUri,
             kibanaReturnUrl,
+            spaceId,
             createdAt: now.toISOString(),
             expiresAt: expiresAt.toISOString(),
             createdBy,

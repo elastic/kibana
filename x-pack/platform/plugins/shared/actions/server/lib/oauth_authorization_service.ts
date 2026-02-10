@@ -104,10 +104,12 @@ export class OAuthAuthorizationService {
   /**
    * Gets OAuth configuration for a connector with decrypted secrets
    * @param connectorId - The connector ID
+   * @param namespace - The space ID where to look for the connector. For default space, it's undefined.
+   * The namespace is the same as where the authorization was initiated from, which should be the space where the connector was created.
    * @returns OAuth configuration including authorizationUrl, clientId, and optional scope
    * @throws Error if connector is not found, not OAuth, or missing required config
    */
-  async getOAuthConfig(connectorId: string): Promise<OAuthConfig> {
+  async getOAuthConfig(connectorId: string, namespace: string | undefined): Promise<OAuthConfig> {
     // Get connector to verify it exists and check auth type
     const connector = await this.actionsClient.get({ id: connectorId });
     const config = connector.config as OAuthConnectorConfig;
@@ -119,7 +121,8 @@ export class OAuthAuthorizationService {
     const rawAction =
       await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorWithOAuth>(
         'action',
-        connectorId
+        connectorId,
+        { namespace }
       );
 
     const secrets = rawAction.attributes.secrets;
