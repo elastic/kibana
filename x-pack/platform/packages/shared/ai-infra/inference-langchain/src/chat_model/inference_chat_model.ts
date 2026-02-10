@@ -186,6 +186,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
     const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
 
     return {
       connectorId: this.connector.connectorId,
@@ -195,8 +196,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       // Some providers (notably Anthropic via OpenAI-compatible gateways) reject `tool_choice`
       // and/or empty tools lists. Only forward tool params when we actually have tools.
       tools: hasTools ? inferredTools : undefined,
-      toolChoice:
-        hasTools && options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // Default to `auto` when tools are present so adapters/providers that require an explicit
+      // tool choice (e.g. Bedrock Converse) can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },

@@ -65,7 +65,18 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
 
       const messages = retryRequest.messages;
 
-      const errorMessage = JSON.parse(messages[messages.length - 1].content as string).response;
+      // The retry request includes a mix of human/assistant/tool messages.
+      // We want the tool-result message that carries the "tool not available" error.
+      const lastToolMessage = [...(messages as Array<{ role?: string; content?: unknown }>)]
+        .reverse()
+        .find((m) => m?.role === 'tool' && typeof m?.content === 'string');
+
+      expect(lastToolMessage).to.not.be(undefined);
+
+      const parsedToolContent = JSON.parse(lastToolMessage!.content as string) as {
+        response?: string;
+      };
+      const errorMessage = parsedToolContent.response ?? '';
 
       expect(errorMessage).to.contain('ERROR: called a tool which was not available');
     });
