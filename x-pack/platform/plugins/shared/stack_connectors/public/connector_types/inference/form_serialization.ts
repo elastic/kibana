@@ -37,8 +37,6 @@ export const formSerializer = (data: ConnectorFormSchema) => {
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
-                // Remove num_allocations as it cannot be set when adaptive allocations is set.
-                num_allocations: undefined,
               }
             : {}),
         },

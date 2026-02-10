@@ -31,26 +31,32 @@ const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
 const formDeserializer = (data: InferenceEndpoint): InferenceEndpoint => {
-  if (
-    data.config?.providerConfig?.['adaptive_allocations.max_number_of_allocations'] ||
-    data.config?.headers
-  ) {
-    const { headers, ...restConfig } = data.config;
-    const maxAllocations =
-      data.config.providerConfig?.['adaptive_allocations.max_number_of_allocations'];
+  const { providerConfig, ...restConfig } = data.config || {};
+  const {
+    'adaptive_allocations.max_number_of_allocations': maxAllocations,
+    'adaptive_allocations.enabled': adaptiveAllocationsEnabled,
+    'adaptive_allocations.min_number_of_allocations': minAllocations,
+    ...restProviderConfig
+  } = providerConfig || {};
+
+  if (maxAllocations || restProviderConfig?.headers) {
+    const { headers, ...restConfigNoHeaders } = restConfig;
 
     return {
       ...data,
       config: {
-        ...restConfig,
+        ...restConfigNoHeaders,
         providerConfig: {
-          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+          ...restProviderConfig,
           ...(headers ? { headers } : {}),
           ...(maxAllocations
             ? // remove the adaptive_allocations from the data config as form does not expect it
-              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+              {
+                max_number_of_allocations: maxAllocations as number,
+                adaptive_allocations: undefined,
+              }
             : {}),
-        } as InferenceEndpoint['config']['providerConfig'],
+        },
       },
     };
   }

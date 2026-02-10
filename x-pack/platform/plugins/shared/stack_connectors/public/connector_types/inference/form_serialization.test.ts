@@ -15,8 +15,6 @@ describe('formSerializer', () => {
       config: {
         providerConfig: {
           max_number_of_allocations: 5,
-          num_threads: 1,
-          num_allocations: 1,
           other_config: 'value',
         },
       },
