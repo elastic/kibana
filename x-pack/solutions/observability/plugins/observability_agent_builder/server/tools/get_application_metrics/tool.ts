@@ -14,6 +14,8 @@ import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '../get_hosts/tool';
+import { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '../get_trace_metrics/tool';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_APPLICATION_METRICS_TOOL_ID =
@@ -67,6 +69,7 @@ When to use:
 - Correlating latency issues with runtime resource saturation
 
 When NOT to use:
+- For non-JVM services (Node.js, Python, Go, etc.) - this tool will return empty results
 - For host-level metrics (CPU, memory of the entire host) - use ${OBSERVABILITY_GET_HOSTS_TOOL_ID} instead
 - For trace/transaction metrics - use ${OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID} instead`,
     schema: getApplicationMetricsToolSchema,
