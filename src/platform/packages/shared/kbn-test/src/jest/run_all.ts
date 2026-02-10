@@ -45,6 +45,12 @@ interface FailedTest {
 // Flags:
 //   --configs       Comma-separated list of jest config file paths (optional, if not passed, all configs in the repo will be run)
 //   --maxParallel   Maximum concurrent Jest config processes (optional, defaults to env JEST_MAX_PARALLEL or 3)
+//
+// Environment Variables:
+//   JEST_ALL_CHECKPOINT_PATH       Path to checkpoint file for tracking completed configs (optional, enables resume functionality)
+//   JEST_ALL_FAILED_CONFIGS_PATH   Path to save list of failed configs (optional)
+//   JEST_MAX_PARALLEL              Default max parallel processes if --maxParallel not specified (optional, defaults to 3)
+//   JEST_CHECKPOINT_TEST_FAIL_AFTER  TEST MODE: Simulate agent failure after N successful configs (optional, for testing checkpoint/resume)
 export async function runJestAll() {
   const argv = getopts(process.argv.slice(2), {
     string: ['configs', 'maxParallel'],
@@ -59,19 +65,23 @@ export async function runJestAll() {
   const configsArg: string | undefined = argv.configs;
   const maxParallelRaw: string | undefined = argv.maxParallel || process.env.JEST_MAX_PARALLEL;
   const maxParallel = Math.max(1, parseInt(maxParallelRaw || '3', 10));
+
   let configs: string[] = [];
+  let passedConfigs: string[] = [];
+  let configsWithTests: Array<{ config: string; testFiles: string[] }> = [];
+  let emptyConfigs: string[] = [];
 
   let hasAnyConfigs = false;
 
   if (configsArg) {
-    const passedConfigs = configsArg
+    passedConfigs = configsArg
       .split(',')
       .map((c) => c.trim())
       .filter(Boolean);
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs(passedConfigs);
-
-    writeConfigDiscoverySummary(passedConfigs, configsWithTests, emptyConfigs, log);
+    const result = await getJestConfigs(passedConfigs);
+    configsWithTests = result.configsWithTests;
+    emptyConfigs = result.emptyConfigs;
 
     hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
 
@@ -79,7 +89,9 @@ export async function runJestAll() {
   } else {
     log.info('--configs flag is not passed. Finding and running all configs in the repo.');
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs();
+    const result = await getJestConfigs();
+    configsWithTests = result.configsWithTests;
+    emptyConfigs = result.emptyConfigs;
 
     configs = configsWithTests.map((c) => c.config);
 
@@ -87,6 +99,68 @@ export async function runJestAll() {
 
     log.info(
       `Found ${configs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
+    );
+  }
+
+  // Load checkpoint to skip already-successful configs from previous runs
+  const checkpointPath = process.env.JEST_ALL_CHECKPOINT_PATH;
+  const completedConfigs = new Set<string>();
+  let resumedConfigCount = 0;
+
+  if (checkpointPath) {
+    log.info(`Checkpoint: Looking for checkpoint at: ${checkpointPath}`);
+    try {
+      const checkpointData = await fs.readFile(checkpointPath, 'utf8');
+      log.info(`Checkpoint: Successfully read checkpoint file (${checkpointData.length} bytes)`);
+      const checkpoint = JSON.parse(checkpointData);
+
+      if (checkpoint.completedConfigs && Array.isArray(checkpoint.completedConfigs)) {
+        checkpoint.completedConfigs.forEach((c: string) => completedConfigs.add(c));
+        log.info(`Checkpoint: Found ${completedConfigs.size} completed configs in checkpoint`);
+        log.info(`Checkpoint: Completed configs: ${Array.from(completedConfigs).join(', ')}`);
+
+        const beforeFilter = configs.length;
+        // Convert configs to relative paths for comparison
+        configs = configs.filter((c) => {
+          const relativeConfig = relative(REPO_ROOT, c);
+          return !completedConfigs.has(relativeConfig);
+        });
+        resumedConfigCount = beforeFilter - configs.length;
+
+        log.info(
+          `Checkpoint: Before filter: ${beforeFilter} configs, After filter: ${configs.length} configs, Resumed: ${resumedConfigCount}`
+        );
+
+        if (resumedConfigCount > 0) {
+          log.info(
+            `Checkpoint: Loaded ${completedConfigs.size} already-completed configs from ${checkpointPath}`
+          );
+          log.info(
+            `Checkpoint: Filtered ${resumedConfigCount} configs (${configs.length} remaining)`
+          );
+        }
+      } else {
+        log.warning(`Checkpoint: File format invalid or missing completedConfigs array`);
+      }
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        log.info(`Checkpoint: File not found at ${checkpointPath}`);
+      } else {
+        log.warning(`Checkpoint: Unable to read checkpoint file: ${(err as Error).message}`);
+      }
+    }
+  } else {
+    log.info('Checkpoint: JEST_ALL_CHECKPOINT_PATH not set, checkpoint/resume disabled');
+  }
+
+  // Write config discovery summary after checkpoint loading (only if configs were explicitly passed)
+  if (configsArg) {
+    writeConfigDiscoverySummary(
+      passedConfigs,
+      configsWithTests,
+      emptyConfigs,
+      resumedConfigCount,
+      log
     );
   }
 
@@ -100,7 +174,9 @@ export async function runJestAll() {
   }
 
   // First pass
-  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
+  const firstPass = configs.length
+    ? await runConfigs(configs, maxParallel, log, checkpointPath, completedConfigs)
+    : [];
 
   let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
 
@@ -108,7 +184,7 @@ export async function runJestAll() {
 
   if (failing.length > 0) {
     log.info('--- Detected failing configs, starting retry pass (maxParallel=1)');
-    retryResults = await runConfigs(failing, 1, log);
+    retryResults = await runConfigs(failing, 1, log, checkpointPath, completedConfigs);
 
     const fixed = retryResults.filter((r) => r.code === 0).map((r) => r.config);
 
@@ -176,7 +252,9 @@ export async function runJestAll() {
 async function runConfigs(
   configs: string[],
   maxParallel: number,
-  log: ToolingLog
+  log: ToolingLog,
+  checkpointPath?: string,
+  completedConfigs?: Set<string>
 ): Promise<JestConfigResult[]> {
   const results: JestConfigResult[] = [];
   let active = 0;
@@ -224,7 +302,7 @@ async function runConfigs(
           buffer += output;
         });
 
-        proc.on('exit', (c) => {
+        proc.on('exit', async (c) => {
           const code = c == null ? 1 : c;
           const durationMs = Date.now() - start;
 
@@ -247,6 +325,99 @@ async function runConfigs(
           // Log how many configs are left to complete
           const remaining = configs.length - results.length;
           log.info(`Configs left: ${remaining}`);
+
+          // TEST MODE: Simulate agent failure after N successful configs
+          if (
+            process.env.JEST_CHECKPOINT_TEST_FAIL_AFTER &&
+            code === 0 &&
+            completedConfigs &&
+            completedConfigs.size >= parseInt(process.env.JEST_CHECKPOINT_TEST_FAIL_AFTER, 10)
+          ) {
+            log.warning(
+              `⚠️  TEST MODE: Simulating agent failure after ${completedConfigs.size} completed configs`
+            );
+            log.warning(`⚠️  Checkpoint saved. Retry this job to test resume functionality.`);
+            // Exit with non-zero to trigger retry, but don't mark this config as failed
+            process.exit(99);
+          }
+
+          // Save checkpoint when a config succeeds
+          if (code === 0 && checkpointPath && completedConfigs) {
+            // Store config as relative path to ensure it matches when comparing on retry
+            const relativeConfig = relative(REPO_ROOT, config);
+            completedConfigs.add(relativeConfig);
+
+            try {
+              await fs.mkdir(dirname(checkpointPath), { recursive: true });
+              await fs.writeFile(
+                checkpointPath,
+                JSON.stringify({ completedConfigs: Array.from(completedConfigs) }, null, 2),
+                'utf8'
+              );
+              log.info(`Checkpoint: Saved progress (${completedConfigs.size} completed configs)`);
+
+              // Upload checkpoint to Buildkite immediately (so it survives agent crashes)
+              if (process.env.BUILDKITE) {
+                // Create unique filename with progress count to avoid "multiple artifacts" error
+                // e.g., jest_checkpoint_integration_0.progress_3.json
+                const checkpointWithProgress = checkpointPath.replace(
+                  '.json',
+                  `.progress_${completedConfigs.size}.json`
+                );
+
+                // Copy checkpoint with progress suffix for upload
+                try {
+                  await fs.copyFile(checkpointPath, checkpointWithProgress);
+                } catch (copyErr) {
+                  log.warning(
+                    `Checkpoint: Unable to create progress copy: ${(copyErr as Error).message}`
+                  );
+                }
+
+                log.info(`Checkpoint: Attempting upload to Buildkite...`);
+                try {
+                  await new Promise<void>((resolve) => {
+                    const uploadProc = spawn(
+                      'buildkite-agent',
+                      ['artifact', 'upload', checkpointWithProgress],
+                      {
+                        stdio: 'pipe',
+                      }
+                    );
+
+                    let uploadOutput = '';
+                    uploadProc.stdout?.on('data', (d) => {
+                      uploadOutput += d.toString();
+                    });
+                    uploadProc.stderr?.on('data', (d) => {
+                      uploadOutput += d.toString();
+                    });
+
+                    uploadProc.on('exit', (uploadCode) => {
+                      if (uploadCode === 0) {
+                        log.info(
+                          `Checkpoint: Uploaded to Buildkite (${completedConfigs.size} configs)`
+                        );
+                        // Clean up the progress file after successful upload
+                        fs.unlink(checkpointWithProgress).catch(() => {
+                          // Ignore cleanup errors
+                        });
+                      } else {
+                        log.warning(
+                          `Checkpoint: Upload failed with code ${uploadCode}: ${uploadOutput}`
+                        );
+                      }
+                      resolve();
+                    });
+                  });
+                } catch (uploadErr) {
+                  log.warning(`Checkpoint: Upload error: ${(uploadErr as Error).message}`);
+                }
+              }
+            } catch (err) {
+              log.warning(`Checkpoint: Unable to write checkpoint file: ${(err as Error).message}`);
+            }
+          }
 
           active -= 1;
           if (index < configs.length) {
@@ -431,6 +602,7 @@ function writeConfigDiscoverySummary(
   passedConfigs: string[],
   configsWithTests: Array<{ config: string; testFiles: string[] }>,
   emptyConfigs: string[],
+  resumedConfigCount: number,
   log: ToolingLog
 ) {
   log.info('Config Discovery Summary:');
@@ -444,12 +616,20 @@ function writeConfigDiscoverySummary(
     },
   });
 
-  table.push(
-    ['Configs passed', passedConfigs.length],
+  const rows: Array<[string, number]> = [
+    ['Configs passed to the Jest runner', passedConfigs.length],
     ['Configs with test files', configsWithTests.length],
     ['Configs with no tests (skipping)', emptyConfigs.length],
-    [`${chalk.bold('Configs to run ')}`, configsWithTests.length]
-  );
+  ];
+
+  // Add resumed configs row if any were resumed from checkpoint
+  if (resumedConfigCount > 0) {
+    rows.push(['Configs resumed from previous run', resumedConfigCount]);
+  }
+
+  rows.push([`${chalk.bold('Configs to run ')}`, configsWithTests.length - resumedConfigCount]);
+
+  table.push(...rows);
 
   log.info(table.toString());
   log.info('');

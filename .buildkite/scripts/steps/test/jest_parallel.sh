@@ -70,6 +70,61 @@ echo "--- Running combined jest_all for configs ($TEST_TYPE)"
 echo "$configs"
 echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
+# Set up checkpoint file for tracking completed configs (resume on agent failure)
+CHECKPOINT_FILE="target/jest_checkpoint_${TEST_TYPE}_${JOB}.json"
+export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
+
+# Try to download existing checkpoint from previous run (if job was restarted)
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
+  echo "--- Downloading checkpoint from previous run attempt"
+  # Multiple uploads of the same checkpoint occur during a run (after each config completes)
+  # This causes "Multiple artifacts" error. Solution: Download all to temp dir and pick the best one
+  CHECKPOINT_TEMP_DIR=$(mktemp -d)  
+  set +e
+  
+  # Download all checkpoint progress files (each upload has unique .progress_N.json suffix)
+  # e.g., jest_checkpoint_integration_0.progress_1.json, .progress_2.json, etc.
+  CHECKPOINT_PATTERN="${CHECKPOINT_FILE%.json}.progress_*.json"
+  
+  buildkite-agent artifact download "$CHECKPOINT_PATTERN" "$CHECKPOINT_TEMP_DIR/" --include-retried-jobs
+  download_code=$?
+  
+  set -e
+  
+  if [ $download_code -eq 0 ]; then   
+    # Find checkpoint with the most completed configs (latest progress)
+    MAX_CONFIGS=0
+    BEST_CHECKPOINT=""
+    
+    # Check all downloaded checkpoint progress files
+    for checkpoint_file in "$CHECKPOINT_TEMP_DIR"/target/*.progress_*.json; do
+      if [ -f "$checkpoint_file" ]; then
+        config_count=$(jq -r '.completedConfigs | length' "$checkpoint_file" 2>/dev/null || echo "0")
+        if [ "$config_count" -ge "$MAX_CONFIGS" ]; then
+          MAX_CONFIGS=$config_count
+          BEST_CHECKPOINT="$checkpoint_file"
+        fi
+      fi
+    done
+    
+    if [ -n "$BEST_CHECKPOINT" ] && [ -f "$BEST_CHECKPOINT" ] && [ "$MAX_CONFIGS" -gt 0 ]; then
+      # Create target directory if it doesn't exist
+      mkdir -p "$(dirname "$CHECKPOINT_FILE")"
+      cp "$BEST_CHECKPOINT" "$CHECKPOINT_FILE"
+      echo "Checkpoint: Found ${MAX_CONFIGS} already-completed configs from previous attempt in $BEST_CHECKPOINT"
+    else
+      echo "No valid checkpoint found (MAX_CONFIGS=$MAX_CONFIGS, BEST_CHECKPOINT=$BEST_CHECKPOINT)"
+      echo "Starting fresh"
+    fi
+  else
+    echo "Download failed with code $download_code"
+    echo "No previous checkpoint found, starting fresh"
+  fi
+  
+  # Cleanup
+  rm -rf "$CHECKPOINT_TEMP_DIR"
+fi
+
 node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
 if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
@@ -85,6 +140,8 @@ set +e
 eval "$full_command"
 code=$?
 set -e
+
+
 
 if [ $code -ne 0 ]; then
   exitCode=10
