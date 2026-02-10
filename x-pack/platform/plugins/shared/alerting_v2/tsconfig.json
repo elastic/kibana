@@ -1,6 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
+    "experimentalDecorators": true,
     "outDir": "target/types"
   },
   "include": [
@@ -16,6 +17,7 @@
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/data-plugin",
+    "@kbn/data-streams",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
@@ -51,6 +53,7 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
+    "@kbn/es-mappings"
   ],
   "exclude": ["target/**/*"]
 }
