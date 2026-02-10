@@ -138,8 +138,7 @@ function getAuth(rawUrl: string): string {
   const { username, password } = url;
 
   return (
-    'Basic ' +
-    Buffer.from(`${username || 'elastic'}:${password || 'changeme'}`).toString('base64')
+    'Basic ' + Buffer.from(`${username || 'elastic'}:${password || 'changeme'}`).toString('base64')
   );
 }
 
