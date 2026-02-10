@@ -52,12 +52,9 @@ export const useDeleteCloudConnector = (
         queryClient.invalidateQueries(['get-cloud-connectors']);
 
         notifications?.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.fleet.cloudConnector.deleteSuccess',
-            {
-              defaultMessage: 'Cloud connector deleted successfully',
-            }
-          ),
+          title: i18n.translate('xpack.fleet.cloudConnector.deleteSuccess', {
+            defaultMessage: 'Cloud connector deleted successfully',
+          }),
         });
 
         if (onSuccess) {
@@ -69,12 +66,9 @@ export const useDeleteCloudConnector = (
         const errorToDisplay = serverMessage ? new Error(serverMessage) : error;
 
         notifications?.toasts.addError(errorToDisplay, {
-          title: i18n.translate(
-            'xpack.fleet.cloudConnector.deleteError',
-            {
-              defaultMessage: 'Failed to delete cloud connector',
-            }
-          ),
+          title: i18n.translate('xpack.fleet.cloudConnector.deleteError', {
+            defaultMessage: 'Failed to delete cloud connector',
+          }),
         });
 
         if (onError) {
