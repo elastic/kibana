@@ -16,12 +16,13 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { v4 } from 'uuid';
 import { load as parseYaml } from 'js-yaml';
+import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
   Template,
   UpdateTemplateInput,
-} from '../../../common/types/domain/template/latest';
+} from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 
 export class TemplatesService {
@@ -125,7 +126,7 @@ export class TemplatesService {
   private async updateMappings(definition: string) {
     const parsedDefinition = parseYaml(definition) as ParsedTemplate['definition'];
 
-    const updatedMappings = {
+    await this.dependencies.esClient.indices.putMapping({
       index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       properties: {
         cases: {
@@ -137,14 +138,12 @@ export class TemplatesService {
                 };
 
                 return acc;
-              }, {} as Record<string, { type: string }>),
+              }, {} as unknown as Record<PropertyName, MappingProperty>),
             },
           },
         },
       },
-    };
-
-    await this.dependencies.esClient.indices.putMapping(updatedMappings);
+    });
   }
 
   async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {

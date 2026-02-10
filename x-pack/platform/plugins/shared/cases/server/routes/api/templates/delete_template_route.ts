@@ -10,8 +10,6 @@ import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 
 /**
  * DELETE /internal/cases/templates/{template_id}
@@ -33,26 +31,19 @@ export const deleteTemplateRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
 
-      // Find all versions of the template
-      const templateVersions = mockTemplates.filter(
-        (t) => t.templateId === templateId && t.deletedAt === null
-      );
+      const template = await casesClient.templates.getTemplate(templateId);
 
-      if (templateVersions.length === 0) {
+      if (!template) {
         return response.notFound({
           body: { message: `Template with id ${templateId} not found` },
         });
       }
 
-      // Soft delete all versions by setting deletedAt
-      const deletedAt = new Date().toISOString();
-      templateVersions.forEach((template) => {
-        template.deletedAt = deletedAt;
-      });
+      await casesClient.templates.deleteTemplate(templateId);
 
       return response.noContent();
     } catch (error) {
