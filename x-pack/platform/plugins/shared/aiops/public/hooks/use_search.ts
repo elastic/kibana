@@ -7,11 +7,13 @@
 
 import { useMemo } from 'react';
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, isQuery } from '@kbn/data-plugin/public';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import {
   isDefaultSearchQuery,
@@ -75,13 +77,15 @@ export const useSearch = (
       }
 
       return {
-        ...(isDefaultSearchQuery(searchQuery) ? {} : { searchQuery }),
+        searchQuery: (isDefaultSearchQuery(searchQuery)
+          ? getDefaultDSLQuery()
+          : searchQuery) as QueryDslQueryContainer,
         searchString: aiopsListState?.searchString,
         searchQueryLanguage: aiopsListState?.searchQueryLanguage,
       };
     } else {
       return {
-        searchQuery: searchData.searchQuery,
+        searchQuery: searchData.searchQuery as QueryDslQueryContainer,
         searchString: searchData.searchString,
         searchQueryLanguage: searchData.queryLanguage,
       };

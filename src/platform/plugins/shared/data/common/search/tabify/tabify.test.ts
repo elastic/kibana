@@ -133,7 +133,7 @@ describe('tabifyAggResponse Integration', () => {
           { type: 'count', params: { scaleMetricValues: true } } as any,
         ]);
 
-        const writeMock = jest.fn(() => ({}));
+        const writeMock = jest.fn(() => ({ params: {} }));
         aggConfigs.getRequestAggs()[0].write = writeMock;
 
         tabifyAggResponse(aggConfigs, enrichResponseWithSampling(metricOnly), {

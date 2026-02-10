@@ -95,10 +95,13 @@ export const getIpRangeBucketAgg = () =>
 
           output.params.ranges = ranges;
         },
-        toExpressionAst: (ranges: AggParamsIpRange['ranges']) => [
-          ...map(ranges?.[IP_RANGE_TYPES.FROM_TO], ipRangeToAst),
-          ...map(ranges?.[IP_RANGE_TYPES.MASK], cidrToAst),
-        ],
+        toExpressionAst: (value: unknown) => {
+          const ranges = value as AggParamsIpRange['ranges'];
+          return [
+            ...map(ranges?.[IP_RANGE_TYPES.FROM_TO], ipRangeToAst),
+            ...map(ranges?.[IP_RANGE_TYPES.MASK], cidrToAst),
+          ];
+        },
       },
     ],
   });

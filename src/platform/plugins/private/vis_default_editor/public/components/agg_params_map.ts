@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggGroupNames, BUCKET_TYPES, METRIC_TYPES, search } from '@kbn/data-plugin/public';
+import type { ComponentType } from 'react';
+import {
+  AggGroupNames,
+  BUCKET_TYPES,
+  METRIC_TYPES,
+  search,
+  type OptionedValueProp,
+} from '@kbn/data-plugin/public';
 import * as controls from './controls';
+import type { AggregateValueProp } from './controls/top_aggregate';
 import { wrapWithInlineComp } from './controls/utils';
+import type { AggParamEditorProps } from './agg_param_props';
 
 const { siblingPipelineType, parentPipelineType } = search.aggs;
 
@@ -50,7 +59,9 @@ const buckets = {
     exclude: controls.IncludeExcludeParamEditor,
     orderBy: controls.OrderByParamEditor,
     orderAgg: controls.OrderAggParamEditor,
-    order: wrapWithInlineComp(controls.OrderParamEditor),
+    order: wrapWithInlineComp(
+      controls.OrderParamEditor as unknown as ComponentType<AggParamEditorProps<OptionedValueProp>>
+    ),
     size: wrapWithInlineComp(controls.SizeParamEditor),
     otherBucket: controls.OtherBucketParamEditor,
     missingBucket: controls.MissingBucketParamEditor,
@@ -60,7 +71,11 @@ const buckets = {
 const metrics = {
   [METRIC_TYPES.TOP_HITS]: {
     field: controls.TopFieldParamEditor,
-    aggregate: wrapWithInlineComp(controls.TopAggregateParamEditor),
+    aggregate: wrapWithInlineComp(
+      controls.TopAggregateParamEditor as unknown as ComponentType<
+        AggParamEditorProps<AggregateValueProp>
+      >
+    ),
     size: wrapWithInlineComp(controls.TopSizeParamEditor),
     sortField: controls.TopSortFieldParamEditor,
     sortOrder: controls.OrderParamEditor,

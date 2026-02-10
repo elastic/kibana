@@ -13,24 +13,36 @@ import type { ISearchSource } from '../../../../public';
 import type { IAggConfigs } from '../agg_configs';
 import type { IAggConfig } from '../agg_config';
 
+export interface AggParamOutput {
+  params: Record<string, unknown>;
+  subAggs?: IAggConfig[];
+  parentAggs?: IAggConfig[];
+  bucketInterval?: unknown;
+  metricScale?: number;
+  metricScaleText?: string;
+  [key: string]: unknown;
+}
+
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;
   type: string;
   displayName: string;
   required: boolean;
   advanced: boolean;
-  default: any;
+  default: unknown;
   write: (
     aggConfig: TAggConfig,
-    output: Record<string, any>,
+    output: AggParamOutput,
     aggConfigs?: IAggConfigs,
-    locals?: Record<string, any>
+    locals?: Record<string, unknown>
   ) => void;
-  serialize: (value: any, aggConfig?: TAggConfig) => any;
-  deserialize: (value: any, aggConfig?: TAggConfig) => any;
-  toExpressionAst?: (value: any) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
-  options: any[];
-  getValueType: (aggConfig: IAggConfig) => any;
+  serialize: (value: unknown, aggConfig?: TAggConfig) => unknown;
+  deserialize: (value: unknown, aggConfig?: TAggConfig) => unknown;
+  toExpressionAst?: (
+    value: unknown
+  ) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
+  options: unknown[];
+  getValueType: (aggConfig: IAggConfig) => unknown;
   onChange?(agg: TAggConfig): void;
   shouldShow?(agg: TAggConfig): boolean;
 
@@ -49,30 +61,31 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     options?: ISearchOptions
   ) => void;
 
-  constructor(config: Record<string, any>) {
-    this.name = config.name;
-    this.type = config.type;
-    this.displayName = config.displayName || this.name;
+  constructor(config: Record<string, unknown>) {
+    this.name = config.name as string;
+    this.type = config.type as string;
+    this.displayName = (config.displayName as string) || this.name;
     this.required = config.required === true;
-    this.advanced = config.advanced || false;
-    this.onChange = config.onChange;
-    this.shouldShow = config.shouldShow;
+    this.advanced = (config.advanced as boolean) || false;
+    this.onChange = config.onChange as typeof this.onChange;
+    this.shouldShow = config.shouldShow as typeof this.shouldShow;
     this.default = config.default;
 
-    const defaultWrite = (aggConfig: TAggConfig, output: Record<string, any>) => {
+    const defaultWrite = (aggConfig: TAggConfig, output: AggParamOutput) => {
       if (aggConfig.params[this.name]) {
         output.params[this.name] = aggConfig.params[this.name] || this.default;
       }
     };
 
-    this.write = config.write || defaultWrite;
-    this.serialize = config.serialize;
-    this.deserialize = config.deserialize;
-    this.toExpressionAst = config.toExpressionAst;
-    this.options = config.options;
+    this.write = (config.write as typeof this.write) || defaultWrite;
+    this.serialize = config.serialize as typeof this.serialize;
+    this.deserialize = config.deserialize as typeof this.deserialize;
+    this.toExpressionAst = config.toExpressionAst as typeof this.toExpressionAst;
+    this.options = config.options as unknown[];
     this.modifyAggConfigOnSearchRequestStart =
-      config.modifyAggConfigOnSearchRequestStart || function () {};
+      (config.modifyAggConfigOnSearchRequestStart as typeof this.modifyAggConfigOnSearchRequestStart) ||
+      function () {};
 
-    this.getValueType = config.getValueType;
+    this.getValueType = config.getValueType as typeof this.getValueType;
   }
 }

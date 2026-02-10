@@ -8,10 +8,11 @@
  */
 
 import { siblingPipelineType } from '../../../..';
+import type { AggParamOutput } from '../../param_types/base';
 import type { IMetricAggConfig } from '../metric_agg_type';
 import { METRIC_TYPES } from '../metric_agg_types';
 
-export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<string, any>) => {
+export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: AggParamOutput) => {
   const metricAgg = agg.getParam('customMetric');
   const bucketAgg = agg.getParam('customBucket');
   if (!metricAgg) return;

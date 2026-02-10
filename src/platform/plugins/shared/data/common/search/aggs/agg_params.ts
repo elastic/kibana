@@ -13,6 +13,7 @@ import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
+import type { AggParamOutput } from './param_types/base';
 
 import type { AggConfig } from './agg_config';
 import type { IAggConfigs } from './agg_configs';
@@ -66,8 +67,8 @@ export const writeParams = <
   aggs?: IAggConfigs,
   locals?: Record<string, any>
 ) => {
-  const output: Record<string, any> = {
-    params: {} as Record<string, any>,
+  const output: AggParamOutput = {
+    params: {} as Record<string, unknown>,
   };
   locals = locals || {};
 

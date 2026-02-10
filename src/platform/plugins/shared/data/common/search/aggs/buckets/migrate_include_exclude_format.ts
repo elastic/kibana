@@ -10,6 +10,7 @@
 import { isString, isObject } from 'lodash';
 import type { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import type { IAggConfig } from '../agg_config';
+import type { AggParamOutput } from '../param_types/base';
 
 export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {
@@ -32,7 +33,7 @@ export const migrateIncludeExcludeFormat = {
   write(
     this: BucketAggType<IBucketAggConfig>,
     aggConfig: IBucketAggConfig,
-    output: Record<string, any>
+    output: AggParamOutput
   ) {
     const value = aggConfig.getParam(this.name);
 

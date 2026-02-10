@@ -69,7 +69,7 @@ export const getIpPrefixBucketAgg = () =>
           output.params.prefix_length = aggConfig.params.ipPrefix.prefixLength;
           output.params.is_ipv6 = aggConfig.params.ipPrefix.isIpv6;
         },
-        toExpressionAst: ipPrefixToAst,
+        toExpressionAst: (value: unknown) => ipPrefixToAst(value as IpPrefix),
       },
     ],
   });

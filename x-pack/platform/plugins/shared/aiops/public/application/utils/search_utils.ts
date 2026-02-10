@@ -65,8 +65,8 @@ export function getEsQueryFromSavedSearch({
       cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
-      savedQuery.bool.filter = savedQuery.bool.filter.filter(
+    if (Array.isArray(savedQuery.bool?.filter) && timeField !== undefined) {
+      savedQuery.bool!.filter = savedQuery.bool!.filter.filter(
         (c: QueryDslQueryContainer) =>
           !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );

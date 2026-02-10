@@ -10,6 +10,7 @@
 import type { IAggConfig, AggConfigSerialized } from '../agg_config';
 import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 
 export class AggParamType<
   TAggConfig extends IAggConfig = IAggConfig
@@ -17,35 +18,36 @@ export class AggParamType<
   makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
   allowedAggs: string[] = [];
 
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
     if (config.allowedAggs) {
-      this.allowedAggs = config.allowedAggs;
+      this.allowedAggs = config.allowedAggs as string[];
     }
 
     if (!config.write) {
-      this.write = (aggConfig: TAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: TAggConfig, output: AggParamOutput) => {
         if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
           output.params[this.name] = aggConfig.params[this.name];
         }
       };
     }
     if (!config.serialize) {
-      this.serialize = (agg: TAggConfig) => {
-        return agg.serialize();
+      this.serialize = (value: unknown) => {
+        return (value as TAggConfig).serialize();
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (state: AggConfigSerialized, agg?: TAggConfig): TAggConfig => {
+      this.deserialize = (state: unknown, agg?: TAggConfig): TAggConfig => {
         if (!agg) {
           throw new Error('aggConfig was not provided to AggParamType deserialize function');
         }
-        return this.makeAgg(agg, state);
+        return this.makeAgg(agg, state as AggConfigSerialized);
       };
     }
     if (!config.toExpressionAst) {
-      this.toExpressionAst = (agg: TAggConfig) => {
+      this.toExpressionAst = (value: unknown) => {
+        const agg = value as TAggConfig;
         if (!agg || !agg.toExpressionAst) {
           throw new Error('aggConfig was not provided to AggParamType toExpressionAst function');
         }
@@ -53,7 +55,7 @@ export class AggParamType<
       };
     }
 
-    this.makeAgg = config.makeAgg;
+    this.makeAgg = config.makeAgg as typeof this.makeAgg;
     this.getValueType = () => AggConfig;
   }
 }
