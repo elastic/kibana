@@ -31,7 +31,6 @@ import { TableSearch } from './search/table_search';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
-import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
 import { useKibana } from '../../hooks/use_kibana';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -143,7 +142,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           return null;
         },
         sortable: true,
-        width: '300px',
       },
       {
         name: i18n.MODEL,
@@ -166,20 +164,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         },
         sortable: false,
         width: '285px',
-      },
-      {
-        field: 'task_type',
-        name: i18n.TASK_TYPE,
-        'data-test-subj': 'typeCell',
-        render: (taskType: InferenceTaskType) => {
-          if (taskType) {
-            return <TaskType type={taskType} />;
-          }
-
-          return null;
-        },
-        sortable: false,
-        width: '100px',
       },
       {
         actions: [

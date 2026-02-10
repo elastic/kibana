@@ -14,10 +14,32 @@ export const PRECONFIGURED_LABEL = i18n.translate(
   }
 );
 
+export const PRECONFIGURED_TOOLTIP = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfiguredTooltip',
+  {
+    defaultMessage: 'This endpoint is preconfigured by Elastic and cannot be deleted',
+  }
+);
+
 export const TECH_PREVIEW_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreview',
   {
     defaultMessage: 'TECH PREVIEW',
+  }
+);
+
+export const TECH_PREVIEW_TOOLTIP = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreviewTooltip',
+  {
+    defaultMessage:
+      'This feature is in technical preview and may be changed or removed in a future release',
+  }
+);
+
+export const TASK_TYPE_TOOLTIP = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip',
+  {
+    defaultMessage: 'The task type of this inference endpoint',
   }
 );
 

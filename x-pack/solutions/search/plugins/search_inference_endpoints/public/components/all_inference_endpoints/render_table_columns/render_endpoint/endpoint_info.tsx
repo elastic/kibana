@@ -6,12 +6,13 @@
  */
 
 import {
+  EuiBadge,
   EuiBetaBadge,
   EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
+  EuiToolTip,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -53,9 +54,12 @@ export interface EndpointInfoProps {
 }
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpointInfo }) => {
-  const euiThemeContext = useEuiTheme();
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { task_type: taskType } = endpointInfo;
+  const isPreconfigured = isEndpointPreconfigured(inferenceId);
+  const isTechPreview = isProviderTechPreview(endpointInfo);
+  const hasBadges = Boolean(taskType) || isPreconfigured || isTechPreview;
 
   useEffect(() => {
     return () => {
@@ -77,68 +81,70 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
   }, []);
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={containerStyles}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              responsive={false}
-              css={containerStyles}
-            >
-              <EuiFlexItem grow={false}>
-                <strong>{inferenceId}</strong>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                className="copyButton"
-                css={
-                  isCopied
-                    ? copyButtonVisibleStyles(euiThemeContext)
-                    : copyButtonHiddenStyles(euiThemeContext)
-                }
-              >
-                <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      size="xs"
-                      display="empty"
-                      onClick={() => handleCopy(copy)}
-                      iconType={isCopied ? 'check' : 'copy'}
-                      color={isCopied ? 'success' : 'text'}
-                      data-test-subj={
-                        isCopied
-                          ? 'inference-endpoint-copy-id-button-copied'
-                          : 'inference-endpoint-copy-id-button'
-                      }
-                      aria-label={isCopied ? i18n.COPY_ID_COPIED : i18n.COPY_ID_TO_CLIPBOARD}
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <strong>{inferenceId}</strong>
           </EuiFlexItem>
-          {isProviderTechPreview(endpointInfo) && (
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.TECH_PREVIEW_LABEL}
-                size="s"
-                color="subdued"
-                alignment="middle"
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem
+            grow={false}
+            className="copyButton"
+            css={isCopied ? copyButtonVisibleStyles : copyButtonHiddenStyles}
+          >
+            <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
+              {(copy) => (
+                <EuiButtonIcon
+                  size="xs"
+                  display="empty"
+                  onClick={() => handleCopy(copy)}
+                  iconType={isCopied ? 'check' : 'copy'}
+                  color={isCopied ? 'success' : 'text'}
+                  data-test-subj={
+                    isCopied
+                      ? 'inference-endpoint-copy-id-button-copied'
+                      : 'inference-endpoint-copy-id-button'
+                  }
+                  aria-label={isCopied ? i18n.COPY_ID_COPIED : i18n.COPY_ID_TO_CLIPBOARD}
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isEndpointPreconfigured(inferenceId) && (
+      {hasBadges && (
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.PRECONFIGURED_LABEL}
-            size="s"
-            color="hollow"
-            alignment="middle"
-          />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+            {taskType && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.TASK_TYPE_TOOLTIP}>
+                  <EuiBadge data-test-subj={`table-column-task-type-${taskType}`} color="hollow">
+                    {taskType}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {isPreconfigured && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
+                  <EuiBadge data-test-subj="preconfiguredBadge" color="hollow">
+                    {i18n.PRECONFIGURED_LABEL}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {isTechPreview && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.TECH_PREVIEW_LABEL}
+                  tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                  size="s"
+                  color="subdued"
+                  alignment="middle"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
