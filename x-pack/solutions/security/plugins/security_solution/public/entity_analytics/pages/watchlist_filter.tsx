@@ -117,10 +117,10 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
   );
 
   const onChangeComboBox = useCallback(
-    (nextOptions: any[]) => {
-      const newlySelected = nextOptions.find((o) => o && !o.isGroupLabelOption) as
-        | WatchlistItem
-        | undefined;
+    (nextOptions: WatchlistOption[]) => {
+      const newlySelected = nextOptions.find(
+        (o) => o && !o.isGroupLabelOption
+      ) as WatchlistItem | undefined;
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
