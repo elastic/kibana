@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { LoginFormProps } from './login_form';
-export { LoginForm } from './login_form';
-export { DisabledLoginForm } from './disabled_login_form';
+export const MAX_ATTACKS_COUNT = 10000;
+export const ATTACK_IDS_FIELD = 'kibana.alert.attack_ids';
