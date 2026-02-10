@@ -39,6 +39,7 @@ import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
 import { ai4SocMeteringService } from './ai4soc/services';
+import { USAGE_REPORTING_ENDPOINT } from './constants';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -56,17 +57,12 @@ export class SecuritySolutionServerlessPlugin
   private ai4SocUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
-  private readonly usageReportingService: UsageReportingService;
+  private usageReportingService?: UsageReportingService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
     this.logger = this.initializerContext.logger.get();
-
-    this.usageReportingService = new UsageReportingService(
-      this.config.usageApi,
-      this.kibanaVersion
-    );
 
     const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
@@ -78,6 +74,20 @@ export class SecuritySolutionServerlessPlugin
   ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
+    let usageApiConfig = pluginsSetup.usageApi?.config;
+    // If no configuration can be retrieved from the usage api plugin, use the configuration from this plugin
+    if (!usageApiConfig) {
+      usageApiConfig = {
+        ...this.config.usageApi,
+        // This plugin adds the reporting endpoint to the url received from its config.
+        // The usage api plugin will return the full URL.
+        url: this.config.usageApi.url
+          ? `${this.config.usageApi.url}${USAGE_REPORTING_ENDPOINT}`
+          : undefined,
+      };
+    }
+
+    this.usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
