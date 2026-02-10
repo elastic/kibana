@@ -88,6 +88,7 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
+  name: true,
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;

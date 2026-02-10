@@ -17,17 +17,20 @@ import { deleteTemplateRoute } from './delete_template_route';
 import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
 
-const validDefinition = yaml.dump({
-  fields: [
-    {
-      control: 'INPUT_TEXT',
-      name: 'test_field',
-      label: 'Test Field',
-      type: 'keyword',
-      metadata: {},
-    },
-  ],
-});
+const buildDefinition = (name: string) =>
+  yaml.dump({
+    name,
+    fields: [
+      {
+        control: 'INPUT_TEXT',
+        name: 'test_field',
+        label: 'Test Field',
+        type: 'keyword',
+      },
+    ],
+  });
+
+const validDefinition = buildDefinition('Template Definition');
 
 const createTestTemplates = (): Template[] => [
   {
@@ -96,10 +99,13 @@ const createMockCasesClient = () => ({
 
       return toSavedObject(latest);
     }),
-    createTemplate: jest.fn(async (input: { name: string; owner: string; definition: string }) => {
+    createTemplate: jest.fn(async (input: { name?: string; owner: string; definition: string }) => {
+      const parsedDefinition = yaml.load(input.definition) as { name: string };
+      const templateName = input.name ?? parsedDefinition.name;
+
       const newTemplate: Template = {
         templateId: `template-${Date.now()}`,
-        name: input.name,
+        name: templateName,
         owner: input.owner,
         definition: input.definition,
         templateVersion: 1,
@@ -111,7 +117,7 @@ const createMockCasesClient = () => ({
       return toSavedObject(newTemplate);
     }),
     updateTemplate: jest.fn(
-      async (templateId: string, input: { name: string; owner: string; definition: string }) => {
+      async (templateId: string, input: { name?: string; owner: string; definition: string }) => {
         const candidates = mockTemplates.filter(
           (template) => template.templateId === templateId && template.deletedAt === null
         );
@@ -121,9 +127,12 @@ const createMockCasesClient = () => ({
         }
 
         const latestVersion = Math.max(...candidates.map((template) => template.templateVersion));
+        const parsedDefinition = yaml.load(input.definition) as { name: string };
+        const templateName = input.name ?? parsedDefinition.name;
+
         const updatedTemplate: Template = {
           templateId,
-          name: input.name,
+          name: templateName,
           owner: input.owner,
           definition: input.definition,
           templateVersion: latestVersion + 1,
@@ -283,9 +292,8 @@ describe('Template Routes', () => {
       const context = createMockContext();
       const request = {
         body: {
-          name: 'New Template',
           owner: 'securitySolution',
-          definition: validDefinition,
+          definition: buildDefinition('New Template'),
         },
       };
       const response = createMockResponse();
@@ -310,9 +318,8 @@ describe('Template Routes', () => {
       const context = createMockContext();
       const request = {
         body: {
-          name: 'New Template',
           owner: 'securitySolution',
-          definition: validDefinition,
+          definition: buildDefinition('New Template'),
         },
       };
       const response = createMockResponse();
@@ -322,6 +329,7 @@ describe('Template Routes', () => {
 
       const body = response.ok.mock.calls[0][0].body;
       expect(body.definition).toEqual({
+        name: 'New Template',
         fields: [
           expect.objectContaining({
             control: 'INPUT_TEXT',
@@ -339,9 +347,8 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'template-1' },
         body: {
-          name: 'Updated Template',
           owner: 'observability',
-          definition: validDefinition,
+          definition: buildDefinition('Updated Template'),
         },
       };
       const response = createMockResponse();
@@ -366,9 +373,8 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'non-existent' },
         body: {
-          name: 'Updated',
           owner: 'securitySolution',
-          definition: validDefinition,
+          definition: buildDefinition('Updated'),
         },
       };
       const response = createMockResponse();
@@ -386,9 +392,8 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'template-3' },
         body: {
-          name: 'Updated',
           owner: 'securitySolution',
-          definition: validDefinition,
+          definition: buildDefinition('Updated'),
         },
       };
       const response = createMockResponse();
@@ -570,7 +575,7 @@ describe('Template Routes', () => {
       });
     });
 
-    it('returns 400 when ids is empty', async () => {
+    it('returns an empty response when ids is empty', async () => {
       const context = createMockContext();
       const request = { body: { ids: [] } };
       const response = createMockResponse();
@@ -578,9 +583,11 @@ describe('Template Routes', () => {
       // @ts-expect-error: mocking necessary properties for handler logic only
       await bulkExportTemplatesRoute.handler({ context, request, response });
 
-      expect(response.badRequest).toHaveBeenCalledWith({
-        body: { message: 'ids must be a non-empty array of template IDs' },
-      });
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: [],
+        })
+      );
     });
   });
 });
