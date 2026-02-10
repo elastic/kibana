@@ -1,0 +1,17 @@
+version: '1'
+name: 'sources.google_drive.metadata'
+description: Get detailed metadata for specific files including ownership, sharing, permissions, and descriptions. Use after search or list to inspect specific files.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: fileIds
+    type: array
+    description: Array of file IDs to fetch metadata for. Use IDs from search or list results.
+steps:
+  - name: get_metadata
+    type: google_drive.getFileMetadata
+    connector-id: <%= stackConnectorId %>
+    with:
+      fileIds: ${{inputs.fileIds}}
