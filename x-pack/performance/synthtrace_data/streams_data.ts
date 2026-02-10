@@ -163,7 +163,13 @@ export async function createBulkDataStreams(
 ) {
   log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES API...`);
 
-  // 1. Create an index template matching the naming pattern
+  // 1. Raise the max shards per node limit (default 1000 is too low for 5000 data streams)
+  await es.cluster.putSettings({
+    persistent: { 'cluster.max_shards_per_node': String(count + 1000) },
+  });
+  log.info(`  Raised cluster.max_shards_per_node to ${count + 1000}`);
+
+  // 2. Create an index template matching the naming pattern
   await es.indices.putIndexTemplate({
     name: 'perf-classic-streams-template',
     index_patterns: [`${prefix}-*`],
