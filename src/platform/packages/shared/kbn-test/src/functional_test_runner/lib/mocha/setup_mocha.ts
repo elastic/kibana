@@ -71,6 +71,23 @@ export async function setupMocha({
     await lifecycle.beforeEachTest.trigger(this.currentTest!);
   });
 
+  // Apply test file filter if specified
+  const testFiles = config.get('testFiles');
+  const testFileFilter = config.get('testFileFilter');
+  let paths = testFiles;
+
+  if (testFileFilter && testFileFilter.length > 0) {
+    log.info(`Applying test file filter: ${testFileFilter.join(', ')}`);
+    paths = testFiles.filter((file: string) =>
+      testFileFilter.some((pattern: string) => file.includes(pattern))
+    );
+    log.info(`Filtered to ${paths.length}/${testFiles.length} test files`);
+
+    if (paths.length === 0) {
+      log.warning('Test file filter matched no files! All test files will be skipped.');
+    }
+  }
+
   loadTests({
     mocha,
     log,
@@ -79,7 +96,7 @@ export async function setupMocha({
     providers,
     updateBaselines: config.get('updateBaselines'),
     updateSnapshots: config.get('updateSnapshots'),
-    paths: config.get('testFiles'),
+    paths,
   });
 
   // validate that there aren't any tests in multiple ciGroups

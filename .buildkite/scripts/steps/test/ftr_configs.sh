@@ -37,6 +37,9 @@ if [ "$configs" == "" ] && [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading ftr test run order"
   download_artifact ftr_run_order.json .
   configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
+  
+  # Check if there's a test file filter for this group
+  testFileFilter=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].testFileFilter // empty' ftr_run_order.json 2>/dev/null)
 fi
 
 if [ "$configs" == "" ]; then
@@ -87,12 +90,25 @@ while read -r config; do
   """
   fi
 
+  # Build test file filter arguments if present
+  FILTER_ARGS=""
+  if [[ -n "$testFileFilter" && "$testFileFilter" != "null" ]]; then
+    echo "Applying test file filter for this config"
+    while IFS= read -r pattern; do
+      if [[ -n "$pattern" ]]; then
+        echo "  - $pattern"
+        FILTER_ARGS="$FILTER_ARGS --test-file-filter=$pattern"
+      fi
+    done < <(echo "$testFileFilter" | jq -r '.[]' 2>/dev/null || echo "")
+  fi
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
+    $FILTER_ARGS \
     "$EXTRA_ARGS"
   lastCode=$?
   set -e;
