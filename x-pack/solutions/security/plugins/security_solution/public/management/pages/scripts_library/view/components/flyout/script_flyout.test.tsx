@@ -22,19 +22,7 @@ describe('EndpointScriptFlyout', () => {
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-  const defaultProps: EndpointScriptFlyoutProps = {
-    queryParams: {
-      page: 1,
-      pageSize: 10,
-      sortField: 'name',
-      sortDirection: 'asc',
-    },
-    onCloseFlyout: jest.fn(),
-    onClickAction: jest.fn(),
-    onSuccess: jest.fn(),
-    show: 'details',
-    'data-test-subj': 'test',
-  };
+  let defaultProps: EndpointScriptFlyoutProps;
 
   const defaultGetScriptHookReturn = {
     isRefetching: false,
@@ -48,13 +36,26 @@ describe('EndpointScriptFlyout', () => {
 
     (useGetEndpointScript as jest.Mock).mockReturnValue(defaultGetScriptHookReturn);
 
-    defaultProps.scriptItem = scriptsGenerator.generate({
-      id: 'script-1',
-      name: 'Script snippet',
-      platform: ['linux', 'macos'],
-      updatedBy: 'elastic',
-      updatedAt: '2026-02-04T12:23:37Z',
-    });
+    defaultProps = {
+      queryParams: {
+        page: 1,
+        pageSize: 10,
+        sortField: 'name',
+        sortDirection: 'asc',
+      },
+      onCloseFlyout: jest.fn(),
+      onClickAction: jest.fn(),
+      onSuccess: jest.fn(),
+      show: 'details',
+      'data-test-subj': 'test',
+      scriptItem: scriptsGenerator.generate({
+        id: 'script-1',
+        name: 'Script snippet',
+        platform: ['linux', 'macos'],
+        updatedBy: 'elastic',
+        updatedAt: '2026-02-04T12:23:37Z',
+      }),
+    };
 
     render = (props?: EndpointScriptFlyoutProps) => {
       renderResult = mockedContext.render(<EndpointScriptFlyout {...(props ?? defaultProps)} />);

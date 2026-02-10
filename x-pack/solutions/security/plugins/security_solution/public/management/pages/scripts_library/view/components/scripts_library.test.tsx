@@ -34,23 +34,11 @@ describe('ScriptsLibrary', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
-
-  const defaultMockGetScriptsResponse = {
-    data: {
-      data: [],
-      page: 1,
-      pageSize: 10,
-      sortDirection: 'asc',
-      sortField: 'name',
-      total: 0,
-    },
-    isFetching: false,
-    isFetched: true,
-    refetch: jest.fn(),
-  };
+  let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsListMock>;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('scripts-library-tests');
+
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
@@ -60,6 +48,20 @@ describe('ScriptsLibrary', () => {
     (useToastsMock as jest.Mock).mockReturnValue({
       addDanger: jest.fn(),
     });
+
+    defaultMockGetScriptsResponse = {
+      data: {
+        data: [],
+        page: 1,
+        pageSize: 10,
+        sortDirection: 'asc',
+        sortField: 'name',
+        total: 0,
+      },
+      isFetching: false,
+      isFetched: true,
+      refetch: jest.fn(),
+    };
 
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
@@ -188,9 +190,10 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should show details flyout when clicked on row action item', async () => {
-      const scriptsList = scriptsGenerator.generateListOfScripts(Array.from({ length: 1 }));
-      setupScriptsList(scriptsList);
+    it('should show details flyout when clicked on row action `View details` item', async () => {
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      setupScriptsList([script]);
 
       act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
@@ -199,23 +202,24 @@ describe('ScriptsLibrary', () => {
       const range = getByTestId('test-table-record-range-label');
       expect(range).toHaveTextContent(`Showing 1-1 of 1 script`);
 
-      const firstScriptId = scriptsList[0].id;
-      const actionsButton = getByTestId(`test-table-row-actions-${firstScriptId}`);
+      const actionsButton = getByTestId(`test-table-row-actions-${scriptId}`);
       expect(actionsButton).toBeInTheDocument();
       fireEvent.click(actionsButton);
-      await waitFor(() => {
-        expect(getByTestId(`test-table-row-actions-${firstScriptId}-panel`)).toBeInTheDocument();
+
+      waitFor(() => {
+        const actionsPanel = getByTestId(`test-table-row-actions-${scriptId}-contextMenuPanel`);
+        expect(actionsPanel).toBeInTheDocument();
       });
 
-      const detailsButton = getByTestId('actionDetails');
-      expect(detailsButton).toBeInTheDocument();
-      await fireEvent.click(detailsButton);
-
-      const flyout = getByTestId('test-endpointScriptFlyout-details');
-      expect(flyout).toBeInTheDocument();
+      waitFor(async () => {
+        const detailsButton = getByTestId('actionDetails');
+        expect(detailsButton).toBeInTheDocument();
+        await fireEvent.click(detailsButton);
+        expect(getByTestId('test-endpointScriptFlyout-details')).toBeInTheDocument();
+      });
     });
 
-    it('should show edit flyout when clicked on row action item', async () => {
+    it('should show edit flyout when clicked on row action `Edit script` item', async () => {
       const scriptsList = scriptsGenerator.generateListOfScripts(Array.from({ length: 1 }));
       setupScriptsList(scriptsList);
 
@@ -230,15 +234,20 @@ describe('ScriptsLibrary', () => {
       const actionsButton = getByTestId(`test-table-row-actions-${firstScriptId}`);
       expect(actionsButton).toBeInTheDocument();
       await fireEvent.click(actionsButton);
-      const actionPanel = getByTestId(`test-table-row-actions-${firstScriptId}-panel`);
-      expect(actionPanel).toBeInTheDocument();
 
-      const editButton = getByTestId('actionEdit');
-      expect(editButton).toBeInTheDocument();
-      await fireEvent.click(editButton);
+      waitFor(() => {
+        const actionsPanel = getByTestId(
+          `test-table-row-actions-${firstScriptId}-contextMenuPanel`
+        );
+        expect(actionsPanel).toBeInTheDocument();
+      });
 
-      const flyout = getByTestId('test-endpointScriptFlyout-edit');
-      expect(flyout).toBeInTheDocument();
+      waitFor(async () => {
+        const editButton = getByTestId('actionEdit');
+        expect(editButton).toBeInTheDocument();
+        await fireEvent.click(editButton);
+        expect(getByTestId('test-endpointScriptFlyout-edit')).toBeInTheDocument();
+      });
     });
 
     it('should not show edit flyout when loaded via URL without `canWriteScriptsLibrary` privilege', async () => {

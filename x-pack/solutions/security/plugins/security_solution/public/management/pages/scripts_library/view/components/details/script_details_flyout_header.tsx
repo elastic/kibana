@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyoutHeader,
 } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { SupportedHostOsType } from '../../../../../../../common/endpoint/constants';
 import { FormattedDate } from '../../../../../../common/components/formatted_date';
 import { SCRIPT_LIBRARY_LABELS as i18n } from '../../../translations';
@@ -29,10 +30,11 @@ interface EndpointScriptDetailsFlyoutHeaderProps {
 
 export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyoutHeaderProps>(
   ({ scriptName, lastUpdated, platforms, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     return (
-      <EuiFlyoutHeader hasBorder data-test-subj={dataTestSubj}>
+      <EuiFlyoutHeader hasBorder data-test-subj={getTestId()}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem data-test-subj={`${dataTestSubj}-lastUpdatedLabel`}>
+          <EuiFlexItem data-test-subj={getTestId('lastUpdatedLabel')}>
             <EuiFlexGroup
               justifyContent="flexStart"
               alignItems="center"
@@ -54,22 +56,22 @@ export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyou
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj={`${dataTestSubj}-scriptNameTitle`}>
+          <EuiFlexItem data-test-subj={getTestId('scriptNameTitle')}>
             <EuiToolTip content={scriptName} anchorClassName="eui-textTruncate">
               <EuiTitle size="s">
                 <h2
                   css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                  data-test-subj="scriptDetailsFlyoutTitle"
+                  data-test-subj={getTestId('scriptDetailsFlyoutTitle')}
                 >
                   {scriptName}
                 </h2>
               </EuiTitle>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj={`${dataTestSubj}-platformBadges`}>
+          <EuiFlexItem data-test-subj={getTestId('platformBadges')}>
             <ScriptTablePlatformBadges
               platforms={platforms}
-              data-test-subj={dataTestSubj ? `${dataTestSubj}-platform` : undefined}
+              data-test-subj={getTestId('platform')}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

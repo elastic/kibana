@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../../../../../components/artifact_list_page/hooks/use_set_url_params';
 import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../../common/lib/kibana';
@@ -47,7 +48,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     onSuccess,
     'data-test-subj': dataTestSubj,
   }) => {
-
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
     const { selectedScriptId } = useScriptsLibraryUrlParams();
@@ -133,15 +134,15 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     return (
       <EuiFlyout
         id={`endpointScriptFlyout-${scriptItem?.id}`}
-        aria-labelledby={dataTestSubj}
+        aria-labelledby={getTestId('flyout')}
         onClose={onCloseFlyout}
         ownFocus
         size={680}
         paddingSize="l"
-        data-test-subj={dataTestSubj}
+        data-test-subj={getTestId()}
       >
         {shouldFetchScriptToViewOrEdit && (
-          <EndpointScriptFlyoutLoading data-test-subj={dataTestSubj} />
+          <EndpointScriptFlyoutLoading data-test-subj={getTestId('loading')} />
         )}
 
         {!shouldFetchScriptToViewOrEdit && show === 'details' && (
@@ -149,10 +150,9 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
             queryParams={queryParams}
             onClickAction={onClickAction}
             scriptItem={formState.scriptItem as EndpointScript}
-            data-test-subj={dataTestSubj}
+            data-test-subj={getTestId()}
           />
         )}
-
       </EuiFlyout>
     );
   }

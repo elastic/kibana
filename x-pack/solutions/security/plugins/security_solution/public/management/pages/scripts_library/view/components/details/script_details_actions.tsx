@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouter } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import {
@@ -22,6 +23,7 @@ interface EndpointScriptDetailsActionsProps {
 }
 export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsProps>(
   ({ scriptItem: script, onClickAction, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const menuOptions = useScriptActionItems({
       script,
       onClickAction,
@@ -54,7 +56,7 @@ export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsPro
           iconSide="right"
           fill
           iconType="arrowDown"
-          data-test-subj={`${dataTestSubj}-takeActionButton`}
+          data-test-subj={getTestId('takeActionButton')}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
@@ -65,7 +67,7 @@ export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsPro
           />
         </EuiButton>
       );
-    }, [isPopoverOpen, dataTestSubj]);
+    }, [isPopoverOpen, getTestId]);
 
     return (
       <EuiPopover
@@ -75,7 +77,7 @@ export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsPro
         closePopover={closePopoverHandler}
         panelPaddingSize="none"
         anchorPosition="downLeft"
-        data-test-subj={`${dataTestSubj}-actionsPopover`}
+        data-test-subj={getTestId('actionsPopover')}
       >
         <EuiContextMenuPanel size="s" items={takeActionItems} />
       </EuiPopover>

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ActionsContextMenu } from '../../../../components/actions_context_menu';
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
 import type { ScriptTagKey } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
@@ -39,8 +40,10 @@ import type {
 import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
-import { ScriptRowActions } from './script_row_actions';
-import type { UseScriptActionItemsProps } from '../hooks/use_script_action_items';
+import {
+  useScriptActionItems,
+  type UseScriptActionItemsProps,
+} from '../hooks/use_script_action_items';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
@@ -52,7 +55,22 @@ const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   actions: '65px',
 });
 
+const ScriptRowActions = memo<{
+  item: EndpointScript;
+  onClickAction: UseScriptActionItemsProps['onClickAction'];
+  'data-test-subj'?: string;
+}>(({ item, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  const items = useScriptActionItems({
+    script: item,
+    onClickAction,
+  });
+  return <ActionsContextMenu items={items} data-test-subj={dataTestSubj} />;
+});
+
+ScriptRowActions.displayName = 'ScriptRowActions';
+
 interface GetScriptsLibraryTableColumnsProps {
+  queryParams: ScriptsLibraryTableProps['queryParams'];
   formatBytes: (bytes: number) => string;
   getTestId: (suffix?: string | undefined) => string | undefined;
   onClickAction: ScriptsLibraryTableProps['onClickAction'];
@@ -60,6 +78,7 @@ interface GetScriptsLibraryTableColumnsProps {
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
+  queryParams,
   getTestId,
   onClickAction,
 }: GetScriptsLibraryTableColumnsProps) => {
@@ -75,6 +94,8 @@ const getScriptsLibraryTableColumns = ({
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <ScriptNameNavLink
               name={name}
+              queryParams={queryParams}
+              scriptId={item.id}
               onClick={() => onClickAction({ show: 'details', script: item })}
               data-test-subj={`${getTestId('column-name')}-${item.id}`}
             />
@@ -184,7 +205,7 @@ const getScriptsLibraryTableColumns = ({
         {
           render: (item: EndpointScript) => (
             <ScriptRowActions
-              scriptItem={item}
+              item={item}
               onClickAction={onClickAction}
               data-test-subj={getTestId(`row-actions-${item.id}`)}
             />
@@ -286,10 +307,11 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
       () =>
         getScriptsLibraryTableColumns({
           formatBytes,
+          queryParams,
           getTestId,
           onClickAction,
         }),
-      [formatBytes, getTestId, onClickAction]
+      [formatBytes, queryParams, getTestId, onClickAction]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

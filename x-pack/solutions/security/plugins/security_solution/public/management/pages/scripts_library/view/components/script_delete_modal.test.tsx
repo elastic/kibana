@@ -25,15 +25,20 @@ describe('EndpointScriptDeleteModal', () => {
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   let defaultProps: React.ComponentProps<typeof EndpointScriptDeleteModal>;
-  const deleteScriptMutation = jest.fn();
-  const onSuccessMock = jest.fn();
-  const onCancelMock = jest.fn();
-  const addSuccessToast = jest.fn();
-  const addErrorToast = jest.fn();
+  let deleteScriptMutation: jest.Mock;
+  let onSuccessMock: jest.Mock;
+  let onCancelMock: jest.Mock;
+  let addSuccessToast: jest.Mock;
+  let addErrorToast: jest.Mock;
 
   beforeEach(() => {
-    mockedContext = createAppRootMockRenderer();
     jest.clearAllMocks();
+    mockedContext = createAppRootMockRenderer();
+    deleteScriptMutation = jest.fn();
+    onSuccessMock = jest.fn();
+    onCancelMock = jest.fn();
+    addSuccessToast = jest.fn();
+    addErrorToast = jest.fn();
 
     (useToastsMock as jest.Mock).mockReturnValue({
       addDanger: jest.fn(),
@@ -73,18 +78,13 @@ describe('EndpointScriptDeleteModal', () => {
     render();
     const { getByTestId } = renderResult;
 
-    const header = getByTestId('test-header');
-    expect(header.textContent).toEqual('Delete script?');
-
-    const body = getByTestId('test-body');
-    expect(body.textContent).toEqual(
+    expect(getByTestId('test-header')).toHaveTextContent('Delete script?');
+    expect(getByTestId('test-body')).toHaveTextContent(
       'Do you really want to delete "Test Script"? This action cannot be undone. The script and all its metadata will be permanently removed from the library.'
     );
 
-    const cancelButton = getByTestId('test-cancel-button');
-    expect(cancelButton.textContent).toEqual('Cancel');
-    const deleteButton = getByTestId('test-delete-button');
-    expect(deleteButton.textContent).toEqual('Delete');
+    expect(getByTestId('test-cancel-button').textContent).toEqual('Cancel');
+    expect(getByTestId('test-delete-button').textContent).toEqual('Delete');
   });
 
   it('should cancel deletion', () => {
