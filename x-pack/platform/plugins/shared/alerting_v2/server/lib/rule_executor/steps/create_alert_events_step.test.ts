@@ -57,6 +57,37 @@ describe('CreateAlertEventsStep', () => {
     });
   });
 
+  it('yields multiple batches when receiving multiple input batches', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse();
+    const batch1 = [{ 'host.name': 'host-a' }];
+    const batch2 = [{ 'host.name': 'host-b' }];
+
+    const state1 = createRulePipelineState({ input, rule, esqlRowBatch: batch1 });
+    const state2 = createRulePipelineState({ input, rule, esqlRowBatch: batch2 });
+
+    const results = await collectStreamResults(
+      step.executeStream(createPipelineStream([state1, state2]))
+    );
+
+    expect(results).toHaveLength(2);
+    expect(results[0].type).toBe('continue');
+    expect(results[0].state.alertEventsBatch).toHaveLength(1);
+    expect(results[1].type).toBe('continue');
+    expect(results[1].state.alertEventsBatch).toHaveLength(1);
+  });
+
+  it('skips batches that produce no alert events', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse();
+
+    const state = createRulePipelineState({ input, rule, esqlRowBatch: [] });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results).toHaveLength(0);
+  });
+
   it('halts with state_not_ready when rule is missing from state', async () => {
     const state = createRulePipelineState({ esqlRowBatch: [{ 'host.name': 'host-a' }] });
 

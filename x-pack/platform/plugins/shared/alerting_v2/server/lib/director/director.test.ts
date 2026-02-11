@@ -373,6 +373,47 @@ describe('DirectorService', () => {
       expect(result[0].episode?.id).toBe('existing-episode');
     });
 
+    it('throws when execution context is already aborted before processing', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+      const abortedContext = createExecutionContext(abortController.signal);
+
+      const alertEvent = createAlertEvent();
+
+      await expect(
+        collectAlertEvents(
+          directorService.run({
+            ruleId: 'rule-1',
+            executionContext: abortedContext,
+            alertEvents: toAlertEventStream([alertEvent]),
+          })
+        )
+      ).rejects.toThrow(/aborted/i);
+
+      expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('passes abort signal to query service for state lookups', async () => {
+      const abortController = new AbortController();
+      const context = createExecutionContext(abortController.signal);
+      const alertEvent = createAlertEvent({ group_hash: 'hash-1' });
+
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+      await collectAlertEvents(
+        directorService.run({
+          ruleId: 'rule-1',
+          executionContext: context,
+          alertEvents: toAlertEventStream([alertEvent]),
+        })
+      );
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ signal: abortController.signal })
+      );
+    });
+
     it('propagates query service errors', async () => {
       const alertEvent = createAlertEvent();
       mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));

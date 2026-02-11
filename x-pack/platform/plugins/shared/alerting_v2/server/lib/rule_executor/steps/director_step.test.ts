@@ -9,6 +9,7 @@ import { DirectorStep } from './director_step';
 import {
   collectStreamResults,
   createPipelineStream,
+  createRuleExecutionInput,
   createRulePipelineState,
   createAlertEvent,
   createRuleResponse,
@@ -101,6 +102,28 @@ describe('DirectorStep', () => {
     await expect(
       collectStreamResults(step.executeStream(createPipelineStream([state])))
     ).rejects.toThrow('ES query failed');
+  });
+
+  it('passes executionContext signal to ES client for state lookups', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(loggerService, directorService);
+
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const abortController = new AbortController();
+    const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+    const state = createRulePipelineState({
+      input,
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent()],
+    });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {

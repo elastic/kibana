@@ -86,8 +86,8 @@ describe('RuleExecutionPipeline', () => {
 
       expect(result.completed).toBe(false);
       expect(result.haltReason).toBe('rule_deleted');
+      // step3 handler was never invoked even though executeStream was called during chain construction
       expect(executionOrder).toEqual(['step1', 'step2']);
-      expect(step3.executeStream).not.toHaveBeenCalled();
     });
 
     it('accumulates state across steps correctly', async () => {
@@ -120,17 +120,18 @@ describe('RuleExecutionPipeline', () => {
 
       const result = await pipeline.execute(input);
 
-      // Step 1 receives only input
-      expect(statesReceived[0]).toEqual({ input });
+      // Step 1 receives only input (with executionContext created by pipeline)
+      expect(statesReceived[0].input.ruleId).toBe(input.ruleId);
+      expect(statesReceived[0].input.executionContext).toBeDefined();
       expect(statesReceived[0].rule).toBeUndefined();
 
       // Step 2 receives input + rule from step 1
-      expect(statesReceived[1].input).toEqual(input);
+      expect(statesReceived[1].input.ruleId).toBe(input.ruleId);
       expect(statesReceived[1].rule).toBeDefined();
       expect(statesReceived[1].queryPayload).toBeUndefined();
 
       // Step 3 receives input + rule + queryPayload
-      expect(statesReceived[2].input).toEqual(input);
+      expect(statesReceived[2].input.ruleId).toBe(input.ruleId);
       expect(statesReceived[2].rule).toBeDefined();
       expect(statesReceived[2].queryPayload).toBeDefined();
 
@@ -157,7 +158,6 @@ describe('RuleExecutionPipeline', () => {
       const input = createRuleExecutionPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
-      expect(step2.executeStream).not.toHaveBeenCalled();
     });
 
     it('returns empty completed result when no steps', async () => {
@@ -168,7 +168,8 @@ describe('RuleExecutionPipeline', () => {
       const result = await pipeline.execute(input);
 
       expect(result.completed).toBe(true);
-      expect(result.finalState).toEqual({ input });
+      expect(result.finalState.input.ruleId).toBe(input.ruleId);
+      expect(result.finalState.input.executionContext).toBeDefined();
     });
 
     it('executes middleware chain around each step', async () => {
@@ -227,6 +228,46 @@ describe('RuleExecutionPipeline', () => {
         'middleware2:after:step1',
         'middleware1:after:step1',
       ]);
+    });
+
+    it('creates ExecutionContext and attaches it to pipeline state', async () => {
+      const { loggerService } = createLoggerService();
+
+      const step = createMockStep('step1', (input) =>
+        pipeStream(input, (state) => {
+          expect(state.input.executionContext).toBeDefined();
+          expect(typeof state.input.executionContext.throwIfAborted).toBe('function');
+          expect(typeof state.input.executionContext.createScope).toBe('function');
+          expect(typeof state.input.executionContext.onAbort).toBe('function');
+          expect(state.input.executionContext.signal).toBeDefined();
+          return { type: 'continue', state };
+        })
+      );
+
+      const pipeline = new RuleExecutionPipeline(loggerService, [step], []);
+      const input = createRuleExecutionPipelineInput();
+
+      const result = await pipeline.execute(input);
+
+      expect(result.completed).toBe(true);
+      expect(result.finalState.input.executionContext).toBeDefined();
+    });
+
+    it('uses the abort signal from pipeline input for the execution context', async () => {
+      const { loggerService } = createLoggerService();
+      const abortController = new AbortController();
+
+      const step = createMockStep('step1', (input) =>
+        pipeStream(input, (state) => {
+          expect(state.input.executionContext.signal).toBe(abortController.signal);
+          return { type: 'continue', state };
+        })
+      );
+
+      const pipeline = new RuleExecutionPipeline(loggerService, [step], []);
+      const input = createRuleExecutionPipelineInput({ abortSignal: abortController.signal });
+
+      await pipeline.execute(input);
     });
 
     it('middleware can intercept errors', async () => {
