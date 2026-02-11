@@ -41,27 +41,24 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      `returns error on empty ${SERVICE_KEY_LEGACY} object`,
-      async ({ apiClient }) => {
-        const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            [SERVICE_KEY_LEGACY]: {},
-          },
-        });
+    apiTest(`returns error on empty ${SERVICE_KEY_LEGACY} object`, async ({ apiClient }) => {
+      const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: {},
+        },
+      });
 
-        expect(response.statusCode).toBe(400);
-        expect(response.body.statusCode).toBe(400);
-        expect(response.body.message).toBe(
-          `[request body.${SERVICE_KEY_LEGACY}.title]: expected value of type [string] but got [undefined]`
-        );
-      }
-    );
+      expect(response.statusCode).toBe(400);
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.message).toBe(
+        `[request body.${SERVICE_KEY_LEGACY}.title]: expected value of type [string] but got [undefined]`
+      );
+    });
 
     apiTest('returns error when "override" parameter is not a boolean', async ({ apiClient }) => {
       const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {

@@ -21,25 +21,22 @@ apiTest.describe(
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest(
-      `returns error when ${SERVICE_KEY} object is not provided`,
-      async ({ apiClient }) => {
-        const response = await apiClient.post(DATA_VIEW_PATH, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: null,
-        });
+    apiTest(`returns error when ${SERVICE_KEY} object is not provided`, async ({ apiClient }) => {
+      const response = await apiClient.post(DATA_VIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: null,
+      });
 
-        expect(response.statusCode).toBe(400);
-        expect(response.body.statusCode).toBe(400);
-        expect(response.body.message).toBe(
-          '[request body]: expected a plain object value, but found [null] instead.'
-        );
-      }
-    );
+      expect(response.statusCode).toBe(400);
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.message).toBe(
+        '[request body]: expected a plain object value, but found [null] instead.'
+      );
+    });
 
     apiTest(`returns error on empty ${SERVICE_KEY} object`, async ({ apiClient }) => {
       const response = await apiClient.post(DATA_VIEW_PATH, {

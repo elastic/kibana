@@ -421,9 +421,7 @@ apiTest.describe(
         expect(response2.statusCode).toBe(200);
         expect(response1.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('foo');
         expect(response2.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('bar');
-        expect(response1.body[SERVICE_KEY_LEGACY].id).toBe(
-          response1.body[SERVICE_KEY_LEGACY].id
-        );
+        expect(response1.body[SERVICE_KEY_LEGACY].id).toBe(response1.body[SERVICE_KEY_LEGACY].id);
         // Only track the final one (override replaced the first)
         createdIds.push(response2.body[SERVICE_KEY_LEGACY].id);
       }
