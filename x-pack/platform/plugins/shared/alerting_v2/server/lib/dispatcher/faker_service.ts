@@ -13,7 +13,7 @@ import type {
   RuleId,
 } from './types';
 
-const NOTIFICATION_POLICY_IDS: NotificationPolicyId[] = ['policy_123', 'policy_456', 'policy_789'];
+const NOTIFICATION_POLICY_IDS: NotificationPolicyId[] = ['policy_123', 'policy_456'];
 
 export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, Rule>> {
   const now = new Date().toISOString();
@@ -22,10 +22,9 @@ export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, 
       id: ruleId,
       name: `Rule ${ruleId}`,
       description: `Description for rule ${ruleId}`,
-      notificationPolicyIds: NOTIFICATION_POLICY_IDS.slice(
-        0,
-        Math.floor(Math.random() * NOTIFICATION_POLICY_IDS.length) + 1
-      ),
+      notificationPolicyIds: [
+        NOTIFICATION_POLICY_IDS[Math.floor(Math.random() * NOTIFICATION_POLICY_IDS.length)],
+      ],
       enabled: true,
       createdAt: now,
       updatedAt: now,
@@ -36,20 +35,34 @@ export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, 
   return new Map(Object.entries(rules));
 }
 
+const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
+  policy_123: {
+    id: 'policy_123',
+    name: 'Policy matching critical alerts in non-dev environments',
+    matcher: 'data.severity == "critical" && data.env != "dev"', // require flatten data support
+    groupBy: [], // not implemted yet, require flattened data support
+    throttle: {
+      interval: '1h',
+    },
+    workflowId: 'workflow_123',
+  },
+  policy_456: {
+    id: 'policy_456',
+    name: 'Policy matching all alerts but throttled to 5 minutes',
+    matcher: undefined, // catch-all
+    groupBy: [], // not implemted yet, require flattened data support
+    throttle: {
+      interval: '5m',
+    },
+    workflowId: 'workflow_456',
+  },
+};
+
 export async function getFakeNotificationPoliciesByIds(
   notificationPolicyIds: NotificationPolicyId[]
 ): Promise<Map<NotificationPolicyId, NotificationPolicy>> {
   const policies = notificationPolicyIds.reduce((acc, policyId) => {
-    acc[policyId] = {
-      id: policyId,
-      name: `Policy ${policyId}`,
-      matcher: '',
-      groupBy: ['data.env'],
-      throttle: {
-        interval: '1h',
-      },
-      workflowId: 'workflow_123',
-    };
+    acc[policyId] = FAKE_POLICIES[policyId];
     return acc;
   }, {} as Record<NotificationPolicyId, NotificationPolicy>);
   return new Map(Object.entries(policies));
