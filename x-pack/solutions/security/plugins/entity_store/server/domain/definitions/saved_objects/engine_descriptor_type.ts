@@ -25,8 +25,11 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         filter: {
           type: 'keyword',
         },
+        additionalIndexPattern: {
+          type: 'keyword', 
+        },
         additionalIndexPatterns: {
-          type: 'keyword', // array of strings (ES keyword supports multi-value)
+          type: 'keyword', 
         },
         fieldHistoryLength: {
           type: 'integer',
@@ -129,11 +132,32 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
+const version2: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition' as const,
+      addedMappings: {
+        logExtractionState: {
+          properties: {
+            additionalIndexPatterns: { type: 'keyword' as const }, // array of strings (ES keyword supports multi-value)
+          },
+        },
+      },
+    },
+  ],
+  schemas: {
+    create: schema.object(engineDescriptorAttributesSchema),
+    forwardCompatibility: schema.object(engineDescriptorAttributesSchema, {
+      unknowns: 'ignore',
+    }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
   hiddenFromHttpApis: true,
 };
