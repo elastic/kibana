@@ -18,7 +18,8 @@ import { getEntityMask } from './get_entity_mask';
 
 const ROOT_FIELDS_TO_STRIP = ['content', 'response', 'system', 'toolCalls'] as const;
 
-const unescapePointerToken = (token: string): string => token.replace(/~1/g, '/').replace(/~0/g, '~');
+const unescapePointerToken = (token: string): string =>
+  token.replace(/~1/g, '/').replace(/~0/g, '~');
 
 const pointerToDotPath = (pointer: string): string => {
   const normalized = pointer.startsWith('/') ? pointer.slice(1) : pointer;
