@@ -54,6 +54,7 @@ export function GaugeDimensionEditor(
       name: defaultPaletteParams.name,
       params: {
         ...defaultPaletteParams,
+        continuity: 'all',
         colorStops: undefined,
         stops: undefined,
         rangeMin: undefined,
