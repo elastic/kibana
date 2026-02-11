@@ -35,13 +35,9 @@ export async function analyzeFile(
   const results = await client.asInternalUser.textStructure.findStructure(
     {
       body: data,
-      querystring: {
-        // @ts-expect-error request types are incorrect
-        ecs_compatibility: 'v1',
-        // set true for all data, just in case NDJSON is found we should parse it recursively to get nested objects
-        should_parse_recursively: true,
-        ...overrides,
-      },
+      ecs_compatibility: 'v1',
+      should_parse_recursively: true,
+      ...overrides,
     },
     { maxRetries: 0, signal: abortSignal }
   );
