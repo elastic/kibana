@@ -14,7 +14,7 @@ import { parseLineForCompletion } from '../../context/parse_line_for_completion'
 
 describe('getConnectorIdSuggestions', () => {
   const fakeConnectorTypes: Record<string, ConnectorTypeInfo> = {
-    slack: {
+    '.slack': {
       actionTypeId: '.slack',
       displayName: 'Slack',
       enabled: true,
@@ -27,7 +27,7 @@ describe('getConnectorIdSuggestions', () => {
         { id: 'private-slack', name: 'Private Slack', isPreconfigured: false, isDeprecated: false },
       ],
     },
-    inference: {
+    '.inference': {
       actionTypeId: '.inference',
       displayName: 'Inference',
       enabled: true,
@@ -61,6 +61,7 @@ describe('getConnectorIdSuggestions', () => {
       focusedStepInfo: { stepType: 'slack' },
       dynamicConnectorTypes: fakeConnectorTypes,
     } as unknown as AutocompleteContext);
+
     expect(result).toHaveLength(3);
     expect(result[0].label).toBe('Public Slack • public-slack');
     expect(result[0].insertText).toBe('public-slack');
