@@ -33,7 +33,7 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreviewTooltip',
   {
     defaultMessage:
-      'This feature is in technical preview and may be changed or removed in a future release',
+      'This functionality is experimental and not supported. It may change or be removed at any time.',
   }
 );
 

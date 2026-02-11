@@ -134,6 +134,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
           )}
           {isTechPreview && (
             <EuiBetaBadge
+              tabIndex={0}
               label={i18n.TECH_PREVIEW_LABEL}
               tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
               size="s"
