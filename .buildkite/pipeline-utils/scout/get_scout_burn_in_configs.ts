@@ -10,81 +10,70 @@
 import { execSync } from 'child_process';
 import Fs from 'fs';
 import path from 'path';
+import { load as loadYaml } from 'js-yaml';
 import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
 import { getKibanaDir } from '../utils';
 
 /**
- * Patterns for files that should never trigger burn-in testing.
- * Changes to these files are considered non-functional and won't
- * affect Scout test behavior.
+ * Inclusive patterns for source files that could affect Scout test behavior.
+ * Only files matching these patterns will be considered for burn-in triggering.
+ * This is more robust than an exclusion list as it won't miss new file types.
  */
-const SKIP_BURN_IN_PATTERNS: RegExp[] = [
-  // Documentation & assets
-  /\.md$/,
-  /\.mdx$/,
-  /\.asciidoc$/,
-  /\.txt$/,
-  /\.(png|jpg|jpeg|gif|svg|ico|webp)$/,
-  // Config & meta files
-  /package\.json$/,
-  /tsconfig\.json$/,
-  /jest\.config\.(ts|js)$/,
-  /jest\.integration\.config\.(ts|js)$/,
-  /\.eslintrc/,
-  /\.prettierrc/,
-  /kibana\.jsonc$/,
-  // CI/CD files
+const SOURCE_FILE_PATTERNS: RegExp[] = [
+  /\.(ts|tsx|js|jsx)$/,
+  /\.(scss|css|less)$/,
+  /\.(json)$/, // Might include config files relevant to runtime
+  /\.(html|pug|ejs)$/,
+];
+
+/**
+ * Paths that should always be excluded even if they match source patterns.
+ * These are test infrastructure paths, not runtime source code.
+ */
+const ALWAYS_EXCLUDE_PATHS: RegExp[] = [
   /^\.buildkite\//,
   /^\.github\//,
-  // Documentation directories
   /^dev_docs\//,
   /^docs\//,
   /^api_docs\//,
   /^legacy_rfcs\//,
+  /\/jest\.config\.(ts|js)$/,
+  /\/jest\.integration\.config\.(ts|js)$/,
+  /\/__mocks__\//,
+  /\/__fixtures__\//,
+  /\.test\.(ts|tsx|js|jsx)$/,
+  /\.mock\.(ts|tsx|js|jsx)$/,
+  /\.stories\.(ts|tsx|js|jsx)$/,
+  /\.d\.ts$/,
 ];
 
-// ─── JSONC Parsing ───────────────────────────────────────────────────────────
+// ─── Moon Dependency Graph ──────────────────────────────────────────────────
 
-interface KibanaJsonc {
-  type?: string;
-  id?: string;
-  plugin?: {
-    id?: string;
-    requiredPlugins?: string[];
-    optionalPlugins?: string[];
-    requiredBundles?: string[];
+interface MoonProject {
+  id: string;
+  dependsOn: string[];
+  metadata?: {
+    sourceRoot?: string;
   };
 }
 
 /**
- * Parse a kibana.jsonc file, stripping comments and trailing commas.
- * Returns null on any parse failure (missing file, invalid JSON, etc.)
+ * Read and parse a moon.yml file to extract project ID and dependencies.
+ * Moon files are auto-generated from kibana.jsonc + tsconfig.json, so they
+ * provide a single source of truth for the full project dependency graph.
  */
-function readKibanaJsonc(filePath: string): KibanaJsonc | null {
+function readMoonYml(filePath: string): MoonProject | null {
   try {
     const content = Fs.readFileSync(filePath, 'utf-8');
-    const stripped = content
-      .split('\n')
-      .map((line) => {
-        // Strip // comments that are not inside strings
-        let inString = false;
-        for (let i = 0; i < line.length; i++) {
-          if (line[i] === '"' && (i === 0 || line[i - 1] !== '\\')) {
-            inString = !inString;
-          }
-          if (!inString && line[i] === '/' && line[i + 1] === '/') {
-            return line.substring(0, i);
-          }
-        }
-        return line;
-      })
-      .join('\n')
-      // Strip block comments
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      // Strip trailing commas before } or ]
-      .replace(/,\s*([\]}])/g, '$1');
-
-    return JSON.parse(stripped) as KibanaJsonc;
+    const parsed = loadYaml(content) as Record<string, unknown>;
+    return {
+      id: (parsed.id as string) ?? '',
+      dependsOn: (parsed.dependsOn as string[]) ?? [],
+      metadata: {
+        sourceRoot: ((parsed.project as Record<string, unknown>)?.metadata as Record<string, unknown>)
+          ?.sourceRoot as string | undefined,
+      },
+    };
   } catch {
     return null;
   }
@@ -151,15 +140,24 @@ function getChangedFiles(): string[] {
   }
 }
 
+/**
+ * Filter changed files to only those that are relevant source files.
+ * Uses inclusive matching: only files matching SOURCE_FILE_PATTERNS are kept,
+ * and files matching ALWAYS_EXCLUDE_PATHS are removed.
+ */
+function filterRelevantFiles(changedFiles: string[]): string[] {
+  return changedFiles.filter(
+    (file) =>
+      SOURCE_FILE_PATTERNS.some((p) => p.test(file)) &&
+      !ALWAYS_EXCLUDE_PATHS.some((p) => p.test(file))
+  );
+}
+
 // ─── Module Path Utilities ───────────────────────────────────────────────────
 
 /**
  * Extract the module base path from a Scout config path.
  * Scout configs follow the pattern: {module-base-path}/test/scout/{ui|api}/playwright.config.ts
- * Custom server configs follow: {module-base-path}/test/scout_{name}/{ui|api}/playwright.config.ts
- *
- * @returns The module base path (e.g., "x-pack/solutions/security/plugins/security_solution/")
- *          or null if the path doesn't match the expected pattern.
  */
 function getModuleBasePath(configPath: string): string | null {
   const match = configPath.match(/^(.+?)\/test\/scout/);
@@ -183,54 +181,37 @@ function buildModulePathMap(allModules: ModuleDiscoveryInfo[]): Map<string, Modu
   return modulePathToModule;
 }
 
-// ─── Dependency Graph (Enhancement 1) ────────────────────────────────────────
+// ─── Dependency Graph via Moon ──────────────────────────────────────────────
 
 /**
- * Read the plugin ID from a module's kibana.jsonc file.
- * Only plugin packages have a plugin.id field.
+ * Read the Moon project ID from a module's moon.yml file.
  */
-function getPluginId(moduleBasePath: string): string | null {
+function getMoonProjectId(moduleBasePath: string): string | null {
   const kibanaDir = getKibanaDir();
-  const manifestPath = path.resolve(kibanaDir, moduleBasePath, 'kibana.jsonc');
-  const manifest = readKibanaJsonc(manifestPath);
-  return manifest?.plugin?.id ?? null;
+  const moonPath = path.resolve(kibanaDir, moduleBasePath, 'moon.yml');
+  const moon = readMoonYml(moonPath);
+  return moon?.id ?? null;
 }
 
 /**
- * Get all plugin dependencies declared in a module's kibana.jsonc.
- * Includes requiredPlugins, optionalPlugins, and requiredBundles.
+ * Get all project dependencies declared in a module's moon.yml.
+ * Moon's dependsOn is generated from tsconfig.json kbn_references and provides
+ * a comprehensive view of all package/plugin dependencies.
  */
-function getPluginDependencies(moduleBasePath: string): string[] {
+function getMoonDependencies(moduleBasePath: string): string[] {
   const kibanaDir = getKibanaDir();
-  const manifestPath = path.resolve(kibanaDir, moduleBasePath, 'kibana.jsonc');
-  const manifest = readKibanaJsonc(manifestPath);
-
-  if (!manifest?.plugin) {
-    return [];
-  }
-
-  const deps = new Set<string>();
-  for (const dep of manifest.plugin.requiredPlugins ?? []) {
-    deps.add(dep);
-  }
-  for (const dep of manifest.plugin.optionalPlugins ?? []) {
-    deps.add(dep);
-  }
-  for (const dep of manifest.plugin.requiredBundles ?? []) {
-    deps.add(dep);
-  }
-
-  return Array.from(deps);
+  const moonPath = path.resolve(kibanaDir, moduleBasePath, 'moon.yml');
+  const moon = readMoonYml(moonPath);
+  return moon?.dependsOn ?? [];
 }
 
 /**
  * Find Scout test modules that depend on any of the directly changed modules,
- * using the plugin dependency graph from kibana.jsonc files.
+ * using Moon's project dependency graph (dependsOn from moon.yml).
  *
- * Algorithm:
- * 1. For each directly changed module path, read its plugin ID
- * 2. For each Scout test module, read its declared plugin dependencies
- * 3. If a Scout test module depends on a changed module's plugin ID, include it
+ * Moon's dependency graph is more comprehensive than kibana.jsonc alone as it
+ * includes all kbn_references from tsconfig.json, covering both plugin and
+ * package dependencies.
  */
 function findDependentModules(
   changedModulePaths: Set<string>,
@@ -239,37 +220,36 @@ function findDependentModules(
 ): Set<string> {
   const additionalAffected = new Set<string>();
 
-  // Step 1: Collect plugin IDs from directly changed modules
-  const changedPluginIds = new Set<string>();
+  // Step 1: Collect Moon project IDs from directly changed modules
+  const changedProjectIds = new Set<string>();
   for (const modulePath of changedModulePaths) {
-    const pluginId = getPluginId(modulePath);
-    if (pluginId) {
-      changedPluginIds.add(pluginId);
+    const projectId = getMoonProjectId(modulePath);
+    if (projectId) {
+      changedProjectIds.add(projectId);
     }
   }
 
-  if (changedPluginIds.size === 0) {
+  if (changedProjectIds.size === 0) {
     return additionalAffected;
   }
 
   console.error(
-    `scout burn-in [dep-graph]: Changed plugin IDs: ${Array.from(changedPluginIds).join(', ')}`
+    `scout burn-in [dep-graph]: Changed project IDs: ${Array.from(changedProjectIds).join(', ')}`
   );
 
-  // Step 2: For each Scout test module, check if it depends on a changed plugin
+  // Step 2: For each Scout test module, check if it depends on a changed project
   for (const [modulePath, module] of allModulePathMap) {
-    // Skip modules already affected by direct directory matching
     if (alreadyAffected.has(module.name)) {
       continue;
     }
 
-    const deps = getPluginDependencies(modulePath);
-    const matchingDep = deps.find((dep) => changedPluginIds.has(dep));
+    const deps = getMoonDependencies(modulePath);
+    const matchingDep = deps.find((dep) => changedProjectIds.has(dep));
 
     if (matchingDep) {
       additionalAffected.add(module.name);
       console.error(
-        `scout burn-in [dep-graph]: ${module.name} depends on changed plugin '${matchingDep}'`
+        `scout burn-in [dep-graph]: ${module.name} depends on changed project '${matchingDep}'`
       );
     }
   }
@@ -283,12 +263,15 @@ function findDependentModules(
  * Filter the full list of Scout modules to only those affected by the current PR changes.
  *
  * Uses two matching strategies:
- * 1. **Directory matching**: If a changed file falls within a module's directory,
+ * 1. **Directory matching**: If a changed source file falls within a module's directory,
  *    that module is affected.
- * 2. **Dependency graph matching**: If a changed module is a plugin and another
- *    Scout test module declares a dependency on it (via requiredPlugins,
- *    optionalPlugins, or requiredBundles in kibana.jsonc), the dependent module
- *    is also affected.
+ * 2. **Dependency graph matching** (via Moon): If a changed module is listed as a
+ *    dependency in another Scout test module's moon.yml dependsOn, the dependent
+ *    module is also affected.
+ *
+ * File filtering uses inclusive patterns (only source files like .ts, .tsx, .js, etc.)
+ * rather than an exclusion list, so new non-source file types won't accidentally
+ * trigger burn-in.
  *
  * @param allModules - The complete list of discovered Scout modules with configs
  * @returns Filtered list containing only modules affected by PR changes
@@ -303,18 +286,16 @@ export function getChangedScoutModules(allModules: ModuleDiscoveryInfo[]): Modul
 
   console.error(`scout burn-in: Detected ${changedFiles.length} changed file(s)`);
 
-  // Filter out files that should never trigger burn-in
-  const relevantChangedFiles = changedFiles.filter(
-    (file) => !SKIP_BURN_IN_PATTERNS.some((pattern) => pattern.test(file))
-  );
+  // Filter to only relevant source files (inclusive pattern)
+  const relevantChangedFiles = filterRelevantFiles(changedFiles);
 
   if (relevantChangedFiles.length === 0) {
-    console.error('scout burn-in: All changed files match skip patterns, no burn-in needed');
+    console.error('scout burn-in: No relevant source files changed, no burn-in needed');
     return [];
   }
 
   console.error(
-    `scout burn-in: ${relevantChangedFiles.length} file(s) after applying skip patterns`
+    `scout burn-in: ${relevantChangedFiles.length} relevant source file(s) after filtering`
   );
 
   // Build module path -> module mapping
@@ -341,16 +322,12 @@ export function getChangedScoutModules(allModules: ModuleDiscoveryInfo[]): Modul
     );
   }
 
-  // Strategy 2: Dependency graph matching
-  // Also find all modules whose changed files belong to ANY module (not just Scout test modules)
-  // by scanning all changed file paths against all known plugin directories
+  // Strategy 2: Dependency graph matching via Moon
+  // Scan changed files for module directories that may not have Scout tests themselves
+  // but could be dependencies of Scout test modules
   const allChangedModulePaths = new Set<string>(changedModulePaths);
 
-  // Scan changed files for module directories that may not have Scout tests themselves
-  // but could be plugin dependencies of Scout test modules
   for (const file of relevantChangedFiles) {
-    // Extract potential module path patterns from the file path
-    // Plugins: */plugins/*/ or */packages/*/
     const pluginMatch = file.match(/^(.+?\/(?:plugins|packages)\/[^/]+\/[^/]+\/)/);
     if (pluginMatch) {
       allChangedModulePaths.add(pluginMatch[1]);

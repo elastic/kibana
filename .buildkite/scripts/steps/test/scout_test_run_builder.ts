@@ -8,7 +8,11 @@
  */
 
 import path from 'path';
-import { pickScoutTestGroupRunOrder, getKibanaDir } from '#pipeline-utils';
+import {
+  pickScoutTestGroupRunOrder,
+  pickScoutBurnInRunOrder,
+  getKibanaDir,
+} from '#pipeline-utils';
 
 (async () => {
   try {
@@ -19,6 +23,10 @@ import { pickScoutTestGroupRunOrder, getKibanaDir } from '#pipeline-utils';
       'scout_playwright_configs.json'
     );
     await pickScoutTestGroupRunOrder(scoutConfigsPath);
+
+    // Generate burn-in steps for modules affected by PR changes.
+    // Runs within the same builder step to avoid a separate agent.
+    await pickScoutBurnInRunOrder(scoutConfigsPath);
   } catch (ex) {
     console.error('Scout test grouping error: ', ex.message);
     if (ex.response) {

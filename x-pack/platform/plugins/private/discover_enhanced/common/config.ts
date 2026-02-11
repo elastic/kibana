@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/** Configuration for the Discover Enhanced plugin features. */
 export interface Config {
   actions: {
     exploreDataInChart: { enabled: boolean };

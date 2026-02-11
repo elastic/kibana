@@ -26,23 +26,24 @@ The existing Cypress burn-in (`ci:cypress-burn`) addresses this for Cypress test
 
 ### Proposal
 
-Introduce a **Scout Burn-in** pipeline step that:
+Introduce **Scout Burn-in** logic within the existing Scout Test Run Builder that:
 
 1. Detects files changed in the PR using `git diff` against the target branch.
 2. Maps changed files to Scout test modules based on directory ownership.
-3. Filters out non-code changes (docs, configs, images) via skip patterns.
-4. Runs the affected modules' Scout configs with Playwright's `--repeat-each` flag for stability validation.
-5. Reports results as soft-fail annotations in Buildkite.
+3. Filters changed files using inclusive source file patterns (`.ts`, `.tsx`, `.js`, `.jsx`, `.scss`, `.css`, etc.).
+4. Uses Moon's dependency graph (`dependsOn` from `moon.yml`) to detect transitive impacts.
+5. Runs the affected modules' Scout configs with Playwright's `--repeat-each` flag for stability validation.
+6. Reports results as soft-fail annotations in Buildkite and a PR comment summary.
 
-The feature is always enabled on PR builds. If no Scout modules are affected by the PR changes, the burn-in builder step completes immediately without generating any test steps.
+The feature is always enabled on PR builds. If no Scout modules are affected by the PR changes, no burn-in steps are generated.
 
 ---
 
 ## Who Is Affected and How
 
-- **All Kibana developers**: The burn-in step appears on every PR build. If the PR changes affect a plugin/package with Scout tests, additional burn-in test steps will be generated. These are soft-fail and do not block the PR.
+- **All Kibana developers**: The burn-in logic runs within the existing Scout Test Run Builder. If the PR changes affect a plugin/package with Scout tests, additional burn-in test steps will be generated. These are soft-fail and do not block the PR.
 - **Scout test authors**: Tests in affected modules will run with `--repeat-each=2`, meaning each test case executes twice. Intermittent failures will be surfaced as warnings.
-- **CI infrastructure**: A lightweight builder step runs on every PR (~1-2 min). Full burn-in test steps only run when affected modules are detected.
+- **CI infrastructure**: No additional builder agents are required. The burn-in detection runs within the existing `build_scout_tests` step. Full burn-in test steps only run when affected modules are detected.
 
 ---
 
@@ -53,30 +54,38 @@ The feature is always enabled on PR builds. If no Scout modules are affected by 
 ```
 PR Pipeline
 ├── build (existing)
-├── scout_test_run_builder (existing) ── produces scout_playwright_configs.json artifact
-├── scout_burn_in_builder (NEW)
-│   ├── Downloads scout_playwright_configs.json artifact
-│   ├── Runs git diff to detect changed files
-│   ├── Maps changed files → affected Scout modules
-│   └── Uploads Buildkite steps for affected modules
-└── Scout Burn-in (dynamic steps, NEW)
-    ├── Module A burn-in (soft_fail, --repeat-each=2)
-    ├── Module B burn-in (soft_fail, --repeat-each=2)
-    └── ...
+├── scout_test_run_builder (existing)
+│   ├── Discovers configs → scout_playwright_configs.json artifact
+│   ├── Produces regular Scout test execution steps
+│   └── Produces burn-in steps for affected modules (NEW)
+└── Dynamic Steps
+    ├── Scout Configs (existing, regular test execution)
+    └── Scout Burn-in (NEW, dynamic steps)
+        ├── Module A burn-in (soft_fail, --repeat-each=2)
+        ├── Module B burn-in (soft_fail, --repeat-each=2)
+        └── Scout Burn-in Summary
 ```
 
 ### Component Details
 
 #### 1. Change Detection (`get_scout_burn_in_configs.ts`)
 
-Uses `git diff` to compare the PR branch against the target branch (`GITHUB_PR_TARGET_BRANCH`). Returns a list of changed file paths.
+Uses `git diff` to compare the PR branch against the target branch. Returns a list of changed file paths.
 
-**Skip patterns** — files matching these patterns never trigger burn-in:
-- Documentation: `*.md`, `*.mdx`, `*.asciidoc`, `*.txt`
-- Assets: `*.png`, `*.jpg`, `*.gif`, `*.svg`, `*.ico`
-- Meta/config files: `package.json`, `tsconfig.json`, `jest.config.*`, `kibana.jsonc`
-- CI/CD files: `.buildkite/`, `.github/`
-- Documentation directories: `dev_docs/`, `docs/`, `api_docs/`
+**Inclusive source file patterns** — only files matching these patterns trigger burn-in:
+- Source code: `*.ts`, `*.tsx`, `*.js`, `*.jsx`
+- Styles: `*.scss`, `*.css`, `*.less`
+- Config: `*.json` (runtime config files)
+- Templates: `*.html`, `*.pug`, `*.ejs`
+
+**Always-excluded paths** — even if they match source patterns:
+- CI/infrastructure: `.buildkite/`, `.github/`
+- Documentation: `dev_docs/`, `docs/`, `api_docs/`, `legacy_rfcs/`
+- Test infrastructure: `jest.config.*`, `__mocks__/`, `__fixtures__/`
+- Test files: `*.test.ts`, `*.mock.ts`, `*.stories.ts`
+- Type declarations: `*.d.ts`
+
+This inclusive approach is more robust than an exclusion list — new non-source file types won't accidentally trigger burn-in.
 
 #### 2. Module Mapping
 
@@ -85,18 +94,21 @@ Each Scout config lives at a path like:
 {module-base-path}/test/scout/{ui|api}/playwright.config.ts
 ```
 
-The module base path is extracted by matching `/test/scout` in the config path. Changed files are then matched against module base paths using simple prefix matching:
+Changed files are matched against module base paths using simple prefix matching:
 
 ```
 Changed file: x-pack/solutions/security/plugins/security_solution/public/alerts/table.tsx
 Module path:  x-pack/solutions/security/plugins/security_solution/
-Config path:  x-pack/solutions/security/plugins/security_solution/test/scout/ui/playwright.config.ts
 → Match! This module's configs will be burn-in tested.
 ```
 
-This directory-based approach is intentionally simple. Cross-module dependency analysis (e.g., via `madge`) is not implemented in v1 due to the size of the monorepo. This can be added in future iterations.
+#### 3. Dependency Graph via Moon (`get_scout_burn_in_configs.ts`)
 
-#### 3. Burn-in Step Generation (`pick_scout_burn_in_run_order.ts`)
+Uses Moon's `dependsOn` from auto-generated `moon.yml` files to detect transitive impacts. Moon's dependency graph is derived from `tsconfig.json` `kbn_references` and provides a comprehensive view of all package/plugin dependencies — more complete than `kibana.jsonc` alone.
+
+When a changed module has a Moon project ID, all Scout test modules whose `moon.yml` `dependsOn` includes that project ID are also marked as affected.
+
+#### 4. Burn-in Step Generation (`pick_scout_burn_in_run_order.ts`)
 
 For each affected module, generates a Buildkite step that:
 - Reuses the existing `scout_configs.sh` execution script
@@ -105,13 +117,15 @@ For each affected module, generates a Buildkite step that:
 - Disables automatic retries (burn-in failures should be investigated, not retried)
 - Groups steps under a "Scout Burn-in" group in the Buildkite UI
 
-#### 4. Playwright Integration
+A summary step aggregates results and posts a PR comment.
 
-The `run_tests.ts` file in `@kbn/scout` reads the `SCOUT_BURN_IN_REPEAT_EACH` environment variable and appends `--repeat-each=N` to the Playwright CLI arguments. This ensures each test case in the config runs N times.
+#### 5. Playwright Integration
 
-#### 5. Pipeline Integration
+The `run_tests.ts` file in `@kbn/scout` reads the `SCOUT_BURN_IN_REPEAT_EACH` environment variable and appends `--repeat-each=N` to the Playwright CLI arguments.
 
-The burn-in pipeline step (`scout_burn_in.yml`) is added to the PR pipeline unconditionally. It depends on the existing `build_scout_tests` step to ensure the `scout_playwright_configs.json` artifact is available.
+#### 6. Pipeline Integration
+
+The burn-in logic runs within the existing `scout_test_run_builder.ts` alongside regular Scout test step generation. No separate pipeline step or agent is required.
 
 ### Configuration
 
@@ -128,37 +142,39 @@ The burn-in pipeline step (`scout_burn_in.yml`) is added to the PR pipeline unco
 1. PR is opened/updated
 2. PR pipeline starts
 3. Build step runs (produces Kibana build)
-4. Scout Test Run Builder runs (discovers configs, uploads JSON artifact)
-5. Scout Burn-in Builder runs:
-   a. Downloads scout_playwright_configs.json
-   b. Runs: git diff origin/${TARGET_BRANCH}...HEAD
-   c. Filters changed files through skip patterns
-   d. Maps remaining files to Scout module directories
-   e. If affected modules found → uploads burn-in Buildkite steps
-   f. If no affected modules → step completes (no burn-in needed)
-6. Burn-in steps execute (if any):
+4. Scout Test Run Builder runs:
+   a. Discovers configs → uploads scout_playwright_configs.json artifact
+   b. Produces regular Scout test execution steps
+   c. Runs git diff to detect changed files
+   d. Filters through inclusive source file patterns
+   e. Maps to Scout module directories + Moon dependency graph
+   f. If affected modules found → uploads burn-in Buildkite steps
+   g. If no affected modules → no burn-in needed
+5. Burn-in steps execute (if any):
    a. Each step runs scout_configs.sh with SCOUT_BURN_IN_REPEAT_EACH=2
    b. Tests run with --repeat-each=2
    c. Results are soft-fail
-7. Developer reviews burn-in results in Buildkite UI
+6. Summary step posts results to PR comment
+7. Developer reviews burn-in results
 ```
 
 ---
 
 ## Risks
 
-1. **False negatives from directory-based matching**: Changes to shared packages (e.g., `@kbn/es-query`) won't trigger burn-in for plugins that depend on them. This is acceptable for v1; dependency-graph-based matching can be added later.
-2. **CI cost**: Each burn-in step adds ~30-60 minutes of CI time. This only happens when affected modules have Scout tests. The soft-fail nature means it doesn't delay PR mergeability.
-3. **Git history availability**: `git diff` requires the target branch to be available. The builder script fetches it if needed, with graceful fallback to no burn-in if git operations fail.
+1. **CI cost**: Each burn-in step adds ~30-60 minutes of CI time. This only happens when affected modules have Scout tests. The soft-fail nature means it doesn't delay PR mergeability.
+2. **Git history availability**: `git diff` requires the target branch to be available. The code uses `GITHUB_PR_MERGE_BASE` (pre-computed by Kibana's bootstrap) with graceful fallbacks.
+3. **Moon graph completeness**: Moon's `dependsOn` covers `kbn_references` from `tsconfig.json`. Implicit or runtime-only dependencies not declared in `tsconfig.json` won't be detected.
 
 ---
 
 ## Alternatives Considered
 
-1. **Full dependency graph analysis (madge)**: The seontechnologies approach uses `madge` to build a complete import graph. This is impractical for Kibana's monorepo size. Directory-based matching provides a good first approximation.
-2. **Label-gated burn-in** (`ci:scout-burn-in`): Requiring a manual label reduces automation benefits. Always-on with soft-fail is preferred since the overhead for unaffected PRs is minimal (one lightweight builder step).
-3. **Playwright's built-in `--only-changed`**: Triggers all tests when any file changes, with no skip patterns or volume control. Too broad for a monorepo.
-4. **Extending existing Scout pipeline**: Adding repeat-each to the regular Scout run would double CI time for all tests. Separate burn-in steps only affect changed modules.
+1. **Full dependency graph analysis (madge)**: The seontechnologies approach uses `madge` to build a complete import graph. This is impractical for Kibana's monorepo size. Moon's existing dependency graph provides a good approximation.
+2. **Label-gated burn-in** (`ci:scout-burn-in`): Requiring a manual label reduces automation benefits. Always-on with soft-fail is preferred since the overhead for unaffected PRs is minimal.
+3. **Playwright's built-in `--only-changed`**: Triggers all tests when any file changes, with no patterns or volume control. Too broad for a monorepo.
+4. **Separate burn-in pipeline step**: Adds an extra agent and pipeline complexity. Integrating into the existing `build_scout_tests` step is simpler and avoids agent costs.
+5. **Exclusive skip patterns**: Maintaining a blocklist of file extensions to skip is fragile — new file types could accidentally trigger burn-in. Inclusive source file patterns are more robust.
 
 ---
 
@@ -167,27 +183,20 @@ The burn-in pipeline step (`scout_burn_in.yml`) is added to the PR pipeline unco
 | File | Purpose |
 |------|---------|
 | `dev_docs/openspecs/scout_burn_in.md` | This specification |
-| `.buildkite/pipeline-utils/scout/get_scout_burn_in_configs.ts` | Change detection and module mapping |
+| `.buildkite/pipeline-utils/scout/get_scout_burn_in_configs.ts` | Change detection, inclusive filtering, and Moon dependency matching |
 | `.buildkite/pipeline-utils/scout/pick_scout_burn_in_run_order.ts` | Buildkite step generation for burn-in |
-| `.buildkite/scripts/steps/test/scout_burn_in_test_run_builder.ts` | TypeScript entry point for builder |
-| `.buildkite/scripts/steps/test/scout_burn_in_test_run_builder.sh` | Shell entry point (downloads artifact, runs TS) |
-| `.buildkite/pipelines/pull_request/scout_burn_in.yml` | Pipeline definition |
+| `.buildkite/scripts/steps/test/scout_burn_in_summary.ts` | Summary step that aggregates results and posts PR comment |
+| `.buildkite/scripts/steps/test/scout_burn_in_summary.sh` | Shell entry point for summary step |
 
 ## Modified Files
 
 | File | Change |
 |------|--------|
 | `.buildkite/pipeline-utils/scout/index.ts` | Export new functions |
-| `.buildkite/scripts/pipelines/pull_request/pipeline.ts` | Add burn-in pipeline to PR builds |
+| `.buildkite/scripts/steps/test/scout_test_run_builder.ts` | Call `pickScoutBurnInRunOrder` alongside regular step generation |
 | `src/platform/packages/shared/kbn-scout/src/playwright/runner/run_tests.ts` | Read `SCOUT_BURN_IN_REPEAT_EACH` env var |
 
 ---
-
-## Implemented Enhancements
-
-1. **Dependency-graph-based matching**: Uses the plugin dependency graph from `kibana.jsonc` (`requiredPlugins`, `optionalPlugins`, `requiredBundles`) to detect Scout test modules affected when their upstream plugin dependencies change.
-2. **Configurable repeat count**: Supports `ci:scout-burn-in-repeat-N` PR labels (e.g., `ci:scout-burn-in-repeat-5`) and `SCOUT_BURN_IN_REPEAT_EACH` env var override. Defaults to 2.
-4. **PR comment summary**: A summary step runs after all burn-in steps, aggregates pass/fail results from Buildkite metadata, and posts a formatted PR comment via `upsertComment`.
 
 ## Future Enhancements
 

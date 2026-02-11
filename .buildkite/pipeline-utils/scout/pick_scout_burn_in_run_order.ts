@@ -13,47 +13,10 @@ import { BuildkiteClient } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
 import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
 import { getChangedScoutModules } from './get_scout_burn_in_configs';
-import { getRequiredEnv } from '#pipeline-utils';
 
 const DEFAULT_BURN_IN_REPEAT_EACH = 2;
-const BURN_IN_LABEL_PREFIX = 'ci:scout-burn-in-repeat-';
-
-/**
- * Parse the repeat-each value from PR labels and environment variables.
- *
- * Priority:
- * 1. `SCOUT_BURN_IN_REPEAT_EACH` env var (explicit override)
- * 2. `ci:scout-burn-in-repeat-N` PR label (e.g., ci:scout-burn-in-repeat-5)
- * 3. Default value (2)
- */
-function getRepeatEachValue(): number {
-  // Check env var override
-  const envValue = process.env.SCOUT_BURN_IN_REPEAT_EACH;
-  if (envValue) {
-    const parsed = parseInt(envValue, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-
-  // Check PR labels for ci:scout-burn-in-repeat-N pattern
-  const prLabels = process.env.GITHUB_PR_LABELS ?? '';
-  if (prLabels) {
-    const labels = prLabels.split(',');
-    for (const label of labels) {
-      const trimmed = label.trim();
-      if (trimmed.startsWith(BURN_IN_LABEL_PREFIX)) {
-        const repeatStr = trimmed.substring(BURN_IN_LABEL_PREFIX.length);
-        const parsed = parseInt(repeatStr, 10);
-        if (!isNaN(parsed) && parsed > 0) {
-          return parsed;
-        }
-      }
-    }
-  }
-
-  return DEFAULT_BURN_IN_REPEAT_EACH;
-}
+const BURN_IN_CONFIGS_SCRIPT = '.buildkite/scripts/steps/test/scout_configs.sh';
+const BURN_IN_SUMMARY_SCRIPT = '.buildkite/scripts/steps/test/scout_burn_in_summary.sh';
 
 /**
  * Reads the Scout configs JSON, filters to modules affected by PR changes,
@@ -90,7 +53,7 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
     return;
   }
 
-  const repeatEach = getRepeatEachValue();
+  const repeatEach = DEFAULT_BURN_IN_REPEAT_EACH;
   console.error(`scout burn-in: Using repeat-each=${repeatEach}`);
 
   const burnInSteps = affectedModules.map((module) => {
@@ -117,13 +80,13 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
       {
         group: 'Scout Burn-in',
         key: 'scout-burn-in',
-        depends_on: ['build_scout_burn_in'],
+        depends_on: ['build_scout_tests'],
         steps: [
           // Test execution steps (one per affected module)
           ...burnInSteps.map(({ label, key, group, agents }) => ({
             label,
             key,
-            command: getRequiredEnv('SCOUT_BURN_IN_CONFIGS_SCRIPT'),
+            command: BURN_IN_CONFIGS_SCRIPT,
             timeout_in_minutes: 60,
             agents,
             soft_fail: true,
@@ -137,7 +100,7 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
           // Summary step: aggregates results and posts a PR comment
           {
             label: 'Scout Burn-in Summary',
-            command: getRequiredEnv('SCOUT_BURN_IN_SUMMARY_SCRIPT'),
+            command: BURN_IN_SUMMARY_SCRIPT,
             timeout_in_minutes: 5,
             agents: expandAgentQueue('n2-4-spot'),
             depends_on: burnInSteps.map(({ key }) => key),
