@@ -36,27 +36,27 @@ describe('useFilteredInferenceEndpoints', () => {
 
   describe('provider filters', () => {
     it('should filter endpoints by single provider', () => {
-      const filters = makeFilters([ServiceProviderKeys.openai]);
-
-      const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
-      );
-
-      expect(result.current).toHaveLength(2);
-      expect(result.current.every((endpoint) => endpoint.service === 'openai')).toBe(true);
-    });
-
-    it('should filter endpoints by multiple providers', () => {
-      const filters = makeFilters([ServiceProviderKeys.elasticsearch, ServiceProviderKeys.cohere]);
+      const filters = makeFilters([ServiceProviderKeys.elasticsearch]);
 
       const { result } = renderHook(() =>
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
       expect(result.current).toHaveLength(3);
+      expect(result.current.every((endpoint) => endpoint.service === 'elasticsearch')).toBe(true);
+    });
+
+    it('should filter endpoints by multiple providers', () => {
+      const filters = makeFilters([ServiceProviderKeys.elasticsearch, ServiceProviderKeys.elastic]);
+
+      const { result } = renderHook(() =>
+        useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
+      );
+
+      expect(result.current).toHaveLength(InferenceEndpoints.length);
       expect(
         result.current.every(
-          (endpoint) => endpoint.service === 'elasticsearch' || endpoint.service === 'cohere'
+          (endpoint) => endpoint.service === 'elasticsearch' || endpoint.service === 'elastic'
         )
       ).toBe(true);
     });
@@ -80,7 +80,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current.length).toBeGreaterThan(0);
+      expect(result.current).toHaveLength(5);
       expect(result.current.every((endpoint) => endpoint.task_type === 'text_embedding')).toBe(
         true
       );
@@ -93,7 +93,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current).toHaveLength(3);
+      expect(result.current).toHaveLength(5);
       expect(
         result.current.every(
           (endpoint) => endpoint.task_type === 'sparse_embedding' || endpoint.task_type === 'rerank'
@@ -104,20 +104,20 @@ describe('useFilteredInferenceEndpoints', () => {
 
   describe('combined provider and type filters', () => {
     it('should apply both provider and type filters', () => {
-      const filters = makeFilters([ServiceProviderKeys.openai], ['text_embedding']);
+      const filters = makeFilters([ServiceProviderKeys.elasticsearch], ['text_embedding']);
 
       const { result } = renderHook(() =>
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].service).toBe('openai');
+      expect(result.current[0].service).toBe('elasticsearch');
       expect(result.current[0].task_type).toBe('text_embedding');
-      expect(result.current[0].inference_id).toBe('my-openai-model-05');
+      expect(result.current[0].inference_id).toBe('.multilingual-e5-small-elasticsearch');
     });
 
     it('should return empty array when combined filters have no matches', () => {
-      const filters = makeFilters([ServiceProviderKeys.elasticsearch], ['rerank']);
+      const filters = makeFilters([ServiceProviderKeys.elasticsearch], ['completion']);
 
       const { result } = renderHook(() =>
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
@@ -141,11 +141,13 @@ describe('useFilteredInferenceEndpoints', () => {
 
     it('should filter by partial inference_id match', () => {
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'mistral')
+        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'gp-llm-v2')
       );
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0].inference_id).toBe('my-mistral-model');
+      expect(result.current).toHaveLength(2);
+      expect(result.current.every((endpoint) => endpoint.inference_id.includes('gp-llm-v2'))).toBe(
+        true
+      );
     });
 
     it('should return empty array when search has no matches', () => {
@@ -175,23 +177,25 @@ describe('useFilteredInferenceEndpoints', () => {
       ).toBe(true);
     });
 
-    it('should filter by model field for providers that use "model" instead of "model_id"', () => {
+    it('should filter by model_id for other models', () => {
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'mistral-embed')
+        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'rainbow-sprinkles')
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].service).toBe('mistral');
-      expect(result.current[0].inference_id).toBe('my-mistral-model');
+      expect(result.current[0].service).toBe('elastic');
+      expect(result.current[0].inference_id).toBe('.rainbow-sprinkles-elastic');
     });
 
     it('should match endpoints by model_id case insensitively', () => {
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'GPT-4')
+        useFilteredInferenceEndpoints(InferenceEndpoints, emptyFilters, 'GPT-4.1')
       );
 
-      expect(result.current).toHaveLength(1);
-      expect(result.current[0].inference_id).toBe('endpoint-06');
+      expect(result.current).toHaveLength(4);
+      expect(
+        result.current.every((endpoint) => endpoint.inference_id.includes('openai-gpt-4.1'))
+      ).toBe(true);
     });
   });
 
@@ -200,40 +204,41 @@ describe('useFilteredInferenceEndpoints', () => {
       const filters = makeFilters([ServiceProviderKeys.elasticsearch]);
 
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'model-04')
+        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'rerank-v1')
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].inference_id).toBe('my-elser-model-04');
+      expect(result.current[0].inference_id).toBe('.rerank-v1-elasticsearch');
     });
 
     it('should apply type filter and search together', () => {
       const filters = makeFilters([], ['text_embedding']);
 
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'cohere')
+        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'jina')
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].service).toBe('cohere');
+      expect(result.current[0].service).toBe('elastic');
       expect(result.current[0].task_type).toBe('text_embedding');
+      expect(result.current[0].inference_id).toBe('.jina-embeddings-v3');
     });
 
     it('should apply all filters (provider, type, and search) together', () => {
       const filters = makeFilters([ServiceProviderKeys.elasticsearch], ['sparse_embedding']);
 
       const { result } = renderHook(() =>
-        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'model-01')
+        useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'elser')
       );
 
       expect(result.current).toHaveLength(1);
-      expect(result.current[0].inference_id).toBe('my-elser-model-01');
+      expect(result.current[0].inference_id).toBe('.elser-2-elasticsearch');
       expect(result.current[0].service).toBe('elasticsearch');
       expect(result.current[0].task_type).toBe('sparse_embedding');
     });
 
     it('should return empty array when combined filters and search have no matches', () => {
-      const filters = makeFilters([ServiceProviderKeys.openai], ['text_embedding']);
+      const filters = makeFilters([ServiceProviderKeys.elasticsearch], ['completion']);
 
       const { result } = renderHook(() =>
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, 'nonexistent')
@@ -245,19 +250,7 @@ describe('useFilteredInferenceEndpoints', () => {
 
   describe('all services coverage', () => {
     it('should filter each service type correctly', () => {
-      const services = [
-        'elasticsearch',
-        'openai',
-        'mistral',
-        'cohere',
-        'azureaistudio',
-        'azureopenai',
-        'googleaistudio',
-        'hugging_face',
-        'alibabacloud-ai-search',
-        'watsonxai',
-        'amazonbedrock',
-      ];
+      const services = ['elasticsearch', 'elastic'];
 
       services.forEach((service) => {
         const filters = makeFilters([service as ServiceProviderKeys]);

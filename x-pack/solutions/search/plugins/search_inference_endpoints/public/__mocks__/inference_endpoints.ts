@@ -9,161 +9,299 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export const InferenceEndpoints: InferenceAPIConfigResponse[] = [
   {
-    inference_id: 'my-elser-model-04',
+    inference_id: '.anthropic-claude-3.7-sonnet-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'anthropic-claude-3.7-sonnet',
+    },
+  },
+  {
+    inference_id: '.anthropic-claude-3.7-sonnet-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'anthropic-claude-3.7-sonnet',
+    },
+  },
+  {
+    inference_id: '.anthropic-claude-4.5-sonnet-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'anthropic-claude-4.5-sonnet',
+    },
+  },
+  {
+    inference_id: '.anthropic-claude-4.5-sonnet-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'anthropic-claude-4.5-sonnet',
+    },
+  },
+  {
+    inference_id: '.elser-2-elastic',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'elser_model_2',
+    },
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
+  },
+  {
+    inference_id: '.elser-2-elasticsearch',
     task_type: 'sparse_embedding',
     service: 'elasticsearch',
     service_settings: {
-      num_allocations: 1,
       num_threads: 1,
-      model_id: '.elser_model_2',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-elser-model-01',
-    task_type: 'sparse_embedding',
-    service: 'elasticsearch',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.elser_model_2',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-openai-model-05',
-    task_type: 'text_embedding',
-    service: 'openai',
-    service_settings: {
-      api_key: 'test-api-key',
-      organization_id: 'test-org',
-      url: 'https://api.openai.com/v1',
-      model_id: 'text-embedding-ada-002',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'endpoint-06',
-    task_type: 'rerank',
-    service: 'openai',
-    service_settings: {
-      api_key: 'test-api-key',
-      organization_id: 'test-org',
-      url: 'https://api.openai.com/v1',
-      model_id: 'gpt-4',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-mistral-model',
-    task_type: 'text_embedding',
-    service: 'mistral',
-    service_settings: {
-      api_key: 'test-api-key',
-      model: 'mistral-embed',
-      max_input_tokens: '512',
-      rate_limit: {
-        requests_per_minute: 100,
+      model_id: '.elser_model_2_linux-x86_64',
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 0,
+        max_number_of_allocations: 32,
       },
     },
-    task_settings: {},
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
   },
   {
-    inference_id: 'my-cohere-model',
-    task_type: 'text_embedding',
-    service: 'cohere',
+    inference_id: '.google-gemini-2.5-flash-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
     service_settings: {
+      model_id: 'google-gemini-2.5-flash',
+    },
+  },
+  {
+    inference_id: '.google-gemini-2.5-flash-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'google-gemini-2.5-flash',
+    },
+  },
+  {
+    inference_id: '.google-gemini-2.5-pro-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'google-gemini-2.5-pro',
+    },
+  },
+  {
+    inference_id: '.google-gemini-2.5-pro-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'google-gemini-2.5-pro',
+    },
+  },
+  {
+    inference_id: '.google-gemini-embedding-001',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'google-gemini-embedding-001',
       similarity: 'cosine',
-      dimensions: '1024',
-      model_id: 'embed-english-v3.0',
-      embedding_type: 'float',
+      dimensions: 768,
     },
-    task_settings: {},
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
   },
   {
-    inference_id: 'my-azureaistudio-model',
-    task_type: 'text_embedding',
-    service: 'azureaistudio',
+    inference_id: '.gp-llm-v2-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
     service_settings: {
-      target: 'https://test.azureaistudio.com',
-      provider: 'openai',
-      embedding_type: 'float',
+      model_id: 'gp-llm-v2',
     },
-    task_settings: {},
   },
   {
-    inference_id: 'my-azureopenai-model',
-    task_type: 'text_embedding',
-    service: 'azureopenai',
+    inference_id: '.gp-llm-v2-completion',
+    task_type: 'completion',
+    service: 'elastic',
     service_settings: {
-      resource_name: 'test-resource',
-      deployment_id: 'test-deployment',
-      api_version: '2023-05-15',
+      model_id: 'gp-llm-v2',
     },
-    task_settings: {},
   },
   {
-    inference_id: 'my-googleaistudio-model',
+    inference_id: '.jina-embeddings-v3',
     task_type: 'text_embedding',
-    service: 'googleaistudio',
+    service: 'elastic',
     service_settings: {
-      model_id: 'text-embedding-004',
-      rate_limit: {
-        requests_per_minute: 100,
+      model_id: 'jina-embeddings-v3',
+      similarity: 'cosine',
+      dimensions: 1024,
+    },
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
+  },
+  {
+    inference_id: '.jina-reranker-v2-base-multilingual',
+    task_type: 'rerank',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'jina-reranker-v2-base-multilingual',
+    },
+  },
+  {
+    inference_id: '.jina-reranker-v3',
+    task_type: 'rerank',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'jina-reranker-v3',
+    },
+  },
+  {
+    inference_id: '.multilingual-e5-small-elasticsearch',
+    task_type: 'text_embedding',
+    service: 'elasticsearch',
+    service_settings: {
+      num_threads: 1,
+      model_id: '.multilingual-e5-small_linux-x86_64',
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 0,
+        max_number_of_allocations: 32,
       },
     },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-huggingface-model',
-    task_type: 'text_embedding',
-    service: 'hugging_face',
-    service_settings: {
-      api_key: 'test-api-key',
-      url: 'https://api-inference.huggingface.co',
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
     },
-    task_settings: {},
   },
   {
-    inference_id: 'my-alibabacloud-model',
-    task_type: 'text_embedding',
-    service: 'alibabacloud-ai-search',
+    inference_id: '.openai-gpt-4.1-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
     service_settings: {
-      api_key: 'test-api-key',
-      service_id: 'test-service',
-      host: 'test-host.aliyuncs.com',
-      workspace: 'default',
-      http_schema: 'https',
-      rate_limit: {
-        requests_per_minute: 100,
+      model_id: 'openai-gpt-4.1',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-4.1-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-4.1',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-4.1-mini-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-4.1-mini',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-4.1-mini-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-4.1-mini',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-5.2-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-5.2',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-5.2-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-5.2',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-oss-120b-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-oss-120b',
+    },
+  },
+  {
+    inference_id: '.openai-gpt-oss-120b-completion',
+    task_type: 'completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-gpt-oss-120b',
+    },
+  },
+  {
+    inference_id: '.openai-text-embedding-3-large',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-text-embedding-3-large',
+      similarity: 'cosine',
+      dimensions: 3072,
+    },
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
+  },
+  {
+    inference_id: '.openai-text-embedding-3-small',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'openai-text-embedding-3-small',
+      similarity: 'cosine',
+      dimensions: 1536,
+    },
+    chunking_settings: {
+      strategy: 'sentence',
+      max_chunk_size: 250,
+      sentence_overlap: 1,
+    },
+  },
+  {
+    inference_id: '.rainbow-sprinkles-elastic',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'rainbow-sprinkles',
+    },
+  },
+  {
+    inference_id: '.rerank-v1-elasticsearch',
+    task_type: 'rerank',
+    service: 'elasticsearch',
+    service_settings: {
+      num_threads: 1,
+      model_id: '.rerank-v1',
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 0,
+        max_number_of_allocations: 32,
       },
     },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-watsonx-model',
-    task_type: 'text_embedding',
-    service: 'watsonxai',
-    service_settings: {
-      api_key: 'test-api-key',
-      url: 'https://us-south.ml.cloud.ibm.com',
-      model_id: 'ibm/slate-125m-english-rtrvr',
-      project_id: 'test-project',
-      api_version: '2024-01-01',
+    task_settings: {
+      return_documents: true,
     },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-amazonbedrock-model',
-    task_type: 'text_embedding',
-    service: 'amazonbedrock',
-    service_settings: {
-      access_key: 'test-access-key',
-      secret_key: 'test-secret-key',
-      region: 'us-east-1',
-      provider: 'amazontitan',
-      model: 'amazon.titan-embed-text-v1',
-    },
-    task_settings: {},
   },
 ];
