@@ -106,10 +106,8 @@ describe('oauthCallbackRoute', () => {
       getDecryptedAsInternalUser: jest.fn(),
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as any);
+    MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
+    MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as never);
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
@@ -119,10 +117,8 @@ describe('oauthCallbackRoute', () => {
       licenseState,
       configurationUtilities,
       mockLogger,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      coreSetup as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockRateLimiter as any
+      coreSetup as never,
+      mockRateLimiter as never
     );
     return router.get.mock.calls[0];
   };
@@ -424,10 +420,8 @@ describe('oauthCallbackRoute', () => {
       licenseState,
       configurationUtilities,
       mockLogger,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      createMockCoreSetup() as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockRateLimiter as any
+      createMockCoreSetup() as never,
+      mockRateLimiter as never
     );
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
