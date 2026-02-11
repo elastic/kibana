@@ -375,7 +375,7 @@ Search for tests that cover the bug's scenario:
 
 ### Step 5: Render Verdict
 
-Combine all evidence from Steps 0-4 to render a verdict. See Verdict Taxonomy below.
+Combine all evidence from Steps 0-4 to render a verdict. See Verdict Taxonomy below. Then assess the issue's `impact:*` label per the **Impact Assessment** section below and note any mismatch.
 
 ---
 
@@ -490,6 +490,67 @@ Either confirm the fix with evidence (read the PR diff + verify it addresses the
 
 ---
 
+## Impact Assessment
+
+After rendering a verdict, assess whether the issue's `impact:*` label is correct. Use the definitions below. If the issue matches clauses from multiple levels, the highest one wins.
+
+### Impact Definitions
+
+**Critical**
+- One of our current or new functionalities is unusable
+- Users are blocked
+- Users are not able to finish their workflows
+- The application is severely degraded
+- Data is affected / Data loss
+- Security vulnerability
+- The issue affects a very large percentage of users (> 60%)
+- The issue may cause our users to lose confidence in our application
+- There is no workaround / No way to avoid it
+
+**High**
+- Main functionalities are affected but there is a workaround
+- The workaround is not obvious or can be difficult to put into practice
+- Critical data is affected
+- Affects a large percentage of users (> 30%)
+- It has a strong impact on the usability of the application
+- It is an important problem but not necessarily blocking the main activity of our users
+
+**Medium**
+- The issue affects a minor functionality
+- Non-critical data is affected
+- There is a reasonable workaround
+
+**Low**
+- The issue does not affect any functionality
+- The issue does not affect data
+- It does not impact the efficiency of the application
+- Cosmetic issues
+
+### How to Assess Impact
+
+After completing the analysis and rendering a verdict, evaluate impact by answering these questions:
+
+1. **What functionality is affected?** Is it a main workflow (e.g., risk scoring, alert triage, case management) or a secondary/debugging feature (e.g., Inspect modal, "Open in Lens")?
+2. **Is there a workaround?** If yes, how obvious is it? Can a typical user find it without documentation?
+3. **Is data affected?** Data loss or corruption = Critical/High. Stale display data = Medium. No data impact = Low.
+4. **How many users does this realistically affect?** Everyone, or only users with specific configurations (e.g., experimental feature flags, multi-space setups, >10k entities)?
+5. **Is it a security/data-boundary issue?** Cross-space data leakage or privilege escalation = Critical regardless of other factors.
+
+### Common Over-Rating Patterns
+
+Watch for these common mistakes when assessing impact:
+
+| Pattern | Often Labeled | Should Be |
+|---------|--------------|-----------|
+| Error message in a secondary feature (Inspect, "Open in Lens") | High | Low or Medium |
+| Cosmetic issue with "no functionality impact" but dramatic screenshot | High | Low |
+| Bug only triggers with experimental feature flags or rare configs | High | Medium |
+| Stale display data that self-corrects on refresh | High | Medium |
+| Missing descriptions/labels in dropdowns or tooltips | High | Low |
+| Action works from one location but fails from another (workaround exists) | High | Medium |
+
+---
+
 ## Output Format
 
 ### Single Issue Report
@@ -542,6 +603,11 @@ When analyzing a single bug, structure your response as:
 
 ### Recommendation
 <What the user should do next -- close the issue, investigate further, try to reproduce, etc.>
+
+### Impact Assessment
+- **Current label:** impact:<level> (or "none")
+- **Suggested label:** impact:<level> (or "correct" if the label is accurate)
+- **Reasoning:** <1-2 sentences explaining why the label is correct or should change>
 ```
 
 ### Bulk Triage Table
@@ -556,18 +622,19 @@ When analyzing multiple bugs from a list URL, present results in two parts:
 **Source:** <URL or label filter>
 **Analyzed:** <N> issues | **Date:** <today>
 
-| # | Title | Filed | Version | Verdict | Confidence | Key Evidence |
-|---|-------|-------|---------|---------|------------|--------------|
-| #12345 | Short title | Jan 10 | 9.3.0 | FIXED | High | PR #12400 closes it |
-| #12346 | Short title | Dec 5 | 9.2.0 | STILL VALID | High | Code unchanged |
-| #12347 | Short title | Nov 20 | 8.15.0 | OBSOLETE | Medium | Component removed |
-| #12348 | Short title | Jan 15 | 9.3.0 | INCONCLUSIVE | N/A | Needs UI verification |
+| # | Title | Filed | Version | Verdict | Confidence | Impact | Key Evidence |
+|---|-------|-------|---------|---------|------------|--------|--------------|
+| #12345 | Short title | Jan 10 | 9.3.0 | FIXED | High | high (correct) | PR #12400 closes it |
+| #12346 | Short title | Dec 5 | 9.2.0 | STILL VALID | High | high -> medium | Code unchanged |
+| #12347 | Short title | Nov 20 | 8.15.0 | OBSOLETE | Medium | medium (correct) | Component removed |
+| #12348 | Short title | Jan 15 | 9.3.0 | INCONCLUSIVE | N/A | none -> high | Needs UI verification |
 
 ### Summary
 - **FIXED:** N issues (can likely be closed)
 - **OBSOLETE:** N issues (can likely be closed)
 - **STILL VALID:** N issues (need attention)
 - **INCONCLUSIVE:** N issues (need further investigation)
+- **Impact mismatches:** N issues (labels may need adjustment)
 ```
 
 **Part 2: Details (on request or for non-obvious verdicts)**
