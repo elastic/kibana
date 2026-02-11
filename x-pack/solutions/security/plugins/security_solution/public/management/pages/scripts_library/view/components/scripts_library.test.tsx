@@ -170,7 +170,7 @@ describe('ScriptsLibrary', () => {
       );
     });
 
-    it('should show details flyout when clicked on row action `View details` item', async () => {
+    it('should show details flyout when clicked on row action `View details` item', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
       setupScriptsList([script]);
@@ -184,17 +184,15 @@ describe('ScriptsLibrary', () => {
 
       const actionsButton = getByTestId(`test-table-row-actions-${scriptId}`);
       expect(actionsButton).toBeInTheDocument();
-      await fireEvent.click(actionsButton);
+      fireEvent.click(actionsButton);
 
       waitFor(() => {
         const actionsPanel = getByTestId(`test-table-row-actions-${scriptId}-contextMenuPanel`);
         expect(actionsPanel).toBeInTheDocument();
-      });
 
-      waitFor(async () => {
         const detailsButton = getByTestId('actionDetails');
         expect(detailsButton).toBeInTheDocument();
-        await fireEvent.click(detailsButton);
+        fireEvent.click(detailsButton);
         expect(getByTestId('test-endpointScriptFlyout-details')).toBeInTheDocument();
       });
     });
