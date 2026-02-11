@@ -17,8 +17,8 @@ describe('Microsoft Defender for Endpoint oAuth token manager', () => {
 
   beforeEach(() => {
     testMock = microsoftDefenderEndpointConnectorMocks.create();
-    connectorTokenManagerClientMock = testMock.options.services.connectorTokenClient
-      .getSharedCredentialsClient() as jest.Mocked<SharedConnectorTokenClient>;
+    connectorTokenManagerClientMock =
+      testMock.options.services.connectorTokenClient.getSharedCredentialsClient() as jest.Mocked<SharedConnectorTokenClient>;
     msOAuthManagerMock = new OAuthTokenManager({
       ...testMock.options,
       apiRequest: async (...args) => testMock.instanceMock.request(...args),
