@@ -117,11 +117,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               method: 'GET',
               path: '/_streams/status',
             });
-            expect(response).to.eql({
-              logs: {
-                enabled: true,
-              },
-            });
+            // Elasticsearch may return additional status keys (e.g. `logs.ecs`, `logs.otel`).
+            expect(response).to.have.property('logs');
+            expect(response.logs).to.have.property('enabled', true);
           });
         }
 
