@@ -126,7 +126,6 @@ export function setupSavedObjects(
     },
     modelVersions: connectorTokenModelVersions,
   });
-
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
@@ -136,6 +135,7 @@ export function setupSavedObjects(
       'expiresAt',
       'createdAt',
       'updatedAt',
+      'refreshTokenExpiresAt',
     ]),
   });
 }
