@@ -73,10 +73,17 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
 
       expect(lastToolMessage).to.not.be(undefined);
 
-      const parsedToolContent = JSON.parse(lastToolMessage!.content as string) as {
-        response?: string;
-      };
-      const errorMessage = parsedToolContent.response ?? '';
+      const toolContent = lastToolMessage!.content as string;
+      let errorMessage = toolContent;
+      // Some connectors/providers may wrap tool result content in a JSON string.
+      try {
+        const parsed = JSON.parse(toolContent) as { response?: unknown };
+        if (parsed && typeof parsed === 'object' && typeof parsed.response === 'string') {
+          errorMessage = parsed.response;
+        }
+      } catch {
+        // Non-JSON tool content; use as-is.
+      }
 
       expect(errorMessage).to.contain('ERROR: called a tool which was not available');
     });

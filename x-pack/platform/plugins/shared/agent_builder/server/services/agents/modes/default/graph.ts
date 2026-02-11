@@ -94,7 +94,7 @@ export const createAgentGraph = ({
       return {
         mainActions: [action],
         currentCycle: state.currentCycle + 1,
-        errorCount: 0,
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);
@@ -215,7 +215,7 @@ export const createAgentGraph = ({
 
       return {
         answerActions: [action],
-        errorCount: 0,
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);
