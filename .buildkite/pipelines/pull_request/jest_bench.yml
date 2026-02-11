@@ -3,6 +3,7 @@ steps:
     label: 'Jest Bench'
     agents:
       machineType: c4d-highmem-16
+      diskType: hyperdisk-balanced
       diskSizeGb: 100
     key: jest_bench
     timeout_in_minutes: 60
