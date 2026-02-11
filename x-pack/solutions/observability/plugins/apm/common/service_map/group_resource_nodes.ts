@@ -69,13 +69,24 @@ function getUngroupedNodesAndEdges({
   const ungroupedEdges = new Map(edgesMap);
   const ungroupedNodes = new Map(nodesMap);
 
+  // Build the set of all grouped node IDs and edge IDs to remove
+  const groupedNodeIds = new Set<string>();
+  const groupedEdgeIds = new Set<string>();
+
   for (const { sources, targets } of groupedConnections) {
     targets.forEach((target) => {
       ungroupedNodes.delete(target);
+      groupedNodeIds.add(target);
       sources.forEach((source) => {
-        ungroupedEdges.delete(getEdgeId(source, target));
+        groupedEdgeIds.add(getEdgeId(source, target));
       });
     });
+  }
+
+  for (const [edgeId, { data }] of ungroupedEdges) {
+    if (groupedEdgeIds.has(edgeId) || groupedNodeIds.has(data.source)) {
+      ungroupedEdges.delete(edgeId);
+    }
   }
 
   return {
