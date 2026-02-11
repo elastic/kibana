@@ -20,12 +20,12 @@ test.describe(
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data only
       await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
       await pageObjects.streams.switchToColumnsView();
     });

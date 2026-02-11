@@ -22,23 +22,23 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.edit-test', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.edit-test', {
         field: 'service.name',
         eq: 'test-service',
       });
 
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update condition
@@ -46,7 +46,7 @@ test.describe(
       await pageObjects.streams.updateRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -59,7 +59,7 @@ test.describe(
     });
 
     test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update and cancel changes
@@ -67,7 +67,7 @@ test.describe(
       await pageObjects.streams.cancelRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
