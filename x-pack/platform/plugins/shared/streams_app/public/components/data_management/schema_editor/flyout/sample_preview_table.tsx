@@ -6,9 +6,10 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { stableStringify } from '@kbn/std';
 import { EuiCallOut, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -52,6 +53,32 @@ const SamplePreviewTableContent = ({
 }: SamplePreviewTableProps & { nextField: TypedMappedSchemaField }) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
+  const nextFieldDefinitionConfig = useMemo(
+    () => convertToFieldDefinitionConfig(nextField),
+    [nextField]
+  );
+  const simulationKey = useMemo(
+    () => stableStringify(nextFieldDefinitionConfig),
+    [nextFieldDefinitionConfig]
+  );
+  const lastSimulationFieldDefinitionConfigRef = useRef<{
+    key: string;
+    config: ReturnType<typeof convertToFieldDefinitionConfig>;
+  }>();
+  const simulationFieldDefinitionConfig = useMemo(() => {
+    const last = lastSimulationFieldDefinitionConfigRef.current;
+    if (last && last.key === simulationKey) {
+      return last.config;
+    }
+
+    lastSimulationFieldDefinitionConfigRef.current = {
+      key: simulationKey,
+      config: nextFieldDefinitionConfig,
+    };
+
+    return nextFieldDefinitionConfig;
+  }, [simulationKey, nextFieldDefinitionConfig]);
+
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch(
@@ -63,15 +90,13 @@ const SamplePreviewTableContent = ({
               name: stream.name,
             },
             body: {
-              field_definitions: [
-                { ...convertToFieldDefinitionConfig(nextField), name: nextField.name },
-              ],
+              field_definitions: [{ ...simulationFieldDefinitionConfig, name: nextField.name }],
             },
           },
         }
       );
     },
-    [stream.name, nextField, streamsRepositoryClient],
+    [stream.name, nextField.name, streamsRepositoryClient, simulationFieldDefinitionConfig],
     { disableToastOnError: true }
   );
 
