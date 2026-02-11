@@ -132,6 +132,70 @@ describe('AbortMonitor', () => {
     expect(executionClient.get).toHaveBeenCalledTimes(1);
   });
 
+  it('should stop polling when execution status is completed', async () => {
+    executionClient.get.mockResolvedValue({
+      executionId: 'exec-1',
+      '@timestamp': new Date().toISOString(),
+      status: ExecutionStatus.completed,
+      agentId: 'agent-1',
+      spaceId: 'default',
+      agentParams: { nextInput: { message: 'test' } },
+    });
+
+    const monitor = new AbortMonitor({
+      executionId: 'exec-1',
+      executionClient,
+      logger,
+    });
+
+    monitor.start();
+
+    // First poll - completed
+    jest.advanceTimersByTime(2000);
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(monitor.getSignal().aborted).toBe(false);
+    expect(executionClient.get).toHaveBeenCalledTimes(1);
+
+    // No further polls should happen
+    jest.advanceTimersByTime(4000);
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(executionClient.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('should stop polling when execution status is failed', async () => {
+    executionClient.get.mockResolvedValue({
+      executionId: 'exec-1',
+      '@timestamp': new Date().toISOString(),
+      status: ExecutionStatus.failed,
+      agentId: 'agent-1',
+      spaceId: 'default',
+      agentParams: { nextInput: { message: 'test' } },
+    });
+
+    const monitor = new AbortMonitor({
+      executionId: 'exec-1',
+      executionClient,
+      logger,
+    });
+
+    monitor.start();
+
+    // First poll - failed
+    jest.advanceTimersByTime(2000);
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(monitor.getSignal().aborted).toBe(false);
+    expect(executionClient.get).toHaveBeenCalledTimes(1);
+
+    // No further polls should happen
+    jest.advanceTimersByTime(4000);
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(executionClient.get).toHaveBeenCalledTimes(1);
+  });
+
   it('should handle errors gracefully without stopping', async () => {
     executionClient.get.mockRejectedValueOnce(new Error('ES unavailable')).mockResolvedValueOnce({
       executionId: 'exec-1',

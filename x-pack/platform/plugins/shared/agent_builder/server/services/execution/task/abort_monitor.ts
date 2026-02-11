@@ -76,9 +76,17 @@ export class AbortMonitor {
 
     try {
       const execution = await this.executionClient.get(this.executionId);
-      if (execution?.status === ExecutionStatus.aborted) {
+      if (!execution) {
+        return;
+      }
+      if (execution.status === ExecutionStatus.aborted) {
         this.logger.info(`Execution ${this.executionId} was aborted, propagating abort signal`);
         this.abortController.abort();
+        this.stop();
+      } else if (
+        execution.status === ExecutionStatus.completed ||
+        execution.status === ExecutionStatus.failed
+      ) {
         this.stop();
       }
     } catch (err) {
