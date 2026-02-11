@@ -12,9 +12,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MultiOptionUnionWidget } from './multi_option_union_widget';
-import { addMeta, getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import { getMeta, setMeta, addMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
-const meta = { getMeta, addMeta };
+const meta = { getMeta, setMeta };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -334,6 +334,7 @@ describe('MultiOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <MultiOptionUnionWidget
+            meta={meta}
             formConfig={{ disabled: true }}
             path="auth"
             schema={schema}
@@ -563,6 +564,7 @@ describe('MultiOptionUnionWidget', () => {
     render(
       <TestFormWrapper>
         <MultiOptionUnionWidget
+          meta={meta}
           formConfig={{}}
           path="auth"
           schema={schema}

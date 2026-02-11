@@ -12,9 +12,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ObjectWidget } from './object_widget';
-import { getMeta, addMeta } from '../../schema_connector_metadata';
+import { getMeta, setMeta } from '../../schema_connector_metadata';
 
-const meta = { getMeta, addMeta };
+const meta = { getMeta, setMeta };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -191,6 +191,7 @@ describe('ObjectWidget', () => {
     render(
       <TestFormWrapper>
         <ObjectWidget
+          meta={meta}
           formConfig={{ disabled: true }}
           path="server"
           schema={schema}
@@ -306,6 +307,7 @@ describe('ObjectWidget', () => {
     render(
       <TestFormWrapper>
         <ObjectWidget
+          meta={meta}
           formConfig={{ disabled: false }}
           path="item"
           schema={schema}

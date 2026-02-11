@@ -176,8 +176,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
 
     it('should unwrap ZodReadonly with number schema and add disabled metadata', () => {
@@ -185,8 +184,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
 
     it('should unwrap ZodReadonly with object schema and add disabled metadata', () => {
@@ -194,8 +192,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
 
       expect(result.schema).toBeInstanceOf(z.ZodObject);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
   });
 
@@ -243,8 +240,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
       expect(result.isOptional).toBe(false);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
 
     it('should unwrap z.optional(z.readonly(...))', () => {
@@ -252,8 +248,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
 
     it('should unwrap z.catch(z.default(...))', () => {
@@ -272,8 +267,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
       expect(result.isOptional).toBe(true);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
 
     it('should unwrap multiple optional wrappers', () => {
@@ -293,8 +287,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBe(42);
       expect(result.isOptional).toBe(true);
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
     });
   });
 
@@ -429,8 +422,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('value');
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
       expect(result.isOptional).toBe(true);
     });
 
@@ -475,8 +467,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe('my-type');
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
       expect(result.isOptional).toBe(true);
     });
 
@@ -493,8 +484,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
       expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
       expect(result.defaultValue).toEqual({ authType: 'none' });
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
       expect(result.isOptional).toBe(false);
     });
 
@@ -511,8 +501,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
       expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
       expect(result.defaultValue).toEqual({ authType: 'none' });
-      const meta = getMeta(result.schema);
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).disabled).toBe(true);
       expect(result.isOptional).toBe(false);
     });
   });
@@ -586,9 +575,8 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema, meta);
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
-      const meta = getMeta(result.schema);
-      expect(meta.label).toBe('readonly');
-      expect(meta.disabled).toBe(true);
+      expect(getMeta(result.schema).label).toBe('readonly');
+      expect(getMeta(result.schema).disabled).toBe(true);
       expect(result.isOptional).toBe(true);
     });
 
@@ -612,9 +600,8 @@ describe('extractSchemaCore', () => {
 
       const { schema: unwrapped } = extractSchemaCore(defaultSchema, meta);
 
-      const meta = getMeta(unwrapped);
-      expect(meta.label).toBe('Test URL');
-      expect(meta.placeholder).toBe('https://');
+      expect(getMeta(unwrapped).label).toBe('Test URL');
+      expect(getMeta(unwrapped).placeholder).toBe('https://');
     });
 
     it('should preserve meta when meta exists on both wrapper and inner schema', () => {
@@ -626,10 +613,10 @@ describe('extractSchemaCore', () => {
 
       const { schema: unwrapped } = extractSchemaCore(optionalSchema, meta);
 
-      const meta = getMeta(unwrapped);
-      expect(meta.label).toBe('Inner Label'); // Inner wins
-      expect(meta.sensitive).toBe(true); // From inner
-      expect(meta.placeholder).toBe('test'); // From wrapper (not overwritten)
+      const schemaMeta = getMeta(unwrapped);
+      expect(schemaMeta.label).toBe('Inner Label'); // Inner wins
+      expect(schemaMeta.sensitive).toBe(true); // From inner
+      expect(schemaMeta.placeholder).toBe('test'); // From wrapper (not overwritten)
     });
 
     it('should preserve meta through multiple wrapper layers like parseObject creates', () => {
@@ -645,10 +632,10 @@ describe('extractSchemaCore', () => {
 
       const { schema: unwrapped } = extractSchemaCore(defaultSchema, meta);
 
-      const meta = getMeta(unwrapped);
-      expect(meta.label).toBe('Base Label');
-      expect(meta.widget).toBe('text');
-      expect(meta.placeholder).toBe('https://r.jina.ai');
+      const schemaMeta = getMeta(unwrapped);
+      expect(schemaMeta.label).toBe('Base Label');
+      expect(schemaMeta.widget).toBe('text');
+      expect(schemaMeta.placeholder).toBe('https://r.jina.ai');
     });
   });
 });

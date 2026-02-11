@@ -12,9 +12,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { PasswordWidget } from './password_widget';
-import { getMeta, addMeta } from '../../schema_connector_metadata';
+import { getMeta, setMeta } from '../../schema_connector_metadata';
 
-const meta = { getMeta, addMeta };
+const meta = { getMeta, setMeta };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -66,6 +66,7 @@ describe('PasswordWidget', () => {
       return (
         <Form form={form}>
           <PasswordWidget
+            meta={meta}
             formConfig={{}}
             path="password"
             schema={z.string()}
@@ -98,6 +99,7 @@ describe('PasswordWidget', () => {
       return (
         <Form form={form}>
           <PasswordWidget
+            meta={meta}
             formConfig={{}}
             path="password"
             schema={z.string()}
@@ -132,6 +134,7 @@ describe('PasswordWidget', () => {
       return (
         <Form form={form}>
           <PasswordWidget
+            meta={meta}
             formConfig={{}}
             path="password"
             schema={z.string().min(6, 'Password must be at least 6 characters')}
@@ -173,6 +176,7 @@ describe('PasswordWidget', () => {
       return (
         <Form form={form}>
           <PasswordWidget
+            meta={meta}
             formConfig={{}}
             path="password"
             schema={z.string().min(1, 'Password is required')}
