@@ -21,9 +21,9 @@ export const registerCreateRoute = ({
 }: RouteDependencies) => {
   const bodySchema = schema.object({
     id: schema.string({ maxLength: 1000 }),
-    remoteCluster: schema.string(),
-    leaderIndexPatterns: schema.arrayOf(schema.string()),
-    followIndexPattern: schema.string(),
+    remoteCluster: schema.string({ maxLength: 1000 }),
+    leaderIndexPatterns: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+    followIndexPattern: schema.string({ maxLength: 1000 }),
   });
 
   router.post(

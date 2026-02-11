@@ -12,6 +12,6 @@ inputs:
 steps:
   - name: get_metadata
     type: google_drive.getFileMetadata
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= google_drive-stack-connector-id %>
     with:
       fileIds: ${{inputs.fileIds}}

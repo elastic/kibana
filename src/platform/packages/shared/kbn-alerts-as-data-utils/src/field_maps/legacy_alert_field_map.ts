@@ -185,6 +185,7 @@ export const legacyAlertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
+    ignore_above: 1024,
   },
 } as const;
 

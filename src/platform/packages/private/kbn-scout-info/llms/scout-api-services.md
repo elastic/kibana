@@ -17,7 +17,7 @@ import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data processing - data sources management',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // 1. We unpack the `apiServices` fixture here.
