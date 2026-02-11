@@ -19,8 +19,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
 import { ObservedEntity } from '../../shared/components/observed_entity';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import type { UserItem } from '../../../../../common/search_strategy';
 import { useObservedUserItems } from '../hooks/use_observed_user_items';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';

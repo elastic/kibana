@@ -22,7 +22,7 @@ import { EntityInsight } from '../../../cloud_security_posture/components/entity
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { UserItem } from '../../../../common/search_strategy';
 
-type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
+export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 
 interface UserPanelContentProps {
   userName: string;
