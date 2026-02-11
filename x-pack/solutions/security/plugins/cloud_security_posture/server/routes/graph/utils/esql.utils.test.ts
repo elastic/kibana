@@ -108,9 +108,7 @@ describe('ESQL utils', () => {
 
       expect(result).toContain('| DROP entity.id');
       expect(result).toContain('| DROP entity.target.id');
-      expect(result).toContain(
-        '| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id'
-      );
+      expect(result).toContain('| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id');
       expect(result).toContain('| RENAME actorEntityName    = entity.name');
       expect(result).toContain('| RENAME actorEntityType    = entity.type');
       expect(result).toContain('| RENAME actorEntitySubType = entity.sub_type');
