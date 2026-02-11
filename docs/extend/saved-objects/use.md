@@ -1,4 +1,8 @@
-# Use [saved-objects-use]
+---
+navigation_title: Use
+---
+
+# Using Saved Objects services [saved-objects-use]
 
 This page describes how to perform CRUD operations (create, get, search, update, delete) on **Saved Object** instances of a given type from server-side plugin code. Use the Saved Objects service exposed by Core; do **not** use the HTTP APIs under `/api/saved_objects/`, which are deprecated and will be removed.
 

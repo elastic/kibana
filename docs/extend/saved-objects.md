@@ -1,6 +1,6 @@
 ---
 mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/saved-objects.html
+  - https://www.elastic.co/guide/en/kibana/current/saved-objects-service.html
 ---
 
 # Saved Objects [saved-objects]

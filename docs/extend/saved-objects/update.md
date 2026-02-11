@@ -1,4 +1,8 @@
-# Update [saved-objects-update]
+---
+navigation_title: Update
+---
+
+# Update a Saved Object type [saved-objects-update]
 
 This page describes how to upgrade existing **Saved Object type** definitions: transitioning legacy types to model versions and adding new model versions to types that already use them. It does not cover updating Saved Object instances via the client.
 

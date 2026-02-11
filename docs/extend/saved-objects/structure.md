@@ -1,4 +1,8 @@
-# Structure [saved-objects-structure]
+---
+navigation_title: Structure
+---
+
+# Structure of a Saved Object type [saved-objects-structure]
 
 This page describes the structure of a **Saved Object type** definition (the configuration you register), not the structure of Saved Object documents in the index. A type is defined by the `SavedObjectsType` interface. Its main parts are:
 

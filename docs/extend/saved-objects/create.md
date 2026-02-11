@@ -1,4 +1,8 @@
-# Create [saved-objects-create]
+---
+navigation_title: Create
+---
+
+# Create a Saved Object type [saved-objects-create]
 
 This page describes how to define and register a **Saved Object type** (the type definition), not how to create Saved Object instances via the client. It covers registering the type, defining mappings and references, and defining the initial model version with full validation.
 

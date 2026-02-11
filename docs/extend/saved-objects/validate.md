@@ -1,4 +1,8 @@
-# Validate [saved-objects-validate]
+---
+navigation_title: Validate
+---
+
+# Validate changes in Saved Object types [saved-objects-validate]
 
 This page covers testing model versions, ensuring safe **Saved Object type** definition changes, and troubleshooting validation failures. It applies to type definitions (the code you register), not to validating Saved Object instances at runtime.
 

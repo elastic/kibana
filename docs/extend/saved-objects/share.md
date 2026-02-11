@@ -1,4 +1,5 @@
 ---
+navigation_title: Share
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html
 ---

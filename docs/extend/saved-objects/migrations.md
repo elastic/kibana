@@ -1,4 +1,8 @@
-# Migrations [saved-objects-migrations]
+---
+navigation_title: Migrations
+---
+
+# Saved Object migrations [saved-objects-migrations]
 
 This page describes how changes to **Saved Object type** schemas and mappings are rolled out, depending on the deployment architecture.
 
