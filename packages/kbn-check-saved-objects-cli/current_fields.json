@@ -401,7 +401,6 @@
     "logExtractionState.lookbackPeriod",
     "logExtractionState.paginationId",
     "logExtractionState.paginationTimestamp",
-    "logExtractionState.paginationId",
     "logExtractionState.timeout",
     "status",
     "type",
