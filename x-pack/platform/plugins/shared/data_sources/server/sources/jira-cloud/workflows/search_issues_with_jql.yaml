@@ -17,7 +17,7 @@ inputs:
 steps:
   - name: search-issues-with-jql
     type: jira-cloud.searchIssuesWithJql
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= jira-cloud-stack-connector-id %>
     with:
       jql: "${{inputs.jql}}"
       maxResults: ${{inputs.maxResults}}
