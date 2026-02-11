@@ -30,6 +30,7 @@ import {
 import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TimeRange } from '@kbn/es-query';
@@ -704,7 +705,10 @@ function doSearch(
       ]
     : [{ type: 'avg', params: { field: numericFieldName } }];
 
-  const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
+  const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl() as Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >;
 
   const req = {
     params: {
