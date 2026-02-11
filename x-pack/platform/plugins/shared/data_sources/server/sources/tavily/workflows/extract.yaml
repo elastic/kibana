@@ -23,7 +23,7 @@ inputs:
 steps:
   - name: tavily-extract
     type: mcp.callTool
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= mcp-stack-connector-id %>
     with:
       name: "tavily_extract"
       arguments:

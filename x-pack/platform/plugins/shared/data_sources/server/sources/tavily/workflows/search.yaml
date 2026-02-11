@@ -33,7 +33,7 @@ inputs:
 steps:
   - name: tavily-search
     type: mcp.callTool
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= mcp-stack-connector-id %>
     with:
       name: "tavily_search"
       arguments:

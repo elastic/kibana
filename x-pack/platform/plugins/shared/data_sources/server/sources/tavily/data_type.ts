@@ -18,15 +18,22 @@ export const tavilyDataSource: DataSource = {
 
   iconType: '.tavily',
 
-  stackConnector: {
-    type: '.mcp',
-    config: {
-      serverUrl: 'https://mcp.tavily.com/mcp/',
-      hasAuth: true,
-      authType: MCPAuthType.Bearer,
+  stackConnectors: [
+    {
+      type: '.mcp',
+      config: {
+        serverUrl: 'https://mcp.tavily.com/mcp/',
+        hasAuth: true,
+        authType: MCPAuthType.Bearer,
+      },
+      importedTools: [
+        { name: 'tavily_search' },
+        { name: 'tavily_extract' },
+        { name: 'tavily_crawl' },
+        { name: 'tavily_map' },
+      ],
     },
-    importedTools: ['tavily_search', 'tavily_extract', 'tavily_crawl', 'tavily_map'],
-  },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',
