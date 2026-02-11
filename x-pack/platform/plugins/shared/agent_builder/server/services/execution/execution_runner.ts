@@ -47,7 +47,7 @@ const EVENT_BATCH_INTERVAL_MS = 200;
  * Dependencies needed to build and run an agent event stream.
  * Shared between the Task Manager handler and the local execution path.
  */
-export interface ExecutionRunnerDeps {
+export interface AgentExecutionDeps {
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
@@ -65,15 +65,15 @@ export interface ExecutionRunnerDeps {
  *
  * @returns An observable of ChatEvents (agent events + persistence events).
  */
-export const buildAgentEventStream = async ({
+export const handleAgentExecution = async ({
+  execution,
   deps,
   request,
-  execution,
   abortSignal,
 }: {
-  deps: ExecutionRunnerDeps;
-  request: KibanaRequest;
   execution: AgentExecution;
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
   abortSignal: AbortSignal;
 }): Promise<Observable<ChatEvent>> => {
   const {
@@ -109,7 +109,7 @@ export const buildAgentEventStream = async ({
   });
 
   // Build the event stream
-  return buildEventStream({
+  return executeAgent({
     agentId,
     request,
     nextInput,
@@ -213,40 +213,9 @@ export const collectAndWriteEvents = ({
   });
 };
 
-/**
- * Writes a synthetic error event to the data stream so followers can detect failures.
- */
-export const writeErrorEvent = async ({
-  execution,
-  eventsClient,
-  error,
-}: {
-  execution: AgentExecution;
-  eventsClient: ExecutionEventsClient;
-  error: Error;
-}): Promise<void> => {
-  const errorEvent: ChatEvent = {
-    type: 'error' as any,
-    data: {
-      message: error.message,
-    },
-  } as any;
-
-  await eventsClient.writeEvents([
-    {
-      '@timestamp': Date.now(),
-      agentExecutionId: execution.executionId,
-      eventNumber: -1,
-      agentId: execution.agentId,
-      spaceId: execution.spaceId,
-      event: errorEvent,
-    },
-  ]);
-};
-
 // --- Internal helpers ---
 
-const buildEventStream = ({
+const executeAgent = ({
   agentId,
   request,
   nextInput,

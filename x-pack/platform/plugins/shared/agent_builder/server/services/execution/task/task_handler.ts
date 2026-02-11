@@ -17,14 +17,13 @@ import {
   type ExecutionEventsClient,
 } from '../persistence';
 import {
-  buildAgentEventStream,
+  handleAgentExecution,
   collectAndWriteEvents,
-  writeErrorEvent,
-  type ExecutionRunnerDeps,
+  type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
 
-export interface TaskHandlerDeps extends ExecutionRunnerDeps {
+export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   dataStreams: DataStreamsStart;
 }
@@ -79,7 +78,7 @@ class TaskHandlerImpl implements TaskHandler {
 
     try {
       // 4. Build the event stream using the shared runner
-      const events$ = await buildAgentEventStream({
+      const events$ = await handleAgentExecution({
         deps: this.deps,
         request: fakeRequest,
         execution,
@@ -99,16 +98,6 @@ class TaskHandlerImpl implements TaskHandler {
     } catch (error) {
       this.logger.error(`Execution ${executionId} failed: ${error.message}`);
 
-      // Write an error event
-      try {
-        await writeErrorEvent({ execution, eventsClient, error });
-      } catch (writeErr) {
-        this.logger.error(
-          `Failed to write error event for execution ${executionId}: ${writeErr.message}`
-        );
-      }
-
-      // Update status to failed
       try {
         await executionClient.updateStatus(executionId, ExecutionStatus.failed);
       } catch (statusError) {

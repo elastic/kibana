@@ -31,16 +31,15 @@ import {
   type ExecutionEventsClient,
 } from './persistence';
 import {
-  buildAgentEventStream,
+  handleAgentExecution,
   collectAndWriteEvents,
-  writeErrorEvent,
-  type ExecutionRunnerDeps,
+  type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
 
 const FOLLOW_POLL_INTERVAL_MS = 500;
 
-export interface AgentExecutionServiceDeps extends ExecutionRunnerDeps {
+export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   dataStreams: DataStreamsStart;
   taskManager: TaskManagerStartContract;
@@ -155,10 +154,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             execution.status === ExecutionStatus.aborted;
 
           if (isTerminal) {
+            // Flush any remaining events before signalling completion/error
             const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
             for (const eventDoc of finalEvents) {
               observer.next(eventDoc.event);
             }
+
+            if (execution.status === ExecutionStatus.failed) {
+              observer.error(new Error(`Execution ${executionId} failed`));
+            } else if (execution.status === ExecutionStatus.aborted) {
+              observer.error(new Error(`Execution ${executionId} was aborted`));
+            }
+
             return true;
           }
 
@@ -254,7 +261,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     try {
       // Build the live event stream
-      const rawEvents$ = await buildAgentEventStream({
+      const rawEvents$ = await handleAgentExecution({
         deps: this.deps,
         request,
         execution,
@@ -319,14 +326,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       })
       .catch(async (error) => {
         this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
-
-        try {
-          await writeErrorEvent({ execution, eventsClient, error });
-        } catch (writeErr) {
-          this.logger.error(
-            `Failed to write error event for local execution ${executionId}: ${writeErr.message}`
-          );
-        }
 
         try {
           await executionClient.updateStatus(executionId, ExecutionStatus.failed);

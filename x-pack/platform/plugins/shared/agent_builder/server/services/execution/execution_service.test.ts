@@ -32,14 +32,12 @@ jest.mock('./persistence', () => ({
 }));
 
 // Mock execution_runner module
-const mockBuildAgentEventStream = jest.fn();
+const mockHandleAgentExecution = jest.fn();
 const mockCollectAndWriteEvents = jest.fn();
-const mockWriteErrorEvent = jest.fn();
 
 jest.mock('./execution_runner', () => ({
-  buildAgentEventStream: (...args: any[]) => mockBuildAgentEventStream(...args),
+  handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
   collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
-  writeErrorEvent: (...args: any[]) => mockWriteErrorEvent(...args),
 }));
 
 // Mock abort monitor
@@ -133,7 +131,7 @@ describe('AgentExecutionService', () => {
         data: { message_id: 'm1', text_chunk: 'hello' },
       } as any;
 
-      mockBuildAgentEventStream.mockResolvedValue(of(fakeEvent));
+      mockHandleAgentExecution.mockResolvedValue(of(fakeEvent));
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
@@ -164,8 +162,8 @@ describe('AgentExecutionService', () => {
         ExecutionStatus.running
       );
 
-      // Should have called buildAgentEventStream
-      expect(mockBuildAgentEventStream).toHaveBeenCalledWith(
+      // Should have called handleAgentExecution
+      expect(mockHandleAgentExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           request,
           execution: expect.objectContaining({
@@ -184,7 +182,7 @@ describe('AgentExecutionService', () => {
         data: { message_id: 'm1', text_chunk: 'hello' },
       } as any;
 
-      mockBuildAgentEventStream.mockResolvedValue(eventsSubject.asObservable());
+      mockHandleAgentExecution.mockResolvedValue(eventsSubject.asObservable());
       mockCollectAndWriteEvents.mockImplementation(({ events$ }: { events$: any }) => {
         return new Promise<void>((resolve) => {
           events$.subscribe({ complete: () => resolve() });
