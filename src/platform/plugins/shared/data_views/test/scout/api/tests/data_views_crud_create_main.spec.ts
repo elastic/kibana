@@ -23,26 +23,30 @@ configArray.forEach((config) => {
       apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
         // Admin role required for creating data views and managing spaces
         adminApiCredentials = await requestAuth.getApiKey('admin');
-        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
-
         // Load ES archive for tests that need basic_index
         await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
-        log.info(`Loaded ES archive: ${ES_ARCHIVE_BASIC_INDEX}`);
       });
 
       apiTest.afterEach(async ({ apiClient, log }) => {
         // Cleanup: delete all data views created during the test
         for (const id of createdIds) {
           try {
-            await apiClient.delete(`${config.path}/${id}`, {
+            const response = await apiClient.delete(`${config.path}/${id}`, {
               headers: {
                 ...COMMON_HEADERS,
                 ...adminApiCredentials.apiKeyHeader,
               },
             });
-            log.debug(`Cleaned up ${config.serviceKey} with id: ${id}`);
+
+            if (response.statusCode === 200) {
+              log.debug(`Cleaned up ${config.serviceKey} with id: ${id}`);
+            } else {
+              log.warning(
+                `Unexpected status ${response.statusCode} cleaning up ${config.serviceKey} with id: ${id}`
+              );
+            }
           } catch (e) {
-            log.debug(
+            log.warning(
               `Failed to clean up ${config.serviceKey} with id: ${id}: ${(e as Error).message}`
             );
           }

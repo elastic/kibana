@@ -28,7 +28,6 @@ apiTest.describe(
     apiTest.beforeAll(async ({ kbnClient, requestAuth, log }) => {
       // Admin role required for creating data views and managing spaces
       adminApiCredentials = await requestAuth.getApiKey('admin');
-      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
 
       // Create a custom space for testing namespace functionality
       await kbnClient.spaces.create({
@@ -42,15 +41,22 @@ apiTest.describe(
       // Cleanup: delete all data views created during the test
       for (const id of createdDataViewIds) {
         try {
-          await apiClient.delete(`${DATA_VIEW_PATH}/${id}`, {
+          const response = await apiClient.delete(`${DATA_VIEW_PATH}/${id}`, {
             headers: {
               ...COMMON_HEADERS,
               ...adminApiCredentials.apiKeyHeader,
             },
           });
-          log.debug(`Cleaned up data view with id: ${id}`);
+
+          if (response.statusCode === 200) {
+            log.debug(`Cleaned up data view with id: ${id}`);
+          } else {
+            log.warning(
+              `Unexpected status ${response.statusCode} cleaning up data view with id: ${id}`
+            );
+          }
         } catch (e) {
-          log.debug(`Failed to clean up data view with id: ${id}: ${(e as Error).message}`);
+          log.warning(`Failed to clean up data view with id: ${id}: ${(e as Error).message}`);
         }
       }
       createdDataViewIds = [];

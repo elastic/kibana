@@ -18,9 +18,8 @@ configArray.forEach((config) => {
     () => {
       let adminApiCredentials: RoleApiCredentials;
 
-      apiTest.beforeAll(async ({ requestAuth, log }) => {
+      apiTest.beforeAll(async ({ requestAuth }) => {
         adminApiCredentials = await requestAuth.getApiKey('admin');
-        log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
       });
 
       apiTest(
