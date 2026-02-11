@@ -28,8 +28,7 @@ import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../../../explore/users/store/model';
-
-type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
+import type { ObservedUserData } from '../content';
 
 export const ObservedDataSection = memo(
   ({
