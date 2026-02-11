@@ -37,10 +37,18 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
-  const wiredStreamsConfig = useWiredStreams
-    ? ` \\
-  --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`
-    : '';
+  const wiredStreamsConfig = (() => {
+    if (!useWiredStreams) return '';
+    if (isManagedOtlpServiceAvailable) {
+      return ` \\
+  --set 'collectors.gateway.config.processors.resource\\/wired_streams.attributes[0].action=upsert' \\
+  --set 'collectors.gateway.config.processors.resource\\/wired_streams.attributes[0].key=elasticsearch.index' \\
+  --set 'collectors.gateway.config.processors.resource\\/wired_streams.attributes[0].value=logs' \\
+  --set 'collectors.gateway.config.service.pipelines.logs.processors[0]=resource/wired_streams'`;
+    }
+    return ` \\
+  --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`;
+  })();
 
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}
 kubectl create secret generic elastic-secret-otel \\

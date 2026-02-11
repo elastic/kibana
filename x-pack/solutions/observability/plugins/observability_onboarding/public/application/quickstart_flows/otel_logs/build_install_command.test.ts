@@ -312,7 +312,7 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
       });
     });
 
-    it('works with managed OTLP service when wired streams enabled', () => {
+    it('injects resource/wired_streams processor when managed OTLP service is available (linux)', () => {
       const command = buildInstallCommand({
         ...baseConfig,
         platform: 'linux',
@@ -320,8 +320,40 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
         useWiredStreams: true,
       });
 
-      expect(command).toContain('logs_index: logs');
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
       expect(command).toContain('managed_otlp/platformlogs.yml');
+      expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
+    });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available (mac)', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'mac',
+        isManagedOtlpServiceAvailable: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain('managed_otlp/platformlogs.yml');
+      expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
+    });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available (windows)', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'windows',
+        isManagedOtlpServiceAvailable: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain('managed_otlp\\platformlogs.yml');
       expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
     });
 

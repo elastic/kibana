@@ -123,5 +123,22 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
   --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`
       );
     });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: true,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index=logs');
+      expect(command).not.toContain('elasticsearch\\/otel');
+      expect(command).toContain('resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+    });
   });
 });
