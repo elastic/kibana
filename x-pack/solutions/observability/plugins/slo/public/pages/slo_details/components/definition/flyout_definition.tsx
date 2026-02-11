@@ -72,6 +72,19 @@ function DescriptionListDescription({ description }: { description: string }) {
   return <EuiText size="s">{description}</EuiText>;
 }
 
+const DEFINITION_LABEL = i18n.translate(
+  'xpack.slo.flyoutDefinition.accordionHeader.definitionLabel',
+  {
+    defaultMessage: 'Definition',
+  }
+);
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.slo.flyoutDefinition.accordionHeader.descriptionLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
 export function SloDetailsFlyoutDefinition() {
   const { slo } = useSloDetailsContext();
   const definitionId = useGeneratedHtmlId();
@@ -180,23 +193,13 @@ export function SloDetailsFlyoutDefinition() {
       <EuiFlexItem>
         <EuiAccordion
           id={definitionId}
-          buttonContent={
-            <AccordionHeader
-              title={i18n.translate('xpack.slo.flyoutDefinition.accordionHeader.definitionLabel', {
-                defaultMessage: 'Definition',
-              })}
-            />
-          }
+          buttonContent={<AccordionHeader title={DEFINITION_LABEL} />}
           initialIsOpen
         >
           <EuiSpacer />
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
-              <SloFlyoutPanel
-                title={i18n.translate('xpack.slo.flyoutDefinition.sloFlyoutCard.definitionLabel', {
-                  defaultMessage: 'Definition',
-                })}
-              >
+              <SloFlyoutPanel title={DEFINITION_LABEL}>
                 <EuiDescriptionList
                   listItems={items}
                   type="column"
@@ -275,24 +278,11 @@ export function SloDetailsFlyoutDefinition() {
           <EuiFlexItem>
             <EuiAccordion
               id={descriptionId}
-              buttonContent={
-                <AccordionHeader
-                  title={i18n.translate(
-                    'xpack.slo.flyoutDefinition.accordionHeader.definitionLabel',
-                    {
-                      defaultMessage: 'Description',
-                    }
-                  )}
-                />
-              }
+              buttonContent={<AccordionHeader title={DESCRIPTION_LABEL} />}
               initialIsOpen
             >
               <EuiSpacer />
-              <SloFlyoutPanel
-                title={i18n.translate('xpack.slo.flyoutDefinition.sloFlyoutCard.descriptionLabel', {
-                  defaultMessage: 'Description',
-                })}
-              >
+              <SloFlyoutPanel title={DESCRIPTION_LABEL}>
                 <EuiText size="s">{slo.description}</EuiText>
               </SloFlyoutPanel>
             </EuiAccordion>
