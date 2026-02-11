@@ -34,16 +34,10 @@ export const fetchSpaceRulesHealth = async (
     body: JSON.stringify(params),
     signal,
   });
-
-export interface GetRuleHealthRequestParams {
-  params: GetRuleHealthRequestParams;
-  signal?: AbortSignal;
-}
-
 /**
  * Fetches health overview of a specific detection rule in the current Kibana space.
  *
- * @param params GetRuleHealthRequestParams request parameters
+ * @param params GetRuleHealthRequestBody request parameters
  * @param signal to cancel request
  *
  * @returns Promise<GetRuleHealthResponse> The health overview of a specific detection rule in the current Kibana space
