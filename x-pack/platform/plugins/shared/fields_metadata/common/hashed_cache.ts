@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { LRUCache } from 'lru-cache';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 export interface IHashedCache<KeyType, ValueType> {
   get(key: KeyType): ValueType | undefined;
@@ -22,17 +22,17 @@ export class HashedCache<KeyType extends unknown, ValueType extends {}> {
   }
 
   public get(key: KeyType): ValueType | undefined {
-    const serializedKey = stringify(key);
+    const serializedKey = stableStringify(key);
     return this.cache.get(serializedKey);
   }
 
   public set(key: KeyType, value: ValueType) {
-    const serializedKey = stringify(key);
+    const serializedKey = stableStringify(key);
     return this.cache.set(serializedKey, value);
   }
 
   public has(key: KeyType): boolean {
-    const serializedKey = stringify(key);
+    const serializedKey = stableStringify(key);
     return this.cache.has(serializedKey);
   }
 
