@@ -263,7 +263,9 @@ async function getOtelJvmMetrics({
               bool: {
                 should: [
                   // OTel native ingest (EDOT Collector → ES)
-                  { term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP } },
+                  {
+                    term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP },
+                  },
                   // APM Server ingest (OTel SDK → APM Server → ES)
                   { term: { [LABEL_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP } },
                 ],
