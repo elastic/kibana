@@ -1297,7 +1297,7 @@
       },
       "logExtractionState": {
         "properties": {
-          "additionalIndexPatterns": {
+          "additionalIndexPattern": {
             "type": "keyword"
           },
           "delay": {
