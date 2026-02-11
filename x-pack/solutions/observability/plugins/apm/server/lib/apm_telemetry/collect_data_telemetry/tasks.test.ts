@@ -1045,14 +1045,20 @@ describe('data telemetry collection tasks', () => {
           total: { value: 1000 },
         },
         aggregations: {
-          agents: {
+          agent_combinations: {
             buckets: [
               {
-                key: 'opentelemetry/nodejs',
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_language: 'nodejs',
+                },
                 doc_count: 500,
               },
               {
-                key: 'opentelemetry/python',
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_language: 'python',
+                },
                 doc_count: 300,
               },
             ],
@@ -1083,8 +1089,6 @@ describe('data telemetry collection tasks', () => {
           'opentelemetry/nodejs': 1000000,
           'opentelemetry/python': 600000,
         },
-        otel_total_size_bytes: 10000000,
-        otel_total_docs: 5000,
         otel_1d_docs: 1000,
         otel_1d_size_bytes: 2000000,
       });
@@ -1093,7 +1097,7 @@ describe('data telemetry collection tasks', () => {
     it('returns empty results when no OTel data', async () => {
       const search = jest.fn().mockResolvedValueOnce({
         hits: { total: { value: 0 } },
-        aggregations: { agents: { buckets: [] } },
+        aggregations: { agent_combinations: { buckets: [] } },
       });
 
       const indicesStats = jest.fn().mockResolvedValueOnce({
@@ -1113,8 +1117,6 @@ describe('data telemetry collection tasks', () => {
       ).toEqual({
         otel_docs_per_agent: {},
         otel_size_per_agent: {},
-        otel_total_size_bytes: 0,
-        otel_total_docs: 0,
         otel_1d_docs: 0,
         otel_1d_size_bytes: 0,
       });
@@ -1126,18 +1128,27 @@ describe('data telemetry collection tasks', () => {
           total: { value: 100 },
         },
         aggregations: {
-          agents: {
+          agent_combinations: {
             buckets: [
               {
-                key: 'opentelemetry/go',
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_language: 'go',
+                },
                 doc_count: 50,
               },
               {
-                key: 'unknown',
+                key: {
+                  sdk_name: 'unknown',
+                  sdk_language: 'java',
+                },
                 doc_count: 30,
               },
               {
-                key: '',
+                key: {
+                  sdk_name: '',
+                  sdk_language: 'python',
+                },
                 doc_count: 20,
               },
             ],
@@ -1177,14 +1188,20 @@ describe('data telemetry collection tasks', () => {
             total: { value: 500 },
           },
           aggregations: {
-            agents: {
+            agent_combinations: {
               buckets: [
                 {
-                  key: 'opentelemetry/nodejs',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'nodejs',
+                  },
                   doc_count: 300,
                 },
                 {
-                  key: 'opentelemetry/python',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'python',
+                  },
                   doc_count: 200,
                 },
               ],
@@ -1197,14 +1214,20 @@ describe('data telemetry collection tasks', () => {
             total: { value: 300 },
           },
           aggregations: {
-            agents: {
+            agent_combinations: {
               buckets: [
                 {
-                  key: 'opentelemetry/nodejs',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'nodejs',
+                  },
                   doc_count: 200,
                 },
                 {
-                  key: 'opentelemetry/java',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'java',
+                  },
                   doc_count: 100,
                 },
               ],
@@ -1217,14 +1240,20 @@ describe('data telemetry collection tasks', () => {
             total: { value: 100 },
           },
           aggregations: {
-            agents: {
+            agent_combinations: {
               buckets: [
                 {
-                  key: 'opentelemetry/python',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'python',
+                  },
                   doc_count: 60,
                 },
                 {
-                  key: 'opentelemetry/java',
+                  key: {
+                    sdk_name: 'opentelemetry',
+                    sdk_language: 'java',
+                  },
                   doc_count: 40,
                 },
               ],
@@ -1291,7 +1320,7 @@ describe('data telemetry collection tasks', () => {
     it('returns empty results when no OTel data by signal', async () => {
       const search = jest.fn().mockResolvedValue({
         hits: { total: { value: 0 } },
-        aggregations: { agents: { buckets: [] } },
+        aggregations: { agent_combinations: { buckets: [] } },
       });
 
       const indicesStats = jest.fn().mockResolvedValue({
