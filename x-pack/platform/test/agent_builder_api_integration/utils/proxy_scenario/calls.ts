@@ -9,6 +9,12 @@ import { last } from 'lodash';
 import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '../llm_proxy';
 
+const getToolChoiceFunctionName = (toolChoice: unknown): string | undefined => {
+  if (!toolChoice || typeof toolChoice !== 'object') return undefined;
+  const maybe = toolChoice as { function?: { name?: unknown } };
+  return typeof maybe.function?.name === 'string' ? maybe.function.name : undefined;
+};
+
 export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
   // Title generation is implemented via structured output (a tool call named "set_title").
   // Different model adapters may shape `tool_choice` differently, so match the request via
@@ -20,7 +26,7 @@ export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
         const systemMessage = body.messages.find((m) => m.role === 'system');
         const systemText = String(systemMessage?.content ?? '');
         return (
-          body.tool_choice?.function?.name === 'set_title' ||
+          getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
           systemText.includes('You are a title-generation utility')
         );
       },
@@ -37,7 +43,7 @@ export const mockTitleGenerationWithError = (llmProxy: LlmProxy, error: LLmError
         const systemMessage = body.messages.find((m) => m.role === 'system');
         const systemText = String(systemMessage?.content ?? '');
         return (
-          body.tool_choice?.function?.name === 'set_title' ||
+          getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
           systemText.includes('You are a title-generation utility')
         );
       },
