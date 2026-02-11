@@ -19,26 +19,9 @@ import {
 
 import { useDateRangePickerContext, type InitialFocus } from './date_range_picker_context';
 
+// TODO move to constants.ts
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-/**
- * Resolve the `initialFocus` target within the panel.
- * A string is treated as a CSS selector; a ref as a direct element handle.
- * Falls back to the panel div itself when unset.
- */
-function resolveInitialFocus(
-  panelRef: React.RefObject<HTMLDivElement>,
-  initialFocus?: InitialFocus
-): HTMLElement | null {
-  if (typeof initialFocus === 'string') {
-    return panelRef.current?.querySelector<HTMLElement>(initialFocus) ?? null;
-  }
-  if (initialFocus && 'current' in initialFocus) {
-    return initialFocus.current;
-  }
-  return panelRef.current;
-}
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -175,4 +158,24 @@ export function DateRangePickerControl() {
       </EuiFormControlLayout>
     </div>
   );
+}
+
+/**
+ * Resolve the `initialFocus` target within the panel.
+ * A string is treated as a CSS selector; a ref as a direct element handle.
+ * Falls back to the panel div itself when unset.
+ *
+ * TODO move to utils.ts
+ */
+function resolveInitialFocus(
+  panelRef: React.RefObject<HTMLDivElement>,
+  initialFocus?: InitialFocus
+): HTMLElement | null {
+  if (typeof initialFocus === 'string') {
+    return panelRef.current?.querySelector<HTMLElement>(initialFocus) ?? null;
+  }
+  if (initialFocus && 'current' in initialFocus) {
+    return initialFocus.current;
+  }
+  return panelRef.current;
 }
