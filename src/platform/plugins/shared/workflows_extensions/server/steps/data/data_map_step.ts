@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyInclude, normalizeFieldsSpec } from './field_include_utils';
+import { applyInclude } from './field_include_utils';
 import { dataMapStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -63,8 +63,7 @@ export const dataMapStepDefinition = createServerStepDefinition({
       let output = mappedItems;
       const pick = context.input.transform?.pick;
       if (pick != null) {
-        const pickSpec = normalizeFieldsSpec(pick);
-        output = mappedItems.map((item) => applyInclude(item, pickSpec)) as typeof mappedItems;
+        output = mappedItems.map((item) => applyInclude(item, pick)) as typeof mappedItems;
       }
 
       return { output: shouldReturnObject ? output[0] : output };
