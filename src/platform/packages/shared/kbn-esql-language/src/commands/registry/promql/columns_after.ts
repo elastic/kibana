@@ -11,29 +11,40 @@ import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
 import { PromqlParamName } from './utils';
+import {
+  collectMetricsAndLabels,
+  findPromqlExpression,
+} from '../../../embedded_languages/promql/ast/traversal';
 
 export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[],
-  _query: string,
+  query: string,
   { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
+  const pipeIndex = query.indexOf('|', promqlCommand.location.max);
   const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
   const stepColumn = getStepColumn(promqlCommand);
 
-  const columns: ESQLColumnData[] = [...sourceColumns];
-
-  if (stepColumn) {
-    columns.push(stepColumn);
+  if (pipeIndex === -1) {
+    return sourceColumns;
   }
 
-  if (userDefinedColumn) {
-    columns.push(userDefinedColumn);
-  }
+  const { metrics, breakdownLabels } = getPromqlOutputColumns(promqlCommand, {
+    excludeMetrics: !!userDefinedColumn,
+  });
 
-  return columns;
+  const sourceByName = new Map(sourceColumns.map((column) => [column.name, column]));
+
+  return buildColumns({
+    stepColumn,
+    userDefinedColumn,
+    sourceByName,
+    metrics,
+    breakdownLabels,
+  });
 };
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
@@ -51,7 +62,7 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 
   return {
     name: target.name,
-    type: 'unknown', // TODO: infer type once PROMQL query AST is available
+    type: 'unknown', // TODO: infer type once PROMQL query AST is available,
     location: target.location,
     userDefined: true,
   };
@@ -71,4 +82,84 @@ function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefine
     type: 'date',
     userDefined: false,
   };
+}
+
+function getPromqlOutputColumns(
+  command: ESQLAstPromqlCommand,
+  { excludeMetrics }: { excludeMetrics: boolean }
+): {
+  metrics: Set<string>;
+  breakdownLabels: Set<string>;
+} {
+  const query = findPromqlExpression(command.query);
+
+  if (!query?.expression) {
+    return { metrics: new Set(), breakdownLabels: new Set() };
+  }
+
+  const { metrics, breakdownLabels } = collectMetricsAndLabels(query.expression);
+  const includeMetrics = query.expression.type === 'selector' && !excludeMetrics;
+
+  if (!includeMetrics) {
+    return { metrics: new Set(), breakdownLabels };
+  }
+
+  return { metrics, breakdownLabels };
+}
+
+function buildColumns({
+  stepColumn,
+  userDefinedColumn,
+  sourceByName,
+  metrics,
+  breakdownLabels,
+}: {
+  stepColumn: ESQLColumnData | undefined;
+  userDefinedColumn: ESQLUserDefinedColumn | undefined;
+  sourceByName: Map<string, ESQLColumnData>;
+  metrics: Set<string>;
+  breakdownLabels: Set<string>;
+}): ESQLColumnData[] {
+  const columnNames = new Set<string>();
+  let columns: ESQLColumnData[] = [];
+
+  columns = appendColumn(columns, columnNames, stepColumn);
+  columns = appendColumn(columns, columnNames, userDefinedColumn);
+  columns = appendPromqlFields(columns, columnNames, sourceByName, metrics);
+  columns = appendPromqlFields(columns, columnNames, sourceByName, breakdownLabels);
+
+  return columns;
+}
+
+function appendPromqlFields(
+  columns: ESQLColumnData[],
+  columnNames: Set<string>,
+  sourceByName: Map<string, ESQLColumnData>,
+  names: Set<string>
+): ESQLColumnData[] {
+  let nextColumns = columns;
+
+  for (const name of names) {
+    const sourceColumn = sourceByName.get(name);
+    nextColumns = appendColumn(nextColumns, columnNames, {
+      name,
+      type: sourceColumn?.type ?? 'unknown',
+      userDefined: false,
+    });
+  }
+
+  return nextColumns;
+}
+
+function appendColumn(
+  columns: ESQLColumnData[],
+  columnNames: Set<string>,
+  column: ESQLColumnData | undefined
+): ESQLColumnData[] {
+  if (!column || columnNames.has(column.name)) {
+    return columns;
+  }
+
+  columnNames.add(column.name);
+  return [...columns, column];
 }

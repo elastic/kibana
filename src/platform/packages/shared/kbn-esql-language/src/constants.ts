@@ -8,5 +8,5 @@
  */
 
 export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql'];
-export const MAX_PRELOADED_FIELDS_ITEMS = 200;
-export const MAX_PRELOADED_FIELDS_PAYLOAD = 20000;
+export const MAX_PRELOADED_RESOURCE_ITEMS = 200;
+export const MAX_PRELOADED_RESOURCE_PAYLOAD = 20000;

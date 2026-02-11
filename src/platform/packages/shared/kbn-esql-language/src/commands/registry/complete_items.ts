@@ -13,7 +13,7 @@ import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { techPreviewLabel } from '../definitions/utils/shared';
-import { SuggestionCategory } from '../../shared/sorting/types';
+import { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import {
   ESQL_STRING_TYPES,
   ESQL_COMMON_NUMERIC_TYPES,
@@ -598,6 +598,30 @@ export function createResourceBrowserSuggestion(options: {
     filterText: options.filterText || '',
     ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
     category: SuggestionCategory.CUSTOM_ACTION,
+  });
+}
+
+export function createIndicesBrowserSuggestion(
+  rangeToReplace?: { start: number; end: number },
+  filterText?: string,
+  insertText?: string,
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
+      defaultMessage: 'Browse indices',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open data source browser',
+      }
+    ),
+    commandId: 'esql.indicesBrowser.open',
+    rangeToReplace,
+    filterText,
+    insertText,
+    commandArgs,
   });
 }
 

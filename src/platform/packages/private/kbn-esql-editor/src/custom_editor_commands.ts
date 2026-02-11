@@ -14,10 +14,13 @@ import {
   type ESQLControlsContext,
   ControlTriggerSource,
   type ESQLControlVariable,
+  type ESQLSourceResult,
+  type IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { IndicesBrowserOpenMode } from './resource_browser/open_mode';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -28,6 +31,11 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openIndicesBrowser?: (options?: {
+    openedFrom?: IndicesBrowserOpenMode;
+    preloadedSources?: ESQLSourceResult[];
+    preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+  }) => void;
   openFieldsBrowser?: (options?: { preloadedFields?: string[] }) => void;
 }
 
@@ -62,6 +70,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openIndicesBrowser,
     openFieldsBrowser,
   } = deps;
 
@@ -83,6 +92,41 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
       openTimePickerPopover();
     })
   );
+
+  // Open indices browser command
+  if (openIndicesBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedSources: ESQLSourceResult[] | undefined;
+        let preloadedTimeSeriesSources: IndexAutocompleteItem[] | undefined;
+
+        if (payload?.sources) {
+          try {
+            preloadedSources = JSON.parse(payload.sources) as ESQLSourceResult[];
+          } catch {
+            preloadedSources = undefined;
+          }
+        }
+
+        if (payload?.timeSeriesSources) {
+          try {
+            preloadedTimeSeriesSources = JSON.parse(
+              payload.timeSeriesSources
+            ) as IndexAutocompleteItem[];
+          } catch {
+            preloadedTimeSeriesSources = undefined;
+          }
+        }
+
+        openIndicesBrowser({
+          openedFrom: IndicesBrowserOpenMode.Autocomplete,
+          preloadedSources,
+          preloadedTimeSeriesSources,
+        });
+      })
+    );
+  }
 
   // Open fields browser command (triggered by the "Browse fields" autocomplete item)
   if (openFieldsBrowser) {
@@ -126,9 +170,11 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.multiCommands', (...args) => {
       const [, { commands }] = args;
-      const commandsToExecute: { id: string; payload?: unknown }[] = JSON.parse(commands);
+      const commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[] =
+        JSON.parse(commands);
       commandsToExecute.forEach((command) => {
-        editorRef.current?.trigger(undefined, command.id, command.payload ?? {});
+        const payload = command.payload ?? command.arguments?.[0] ?? {};
+        editorRef.current?.trigger(undefined, command.id, payload);
       });
     })
   );
