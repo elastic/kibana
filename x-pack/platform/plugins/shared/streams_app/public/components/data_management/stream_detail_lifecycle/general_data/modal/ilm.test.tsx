@@ -31,7 +31,7 @@ describe('getPhaseDescription', () => {
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
         frozen: { min_age: '90d' },
-      } as IlmPolicyPhases,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse, first should be hot... last frozen
@@ -47,7 +47,7 @@ describe('getPhaseDescription', () => {
         hot: { min_age: '0d' },
         warm: { min_age: '30d' },
         cold: { min_age: '60d' },
-      } as IlmPolicyPhases,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse: hot, warm, cold
@@ -62,7 +62,7 @@ describe('getPhaseDescription', () => {
       {
         delete: { min_age: '180d' },
         hot: { min_age: '0d' },
-      } as IlmPolicyPhases,
+      } as unknown as IlmPolicyPhases,
       colors
     );
     // After reverse only Hot phase in array
@@ -74,10 +74,10 @@ describe('getPhaseDescription', () => {
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('IlmField', () => {
-  const policies: IlmPolicy[] = [
+  const policies = [
     { name: 'policyA', phases: { hot: { min_age: '0d' } } },
     { name: 'policyB', phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } } },
-  ];
+  ] as unknown as IlmPolicy[];
 
   it('loads and displays ILM policies', async () => {
     const getIlmPolicies = jest.fn().mockResolvedValue(policies);
