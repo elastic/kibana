@@ -152,6 +152,18 @@ export function DependencyOperationDetailView() {
     },
     [history]
   );
+
+  const queryParams = useMemo(
+    () => ({
+      kuery,
+      spanName,
+      dependencyName,
+      sampleRangeFrom,
+      sampleRangeTo,
+    }),
+    [kuery, spanName, dependencyName, sampleRangeFrom, sampleRangeTo]
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -195,13 +207,7 @@ export function DependencyOperationDetailView() {
               onShowCriticalPathChange={onShowCriticalPathChange}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
-              queryParams={{
-                kuery,
-                spanName,
-                dependencyName,
-                sampleRangeFrom,
-                sampleRangeTo,
-              }}
+              queryParams={queryParams}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

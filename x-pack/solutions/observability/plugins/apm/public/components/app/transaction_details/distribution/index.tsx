@@ -182,6 +182,17 @@ export function TransactionDistribution({
     [history]
   );
 
+  const queryParams = useMemo(
+    () => ({
+      kuery,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    }),
+    [kuery, transactionName, transactionType, sampleRangeFrom, sampleRangeTo]
+  );
+
   return (
     <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -216,13 +227,7 @@ export function TransactionDistribution({
           onLogsTableConfigChange={onLogsTableConfigChange}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
-          queryParams={{
-            kuery,
-            transactionName,
-            transactionType,
-            sampleRangeFrom,
-            sampleRangeTo,
-          }}
+          queryParams={queryParams}
         />
       </div>
     </ResettingHeightRetainer>
