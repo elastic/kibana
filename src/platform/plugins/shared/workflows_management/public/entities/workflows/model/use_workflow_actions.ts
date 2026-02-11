@@ -21,11 +21,25 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
+/** Called when refetched data is considered similar to the previous data (before optimistic update). */
+export type OnSuccessWhenSimilarCallback = (args: {
+  previousData: WorkflowListDto;
+  freshData: WorkflowListDto;
+  updatedWorkflowId: string;
+}) => void;
+
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<WorkflowDetailDto>;
   isBulkAction?: boolean;
   bulkActionCount?: number;
+  /**
+   * If provided, after a successful refetch the fresh data is compared to the previous data
+   * (before the optimistic update). When this returns true, `onSuccessWhenSimilar` is called.
+   */
+  areSimilar?: (previous: WorkflowListDto, fresh: WorkflowListDto) => boolean;
+  /** Called when refetched data is similar to the previous data (see `areSimilar`). */
+  onSuccessWhenSimilar?: OnSuccessWhenSimilarCallback;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -40,6 +54,11 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
   const telemetry = useTelemetry();
+
+  const getPreviousData = () => {
+    const prevData = queryClient.getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] });
+    return prevData;
+  };
 
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
@@ -56,23 +75,21 @@ export function useWorkflowActions() {
       const previousData = new Map<string, WorkflowListDto>();
 
       // Update all workflow list queries (e.g., different pages, filters)
-      queryClient
-        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
-        .forEach(([queryKey, data]) => {
-          if (data && data.results) {
-            const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
-            previousData.set(queryKeyString, data);
+      getPreviousData().forEach(([queryKey, data]) => {
+        if (data && data.results) {
+          const queryKeyString = JSON.stringify(queryKey);
+          // Store previous data for rollback on error
+          previousData.set(queryKeyString, data);
 
-            // Immediately update the workflow in the list with new data
-            const optimisticData: WorkflowListDto = {
-              ...data,
-              results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
-            };
+          // Immediately update the workflow in the list with new data
+          const optimisticData: WorkflowListDto = {
+            ...data,
+            results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
+          };
 
-            queryClient.setQueryData(queryKey, optimisticData);
-          }
-        });
+          queryClient.setQueryData(queryKey, optimisticData);
+        }
+      });
 
       // Update workflow detail query (used in YAML editor view)
       // But skip optimistic update when saving YAML, as the component manages its own state
@@ -125,7 +142,7 @@ export function useWorkflowActions() {
         error: errorObj,
       });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables, context) => {
       // Report telemetry for successful update
       // The telemetry service automatically determines which event to publish based on the update
       telemetry.reportWorkflowUpdated({
@@ -141,8 +158,32 @@ export function useWorkflowActions() {
         error: undefined,
       });
 
-      // Refetch to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      // Refetch to ensure data is in sync with server (await so we have fresh data for comparison)
+      await queryClient.refetchQueries({ queryKey: ['workflows'] });
+
+      // If custom similarity check and callback are provided, run them per query that was updated
+      if (
+        variables.areSimilar &&
+        variables.onSuccessWhenSimilar &&
+        context?.previousData &&
+        context.previousData.size > 0
+      ) {
+        const freshDataEntries = getPreviousData();
+        for (const [queryKeyString, previousData] of context.previousData) {
+          const freshEntry = freshDataEntries.find(([k]) => JSON.stringify(k) === queryKeyString);
+          if (
+            freshEntry?.[1] &&
+            previousData &&
+            variables.areSimilar(previousData, freshEntry[1])
+          ) {
+            variables.onSuccessWhenSimilar({
+              previousData,
+              freshData: freshEntry[1],
+              updatedWorkflowId: variables.id,
+            });
+          }
+        }
+      }
     },
   });
 
@@ -161,24 +202,22 @@ export function useWorkflowActions() {
       const previousData = new Map<string, WorkflowListDto>();
 
       // Update all workflow list queries (e.g., different pages, filters)
-      queryClient
-        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
-        .forEach(([queryKey, data]) => {
-          if (data && data.results) {
-            const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
-            previousData.set(queryKeyString, data);
+      getPreviousData().forEach(([queryKey, data]) => {
+        if (data && data.results) {
+          const queryKeyString = JSON.stringify(queryKey);
+          // Store previous data for rollback on error
+          previousData.set(queryKeyString, data);
 
-            // Immediately remove deleted workflows from the list and update pagination
-            const optimisticData: WorkflowListDto = {
-              ...data,
-              results: data.results.filter((w) => !ids.includes(w.id)),
-              total: data.total - ids.length,
-            };
+          // Immediately remove deleted workflows from the list and update pagination
+          const optimisticData: WorkflowListDto = {
+            ...data,
+            results: data.results.filter((w) => !ids.includes(w.id)),
+            total: data.total - ids.length,
+          };
 
-            queryClient.setQueryData(queryKey, optimisticData);
-          }
-        });
+          queryClient.setQueryData(queryKey, optimisticData);
+        }
+      });
 
       // Return previous data for potential rollback
       return { previousData };
@@ -328,5 +367,6 @@ export function useWorkflowActions() {
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
+    getPreviousData: () => getPreviousData()?.[1]?.[1],
   };
 }

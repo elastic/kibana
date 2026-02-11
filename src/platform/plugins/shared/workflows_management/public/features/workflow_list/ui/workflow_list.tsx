@@ -33,7 +33,10 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
+import {
+  areSimilarResults,
+  shouldShowWorkflowsEmptyState,
+} from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -78,9 +81,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     const result = await refetch();
     // Update selected items with fresh data after refetch
     if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = selectedItems.map((item) => item.id);
+      const selectedIds = new Set(selectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.includes(workflow.id)
+        selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
@@ -148,6 +151,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           id: item.id,
           workflow: {
             enabled: !item.enabled,
+          },
+          areSimilar: (previous, fresh) => {
+            return areSimilarResults(fresh, previous);
+          },
+          onSuccessWhenSimilar: ({ previousData, freshData, updatedWorkflowId }) => {
+            // resort the freshData to the same order as the previousData
+            const previousDataIndexById = new Map(previousData.results.map((r, i) => [r.id, i]));
+
+            freshData.results.sort(
+              (a, b) =>
+                (previousDataIndexById.get(a.id) ?? -1) - (previousDataIndexById.get(b.id) ?? -1)
+            );
           },
         },
         {
@@ -261,8 +276,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   content={
                     !item.valid
                       ? i18n.translate('workflows.workflowList.invalid', {
-                          defaultMessage: 'Fix errors to enable workflow',
-                        })
+                        defaultMessage: 'Fix errors to enable workflow',
+                      })
                       : undefined
                   }
                 >
@@ -273,11 +288,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                     label={
                       item.enabled
                         ? i18n.translate('workflows.workflowList.enabled', {
-                            defaultMessage: 'Enabled',
-                          })
+                          defaultMessage: 'Enabled',
+                        })
                         : i18n.translate('workflows.workflowList.disabled', {
-                            defaultMessage: 'Disabled',
-                          })
+                          defaultMessage: 'Disabled',
+                        })
                     }
                     showLabel={false}
                   />
