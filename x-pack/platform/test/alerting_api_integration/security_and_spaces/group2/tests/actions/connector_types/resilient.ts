@@ -112,6 +112,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             orgId: mockResilient.config.orgId,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 

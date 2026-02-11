@@ -20,8 +20,7 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'data_backfill',
         backfillFn: (doc) => {
-          const { config, authMode } = doc.attributes;
-          if (config && config.authType && !authMode) {
+          if (!doc.attributes.authMode) {
             return { ...doc, attributes: { ...doc.attributes, authMode: 'shared' } };
           }
           return doc;

@@ -334,6 +334,7 @@ describe('getAll()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testPreconfigured',
@@ -341,6 +342,7 @@ describe('getAll()', () => {
           name: 'test',
           isPreconfigured: true,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
@@ -422,6 +424,7 @@ describe('getAll()', () => {
           isSystemAction: true,
           name: 'System action: .cases',
           referencedByCount: 2,
+          authMode: 'shared',
         },
         {
           id: '1',
@@ -429,6 +432,7 @@ describe('getAll()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testPreconfigured',
@@ -436,6 +440,7 @@ describe('getAll()', () => {
           name: 'test',
           isPreconfigured: true,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
@@ -511,6 +516,7 @@ describe('getAll()', () => {
           name: 'test',
           referencedByCount: 6,
           actionTypeId: undefined,
+          authMode: 'shared',
         },
         {
           actionTypeId: '.slack',
@@ -518,6 +524,7 @@ describe('getAll()', () => {
           isPreconfigured: true,
           name: 'test',
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
 
@@ -651,6 +658,7 @@ describe('getAll()', () => {
           isSystemAction: true,
           name: 'test2',
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
@@ -729,6 +737,7 @@ describe('getAll()', () => {
           referencedByCount: 6,
           isConnectorTypeDeprecated: true,
           isMissingSecrets: false,
+          authMode: 'shared',
         },
         {
           actionTypeId: '.slack',
@@ -737,6 +746,7 @@ describe('getAll()', () => {
           name: 'test',
           referencedByCount: 2,
           isConnectorTypeDeprecated: true,
+          authMode: 'shared',
         },
       ]);
     });
@@ -813,6 +823,7 @@ describe('getAll()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testWithAuthMode',
@@ -897,6 +908,7 @@ describe('getAll()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testWithPerUserAuth',
@@ -980,6 +992,7 @@ describe('getAll()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testWithoutAuthMode',
@@ -987,13 +1000,14 @@ describe('getAll()', () => {
           name: 'test without authMode',
           isPreconfigured: true,
           referencedByCount: 1,
+          authMode: 'shared',
         },
       ]);
 
-      // Ensure authMode is not in the result
+      // Ensure authMode defaults to 'shared' even when not explicitly set
       const connectorWithoutAuthMode = result.find((c) => c.id === 'testWithoutAuthMode');
       expect(connectorWithoutAuthMode).toBeDefined();
-      expect(connectorWithoutAuthMode).not.toHaveProperty('authMode');
+      expect(connectorWithoutAuthMode!.authMode).toBe('shared');
     });
   });
 
@@ -1131,6 +1145,7 @@ describe('getAll()', () => {
           name: 'Test system action',
           isSystemAction: true,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
@@ -1161,6 +1176,7 @@ describe('getAllUnsecured()', () => {
               foo: 'bar',
             },
             secrets: 'this should not be returned',
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -1218,6 +1234,7 @@ describe('getAllUnsecured()', () => {
         isMissingSecrets: false,
         config: { foo: 'bar' },
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         id: 'testPreconfigured',
@@ -1226,6 +1243,7 @@ describe('getAllUnsecured()', () => {
         isPreconfigured: true,
         referencedByCount: 2,
         config: { foo: 'bar' },
+        authMode: 'shared',
       },
     ]);
 
@@ -1328,6 +1346,7 @@ describe('getAllUnsecured()', () => {
               foo: 'bar',
             },
             secrets: 'this should not be returned',
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -1383,6 +1402,7 @@ describe('getAllUnsecured()', () => {
         isMissingSecrets: false,
         config: { foo: 'bar' },
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         id: 'testPreconfigured',
@@ -1390,6 +1410,7 @@ describe('getAllUnsecured()', () => {
         name: 'test',
         isPreconfigured: true,
         referencedByCount: 2,
+        authMode: 'shared',
       },
     ]);
 
@@ -1491,6 +1512,7 @@ describe('getAllUnsecured()', () => {
             config: {
               foo: 'bar',
             },
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -1537,6 +1559,7 @@ describe('getAllUnsecured()', () => {
         isMissingSecrets: false,
         name: 'test',
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         actionTypeId: '.slack',
@@ -1544,6 +1567,7 @@ describe('getAllUnsecured()', () => {
         isPreconfigured: true,
         name: 'test',
         referencedByCount: 2,
+        authMode: 'shared',
       },
     ]);
 

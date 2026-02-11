@@ -54,7 +54,7 @@ describe('Connector Model Versions', () => {
         expect(typeof backfillFn).toBe('function');
       });
 
-      it('adds authMode "shared" when config.authType exists', () => {
+      it('adds authMode "shared" correctly', () => {
         const mockDocument = {
           id: 'test-connector-id',
           type: 'action',
@@ -86,114 +86,6 @@ describe('Connector Model Versions', () => {
             authMode: 'shared',
           },
         });
-      });
-
-      it('returns document unchanged when config is missing', () => {
-        const mockDocument = {
-          id: 'test-connector-id',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.server-log',
-            name: 'Test Logger',
-            isMissingSecrets: false,
-            secrets: '{}',
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-        };
-
-        const result = backfillFn!(mockDocument, context);
-
-        expect(result).toEqual(mockDocument);
-      });
-
-      it('returns document unchanged when config exists but authType is missing', () => {
-        const mockDocument = {
-          id: 'test-connector-id',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.email',
-            name: 'Test Email',
-            isMissingSecrets: false,
-            config: {
-              service: 'gmail',
-              from: 'test@example.com',
-            },
-            secrets: '{}',
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-        };
-
-        const result = backfillFn!(mockDocument, context);
-
-        expect(result).toEqual(mockDocument);
-      });
-
-      it('returns document unchanged when config.authType is null', () => {
-        const mockDocument = {
-          id: 'test-connector-id',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.index',
-            name: 'Test Index',
-            isMissingSecrets: false,
-            config: {
-              authType: null,
-              index: 'test-index',
-            },
-            secrets: '{}',
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-        };
-
-        const result = backfillFn!(mockDocument, context);
-
-        expect(result).toEqual(mockDocument);
-      });
-
-      it('returns document unchanged when config.authType is undefined', () => {
-        const mockDocument = {
-          id: 'test-connector-id',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.pagerduty',
-            name: 'Test PagerDuty',
-            isMissingSecrets: false,
-            config: {
-              authType: undefined,
-              apiUrl: 'https://api.pagerduty.com',
-            },
-            secrets: '{}',
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-        };
-
-        const result = backfillFn!(mockDocument, context);
-
-        expect(result).toEqual(mockDocument);
       });
 
       it('does not overwrite existing authMode if already present', () => {

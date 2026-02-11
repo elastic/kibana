@@ -88,7 +88,8 @@
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
-      "isSystemAction": false
+      "isSystemAction": false,
+      "authMode": "shared"
     },
     {
       "name": "Email Connector",
@@ -100,7 +101,8 @@
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
-      "isSystemAction": false
+      "isSystemAction": false,
+      "authMode": "shared"
     }
   ]
 }

@@ -156,6 +156,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_system_action: false,
                 is_deprecated: false,
                 is_connector_type_deprecated: false,
+                auth_mode: 'shared',
               });
               break;
             default:

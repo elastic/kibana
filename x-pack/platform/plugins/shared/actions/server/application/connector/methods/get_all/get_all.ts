@@ -130,7 +130,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        ...(connector.authMode !== undefined ? { authMode: connector.authMode } : {}),
+        authMode: connector.authMode ? connector.authMode : 'shared',
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));
@@ -190,6 +190,7 @@ export async function getAllSystemConnectors({
       isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
         systemConnector.actionTypeId
       ),
+      authMode: systemConnector.authMode ? systemConnector.authMode : 'shared',
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

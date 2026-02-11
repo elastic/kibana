@@ -79,6 +79,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   },
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.email',
@@ -89,6 +90,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured-es-index-action',
@@ -99,6 +101,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -109,6 +112,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -119,6 +123,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-slack1',
@@ -129,6 +134,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -139,6 +145,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'SystemABC',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -149,6 +156,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-test-email',
@@ -159,6 +167,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'TestEmail#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
               ]);
               break;
@@ -248,6 +257,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   },
                   referenced_by_count: 1,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.email',
@@ -258,6 +268,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured-es-index-action',
@@ -268,6 +279,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -278,6 +290,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -288,6 +301,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-slack1',
@@ -298,6 +312,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -308,6 +323,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'SystemABC',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -318,6 +334,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-test-email',
@@ -328,6 +345,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'TestEmail#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
               ]);
               break;
@@ -389,6 +407,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured-es-index-action',
@@ -399,6 +418,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -409,6 +429,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.servicenow',
@@ -419,6 +440,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-slack1',
@@ -429,6 +451,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'custom-system-abc-connector',
@@ -439,6 +462,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'SystemABC',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'preconfigured.test.index-record',
@@ -449,6 +473,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: 'my-test-email',
@@ -459,6 +484,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'TestEmail#xyz',
                   referenced_by_count: 0,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
               ]);
               break;

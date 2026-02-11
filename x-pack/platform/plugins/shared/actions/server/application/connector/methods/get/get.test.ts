@@ -357,7 +357,6 @@ describe('get()', () => {
           actionTypeId: '.webhook',
           config: { url: 'https://example.com' },
           isMissingSecrets: false,
-          authMode: 'shared',
         },
         references: [],
       });

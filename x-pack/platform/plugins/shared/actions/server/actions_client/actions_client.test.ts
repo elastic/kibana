@@ -1080,6 +1080,7 @@ describe('get()', () => {
       isPreconfigured: true,
       name: 'test',
       config: undefined, // in memory connectors do not return unless exposeConfig is true
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1150,6 +1151,7 @@ describe('get()', () => {
       id: 'system-connector-.cases',
       isSystemAction: true,
       name: 'System action: .cases',
+      authMode: 'shared',
     });
   });
 });
@@ -1370,6 +1372,7 @@ describe('getBulk()', () => {
         actionTypeId: '.slack',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         id: '1',
@@ -1377,6 +1380,7 @@ describe('getBulk()', () => {
         name: 'test',
         config: { foo: 'bar' },
         isMissingSecrets: false,
+        authMode: 'shared',
       },
     ]);
   });
@@ -1526,12 +1530,14 @@ describe('getBulk()', () => {
         id: 'testPreconfigured',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         actionTypeId: '.cases',
         id: 'system-connector-.cases',
         isSystemAction: true,
         name: 'System action: .cases',
+        authMode: 'shared',
       },
       {
         actionTypeId: 'test',
@@ -1539,6 +1545,7 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         name: 'test',
+        authMode: 'shared',
       },
     ]);
   });
