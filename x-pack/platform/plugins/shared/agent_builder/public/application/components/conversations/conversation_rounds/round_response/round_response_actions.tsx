@@ -28,7 +28,7 @@ const labels = {
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
-  isLastRound: boolean;
+  isLastRound?: boolean;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
