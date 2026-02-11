@@ -151,7 +151,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
           ...('prefix' in secondaryMetric && secondaryMetric.prefix
-            ? { secondaryPrefix: secondaryMetric.prefix }
+            ? { secondaryLabel: secondaryMetric.prefix }
             : {}),
           secondaryAlign:
             'alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined,
@@ -410,8 +410,8 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    if (visualization.secondaryPrefix) {
-      secondaryMetric.prefix = visualization.secondaryPrefix;
+    if (visualization.secondaryLabel || visualization.secondaryPrefix) {
+      secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
