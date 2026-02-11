@@ -31,7 +31,7 @@ const INDEX_CONFIG_MAP: Record<IndexType, string[]> = {
   error: ['error'],
 };
 
-interface ESQLQueryParams {
+export interface ESQLQueryParams {
   kuery?: string;
   serviceName?: string;
   environment?: string;

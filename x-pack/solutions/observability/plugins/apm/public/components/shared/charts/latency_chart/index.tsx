@@ -27,7 +27,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
 import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
-import { OpenChartInDiscoverLink } from '../../links/discover_links/open_chart_in_discover_link';
+import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 
 interface Props {
   height?: number;
@@ -47,7 +47,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const license = useLicenseContext();
 
   const {
-    query: { comparisonEnabled, latencyAggregationType, offset },
+    query: { comparisonEnabled, latencyAggregationType, offset, rangeFrom, rangeTo },
     query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -142,7 +142,20 @@ export function LatencyChart({ height, kuery }: Props) {
           <EuiFlexItem>
             <EuiFlexGroup direction="column" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
-                <OpenChartInDiscoverLink dataTestSubj="apmLatencyChartOpenInDiscover" />
+                <OpenInDiscover
+                  variant="link"
+                  dataTestSubj="apmLatencyChartOpenInDiscover"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{
+                    kuery,
+                    serviceName,
+                    environment,
+                    transactionName: transactionName ?? undefined,
+                    transactionType,
+                  }}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MLHeader

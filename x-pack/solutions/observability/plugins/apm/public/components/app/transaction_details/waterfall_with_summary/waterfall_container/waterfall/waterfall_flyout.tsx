@@ -29,7 +29,7 @@ interface Props {
 export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Props) {
   const history = useHistory();
   const {
-    query: { flyoutDetailTab, rangeFrom, rangeTo },
+    query: { flyoutDetailTab, rangeFrom, rangeTo, kuery },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -58,8 +58,9 @@ export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Pr
           onClose={() => toggleFlyout({ history })}
           spanLinksCount={currentItem.spanLinksCount}
           flyoutDetailTab={flyoutDetailTab}
-          start={start}
-          end={end}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          kuery={kuery}
         />
       );
     case 'transaction':

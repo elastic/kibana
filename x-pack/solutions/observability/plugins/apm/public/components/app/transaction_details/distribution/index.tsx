@@ -45,7 +45,17 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+    query: {
+      rangeFrom,
+      rangeTo,
+      showCriticalPath,
+      environment,
+      kuery,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -204,6 +214,15 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          queryParams={{
+            kuery,
+            transactionName,
+            transactionType,
+            sampleRangeFrom,
+            sampleRangeTo,
+          }}
         />
       </div>
     </ResettingHeightRetainer>

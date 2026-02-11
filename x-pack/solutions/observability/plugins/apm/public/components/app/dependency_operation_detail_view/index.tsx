@@ -193,6 +193,15 @@ export function DependencyOperationDetailView() {
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              queryParams={{
+                kuery,
+                spanName,
+                dependencyName,
+                sampleRangeFrom,
+                sampleRangeTo,
+              }}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

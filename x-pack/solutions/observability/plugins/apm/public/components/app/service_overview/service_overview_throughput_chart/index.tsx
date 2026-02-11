@@ -25,7 +25,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
-import { OpenChartInDiscoverLink } from '../../../shared/links/discover_links/open_chart_in_discover_link';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -184,7 +184,20 @@ export function ServiceOverviewThroughputChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <OpenChartInDiscoverLink dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover" />
+          <OpenInDiscover
+            dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            variant="link"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

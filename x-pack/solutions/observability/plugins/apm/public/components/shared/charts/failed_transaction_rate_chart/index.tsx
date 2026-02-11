@@ -26,7 +26,7 @@ import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_pref
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
-import { OpenChartInDiscoverLink } from '../../links/discover_links/open_chart_in_discover_link';
+import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -181,7 +181,20 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <OpenChartInDiscoverLink dataTestSubj="apmFailedTransactionRateChartOpenInDiscover" />
+          <OpenInDiscover
+            dataTestSubj="apmFailedTransactionRateChartOpenInDiscover"
+            variant="link"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

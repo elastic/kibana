@@ -32,6 +32,7 @@ export function TraceExplorerWaterfall() {
       environment,
       showCriticalPath,
       detailTab,
+      kuery,
     },
   } = useApmParams('/traces/explorer/waterfall');
 
@@ -125,6 +126,9 @@ export function TraceExplorerWaterfall() {
         serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        queryParams={{ kuery }}
       />
     </ResettingHeightRetainer>
   );
