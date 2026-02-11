@@ -260,8 +260,28 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   });
 
   test('should trigger workflow from alert', async ({ pageObjects, page, browserAuth }) => {
-    // Admin privileges needed to write to the test index and create detection rules
-    await browserAuth.loginAsAdmin();
+    // Custom role with extra privileges beyond the default editor:
+    // 1. Write to test-security-alerts-index (workflow indexes alert docs to trigger the rule)
+    // 2. Create ingest pipelines (workflow creates add_timestamp_if_missing pipeline)
+    // Detection rule creation uses kibana.request, so Kibana 'all' base privilege covers it.
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: {
+        cluster: ['manage_ingest_pipelines'],
+        indices: [
+          {
+            names: ['test-security-alerts-index'],
+            privileges: ['write', 'read', 'view_index_metadata', 'create_index'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+    });
 
     const singleWorkflowName = `Handle single alert ${Math.floor(Math.random() * 10000)}`;
     const multipleWorkflowName = `Handle multiple alerts ${Math.floor(Math.random() * 10000)}`;
@@ -338,15 +358,14 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
 
     const executionItems = page.testSubj.locator('workflowExecutionListItem');
-    await expect(executionItems).toHaveCount(2, { timeout: ALERT_PROPAGATION_TIMEOUT });
+    await expect(executionItems).toHaveCount(mockAlerts.length, {
+      timeout: ALERT_PROPAGATION_TIMEOUT,
+    });
 
     // Most recent execution first -> last alert first
-    const expectedSingleAlertDescriptions = [
-      'suspicious_data_transfer',
-      'bruteforce_login_attempt',
-    ];
+    const expectedSingleAlertIds = [...mockAlerts].reverse().map((a) => a.alert_id);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < expectedSingleAlertIds.length; i++) {
       // eslint-disable-next-line playwright/no-nth-methods -- iterating over execution list items by index
       await executionItems.nth(i).click();
 
@@ -364,7 +383,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       await logEachAlertButtons.first().click();
 
       const stepOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
-      expect(JSON.stringify(stepOutput)).toContain(expectedSingleAlertDescriptions[i]);
+      expect(JSON.stringify(stepOutput)).toContain(expectedSingleAlertIds[i]);
 
       await page.testSubj.click('backToExecutionsLink');
       await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
@@ -395,16 +414,14 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     const logEachAlertButtons2 = executionPanel2.getByRole('button', {
       name: /^log_each_alert/,
     });
-    await expect(logEachAlertButtons2).toHaveCount(2);
+    await expect(logEachAlertButtons2).toHaveCount(mockAlerts.length);
 
-    const expectedAlertIds = ['bruteforce_login_attempt', 'suspicious_data_transfer'];
-
-    for (let i = 0; i < expectedAlertIds.length; i++) {
+    for (let i = 0; i < mockAlerts.length; i++) {
       // eslint-disable-next-line playwright/no-nth-methods -- iterating over foreach iterations by index
       await logEachAlertButtons2.nth(i).click();
 
       const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
-      expect(JSON.stringify(alertOutput)).toContain(expectedAlertIds[i]);
+      expect(JSON.stringify(alertOutput)).toContain(mockAlerts[i].alert_id);
     }
   });
 });

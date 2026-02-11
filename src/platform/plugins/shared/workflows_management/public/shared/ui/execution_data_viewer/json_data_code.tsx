@@ -21,14 +21,13 @@ export const JsonDataCode = ({ json }: JsonDataCodeProps) => {
   }, [json]);
 
   return (
-    <div data-test-subj="stepResultJsonEditor">
-      <JSONCodeEditorCommonMemoized
-        jsonValue={formattedJson}
-        onEditorDidMount={() => {}}
-        height="100%"
-        hasLineNumbers
-        enableFindAction
-      />
-    </div>
+    <JSONCodeEditorCommonMemoized
+      data-test-subj="stepResultJsonEditor"
+      jsonValue={formattedJson}
+      onEditorDidMount={() => {}}
+      height="100%"
+      hasLineNumbers
+      enableFindAction
+    />
   );
 };
