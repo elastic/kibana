@@ -14,7 +14,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import { DateRangePicker, type DateRangePickerProps } from './date_range_picker';
 
 const defaultProps: DateRangePickerProps = {
-  value: 'last 20 minutes',
+  defaultValue: 'last 20 minutes',
   onChange: () => {},
 };
 

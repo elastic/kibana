@@ -32,7 +32,7 @@ import { durationToDisplayShortText, timeRangeToDisplayText } from './format';
 
 export interface DateRangePickerProps {
   /** Text representation of the time range */
-  value?: string;
+  defaultValue?: string;
 
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
@@ -65,13 +65,13 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
  * A date range picker component that accepts natural language and date math input.
  */
 export function DateRangePicker(props: DateRangePickerProps) {
-  const { value, onChange, dateFormat, isInvalid, compressed = true } = props;
+  const { defaultValue, onChange, dateFormat, isInvalid, compressed = true } = props;
   const { euiTheme } = useEuiTheme();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => value ?? '');
+  const [text, setText] = useState<string>(() => defaultValue ?? '');
   const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
