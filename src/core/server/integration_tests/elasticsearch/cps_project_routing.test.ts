@@ -27,9 +27,12 @@ const TOTAL_DOCS_COUNT = TEST_DOCUMENTS.length;
 const ALPHA_CATEGORY_DOCS_COUNT = TEST_DOCUMENTS.filter((d) => d.category === 'alpha').length;
 const BETA_CATEGORY_DOCS_COUNT = TEST_DOCUMENTS.filter((d) => d.category === 'beta').length;
 const FIRST_TITLE_DOCS_COUNT = TEST_DOCUMENTS.filter((d) => d.title === 'First document').length;
-const DOCS_WITH_DOCUMENT_IN_TITLE = TEST_DOCUMENTS.filter((d) => d.title.includes('document'))
-  .length;
-const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS].sort((a, b) => b.count - a.count).map((d) => d.count);
+const DOCS_WITH_DOCUMENT_IN_TITLE = TEST_DOCUMENTS.filter((d) =>
+  d.title.includes('document')
+).length;
+const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
+  .sort((a, b) => b.count - a.count)
+  .map((d) => d.count);
 
 /**
  * Integration tests for CPS (Cross-Project Search) project_routing parameter.
@@ -507,25 +510,28 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('PIT (Point-In-Time) operations', () => {
-    itIfCpsSupported('can open PIT without project_routing (PIT establishes its own scope)', async () => {
-      const pitResponse = await client.openPointInTime({
-        index: TEST_INDEX,
-        keep_alive: '1m',
-      });
+    itIfCpsSupported(
+      'can open PIT without project_routing (PIT establishes its own scope)',
+      async () => {
+        const pitResponse = await client.openPointInTime({
+          index: TEST_INDEX,
+          keep_alive: '1m',
+        });
 
-      expect(pitResponse.id).toBeDefined();
+        expect(pitResponse.id).toBeDefined();
 
-      // Search using PIT (no project_routing needed - PIT has its own scope)
-      const searchResponse = await client.search({
-        pit: { id: pitResponse.id, keep_alive: '1m' },
-        query: { match_all: {} },
-      });
+        // Search using PIT (no project_routing needed - PIT has its own scope)
+        const searchResponse = await client.search({
+          pit: { id: pitResponse.id, keep_alive: '1m' },
+          query: { match_all: {} },
+        });
 
-      expect(searchResponse.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+        expect(searchResponse.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
 
-      // Close PIT
-      await client.closePointInTime({ id: pitResponse.id });
-    });
+        // Close PIT
+        await client.closePointInTime({ id: pitResponse.id });
+      }
+    );
   });
 
   describe('edge cases and error scenarios', () => {
@@ -644,4 +650,3 @@ describe('CPS project_routing on serverless ES', () => {
     });
   });
 });
-

@@ -553,11 +553,7 @@ describe('CPS onRequest handler', () => {
     });
 
     describe('onRequest handler behavior', () => {
-      let onRequestHandler: (
-        ctx: { scoped: boolean },
-        params: any,
-        options?: any
-      ) => void;
+      let onRequestHandler: (ctx: { scoped: boolean }, params: any, options?: any) => void;
 
       beforeEach(async () => {
         MockClusterClient.mockClear();
@@ -573,7 +569,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: false }, params, options);
 
@@ -601,7 +597,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: [] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: true }, params, options);
 
@@ -616,7 +612,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: true }, params, options);
 
@@ -632,7 +628,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: true }, params, options);
 
@@ -647,7 +643,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: true }, params, options);
 
@@ -662,7 +658,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         onRequestHandler({ scoped: true }, params, options);
 
@@ -680,7 +676,7 @@ describe('CPS onRequest handler', () => {
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        serverlessElasticsearchService['cpsEnabled'] = true;
+        serverlessElasticsearchService.cpsEnabled = true;
 
         expect(() => onRequestHandler({ scoped: true }, params, undefined)).not.toThrow();
       });
