@@ -69,7 +69,7 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources] = await Promise.all([
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
     shouldValidateCallback(callbacks, 'getSources')
       ? retrieveSources(rootCommands, callbacks)
       : new Set<string>(),
@@ -80,6 +80,7 @@ async function validateAst(
     shouldValidateCallback(callbacks, 'getTimeseriesIndices')
       ? callbacks?.getTimeseriesIndices?.()
       : undefined,
+    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
   ]);
 
   const sourceQuery = queryString.split('|')[0];
@@ -113,6 +114,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -135,12 +137,17 @@ async function validateAst(
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
-      currentCommand.name === 'join'
+      currentCommand.name === 'join' || currentCommand.name === 'promql'
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
+    const queryForColumns =
+      currentCommand.name === 'promql'
+        ? queryString.slice(0, currentCommand.location.max + 1)
+        : queryString;
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -150,6 +157,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -230,6 +238,7 @@ function validateCommand(
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
+    views: references.views,
     unmappedFieldsStrategy,
   };
 

@@ -22,6 +22,7 @@ export const dataStreamSchemaV1 = schema.object({
     ),
     {
       minSize: 1,
+      maxSize: 100,
     }
   ),
   job_info: schema.object({
