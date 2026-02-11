@@ -10,41 +10,42 @@ import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import { getIndexFromPromQLParams } from '../../definitions/utils/promql';
-import { synth } from '../../../..';
+import { PromqlParamName } from './utils';
+import {
+  collectMetricsAndLabels,
+  findPromqlExpression,
+} from '../../../embedded_languages/promql/ast/traversal';
 
 export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[],
-  _query: string,
-  { fromFrom }: IAdditionalFields
+  query: string,
+  { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const sourceColumns = await getSourceColumns(promqlCommand, fromFrom);
+  const pipeIndex = query.indexOf('|', promqlCommand.location.max);
+  const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
+  const stepColumn = getStepColumn(promqlCommand);
 
-  return userDefinedColumn ? [...sourceColumns, userDefinedColumn] : sourceColumns;
-};
-
-async function getSourceColumns(
-  command: ESQLAstPromqlCommand,
-  fromFrom: IAdditionalFields['fromFrom']
-): Promise<ESQLColumnData[]> {
-  const indexName = getIndexFromPromQLParams(command);
-
-  if (!indexName) {
-    return [];
+  if (pipeIndex === -1) {
+    return sourceColumns;
   }
 
-  /*
-   * PROMQL stores the index in params, not as a source arg like FROM/TS:
-   *   FROM metrics  → args: [{ type: "source", name: "metrics" }]
-   *   PROMQL index=metrics → params.entries: [{ key: "index", value: "metrics" }]
-   *
-   * We create a synthetic FROM command to reuse the existing field fetching infrastructure.
-   */
-  return fromFrom(synth.cmd`FROM ${indexName}`);
-}
+  const { metrics, breakdownLabels } = getPromqlOutputColumns(promqlCommand, {
+    excludeMetrics: !!userDefinedColumn,
+  });
+
+  const sourceByName = new Map(sourceColumns.map((column) => [column.name, column]));
+
+  return buildColumns({
+    stepColumn,
+    userDefinedColumn,
+    sourceByName,
+    metrics,
+    breakdownLabels,
+  });
+};
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
   const { query } = command;
@@ -61,8 +62,104 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 
   return {
     name: target.name,
-    type: 'unknown', // TODO: infer type once PROMQL query AST is available
+    type: 'unknown', // TODO: infer type once PROMQL query AST is available,
     location: target.location,
     userDefined: true,
   };
+}
+
+function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
+  const hasStep = command.params?.entries?.some(
+    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
+  );
+
+  if (!hasStep) {
+    return undefined;
+  }
+
+  return {
+    name: PromqlParamName.Step,
+    type: 'date',
+    userDefined: false,
+  };
+}
+
+function getPromqlOutputColumns(
+  command: ESQLAstPromqlCommand,
+  { excludeMetrics }: { excludeMetrics: boolean }
+): {
+  metrics: Set<string>;
+  breakdownLabels: Set<string>;
+} {
+  const query = findPromqlExpression(command.query);
+
+  if (!query?.expression) {
+    return { metrics: new Set(), breakdownLabels: new Set() };
+  }
+
+  const { metrics, breakdownLabels } = collectMetricsAndLabels(query.expression);
+  const includeMetrics = query.expression.type === 'selector' && !excludeMetrics;
+
+  if (!includeMetrics) {
+    return { metrics: new Set(), breakdownLabels };
+  }
+
+  return { metrics, breakdownLabels };
+}
+
+function buildColumns({
+  stepColumn,
+  userDefinedColumn,
+  sourceByName,
+  metrics,
+  breakdownLabels,
+}: {
+  stepColumn: ESQLColumnData | undefined;
+  userDefinedColumn: ESQLUserDefinedColumn | undefined;
+  sourceByName: Map<string, ESQLColumnData>;
+  metrics: Set<string>;
+  breakdownLabels: Set<string>;
+}): ESQLColumnData[] {
+  const columnNames = new Set<string>();
+  let columns: ESQLColumnData[] = [];
+
+  columns = appendColumn(columns, columnNames, stepColumn);
+  columns = appendColumn(columns, columnNames, userDefinedColumn);
+  columns = appendPromqlFields(columns, columnNames, sourceByName, metrics);
+  columns = appendPromqlFields(columns, columnNames, sourceByName, breakdownLabels);
+
+  return columns;
+}
+
+function appendPromqlFields(
+  columns: ESQLColumnData[],
+  columnNames: Set<string>,
+  sourceByName: Map<string, ESQLColumnData>,
+  names: Set<string>
+): ESQLColumnData[] {
+  let nextColumns = columns;
+
+  for (const name of names) {
+    const sourceColumn = sourceByName.get(name);
+    nextColumns = appendColumn(nextColumns, columnNames, {
+      name,
+      type: sourceColumn?.type ?? 'unknown',
+      userDefined: false,
+    });
+  }
+
+  return nextColumns;
+}
+
+function appendColumn(
+  columns: ESQLColumnData[],
+  columnNames: Set<string>,
+  column: ESQLColumnData | undefined
+): ESQLColumnData[] {
+  if (!column || columnNames.has(column.name)) {
+    return columns;
+  }
+
+  columnNames.add(column.name);
+  return [...columns, column];
 }

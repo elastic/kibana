@@ -27,6 +27,13 @@ jest.mock('../../../../common', () => ({
   useValidateIndex: jest.fn(),
   useGetIntegrationById: jest.fn(),
   useCreateUpdateIntegration: jest.fn(),
+  useUploadSamples: jest.fn(() => ({
+    uploadSamplesMutation: {
+      mutateAsync: jest.fn(),
+      isLoading: false,
+    },
+    isLoading: false,
+  })),
   generateId: jest.fn(() => 'mock-id'),
   useKibana: jest.fn(() => ({
     services: {
