@@ -70,8 +70,9 @@ function readMoonYml(filePath: string): MoonProject | null {
       id: (parsed.id as string) ?? '',
       dependsOn: (parsed.dependsOn as string[]) ?? [],
       metadata: {
-        sourceRoot: ((parsed.project as Record<string, unknown>)?.metadata as Record<string, unknown>)
-          ?.sourceRoot as string | undefined,
+        sourceRoot: (
+          (parsed.project as Record<string, unknown>)?.metadata as Record<string, unknown>
+        )?.sourceRoot as string | undefined,
       },
     };
   } catch {

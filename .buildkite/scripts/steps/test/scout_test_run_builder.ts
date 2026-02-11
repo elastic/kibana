@@ -8,11 +8,7 @@
  */
 
 import path from 'path';
-import {
-  pickScoutTestGroupRunOrder,
-  pickScoutBurnInRunOrder,
-  getKibanaDir,
-} from '#pipeline-utils';
+import { pickScoutTestGroupRunOrder, pickScoutBurnInRunOrder, getKibanaDir } from '#pipeline-utils';
 
 (async () => {
   try {
