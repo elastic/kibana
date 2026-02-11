@@ -26,3 +26,8 @@ if [[ "${KIBANA_BUILD_ID:-}" && "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" ]]; then
   See job here: $KIBANA_REUSABLE_BUILD_JOB_URL
 EOF
 fi
+
+# Annotate ingestable meta-data (prefixed with 'ingest:')
+if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then # if we're in a PR build
+  buildkite-agent meta-data set "ingest:is_draft_pr" "${GITHUB_PR_DRAFT:-}" # GITHUB_PR_DRAFT is set by our pr build trigger bot
+fi
