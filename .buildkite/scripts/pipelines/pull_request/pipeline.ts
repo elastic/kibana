@@ -50,17 +50,17 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
+    pipeline.push('steps:');
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml'));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
       return;
     }
 
     await runPreBuild();
-    pipeline.push('steps:');
 
     /**
      * Start FTR bench early to avoid blocking the build.
