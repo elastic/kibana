@@ -17,11 +17,11 @@ import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { DatasourceLayers, MetricVisualizationState } from '@kbn/lens-common';
+import { legacyMetricStateDefaults, metricStateDefaults } from '@kbn/lens-common';
 import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import {
   getColorMode,
   getDefaultConfigForMode,

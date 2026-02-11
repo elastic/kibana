@@ -38,18 +38,18 @@ import type {
   SecondaryTrendType,
 } from '@kbn/lens-common';
 import { css } from '@emotion/react';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_GROUP_ID,
+  metricStateDefaults,
+  legacyMetricStateDefaults,
+} from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
-import {
-  SECONDARY_DEFAULT_STATIC_COLOR,
-  GROUP_ID,
-  metricStateDefaults,
-  legacyMetricStateDefaults,
-} from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -455,7 +455,7 @@ function SecondaryMetricEditor({
     () =>
       state.secondaryTrend?.type === 'static'
         ? state.secondaryTrend.color
-        : SECONDARY_DEFAULT_STATIC_COLOR,
+        : LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     [state]
   );
 
@@ -1214,7 +1214,7 @@ export function DimensionEditorDataExtraComponent({
   setState,
 }: Omit<Props, 'paletteService'>) {
   const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
-  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+  if (!isMetricNumeric || groupId !== LENS_METRIC_GROUP_ID.BREAKDOWN_BY) {
     return null;
   }
   return (

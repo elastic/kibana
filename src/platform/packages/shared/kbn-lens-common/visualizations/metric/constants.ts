@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricVisualizationStateOptionals } from './types';
+import type {
+  MetricVisualizationStateOptionals,
+  MetricStateDefaults,
+  MetricLayoutWithDefault,
+} from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 
@@ -22,19 +26,53 @@ export const LENS_METRIC_GROUP_ID = {
   TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;
 
+export const legacyMetricStateDefaults: Pick<MetricStateDefaults, 'iconAlign'> = {
+  iconAlign: 'left',
+};
+
+/** Defaults for select optional Metric vis state options */
+export const metricStateDefaults: MetricStateDefaults = {
+  titlesTextAlign: 'left',
+  primaryAlign: 'right',
+  secondaryAlign: 'right',
+  iconAlign: 'right',
+  valueFontMode: 'default',
+  primaryPosition: 'bottom',
+  titleWeight: 'bold',
+  secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
+};
+
 /**
  * Defaults for select optional Metric vis state options
  */
 export const LENS_METRIC_STATE_DEFAULTS: Required<
   Pick<
     MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
+    'titlesTextAlign' | 'primaryAlign' | 'iconAlign' | 'valueFontMode'
   >
 > = {
   titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
+  primaryAlign: 'right',
   iconAlign: 'left',
   valueFontMode: 'default',
+};
+
+export const METRIC_LAYOUT_BY_POSITION: Record<'bottom' | 'top', MetricLayoutWithDefault> = {
+  bottom: {
+    titlesTextAlign: 'left',
+    titleWeight: 'bold',
+    primaryAlign: 'right',
+    iconAlign: 'right',
+    secondaryAlign: 'right',
+  },
+  top: {
+    titlesTextAlign: 'left',
+    titleWeight: 'normal',
+    primaryAlign: 'left',
+    iconAlign: 'right',
+    secondaryAlign: 'left',
+  },
 };
 
 export const LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

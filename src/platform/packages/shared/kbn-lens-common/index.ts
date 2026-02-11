@@ -214,6 +214,7 @@ export type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricLayoutWithDefault,
 } from './visualizations/metric/types';
 export type {
   SharedPartitionLayerState,
@@ -353,11 +354,14 @@ export {
   LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
 } from './visualizations/legacy_metric/constants';
 export {
+  legacyMetricStateDefaults,
+  metricStateDefaults,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
   LENS_METRIC_DEFAULT_TRENDLINE_NAME,
+  METRIC_LAYOUT_BY_POSITION,
   METRIC_TRENDLINE_NAME,
   LENS_METRIC_LABEL_POSITION,
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,

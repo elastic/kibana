@@ -9,8 +9,8 @@ import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '@kbn/lens-common';
+import { METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { METRIC_LAYOUT_BY_POSITION } from '../constants';
 import { MetricAppearanceSettings } from './appearance_settings';
 
 const palette: PaletteOutput<CustomPaletteParams> = {

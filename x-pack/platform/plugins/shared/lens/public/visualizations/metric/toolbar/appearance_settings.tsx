@@ -20,13 +20,13 @@ import type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricLayoutWithDefault,
 } from '@kbn/lens-common';
 import {
   METRIC_LAYOUT_BY_POSITION,
   legacyMetricStateDefaults,
   metricStateDefaults,
-  type MetricLayoutWithDefault,
-} from '../constants';
+} from '@kbn/lens-common';
 
 /** Get default layout config based on primary metric position */
 const getDefaultLayoutConfig = (

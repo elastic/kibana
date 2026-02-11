@@ -14,7 +14,7 @@ import type {
   SecondaryTrend,
   SecondaryTrendType,
 } from '@kbn/lens-common';
-import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
+import { LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR } from '@kbn/lens-common';
 
 export function getColorMode(
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -74,7 +74,7 @@ export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTren
   if (mode === 'static') {
     return {
       type: 'static',
-      color: SECONDARY_DEFAULT_STATIC_COLOR,
+      color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     };
   }
   return {
