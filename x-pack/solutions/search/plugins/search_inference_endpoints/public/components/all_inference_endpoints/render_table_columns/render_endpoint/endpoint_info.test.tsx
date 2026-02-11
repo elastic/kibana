@@ -243,6 +243,57 @@ describe('RenderEndpoint component tests', () => {
     });
   });
 
+  describe('preconfigured and tech preview tooltips', () => {
+    it('shows tooltip for preconfigured badge on hover', async () => {
+      const mockProvider = {
+        inference_id: '.elser-2-elasticsearch',
+        task_type: 'sparse_embedding',
+        service: 'elasticsearch',
+        service_settings: {
+          model_id: '.elser_model_2',
+        },
+      } as any;
+
+      renderEndpointInfo({
+        inferenceId: '.elser-2-elasticsearch',
+        endpointInfo: mockProvider,
+      });
+
+      const badge = screen.getByText('PRECONFIGURED');
+      fireEvent.mouseOver(badge);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('This endpoint is preconfigured by Elastic and cannot be deleted')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('shows tooltip for tech preview badge on hover', async () => {
+      const mockProvider = {
+        inference_id: 'elastic-rerank',
+        task_type: 'rerank',
+        service: 'elasticsearch',
+        service_settings: {
+          model_id: '.rerank-v1',
+        },
+      } as any;
+
+      renderEndpointInfo({ inferenceId: 'elastic-rerank', endpointInfo: mockProvider });
+
+      const badge = screen.getByText('TECH PREVIEW');
+      fireEvent.mouseOver(badge);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'This feature is in technical preview and may be changed or removed in a future release'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('copy to clipboard functionality', () => {
     const mockProvider = {
       inference_id: 'test-endpoint',

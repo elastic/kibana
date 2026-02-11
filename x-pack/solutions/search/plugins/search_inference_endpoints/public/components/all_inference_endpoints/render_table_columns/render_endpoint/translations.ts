@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const PRECONFIGURED_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
@@ -36,7 +37,7 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
   }
 );
 
-export const TASK_TYPE_TOOLTIPS: Record<string, string> = {
+export const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
   text_embedding: i18n.translate(
     'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.textEmbedding',
     {
