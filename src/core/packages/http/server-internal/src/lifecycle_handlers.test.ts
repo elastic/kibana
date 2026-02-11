@@ -277,11 +277,11 @@ describe('excludeRoutes pre-auth handler', () => {
       logger
     );
     const request = forgeRequest({ path: '/s/space-id/api/status' });
-  
+
     responseFactory.notFound.mockReturnValue('notFound' as any);
-  
+
     const result = handler(request, responseFactory, toolkit);
-  
+
     expect(toolkit.next).not.toHaveBeenCalled();
     expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
     expect(result).toBe('notFound');
