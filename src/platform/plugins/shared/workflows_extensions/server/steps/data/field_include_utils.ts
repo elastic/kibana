@@ -21,13 +21,14 @@ export type FieldsSpec = Record<string, unknown>;
  * the same projection to each element. For objects, keeps only keys present in
  * the pick spec; if the spec value is a nested object, recurses into that branch.
  */
-export function applyInclude(value: unknown, pick: unknown): unknown {
+export function applyInclude(value: unknown, pick: unknown, recurseDepth: number = 1): unknown {
+  const MAX_RECURSE_DEPTH = 15;
   const spec = normalizeFieldsSpec(pick);
   if (!isPlainObject(spec)) {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyInclude(item, spec));
+    return value.map((item) => applyInclude(item, spec, recurseDepth + 1));
   }
   if (isPlainObject(value)) {
     const result: Record<string, unknown> = {};
@@ -35,9 +36,18 @@ export function applyInclude(value: unknown, pick: unknown): unknown {
       if (key in value) {
         const childSpec = spec[key];
         const childValue = value[key];
-        result[key] = isNonEmptyPlainObject(childSpec)
-          ? applyInclude(childValue, childSpec)
-          : childValue;
+        if (isNonEmptyPlainObject(childSpec)) {
+          if (recurseDepth > MAX_RECURSE_DEPTH) {
+            return {
+              error: new Error(
+                `Maximum recursion depth ${MAX_RECURSE_DEPTH} has been exceeded`
+              ),
+            };
+          }
+          result[key] = applyInclude(childValue, childSpec, recurseDepth + 1);
+        } else {
+          result[key] = childValue;
+        }
       }
     }
     return result;
