@@ -32,7 +32,7 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
   ({ scriptItem, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const formatBytes = useFormatBytes();
-    const orderedScriptDetails: Record<KeyType, boolean | string | number | string[]> =
+    const orderedScriptDetails: Record<KeyType, boolean | string | number | string[]> | null =
       useMemo(() => {
         if (!scriptItem) {
           return null;

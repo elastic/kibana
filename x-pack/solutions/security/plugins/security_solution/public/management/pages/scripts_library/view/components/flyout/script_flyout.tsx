@@ -115,14 +115,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
           });
         }
       }
-    }, [
-      fetchScriptError,
-      isViewingOrEditing,
-      queryParams,
-      isMounted,
-      setUrlParams,
-      toasts,
-    ]);
+    }, [fetchScriptError, isViewingOrEditing, queryParams, isMounted, setUrlParams, toasts]);
 
     return (
       <EuiFlyout
