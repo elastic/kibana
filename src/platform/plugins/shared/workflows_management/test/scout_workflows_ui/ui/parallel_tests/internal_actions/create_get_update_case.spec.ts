@@ -19,8 +19,8 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     await browserAuth.loginAsAdmin();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
   test('should run create_get_update_case workflow successfully', async ({ page, pageObjects }) => {

@@ -37,7 +37,7 @@ export class WorkflowEditorPage {
    * Navigate to the workflow editor for an existing workflow by ID
    */
   async gotoWorkflow(workflowId: string) {
-    await this.page.gotoApp('workflows', { hash: workflowId });
+    await this.page.gotoApp(`workflows/${workflowId}`);
     await this.waitForEditorToLoad();
   }
 

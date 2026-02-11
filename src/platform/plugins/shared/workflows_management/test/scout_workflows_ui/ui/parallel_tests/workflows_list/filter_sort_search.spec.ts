@@ -11,29 +11,37 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
+import { getListTestWorkflowYaml } from '../../fixtures/workflows';
 
 test.describe('WorkflowsList/FilterSortSearch', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should filter workflows by enabling state', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should filter workflows by enabling state', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const enabledWorkflow = {
-      name: `FilterSortSearch Enabled Workflow 1 ${suffix}`,
-      description: 'This is bulk workflow number 1',
+      name: 'FilterSortSearch Enabled Workflow 1',
+      description: 'Enabled workflow for filter test',
       enabled: true,
     };
     const disabledWorkflow = {
-      name: `FilterSortSearch Disabled Workflow 1 ${suffix}`,
-      description: 'This is bulk workflow number 1',
+      name: 'FilterSortSearch Disabled Workflow 1',
+      description: 'Disabled workflow for filter test',
       enabled: false,
     };
-    await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow, disabledWorkflow]);
+    await apiServices.workflows.bulkCreate(
+      scoutSpace.id,
+      [enabledWorkflow, disabledWorkflow].map(getListTestWorkflowYaml)
+    );
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList
@@ -46,19 +54,26 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: tags.DEPLOYMENT_AGNOSTIC 
     await expect(pageObjects.workflowList.getWorkflowRow(enabledWorkflow.name)).toBeVisible();
   });
 
-  test('should filter workflows by disabling state', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should filter workflows by disabling state', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const enabledWorkflow = {
-      name: `FilterSortSearch Enabled Workflow 2 ${suffix}`,
-      description: 'This is bulk workflow number 2',
+      name: 'FilterSortSearch Enabled Workflow 2',
+      description: 'Enabled workflow for disable filter test',
       enabled: true,
     };
     const disabledWorkflow = {
-      name: `FilterSortSearch Disabled Workflow 2 ${suffix}`,
-      description: 'This is bulk workflow number 2',
+      name: 'FilterSortSearch Disabled Workflow 2',
+      description: 'Disabled workflow for disable filter test',
       enabled: false,
     };
-    await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow, disabledWorkflow]);
+    await apiServices.workflows.bulkCreate(
+      scoutSpace.id,
+      [enabledWorkflow, disabledWorkflow].map(getListTestWorkflowYaml)
+    );
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList
@@ -71,26 +86,29 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: tags.DEPLOYMENT_AGNOSTIC 
     await expect(pageObjects.workflowList.getWorkflowRow(disabledWorkflow.name)).toBeVisible();
   });
 
-  test('should search by name and description', async ({ pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should search by name and description', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflows = [
       {
-        name: `Search Test Apple Workflow ${suffix}`,
+        name: 'Search Test Apple Workflow',
         description: 'Workflow for testing apple search',
         enabled: true,
       },
       {
-        name: `Search Test Banana Workflow ${suffix}`,
+        name: 'Search Test Banana Workflow',
         description: 'Workflow for testing banana search',
         enabled: true,
       },
       {
-        name: `Search Test Orange Workflow ${suffix}`,
+        name: 'Search Test Orange Workflow',
         description: 'Contains apple in description',
         enabled: false,
       },
     ];
-    await pageObjects.workflowList.createDummyWorkflows(workflows);
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
 

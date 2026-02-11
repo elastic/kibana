@@ -11,24 +11,24 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
+import { getListTestWorkflowYaml } from '../../fixtures/workflows';
 
 test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should run enabled workflow', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should run enabled workflow', async ({ page, pageObjects, apiServices, scoutSpace }) => {
     const enabledWorkflow = {
-      name: `ThreeDotsTest Enabled Workflow 1 ${suffix}`,
-      description: 'This is bulk workflow number 1',
+      name: 'ThreeDotsTest Enabled Workflow',
+      description: 'Enabled workflow for run test',
       enabled: true,
     };
-    await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(enabledWorkflow));
 
     // verify run via direct action button
     await pageObjects.workflowList.navigate();
@@ -51,14 +51,13 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     ).toBeVisible();
   });
 
-  test('should not run disabled workflow', async ({ pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should not run disabled workflow', async ({ pageObjects, apiServices, scoutSpace }) => {
     const disabledWorkflow = {
-      name: `ThreeDotsTest Disabled Workflow 1 ${suffix}`,
-      description: 'This is bulk workflow number 1',
+      name: 'ThreeDotsTest Disabled Workflow',
+      description: 'Disabled workflow for run test',
       enabled: false,
     };
-    await pageObjects.workflowList.createDummyWorkflows([disabledWorkflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(disabledWorkflow));
     await pageObjects.workflowList.navigate();
 
     // verify disabled via direct action button
@@ -74,14 +73,17 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await expect(runThreeDotsAction).toBeDisabled();
   });
 
-  test('should enable disabled workflow via toggle', async ({ pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should enable disabled workflow via toggle', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const disabledWorkflow = {
-      name: `Toggle Enable Workflow ${suffix}`,
+      name: 'Toggle Enable Workflow',
       description: 'This workflow starts disabled and should be enabled via toggle',
       enabled: false,
     };
-    await pageObjects.workflowList.createDummyWorkflows([disabledWorkflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(disabledWorkflow));
     await pageObjects.workflowList.navigate();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflow.name);
@@ -95,14 +97,17 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     ).toBeEnabled();
   });
 
-  test('should disable enabled workflow via toggle', async ({ pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should disable enabled workflow via toggle', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const enabledWorkflow = {
-      name: `Toggle Disable Workflow ${suffix}`,
+      name: 'Toggle Disable Workflow',
       description: 'This workflow starts enabled and should be disabled via toggle',
       enabled: true,
     };
-    await pageObjects.workflowList.createDummyWorkflows([enabledWorkflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(enabledWorkflow));
     await pageObjects.workflowList.navigate();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(enabledWorkflow.name);
@@ -116,14 +121,18 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     ).toBeDisabled();
   });
 
-  test('should open workflow for editing via edit action', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should open workflow for editing via edit action', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflow = {
-      name: `Edit Action Test Workflow ${suffix}`,
+      name: 'Edit Action Test Workflow',
       description: 'This workflow should be opened for editing',
       enabled: true,
     };
-    await pageObjects.workflowList.createDummyWorkflows([workflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
     // verify edit via direct action button
@@ -144,14 +153,17 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
   });
 
-  test('should clone workflow via three dots menu', async ({ pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should clone workflow via three dots menu', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflow = {
-      name: `Clone Action Test Workflow ${suffix}`,
+      name: 'Clone Action Test Workflow',
       description: 'This workflow should be cloned',
       enabled: true,
     };
-    await pageObjects.workflowList.createDummyWorkflows([workflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
     const cloneAction = await pageObjects.workflowList.getThreeDotsMenuAction(
@@ -165,14 +177,18 @@ test.describe('WorkflowsList/SingleActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await expect(pageObjects.workflowList.getWorkflowRow(clonedWorkflowName)).toBeVisible();
   });
 
-  test('should delete workflow via three dots menu', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should delete workflow via three dots menu', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflow = {
-      name: `Delete Action Test Workflow ${suffix}`,
+      name: 'Delete Action Test Workflow',
       description: 'This workflow should be deleted',
       enabled: true,
     };
-    await pageObjects.workflowList.createDummyWorkflows([workflow]);
+    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
     // Set up dialog handler to accept the confirmation dialog

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnClient } from '@kbn/scout';
-import type { ApiServicesFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/apis';
 import type { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/scout_space';
+import type { WorkflowsApiServicesFixture } from '.';
 
 /**
  * Cleanup function to delete workflows and alert rules in a space.
@@ -20,31 +19,11 @@ import type { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtur
 export async function cleanupWorkflowsAndRules({
   scoutSpace,
   apiServices,
-  kbnClient,
 }: {
   scoutSpace: ScoutSpaceParallelFixture;
-  apiServices: ApiServicesFixture;
-  kbnClient: KbnClient;
+  apiServices: WorkflowsApiServicesFixture;
 }) {
-  // Delete all workflows in the space (stored in ES, not saved objects)
-  const workflowsResponse = await kbnClient.request<{ results?: Array<{ id: string }> }>({
-    method: 'POST',
-    path: `/s/${scoutSpace.id}/api/workflows/search`,
-    body: { size: 10000, page: 1 },
-  });
-
-  const workflowIds = workflowsResponse.data.results?.map((w) => w.id) || [];
-  if (workflowIds.length > 0) {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `/s/${scoutSpace.id}/api/workflows`,
-      body: { ids: workflowIds },
-    });
-  }
-
-  // Delete all alert rules in the space
+  await apiServices.workflows.deleteAll(scoutSpace.id);
   await apiServices.alerting.cleanup.deleteAllRules(scoutSpace.id);
-
-  // Clean up standard saved objects
   await scoutSpace.savedObjects.cleanStandardList();
 }

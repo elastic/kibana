@@ -11,31 +11,29 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
+import { getListTestWorkflowYaml } from '../../fixtures/workflows';
 
 test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should enable disabled workflows', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should enable disabled workflows', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflows = [
-      {
-        name: `BulkTest Enabled Workflow 1 ${suffix}`,
-        description: 'This is bulk workflow number 1',
-        enabled: false,
-      },
-      {
-        name: `BulkTest Enabled Workflow 2 ${suffix}`,
-        description: 'This is bulk workflow number 2',
-        enabled: false,
-      },
+      { name: 'BulkTest Enabled Workflow 1', description: 'Bulk workflow 1', enabled: false },
+      { name: 'BulkTest Enabled Workflow 2', description: 'Bulk workflow 2', enabled: false },
     ];
-    await pageObjects.workflowList.createDummyWorkflows(workflows);
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'enable'
@@ -50,21 +48,18 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     await checkEnabled();
   });
 
-  test('should disable enabled workflows', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should disable enabled workflows', async ({
+    page,
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
     const workflows = [
-      {
-        name: `BulkTest Disabled Workflow 1 ${suffix}`,
-        description: 'This is bulk workflow number 1',
-        enabled: true,
-      },
-      {
-        name: `BulkTest Disabled Workflow 2 ${suffix}`,
-        description: 'This is bulk workflow number 2',
-        enabled: true,
-      },
+      { name: 'BulkTest Disabled Workflow 1', description: 'Bulk workflow 1', enabled: true },
+      { name: 'BulkTest Disabled Workflow 2', description: 'Bulk workflow 2', enabled: true },
     ];
-    await pageObjects.workflowList.createDummyWorkflows(workflows);
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'disable'
@@ -81,21 +76,13 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     await checkDisabled();
   });
 
-  test('should delete workflows', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should delete workflows', async ({ page, pageObjects, apiServices, scoutSpace }) => {
     const workflows = [
-      {
-        name: `BulkTest Delete Workflow 1 ${suffix}`,
-        description: 'This is bulk workflow number 1 to be deleted',
-        enabled: true,
-      },
-      {
-        name: `BulkTest Delete Workflow 2 ${suffix}`,
-        description: 'This is bulk workflow number 2 to be deleted',
-        enabled: true,
-      },
+      { name: 'BulkTest Delete Workflow 1', description: 'To be deleted', enabled: true },
+      { name: 'BulkTest Delete Workflow 2', description: 'To be deleted', enabled: true },
     ];
-    await pageObjects.workflowList.createDummyWorkflows(workflows);
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'delete'
@@ -111,21 +98,21 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     await checkDeleted();
   });
 
-  test('should clear selection', async ({ page, pageObjects }) => {
-    const suffix = Math.floor(Math.random() * 10000);
+  test('should clear selection', async ({ page, pageObjects, apiServices, scoutSpace }) => {
     const workflows = [
       {
-        name: `BulkTest Clear Selection Workflow 1 ${suffix}`,
-        description: 'This is bulk workflow number 1',
+        name: 'BulkTest Clear Selection Workflow 1',
+        description: 'Bulk workflow 1',
         enabled: true,
       },
       {
-        name: `BulkTest Clear Selection Workflow 2 ${suffix}`,
-        description: 'This is bulk workflow number 2',
+        name: 'BulkTest Clear Selection Workflow 2',
+        description: 'Bulk workflow 2',
         enabled: true,
       },
     ];
-    await pageObjects.workflowList.createDummyWorkflows(workflows);
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+
     await pageObjects.workflowList.selectWorkflows(workflows.map((w) => w.name));
     await page.testSubj.waitForSelector('workflows-table-bulk-actions-button', {
       state: 'visible',

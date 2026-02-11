@@ -22,14 +22,14 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
   test('Create, save, run and view a dummy workflow', async ({ pageObjects, page }) => {
     await pageObjects.workflowEditor.gotoNewWorkflow();
 
-    const workflowName = `Dummy workflow ${Math.floor(Math.random() * 1000)}`;
+    const workflowName = 'Dummy Workflow';
 
     // Set the editor value
     await pageObjects.workflowEditor.setYamlEditorValue(getDummyWorkflowYaml(workflowName));
@@ -65,7 +65,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     pageObjects,
   }) => {
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    const workflowName = `Invalid workflow ${Math.floor(Math.random() * 1000)}`;
+    const workflowName = 'Invalid Workflow';
     await pageObjects.workflowEditor.setYamlEditorValue(getInvalidWorkflowYaml(workflowName));
 
     // Wait for validation to complete and show errors
@@ -86,7 +86,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
 
   test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    const workflowName = `Autocomplete test ${Math.floor(Math.random() * 1000)}`;
+    const workflowName = 'Autocomplete Test';
     await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
 
     // Set incomplete YAML with empty step type

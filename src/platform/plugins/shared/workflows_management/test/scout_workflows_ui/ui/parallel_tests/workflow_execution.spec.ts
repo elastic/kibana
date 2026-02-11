@@ -27,15 +27,15 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test.afterAll(async ({ scoutSpace, apiServices, kbnClient }) => {
-    await cleanupWorkflowsAndRules({ scoutSpace, apiServices, kbnClient });
+  test.afterAll(async ({ scoutSpace, apiServices }) => {
+    await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
   test('should run unsaved workflow as test run with isTestRun: true', async ({
     pageObjects,
     page,
   }) => {
-    const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Test Workflow Unsaved';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
@@ -59,7 +59,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     pageObjects,
     page,
   }) => {
-    const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Test Workflow Saved';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
@@ -83,7 +83,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     pageObjects,
     page,
   }) => {
-    const workflowName = `Test Workflow ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Test Workflow Disabled Then Enabled';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getTestRunWorkflowYaml(workflowName));
@@ -124,7 +124,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   });
 
   test('should run individual step with custom context override', async ({ pageObjects, page }) => {
-    const workflowName = `Test Workflow with loop ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Test Workflow Step Override';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getWorkflowWithLoopYaml(workflowName));
@@ -163,7 +163,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     pageObjects,
     page,
   }) => {
-    const workflowName = `Test Workflow with loop ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Test Workflow Foreach Iterations';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getIterationLoopWorkflowYaml(workflowName));
@@ -223,7 +223,7 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     pageObjects,
     page,
   }) => {
-    const workflowName = `Scroll test workflow ${Math.floor(Math.random() * 10000)}`;
+    const workflowName = 'Scroll Test Workflow';
 
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(
@@ -259,7 +259,13 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await expect(lastStep).toBeVisible();
   });
 
-  test('should trigger workflow from alert', async ({ pageObjects, page, browserAuth }) => {
+  test('should trigger workflow from alert', async ({
+    pageObjects,
+    page,
+    browserAuth,
+    apiServices,
+    scoutSpace,
+  }) => {
     // Custom role with extra privileges beyond the default editor:
     // 1. Write to test-security-alerts-index (workflow indexes alert docs to trigger the rule)
     // 2. Create ingest pipelines (workflow creates add_timestamp_if_missing pipeline)
@@ -283,12 +289,10 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       ],
     });
 
-    const singleWorkflowName = `Handle single alert ${Math.floor(Math.random() * 10000)}`;
-    const multipleWorkflowName = `Handle multiple alerts ${Math.floor(Math.random() * 10000)}`;
-    const createAlertRuleWorkflowName = `Create alert rule workflow ${Math.floor(
-      Math.random() * 10000
-    )}`;
-    const triggerAlertWorkflowName = `Trigger alert workflow ${Math.floor(Math.random() * 10000)}`;
+    const singleWorkflowName = 'Handle single alert';
+    const multipleWorkflowName = 'Handle multiple alerts';
+    const createAlertRuleWorkflowName = 'Create alert rule workflow';
+    const triggerAlertWorkflowName = 'Trigger alert workflow';
     const mockAlerts = [
       {
         severity: 'high',
@@ -308,41 +312,27 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       },
     ];
 
-    // Create single-alert target workflow (summaryMode: false)
-    await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(
-      getPrintAlertsWorkflowYaml(singleWorkflowName)
-    );
-    await pageObjects.workflowEditor.saveWorkflow();
-    const singleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
+    // Create all 4 workflows via bulk API in a single request
+    const { created } = await apiServices.workflows.bulkCreate(scoutSpace.id, [
+      getPrintAlertsWorkflowYaml(singleWorkflowName),
+      getPrintAlertsWorkflowYaml(multipleWorkflowName),
+      getCreateAlertRuleWorkflowYaml(createAlertRuleWorkflowName),
+      getTriggerAlertWorkflowYaml(triggerAlertWorkflowName),
+    ]);
+    const [singleWorkflow, multipleWorkflow, createAlertRuleWorkflow, triggerAlertWorkflow] =
+      created;
 
-    // Create multiple-alerts target workflow (summaryMode: true)
-    await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(
-      getPrintAlertsWorkflowYaml(multipleWorkflowName)
-    );
-    await pageObjects.workflowEditor.saveWorkflow();
-    const multipleWorkflowId = page.url().match(/workflows\/([^\/]+)/)?.[1];
-
-    // Create and run the alert rule creation workflow
-    await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(
-      getCreateAlertRuleWorkflowYaml(createAlertRuleWorkflowName)
-    );
-    await pageObjects.workflowEditor.saveWorkflow();
+    // Navigate to alert rule creation workflow and execute
+    await pageObjects.workflowEditor.gotoWorkflow(createAlertRuleWorkflow.id);
     await pageObjects.workflowEditor.executeWorkflowWithInputs({
-      wf_single_alert: singleWorkflowId,
-      wf_multiple_alerts: multipleWorkflowId,
+      wf_single_alert: singleWorkflow.id,
+      wf_multiple_alerts: multipleWorkflow.id,
     });
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-    // Create and run the alert trigger workflow (indexes docs that fire the rule)
-    await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(
-      getTriggerAlertWorkflowYaml(triggerAlertWorkflowName)
-    );
-    await pageObjects.workflowEditor.saveWorkflow();
+    // Navigate to alert trigger workflow and execute (indexes docs that fire the rule)
+    await pageObjects.workflowEditor.gotoWorkflow(triggerAlertWorkflow.id);
     await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);

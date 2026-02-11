@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { KibanaCodeEditorWrapper, type Locator, type ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class WorkflowListPage {
   constructor(private readonly page: ScoutPage) {}
@@ -17,37 +16,6 @@ export class WorkflowListPage {
   /** Navigates to the workflows list page. */
   async navigate() {
     await this.page.gotoApp('workflows');
-  }
-
-  // Workflow Creation
-
-  /** Creates multiple dummy workflows with the specified properties. */
-  async createDummyWorkflows(workflows: { name: string; description: string; enabled: boolean }[]) {
-    for (const workflow of workflows) {
-      await this.navigate();
-      await this.page.testSubj.click('createWorkflowButton');
-
-      const yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
-      await expect(yamlEditor).toBeVisible();
-
-      const yamlEditorWrapper = new KibanaCodeEditorWrapper(this.page);
-      const dummyWorkflow = `
-name: ${workflow.name}
-enabled: ${workflow.enabled}
-description: ${workflow.description}
-triggers:
-  - type: manual
-
-steps:
-  - name: hello_world_step
-    type: console
-    with:
-      message: "Test run: {{ execution.isTestRun }}"
-`;
-      await yamlEditorWrapper.setCodeEditorValue(dummyWorkflow);
-      await this.page.testSubj.click('saveWorkflowHeaderButton');
-      await this.page.testSubj.waitForSelector('workflowSavedChangesBadge');
-    }
   }
 
   // Workflow Locators

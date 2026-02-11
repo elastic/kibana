@@ -8,6 +8,30 @@
  */
 
 /**
+ * Minimal workflow with configurable properties for list-level tests (bulk actions, filtering, etc.).
+ */
+export const getListTestWorkflowYaml = ({
+  name,
+  description,
+  enabled,
+}: {
+  name: string;
+  description: string;
+  enabled: boolean;
+}) => `
+name: ${name}
+enabled: ${enabled}
+description: ${description}
+triggers:
+  - type: manual
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "Test run: {{ execution.isTestRun }}"
+`;
+
+/**
  * Simple workflow with a single console step that logs the isTestRun flag.
  * Used in test-run execution tests (saved, unsaved, disabled-then-enabled).
  */
