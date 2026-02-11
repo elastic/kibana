@@ -150,6 +150,7 @@ export const mapExportIntegrationToMetaData = (intgrationId: string) => {
     case 'scheduledReports':
       return {
         label: topNavStrings.export.scheduleExportLabel,
+        testId: 'scheduleExport',
         iconType: 'calendar',
         order: 3,
         separator: 'above' as const,

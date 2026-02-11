@@ -462,10 +462,6 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
-            // Allow editing the write_to_logs_streams field
-            if (key === 'write_to_logs_streams') {
-              continue;
-            }
             // Allow ssl to differ if set to default empty values
             if (
               key === 'ssl' &&

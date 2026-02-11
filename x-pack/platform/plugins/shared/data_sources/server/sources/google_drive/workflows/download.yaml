@@ -1,0 +1,93 @@
+version: '1'
+name: 'sources.google_drive.download'
+description: Download files and extract their text content (best for PDFs, Word docs, etc.). You can optionally set rerank to true and specify topK to use semantic reranking - this is useful when downloading many documents and you want to avoid using too much of your context window by only keeping the top K most relevant documents based on the rerankQuery.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: fileIds
+    type: array
+    description: Array of file IDs from search or list results. Works with PDFs, Office docs, Google Docs, and other text-based formats
+  - name: rerank
+    type: boolean
+    required: false
+    default: false
+    description: Set to true to rerank results by relevance to rerankQuery. Useful when downloading many documents to reduce context window usage by keeping only the most relevant ones.
+  - name: topK
+    type: number
+    required: false
+    default: 5
+    description: When rerank is true, return only the top K most relevant documents after reranking.
+  - name: rerankQuery
+    type: string
+    required: false
+    description: The query to rerank documents against. Required when rerank is true. Documents will be scored by relevance to this query.
+steps:
+  - name: init_results
+    type: data.set
+    with:
+      results: []
+  - name: process_files
+    type: foreach
+    foreach: "${{inputs.fileIds}}"
+    steps:
+      - name: download_file
+        type: google_drive.downloadFile
+        connector-id: <%= stackConnectorId %>
+        with:
+          fileId: "${{foreach.item}}"
+      - name: extract_content
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_ingest/pipeline/_simulate
+          body:
+            pipeline:
+              processors:
+                - attachment:
+                    field: data
+                    indexed_chars: -1
+                    remove_binary: true
+            docs:
+              - _id: "${{foreach.item}}"
+                _source:
+                  filename: "${{steps.download_file.output.name}}"
+                  data: "${{steps.download_file.output.content}}"
+      - name: normalize_result
+        type: data.set
+        with:
+          normalized:
+            fileId: "${{foreach.item}}"
+            filename: "${{steps.download_file.output.name}}"
+            content: "${{steps.extract_content.output.docs[0].doc._source.attachment.content}}"
+            content_type: "${{steps.extract_content.output.docs[0].doc._source.attachment.content_type}}"
+      - name: accumulate_result
+        type: data.set
+        with:
+          results: '${{variables.results | push: variables.normalized}}'
+  - name: conditional_rerank
+    type: if
+    condition: "${{inputs.rerank}}"
+    steps:
+      - name: do_rerank
+        type: search.rerank
+        with:
+          rerank_text: "${{inputs.rerankQuery}}"
+          data: ${{variables.results}}
+          fields:
+            - ["content"]
+          rank_window_size: ${{inputs.topK}}
+      - name: store_reranked
+        type: data.set
+        with:
+          final_results: "${{steps.do_rerank.output}}"
+    else:
+      - name: store_all
+        type: data.set
+        with:
+          final_results: "${{variables.results}}"
+  - name: output_results
+    type: data.set
+    with:
+      results: "${{variables.final_results}}"

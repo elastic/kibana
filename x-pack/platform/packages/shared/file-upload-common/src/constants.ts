@@ -17,8 +17,7 @@ export const FILE_FORMATS = {
 };
 
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
-export const MAX_FILE_SIZE = '100MB';
-export const MAX_FILE_SIZE_BYTES = 524288000; // 500MB
+export const MAX_FILE_SIZE = '500MB';
 export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
 export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 export const MAX_TIKA_FILE_SIZE_BYTES = 62914560; // 60MB

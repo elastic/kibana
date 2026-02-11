@@ -9,6 +9,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useEuiTheme, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
+import fs from 'fs';
+import path from 'path';
 import {
   useMetricsGridFullScreen,
   toggleMetricsGridFullScreen,
@@ -88,6 +90,26 @@ describe('useMetricsGridFullScreen', () => {
     expect(document.body.classList.remove).toHaveBeenCalledWith(
       expect.any(String),
       METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+    );
+  });
+
+  it('fullscreen styles use EUI push flyout CSS variable to prevent overlap with push flyouts', () => {
+    // When the metrics grid is in fullscreen mode (position: fixed), it must respect
+    // the width of any open EUI push flyout. The --euiPushFlyoutOffsetInlineEnd CSS
+    // variable is set by EuiFlyout when type="push" and automatically updates when
+    // the flyout is opened, closed, or resized.
+    // See EUI docs: https://eui.elastic.co/docs/components/containers/flyout/#relative-positioning
+    //
+
+    // Since @emotion/css compiles CSS to hashed class names, we verify the source code
+    // directly to ensure the critical CSS variable is present and won't be accidentally removed.
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]right['"]\s*,\s*['"]var\(--euiPushFlyoutOffsetInlineEnd,\s*0px\)['"]\s*\)/
     );
   });
 });

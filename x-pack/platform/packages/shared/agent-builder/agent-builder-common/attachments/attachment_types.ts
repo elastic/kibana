@@ -16,12 +16,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
+  visualizationRef = 'visualization_ref',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.visualizationRef]: VisualizationRefAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -75,6 +77,24 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
+}
+
+export const visualizationRefAttachmentDataSchema = z.object({
+  saved_object_id: z.string(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
+/**
+ * Data for a visualization_ref attachment.
+ *
+ * This attachment does not store the full saved object state, only a reference to a Lens saved
+ * object. The content can be resolved on-demand by the server when needed.
+ */
+export interface VisualizationRefAttachmentData {
+  saved_object_id: string;
+  title?: string;
+  description?: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

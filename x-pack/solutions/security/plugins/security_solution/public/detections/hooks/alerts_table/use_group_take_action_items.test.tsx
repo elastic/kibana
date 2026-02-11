@@ -21,6 +21,7 @@ describe('useGroupTakeActionsItems', () => {
     tableId: 'mock-id',
     groupNumber: 0,
     selectedGroup: 'test',
+    closePopover: () => {},
     groupBucket: {
       key: ['bucket-test'],
       key_as_string: 'bucket-test',

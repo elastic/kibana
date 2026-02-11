@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureFlagsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import type {
@@ -35,6 +35,7 @@ import type {
 } from '@kbn/lens-common';
 import { isEsqlQuerySuccess, generateEsqlQuery } from './generate_esql_query';
 import { convertToAbsoluteDateRange } from '../../utils';
+import { getLensFeatureFlags } from '../../get_feature_flags';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import { dedupeAggs } from './dedupe_aggs';
@@ -75,7 +76,6 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
-  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
@@ -176,7 +176,7 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
+    const lensESQLEnabled = getLensFeatureFlags().enableEsql;
     const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL;
 
     // Only generate ES|QL query when ES|QL mode is enabled
@@ -563,7 +563,6 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
-  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
@@ -574,7 +573,6 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
-      featureFlags,
       dateRange,
       nowInstant,
       searchSessionId,

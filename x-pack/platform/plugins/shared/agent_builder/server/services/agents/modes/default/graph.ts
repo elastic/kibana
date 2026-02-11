@@ -7,7 +7,6 @@
 
 import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -19,6 +18,7 @@ import {
   createReasoningEvent,
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import type { PromptFactory } from './prompts';
@@ -49,7 +49,7 @@ const MAX_ERROR_COUNT = 2;
 
 export const createAgentGraph = ({
   chatModel,
-  tools,
+  toolManager,
   configuration,
   capabilities,
   logger,
@@ -60,7 +60,7 @@ export const createAgentGraph = ({
   promptFactory,
 }: {
   chatModel: InferenceChatModel;
-  tools: StructuredTool[];
+  toolManager: ToolManager;
   capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
@@ -74,18 +74,17 @@ export const createAgentGraph = ({
     return {};
   };
 
-  const researcherModel = chatModel.bindTools(tools).withConfig({
-    tags: [tags.agent, tags.researchAgent],
-  });
-
   const researchAgent = async (state: StateType) => {
+    const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
+      tags: [tags.agent, tags.researchAgent],
+    });
+
     if (state.mainActions.length === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
       const response = await researcherModel.invoke(
         await promptFactory.getMainPrompt({
-          initialMessages: state.initialMessages,
           actions: state.mainActions,
         })
       );
@@ -134,9 +133,9 @@ export const createAgentGraph = ({
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
   };
 
-  const toolNode = new ToolNode<BaseMessage[]>(tools);
-
   const executeTool = async (state: StateType) => {
+    const toolNode = new ToolNode<BaseMessage[]>(toolManager.list());
+
     const lastAction = state.mainActions[state.mainActions.length - 1];
     if (!isToolCallAction(lastAction)) {
       throw invalidState(
@@ -144,9 +143,12 @@ export const createAgentGraph = ({
       );
     }
 
+    lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
+
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const action = processToolNodeResponse(toolNodeResult);
+
     return {
       mainActions: [action],
     };
@@ -195,7 +197,6 @@ export const createAgentGraph = ({
     try {
       const response = await answeringModel.invoke(
         await promptFactory.getAnswerPrompt({
-          initialMessages: state.initialMessages,
           actions: state.mainActions,
           answerActions: state.answerActions,
         })

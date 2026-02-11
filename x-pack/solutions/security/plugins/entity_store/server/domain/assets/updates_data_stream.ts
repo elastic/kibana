@@ -7,11 +7,10 @@
 
 import { getEntityDefinitionId } from '../../../common/domain/definitions/registry';
 import { getEntityIndexPattern, ENTITY_SCHEMA_VERSION_V2, ENTITY_UPDATES } from '../constants';
-import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-export const getUpdatesEntitiesDataStreamName = (entityType: EntityType, namespace: string) =>
+export const getUpdatesEntitiesDataStreamName = (namespace: string) =>
   getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_UPDATES,
-    definitionId: getEntityDefinitionId(entityType, namespace),
+    namespace,
   });

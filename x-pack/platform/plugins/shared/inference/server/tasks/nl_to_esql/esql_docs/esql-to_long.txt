@@ -1,26 +1,41 @@
 # TO_LONG
 
-Converts an input value to a long value. If the input is of a date type, it is interpreted as milliseconds since the Unix epoch and converted to a long. Boolean values are converted as follows: `true` to `1` and `false` to `0`.
+Converts the input value to a long integer. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to long. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as a long in the specified base. If parsing fails, a warning is generated and the result is `null`. A leading '0x' prefix is allowed for base 16.
 
 ## Syntax
 
-`TO_LONG(field)`
+`TO_LONG(field, base)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value to convert. This can be a single- or multi-valued column or an expression.
+
+#### base
+
+(Optional) The radix or base used to convert the input value. When a base is specified, the input type must be `keyword` or `text`.
 
 ## Examples
 
-Converting strings to long values
+Converts several string values to long integers, with invalid conversions resulting in null and a warning.
 
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
 ```
 
-- `str1` is successfully converted to a long value.
-- `str2` is also converted to a long value, truncating the decimal part.
-- `str3` cannot be converted, resulting in a `null` value.
+Parses string values as long integers using base 16 and base 13, and keeps both the original and converted values.
+
+```esql
+ROW str1 = "0x32", str2 = "31"
+| EVAL long1 = TO_LONG(str1, 16), long2 = TO_LONG(str2, 13)
+| KEEP str1, long1, str2, long2
+```
+
+Attempts to parse a string as a long integer in base 36 (succeeds) and base 10 (fails, returns null and warning).
+
+```esql
+ROW str1 = "Hazelnut"
+| EVAL long1 = TO_LONG(str1, 36), fail1 = TO_LONG(str1, 10)
+```

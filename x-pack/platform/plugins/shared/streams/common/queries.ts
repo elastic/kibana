@@ -13,6 +13,8 @@ export interface QueryLink {
   'asset.id': string;
   query: StreamQuery;
   stream_name: string;
+  /** Whether a Kibana rule exists for this query. */
+  rule_backed?: boolean;
 }
 
 export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;

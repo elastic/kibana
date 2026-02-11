@@ -19,6 +19,7 @@ export const COMMON_HEADERS = {
  */
 export const ENTITY_STORE_ROUTES = {
   INSTALL: 'internal/security/entity-store/install',
+  START: 'internal/security/entity-store/start',
   STOP: 'internal/security/entity-store/stop',
   UNINSTALL: 'internal/security/entity-store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
@@ -34,3 +35,6 @@ export const UPDATES_INDEX: Record<EntityType, string> = {
   user: '.entities.v2.updates.security_user_default',
   service: '.entities.v2.updates.security_service_default',
 } as const;
+export const ENTITY_STORE_TAGS = ['@ess', '@svlSecurity'];
+
+export const UPDATES_INDEX = '.entities.v2.updates.security_default';

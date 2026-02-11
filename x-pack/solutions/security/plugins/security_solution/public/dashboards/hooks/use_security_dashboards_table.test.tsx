@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, waitFor, renderHook } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
@@ -29,6 +30,10 @@ jest.mock('../../common/containers/tags/api');
 jest.mock('../../common/containers/dashboards/api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+const securityDashboardsCaption = i18n.translate('useSecurityDashboardsTable.tableCaption', {
+  defaultMessage: 'Security dashboards',
+});
 
 const spyUseGetSecuritySolutionUrl = jest.spyOn(linkTo, 'useGetSecuritySolutionUrl');
 const spyTrack = jest.spyOn(telemetry, 'track');
@@ -180,7 +185,11 @@ describe('Security Dashboards Table hooks', () => {
     });
 
     const result = render(
-      <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
+      <EuiBasicTable
+        tableCaption={securityDashboardsCaption}
+        items={itemsResult.current.items}
+        columns={columnsResult.current}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -209,7 +218,11 @@ describe('Security Dashboards Table hooks', () => {
     });
 
     const result = render(
-      <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
+      <EuiBasicTable
+        tableCaption={securityDashboardsCaption}
+        items={itemsResult.current.items}
+        columns={columnsResult.current}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -234,9 +247,16 @@ describe('Security Dashboards Table hooks', () => {
       expect(columnsResult.current).toHaveLength(3);
     });
 
-    render(<EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <EuiBasicTable
+        tableCaption={securityDashboardsCaption}
+        items={itemsResult.current.items}
+        columns={columnsResult.current}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     await waitFor(() => {
       expect(mockGetSecuritySolutionUrl).toHaveBeenCalledWith({

@@ -9,11 +9,11 @@ export { getEuidFromObject } from './memory';
 export { getEuidPainlessEvaluation } from './painless';
 export { getEuidDslFilterBasedOnDocument } from './dsl';
 export {
+    buildEntityFiltersFromEntityIdentifiers,
+    buildGenericEntityFlyoutPreviewQuery,
+} from './entity_filters';
+export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
 } from './esql';
-export {
-  buildEntityFiltersFromEntityIdentifiers,
-  buildGenericEntityFlyoutPreviewQuery,
-} from './entity_filters';

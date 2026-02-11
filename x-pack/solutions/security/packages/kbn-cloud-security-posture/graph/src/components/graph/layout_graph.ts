@@ -188,6 +188,212 @@ const layoutStackedLabels = (
 };
 
 /**
+ * Shared context for graph alignment operations.
+ * - Y/Height/setY: accessors for node vertical position and height in Dagre
+ * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
+ */
+interface GraphHelpers {
+  g: Dagre.graphlib.Graph;
+  filter: (node: string) => boolean;
+  Y: (id: string) => number;
+  Height: (id: string) => number;
+  setY: (id: string, y: number) => number;
+  prevNodeY: Record<string, number>;
+}
+
+/** Returns child nodes (successors) that pass the filter. */
+const getFilteredSuccessors = (
+  g: Dagre.graphlib.Graph,
+  node: string,
+  filter: (n: string) => boolean
+): string[] =>
+  (g.successors(node)?.filter((sV) => filter(sV.toString())) ?? []).map((s) => s.toString());
+
+/** Returns parent nodes (predecessors) that pass the filter. */
+const getFilteredPredecessors = (
+  g: Dagre.graphlib.Graph,
+  node: string,
+  filter: (n: string) => boolean
+): string[] =>
+  (g.predecessors(node)?.filter((pV) => filter(pV.toString())) ?? []).map((p) => p.toString());
+
+/**
+ * Finds all sibling nodes (via shared parents) that also share at least one child with currNode.
+ * Used to identify nodes that need coordinated vertical distribution to avoid overlap.
+ */
+const findSiblingsWithSharedChildren = (
+  helpers: GraphHelpers,
+  currNode: string,
+  children: string[],
+  parents: string[]
+): string[] => {
+  const { g, filter } = helpers;
+  const siblingsWithSharedChildren: string[] = [];
+
+  for (const parent of parents) {
+    const allSiblings = getFilteredSuccessors(g, parent, filter);
+
+    for (const sibling of allSiblings) {
+      if (!siblingsWithSharedChildren.includes(sibling)) {
+        const siblingChildren = getFilteredSuccessors(g, sibling, filter);
+
+        if (children.some((child) => siblingChildren.includes(child))) {
+          siblingsWithSharedChildren.push(sibling);
+        }
+      }
+    }
+  }
+
+  return siblingsWithSharedChildren;
+};
+
+/**
+ * Positions a node with multiple children at the vertical center of its children.
+ * If siblings share the same children (fan-in pattern), distributes them evenly
+ * around that center to prevent overlap while maintaining visual balance.
+ */
+const handleMultipleChildren = (
+  helpers: GraphHelpers,
+  currNode: string,
+  children: string[]
+): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+
+  const first = children.reduce(
+    (min, childNode) => (Y(childNode) < Y(min) ? childNode : min),
+    children[0]
+  );
+  const last = children.reduce(
+    (max, childNode) => (Y(childNode) > Y(max) ? childNode : max),
+    children[0]
+  );
+  const centerY = Y(first) + (Y(last) - Y(first)) / 2;
+
+  const parents = getFilteredPredecessors(g, currNode, filter);
+  const siblingsWithSharedChildren = findSiblingsWithSharedChildren(
+    helpers,
+    currNode,
+    children,
+    parents
+  );
+
+  if (siblingsWithSharedChildren.length > 1) {
+    siblingsWithSharedChildren.sort((a, b) => Y(a) - Y(b));
+
+    const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
+    const siblingCount = siblingsWithSharedChildren.length;
+    const spacing = Height(currNode) + GRID_SIZE_OFFSET;
+    const totalHeight = (siblingCount - 1) * spacing;
+    const newY = centerY - totalHeight / 2 + siblingIndex * spacing;
+
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(newY));
+  } else {
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(centerY));
+  }
+};
+
+/**
+ * Positions a node with exactly one child. When multiple nodes converge to the same child
+ * (fan-in), calculates position to maintain equal edge lengths from first to last sibling.
+ * If child was already adjusted, propagates that adjustment to maintain relative positioning.
+ */
+const handleSingleChild = (helpers: GraphHelpers, currNode: string, child: string): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const siblings = getFilteredPredecessors(g, child, filter);
+
+  if (siblings.length > 1) {
+    const { lastSiblingInfo, firstSiblingInfo } = analyzeSiblings(siblings, prevNodeY, Y, Height);
+    const edgesHeight = lastSiblingInfo.middle - firstSiblingInfo.middle;
+    const finalChildY = Y(child) - Height(child) / 2;
+    const firstSiblingNewY = finalChildY - (edgesHeight - Height(child)) / 2;
+    const finalFirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
+    const newY = snapped(finalFirstSiblingNewY) + currY - firstSiblingInfo.top;
+
+    prevNodeY[currNode] = currY;
+    setY(currNode, newY);
+  } else if (prevNodeY[child] !== undefined) {
+    const newY = currY - (prevNodeY[child] - Y(child));
+    prevNodeY[currNode] = currY;
+    setY(currNode, newY);
+  }
+};
+
+/**
+ * Positions a leaf node (no children) based on its parents.
+ * Delegates to handleMultipleParents or handleSingleParent, or preserves
+ * position for isolated nodes.
+ */
+const handleNoChildren = (helpers: GraphHelpers, currNode: string): void => {
+  const { g, filter, Y, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const parents = getFilteredPredecessors(g, currNode, filter);
+
+  if (parents.length > 1) {
+    handleMultipleParents(helpers, currNode, parents);
+  } else if (parents.length === 1) {
+    handleSingleParent(helpers, currNode, parents[0]);
+  } else {
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(currY));
+  }
+};
+
+/**
+ * Positions a node with multiple parents. If node has siblings (fan-out from any parent),
+ * preserves Dagre's positioning to avoid overlap. Otherwise, centers vertically
+ * between first and last parent for balanced edge lengths.
+ */
+const handleMultipleParents = (
+  helpers: GraphHelpers,
+  currNode: string,
+  parents: string[]
+): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+
+  const hasSiblings = parents.some((parent) => getFilteredSuccessors(g, parent, filter).length > 1);
+
+  if (hasSiblings) {
+    prevNodeY[currNode] = currY;
+  } else {
+    const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } = analyzeSiblings(
+      parents,
+      prevNodeY,
+      Y,
+      Height
+    );
+    const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
+    const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
+
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(newY));
+  }
+};
+
+/**
+ * Positions a node with exactly one parent. If parent has multiple children (fan-out),
+ * preserves Dagre's positioning to avoid sibling overlap. Otherwise, aligns
+ * vertically centered on the parent.
+ */
+const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: string): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const siblings = getFilteredSuccessors(g, parent, filter);
+
+  if (siblings.length > 1) {
+    prevNodeY[currNode] = currY;
+  } else {
+    const newY = Y(parent) - Height(currNode) / 2;
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(newY));
+  }
+};
+
+/**
  * Re-centre a Dagre-laid-out LR graph so that…
  *   • any node with children sits at the vertical mid-point of its children
  *   • any node with ≥2 parents sits at the vertical mid-point of its parents
@@ -196,111 +402,26 @@ const layoutStackedLabels = (
  * Mutates the Dagre graph in place.
  */
 const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean) => {
-  const Y = (id: string) => (g.node(id) as Dagre.Node).y;
-  const Height = (id: string) => (g.node(id) as Dagre.Node).height;
-  const setY = (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y);
+  const helpers: GraphHelpers = {
+    g,
+    filter,
+    Y: (id: string) => (g.node(id) as Dagre.Node).y,
+    Height: (id: string) => (g.node(id) as Dagre.Node).height,
+    setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
+    prevNodeY: {},
+  };
 
-  const prevNodeY: Record<string, number> = {};
   const topo = topsort(g, filter);
 
   for (const currNode of topo.reverse()) {
-    const currY = Y(currNode);
-    const children = (g.successors(currNode)?.filter((sV) => filter(sV.toString())) ?? []).map(
-      (childNode) => childNode.toString()
-    );
+    const children = getFilteredSuccessors(g, currNode, filter);
 
     if (children.length > 1) {
-      const first = children.reduce(
-        (min, childNode) => (Y(childNode) < Y(min) ? childNode : min),
-        children[0]
-      );
-      const last = children.reduce(
-        (max, childNode) => (Y(childNode) > Y(max) ? childNode : max),
-        children[0]
-      );
-
-      const centerY = Y(first) + (Y(last) - Y(first)) / 2;
-      const prevY = Y(currNode);
-
-      // Log the diff for current node
-      prevNodeY[currNode] = prevY;
-      setY(currNode, snapped(centerY));
+      handleMultipleChildren(helpers, currNode, children);
     } else if (children.length === 1) {
-      const child = children[0].toString();
-      const siblings = (
-        g.predecessors(child)?.filter((parentNode) => filter(parentNode.toString())) ?? []
-      ).map((siblingNode) => siblingNode.toString());
-
-      if (siblings.length > 1) {
-        const { lastSiblingInfo, firstSiblingInfo } = analyzeSiblings(
-          siblings,
-          prevNodeY,
-          Y,
-          Height
-        );
-
-        // We want to center the current node vertically between the first and last sibling
-        // So that the edges between the first and last sibling are equal in their length
-        const edgesHeight = lastSiblingInfo.middle - firstSiblingInfo.middle;
-
-        // Final Y position is effected by the node height (checkout layoutGraph function)
-        const finalChildY = Y(child) - Height(child) / 2;
-
-        // Position of the first sibling when adjusted
-        const firstSiblingNewY = finalChildY - (edgesHeight - Height(child)) / 2;
-
-        // Final Y position is effected by the node height (checkout layoutGraph function)
-        const finalFirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
-
-        // Calculate the current node position relative to the first sibling
-        const newY = snapped(finalFirstSiblingNewY) + currY - firstSiblingInfo.top;
-
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, newY);
-      } else if (prevNodeY[child] !== undefined) {
-        // There is only one child, and that child was already adjusted
-        const newY = currY - (prevNodeY[child] - Y(child));
-
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, newY);
-      }
-    } else if (children.length === 0) {
-      // No children, so we center by its parents
-      const parents = (
-        g.predecessors(currNode)?.filter((parentNode) => filter(parentNode.toString())) ?? []
-      ).map((parentNode) => parentNode.toString());
-
-      if (parents.length > 1) {
-        // const avg = parents.reduce((sum, parentNode) => sum + Y(parentNode), 0) / parents.length;
-        const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } =
-          analyzeSiblings(parents, prevNodeY, Y, Height);
-
-        // We want to center the current node vertically between the first and last sibling
-        // So that the edges between the first and last sibling are equal in their length
-        const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
-
-        // Calculate the current node position relative to the first sibling
-        const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
-
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, snapped(newY));
-      } else if (parents.length === 1) {
-        // There is only one parent, so we just set the current node to the parent's Y position
-        const parent = parents[0].toString();
-        const newY = Y(parent) - Height(currNode) / 2;
-
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, snapped(newY));
-      }
+      handleSingleChild(helpers, currNode, children[0]);
     } else {
-      // No children and no parents, so we just set the current node to its own Y position
-      // This is a no-op, but we log it for consistency
-      prevNodeY[currNode] = currY;
-      setY(currNode, snapped(currY));
+      handleNoChildren(helpers, currNode);
     }
   }
 };

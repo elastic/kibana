@@ -16,7 +16,7 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { StreamNameFormRow, useChildStreamInput } from './stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../../stream_name_form_row';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);

@@ -31,7 +31,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       }
     }
 
-    const panelSchema = transforms?.getSchema?.();
+    const panelSchema = transforms?.schema;
 
     if (!panelSchema) {
       warnings.push(
@@ -85,7 +85,7 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
 
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
-    const panelSchema = transforms?.getSchema?.();
+    const panelSchema = transforms?.schema;
 
     if (!panelSchema) {
       throw new Error(

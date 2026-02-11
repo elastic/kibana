@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
@@ -16,7 +16,7 @@ import {
   expectedUserEntities,
 } from '../fixtures/entity_extraction_expected';
 
-apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
@@ -54,7 +54,7 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest('Should extract properly generate euid for host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 17;
+    const expectedResultCount = 22;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -72,7 +72,14 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_host_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        bool: {
+          filter: {
+            term: { 'entity.EngineMetadata.Type': 'host' },
+          },
+        },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -99,7 +106,14 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_user_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        bool: {
+          filter: {
+            term: { 'entity.EngineMetadata.Type': 'user' },
+          },
+        },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -126,7 +140,14 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_service_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        bool: {
+          filter: {
+            term: { 'entity.EngineMetadata.Type': 'service' },
+          },
+        },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -153,7 +174,14 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_generic_default',
+      index: '.entities.v2.latest.security_default',
+      query: {
+        bool: {
+          filter: {
+            term: { 'entity.EngineMetadata.Type': 'generic' },
+          },
+        },
+      },
       size: 1000, // a lot just to be sure we are not capping it
     });
 

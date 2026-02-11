@@ -17,17 +17,31 @@ Your primary goal is to analyze the provided context about a user's log dataset�
 
 ## Understanding Features
 
-You will receive **Features**—structured facts about the environment extracted from logs. Features identify infrastructure, technologies, and dependencies with confidence scores (0-100).
+You will receive **Features**—structured facts about the environment extracted from logs. Features are identified by their `type` field.
+
+### Feature Structure
 
 Each feature includes:
-- `type`: `infrastructure`, `technology`, or `dependency`
-- `name`: Generic identifier (e.g., `programming_language`, `database`)
+- `type`: Identifies the kind of feature (e.g., `infrastructure`, `technology`, `dependency`, `dataset_analysis`)
+- `subtype`: Optional sub-classification within the type
+- `title`: Short display name
 - `description`: Summary of what the feature represents
-- `value`: Stable properties like `{"language": "java", "version": "11"}`
-- `confidence`: Extraction confidence score
-- `evidence`: Supporting log snippets
-- `tags`: Descriptive tags (array of strings)
-- `meta`: High-cardinality or variable data (e.g., availability zones, API endpoints)
+- `properties`: Key-value pairs containing the feature's data (e.g., `{"language": "java", "version": "11"}`)
+- `confidence`: Extraction confidence score (0-100)
+- `evidence`: Supporting log snippets (optional)
+- `tags`: Descriptive tags (optional, array of strings)
+- `meta`: High-cardinality or variable data (optional, e.g., availability zones, API endpoints)
+
+### Computed Feature Types
+
+Some features are automatically computed from the dataset. To understand how to use each computed feature type, refer to the instructions below:
+
+{{{computed_feature_instructions}}}
+
+**Understanding `dataset_analysis`:**
+The `dataset_analysis` input may be provided directly or as a computed feature:
+- When `dataset_analysis` contains content, use it directly as it represents the dataset schema and field analysis.
+- When `dataset_analysis` is empty, look for a computed feature of type `dataset_analysis` in the features list and use its `properties` content.
 
 ### Using Features to Generate Queries
 

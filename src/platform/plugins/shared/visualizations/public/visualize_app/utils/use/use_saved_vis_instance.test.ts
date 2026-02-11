@@ -136,7 +136,9 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
         { originatingAppName: undefined, redirectToOrigin: undefined },
@@ -172,7 +174,9 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
         { originatingAppName: undefined, redirectToOrigin: undefined },

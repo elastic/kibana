@@ -16,8 +16,8 @@ interface StreamFeaturesApi {
   getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
   scheduleFeaturesIdentificationTask: (connectorId: string) => Promise<void>;
   cancelFeaturesIdentificationTask: () => Promise<void>;
-  deleteFeature: (featureId: string) => Promise<void>;
-  deleteFeaturesInBulk: (featureIds: string[]) => Promise<void>;
+  deleteFeature: (uuid: string) => Promise<void>;
+  deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -67,21 +67,21 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         });
       },
-      deleteFeature: async (featureId: string) => {
-        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{id}', {
+      deleteFeature: async (uuid: string) => {
+        await streamsRepositoryClient.fetch('DELETE /internal/streams/{name}/features/{uuid}', {
           signal,
           params: {
-            path: { name: definition.name, id: featureId },
+            path: { name: definition.name, uuid },
           },
         });
       },
-      deleteFeaturesInBulk: async (featureIds: string[]) => {
+      deleteFeaturesInBulk: async (uuids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: definition.name },
             body: {
-              operations: featureIds.map((id) => ({ delete: { id } })),
+              operations: uuids.map((id) => ({ delete: { id } })),
             },
           },
         });

@@ -21,6 +21,7 @@ import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { escape } from 'lodash';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -104,7 +105,7 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
+    () => (value ? getHighlightedMessage(escape(value), row, euiTheme, isDarkTheme) : value),
     [value, row, euiTheme, isDarkTheme]
   );
 

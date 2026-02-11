@@ -210,7 +210,9 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Security and removal');
 
       expect(results.getByText('Unenroll 2 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Remove root access for 2 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 2 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {

@@ -29,12 +29,21 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
 export const KibanaRenderContextProvider: FC<
   PropsWithChildren<KibanaRenderContextProviderProps>
 > = ({ children, ...props }) => {
-  const { analytics, executionContext, i18n, theme, userProfile, colorMode, modify, coreEnv } =
-    props;
+  const {
+    analytics,
+    executionContext,
+    i18n,
+    theme,
+    userProfile,
+    colorMode,
+    modify,
+    coreEnv,
+    chrome,
+  } = props;
   return (
     <KibanaRootContextProvider
       globalStyles={false}
-      {...{ executionContext, i18n, theme, userProfile, modify, colorMode, coreEnv }}
+      {...{ executionContext, i18n, theme, userProfile, modify, colorMode, coreEnv, chrome }}
     >
       <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

@@ -21,6 +21,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     // entity.id doesn't need to be mapped because it's the main entity field
     // and it's already mapped by default
 
+    newestValue({ source: `entity.name` }),
     ...getEntityFieldsDescriptions(),
 
     newestValue({ source: 'cloud.account.id' }),

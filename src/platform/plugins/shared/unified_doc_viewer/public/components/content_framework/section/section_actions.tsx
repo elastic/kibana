@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import { getLinkActionProps } from '../utils/link_action';
 
 interface BaseAction {
   icon: IconType;
@@ -20,8 +21,8 @@ interface BaseAction {
 }
 
 export type Action =
-  | (BaseAction & { onClick: () => void; href?: never })
-  | (BaseAction & { href: string; onClick?: never });
+  | (BaseAction & { onClick: () => void; href?: string })
+  | (BaseAction & { href: string; onClick?: () => void });
 
 export interface SectionActionsProps {
   actions: Action[];
@@ -35,7 +36,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions.map((action, idx) => {
         const { icon, ariaLabel, dataTestSubj, label, onClick, href } = action;
-        const buttonProps = onClick ? { onClick } : { href };
+        const buttonProps = getLinkActionProps({ href, onClick });
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>

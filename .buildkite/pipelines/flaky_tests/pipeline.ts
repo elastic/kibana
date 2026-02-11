@@ -225,14 +225,13 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_REPORTER_ENABLED: 'true',
         SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,

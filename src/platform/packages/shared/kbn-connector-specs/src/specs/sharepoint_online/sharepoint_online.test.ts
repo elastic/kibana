@@ -641,7 +641,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root/children',
         {
           params: {
-            $select:
+            select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }
@@ -664,7 +664,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root:/Folder/Subfolder:/children',
         {
           params: {
-            $select:
+            select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }
@@ -702,7 +702,7 @@ describe('SharepointOnline', () => {
   });
 
   describe('downloadItemFromURL action', () => {
-    it('should download content as text', async () => {
+    it('should download content as base64', async () => {
       const mockResponse = {
         data: Uint8Array.from([72, 101, 108, 108, 111]),
         headers: {
@@ -722,7 +722,7 @@ describe('SharepointOnline', () => {
       expect(result).toEqual({
         contentType: 'text/plain',
         contentLength: '5',
-        text: 'Hello',
+        base64: 'SGVsbG8=',
       });
     });
   });

@@ -48,18 +48,6 @@ export interface APMDownstreamDependency {
   throughputPerMin?: number;
 }
 
-interface APMError {
-  downstreamServiceResource: string | undefined;
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-  traceId: string | undefined;
-}
-
 interface APMErrorSample {
   processor?: {
     event?: string;
@@ -145,14 +133,6 @@ interface InfraHostsResponse {
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
-  apmErrors: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<APMError[]>;
-
   apmErrorDetails: (params: {
     request: KibanaRequest;
     errorId: string;

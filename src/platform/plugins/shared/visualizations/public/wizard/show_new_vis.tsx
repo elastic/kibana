@@ -31,6 +31,7 @@ export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
   originatingApp?: string;
+  originatingPath?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
   showAggsSelection?: boolean;
@@ -46,6 +47,7 @@ export function showNewVisModal({
   editorParams = [],
   onClose,
   originatingApp,
+  originatingPath,
   outsideVisualizeApp,
   showAggsSelection,
   selectedVisType,
@@ -80,6 +82,7 @@ export function showNewVisModal({
             isOpen={true}
             onClose={handleClose}
             originatingApp={originatingApp}
+            originatingPath={originatingPath}
             stateTransfer={getEmbeddable().getStateTransfer()}
             outsideVisualizeApp={outsideVisualizeApp}
             editorParams={editorParams}

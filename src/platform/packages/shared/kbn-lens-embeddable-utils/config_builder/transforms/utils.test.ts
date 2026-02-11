@@ -77,7 +77,7 @@ describe('getDatasetIndex', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "index": "test_index",
-        "timeFieldName": "@timestamp",
+        "timeFieldName": undefined,
       }
     `);
   });
@@ -179,7 +179,7 @@ describe('buildDatasourceStates', () => {
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
-                "timeField": "@timestamp",
+                "timeField": undefined,
               },
             },
           },
@@ -187,7 +187,7 @@ describe('buildDatasourceStates', () => {
         "usedDataviews": Object {
           "layer_0": Object {
             "index": "test",
-            "timeFieldName": "@timestamp",
+            "timeFieldName": undefined,
             "type": "adHocDataView",
           },
         },

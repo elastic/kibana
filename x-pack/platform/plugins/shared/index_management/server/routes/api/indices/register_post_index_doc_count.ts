@@ -9,11 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
-interface Bucket {
-  key: string;
-  doc_count: number;
-}
-
 export function registerPostIndexDocCountRoute({
   router,
   lib: { handleEsError },
@@ -38,25 +33,20 @@ export function registerPostIndexDocCountRoute({
       const { indexNames } = request.body;
 
       try {
-        const result = await client.search<unknown, { by_index: { buckets: Bucket[] } }>({
-          index: indexNames,
-          size: 0,
-          aggs: {
-            by_index: {
-              terms: {
-                field: '_index',
-                size: indexNames.length,
-              },
-            },
-          },
+        // use ES since index list is too long for query dsl
+        const result = await client.esql.query({
+          query: `FROM ${indexNames.join(',')} METADATA _index | STATS count() BY _index`,
         });
 
-        const values = (result.aggregations?.by_index.buckets || []).reduce((col, bucket) => {
-          col[bucket.key] = bucket.doc_count;
+        const indexNameIndex = result.columns.findIndex((col) => col.name === '_index');
+        const countIndex = result.columns.findIndex((col) => col.name === 'count()');
+
+        const values = (result.values || []).reduce((col, vals) => {
+          col[vals[indexNameIndex] as string] = vals[countIndex] as number;
           return col;
         }, {} as Record<string, number>);
 
-        // add zeros back in since they won't be present in the agg results
+        // add zeros back in since they won't be present in the results
         indexNames.forEach((indexName) => {
           if (!(indexName in values)) {
             values[indexName] = 0;

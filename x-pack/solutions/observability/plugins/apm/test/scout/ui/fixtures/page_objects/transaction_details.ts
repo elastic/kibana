@@ -54,7 +54,7 @@ export class TransactionDetailsPage {
         offset: '1d',
       })}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await this.waitForPageToLoad(this.page);
   }
 
   async reload() {
@@ -66,6 +66,12 @@ export class TransactionDetailsPage {
     const searchBar = this.page.getByTestId('apmUnifiedSearchBar');
     await searchBar.fill(query);
     await searchBar.press('Enter');
+  }
+
+  async waitForPageToLoad(page: ScoutPage) {
+    await page
+      .getByTestId('superDatePickerToggleQuickMenuButton')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Span links methods

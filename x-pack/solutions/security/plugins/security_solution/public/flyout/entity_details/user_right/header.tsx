@@ -31,6 +31,7 @@ interface UserPanelHeaderProps {
 }
 
 const linkTitleCSS = { width: 'fit-content' };
+const urlParamOverride = { timeline: { isOpen: false } };
 
 export const UserPanelHeader = ({
   userName,
@@ -76,6 +77,7 @@ export const UserPanelHeader = ({
             target={'_blank'}
             external={false}
             css={linkTitleCSS}
+            override={urlParamOverride}
           >
             <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>

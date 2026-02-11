@@ -34,6 +34,8 @@ const blockStyles = {
   minWidth: 280,
 };
 
+const urlParamOverride = { timeline: { isOpen: false } };
+
 /**
  * Alert details flyout right section header
  */
@@ -48,7 +50,7 @@ export const AlertHeaderTitle = memo(() => {
   } = useDocumentDetailsContext();
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
   const ruleTitle = useMemo(
     () =>
       href ? (

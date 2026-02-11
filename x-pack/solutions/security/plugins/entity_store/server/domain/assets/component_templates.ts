@@ -6,7 +6,10 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
+import type {
+  EntityDefinition,
+  EntityType,
+} from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
@@ -18,18 +21,22 @@ const BASE_ENTITY_INDEX_MAPPING = {
   tags: { type: 'keyword', ignore_above: 1024 },
   'entity.id': { type: 'keyword' },
   'entity.EngineMetadata.Type': { type: 'keyword' },
+  'entity.EngineMetadata.UntypedId': { type: 'keyword' },
 
   // 'asset.criticality': { type: 'keyword' },
   // 'entity.name': { type: 'keyword' },
   // 'entity.source': { type: 'keyword' },
 } as const satisfies MappingProperties;
 
-export const getComponentTemplateName = (definitionId: string) =>
-  `${ENTITY_BASE_PREFIX}-${definitionId}-latest@platform`;
+export const getComponentTemplateName = (type: EntityType, namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
 
-export const getEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
+export const getEntityDefinitionComponentTemplate = (
+  definition: EntityDefinition,
+  namespace: string
+) => {
   return {
-    name: getComponentTemplateName(definition.id),
+    name: getComponentTemplateName(definition.type, namespace),
     template: { settings: { hidden: true }, mappings: getIndexMappings(definition) },
   };
 };
@@ -45,12 +52,15 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
   },
 });
 
-export const getUpdatesComponentTemplateName = (definitionId: string) =>
-  `${ENTITY_BASE_PREFIX}-${definitionId}-updates@platform`;
+export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
 
-export const getUpdatesEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
+export const getUpdatesEntityDefinitionComponentTemplate = (
+  definition: EntityDefinition,
+  namespace: string
+) => {
   return {
-    name: getUpdatesComponentTemplateName(definition.id),
+    name: getUpdatesComponentTemplateName(definition.type, namespace),
     template: { settings: { hidden: true }, mappings: getUpdatesIndexMappings(definition) },
   };
 };

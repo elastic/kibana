@@ -137,6 +137,8 @@ export const collapseBySchema = schema.oneOf(
   }
 );
 
+export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
+
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;

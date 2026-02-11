@@ -8,10 +8,9 @@
 import { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { GroupStatsItem, NamedAggregation, RawBucket } from '@kbn/grouping';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 
+import { dsl } from '../../utils/dsl';
 import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_settings/types';
 
 const STATS_GROUP_ALERTS = i18n.translate(
@@ -20,15 +19,6 @@ const STATS_GROUP_ALERTS = i18n.translate(
     defaultMessage: 'Alerts:',
   }
 );
-
-const dsl = {
-  isAttack(): QueryDslQueryContainer {
-    return { term: { 'kibana.alert.rule.rule_type_id': ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } };
-  },
-  isNotAttack(): QueryDslQueryContainer {
-    return { bool: { must_not: dsl.isAttack() } };
-  },
-};
 
 export const useGroupStats = () => {
   const { euiTheme } = useEuiTheme();

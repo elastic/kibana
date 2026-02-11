@@ -15,12 +15,14 @@ import type {
 import type { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
 import type {
   DetectionRuleApiService,
+  DetectionAlertsApiService,
   EntityAnalyticsApiService,
   CloudConnectorApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
+  detectionAlerts: DetectionAlertsApiService;
   entityAnalytics: EntityAnalyticsApiService;
   cloudConnectorApi: CloudConnectorApiService;
 }

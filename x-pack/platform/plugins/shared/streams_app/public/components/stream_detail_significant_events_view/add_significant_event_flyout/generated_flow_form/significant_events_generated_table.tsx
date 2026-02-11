@@ -22,7 +22,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
-import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge';
+import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge/severity_badge';
 
 interface Props {
   definition: Streams.all.Definition;

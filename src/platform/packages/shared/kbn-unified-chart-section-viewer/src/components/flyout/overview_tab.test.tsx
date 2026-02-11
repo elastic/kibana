@@ -169,6 +169,19 @@ describe('Metric Flyout Overview Tab', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('keeps pagination visible when on last page with fewer items than page size', () => {
+      const dimensions = Array.from({ length: 25 }, (_, i) => ({
+        name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
+      }));
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId } = render(<OverviewTab metric={metric} />);
+
+      expect(
+        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).toBeInTheDocument();
+    });
+
     it('sorts dimensions alphabetically', () => {
       const dimensions = [
         { name: 'zebra.field', type: ES_FIELD_TYPES.KEYWORD },

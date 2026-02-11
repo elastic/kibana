@@ -84,14 +84,14 @@ The \`COMPLETION\` processing command uses a machine learning model to generate 
 **Syntax**
 
 \`\`\` esql
-COMPLETION [column =] prompt WITH inference_id
+COMPLETION [column =] prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 \`\`\`
 
 **Parameters**
 
 * \`column\`: (Optional) The name of the output column that will contain the completion results. If not specified, the results will be stored in a column named \`completion\`. If the specified column already exists, it will be overwritten with the new completion results.
 * \`prompt\`: The input text or expression that will be used as the prompt for the completion. This can be a string literal or a reference to a column containing text.
-* \`inference_id\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
+* \`my_inference_endpoint\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
 
 **Best practices**
 
@@ -110,7 +110,7 @@ The following is a basic example with an inline prompt:
 
 \`\`\` esql
 ROW question = "What is Elasticsearch?"
-| COMPLETION answer = question WITH test_completion_model
+| COMPLETION answer = question WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP question, answer
 \`\`\`
 
@@ -130,7 +130,7 @@ FROM movies
    "Synopsis: ", synopsis, "\\\\n",
    "Actors: ", MV_CONCAT(actors, ", "), "\\\\n",
   )
-| COMPLETION summary = prompt WITH test_completion_model
+| COMPLETION summary = prompt WITH '{ "inference_id" : "my_inference_endpoint" }'
 | KEEP title, summary, rating
 \`\`\`
 
@@ -856,7 +856,7 @@ FROM books METADATA _score
       ignoreTag: true,
     },
     openLinksInNewTab: true,
-    preview: true,
+    preview: false,
   },
   {
     name: 'sample',

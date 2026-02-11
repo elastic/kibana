@@ -54,9 +54,18 @@ export const arrowFn = (
  * Who would write such a complicated function?? Ewwww.
  *
  * According to https://jsdoc.app/tags-param.html#parameters-with-properties,
- * this is how destructured arguements should be commented.
+ * this is how destructured arguments should be commented.
+ * Use a named object and dot-notation properties rather than inline destructuring.
  *
- * @param obj A very crazy parameter that is destructured when passing in.
+ * @param {Object} obj A very crazy parameter that is destructured when passing in.
+ * @param {string} obj.hi Greeting on the obj.
+ * @param {{fn1: (foo: {param: string}) => number, fn2: () => void}} fns A destructured object containing two functions.
+ * @param {(foo: {param: string}) => number} fns.fn1 The first function.
+ * @param {() => void} fns.fn2 The second function.
+ * @param {{param: string}} fns.fn1.foo A parameter object for fn1.
+ * @param {string} fns.fn1.foo.param A nested parameter for foo.
+ * @param {{str: string}} strObj A destructured object containing a string.
+ * @param {string} strObj.str The string property.
  *
  * @returns I have no idea.
  *
@@ -64,12 +73,12 @@ export const arrowFn = (
 export const crazyFunction =
   (
     obj: { hi: string },
-    { fn1, fn2 }: { fn1: (foo: { param: string }) => number; fn2: () => void },
-    { str }: { str: string }
+    fns: { fn1: (foo: { param: string }) => number; fn2: () => void },
+    strObj: { str: string }
   ) =>
   () =>
   () =>
-    fn1({ param: str });
+    fns.fn1({ param: strObj.str });
 
 export const fnWithNonExportedRef = (a: ImNotExportedFromIndex) => a;
 
@@ -81,7 +90,7 @@ export type NotAnArrowFnType = typeof notAnArrowFn;
 export const iShouldBeInternalFn = () => 'hi';
 
 // Expected issues:
-//   missing comments (27):
+//   missing comments (18):
 //     line 24 - a
 //     line 24 - a
 //     line 24 - a
@@ -97,18 +106,16 @@ export const iShouldBeInternalFn = () => 'hi';
 //     line 28 - e
 //     line 28 - e
 //     line 28 - e
-//     line 66 - hi
-//     line 66 - obj
-//     line 67 - { fn1, fn2 }
-//     line 67 - fn1
-//     line 67 - fn2
-//     line 67 - foo
-//     line 67 - param
-//     line 68 - { str }
-//     line 68 - str
-//     line 74 - a
-//     line 74 - fnWithNonExportedRef
-//     line 76 - NotAnArrowFnType
+//     line 83 - a
+//     line 83 - fnWithNonExportedRef
+//     line 85 - NotAnArrowFnType
+//   param doc mismatches (2):
+//     line 83 - fnWithNonExportedRef
+//     line 85 - NotAnArrowFnType
+//   missing complex type info (3):
+//     line 27 - d
+//     line 27 - d
+//     line 27 - d
 //   no references (40):
 //     line 13 - notAnArrowFn
 //     line 24 - a
@@ -137,16 +144,16 @@ export const iShouldBeInternalFn = () => 'hi';
 //     line 46 - c
 //     line 47 - d
 //     line 48 - e
-//     line 64 - crazyFunction
-//     line 66 - hi
-//     line 66 - obj
-//     line 67 - { fn1, fn2 }
-//     line 67 - fn1
-//     line 67 - fn2
-//     line 67 - foo
-//     line 67 - param
-//     line 68 - { str }
-//     line 68 - str
-//     line 74 - a
-//     line 74 - fnWithNonExportedRef
-//     line 76 - NotAnArrowFnType
+//     line 73 - crazyFunction
+//     line 75 - hi
+//     line 75 - obj
+//     line 76 - fn1
+//     line 76 - fn2
+//     line 76 - fns
+//     line 76 - foo
+//     line 76 - param
+//     line 77 - str
+//     line 77 - strObj
+//     line 83 - a
+//     line 83 - fnWithNonExportedRef
+//     line 85 - NotAnArrowFnType

@@ -13,17 +13,18 @@ import { FeatureDetailsFlyout } from './feature_details_flyout';
 
 function createMinimalFeature(overrides: Partial<Feature> = {}): Feature {
   return {
+    uuid: '123123',
     id: 'feature-123',
     type: 'service',
-    name: 'Test feature',
     description: 'A test feature',
-    value: { key: 'value' },
+    properties: { key: 'value' },
     confidence: 80,
     evidence: [],
     tags: [],
     meta: {},
     status: 'active',
     last_seen: '2025-01-01T00:00:00Z',
+    stream_name: 'test-stream',
     ...overrides,
   };
 }

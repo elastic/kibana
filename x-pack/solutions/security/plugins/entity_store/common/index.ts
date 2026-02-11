@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';
@@ -30,8 +31,23 @@ export const euid = {
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
 };
 
-export {
-  buildEntityFiltersFromEntityIdentifiers,
-  buildGenericEntityFlyoutPreviewQuery,
-} from './domain/euid';
 export type { EntityType } from './domain/definitions/entity_schema';
+export {
+    buildEntityFiltersFromEntityIdentifiers,
+    buildGenericEntityFlyoutPreviewQuery,
+} from './domain/euid';
+
+export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
+export const EntityStoreStatus = z.enum([
+  'not_installed',
+  'installing',
+  'running',
+  'stopped',
+  'error',
+]);
+
+export const ENTITY_STORE_ROUTES = {
+  INSTALL: '/internal/security/entity-store/install',
+  UNINSTALL: '/internal/security/entity-store/uninstall',
+  STATUS: '/internal/security/entity-store/status',
+} as const satisfies Record<string, string>;

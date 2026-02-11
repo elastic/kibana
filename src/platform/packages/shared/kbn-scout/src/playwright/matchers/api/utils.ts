@@ -12,13 +12,14 @@ export interface MatcherErrorOptions {
   matcherName: string;
   received: unknown;
   isNegated?: boolean;
+  message?: string;
 }
 
 /**
  * Format error messages for API matchers like Playwright.
  */
 export function createMatcherError(options: MatcherErrorOptions): Error {
-  const { expected, matcherName, received, isNegated = false } = options;
+  const { expected, matcherName, received, isNegated = false, message } = options;
   const gray = '\x1b[90m';
   const red = '\x1b[31m';
   const green = '\x1b[32m';
@@ -30,11 +31,13 @@ export function createMatcherError(options: MatcherErrorOptions): Error {
     `${matcherName}` +
     `${gray}(${green}expected${gray})${reset}`;
 
-  return new Error(
+  const errorMessage =
     `${matcherCall}\n\n` +
-      `Expected: ${isNegated ? 'not ' : ''}${green}${expected}${reset}\n` +
-      `Received: ${red}${received}${reset}`
-  );
+    `Expected: ${isNegated ? 'not ' : ''}${green}${expected}${reset}\n` +
+    `Received: ${red}${received}${reset}`;
+
+  // Prepend custom message if provided (matching Playwright's format)
+  return new Error(message ? `${message}\n\n${errorMessage}` : errorMessage);
 }
 
 /**

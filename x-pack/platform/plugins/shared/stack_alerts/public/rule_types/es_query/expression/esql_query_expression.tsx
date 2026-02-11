@@ -32,6 +32,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsqlQuery } from '@kbn/esql-language';
 import useDebounce from 'react-use/lib/useDebounce';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
@@ -112,7 +113,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews } = useTriggerUiActionServices();
+  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -212,11 +213,14 @@ export const EsqlQueryExpression: React.FC<
     }
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+
     const table = await getESQLResults({
       esqlQuery: esqlQuery.esql,
       search: data.search.search,
       dropNullColumns: true,
       timeRange,
+      timezone,
       filter: timeFilter,
     });
     if (table.response) {
@@ -254,6 +258,7 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     data.search.search,
+    uiSettings,
     timeField,
     isServerless,
     groupBy,

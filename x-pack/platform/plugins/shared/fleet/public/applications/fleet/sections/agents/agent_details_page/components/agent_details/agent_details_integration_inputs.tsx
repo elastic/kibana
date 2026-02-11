@@ -25,9 +25,10 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
           return new Map<string, InputStatusFormatter>();
         }
         if (current.enabled) {
-          const agentUnit = getInputUnitsByPackage(agent.components, packagePolicy)?.find((i) =>
-            i.id.match(new RegExp(current.type))
-          );
+          const agentUnit = getInputUnitsByPackage(
+            agent.components,
+            current.id ?? packagePolicy.id
+          )?.find((i) => i.id.match(new RegExp(current.type)));
           acc.set(
             current.type,
             agentUnit

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
+// Note: Processor creation, conditional steps, and nested steps API correctness is covered by
+// API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
+// These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
 test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -25,6 +28,14 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
+  });
+
+  test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
+    page,
+  }) => {
+    // In the empty state without AI connectors, the Technical Preview badge should be hidden
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
+    await expect(page.getByText('Technical Preview')).toBeHidden();
   });
 
   test('should create a new processor successfully', async ({ pageObjects }) => {

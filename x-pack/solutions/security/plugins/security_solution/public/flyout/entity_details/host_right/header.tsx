@@ -25,6 +25,7 @@ interface HostPanelHeaderProps {
 }
 
 const linkTitleCSS = { width: 'fit-content' };
+const urlParamOverride = { timeline: { isOpen: false } };
 
 export const HostPanelHeader = ({ entityIdentifiers, observedHost }: HostPanelHeaderProps) => {
   const hostName = useMemo(
@@ -61,6 +62,7 @@ export const HostPanelHeader = ({ entityIdentifiers, observedHost }: HostPanelHe
             target={'_blank'}
             external={false}
             css={linkTitleCSS}
+            override={urlParamOverride}
           >
             <FlyoutTitle title={hostName} iconType={'storage'} isLink />
           </SecuritySolutionLinkAnchor>

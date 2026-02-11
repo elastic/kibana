@@ -19,7 +19,7 @@ import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_
 import { buildApiDeclarationTopNode } from './build_api_declaration';
 import { isNamedNode } from '../tsmorph_utils';
 import { getTypeKind } from './get_type_kind';
-import { getSignature } from './get_signature';
+import { getSignature, normalizeVerboseSignatures } from './get_signature';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildVariableDec } from './build_variable_dec';
 import { buildCallSignatureDec } from './build_call_signature_dec';
@@ -144,8 +144,8 @@ it('Function inside interface has a label', () => {
   expect(fn?.type).toBe(TypeKind.FunctionKind);
 });
 
-// FAILING: https://github.com/elastic/kibana/issues/120125
-it.skip('Test ReactElement signature', () => {
+// https://github.com/elastic/kibana/issues/120125
+it('Test ReactElement signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'AReactElementFn');
   expect(node).toBeDefined();
   const def = buildApiDeclarationTopNode(node!, {
@@ -229,9 +229,10 @@ describe('Parameter extraction', () => {
     const hiProp = paramObj!.children!.find((c) => c.label === 'hi');
     expect(hiProp).toBeDefined();
     expect(hiProp!.type).toBe(TypeKind.StringKind);
+    expect(hiProp!.description?.[0]).toContain('Greeting');
 
-    // Second parameter: { fn1, fn2 }: { fn1: Function, fn2: Function }
-    const paramFn = def.children!.find((c) => c.label === '{ fn1, fn2 }');
+    // Second parameter: fns: { fn1: Function, fn2: Function }
+    const paramFn = def.children!.find((c) => c.label === 'fns');
     expect(paramFn).toBeDefined();
     expect(paramFn!.children).toBeDefined();
     expect(paramFn!.children!.length).toBe(2);
@@ -239,16 +240,23 @@ describe('Parameter extraction', () => {
     const fn1 = paramFn!.children!.find((c) => c.label === 'fn1');
     expect(fn1).toBeDefined();
     expect(fn1!.type).toBe(TypeKind.FunctionKind);
+    const fn1Desc = fn1?.description?.[0] ?? '';
+    expect(fn1Desc).toContain('first function');
 
     const fn2 = paramFn!.children!.find((c) => c.label === 'fn2');
     expect(fn2).toBeDefined();
     expect(fn2!.type).toBe(TypeKind.FunctionKind);
+    const fn2Desc = fn2?.description?.[0] ?? '';
+    expect(fn2Desc).toContain('second function');
 
-    // Third parameter: { str }: { str: string }
-    const paramStr = def.children!.find((c) => c.label === '{ str }');
+    // Third parameter: strObj: { str: string }
+    const paramStr = def.children!.find((c) => c.label === 'strObj');
     expect(paramStr).toBeDefined();
     expect(paramStr!.children).toBeDefined();
     expect(paramStr!.children!.length).toBe(1);
+
+    const strProp = paramStr!.children!.find((c) => c.label === 'str');
+    expect(strProp?.description?.[0]).toContain('string property');
   });
 
   it('extracts nested destructured parameters', () => {
@@ -262,8 +270,8 @@ describe('Parameter extraction', () => {
       captureReferences: false,
     });
 
-    // Check nested structure: { fn1, fn2 }.fn1.foo.param
-    const paramFn = def.children!.find((c) => c.label === '{ fn1, fn2 }');
+    // Check nested structure: fns.fn1.foo.param
+    const paramFn = def.children!.find((c) => c.label === 'fns');
     expect(paramFn).toBeDefined();
 
     const fn1 = paramFn!.children!.find((c) => c.label === 'fn1');
@@ -425,19 +433,12 @@ describe('Parameter extraction', () => {
     // First parameter has @param obj comment
     const paramObj = def.children!.find((c) => c.label === 'obj');
     expect(paramObj).toBeDefined();
-    // Current behavior: parent parameter comments are NOT extracted for TypeLiteral parameters
-    // This is a known limitation - when a parameter has a TypeLiteral type (destructured params),
-    // buildApiDeclaration is called directly without extracting the JSDoc comment for the parameter name.
-    // This will be fixed in Phase 4.1
     expect(paramObj!.description).toBeDefined();
-    // Currently, the description is empty for destructured parameters
-    // After Phase 4.1, this should contain the @param obj comment
-    expect(paramObj!.description!.length).toBe(0);
+    expect(paramObj!.description!.length).toBeGreaterThan(0);
+    expect(paramObj!.description![0]).toContain('crazy parameter');
   });
 
-  it('does not extract property-level JSDoc comments (current limitation)', () => {
-    // This test documents current behavior: property-level @param tags like @param obj.hi
-    // are not currently extracted. This will be fixed in Phase 4.1.
+  it('extracts property-level JSDoc comments for destructured parameters', () => {
     const node = nodes.find((n) => getNodeName(n) === 'crazyFunction');
     expect(node).toBeDefined();
     const def = buildApiDeclarationTopNode(node!, {
@@ -453,11 +454,9 @@ describe('Parameter extraction', () => {
 
     const hiProp = paramObj!.children!.find((c) => c.label === 'hi');
     expect(hiProp).toBeDefined();
-    // Current behavior: property-level comments are not extracted
-    // Even if @param obj.hi existed, it wouldn't be found
-    // This is a known limitation that will be addressed in Phase 4.1
     expect(hiProp!.description).toBeDefined();
-    expect(hiProp!.description!.length).toBe(0);
+    expect(hiProp!.description!.length).toBeGreaterThan(0);
+    expect(hiProp!.description![0]).toContain('Greeting');
   });
 });
 
@@ -659,6 +658,63 @@ describe('getSignature edge cases', () => {
 
     // The signature should have the ReactElement hack applied if present
     expect(signature).toBeDefined();
+  });
+});
+
+describe('normalizeVerboseSignatures', () => {
+  it('collapses ReactNode expansion back to React.ReactNode', () => {
+    const input =
+      'string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactNode');
+  });
+
+  it('collapses ReactNode expansion when embedded in a larger signature', () => {
+    const input =
+      '(children: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined) => void';
+    expect(normalizeVerboseSignatures(input)).toBe('(children: React.ReactNode) => void');
+  });
+
+  it('strips the second generic from ReactElement', () => {
+    const input = 'React.ReactElement<MyProps, string | React.JSXElementConstructor<any>>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactElement<MyProps>');
+  });
+
+  it('strips the second generic from ReactElement without the React. prefix', () => {
+    const input = 'ReactElement<any, string | React.JSXElementConstructor<any>>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ReactElement<any>');
+  });
+
+  it('collapses ComponentClass | FunctionComponent to ComponentType', () => {
+    const input = 'React.ComponentClass<{}, any> | React.FunctionComponent<{}>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType');
+  });
+
+  it('strips empty props default from ComponentType', () => {
+    const input = 'React.ComponentType<{}>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType');
+  });
+
+  it('strips ComponentType<{}> when embedded in a union', () => {
+    const input = 'React.ComponentType<{}> | undefined';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType | undefined');
+  });
+
+  it('preserves ComponentType with non-empty props', () => {
+    const input = 'React.ComponentType<MyProps>';
+    expect(normalizeVerboseSignatures(input)).toBe('React.ComponentType<MyProps>');
+  });
+
+  it('applies multiple rules in a single signature', () => {
+    const input =
+      '{ node: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; component: React.ComponentType<{}> }';
+    expect(normalizeVerboseSignatures(input)).toBe(
+      '{ node: React.ReactNode; component: React.ComponentType }'
+    );
+  });
+
+  it('returns the input unchanged when no patterns match', () => {
+    const input = '(a: string, b: number) => boolean';
+    expect(normalizeVerboseSignatures(input)).toBe(input);
   });
 });
 

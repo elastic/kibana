@@ -14,6 +14,7 @@ import {
   QUERY_KQL_BODY,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  RULE_BACKED,
   STREAM_NAME,
 } from './fields';
 
@@ -33,6 +34,7 @@ export const queryStorageSettings = {
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
       [QUERY_SEVERITY_SCORE]: types.long(),
+      [RULE_BACKED]: types.boolean(),
       experimental: types.object({ enabled: false }),
     },
   },

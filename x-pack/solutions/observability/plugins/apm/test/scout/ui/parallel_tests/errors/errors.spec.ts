@@ -6,7 +6,7 @@
  */
 
 import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
 test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {

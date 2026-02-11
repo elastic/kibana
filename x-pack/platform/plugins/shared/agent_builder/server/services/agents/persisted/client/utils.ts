@@ -8,7 +8,7 @@
 import { allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ToolRegistry } from '../../../tools';
+import type { ToolRegistry } from '@kbn/agent-builder-server';
 
 export interface ValidateToolSelectionParams {
   toolRegistry: ToolRegistry;

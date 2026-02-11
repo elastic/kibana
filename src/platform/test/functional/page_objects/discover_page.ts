@@ -11,6 +11,8 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -30,13 +32,29 @@ export class DiscoverPageObject extends FtrService {
   private readonly toasts = this.ctx.getService('toasts');
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  public readonly APP_ID = 'discover';
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
+  }
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
     await this.testSubjects.existOrFail('discoverNewButton');
     await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
+  public async isOnDashboardsEditMode() {
+    const [newButton, openButton] = await Promise.all([
+      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
+      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
+    ]);
+
+    return !newButton && !openButton;
   }
 
   public async getChartTimespan() {
@@ -188,6 +206,16 @@ export class DiscoverPageObject extends FtrService {
   public async clickSaveSearchButton() {
     await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
+  }
+
+  public async clickCancelButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('discoverCancelButton');
+    await this.testSubjects.click('discoverCancelButton');
   }
 
   public async clickLoadSavedSearchButton() {
@@ -494,8 +522,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
@@ -1008,5 +1040,17 @@ export class DiscoverPageObject extends FtrService {
 
   public async ensureNoUnsavedChangesIndicator() {
     await this.testSubjects.missingOrFail('split-button-notification-indicator');
+  }
+
+  public resetQueryMode() {
+    return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public getQueryMode() {
+    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public setQueryMode(mode: string) {
+    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 }

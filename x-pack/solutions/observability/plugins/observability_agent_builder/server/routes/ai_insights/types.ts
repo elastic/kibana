@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { concat, of } from 'rxjs';
 import type { ChatCompletionEvent } from '@kbn/inference-common';
 
 export interface ContextEvent {
@@ -17,4 +18,17 @@ export interface ContextEvent {
 export interface AiInsightResult {
   events$: Observable<ChatCompletionEvent | ContextEvent>;
   context: string;
+}
+
+/**
+ * Creates an AiInsightResult by prepending a context event to the chat completion stream.
+ */
+export function createAiInsightResult(
+  context: string,
+  events$: Observable<ChatCompletionEvent>
+): AiInsightResult {
+  return {
+    events$: concat(of<ContextEvent>({ type: 'context', context }), events$),
+    context,
+  };
 }

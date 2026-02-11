@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
   TabInitializationStatus,
 } from './types';
 

@@ -163,9 +163,7 @@ export const PartialSimulationBadge = ({ short = false }: { short?: boolean }) =
           : undefined
       }
     >
-      <EuiBadge tabIndex={0} color="warning">
-        {label}
-      </EuiBadge>
+      <EuiBadge tabIndex={0}>{label}</EuiBadge>
     </EuiToolTip>
   );
 };

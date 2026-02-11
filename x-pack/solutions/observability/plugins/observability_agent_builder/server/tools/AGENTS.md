@@ -14,13 +14,13 @@
 
 ## 1. Tool-to-Investigation Phase Mapping
 
-| Phase           | Example Tools                                                    |
-| --------------- | ---------------------------------------------------------------- |
-| **Detection**   | `get_alerts`, `get_services`                                     |
-| **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`                 |
-| **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`       |
-| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`             |
-| **Root Cause**  | `get_log_categories`, `get_trace_metrics` (grouped by dimension) |
+| Phase           | Example Tools                                                |
+| --------------- | ------------------------------------------------------------ |
+| **Detection**   | `get_alerts`, `get_services`                                 |
+| **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
+| **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
+| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`         |
+| **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
 
@@ -32,7 +32,7 @@
 
 2. **Structured for summarization** — Output should be easy for LLMs to extract insights and present them in natural language to users.
 
-3. **Progressive disclosure** — Return high-level summaries first; provide parameters for deeper investigation when needed.
+3. **Progressive disclosure** Return high-level summaries first to conserve context window tokens. The agent needs to see the shape of the data and identifying information to decide where to drill down. Tool parameters must be available for deeper investigation when needed.
 
 ### Tool Design
 
@@ -103,7 +103,7 @@ Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Ob
 
 ### Common Aliases
 
-| Query This (ECS)       | Instead of (OTel)        |
+| ECS Alias              | OTel Field               |
 | ---------------------- | ------------------------ |
 | `message`              | `body.text`              |
 | `log.level`            | `severity_text`          |
@@ -112,6 +112,12 @@ Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Ob
 | `service.environment`  | `deployment.environment` |
 | `kubernetes.pod.name`  | `k8s.pod.name`           |
 | `kubernetes.namespace` | `k8s.namespace.name`     |
+
+You can retrieve the full list of OTel aliases in a cluster:
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9200/*otel*/_mapping/field/*" | jq '[.[] | .mappings | to_entries[] | select(.value.mapping[].type == "alias") | {alias: .key, target: .value.mapping[].path}] | unique'
+```
 
 ---
 
@@ -212,7 +218,7 @@ Every tool MUST have a Synthtrace scenario. Run with:
 ```bash
 node scripts/synthtrace \
   src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/<tool_name>/<scenario>.ts \
-  --from "now-1h" --to "now" --clean --workers=1
+  --from "now-1h" --to "now" --clean
 ```
 
 ### Executing Tools Locally
@@ -223,6 +229,7 @@ Test your tool directly via the API:
 curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
     "tool_id": "observability.<tool_name>",
@@ -238,6 +245,7 @@ Test your tools end-to-end by chatting with the Observability agent:
 curl -X POST http://localhost:5601/api/agent_builder/converse \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
     "input": "What services are experiencing issues?",

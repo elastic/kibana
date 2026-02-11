@@ -102,6 +102,7 @@ mapped_pages:
 | [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
+| [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
 | [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
 | [workflowsExtensions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
@@ -141,7 +142,7 @@ mapped_pages:
 | [dataCatalog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_catalog/README.md) | A Kibana plugin providing a common abstraction (Data Source) for content connectors and federated connectors, as well as additional future data sources needed by O11y/Security solutions for chat. |
 | [dataQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_quality/README.md) | Page where users can see the quality of their log data sets. |
 | [datasetQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dataset_quality/README.md) | In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others. |
-| [dataSources](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_sources/README.md) | Home of the Data Sources plugin. |
+| [dataSources](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_sources/README.md) | The Data Sources plugin manages connections to external data sources, such as for Kibana's Workplace AI solution. It provides a registry for defining data source types (like GitHub, Notion, SharePoint) and APIs for users to create active connections to those sources. |
 | [dataUsage](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_usage/README.md) | Serverless-only plugin for users to view data usage. Available in all 3 solutions. |
 | [dataVisualizer](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_visualizer/README.md) | The data_visualizer plugin enables you to explore the fields in your data. |
 | [discoverEnhanced](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/discover_enhanced/README.md) | Contains the enhancements to the OSS discover app. |
@@ -157,6 +158,7 @@ mapped_pages:
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |
+| [feedback](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/feedback/README.md) | Universal way of giving feedback about Elastic in Kibana. |
 | [fieldsMetadata](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fields_metadata/README.md) | The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future. |
 | [fileUpload](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/file_upload) | WARNING: Missing or empty README. |
 | [fleet](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/README.md) | Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies. |
@@ -253,6 +255,7 @@ mapped_pages:
 | [upgradeAssistant](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/upgrade_assistant/README.md) | Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack. |
 | [uptime](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/uptime/README.md) | The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening in their infrastructure. |
 | [urlDrilldown](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md) | NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin. |
+| [usageApi](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/usage_api/README.md) | This plugin is used to report Usage metrics to our Cloud internal Usage API. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
 | [workplaceAIApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/workplaceai/plugins/workplace_ai_app/README.md) | Workplace AI application plugin |
