@@ -58,7 +58,11 @@ export function ESQLMenu({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={searchTooltipLabel(commandKey)} disableScreenReaderOutput>
+        <EuiToolTip
+          position="top"
+          content={searchTooltipLabel(commandKey)}
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             iconType={MagnifyGradientIcon}
             size="xs"
