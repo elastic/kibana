@@ -19,10 +19,7 @@ export const getBaseConnectorType = (fullConnectorType: string): string => {
     // Handle connectors with dot notation properly
     if (fullConnectorType.startsWith('.')) {
       // For connectors like ".jira", remove the leading dot
-      return fullConnectorType.substring(1);
-    } else if (fullConnectorType.includes('.')) {
-      // For connectors like "thehive.createAlert", use base name
-      return fullConnectorType.split('.')[0];
+      return fullConnectorType.slice(1);
     } else {
       // For simple connectors like "slack", use as-is
       return fullConnectorType;
