@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
+    key: defend-workflows-burn
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -21,6 +22,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
+    key: defend-workflows-serverless-burn
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -41,6 +43,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
+    key: security-solution-burn
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -60,6 +63,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: '[Soft fail] Osquery Cypress Tests, burning changed specs'
+    key: osquery-cypress-burn
     agents:
       machineType: n2-standard-4
       preemptible: true

@@ -80,6 +80,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             label,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
+            key,
             agents,
             env: {
               SCOUT_CONFIG_GROUP_KEY: key,
@@ -98,4 +99,11 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       },
     ].flat()
   );
+
+  // Register each Scout child step for cancel-on-gate-failure so gate steps can cancel them.
+  // We register child step keys (not the group key) because `buildkite-agent step cancel`
+  // does not work on group keys.
+  for (const { key } of scoutCiRunGroups) {
+    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
+  }
 }

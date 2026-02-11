@@ -73,4 +73,10 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   if [ -n "${PING_SLACK_TEAM:-}" ]; then
     buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
   fi
+
+  # Cancel steps registered for cancel-on-gate-failure when a check gate fails.
+  if [[ "${CHECK_GATE:-}" == "true" ]]; then
+    echo '--- Cancel steps on gate failure'
+    .buildkite/scripts/steps/gate_failure/cancel.sh || true
+  fi
 fi
