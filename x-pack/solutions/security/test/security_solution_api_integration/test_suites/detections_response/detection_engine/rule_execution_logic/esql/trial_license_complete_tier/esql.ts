@@ -1728,7 +1728,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           const document = {
             id,
-            '@timestamp': '2020-10-28T05:30:00.000Z',
             agent: { name: Array.from({ length: 150 }, (_, i) => `test_1_${1000 + i}`) },
           };
 
@@ -1738,7 +1737,10 @@ export default ({ getService }: FtrProviderContext) => {
                 index,
                 id,
                 refresh: true,
-                document,
+                document: {
+                  ...document,
+                  '@timestamp': `2020-10-28T05:30:00.00${i}Z`,
+                },
               })
             )
           );
