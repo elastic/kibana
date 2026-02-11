@@ -77,7 +77,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     [query, router, selectedTab, serviceName, title]
   );
 
-  // Configure agent builder global flyout with the SLO attachment
+  // Configure agent builder global flyout with the service attachment
   useEffect(() => {
     if (!agentBuilder || !serviceName) {
       return;
