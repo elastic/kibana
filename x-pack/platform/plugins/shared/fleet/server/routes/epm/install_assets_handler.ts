@@ -25,7 +25,10 @@ import type {
   InstallRuleAssetsRequestSchema,
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
-import { stepCreateAlertingRules } from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
+import {
+  createInactivityMonitoringTemplate,
+  stepCreateAlertingRules,
+} from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -97,6 +100,8 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
       },
     });
   }
+
+  await createInactivityMonitoringTemplate({ logger, savedObjectsClient }, { packageInfo });
 
   return response.ok({ body: { success: true } });
 };
