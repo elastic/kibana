@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
@@ -15,7 +16,7 @@ import {
   toggleInheritSwitch,
 } from '../../../fixtures/retention_helpers';
 
-test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
+test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
