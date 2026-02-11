@@ -22,6 +22,7 @@ import {
   SESSION_GRACE_PERIOD_MS,
   SESSION_ROUTE,
 } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
@@ -35,7 +36,11 @@ jest.spyOn(document, 'removeEventListener');
 const nowMock = jest.spyOn(Date, 'now');
 const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
-function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBeExtended = true) {
+function createSessionTimeout(
+  expiresInMs: number | null = 60 * 60 * 1000,
+  canBeExtended = true,
+  expirationReason: SessionInfo['expirationReason'] = 'idle'
+) {
   const { http, notifications, overlays, ...coreStart } = coreMock.createStart();
   const toast = Symbol();
   const modal = {
@@ -58,6 +63,7 @@ function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBe
     expiresInMs,
     canBeExtended,
     provider: { type: 'basic', name: 'basic1' },
+    ...(expiresInMs !== null ? { expirationReason } : {}),
   } as SessionInfo);
 
   return { sessionTimeout, sessionExpired, notifications, http, overlays, modal };
@@ -374,13 +380,26 @@ describe('SessionTimeout', () => {
     expect(modalInstance.close).toHaveBeenCalled();
   });
 
-  it('logs user out slightly before session expires', async () => {
-    const { sessionTimeout, sessionExpired } = createSessionTimeout(60 * 60 * 1000);
+  it('logs user out slightly before session expires with idle timeout reason', async () => {
+    const { sessionTimeout, sessionExpired } = createSessionTimeout(60 * 60 * 1000, true, 'idle');
     await sessionTimeout.start();
 
     jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
 
-    expect(sessionExpired.logout).toHaveBeenCalled();
+    expect(sessionExpired.logout).toHaveBeenCalledWith(LogoutReason.SESSION_IDLE_TIMEOUT);
+  });
+
+  it('logs user out slightly before session expires with lifespan timeout reason', async () => {
+    const { sessionTimeout, sessionExpired } = createSessionTimeout(
+      60 * 60 * 1000,
+      false,
+      'lifespan'
+    );
+    await sessionTimeout.start();
+
+    jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
+
+    expect(sessionExpired.logout).toHaveBeenCalledWith(LogoutReason.SESSION_LIFESPAN_TIMEOUT);
   });
 
   it('logs user out immediately if session expiration is imminent', async () => {
