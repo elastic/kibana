@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { nationalParksWorkflow } from '../../fixtures/workflows';
 
-test.describe('InternalActions/Elasticsearch', { tag: ['@ess'] }, () => {
+test.describe('InternalActions/Elasticsearch', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
@@ -89,9 +90,10 @@ test.describe('InternalActions/Elasticsearch', { tag: ['@ess'] }, () => {
     const requiredOutputs = ['Grand Canyon National Park', 'Zion National Park'];
 
     for (let i = 0; i < requiredOutputs.length; i++) {
-      await pageObjects.workflowExecution
-        .getStep(`loop_over_results > ${i} > process-item`)
-        .then((locator) => locator.click());
+      const step = await pageObjects.workflowExecution.getStep(
+        `loop_over_results > ${i} > process-item`
+      );
+      await step.click();
 
       const stepOutput = await pageObjects.workflowExecution.getStepResultJson<string>('output');
       expect(stepOutput).toBe(requiredOutputs[i]);

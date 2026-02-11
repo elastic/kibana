@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
@@ -35,7 +36,13 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 // Security uses the detection engine API; Observability uses the generic alerting API.
 test.describe(
   'Workflow execution - Alert triggers',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+    ],
+  },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
       // Custom role with extra privileges beyond the default editor:

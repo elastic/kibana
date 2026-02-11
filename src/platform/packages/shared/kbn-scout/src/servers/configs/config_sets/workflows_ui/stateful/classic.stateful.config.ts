@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as defaultConfig } from '../../../default/serverless/es.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.
@@ -16,9 +16,6 @@ import type { ScoutServerConfig } from '../../../../../types';
  *
  * This config is automatically used when running tests from:
  * workflows_management/test/scout_workflows_ui/
- *
- * Usage:
- *   node scripts/scout.js start-server --serverless=es --config-dir workflows_ui
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -27,6 +24,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.workflows:ui:enabled=true',
+      // Allow short alert rule intervals for alert trigger tests (default minimum is 1m)
+      '--xpack.alerting.rules.minimumScheduleInterval.value=15s',
     ],
   },
 };

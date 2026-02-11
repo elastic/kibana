@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { getListTestWorkflowYaml } from '../../fixtures/workflows';
 
-test.describe('WorkflowsList/FilterSortSearch', { tag: ['@ess'] }, () => {
+test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
@@ -43,9 +44,11 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: ['@ess'] }, () => {
     );
 
     await pageObjects.workflowList.navigate();
-    await pageObjects.workflowList
-      .getFilterOption('enabled-filter-popover-button', 'true')
-      .then((locator) => locator.click());
+    const filterOption = await pageObjects.workflowList.getFilterOption(
+      'enabled-filter-popover-button',
+      'true'
+    );
+    await filterOption.click();
     await expect(
       page.locator('tr [data-test-subj^="workflowToggleSwitch-"][aria-checked="false"]')
     ).toHaveCount(0);
@@ -75,9 +78,11 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: ['@ess'] }, () => {
     );
 
     await pageObjects.workflowList.navigate();
-    await pageObjects.workflowList
-      .getFilterOption('enabled-filter-popover-button', 'false')
-      .then((locator) => locator.click());
+    const filterOption = await pageObjects.workflowList.getFilterOption(
+      'enabled-filter-popover-button',
+      'false'
+    );
+    await filterOption.click();
     await expect(
       page.locator('tr [data-test-subj^="workflowToggleSwitch-"][aria-checked="true"]')
     ).toHaveCount(0);

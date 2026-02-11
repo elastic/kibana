@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
+import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { getListTestWorkflowYaml } from '../../fixtures/workflows';
 
-test.describe('WorkflowsList/SingleActions', { tag: ['@ess'] }, () => {
+test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
@@ -41,9 +42,11 @@ test.describe('WorkflowsList/SingleActions', { tag: ['@ess'] }, () => {
 
     // verify run via three dots menu action
     await pageObjects.workflowList.navigate();
-    await pageObjects.workflowList
-      .getThreeDotsMenuAction(enabledWorkflow.name, 'runWorkflowAction')
-      .then((locator) => locator.click());
+    const runThreeDotsAction = await pageObjects.workflowList.getThreeDotsMenuAction(
+      enabledWorkflow.name,
+      'runWorkflowAction'
+    );
+    await runThreeDotsAction.click();
     await page.waitForURL('**/workflows/*?executionId=*');
     await expect(
       page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
