@@ -187,7 +187,7 @@ const previouslyRegisteredTypes = [
   'alerting_notification_policy',
 ].sort();
 
-describe('SO type registrations', () => {
+describe.only('SO type registrations', () => {
   let root: ReturnType<typeof createRoot>;
 
   afterEach(async () => {
