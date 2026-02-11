@@ -43,8 +43,7 @@ import {
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
-
-const FOLLOW_POLL_INTERVAL_MS = 500;
+import { FOLLOW_POLL_INTERVAL_MS } from './constants';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;

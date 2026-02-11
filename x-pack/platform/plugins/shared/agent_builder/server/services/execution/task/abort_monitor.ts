@@ -8,8 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { ExecutionStatus } from '../types';
 import type { AgentExecutionClient } from '../persistence';
-
-const ABORT_POLL_INTERVAL_MS = 2000;
+import { ABORT_POLL_INTERVAL_MS } from '../constants';
 
 /**
  * Monitors an agent execution for abort requests by polling the execution status.

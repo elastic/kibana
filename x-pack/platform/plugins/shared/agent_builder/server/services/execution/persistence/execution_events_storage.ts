@@ -10,8 +10,9 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import type { MappingsDefinition, GetFieldsOf } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import type { ChatEvent } from '@kbn/agent-builder-common';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 
-export const executionEventsDataStreamName = '.kibana-agent-execution-events';
+export const executionEventsDataStreamName = chatSystemIndex('agent-execution-events');
 
 const executionEventsMappings = {
   dynamic: false,
