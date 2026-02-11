@@ -34,11 +34,13 @@ export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererP
 
   return (
     <Suspense fallback={<Fallback />}>
-      {hasStore ? (
-        <LazyComponent state={state} actions={appApi.actions} onClose={appApi.close} />
-      ) : (
-        <LazyComponent onClose={appApi.close} />
-      )}
+      <LazyComponent
+        onClose={appApi.close}
+        {...(hasStore && {
+          state,
+          actions: appApi.actions,
+        })}
+      />
     </Suspense>
   );
 }
