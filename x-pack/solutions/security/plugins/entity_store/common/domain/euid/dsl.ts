@@ -32,13 +32,13 @@ export function getEuidDslFilterBasedOnDocument(
     },
   };
 
-  /*const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
   if (toBeFilteredOut.length > 0) {
     dsl.bool = {
       ...dsl.bool,
       must_not: toBeFilteredOut.map((field) => ({ exists: { field } })),
     };
-  }*/
+  }
 
   return dsl;
 }
