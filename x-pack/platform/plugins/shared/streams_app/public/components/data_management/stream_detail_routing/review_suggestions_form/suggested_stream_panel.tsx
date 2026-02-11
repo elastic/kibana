@@ -67,7 +67,8 @@ export function SuggestedStreamPanel({
       : null
   );
 
-  const currentSuggestion = isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
+  const currentSuggestion =
+    isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);

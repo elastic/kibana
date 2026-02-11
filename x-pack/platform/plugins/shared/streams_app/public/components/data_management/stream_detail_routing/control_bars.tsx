@@ -42,7 +42,9 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
 
-  const streamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition.stream.name);
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const hasPrivileges = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.privileges.manage
   );
@@ -54,7 +56,9 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
   const canForkRouting = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.fork' })
   );
-  const currentRoutingRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
+  const currentRoutingRule = useStreamsRoutingSelector((snapshot) =>
+    selectCurrentRule(snapshot.context)
+  );
 
   const onViewCodeClick = () => {
     const body = buildRoutingForkRequestPayload({
@@ -123,7 +127,9 @@ export const EditRoutingRuleControls = ({
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
 
-  const streamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition.stream.name);
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
   const isUpdating = useStreamsRoutingSelector((snapshot) =>

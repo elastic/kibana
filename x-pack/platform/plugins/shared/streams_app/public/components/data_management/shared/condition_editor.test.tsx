@@ -126,7 +126,9 @@ describe('ConditionEditor', () => {
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       await user.click(switchButton);
 
-      const textarea = screen.getByTestId('streamsAppConditionEditorCodeEditor') as HTMLTextAreaElement;
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
       const nextValue = JSON.stringify({ field: 'severity_text', eq: 'error' }, null, 2);
 
       fireEvent.change(textarea, { target: { value: nextValue } });
@@ -157,7 +159,9 @@ describe('ConditionEditor', () => {
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       await user.click(switchButton);
 
-      const textarea = screen.getByTestId('streamsAppConditionEditorCodeEditor') as HTMLTextAreaElement;
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
       const nextValue = JSON.stringify({ field: 'severity_text', eq: 'warn' }, null, 2);
 
       fireEvent.change(textarea, { target: { value: nextValue } });
@@ -190,7 +194,9 @@ describe('ConditionEditor', () => {
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       await user.click(switchButton);
 
-      const textarea = screen.getByTestId('streamsAppConditionEditorCodeEditor') as HTMLTextAreaElement;
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
       const nextValue = JSON.stringify({ field: 'severity_text', eq: 'debug' }, null, 2);
 
       fireEvent.change(textarea, { target: { value: nextValue } });

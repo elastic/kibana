@@ -90,8 +90,12 @@ export function StreamDetailRoutingImpl() {
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
-  const canSaveRouting = useStreamsRoutingSelector((snapshot) => snapshot.can({ type: 'routingRule.save' }));
-  const canForkRouting = useStreamsRoutingSelector((snapshot) => snapshot.can({ type: 'routingRule.fork' }));
+  const canSaveRouting = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.save' })
+  );
+  const canForkRouting = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.fork' })
+  );
   const canSaveSuggestion = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'suggestion.saveSuggestion' })
   );
@@ -105,8 +109,7 @@ export function StreamDetailRoutingImpl() {
     selectHasRoutingChanges(snapshot.context)
   );
 
-  const shouldDisplayBottomBar =
-    isReordering && canSaveRouting && hasRoutingChanges;
+  const shouldDisplayBottomBar = isReordering && canSaveRouting && hasRoutingChanges;
 
   const { onPageReady } = usePerformanceContext();
   const { timeState } = useTimefilter();
@@ -140,8 +143,7 @@ export function StreamDetailRoutingImpl() {
   }, [streamsListFetch, onPageReady, definition.stream, queryRangeSeconds]);
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges:
-      canSaveRouting || canForkRouting || canSaveSuggestion,
+    hasUnsavedChanges: canSaveRouting || canForkRouting || canSaveSuggestion,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
