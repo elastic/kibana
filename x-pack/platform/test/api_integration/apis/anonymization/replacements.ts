@@ -26,12 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
         scope_id: `exec-${id}`,
         profile_id: 'profile-test',
         token_to_original: {
-          HOST_NAME_abc123: 'my-server-01',
-          USER_NAME_def456: 'alice',
+          HOST_NAME_ABC123: 'my-server-01',
+          USER_NAME_DEF456: 'alice',
         },
         token_sources: [
           {
-            token: 'HOST_NAME_abc123',
+            token: 'HOST_NAME_ABC123',
             pointer: '/kibana.alert.host.name',
             entity_class: 'HOST_NAME',
             source_type: 'test',
@@ -69,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.id).to.be(id);
-        expect(body.tokenToOriginal).to.have.property('HOST_NAME_abc123', 'my-server-01');
-        expect(body.tokenToOriginal).to.have.property('USER_NAME_def456', 'alice');
+        expect(body.tokenToOriginal).to.have.property('HOST_NAME_ABC123', 'my-server-01');
+        expect(body.tokenToOriginal).to.have.property('USER_NAME_DEF456', 'alice');
       });
 
       it('resolves replacements by scope', async () => {
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', API_VERSION)
           .send({
-            text: 'The host HOST_NAME_abc123 was accessed by USER_NAME_def456',
+            text: 'The host HOST_NAME_ABC123 was accessed by USER_NAME_DEF456',
             replacementsId: id,
           });
 
@@ -137,12 +137,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('imports compatible replacements successfully', async () => {
         const source = await createReplacementsDoc({
           scope_id: 'exec-source',
-          token_to_original: { HOST_NAME_source: 'source-host' },
+          token_to_original: { HOST_NAME_SOURCE: 'source-host' },
         });
         const dest = await createReplacementsDoc({
           scope_id: 'thread-dest',
           scope_type: 'thread',
-          token_to_original: { USER_NAME_dest: 'dest-user' },
+          token_to_original: { USER_NAME_DEST: 'dest-user' },
         });
 
         const { body, status } = await supertest
