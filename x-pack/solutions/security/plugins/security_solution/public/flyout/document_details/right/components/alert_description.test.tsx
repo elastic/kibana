@@ -22,6 +22,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -35,6 +36,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../common/components/user_privileges');
 
 const ruleUuid = {
   category: 'kibana',
@@ -89,6 +91,12 @@ const NO_DATA_MESSAGE = "There's no description for this rule.";
 describe('<AlertDescription />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
+  beforeEach(() => {
+    jest.mocked(useUserPrivileges).mockReturnValue({
+      rulesPrivileges: { rules: { read: true } },
+    } as ReturnType<typeof useUserPrivileges>);
   });
 
   it('should render the component', () => {
@@ -157,6 +165,18 @@ describe('<AlertDescription />', () => {
           isPreviewMode: true,
         },
       });
+    });
+
+    it('should render rule preview button as disabled if user does not have read privileges for rules', () => {
+      jest.mocked(useUserPrivileges).mockReturnValue({
+        rulesPrivileges: { rules: { read: false } },
+      } as ReturnType<typeof useUserPrivileges>);
+
+      const { getByTestId } = renderDescription(
+        panelContextValue([ruleUuid, ruleDescription, ruleName])
+      );
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
     });
   });
 });

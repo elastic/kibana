@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuerySummary, isComputedColumn } from './get_query_summary';
+import {
+  getQuerySummary,
+  getQuerySummaryPerCommandType,
+  isComputedColumn,
+} from './get_query_summary';
 
 describe('getQuerySummary', () => {
   it('returns new columns from ROW command', () => {
@@ -191,5 +195,43 @@ describe('isComputedColumn', () => {
   it('returns true for metadata fields', () => {
     const query = 'FROM index METADATA _id | KEEP _id';
     expect(isComputedColumn('_id', getQuerySummary(query))).toBe(true);
+  });
+});
+
+describe('getQuerySummaryPerCommandType', () => {
+  it('returns array with one summary for a query with one STATS command', () => {
+    const query = 'FROM index | STATS avg_price = AVG(price)';
+    const result = getQuerySummaryPerCommandType(query, 'stats');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].newColumns).toEqual(new Set(['avg_price']));
+  });
+
+  it('returns array with multiple summaries for a query with multiple STATS commands', () => {
+    const query = `
+      FROM index
+      | STATS avg_price = AVG(price) BY category
+      | STATS total = SUM(avg_price)
+    `;
+    const result = getQuerySummaryPerCommandType(query, 'stats');
+
+    expect(result).toHaveLength(2);
+    expect(result[0].newColumns).toEqual(new Set(['avg_price']));
+    expect(result[1].newColumns).toEqual(new Set(['total']));
+  });
+
+  it('returns empty array when no commands of the specified type exist', () => {
+    const query = 'FROM index | WHERE price > 100 | LIMIT 10';
+    const result = getQuerySummaryPerCommandType(query, 'stats');
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('returns summaries only for the specified command type', () => {
+    const query = 'FROM index | EVAL computed = price * 2 | STATS avg = AVG(computed)';
+    const result = getQuerySummaryPerCommandType(query, 'eval');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].newColumns).toEqual(new Set(['computed']));
   });
 });

@@ -62,6 +62,44 @@
       },
       {
         "parentPluginId": "@kbn/core-notifications-browser",
+        "id": "def-public.FeedbackStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeedbackStart",
+        "description": [
+          "\nExposes public API of the Feedback service during the start phase."
+        ],
+        "path": "src/core/packages/notifications/browser/src/feedback_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.FeedbackStart.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nReturns whether feedback elements are allowed to be shown."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/notifications/browser/src/feedback_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-notifications-browser",
         "id": "def-public.IToasts",
         "type": "Interface",
         "tags": [],
@@ -656,7 +694,7 @@
         "label": "NotificationsSetup",
         "description": [],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -674,7 +712,7 @@
               "IToasts"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
-            "lineNumber": 26,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -693,7 +731,7 @@
               "NotificationCoordinatorPublicApi"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -725,7 +763,7 @@
         "label": "NotificationsStart",
         "description": [],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
-        "lineNumber": 34,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -743,7 +781,7 @@
               "IToasts"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -759,7 +797,7 @@
               "(options: { title: string; error: Error; }) => void"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
-            "lineNumber": 38,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -772,7 +810,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/notifications/browser/src/contracts.ts",
-                "lineNumber": 38,
+                "lineNumber": 40,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -785,7 +823,7 @@
                     "label": "title",
                     "description": [],
                     "path": "src/core/packages/notifications/browser/src/contracts.ts",
-                    "lineNumber": 38,
+                    "lineNumber": 40,
                     "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
@@ -801,7 +839,7 @@
                       "Error"
                     ],
                     "path": "src/core/packages/notifications/browser/src/contracts.ts",
-                    "lineNumber": 38,
+                    "lineNumber": 40,
                     "columnNumber": 47,
                     "deprecated": false,
                     "trackAdoption": false
@@ -810,6 +848,42 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationsStart.feedback",
+            "type": "Object",
+            "tags": [],
+            "label": "feedback",
+            "description": [
+              "\nControls visibility of feedback elements"
+            ],
+            "signature": [
+              "FeedbackStart"
+            ],
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationsStart.tours",
+            "type": "Object",
+            "tags": [],
+            "label": "tours",
+            "description": [
+              "\nControls visibility of guided tours"
+            ],
+            "signature": [
+              "ToursStart"
+            ],
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -846,6 +920,44 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-notifications-browser",
+        "id": "def-public.ToursStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToursStart",
+        "description": [
+          "\nExposes public API of the Tours service during the start phase."
+        ],
+        "path": "src/core/packages/notifications/browser/src/tours_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.ToursStart.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nReturns whether guided tours are allowed to be shown."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/notifications/browser/src/tours_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -970,7 +1082,7 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -989,7 +1101,7 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
-        "lineNumber": 18,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

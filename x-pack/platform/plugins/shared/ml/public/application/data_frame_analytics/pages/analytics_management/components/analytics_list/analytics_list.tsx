@@ -221,7 +221,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     return (
       <div data-test-subj="mlAnalyticsJobList">
         <EuiSpacer size="m" />
-        <AnalyticsEmptyPrompt showDocsLink />
+        <AnalyticsEmptyPrompt showDocsLink iconSize="s" />
       </div>
     );
   }
@@ -262,6 +262,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <EuiSpacer size="m" />
         <div data-test-subj="mlAnalyticsTableContainer">
           <EuiInMemoryTable<DataFrameAnalyticsListRow>
+            tableCaption={i18n.translate('xpack.ml.dataFrame.analyticsList.tableCaption', {
+              defaultMessage: 'Data frame analytics jobs table',
+            })}
             rowHeader={DataFrameAnalyticsListColumn.id}
             allowNeutralSort={false}
             columns={columns}

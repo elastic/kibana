@@ -11,6 +11,7 @@ import {
   STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
+  STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -18,6 +19,7 @@ import {
   streamsSystemIdentificationIdentifiedSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
+  streamsInsightsGeneratedSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -43,6 +45,10 @@ const streamsSignificantEventsGeneratedEventType = {
   eventType: STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   schema: streamsSignificantEventsQueriesGeneratedSchema,
 };
+const streamsInsightsGeneratedEventType = {
+  eventType: STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
+  schema: streamsInsightsGeneratedSchema,
+};
 
 export {
   streamsEndpointLatencyEventType,
@@ -50,4 +56,5 @@ export {
   streamsSystemIdentificationIdentifiedEventType,
   streamsDescriptionGeneratedEventType,
   streamsSignificantEventsGeneratedEventType,
+  streamsInsightsGeneratedEventType,
 };

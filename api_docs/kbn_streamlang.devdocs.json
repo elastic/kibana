@@ -5896,7 +5896,7 @@
             "label": "streamType",
             "description": [],
             "signature": [
-              "\"classic\" | \"wired\" | undefined"
+              "\"classic\" | \"wired\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
             "lineNumber": 73,

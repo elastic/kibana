@@ -33,6 +33,7 @@ export interface ProjectPickerProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
   isReadonly?: boolean;
+  settingsComponent?: React.ReactNode;
 }
 
 export const ProjectPicker = ({
@@ -40,6 +41,7 @@ export const ProjectPicker = ({
   onProjectRoutingChange,
   fetchProjects,
   isReadonly = false,
+  settingsComponent,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -112,12 +114,14 @@ export const ProjectPicker = ({
         ownFocus
         panelPaddingSize="none"
         panelProps={{ css: styles.popover }}
+        hasArrow
       >
         <ProjectPickerContent
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           fetchProjects={fetchProjects}
           isReadonly={isReadonly}
+          settingsComponent={settingsComponent}
         />
       </EuiPopover>
     </EuiTourStep>

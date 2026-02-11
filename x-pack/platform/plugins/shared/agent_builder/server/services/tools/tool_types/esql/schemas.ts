@@ -8,16 +8,12 @@
 import { schema } from '@kbn/config-schema';
 
 export const paramValueTypeSchema = schema.oneOf([
-  schema.literal('text'),
-  schema.literal('keyword'),
-  schema.literal('long'),
+  schema.literal('string'),
   schema.literal('integer'),
-  schema.literal('double'),
   schema.literal('float'),
   schema.literal('boolean'),
   schema.literal('date'),
-  schema.literal('object'),
-  schema.literal('nested'),
+  schema.literal('array'),
 ]);
 
 export const paramSchema = schema.object({
@@ -32,8 +28,7 @@ export const paramSchema = schema.object({
         schema.string(),
         schema.number(),
         schema.boolean(),
-        schema.recordOf(schema.string(), schema.any()),
-        schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+        schema.arrayOf(schema.oneOf([schema.string(), schema.number()]), { maxSize: 100 }),
       ])
     ),
     schema.never()

@@ -12,6 +12,8 @@ import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysoluti
 import { LIST_ID } from '@kbn/lists-plugin/common/constants.mock';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import { createListsIndex, deleteListsIndex, deleteAllExceptions } from '../../../utils';
 
 interface SummaryResponseType {
@@ -21,6 +23,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA summary_exception_lists', () => {
@@ -126,6 +129,49 @@ export default ({ getService }: FtrProviderContext) => {
           windows: 1,
         };
         expect(body).to.eql(expected);
+      });
+
+      describe('@skipInServerless with read rules and all exceptions role', () => {
+        const role = ROLES.rules_read_exceptions_all;
+
+        beforeEach(async () => {
+          await deleteAndReCreateUserRole(getService, role);
+        });
+
+        it('should return right summary when there are items created', async () => {
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+          await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateExceptionListMinimalSchemaMock())
+            .expect(200);
+
+          const item = getCreateExceptionListItemMinimalSchemaMock();
+
+          for (const os of ['windows', 'linux', 'macos']) {
+            await supertest
+              .post(EXCEPTION_LIST_ITEM_URL)
+              .set('kbn-xsrf', 'true')
+              .send({ ...item, os_types: [os], item_id: `${item.item_id}-${os}` })
+              .expect(200);
+          }
+
+          const { body }: SummaryResponseType = await restrictedApis
+            .readExceptionListSummary({
+              query: { list_id: LIST_ID },
+            })
+            .expect(200);
+
+          const expected: ExceptionListSummarySchema = {
+            linux: 1,
+            macos: 1,
+            total: 3,
+            windows: 1,
+          };
+          expect(body).to.eql(expected);
+        });
       });
     });
   });

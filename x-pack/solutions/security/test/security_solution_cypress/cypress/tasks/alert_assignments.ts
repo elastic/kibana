@@ -141,7 +141,7 @@ export const selectAlertAssignee = (assignee: string) => {
 
 /**
  * This will update assignees for selected alert
- * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
+ * @param users The list of assignees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
  */
 export const updateAssigneesForFirstAlert = (users: string[]) => {
   openFirstAlertAssigningActionMenu();

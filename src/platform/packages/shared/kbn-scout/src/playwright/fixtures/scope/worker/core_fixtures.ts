@@ -257,6 +257,12 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       // it from interfering with test flows
       await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
 
+      // disable solution tour on ECH
+      if (config.isCloud && !config.serverless) {
+        log.info('Disabling Space Solution Tour globally on ECH deployment');
+        await kbnClient.uiSettings.updateGlobal({ showSpaceSolutionTour: false });
+      }
+
       await use({
         session,
         customRoleName,

@@ -6,15 +6,21 @@
  */
 
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { flattenRecord, namedFieldDefinitionConfigSchema } from '@kbn/streams-schema';
+import {
+  flattenRecord,
+  isEnabledFailureStore,
+  namedFieldDefinitionConfigSchema,
+} from '@kbn/streams-schema';
+import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { z } from '@kbn/zod';
 import { streamlangDSLSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
+import { FailureStoreNotEnabledError } from '../../../../lib/streams/errors/failure_store_not_enabled_error';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
+import { checkAccess, getFailureStore } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 import type { ProcessingSimulationParams } from './simulation_handler';
 import { simulateProcessing } from './simulation_handler';
@@ -31,6 +37,8 @@ import {
   processingDissectSuggestionsSchema,
 } from './dissect_suggestions_handler';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
+import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const paramsSchema = z.object({
@@ -232,9 +240,74 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
 });
 
+const failureStoreSamplesParamsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  query: z
+    .object({
+      size: z.coerce.number().optional(),
+      start: z.string().optional(),
+      end: z.string().optional(),
+    })
+    .optional(),
+});
+
+export const failureStoreSamplesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/processing/_failure_store_samples',
+  options: {
+    access: 'internal',
+    summary: 'Get failure store samples with parent processors applied',
+    description:
+      'Fetches documents from the failure store and applies all configured processors from parent streams',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: failureStoreSamplesParamsSchema,
+  handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
+      request,
+    });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    const { read_failure_store: readFailureStore } = await streamsClient.getPrivileges(
+      params.path.name
+    );
+    if (!readFailureStore) {
+      throw new SecurityError(
+        `Cannot read failure store for stream ${params.path.name}, insufficient privileges`
+      );
+    }
+
+    // Check if failure store is enabled for this stream
+    const dataStream = await streamsClient.getDataStream(params.path.name);
+    const effectiveFailureStore = getFailureStore({
+      dataStream: dataStream as DataStreamWithFailureStore,
+    });
+    if (!isEnabledFailureStore(effectiveFailureStore)) {
+      throw new FailureStoreNotEnabledError(
+        `Failure store is not enabled for stream ${params.path.name}`
+      );
+    }
+
+    return getFailureStoreSamples({
+      params,
+      scopedClusterClient,
+      streamsClient,
+      fieldsMetadataClient,
+    });
+  },
+});
+
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingGrokSuggestionRoute,
   ...processingDissectSuggestionRoute,
   ...processingDateSuggestionsRoute,
+  ...failureStoreSamplesRoute,
 };

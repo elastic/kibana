@@ -13,6 +13,7 @@ import {
   type System,
 } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -26,10 +27,15 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   systems?: System[];
   sampleDocsSize?: number;
+  streamName: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
   'streams_significant_events_queries_generation';
+
+export function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
+  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
+}
 
 export function createStreamsSignificantEventsQueriesGenerationTask(taskContext: TaskContext) {
   return {
@@ -42,9 +48,9 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, systems, sampleDocsSize, _task } = runContext
-                .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
-              const { stream: name } = _task;
+              const { connectorId, start, end, systems, sampleDocsSize, streamName, _task } =
+                runContext.taskInstance
+                  .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
                 taskClient,
@@ -58,8 +64,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               });
 
               try {
-                const stream = await streamsClient.getStream(name);
-                const { hits: features } = await featureClient.getFeatures(name);
+                const stream = await streamsClient.getStream(streamName);
+                const { hits: features } = await featureClient.getFeatures(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -128,7 +134,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { connectorId, start, end, systems, sampleDocsSize }, combinedResults);
+                >(
+                  _task,
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
+                  combinedResults
+                );
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -141,7 +151,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -150,9 +160,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { connectorId, start, end, systems, sampleDocsSize },
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
                   errorMessage
                 );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,
