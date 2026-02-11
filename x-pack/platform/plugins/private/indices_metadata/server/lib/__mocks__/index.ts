@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TelemetryConfigProvider } from '../services/telemetry_config_provider'
+import type { TelemetryConfigProvider } from '../services/telemetry_config_provider';
 
 export const createMockTelemetryConfigProvider = (
   isOptedIn = true
@@ -15,4 +15,4 @@ export const createMockTelemetryConfigProvider = (
     start: jest.fn(),
     stop: jest.fn(),
     getObservable: jest.fn(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  } as any);

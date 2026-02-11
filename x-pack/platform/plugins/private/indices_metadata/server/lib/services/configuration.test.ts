@@ -223,7 +223,11 @@ describe('ConfigurationService', () => {
             })
             .mockRejectedValue(error);
 
-          configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
           const config$ = configurationService.getIndicesMetadataConfiguration$();
 
           let config: IndicesMetadataConfiguration | undefined;
@@ -303,7 +307,11 @@ describe('ConfigurationService', () => {
 
           jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
 
-          configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
           configurationService.getIndicesMetadataConfiguration$().subscribe();
 
           await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
