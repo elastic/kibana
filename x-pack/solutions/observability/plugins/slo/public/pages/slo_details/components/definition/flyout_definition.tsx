@@ -35,9 +35,9 @@ import {
 } from '../../../../utils/slo/labels';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { SloDetailsDefinitionProps } from './types';
 import { DESCRIPTION_LIST_ROW_WIDTH_BREAKPOINT } from '../../shared_flyout/constants';
 import { DisplayQuery } from '../overview/display_query';
+import { useSloDetailsContext } from '../slo_details_context';
 
 function AccordionHeader({ title }: { title: string }) {
   return (
@@ -72,7 +72,8 @@ function DescriptionListDescription({ description }: { description: string }) {
   return <EuiText size="s">{description}</EuiText>;
 }
 
-export function SloDetailsFlyoutDefinition({ slo }: SloDetailsDefinitionProps) {
+export function SloDetailsFlyoutDefinition() {
+  const { slo } = useSloDetailsContext();
   const definitionId = useGeneratedHtmlId();
   const descriptionId = useGeneratedHtmlId();
 

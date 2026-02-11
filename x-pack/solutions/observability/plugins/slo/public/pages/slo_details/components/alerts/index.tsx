@@ -6,22 +6,16 @@
  */
 
 import React from 'react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SloDetailsFlyoutAlerts } from './slo_details_flyout_alerts';
-import { SloDetailsPageAlerts } from './slo_detail_alerts';
+import { SloDetailsPageAlerts } from './slo_detail_page_alerts';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export interface SloDetailsAlertsProps {
-  slo: SLOWithSummaryResponse;
-}
+export function SloDetailsAlerts() {
+  const { isFlyout } = useSloDetailsContext();
 
-interface Props extends SloDetailsAlertsProps {
-  isFlyout?: boolean;
-}
-
-export function SloDetailsAlerts({ slo, isFlyout }: Props) {
   if (isFlyout) {
-    return <SloDetailsFlyoutAlerts slo={slo} />;
+    return <SloDetailsFlyoutAlerts />;
   }
 
-  return <SloDetailsPageAlerts slo={slo} />;
+  return <SloDetailsPageAlerts />;
 }

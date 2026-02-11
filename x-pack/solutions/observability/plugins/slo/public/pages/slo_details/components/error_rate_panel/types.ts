@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_definition';
 import type { TimeBounds } from '../../types';
 
 export interface ErrorRatePanelProps {
-  slo: SLOWithSummaryResponse;
   dataTimeRange: TimeRange;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }

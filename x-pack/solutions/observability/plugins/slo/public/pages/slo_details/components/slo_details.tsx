@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID, DEFINITION_TAB_ID, HISTORY_TAB_ID } from '@kbn/deeplinks-observability';
 import moment from 'moment';
@@ -20,15 +19,14 @@ import { SloRemoteCallout } from './slo_remote_callout';
 import { ActionModalProvider } from '../../../context/action_modal';
 import { SloDetailsDefinition } from './definition';
 import { SloDetailsAlerts } from './alerts';
+import { useSloDetailsContext } from './slo_details_context';
 
 export interface Props {
-  slo: SLOWithSummaryResponse;
-  isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
-  isFlyout?: boolean;
 }
 
-export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: Props) {
+export function SloDetails({ selectedTabId }: Props) {
+  const { isAutoRefreshing } = useSloDetailsContext();
   const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
     const now = new Date();
     return {
@@ -50,27 +48,27 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: P
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return <SloDetailsHistory slo={slo} isFlyout={isFlyout} />;
+    return <SloDetailsHistory />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
-    return <SloDetailsDefinition slo={slo} isFlyout={isFlyout} />;
+    return <SloDetailsDefinition />;
   }
 
   if (selectedTabId === ALERTS_TAB_ID) {
-    return <SloDetailsAlerts slo={slo} isFlyout={isFlyout} />;
+    return <SloDetailsAlerts />;
   }
 
   return (
     <ActionModalProvider>
       <EuiFlexGroup direction="column" gutterSize="xl">
-        <SloRemoteCallout slo={slo} />
-        <SloHealthCallout slo={slo} />
+        <SloRemoteCallout />
+        <SloHealthCallout />
 
         <EuiFlexGroup direction="column" gutterSize="l">
-          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
-          <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
-          <EventsChartPanel slo={slo} range={range} isFlyout={isFlyout} />
+          <BurnRatePanel />
+          <HistoricalDataCharts />
+          <EventsChartPanel range={range} />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </ActionModalProvider>

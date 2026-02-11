@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 import type { ErrorBudgetChartPanelProps } from './types';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -26,11 +27,11 @@ interface Props extends ErrorBudgetChartPanelProps {
 export function ErrorBudgetChartPagePanel({
   data,
   isLoading,
-  slo,
   handleAttachToDashboardSave,
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
+  const { slo } = useSloDetailsContext();
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
@@ -61,7 +62,7 @@ export function ErrorBudgetChartPagePanel({
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
 
-          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} onBrushed={onBrushed} />
+          <ErrorBudgetChart data={data} isLoading={isLoading} onBrushed={onBrushed} />
         </EuiFlexGroup>
       </EuiPanel>
       {isDashboardAttachmentReady ? (

@@ -10,8 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import type { ErrorRatePanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function ErrorRateFlyoutPanel({ slo, dataTimeRange, onBrushed }: ErrorRatePanelProps) {
+export function ErrorRateFlyoutPanel({ dataTimeRange, onBrushed }: ErrorRatePanelProps) {
+  const { slo } = useSloDetailsContext();
   return (
     <SloFlyoutPanel
       title={i18n.translate('xpack.slo.errorRateFlyoutPanel.errorRatePanelTitle', {

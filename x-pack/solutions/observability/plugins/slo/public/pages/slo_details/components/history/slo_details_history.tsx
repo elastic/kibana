@@ -7,7 +7,6 @@
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useUrlAppState } from './hooks/use_url_app_state';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -17,13 +16,10 @@ import { HistoricalDataCharts } from '../historical_data_charts/historical_data_
 import { CalendarPeriodPicker } from './calendar_period_picker';
 import { ErrorRatePanel } from '../error_rate_panel';
 import { EventsChartPanel } from '../events_chart_panel';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export interface Props {
-  slo: SLOWithSummaryResponse;
-  isFlyout?: boolean;
-}
-
-export function SloDetailsHistory({ slo, isFlyout }: Props) {
+export function SloDetailsHistory() {
+  const { slo, isFlyout } = useSloDetailsContext();
   const { uiSettings } = useKibana().services;
 
   const { state, updateState } = useUrlAppState(slo);
@@ -71,29 +67,15 @@ export function SloDetailsHistory({ slo, isFlyout }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <ErrorRatePanel
-        slo={slo}
-        dataTimeRange={state.range}
-        onBrushed={onBrushed}
-        isFlyout={isFlyout}
-      />
+      <ErrorRatePanel dataTimeRange={state.range} onBrushed={onBrushed} />
 
       <HistoricalDataCharts
-        slo={slo}
-        isAutoRefreshing={false}
         range={state.range}
         onBrushed={onBrushed}
         hideHeaderDurationLabel={true}
-        isFlyout={isFlyout}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={state.range}
-        hideRangeDurationLabel
-        onBrushed={onBrushed}
-        isFlyout={isFlyout}
-      />
+      <EventsChartPanel range={state.range} hideRangeDurationLabel onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }

@@ -12,9 +12,10 @@ import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { BurnRateStatus } from './burn_rate_status';
 import { burnRateWindowLabel } from './utils';
 import { useBurnRatePanel } from './hooks/use_burn_rate_panel';
-import type { BurnRatePanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function BurnRatePagePanel({ slo, isAutoRefreshing }: BurnRatePanelProps) {
+export function BurnRatePagePanel() {
+  const { slo } = useSloDetailsContext();
   const {
     burnRateWindows,
     selectedWindow,
@@ -25,7 +26,7 @@ export function BurnRatePagePanel({ slo, isAutoRefreshing }: BurnRatePanelProps)
     threshold,
     currentStatus,
     dataTimeRange,
-  } = useBurnRatePanel({ slo, isAutoRefreshing });
+  } = useBurnRatePanel();
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">

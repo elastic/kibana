@@ -31,6 +31,7 @@ import { getSloChartState } from '../../../utils/is_slo_failed';
 import { ErrorBudgetActions } from './error_budget_actions';
 import type { ErrorBudgetChartPanelProps } from './types';
 import { CHART_PANEL_WIDTH_BREAKPOINT } from '../../../shared_flyout/constants';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -41,18 +42,18 @@ interface Props extends ErrorBudgetChartPanelProps {
 export function ErrorBudgetChartFlyoutPanel({
   data,
   isLoading,
-  slo,
   handleAttachToDashboardSave,
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
+  const { slo } = useSloDetailsContext();
   const {
     isSloFailed,
     lastErrorBudgetRemaining,
     errorBudgetTimeRemainingFormatted,
     percentFormat,
     isDashboardContext,
-  } = useErrorBudgetChart({ slo, data });
+  } = useErrorBudgetChart({ data });
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 

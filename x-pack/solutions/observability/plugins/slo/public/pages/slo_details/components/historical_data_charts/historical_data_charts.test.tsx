@@ -15,6 +15,7 @@ import { buildSlo } from '../../../../data/slo/slo';
 import { HistoricalDataCharts } from './historical_data_charts';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { SloDetailsContextProvider } from '../slo_details_context';
 
 jest.mock('../../../../hooks/use_fetch_historical_summary');
 jest.mock('../../../../hooks/use_kibana');
@@ -95,7 +96,11 @@ describe('HistoricalDataCharts', () => {
   describe.each([false, true])('when isFlyout is %s', (isFlyout) => {
     it('renders both SLI and error budget chart panels', () => {
       const slo = buildSlo({ id: 'test-slo-id' });
-      render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} isFlyout={isFlyout} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts />
+        </SloDetailsContextProvider>
+      );
 
       expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
       expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
@@ -103,7 +108,11 @@ describe('HistoricalDataCharts', () => {
 
     it('calculates observed value from the latest entry in historical data', () => {
       const slo = buildSlo({ id: 'test-slo-id' });
-      render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} isFlyout={isFlyout} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts />
+        </SloDetailsContextProvider>
+      );
 
       // The observed value should be from the latest entry (0.97 from 2024-01-03)
       // Format: 0.97 -> 97.0%
@@ -148,7 +157,11 @@ describe('HistoricalDataCharts', () => {
       });
 
       const slo = buildSlo({ id: 'test-slo-id' });
-      render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} isFlyout={isFlyout} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts />
+        </SloDetailsContextProvider>
+      );
 
       // Should use the valid entry (0.95), not the NO_DATA entry
       expect(screen.getByText('95.0%')).toBeTruthy();
@@ -167,7 +180,11 @@ describe('HistoricalDataCharts', () => {
       });
 
       const slo = buildSlo({ id: 'test-slo-id' });
-      render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} isFlyout={isFlyout} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts />
+        </SloDetailsContextProvider>
+      );
 
       // Should still render the panels, but use slo.summary.sliValue as fallback
       expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
@@ -212,7 +229,11 @@ describe('HistoricalDataCharts', () => {
       });
 
       const slo = buildSlo({ id: 'test-slo-id' });
-      render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} isFlyout={isFlyout} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts />
+        </SloDetailsContextProvider>
+      );
 
       // Should still render the panels, but use slo.summary.sliValue as fallback
       expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
@@ -227,12 +248,9 @@ describe('HistoricalDataCharts', () => {
       };
 
       render(
-        <HistoricalDataCharts
-          slo={slo}
-          isAutoRefreshing={false}
-          range={range}
-          isFlyout={isFlyout}
-        />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <HistoricalDataCharts range={range} />
+        </SloDetailsContextProvider>
       );
 
       // Verify that useFetchHistoricalSummary was called with the range

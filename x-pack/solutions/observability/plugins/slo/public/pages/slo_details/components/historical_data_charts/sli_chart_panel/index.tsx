@@ -9,12 +9,11 @@ import React from 'react';
 import type { SliChartPanelProps } from './types';
 import { SliChartFlyoutPanel } from './sli_chart_flyout_panel';
 import { SliChartPagePanel } from './sli_chart_page_panel';
+import { useSloDetailsContext } from '../../slo_details_context';
 
-interface Props extends SliChartPanelProps {
-  isFlyout?: boolean;
-}
+export function SliChartPanel(props: SliChartPanelProps) {
+  const { isFlyout } = useSloDetailsContext();
 
-export function SliChartPanel({ isFlyout, ...props }: Props) {
   if (isFlyout) {
     return <SliChartFlyoutPanel {...props} />;
   }
