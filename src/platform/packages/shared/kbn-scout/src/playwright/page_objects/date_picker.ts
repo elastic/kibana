@@ -73,13 +73,10 @@ export class DatePicker {
     }
 
     if (await showBtn.isVisible()) {
-      // Click the visible "Show dates" button (avoids clicking a hidden instance when multiple date pickers exist, e.g. Streams app)
-      const visibleShowBtn = containerLocator ? showBtn : showBtn.filter({ visible: true }).first();
-      await visibleShowBtn.click();
-      // Wait for the absolute tab to be visible; scope to container when provided (same as openAbsoluteTab semantics)
-      const absoluteTabLocator = getTestSubjLocator('superDatePickerAbsoluteTab');
-      await absoluteTabLocator.filter({ visible: true }).first().waitFor({ timeout: 15000 });
-      await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
+      // Click to show start/end time pickers
+      await showBtn.click();
+      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
+      await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
     } else {
       await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
     }
