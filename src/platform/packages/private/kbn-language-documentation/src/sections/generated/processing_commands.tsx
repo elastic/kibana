@@ -813,7 +813,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.rerank', {
         defaultMessage: 'RERANK',
       }),
-      preview: true,
+      preview: false,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.rerank.markdown', {
           defaultMessage: `### RERANK
