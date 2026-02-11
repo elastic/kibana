@@ -98,17 +98,21 @@ export async function generateSignificantEvents({
     formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
   }
 
-  const fieldCapsResponse = await esClient.fieldCaps({
-    index: stream.name,
-    fields: '*',
-    index_filter: {
-      bool: {
-        filter: dateRangeQuery(start, end),
+  const fieldCapsResponse = await esClient
+    .fieldCaps({
+      index: stream.name,
+      fields: '*',
+      index_filter: {
+        bool: {
+          filter: dateRangeQuery(start, end),
+        },
       },
-    },
-  }).catch((error) => {
-    throw new Error(`Failure to retrieve mappings to determine field eligibility: ${error.message}`);
-  });
+    })
+    .catch((error) => {
+      throw new Error(
+        `Failure to retrieve mappings to determine field eligibility: ${error.message}`
+      );
+    });
 
   const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
