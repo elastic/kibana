@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
 import { uniq } from 'lodash';
 
@@ -159,8 +159,6 @@ export const useAvailablePackages = ({
     initialSelectedCategory,
     initialSubcategory,
     initialOnlyAgentless,
-    initialShowBeta,
-    initialShowDeprecated,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -175,28 +173,12 @@ export const useAvailablePackages = ({
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
   const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
-  const [showBeta, setShowBeta] = useState<boolean | undefined>(initialShowBeta);
-  const [showDeprecated, setShowDeprecated] = useState<boolean | undefined>(initialShowDeprecated);
-
-  // Sync state with URL parameters when they change
-  useEffect(() => {
-    setShowBeta(initialShowBeta);
-  }, [initialShowBeta]);
-
-  useEffect(() => {
-    setShowDeprecated(initialShowDeprecated);
-  }, [initialShowDeprecated]);
-
-  // Use showBeta state if defined, otherwise fall back to prereleaseIntegrationsEnabled
-  // This ensures the query updates immediately when the filter changes
-  const effectivePrereleaseEnabled =
-    showBeta !== undefined ? showBeta : prereleaseIntegrationsEnabled;
 
   const {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackagesQuery({ prerelease: effectivePrereleaseEnabled });
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -281,7 +263,7 @@ export const useAvailablePackages = ({
     data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategoriesQuery({ prerelease: effectivePrereleaseEnabled });
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
 
@@ -325,10 +307,6 @@ export const useAvailablePackages = ({
     onlyAgentlessFilter,
     setOnlyAgentlessFilter,
     isAgentlessEnabled,
-    showBeta,
-    setShowBeta,
-    showDeprecated,
-    setShowDeprecated,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||

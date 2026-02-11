@@ -76,9 +76,8 @@ export function useBrowseIntegrationHook({
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
 
-    // Apply deprecated filter (beta is handled at the query level via prerelease parameter)
+    // Apply deprecated filter
     // When showDeprecated is true, show ONLY deprecated integrations
-    // When showDeprecated is false or undefined return all integrations except deprecated ones
     const showDeprecated = urlFilters.showDeprecated;
 
     cards = cards.filter((card) => {

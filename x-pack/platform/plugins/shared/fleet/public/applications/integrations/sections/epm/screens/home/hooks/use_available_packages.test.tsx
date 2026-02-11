@@ -193,8 +193,8 @@ describe('useAvailablePackages', () => {
       initialSelectedCategory: '',
       initialSubcategory: undefined,
       initialOnlyAgentless: false,
-      initialShowBeta: undefined,
-      initialShowDeprecated: undefined,
+      showBeta: undefined,
+      showDeprecated: undefined,
       setUrlandPushHistory: mockSetUrlandPushHistory,
       setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
       getHref: mockGetHref,
@@ -215,8 +215,6 @@ describe('useAvailablePackages', () => {
       expect(result.current.searchTerm).toBe('');
       expect(result.current.preference).toBe('agent');
       expect(result.current.onlyAgentlessFilter).toBe(false);
-      expect(result.current.showBeta).toBeUndefined();
-      expect(result.current.showDeprecated).toBeUndefined();
     });
 
     it('should initialize from URL parameters', () => {
@@ -224,8 +222,8 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'web',
         initialSubcategory: 'nginx',
         initialOnlyAgentless: true,
-        initialShowBeta: true,
-        initialShowDeprecated: false,
+        showBeta: true,
+        showDeprecated: false,
         setUrlandPushHistory: mockSetUrlandPushHistory,
         setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
         getHref: mockGetHref,
@@ -242,8 +240,6 @@ describe('useAvailablePackages', () => {
       expect(result.current.selectedSubCategory).toBe('nginx');
       expect(result.current.searchTerm).toBe('nginx');
       expect(result.current.onlyAgentlessFilter).toBe(true);
-      expect(result.current.showBeta).toBe(true);
-      expect(result.current.showDeprecated).toBe(false);
     });
   });
 
@@ -260,18 +256,6 @@ describe('useAvailablePackages', () => {
 
       expect(mockUseGetPackagesQuery).toHaveBeenCalledWith({ prerelease: false });
       expect(mockUseGetCategoriesQuery).toHaveBeenCalledWith({ prerelease: false });
-    });
-
-    it('should use showBeta state over prereleaseIntegrationsEnabled when defined', () => {
-      mockUseBuildIntegrationsUrl.mockReturnValue({
-        ...mockUseBuildIntegrationsUrl(),
-        initialShowBeta: true,
-      });
-
-      renderHook(() => useAvailablePackages({ prereleaseIntegrationsEnabled: false }));
-
-      expect(mockUseGetPackagesQuery).toHaveBeenCalledWith({ prerelease: true });
-      expect(mockUseGetCategoriesQuery).toHaveBeenCalledWith({ prerelease: true });
     });
   });
 

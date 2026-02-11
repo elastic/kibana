@@ -90,32 +90,22 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
     return count;
   }, [showBeta, showDeprecated]);
 
-  const handleChange = useCallback(
+  const onSelectionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const betaOption = newOptions.find((option) => option.key === 'beta');
-      const deprecatedOption = newOptions.find((option) => option.key === 'deprecated');
-
-      // Pass true when checked, undefined when unchecked (to remove from URL and fall back to default)
-      const newShowBeta = betaOption?.checked === 'on' ? true : undefined;
-      const newShowDeprecated = deprecatedOption?.checked === 'on' ? true : undefined;
-
-      // Update server settings if beta changed
-      if (newShowBeta !== showBeta) {
-        // Only update settings when beta filter is explicitly toggled
-        if (newShowBeta === true) {
-          updateBetaSettings(true);
-        } else if (showBeta === true && newShowBeta === undefined) {
-          // Beta was on and is now being turned off
-          updateBetaSettings(false);
+      newOptions.forEach((option, index) => {
+        const isBeta = option.key === 'beta';
+        const isDeprecated = option.key === 'deprecated';
+        if (option.checked !== options[index].checked) {
+          if (isBeta) {
+            onChange({ showBeta: option.checked === 'on' ? true : undefined, showDeprecated });
+            updateBetaSettings(option.checked === 'on');
+          } else if (isDeprecated) {
+            onChange({ showBeta, showDeprecated: option.checked === 'on' ? true : undefined });
+          }
         }
-      }
-
-      onChange({
-        showBeta: newShowBeta,
-        showDeprecated: newShowDeprecated,
       });
     },
-    [showBeta, onChange, updateBetaSettings]
+    [onChange, options, showBeta, showDeprecated, updateBetaSettings]
   );
 
   return (
@@ -142,7 +132,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
         data-test-subj={`${testSubjPrefix}.statusSelectableList`}
         searchable={false}
         options={options}
-        onChange={handleChange}
+        onChange={onSelectionChange}
         listProps={{
           paddingSize: 's',
           showIcons: true,

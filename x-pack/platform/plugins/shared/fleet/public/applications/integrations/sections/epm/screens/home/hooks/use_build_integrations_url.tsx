@@ -19,8 +19,6 @@ export interface IntegrationsURLParameters {
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
-  showBeta?: boolean;
-  showDeprecated?: boolean;
 }
 
 export const useBuildIntegrationsUrl = () => {
@@ -32,8 +30,6 @@ export const useBuildIntegrationsUrl = () => {
     selectedSubcategory: initialSubcategory,
     searchParam,
     onlyAgentless: initialOnlyAgentless,
-    showBeta: initialShowBeta,
-    showDeprecated: initialShowDeprecated,
   } = getParams(useParams<CategoryParams>(), useLocation().search);
 
   const { getHref, getAbsolutePath } = useLink();
@@ -44,16 +40,12 @@ export const useBuildIntegrationsUrl = () => {
     categoryId,
     subCategoryId,
     onlyAgentless,
-    showBeta,
-    showDeprecated,
   }: IntegrationsURLParameters) => {
     const url = pagePathGetters.integrations_all({
       category: categoryId ? categoryId : '',
       subCategory: subCategoryId ? subCategoryId : '',
       searchTerm: searchString ? searchString : '',
       onlyAgentless: onlyAgentless || false,
-      showBeta: showBeta ?? false,
-      showDeprecated: showDeprecated ?? false,
     })[1];
     return url;
   };
@@ -63,16 +55,12 @@ export const useBuildIntegrationsUrl = () => {
     categoryId,
     subCategoryId,
     onlyAgentless,
-    showBeta,
-    showDeprecated,
   }: IntegrationsURLParameters) => {
     const url = buildUrl({
       categoryId,
       searchString,
       subCategoryId,
       onlyAgentless,
-      showBeta,
-      showDeprecated,
     });
     history.push(url);
   };
@@ -82,16 +70,12 @@ export const useBuildIntegrationsUrl = () => {
     categoryId,
     subCategoryId,
     onlyAgentless,
-    showBeta,
-    showDeprecated,
   }: IntegrationsURLParameters) => {
     const url = buildUrl({
       categoryId,
       searchString,
       subCategoryId,
       onlyAgentless,
-      showBeta,
-      showDeprecated,
     });
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(url);
@@ -101,8 +85,6 @@ export const useBuildIntegrationsUrl = () => {
     initialSelectedCategory,
     initialSubcategory,
     initialOnlyAgentless,
-    initialShowBeta,
-    initialShowDeprecated,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
