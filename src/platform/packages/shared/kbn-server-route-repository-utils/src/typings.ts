@@ -18,7 +18,7 @@ import type {
   RouteMethod,
 } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type * as t from 'io-ts';
 import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
@@ -42,9 +42,9 @@ export interface RouteParams {
 }
 
 export type ZodParamsObject = z.ZodObject<{
-  path?: z.ZodSchema;
-  query?: z.ZodSchema;
-  body?: z.ZodSchema;
+  path?: z.ZodType;
+  query?: z.ZodType;
+  body?: z.ZodType;
 }>;
 
 export type IoTsParamsObject = WithoutIncompatibleMethods<t.Type<RouteParams>>;
@@ -195,9 +195,9 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodType<infer O extends Record<string, any>>
     ? MaybeOptional<{
-        params: z.input<TRouteParamsRT>;
+        params: O;
       }>
     : never;
 
@@ -206,9 +206,9 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodType<infer O extends Record<string, any>>
     ? MaybeOptional<{
-        params: z.output<TRouteParamsRT>;
+        params: O;
       }>
     : never;
 
