@@ -14,12 +14,12 @@ apiTest.describe(
   'Stream lifecycle - retention API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-   // Stream names must be exactly one level deep when forking from 'logs.otel'
-  // Format: logs.otel.<name> where name uses hyphens, not dots
-  // The prefix 'lc' is used for cleanup matching
-  // Note: Using logs.otel as it's created by default in fresh installs
-  const rootStream = 'logs.otel';
-  const streamNamePrefix = `${rootStream}.lc`;
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
+    // The prefix 'lc' is used for cleanup matching
+    // Note: Using logs.otel as it's created by default in fresh installs
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.lc`;
 
     // Helper to create a stream and verify it was created
     async function createTestStream(
