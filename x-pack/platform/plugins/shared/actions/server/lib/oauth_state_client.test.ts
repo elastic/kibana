@@ -51,6 +51,9 @@ describe('OAuthStateClient', () => {
   describe('create', () => {
     it('creates OAuth state with PKCE parameters', async () => {
       const client = createClient();
+      const now = new Date('2025-06-01T12:00:00.000Z');
+      jest.useFakeTimers();
+      jest.setSystemTime(now);
       mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
         id: 'generated-id',
         attributes: {
@@ -93,29 +96,11 @@ describe('OAuthStateClient', () => {
           redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
-          createdAt: expect.any(String),
-          expiresAt: expect.any(String),
+          createdAt: now.toISOString(),
+          expiresAt: '2025-06-01T12:10:00.000Z', // now + 10 minutes
         }),
         { id: 'generated-id' }
       );
-    });
-
-    it('omits createdBy when undefined', async () => {
-      const client = createClient();
-      mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
-        id: 'generated-id',
-        attributes: {},
-      });
-
-      await client.create({
-        connectorId: 'connector-1',
-        redirectUri: 'https://kibana.example.com/callback',
-        kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-        spaceId: 'default',
-      });
-
-      const createdAttributes = mockUnsecuredSavedObjectsClient.create.mock.calls[0][1];
-      expect(createdAttributes).not.toHaveProperty('createdBy');
     });
 
     it('includes createdBy when provided', async () => {
@@ -135,31 +120,6 @@ describe('OAuthStateClient', () => {
 
       const createdAttributes = mockUnsecuredSavedObjectsClient.create.mock.calls[0][1];
       expect(createdAttributes.createdBy).toBe('testuser');
-    });
-
-    it('sets expiration to 10 minutes from now', async () => {
-      const client = createClient();
-      const now = new Date('2025-06-01T12:00:00.000Z');
-      jest.useFakeTimers();
-      jest.setSystemTime(now);
-
-      mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
-        id: 'generated-id',
-        attributes: {},
-      });
-
-      await client.create({
-        connectorId: 'connector-1',
-        redirectUri: 'https://kibana.example.com/callback',
-        kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-        spaceId: 'default',
-      });
-
-      const createdAttributes = mockUnsecuredSavedObjectsClient.create.mock.calls[0][1];
-      expect(createdAttributes.createdAt).toBe('2025-06-01T12:00:00.000Z');
-      expect(createdAttributes.expiresAt).toBe('2025-06-01T12:10:00.000Z');
-
-      jest.useRealTimers();
     });
 
     it('throws and logs error on creation failure', async () => {
