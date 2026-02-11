@@ -5,11 +5,9 @@
  * 2.0.
  */
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
-import { getOutcomeAggregation } from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -25,7 +23,9 @@ import {
   type DocumentType,
   getLatencyAggregation,
   getLatencyValue,
-} from '../../utils/get_latency_aggregation';
+  getFailureRateAggregation,
+  getThroughputAggregation,
+} from '../../utils/trace_metrics_aggregations';
 
 interface Bucket {
   key: string | number;
@@ -106,9 +106,6 @@ export async function getToolHandler({
   const documentType = source.documentType as DocumentType;
   const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
 
-  const calculateFailedTransactionRate =
-    'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
-
   const response = await apmEventClient.search('get_trace_change_points', {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -138,49 +135,13 @@ export async function getToolHandler({
               fixed_interval: `${bucketSizeInSeconds}s`,
             },
             aggs: {
-              ...getOutcomeAggregation(documentType),
               ...getLatencyAggregation({
                 latencyAggregationType: latencyType,
                 hasDurationSummaryField,
                 documentType,
               }),
-              failure_rate:
-                documentType === ApmDocumentType.ServiceTransactionMetric
-                  ? {
-                      bucket_script: {
-                        buckets_path: {
-                          successful_or_failed: 'successful_or_failed',
-                          success: 'successful',
-                        },
-                        script: {
-                          source: calculateFailedTransactionRate,
-                        },
-                      },
-                    }
-                  : {
-                      bucket_script: {
-                        buckets_path: {
-                          successful_or_failed: 'successful_or_failed>_count',
-                          success: 'successful>_count',
-                        },
-                        script: {
-                          source: calculateFailedTransactionRate,
-                        },
-                      },
-                    },
-              throughput: {
-                bucket_script: {
-                  buckets_path: {
-                    count: '_count',
-                  },
-                  script: {
-                    source: 'params.count != null ? params.count / (params.bucketSize / 60.0) : 0',
-                    params: {
-                      bucketSize: bucketSizeInSeconds,
-                    },
-                  },
-                },
-              },
+              ...getFailureRateAggregation(documentType),
+              ...getThroughputAggregation(bucketSizeInSeconds / 60),
             },
           },
           changes_latency: getChangePointsAggs('time_series>latency'),

@@ -6,8 +6,6 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
-import { getOutcomeAggregation } from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -22,7 +20,9 @@ import {
   type DocumentType,
   getLatencyAggregation,
   getLatencyValue,
-} from '../../utils/get_latency_aggregation';
+  getFailureRateAggregation,
+  getThroughputAggregation,
+} from '../../utils/trace_metrics_aggregations';
 
 export interface TraceMetricsItem {
   group: string;
@@ -45,55 +45,6 @@ function getTermsOrderAggregationPath(
     case 'failureRate':
       return 'failure_rate';
   }
-}
-function getFailureRateAggregation(documentType: DocumentType) {
-  const calculateFailedTransactionRate =
-    'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
-  return {
-    ...getOutcomeAggregation(documentType),
-    failure_rate:
-      documentType === ApmDocumentType.ServiceTransactionMetric
-        ? {
-            bucket_script: {
-              buckets_path: {
-                successful_or_failed: 'successful_or_failed',
-                success: 'successful',
-              },
-              script: {
-                source: calculateFailedTransactionRate,
-              },
-            },
-          }
-        : {
-            bucket_script: {
-              buckets_path: {
-                successful_or_failed: 'successful_or_failed>_count',
-                success: 'successful>_count',
-              },
-              script: {
-                source: calculateFailedTransactionRate,
-              },
-            },
-          },
-  };
-}
-
-function getThroughputAggregation(durationAsMinutes: number) {
-  return {
-    throughput: {
-      bucket_script: {
-        buckets_path: {
-          count: '_count',
-        },
-        script: {
-          source: 'params.count != null ? params.count / params.durationAsMinutes : 0',
-          params: {
-            durationAsMinutes,
-          },
-        },
-      },
-    },
-  };
 }
 
 export async function getToolHandler({
