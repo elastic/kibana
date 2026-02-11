@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import Boom from '@hapi/boom';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { pipeStream } from '../stream_utils';
+import { mapOneToOneStep } from '../stream_utils';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -25,7 +25,7 @@ export class FetchRuleStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return pipeStream(streamState, async (state) => {
+    return mapOneToOneStep(streamState, async (state) => {
       const { input } = state;
       const { ruleId } = input;
 

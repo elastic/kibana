@@ -14,8 +14,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { hasState } from '../type_guards';
-import { pipeStream } from '../stream_utils';
+import { mapOneToOneStep, requireState } from '../stream_utils';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -27,16 +26,18 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return pipeStream(streamState, async (state) => {
+    return mapOneToOneStep(streamState, async (state) => {
       const { input } = state;
 
       this.logger.debug({
         message: `[${this.name}] Starting step for rule ${input.ruleId}`,
       });
 
-      if (!hasState(state, ['alertEventsBatch'])) {
+      const requiredState = requireState(state, ['alertEventsBatch']);
+
+      if (!requiredState.ok) {
         this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-        return { type: 'halt', reason: 'state_not_ready', state };
+        return requiredState.result;
       }
 
       this.logger.debug({
@@ -45,14 +46,14 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
 
       await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
-        docs: state.alertEventsBatch,
+        docs: [...requiredState.state.alertEventsBatch],
       });
 
       this.logger.debug({
         message: `[${this.name}] Successfully stored alert events batch`,
       });
 
-      return { type: 'continue', state };
+      return { type: 'continue', state: requiredState.state };
     });
   }
 }

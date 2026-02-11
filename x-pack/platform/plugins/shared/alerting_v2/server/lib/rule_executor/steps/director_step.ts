@@ -12,8 +12,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
-import { hasState } from '../type_guards';
-import { pipeStream } from '../stream_utils';
+import { flatMapStep, requireState } from '../stream_utils';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -27,20 +26,22 @@ export class DirectorStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return pipeStream(streamState, async function* (state) {
+    return flatMapStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({
         message: `[${step.name}] Starting step for rule ${input.ruleId}`,
       });
 
-      if (!hasState(state, ['rule', 'alertEventsBatch'])) {
+      const requiredState = requireState(state, ['rule', 'alertEventsBatch']);
+
+      if (!requiredState.ok) {
         step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield { type: 'halt', reason: 'state_not_ready', state };
+        yield requiredState.result;
         return;
       }
 
-      const { rule, alertEventsBatch } = state;
+      const { rule, alertEventsBatch } = requiredState.state;
 
       /**
        * Only alertable rules can generate episodes.
@@ -50,7 +51,7 @@ export class DirectorStep implements RuleExecutionStep {
           message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
         });
 
-        yield { type: 'continue', state };
+        yield { type: 'continue', state: requiredState.state };
         return;
       }
 
@@ -59,14 +60,14 @@ export class DirectorStep implements RuleExecutionStep {
           message: `[${step.name}] No alert events to process for rule ${input.ruleId}`,
         });
 
-        yield { type: 'continue', state };
+        yield { type: 'continue', state: requiredState.state };
         return;
       }
 
       const alertsWithEpisodesStream = step.director.run({
         ruleId: input.ruleId,
         alertEvents: (async function* () {
-          yield alertEventsBatch;
+          yield [...alertEventsBatch];
         })(),
       });
 
@@ -76,7 +77,7 @@ export class DirectorStep implements RuleExecutionStep {
 
       for await (const batch of alertsWithEpisodesStream) {
         if (batch.length > 0) {
-          yield { type: 'continue', state: { ...state, alertEventsBatch: batch } };
+          yield { type: 'continue', state: { ...requiredState.state, alertEventsBatch: batch } };
         }
       }
     });

@@ -14,8 +14,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
-import { hasState } from '../type_guards';
-import { pipeStream } from '../stream_utils';
+import { flatMapStep, requireState } from '../stream_utils';
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
@@ -29,20 +28,22 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return pipeStream(streamState, async function* (state) {
+    return flatMapStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({
         message: `[${step.name}] Starting step for rule ${input.ruleId}`,
       });
 
-      if (!hasState(state, ['rule'])) {
+      const requiredState = requireState(state, ['rule']);
+
+      if (!requiredState.ok) {
         step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield { type: 'halt', reason: 'state_not_ready', state };
+        yield requiredState.result;
         return;
       }
 
-      const { rule } = state;
+      const { rule } = requiredState.state;
 
       const queryPayload = getQueryPayload({
         query: rule.query,
@@ -71,7 +72,10 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       });
 
       for await (const batch of esqlRowBatchStream) {
-        yield { type: 'continue', state: { ...state, queryPayload, esqlRowBatch: batch } };
+        yield {
+          type: 'continue',
+          state: { ...requiredState.state, queryPayload, esqlRowBatch: batch },
+        };
       }
     });
   }

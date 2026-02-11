@@ -12,8 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { hasState } from '../type_guards';
-import { pipeStream } from '../stream_utils';
+import { flatMapStep, requireState } from '../stream_utils';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -25,16 +24,18 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     const step = this;
     let buildBatch: AlertEventsBatchBuilder | undefined;
 
-    return pipeStream(streamState, async function* (state) {
+    return flatMapStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({
         message: `[${step.name}] Starting step for rule ${input.ruleId}`,
       });
 
-      if (!hasState(state, ['rule', 'esqlRowBatch'])) {
+      const requiredState = requireState(state, ['rule', 'esqlRowBatch']);
+
+      if (!requiredState.ok) {
         step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield { type: 'halt', reason: 'state_not_ready', state };
+        yield requiredState.result;
         return;
       }
 
@@ -42,7 +43,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         buildBatch = createAlertEventsBatchBuilder({
           ruleId: input.ruleId,
           spaceId: input.spaceId,
-          ruleAttributes: state.rule,
+          ruleAttributes: requiredState.state.rule,
           scheduledTimestamp: input.scheduledAt,
           ruleVersion: 1,
         });
@@ -52,10 +53,10 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         });
       }
 
-      const alertEventsBatch = buildBatch(state.esqlRowBatch);
+      const alertEventsBatch = buildBatch([...requiredState.state.esqlRowBatch]);
 
       if (alertEventsBatch.length > 0) {
-        yield { type: 'continue', state: { ...state, alertEventsBatch } };
+        yield { type: 'continue', state: { ...requiredState.state, alertEventsBatch } };
       }
     });
   }

@@ -7,8 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { pipeStream } from '../stream_utils';
-import { hasState } from '../type_guards';
+import { mapOneToOneStep, requireState } from '../stream_utils';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -21,19 +20,21 @@ export class ValidateRuleStep implements RuleExecutionStep {
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return pipeStream(streamState, (state) => {
+    return mapOneToOneStep(streamState, (state) => {
       const { input } = state;
 
       this.logger.debug({
         message: `[${this.name}] Starting step for rule ${input.ruleId}`,
       });
 
-      if (!hasState(state, ['rule'])) {
+      const requiredState = requireState(state, ['rule']);
+
+      if (!requiredState.ok) {
         this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-        return { type: 'halt', reason: 'state_not_ready', state };
+        return requiredState.result;
       }
 
-      if (!state.rule.enabled) {
+      if (!requiredState.state.rule.enabled) {
         this.logger.debug({
           message: `[${this.name}] Rule ${input.ruleId} is disabled, halting`,
         });
@@ -45,7 +46,7 @@ export class ValidateRuleStep implements RuleExecutionStep {
         message: `[${this.name}] Rule ${input.ruleId} is valid and enabled`,
       });
 
-      return { type: 'continue', state };
+      return { type: 'continue', state: requiredState.state };
     });
   }
 }

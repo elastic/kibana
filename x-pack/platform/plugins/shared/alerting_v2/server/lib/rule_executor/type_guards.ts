@@ -7,7 +7,7 @@
 
 import type { RulePipelineState } from './types';
 
-type OptionalStateKey = keyof Omit<RulePipelineState, 'input'>;
+export type OptionalStateKey = keyof Omit<RulePipelineState, 'input'>;
 
 export type StateWith<K extends OptionalStateKey> = RulePipelineState & {
   [P in K]: NonNullable<RulePipelineState[P]>;
