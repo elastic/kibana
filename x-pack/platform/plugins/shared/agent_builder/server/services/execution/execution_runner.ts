@@ -12,14 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type {
-  ChatEvent,
-  ConverseInput,
-  AgentCapabilities,
-  AgentConfigurationOverrides,
-  BrowserApiToolMetadata,
-  ConversationAction,
-} from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -27,7 +20,6 @@ import {
   AgentBuilderErrorCode,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -97,10 +89,10 @@ export const handleAgentExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, trackingService, analyticsService } = deps;
+  const { logger, agentService, trackingService, analyticsService } = deps;
 
   // Resolve scoped services
-  const services = await resolveServices({
+  const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     request,
@@ -112,32 +104,67 @@ export const handleAgentExecution = async ({
     agentId,
     conversationId,
     autoCreateConversationWithId,
-    conversationClient: services.conversationClient,
+    conversationClient,
   });
 
-  // Build the event stream
-  return executeAgent({
+  // Emit conversation ID for new conversations (only when persisting)
+  const conversationIdEvent$ =
+    storeConversation && conversation.operation === 'CREATE'
+      ? of(createConversationIdSetEvent(conversation.id))
+      : EMPTY;
+
+  // Execute agent
+  const agentEvents$ = executeAgent$({
     agentId,
     request,
     nextInput,
     capabilities,
     structuredOutput,
     outputSchema,
-    storeConversation,
     abortSignal,
     conversation,
-    conversationId,
-    conversationClient: services.conversationClient,
-    chatModel: services.chatModel,
-    selectedConnectorId: services.selectedConnectorId,
+    defaultConnectorId: selectedConnectorId,
+    agentService,
     browserApiTools,
     configurationOverrides,
     action,
-    agentService: deps.agentService,
-    logger,
-    trackingService,
-    analyticsService,
   });
+
+  // Generate title (for CREATE) or use existing title (for UPDATE)
+  const title$ =
+    conversation.operation === 'CREATE'
+      ? generateTitle({ chatModel, conversation, nextInput })
+      : of(conversation.title);
+
+  // Persist conversation (optional)
+  const persistenceEvents$ = storeConversation
+    ? buildPersistenceEvents({
+        agentId,
+        conversation,
+        conversationClient,
+        conversationId,
+        title$,
+        agentEvents$,
+        action,
+      })
+    : EMPTY;
+
+  // Merge all event streams
+  const effectiveConversationId =
+    conversation.operation === 'CREATE' ? conversation.id : conversationId;
+  const modelProvider = getConnectorProvider(chatModel.getConnector());
+
+  return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+    handleCancellation(abortSignal),
+    convertErrors({
+      agentId,
+      logger,
+      analyticsService,
+      trackingService,
+      modelProvider,
+      conversationId: effectiveConversationId,
+    })
+  );
 };
 
 /**
@@ -232,113 +259,6 @@ export const serializeExecutionError = (error: unknown): SerializedExecutionErro
   }
   const message = error instanceof Error ? error.message : String(error);
   return { code: AgentBuilderErrorCode.internalError, message };
-};
-
-const executeAgent = ({
-  agentId,
-  request,
-  nextInput,
-  capabilities,
-  structuredOutput,
-  outputSchema,
-  storeConversation,
-  abortSignal,
-  conversation,
-  conversationId,
-  conversationClient,
-  chatModel,
-  selectedConnectorId,
-  browserApiTools,
-  configurationOverrides,
-  action,
-  agentService,
-  logger,
-  trackingService,
-  analyticsService,
-}: {
-  agentId: string;
-  request: KibanaRequest;
-  nextInput: ConverseInput;
-  capabilities?: AgentCapabilities;
-  structuredOutput?: boolean;
-  outputSchema?: Record<string, unknown>;
-  storeConversation: boolean;
-  abortSignal: AbortSignal;
-  conversation: ConversationWithOperation;
-  conversationId?: string;
-  conversationClient: ConversationClient;
-  chatModel: InferenceChatModel;
-  selectedConnectorId: string;
-  browserApiTools?: BrowserApiToolMetadata[];
-  configurationOverrides?: AgentConfigurationOverrides;
-  action?: ConversationAction;
-  agentService: AgentsServiceStart;
-  logger: Logger;
-  trackingService?: TrackingService;
-  analyticsService?: AnalyticsService;
-}): Observable<ChatEvent> => {
-  // Emit conversation ID for new conversations (only when persisting)
-  const conversationIdEvent$ =
-    storeConversation && conversation.operation === 'CREATE'
-      ? of(createConversationIdSetEvent(conversation.id))
-      : EMPTY;
-
-  // Execute agent
-  const agentEvents$ = executeAgent$({
-    agentId,
-    request,
-    nextInput,
-    capabilities,
-    structuredOutput,
-    outputSchema,
-    abortSignal,
-    conversation,
-    defaultConnectorId: selectedConnectorId,
-    agentService,
-    browserApiTools,
-    configurationOverrides,
-    action,
-  });
-
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
-    conversation.operation === 'CREATE'
-      ? generateTitle({
-          chatModel,
-          conversation,
-          nextInput,
-        })
-      : of(conversation.title);
-
-  // Persist conversation (optional)
-  const persistenceEvents$ = storeConversation
-    ? buildPersistenceEvents({
-        agentId,
-        conversation,
-        conversationClient,
-        conversationId,
-        title$,
-        agentEvents$,
-        action,
-      })
-    : EMPTY;
-
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
-  const modelProvider = getConnectorProvider(chatModel.getConnector());
-
-  return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-    handleCancellation(abortSignal),
-    convertErrors({
-      agentId,
-      logger,
-      analyticsService,
-      trackingService,
-      modelProvider,
-      conversationId: effectiveConversationId,
-    })
-  );
 };
 
 const buildPersistenceEvents = ({
