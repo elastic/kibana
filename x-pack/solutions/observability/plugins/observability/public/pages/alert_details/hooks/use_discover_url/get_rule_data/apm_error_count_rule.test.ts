@@ -11,9 +11,7 @@ import { ERROR_GROUP_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-type
 import type { TopAlert } from '../../../../../typings/alerts';
 import { getApmErrorCountRuleData } from './apm_error_count_rule';
 
-describe('getApmErrorCountRuleData', () => {
-  // Default group by fields for error count rules are SERVICE_NAME and SERVICE_ENVIRONMENT.
-  // These are always present in alert documents.
+describe('getApmErrorCountRuleData', () => {  
   const mockAlert: TopAlert = {
     fields: {
       [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
