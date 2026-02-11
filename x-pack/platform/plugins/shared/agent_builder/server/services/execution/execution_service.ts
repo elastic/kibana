@@ -43,7 +43,11 @@ import {
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
-import { FOLLOW_POLL_INTERVAL_MS } from './constants';
+import {
+  FOLLOW_POLL_INTERVAL_MS,
+  FOLLOW_TERMINAL_READ_MAX_RETRIES,
+  FOLLOW_TERMINAL_READ_RETRY_DELAY_MS,
+} from './constants';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -161,10 +165,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             execution.status === ExecutionStatus.aborted;
 
           if (isTerminal) {
-            // Flush any remaining events before signalling completion/error
-            const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
-            for (const eventDoc of finalEvents) {
-              observer.next(eventDoc.event);
+            // Drain any remaining events that may not yet be searchable due to
+            // ES near-real-time indexing. Retry a few times with a short delay.
+            for (let retry = 0; retry < FOLLOW_TERMINAL_READ_MAX_RETRIES; retry++) {
+              const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
+              for (const eventDoc of finalEvents) {
+                observer.next(eventDoc.event);
+                if (eventDoc.eventNumber > lastEventNumber) {
+                  lastEventNumber = eventDoc.eventNumber;
+                }
+              }
+              if (finalEvents.length > 0 || retry === FOLLOW_TERMINAL_READ_MAX_RETRIES - 1) {
+                break;
+              }
+              await new Promise<void>((resolve) =>
+                setTimeout(resolve, FOLLOW_TERMINAL_READ_RETRY_DELAY_MS)
+              );
             }
 
             if (execution.status === ExecutionStatus.failed) {
