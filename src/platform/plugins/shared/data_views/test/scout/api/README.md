@@ -4,7 +4,7 @@ This directory contains Scout API tests migrated from FTR tests located in `src/
 
 ## Status
 
-🚧 **Partial migration** (1 config file + 4 test files)
+🚧 **Partial migration** (1 config file + 7 test files)
 
 ## Structure
 
@@ -14,23 +14,31 @@ src/platform/plugins/shared/data_views/test/scout/api/
 ├── fixtures/
 │   └── constants.ts               # Shared constants and test data paths
 ├── tests/
-│   ├── data_views_crud_create_validation.spec.ts  # ✅ Created
-│   ├── data_views_crud_create_main.spec.ts        # ✅ Created
-│   ├── data_views_crud_create_spaces.spec.ts      # ✅ Created - Namespaces/spaces tests
-│   └── data_views_crud_delete_errors.spec.ts      # ✅ Created
-└── README.md                                      # Current file
-└── tsconfig.json                                  # TypeScript configuration
+│   ├── data_views_crud_create_main.spec.ts              # ✅ New data view API - create main
+│   ├── data_views_crud_create_spaces.spec.ts            # ✅ New data view API - namespaces/spaces
+│   ├── data_views_crud_create_validation.spec.ts        # ✅ New data view API - create validation
+│   ├── data_views_crud_delete_errors.spec.ts            # ✅ New data view API - delete errors
+│   ├── index_patterns_crud_create_main.spec.ts          # ✅ Legacy index pattern API - create main
+│   ├── index_patterns_crud_create_validation.spec.ts    # ✅ Legacy index pattern API - create validation
+│   └── index_patterns_crud_delete_errors.spec.ts        # ✅ Legacy index pattern API - delete errors
+├── README.md                     # Current file
+└── tsconfig.json                 # TypeScript configuration
 ```
 
-## Test Files (4 files)
+## Test Files (7 files)
 
-**Data Views CRUD - Create (3 files):**
-- `data_views_crud_create_validation.spec.ts`
-- `data_views_crud_create_main.spec.ts`
-- `data_views_crud_create_spaces.spec.ts` - Tests for namespaces/spaces functionality
+**New Data View API (`api/data_views/data_view`) — 4 files:**
+- `data_views_crud_create_main.spec.ts` - Main creation tests
+- `data_views_crud_create_spaces.spec.ts` - Namespaces/spaces functionality
+- `data_views_crud_create_validation.spec.ts` - Request validation errors
+- `data_views_crud_delete_errors.spec.ts` - Delete error cases
 
-**Data Views CRUD - Delete (1 file):**
-- `data_views_crud_delete_errors.spec.ts`
+**Legacy Index Pattern API (`api/index_patterns/index_pattern`) — 3 files:**
+- `index_patterns_crud_create_main.spec.ts` - Main creation tests
+- `index_patterns_crud_create_validation.spec.ts` - Request validation errors
+- `index_patterns_crud_delete_errors.spec.ts` - Delete error cases
+
+> **Note:** Spaces/namespaces tests are only for the new data view API — the legacy index pattern API does not support namespaces.
 
 ## Running Tests
 
