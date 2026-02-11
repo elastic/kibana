@@ -20,10 +20,7 @@ export {
   EARS_REVOKE_TOKEN_ROUTE,
 } from './routes';
 
-export {
-  EarsOAuthProvider,
-  ALL_EARS_OAUTH_PROVIDERS,
-} from './http_api/ears';
+export { EarsOAuthProvider, ALL_EARS_OAUTH_PROVIDERS } from './http_api/ears';
 
 export type {
   exchangeCodeResponseSchema,

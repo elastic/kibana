@@ -88,17 +88,14 @@ export function registerExchangeCodeRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({code}),
+          body: JSON.stringify({ code }),
         };
 
         if (allowInsecure) {
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(
-          `${earsUrl}/${provider}/oauth/token`,
-          fetchOptions
-        );
+        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/token`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();

@@ -19,7 +19,8 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EarsOAuthProvider, GoogleUserInfo } from '../../../common';
+import type { GoogleUserInfo } from '../../../common';
+import { EarsOAuthProvider } from '../../../common';
 import { useWorkplaceAIConfig } from '../hooks/use_kibana';
 import { useExchangeCode, useRefreshToken, useRevokeToken } from '../hooks/use_ears_oauth';
 
@@ -35,14 +36,13 @@ const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/drive.metadata.readonly',
 ];
 
-
-function getEARSAuthUrl() : string | undefined {
+function getEARSAuthUrl(): string | undefined {
   const config = useWorkplaceAIConfig();
   const earsUrl = config.ears.url;
 
   const params = new URLSearchParams();
   GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
-  params.set('callback_uri', 'http://localhost:5601/app/workplace_ai')
+  params.set('callback_uri', 'http://localhost:5601/app/workplace_ai');
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
@@ -52,7 +52,7 @@ function getEARSAuthUrl() : string | undefined {
 }
 
 export const EarsConnectionsSection: React.FC = () => {
-  const earsAuthUrl = getEARSAuthUrl()
+  const earsAuthUrl = getEARSAuthUrl();
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -76,7 +76,9 @@ export const EarsConnectionsSection: React.FC = () => {
       {
         onSuccess: (data) => {
           if (!data.access_token || data.access_token.length == 0) {
-            setEarsError("Got empty token. Likely your access code is invalid - delete it from the query parameters and try the flow again")
+            setEarsError(
+              'Got empty token. Likely your access code is invalid - delete it from the query parameters and try the flow again'
+            );
             return;
           }
 
@@ -84,14 +86,14 @@ export const EarsConnectionsSection: React.FC = () => {
           if (data.refresh_token) {
             setRefreshToken(data.refresh_token);
           }
-          setEarsError(null)
+          setEarsError(null);
         },
         onError: (error) => {
-          setEarsError(`Failed to exchange code for token: ${error}`)
+          setEarsError(`Failed to exchange code for token: ${error}`);
         },
         onSettled: () => {
           setEarsLoading(false);
-        }
+        },
       }
     );
   };
@@ -130,14 +132,14 @@ export const EarsConnectionsSection: React.FC = () => {
       {
         onSuccess: (data) => {
           setAccessToken(data.access_token);
-          setEarsError(null)
+          setEarsError(null);
         },
         onError: (error) => {
-          setEarsError(`Failed to refresh token: ${error}`)
+          setEarsError(`Failed to refresh token: ${error}`);
         },
         onSettled: () => {
           setEarsLoading(false);
-        }
+        },
       }
     );
   };
@@ -153,14 +155,14 @@ export const EarsConnectionsSection: React.FC = () => {
       {
         onSuccess: (data) => {
           console.log('Token successfully revoked');
-          setEarsError(null)
+          setEarsError(null);
         },
         onError: (error) => {
-          setEarsError(`Failed to revoke the token: ${error}`)
+          setEarsError(`Failed to revoke the token: ${error}`);
         },
         onSettled: () => {
           setEarsLoading(false);
-        }
+        },
       }
     );
   };
@@ -186,34 +188,31 @@ export const EarsConnectionsSection: React.FC = () => {
       <EuiSpacer size="m" />
 
       {!code && (
-      <EuiPanel paddingSize="l">
-        <EuiFlexGroup alignItems="center" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
+        <EuiPanel paddingSize="l">
+          <EuiFlexGroup alignItems="center" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
+                    defaultMessage="Google"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
-                  defaultMessage="Google"
+                  id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
+                  defaultMessage="Connect your Google account."
                 />
-              </h3>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
-                defaultMessage="Connect your Google account."
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
-                  <EuiButton
-                    href={earsAuthUrl}
-                    isDisabled={!earsAuthUrl}
-                  >
+                  <EuiButton href={earsAuthUrl} isDisabled={!earsAuthUrl}>
                     <FormattedMessage
                       id="xpack.workplaceai.gettingStarted.earsSection.connectGoogleButton"
                       defaultMessage="Connect to Google"
@@ -224,39 +223,35 @@ export const EarsConnectionsSection: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-        )}
+      )}
 
       {code && (
-      <EuiPanel paddingSize="l">
-        <EuiFlexGroup alignItems="center" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
+        <EuiPanel paddingSize="l">
+          <EuiFlexGroup alignItems="center" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
+                    defaultMessage="Google"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
-                  defaultMessage="Google"
+                  id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
+                  defaultMessage="Code received, you can try it out!"
                 />
-              </h3>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
-                defaultMessage="Code received, you can try it out!"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
                 {code && !accessToken && (
                   <EuiFlexItem>
-                    <EuiButton
-                      color="success"
-                      onClick={handleExchangeCode}
-                      isLoading={earsLoading}
-                    >
+                    <EuiButton color="success" onClick={handleExchangeCode} isLoading={earsLoading}>
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.exchangeCodeButton"
                         defaultMessage="Exchange code for token"
@@ -281,11 +276,7 @@ export const EarsConnectionsSection: React.FC = () => {
                 )}
                 {refreshToken && (
                   <EuiFlexItem>
-                    <EuiButton
-                      color="primary"
-                      onClick={handleRefreshToken}
-                      isLoading={earsLoading}
-                    >
+                    <EuiButton color="primary" onClick={handleRefreshToken} isLoading={earsLoading}>
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.refreshTokenButton"
                         defaultMessage="Refresh Token"
@@ -295,11 +286,7 @@ export const EarsConnectionsSection: React.FC = () => {
                 )}
                 {accessToken && (
                   <EuiFlexItem>
-                    <EuiButton
-                      color="primary"
-                      onClick={handleRevokeToken}
-                      isLoading={earsLoading}
-                    >
+                    <EuiButton color="primary" onClick={handleRevokeToken} isLoading={earsLoading}>
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.revokeTokenButton"
                         defaultMessage="Revoke Token"
@@ -307,104 +294,100 @@ export const EarsConnectionsSection: React.FC = () => {
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        {earsError && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              title={
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {earsError && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  announceOnMount
+                  title={
+                    <FormattedMessage
+                      id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
+                      defaultMessage="Failed to execute EARS call"
+                    />
+                  }
+                  color="warning"
+                  iconType="warning"
+                >
+                  {earsError}
+                </EuiCallOut>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
+      {code && (
+        <EuiPanel paddingSize="l">
+          <EuiFlexGroup alignItems="center" gutterSize="l">
+            <EuiFlexItem>
+              <EuiButton color="primary" onClick={handleWhoAmI} isLoading={userInfoLoading}>
                 <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
-                  defaultMessage="Failed to execute EARS call"
+                  id="xpack.workplaceai.gettingStarted.earsSection.whoAmIButton"
+                  defaultMessage="Who Am I?"
                 />
-              }
-              color="warning"
-              iconType="warning"
-            >
-              {earsError}
-            </EuiCallOut>
-          </>
-        )}
-        </EuiFlexGroup>
-      </EuiPanel>
-  )}
-  {code && (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup alignItems="center" gutterSize="l">
-        <EuiFlexItem>
-          <EuiButton
-            color="primary"
-            onClick={handleWhoAmI}
-            isLoading={userInfoLoading}
-          >
-            <FormattedMessage
-              id="xpack.workplaceai.gettingStarted.earsSection.whoAmIButton"
-              defaultMessage="Who Am I?"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        {userInfo && (
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.workplaceai.gettingStarted.earsSection.connectedTitle"
-                defaultMessage="Successfully connected!"
-              />
-            }
-            color="success"
-            iconType="check"
-          >
-            <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              {userInfo.picture && (
-                <EuiFlexItem grow={false}>
-                  <EuiAvatar name={userInfo.email} imageUrl={userInfo.picture} size="l" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  type="column"
-                  compressed
-                  listItems={[
-                    {
-                      title: (
-                        <FormattedMessage
-                          id="xpack.workplaceai.gettingStarted.earsSection.emailLabel"
-                          defaultMessage="Email"
-                        />
-                      ),
-                      description: userInfo.email,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCallOut>
-        )}
-        {userInfoError && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
-                  defaultMessage="Failed to fetch user info"
-                />
-              }
-              color="warning"
-              iconType="warning"
-            >
-              {userInfoError}
-            </EuiCallOut>
-          </>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
-  )}
-  </EuiFlexGroup>
-  )
+              </EuiButton>
+            </EuiFlexItem>
+            {userInfo && (
+              <EuiCallOut
+                announceOnMount
+                title={
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.connectedTitle"
+                    defaultMessage="Successfully connected!"
+                  />
+                }
+                color="success"
+                iconType="check"
+              >
+                <EuiSpacer size="s" />
+                <EuiFlexGroup alignItems="center" gutterSize="m">
+                  {userInfo.picture && (
+                    <EuiFlexItem grow={false}>
+                      <EuiAvatar name={userInfo.email} imageUrl={userInfo.picture} size="l" />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem>
+                    <EuiDescriptionList
+                      type="column"
+                      compressed
+                      listItems={[
+                        {
+                          title: (
+                            <FormattedMessage
+                              id="xpack.workplaceai.gettingStarted.earsSection.emailLabel"
+                              defaultMessage="Email"
+                            />
+                          ),
+                          description: userInfo.email,
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiCallOut>
+            )}
+            {userInfoError && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  announceOnMount
+                  title={
+                    <FormattedMessage
+                      id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
+                      defaultMessage="Failed to fetch user info"
+                    />
+                  }
+                  color="warning"
+                  iconType="warning"
+                >
+                  {userInfoError}
+                </EuiCallOut>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
+    </EuiFlexGroup>
+  );
 };

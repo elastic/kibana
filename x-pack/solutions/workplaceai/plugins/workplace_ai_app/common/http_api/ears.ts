@@ -55,8 +55,7 @@ export interface RevokeTokenRequest {
   token: string;
 }
 
-export const revokeTokenResponseSchema = z.object({
-});
+export const revokeTokenResponseSchema = z.object({});
 
 export type RevokeTokenResponse = z.infer<typeof refreshTokenResponseSchema>;
 
@@ -64,4 +63,3 @@ export interface GoogleUserInfo {
   picture: string;
   email: string;
 }
-

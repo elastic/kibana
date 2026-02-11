@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -77,17 +76,14 @@ export function registerRevokeTokenRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({token}),
+          body: JSON.stringify({ token }),
         };
 
         if (allowInsecure) {
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(
-          `${earsUrl}/${provider}/oauth/revoke`,
-          fetchOptions
-        );
+        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/revoke`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();
@@ -115,4 +111,3 @@ export function registerRevokeTokenRoute({
     }
   );
 }
-

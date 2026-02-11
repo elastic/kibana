@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useMutation, useQuery } from '@kbn/react-query';
-import type { UseQueryResult, UseMutationResult } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
+import type { UseMutationResult } from '@kbn/react-query';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { ExchangeCodeRequest } from '../../../common';
 import {
   EARS_API_PATH,
-  ExchangeCodeRequest,
   type EarsOAuthProvider,
   type ExchangeCodeResponse,
   type RefreshTokenResponse,
-  type RevokeTokenResponse
+  type RevokeTokenResponse,
 } from '../../../common';
 import { useKibana } from './use_kibana';
-import { RefreshTokenRequest, RevokeTokenRequest } from '@kbn/workplace-ai-app/common/http_api/ears';
+import type { RefreshTokenRequest, RevokeTokenRequest } from '../../../common/http_api/ears';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -25,7 +25,6 @@ interface UseExchangeCodeInput {
   provider: EarsOAuthProvider;
   code: string;
 }
-
 
 export const useExchangeCode = (): UseMutationResult<
   ExchangeCodeResponse,
@@ -49,7 +48,6 @@ interface UseRefreshTokenInput {
   provider: EarsOAuthProvider;
   refresh_token: string;
 }
-
 
 export const useRefreshToken = (): UseMutationResult<
   RefreshTokenResponse,

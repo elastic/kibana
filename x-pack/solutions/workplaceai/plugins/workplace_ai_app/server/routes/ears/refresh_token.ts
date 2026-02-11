@@ -76,17 +76,14 @@ export function registerRefreshTokenRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({refresh_token}),
+          body: JSON.stringify({ refresh_token }),
         };
 
         if (allowInsecure) {
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(
-          `${earsUrl}/${provider}/oauth/refresh`,
-          fetchOptions
-        );
+        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/refresh`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();
@@ -130,4 +127,3 @@ export function registerRefreshTokenRoute({
     }
   );
 }
-
