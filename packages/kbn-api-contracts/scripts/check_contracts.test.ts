@@ -23,6 +23,12 @@ jest.mock('fs', () => ({
 
 jest.mock('../src/diff/run_bump_diff', () => ({
   runBumpDiff: jest.fn(),
+  BumpServiceError: class BumpServiceError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'BumpServiceError';
+    }
+  },
 }));
 
 jest.mock('../src/diff/parse_bump_diff', () => ({
@@ -47,7 +53,7 @@ jest.mock('../src/report/format_failure', () => ({
 
 import { execSync } from 'child_process';
 import { rmSync } from 'fs';
-import { runBumpDiff } from '../src/diff/run_bump_diff';
+import { runBumpDiff, BumpServiceError } from '../src/diff/run_bump_diff';
 import { parseBumpDiff } from '../src/diff/parse_bump_diff';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
@@ -361,5 +367,32 @@ describe('check_contracts', () => {
     await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow();
 
     expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
+  });
+
+  it('warns and does not fail when bump.sh service is unavailable', async () => {
+    mockRunBumpDiff.mockImplementation(() => {
+      throw new BumpServiceError(
+        'bump.sh service unavailable — the API diff could not be computed.'
+      );
+    });
+
+    await runCallback({ flags: defaultFlags, log: mockLog });
+
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('bump.sh service unavailable')
+    );
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping API contract check')
+    );
+  });
+
+  it('still cleans up temp files when bump.sh service is unavailable', async () => {
+    mockRunBumpDiff.mockImplementation(() => {
+      throw new BumpServiceError('bump.sh service unavailable');
+    });
+
+    await runCallback({ flags: defaultFlags, log: mockLog });
+
+    expect(rmSync).toHaveBeenCalled();
   });
 });

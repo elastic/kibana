@@ -8,7 +8,7 @@
  */
 
 export { loadOas } from './src/input/load_oas';
-export { runBumpDiff } from './src/diff/run_bump_diff';
+export { runBumpDiff, BumpServiceError } from './src/diff/run_bump_diff';
 export { parseBumpDiff } from './src/diff/parse_bump_diff';
 export { applyAllowlist } from './src/diff/breaking_rules';
 export { formatFailure } from './src/report/format_failure';

@@ -11,7 +11,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runBumpDiff } from '../src/diff/run_bump_diff';
+import { runBumpDiff, BumpServiceError } from '../src/diff/run_bump_diff';
 import { parseBumpDiff } from '../src/diff/parse_bump_diff';
 import { applyAllowlist } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
@@ -209,6 +209,15 @@ run(
       throw new Error(
         `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
       );
+    } catch (error) {
+      if (error instanceof BumpServiceError) {
+        log.warning(`${error.message}`);
+        log.warning(
+          'Skipping API contract check — results are inconclusive due to external service failure.'
+        );
+        return;
+      }
+      throw error;
     } finally {
       cleanup(basePath);
     }

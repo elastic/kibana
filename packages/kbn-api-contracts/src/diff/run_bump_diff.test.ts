@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'child_process';
-import { runBumpDiff } from './run_bump_diff';
+import { runBumpDiff, BumpServiceError } from './run_bump_diff';
 
 jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
@@ -108,5 +108,53 @@ describe('runBumpDiff', () => {
     });
 
     expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow();
+  });
+
+  it('throws BumpServiceError when bump.sh service is unavailable (stderr)', () => {
+    const error = Object.assign(new Error('Command failed'), {
+      stdout: '',
+      stderr:
+        'Error: We were unable to compute your documentation diff. Sorry about that. Please try again later.',
+      status: 1,
+    });
+    mockExecSync.mockImplementation(() => {
+      throw error;
+    });
+
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(BumpServiceError);
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(
+      /bump\.sh service unavailable/
+    );
+  });
+
+  it('throws BumpServiceError when bump.sh service error is in message', () => {
+    const error = Object.assign(
+      new Error(
+        'We were unable to compute your documentation diff. Please contact support at https://bump.sh'
+      ),
+      {
+        stdout: '',
+        status: 2,
+      }
+    );
+    mockExecSync.mockImplementation(() => {
+      throw error;
+    });
+
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(BumpServiceError);
+  });
+
+  it('does not throw BumpServiceError for unrelated errors', () => {
+    const error = Object.assign(new Error('ENOBUFS'), {
+      stdout: '',
+      stderr: 'spawnSync /bin/sh ENOBUFS',
+      status: null,
+    });
+    mockExecSync.mockImplementation(() => {
+      throw error;
+    });
+
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow('ENOBUFS');
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).not.toThrow(BumpServiceError);
   });
 });

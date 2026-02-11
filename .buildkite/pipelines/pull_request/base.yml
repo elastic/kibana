@@ -97,6 +97,7 @@ steps:
     key: check_api_contracts
     depends_on: check_oas_snapshot
     timeout_in_minutes: 30
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'

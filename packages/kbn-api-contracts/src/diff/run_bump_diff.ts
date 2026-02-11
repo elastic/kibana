@@ -14,6 +14,29 @@ import type { BumpDiffEntry } from './parse_bump_diff';
 const OAS_DOCS_DIR = path.resolve(REPO_ROOT, './oas_docs');
 const DIFF_TIMEOUT = 240_000;
 
+const BUMP_SERVICE_ERROR_PATTERNS = [
+  'unable to compute your documentation diff',
+  'please try again later',
+  'please contact support at https://bump.sh',
+];
+
+export class BumpServiceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'BumpServiceError';
+  }
+}
+
+const isBumpServiceError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const stderr = ('stderr' in error ? (error as { stderr: string | Buffer }).stderr : '')
+    ?.toString()
+    .toLowerCase();
+  const message = ('message' in error ? (error as Error).message : '').toLowerCase();
+  const combined = `${stderr} ${message}`;
+  return BUMP_SERVICE_ERROR_PATTERNS.some((pattern) => combined.includes(pattern));
+};
+
 export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntry[] => {
   try {
     const output = execSync(`npx bump-cli diff "${basePath}" "${currentPath}" --format=json`, {
@@ -34,7 +57,6 @@ export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntr
       const { stdout, status } = error as { stdout: string; status: number | null };
       // bump-cli exits with code 1 when there are breaking changes but still outputs valid JSON
       if (status === 1 && stdout?.trim()) {
-        // get breaking changes
         try {
           return JSON.parse(stdout.trim()) as BumpDiffEntry[];
         } catch {
@@ -42,6 +64,13 @@ export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntr
         }
       }
     }
+
+    if (isBumpServiceError(error)) {
+      throw new BumpServiceError(
+        `bump.sh service unavailable — the API diff could not be computed. This is a transient error from the bump.sh external service, not a problem with your PR. Re-running the CI job should resolve this.`
+      );
+    }
+
     throw error;
   }
 };
