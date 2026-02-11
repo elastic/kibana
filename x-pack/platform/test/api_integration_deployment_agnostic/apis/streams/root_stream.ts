@@ -10,7 +10,13 @@ import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  indexDocument,
+  putStream,
+  deleteStream,
+} from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
@@ -281,6 +287,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await indexDocument(esClient, `${rootStream}.gcpcloud`, doc, false);
         expect(response.failure_store).to.be('used');
       });
+    });
+  });
+
+  describe('Root stream deletion', () => {
+    before(async () => {
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      await enableStreams(apiClient);
+    });
+
+    after(async () => {
+      await disableStreams(apiClient);
+    });
+
+    it('should allow deletion of legacy logs root stream', async () => {
+      const response = await deleteStream(apiClient, 'logs', 200);
+      expect(response).to.have.property('acknowledged', true);
+      expect(response).to.have.property('result', 'deleted');
+    });
+
+    it('should NOT allow deletion of logs.otel root stream', async () => {
+      const response = await deleteStream(apiClient, 'logs.otel', 400);
+      expect(response).to.have.property('message', 'Cannot delete root stream');
+    });
+
+    it('should NOT allow deletion of logs.ecs root stream', async () => {
+      const response = await deleteStream(apiClient, 'logs.ecs', 400);
+      expect(response).to.have.property('message', 'Cannot delete root stream');
     });
   });
 }

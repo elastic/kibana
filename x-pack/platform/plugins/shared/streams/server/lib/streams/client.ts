@@ -871,7 +871,11 @@ export class StreamsClient {
     }
 
     if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
-      throw new StatusError('Cannot delete root stream', 400);
+      // Only allow deletion of the legacy 'logs' root stream
+      // logs.otel and logs.ecs remain protected
+      if (name !== LOGS_ROOT_STREAM_NAME) {
+        throw new StatusError('Cannot delete root stream', 400);
+      }
     }
 
     await State.attemptChanges([{ type: 'delete', name }], {

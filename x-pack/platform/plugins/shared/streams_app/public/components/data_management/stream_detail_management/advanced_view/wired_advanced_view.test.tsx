@@ -335,7 +335,7 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
     });
 
-    it('should NOT render Delete stream panel for root streams', () => {
+    it('should render Delete stream panel for legacy logs root stream', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
@@ -346,6 +346,42 @@ describe('WiredAdvancedView', () => {
       renderWithProviders(
         <WiredAdvancedView
           definition={createMockDefinition('logs')}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
+    });
+
+    it('should NOT render Delete stream panel for logs.otel root stream', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition('logs.otel')}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.queryByText('Delete stream')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Delete stream panel for logs.ecs root stream', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition('logs.ecs')}
           refreshDefinition={mockRefreshDefinition}
         />
       );
