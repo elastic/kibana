@@ -48,10 +48,10 @@ function useAgentDashboardLink(agent: Agent) {
 
   if (agent.type === 'OPAMP') {
     const link = dashboardLocator?.getRedirectUrl({
-      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_HOST_OVERVIEW,
-      time_range: {
-        from: 'now-15h',
-        to: 'now',
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_INTERNAL_TELEMETRY,
+      query: {
+        language: 'kuery',
+        query: `service.instance.id:${agent.id}`,
       },
     });
 
