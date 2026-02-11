@@ -62,7 +62,7 @@ export function registerInternalToolsRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       const { ids } = request.body;
-      const { tools: toolService } = getInternalServices();
+      const { tools: toolService, auditLogService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
       const deleteResults = await Promise.allSettled(ids.map((id) => registry.delete(id)));
 
@@ -82,6 +82,8 @@ export function registerInternalToolsRoutes({
           success: true,
         };
       });
+
+      auditLogService.logBulkToolDeleteResults(request, { ids, deleteResults });
 
       return response.ok<BulkDeleteToolResponse>({
         body: {
@@ -122,7 +124,7 @@ export function registerInternalToolsRoutes({
         tags,
         skip_existing: skipExisting,
       } = request.body;
-      const { tools: toolService } = getInternalServices();
+      const { tools: toolService, auditLogService } = getInternalServices();
       const [, { actions }] = await coreSetup.getStartServices();
       const registry = await toolService.getRegistry({ request });
 
@@ -136,6 +138,8 @@ export function registerInternalToolsRoutes({
         tags,
         skipExisting,
       });
+
+      auditLogService.logBulkCreateMcpToolResults(request, { results });
 
       return response.ok<BulkCreateMcpToolsResponse>({
         body: {

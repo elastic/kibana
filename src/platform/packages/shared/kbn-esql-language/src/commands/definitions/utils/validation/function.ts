@@ -26,9 +26,16 @@ import type {
   ESQLFunction,
   ESQLMessage,
 } from '../../../../types';
-import type { FunctionDefinition, SupportedDataType } from '../../types';
+import type {
+  FunctionDefinition,
+  PromQLFunctionDefinition,
+  PromQLFunctionParamType,
+  PromQLSignature,
+  SupportedDataType,
+} from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
+import type { PromQLFunction } from '../../../../embedded_languages/promql/types';
 
 export function validateFunction({
   fn,
@@ -270,4 +277,80 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
     return removeInlineCasts(arg.value);
   }
   return arg;
+}
+
+// ----------------------------------------------------------------------------
+// PromQL
+// ----------------------------------------------------------------------------
+
+/* Checks if the argument count is within the allowed min..max range. */
+export function getPromqlFunctionArityCheck(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition
+): { expected: string; actual: number } | null {
+  if (fn.incomplete) {
+    return null;
+  }
+
+  const minArgs = Math.min(
+    ...definition.signatures.map(
+      (sig) => sig.minParams ?? sig.params.filter(({ optional }) => !optional).length
+    )
+  );
+  const maxArgs = Math.max(...definition.signatures.map(({ params }) => params.length));
+
+  if (fn.args.length < minArgs || fn.args.length > maxArgs) {
+    const expected = minArgs === maxArgs ? `${minArgs}` : `${minArgs}..${maxArgs}`;
+
+    return { expected, actual: fn.args.length };
+  }
+
+  return null;
+}
+
+/* Filters signatures compatible by arity and argument types. */
+export function getPromqlMatchingSignatures(
+  signatures: PromQLSignature[],
+  argTypes: (PromQLFunctionParamType | undefined)[]
+): PromQLSignature[] {
+  if (argTypes.some((argType) => argType === undefined)) {
+    return signatures;
+  }
+
+  const matchingArity = filterByMatchingArity(signatures, argTypes.length);
+
+  return matchingArity.filter(({ params }) =>
+    argTypes.every((argType, idx) => params[idx]?.type === argType)
+  );
+}
+
+/* Finds the first argument position where the type does not match the signature. */
+export function getPromqlSignatureMismatch(
+  signatures: PromQLSignature[],
+  argTypes: (PromQLFunctionParamType | undefined)[],
+  argCount: number
+): { required: string; mismatchIdx: number } | null {
+  const matchingArity = filterByMatchingArity(signatures, argCount);
+
+  if (matchingArity.length === 0) {
+    return null;
+  }
+
+  const { params: refParams } = matchingArity[0];
+  const required = refParams
+    .slice(0, argCount)
+    .map(({ name, type }) => `${name}=${type}`)
+    .join(', ');
+  const mismatchIdx = argTypes.findIndex((argType, idx) => refParams[idx]?.type !== argType);
+
+  return { required, mismatchIdx };
+}
+
+/* Filters signatures whose required/max param count includes argCount. */
+function filterByMatchingArity(signatures: PromQLSignature[], argCount: number): PromQLSignature[] {
+  return signatures.filter(
+    (sig) =>
+      argCount >= (sig.minParams ?? sig.params.filter(({ optional }) => !optional).length) &&
+      argCount <= sig.params.length
+  );
 }
