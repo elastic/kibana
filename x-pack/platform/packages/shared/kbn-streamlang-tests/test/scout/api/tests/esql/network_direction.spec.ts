@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -35,7 +35,7 @@ apiTest.describe(
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
+      expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
     });
 
     apiTest(
@@ -67,7 +67,7 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
+        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
       }
     );
 
@@ -98,8 +98,8 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
-        expect(esqlResult.documents[1]).toHaveProperty(['network.direction'], null);
+        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
+        expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
       }
     );
 
@@ -135,8 +135,8 @@ apiTest.describe(
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty(['network.direction'], 'inbound');
-      expect(esqlResult.documents[1]).toHaveProperty(['network.direction'], null);
+      expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
+      expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
     });
   }
 );

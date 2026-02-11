@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -35,7 +35,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('network.direction', 'inbound');
+      expect(ingestedDocs[0]?.network.direction).toBe('inbound');
     });
 
     apiTest('should set network direction with internal networks field', async ({ testBed }) => {
@@ -65,7 +65,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('network.direction', 'inbound');
+      expect(ingestedDocs[0]?.network.direction).toBe('inbound');
     });
 
     apiTest('should set network direction with target field', async ({ testBed }) => {
@@ -90,7 +90,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('test_network_direction', 'inbound');
+      expect(ingestedDocs[0]?.test_network_direction).toBe('inbound');
     });
 
     apiTest(
@@ -127,8 +127,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(ingestedDocs[0]).toHaveProperty('network.direction', 'inbound');
-        expect(ingestedDocs[1]).not.toHaveProperty('network.direction');
+        expect(ingestedDocs[0]?.network.direction).toBe('inbound');
+        expect(ingestedDocs[1]?.network?.direction).toBeUndefined();
       }
     );
 
@@ -159,8 +159,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(ingestedDocs[0]).toHaveProperty('network.direction', 'inbound');
-        expect(ingestedDocs[1]).not.toHaveProperty('network.direction');
+        expect(ingestedDocs[0]?.network.direction).toBe('inbound');
+        expect(ingestedDocs[1]?.network?.direction).toBeUndefined();
       }
     );
   }
