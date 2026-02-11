@@ -512,7 +512,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('2 grouped events', async () => {
+      it('two label nodes, one single and one grouped', async () => {
         const response = await postGraph(supertest, {
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
@@ -533,9 +533,14 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5); // 1 group + 2 entities + 2 labels
+        expect(response.body).to.have.property('nodes').length(5); // 2 entities + 2 labels + 1 group
         expect(response.body).to.have.property('edges').length(6); // actor→group, group→target, group↔label1, group↔label2
         expect(response.body).not.to.have.property('messages');
+
+        const groupNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape === 'group'
+        );
+        expect(groupNodes).to.have.length(1);
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group' && node.shape !== 'relationship') {
@@ -1586,10 +1591,10 @@ export default function (providerContext: FtrProviderContext) {
               // - 1 actor node (single user)
               // - 1 grouped target node for Storage entities (target-bucket-a, target-bucket-b from entity.target.id + target-bucket-c from service.target.entity.id)
               // - 1 single target node for Service entity (target-sa-different from service.target.entity.id)
-              // - 2 label nodes (one for each target type due to different entity types)
-              // Total: 5 nodes, 4 edges (actor->label1->service, actor->label2->storage group)
-              expect(response.body).to.have.property('nodes').length(5);
-              expect(response.body).to.have.property('edges').length(4);
+              // - 1 label node (deduped - single action fans out to both targets)
+              // Total: 4 nodes, 3 edges (actor→label, label→service, label→storage group)
+              expect(response.body).to.have.property('nodes').length(4);
+              expect(response.body).to.have.property('edges').length(3);
               expect(response.body).not.to.have.property('messages');
 
               // Verify actor node (single enriched user)
@@ -1694,21 +1699,20 @@ export default function (providerContext: FtrProviderContext) {
                 })
               );
 
-              // Verify label nodes (should have 2 - one for each target type)
+              // Verify label node (should have 1 - deduped label fans out to both targets)
               const labelNodes = response.body.nodes.filter(
                 (node: NodeDataModel) => node.shape === 'label'
               ) as LabelNodeDataModel[];
-              expect(labelNodes).to.have.length(2);
-              labelNodes.forEach((labelNode) => {
-                expect(labelNode.color).equal('primary');
-                expect(labelNode.label).to.equal('google.cloud.multi.target.action');
-                expect(labelNode.documentsData).to.have.length(1);
-                expectExpect(labelNode.documentsData).toContainEqual(
-                  expectExpect.objectContaining({
-                    type: 'event',
-                  })
-                );
-              });
+              expect(labelNodes).to.have.length(1);
+              const labelNode = labelNodes[0];
+              expect(labelNode.color).equal('primary');
+              expect(labelNode.label).to.equal('google.cloud.multi.target.action');
+              expect(labelNode.documentsData).to.have.length(1);
+              expectExpect(labelNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  type: 'event',
+                })
+              );
 
               // Verify edges
               response.body.edges.forEach((edge: EdgeDataModel) => {

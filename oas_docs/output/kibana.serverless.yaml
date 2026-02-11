@@ -2183,6 +2183,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -2521,6 +2526,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -3207,7 +3217,7 @@ paths:
                               - KO
                               - buy
                         tool_result_id: xTpT
-                        type: tabular_data
+                        type: esql_results
                 executeBuiltinToolExample:
                   description: Example response calling built-in platform.core.get_document_by_id tool
                   value:
@@ -3256,7 +3266,7 @@ paths:
                               - 89.93244177666526
                               - INTL_CORP_EU_B
                         tool_result_id: Voy8
-                        type: tabular_data
+                        type: esql_results
                 executeIndexSearchToolExample:
                   description: Example response calling custom example-index-search-tool tool
                   value:
@@ -3301,7 +3311,7 @@ paths:
                               - JAP_JGB_10YR
                               - sell
                         tool_result_id: uE8y
-                        type: tabular_data
+                        type: esql_results
           description: Indicates a successful response
       summary: Run a tool
       tags:
@@ -29550,6 +29560,8 @@ paths:
                                     - UPG_WATCHING
                                     - UPG_ROLLBACK
                                   type: string
+                                reason:
+                                  type: string
                                 retry_error_msg:
                                   type: string
                                 retry_until:
@@ -30091,6 +30103,8 @@ paths:
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
                                 type: string
+                              reason:
+                                type: string
                               retry_error_msg:
                                 type: string
                               retry_until:
@@ -30487,6 +30501,8 @@ paths:
                                   - UPG_FAILED
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
+                                type: string
+                              reason:
                                 type: string
                               retry_error_msg:
                                 type: string

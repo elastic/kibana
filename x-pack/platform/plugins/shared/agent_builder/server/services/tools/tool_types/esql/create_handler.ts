@@ -75,7 +75,7 @@ export const createHandler = (
         },
         {
           tool_result_id: getToolResultId(),
-          type: ToolResultType.tabularData,
+          type: ToolResultType.esqlResults,
           data: {
             source: 'esql',
             query: interpolatedQuery,
