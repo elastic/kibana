@@ -1012,17 +1012,26 @@ const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSi
   return matchCount / docs.length;
 };
 
+type MappingDetectedField = NamedFieldDefinitionConfig & {
+  type: (typeof FIELD_DEFINITION_TYPES)[number];
+};
+
+const isMappingDetectedField = (field: NamedFieldDefinitionConfig): field is MappingDetectedField =>
+  FIELD_DEFINITION_TYPES.includes(field.type as (typeof FIELD_DEFINITION_TYPES)[number]);
+
 const computeMappingProperties = (
   detectedFields: NamedFieldDefinitionConfig[]
 ): StreamsMappingProperties => {
   return Object.fromEntries(
-    detectedFields.flatMap(({ name, ...config }) => {
-      if (config.type === 'system' || config.type === 'unmapped') {
+    detectedFields.flatMap((field) => {
+      if (!isMappingDetectedField(field)) {
         return [];
       }
+
+      const { name, description: _description, ...config } = field;
       return [[name, { ...config, ignore_malformed: false }]];
     })
-  );
+  ) as StreamsMappingProperties;
 };
 
 /**

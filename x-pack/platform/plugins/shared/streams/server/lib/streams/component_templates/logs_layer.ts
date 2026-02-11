@@ -253,8 +253,17 @@ export function addAliasesForNamespacedFields(
   // Add aliases defined in the base mappings
   Object.entries(baseMappings).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
+      if (!fieldDef.path) {
+        return;
+      }
+
+      const baseFieldType = baseFields[fieldDef.path]?.type;
+      if (!baseFieldType || baseFieldType === 'system' || baseFieldType === 'unmapped') {
+        return;
+      }
+
       inheritedFields[key] = {
-        type: baseFields[fieldDef.path!].type,
+        type: baseFieldType,
         alias_for: fieldDef.path,
         from: 'logs',
       };

@@ -13,7 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
-import type { MappedSchemaField, SchemaEditorField } from '../schema_editor/types';
+import type { SchemaEditorField } from '../schema_editor/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -27,7 +27,7 @@ interface DetectedFieldsEditorProps {
 export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const { mapField, unmapField } = useStreamEnrichmentEvents();
+  const { mapField, stageDocOnlyOverride, unmapField } = useStreamEnrichmentEvents();
 
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
@@ -88,16 +88,11 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
           if (field.status === 'mapped') {
             mapField(field);
           } else if (field.status === 'unmapped') {
-            // Check if the unmapped field has meaningful updates that should be preserved
-            // (e.g., a description or an explicit 'unmapped' type for documentation-only fields)
-            const hasMeaningfulUpdates = field.description || field.type === 'unmapped';
-            if (hasMeaningfulUpdates) {
-              // Convert to a mapped field to preserve the updates
-              mapField({
-                ...field,
-                status: 'mapped',
-                type: field.type ?? 'unmapped',
-              } as MappedSchemaField);
+            const normalizedDescription = field.description?.trim();
+            // Keep "Unmapped" selectable for documentation-only overrides, but ensure we never
+            // persist `type: 'unmapped'` over the API.
+            if (normalizedDescription) {
+              stageDocOnlyOverride({ fieldName: field.name, description: normalizedDescription });
             } else {
               unmapField(field.name);
             }

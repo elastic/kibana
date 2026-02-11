@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import type {
+  FieldDefinitionType,
+  NamedFieldDefinitionConfig,
+  SampleDocument,
+} from '@kbn/streams-schema';
+import { FIELD_DEFINITION_TYPES, namedFieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -29,6 +33,21 @@ import {
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
+  typeof value === 'string' &&
+  (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
+
+const isSimulatableFieldDefinition = (
+  field: NamedFieldDefinitionConfig
+): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } => isFieldDefinitionType(field.type);
+
+const getSimulatableFieldDefinitions = (fields: NamedFieldDefinitionConfig[]) =>
+  fields.filter(isSimulatableFieldDefinition);
+
+export const __test__ = {
+  getSimulatableFieldDefinitions,
+};
 
 interface SimulateIngestDoc {
   _source: SampleDocument;
@@ -150,9 +169,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({
@@ -174,13 +191,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
-    const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
-      // filter out potential system/unmapped fields since we can't simulate them anyway
-      if (field.type === 'system' || field.type === 'unmapped') {
-        return [];
-      }
-      return [field];
-    });
+    // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
+    // and UI-only pseudo-types (e.g. `unmapped`, `system`).
+    const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
+    if (userFieldDefinitions.length === 0) {
+      return {
+        status: 'success',
+        simulationError: null,
+        documentsWithRuntimeFieldsApplied: null,
+      };
+    }
 
     const propertiesForSample: Record<string, { type: 'keyword' }> = {};
     userFieldDefinitions.forEach((field) => {

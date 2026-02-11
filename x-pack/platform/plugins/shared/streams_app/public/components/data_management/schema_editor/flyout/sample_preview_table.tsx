@@ -16,7 +16,7 @@ import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../shared/preview_table';
 import { LoadingPanel } from '../../../loading_panel';
-import type { MappedSchemaField, SchemaField } from '../types';
+import type { SchemaField, TypedMappedSchemaField } from '../types';
 import { isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 
@@ -49,7 +49,7 @@ const SamplePreviewTableContent = ({
   stream,
   nextField,
   onValidate,
-}: SamplePreviewTableProps & { nextField: MappedSchemaField }) => {
+}: SamplePreviewTableProps & { nextField: TypedMappedSchemaField }) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   const { value, loading, error } = useStreamsAppFetch(

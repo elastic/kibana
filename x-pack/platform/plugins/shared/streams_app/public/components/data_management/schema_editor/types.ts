@@ -13,7 +13,14 @@ import type {
 import type { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
-export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']>;
+/**
+ * Field types used by the Schema editor UI.
+ *
+ * Note: the UI supports pseudo-types like `system` and `unmapped` that must never be
+ * persisted as real mapping types.
+ */
+export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']> | 'system' | 'unmapped';
+export type PersistableSchemaFieldType = SchemaFieldType;
 
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
@@ -26,8 +33,18 @@ export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
 }
 
 export interface MappedSchemaField extends BaseSchemaField {
-  status: 'inherited' | 'mapped';
+  status: 'mapped';
   type: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - available when field exists in ES but may not be directly supported by streams schema
+   */
+  esType?: string;
+  additionalParameters?: FieldDefinitionConfigAdvancedParameters;
+}
+
+export interface InheritedSchemaField extends BaseSchemaField {
+  status: 'inherited';
+  type?: SchemaFieldType;
   /**
    * Elasticsearch-level type of the field - available when field exists in ES but may not be directly supported by streams schema
    */
@@ -45,7 +62,7 @@ export interface UnmappedSchemaField extends BaseSchemaField {
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
-export type SchemaField = MappedSchemaField | UnmappedSchemaField;
+export type SchemaField = MappedSchemaField | UnmappedSchemaField | InheritedSchemaField;
 
 export type SchemaEditorField = SchemaField & {
   result?: 'created' | 'modified';
@@ -69,6 +86,17 @@ export interface SchemaEditorProps {
   enableGeoPointSuggestions?: boolean;
 }
 
-export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {
-  return !!field && !!field.name && !!field.type;
+export type TypedMappedSchemaField = MappedSchemaField & {
+  type: Exclude<SchemaFieldType, 'system' | 'unmapped'>;
+};
+
+export const isSchemaFieldTyped = (field: SchemaField): field is TypedMappedSchemaField => {
+  return (
+    !!field &&
+    !!field.name &&
+    field.status === 'mapped' &&
+    !!field.type &&
+    field.type !== 'unmapped' &&
+    field.type !== 'system'
+  );
 };

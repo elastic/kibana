@@ -15,6 +15,7 @@ const user = userEvent.setup({ pointerEventsCheck: 0 });
 import { FieldActionsCell } from './field_actions';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import type {
+  InheritedSchemaField,
   MappedSchemaField,
   UnmappedSchemaField,
   SchemaEditorField,
@@ -199,7 +200,7 @@ describe('FieldActionsCell', () => {
         description: 'Local description',
       };
 
-      const inheritedField: MappedSchemaField = {
+      const inheritedField: InheritedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs',
         status: 'inherited',
@@ -285,7 +286,7 @@ describe('FieldActionsCell', () => {
         status: 'unmapped',
       };
 
-      const inheritedField: MappedSchemaField = {
+      const inheritedField: InheritedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs',
         status: 'inherited',
@@ -312,7 +313,7 @@ describe('FieldActionsCell', () => {
         status: 'unmapped',
       };
 
-      const inheritedUnmappedField: MappedSchemaField = {
+      const inheritedUnmappedField: InheritedSchemaField = {
         name: 'attributes.field1',
         parent: 'logs',
         status: 'inherited',
@@ -357,7 +358,7 @@ describe('FieldActionsCell', () => {
 
   describe('inherited fields', () => {
     it('should show View and Edit actions for inherited fields', async () => {
-      const inheritedField: MappedSchemaField = {
+      const inheritedField: InheritedSchemaField = {
         name: 'attributes.inherited_field',
         parent: 'logs',
         status: 'inherited',
@@ -376,7 +377,7 @@ describe('FieldActionsCell', () => {
     });
 
     it('should show Clear description action when inherited field has description', async () => {
-      const inheritedFieldWithDescription: MappedSchemaField = {
+      const inheritedFieldWithDescription: InheritedSchemaField = {
         name: 'attributes.inherited_field',
         parent: 'logs',
         status: 'inherited',
@@ -392,7 +393,7 @@ describe('FieldActionsCell', () => {
     });
 
     it('should call onFieldUpdate without description when Clear description is clicked', async () => {
-      const fieldWithDescription: MappedSchemaField = {
+      const fieldWithDescription: InheritedSchemaField = {
         name: 'attributes.inherited_field',
         parent: 'logs',
         status: 'inherited',

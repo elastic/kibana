@@ -55,6 +55,11 @@ export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldD
     };
   }
 
+  if (field.type === 'system') {
+    // `system` is a UI-only pseudo-type and must never be persisted in a stream definition.
+    throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
+  }
+
   return {
     type: field.type,
     ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
@@ -106,6 +111,10 @@ export const buildSchemaSavePayload = (
     // - mapped fields (real overrides)
     // - doc-only overrides (description-only), even if status is 'unmapped'
     if (field.status === 'mapped') {
+      // UI-only pseudo-type; never persist.
+      if (field.type === 'system') {
+        return acc;
+      }
       // For legacy doc-only `type: 'unmapped'`, only persist when description is present.
       if (field.type === 'unmapped') {
         if (hasNonEmptyDescription) {

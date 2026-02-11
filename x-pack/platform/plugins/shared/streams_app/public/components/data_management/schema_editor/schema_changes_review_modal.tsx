@@ -384,24 +384,45 @@ export function SchemaChangesReviewModal({
 }
 
 export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEditorField[]) {
-  const addedFields = fields.filter(
-    (field) =>
-      (field.status === 'mapped' || field.status === 'unmapped') &&
-      // Filter out fields with type 'unmapped' since they don't affect ES mappings
-      field.type !== 'unmapped' &&
-      !storedFields.some((stored) => stored.name === field.name)
-  );
+  /**
+   * This modal is meant to review ES mapping-affecting changes.
+   *
+   * We intentionally ignore:
+   * - description-only changes
+   * - typeless doc-only overrides (`{ description }`)
+   * - legacy documentation-only fields (`type: 'unmapped'`)
+   *
+   * We include:
+   * - adding/changing/removing real mapping overrides (type/format/advanced params)
+   */
+  const getMappingAffectingConfig = (field: SchemaEditorField) => {
+    // Only mapped fields can affect ES mappings; unmapped/inherited entries are either doc-only or inherited.
+    if (field.status !== 'mapped') return null;
 
-  const changedFields = fields.filter((field) => {
-    // Filter out fields with type 'unmapped' since they don't affect ES mappings
-    if (field.type === 'unmapped') {
-      return false;
-    }
+    // Legacy documentation-only fields should not be treated as mapping changes.
+    if (!field.type || field.type === 'unmapped') return null;
+
+    return {
+      type: field.type,
+      ...(field.type === 'date' && field.format ? { format: field.format } : {}),
+      ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
+        ? { additionalParameters: field.additionalParameters }
+        : {}),
+      // `alias_for` impacts mappings (alias field), but is not always present.
+      ...(field.alias_for ? { alias_for: field.alias_for } : {}),
+    };
+  };
+
+  return fields.filter((field) => {
+    if (field.status === 'inherited') return false;
+
     const stored = storedFields.find(
-      (storedField) => field.status !== 'inherited' && storedField.name === field.name
+      (storedField) => storedField.status !== 'inherited' && storedField.name === field.name
     );
-    return stored && !isEqual(stored, field);
-  });
 
-  return [...addedFields, ...changedFields];
+    const currentConfig = getMappingAffectingConfig(field);
+    const storedConfig = stored ? getMappingAffectingConfig(stored) : null;
+
+    return !isEqual(storedConfig, currentConfig);
+  });
 }

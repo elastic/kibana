@@ -118,7 +118,7 @@ describe('getChanges', () => {
       expect(changes).toHaveLength(0);
     });
 
-    it('should include unmapped status fields that are new', () => {
+    it('should not include doc-only overrides (unmapped status, no type) as mapping changes', () => {
       const unmappedStatusField: SchemaEditorField = createMockUnmappedField({
         name: 'new_unmapped_field',
       });
@@ -128,10 +128,7 @@ describe('getChanges', () => {
 
       const changes = getChanges(fields, storedFields);
 
-      // Unmapped status fields (not unmapped type) should be included
-      expect(changes).toHaveLength(1);
-      expect(changes[0].name).toBe('new_unmapped_field');
-      expect(changes[0].status).toBe('unmapped');
+      expect(changes).toHaveLength(0);
     });
   });
 
@@ -197,6 +194,41 @@ describe('getChanges', () => {
       const changes = getChanges(fields, storedFields);
 
       expect(changes).toHaveLength(0);
+    });
+  });
+
+  describe('description-only changes', () => {
+    it('should not include mapped fields when only the description changed', () => {
+      const originalField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'existing_field' }),
+        type: 'keyword',
+        description: 'Original description',
+      };
+
+      const updatedField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'existing_field' }),
+        type: 'keyword',
+        description: 'Updated description',
+      };
+
+      const changes = getChanges([updatedField], [originalField]);
+      expect(changes).toHaveLength(0);
+    });
+
+    it('should include a field when a real mapping override is removed (mapped -> unmapped)', () => {
+      const originalField: SchemaEditorField = {
+        ...createMockMappedField({ name: 'field_to_unmap' }),
+        type: 'keyword',
+      };
+
+      const updatedField: SchemaEditorField = {
+        ...createMockUnmappedField({ name: 'field_to_unmap' }),
+      };
+
+      const changes = getChanges([updatedField], [originalField]);
+      expect(changes).toHaveLength(1);
+      expect(changes[0].name).toBe('field_to_unmap');
+      expect(changes[0].status).toBe('unmapped');
     });
   });
 });

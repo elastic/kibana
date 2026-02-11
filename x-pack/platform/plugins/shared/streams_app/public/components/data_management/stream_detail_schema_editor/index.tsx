@@ -32,7 +32,7 @@ import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_requ
 import { SchemaEditor } from '../schema_editor';
 import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
-import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
+import { getChanges, SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { buildSchemaSavePayload } from '../schema_editor/utils';
 
 interface SchemaEditorProps {
@@ -115,13 +115,21 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   };
 
   const openConfirmationModal = () => {
+    const reviewFields = fields.filter(
+      (field) => field.status !== 'unmapped' || definitionFieldMap.has(field.name)
+    );
+    const changes = getChanges(reviewFields, definitionFields);
+    if (changes.length === 0) {
+      // If there are no mapping-affecting changes, skip the review modal entirely.
+      void submitChanges();
+      return;
+    }
+
     const overlay = context.core.overlays.openModal(
       toMountPoint(
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
-            fields={fields.filter(
-              (field) => field.status !== 'unmapped' || definitionFieldMap.has(field.name)
-            )}
+            fields={reviewFields}
             streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}

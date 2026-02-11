@@ -245,10 +245,10 @@ export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse):
 
   for (const [name, field] of Object.entries(definitionFields)) {
     const type = field.type;
-    const hasType = Boolean(type && type !== 'unmapped');
+    const isDocOnlyOverride = !type || type === 'unmapped';
 
     // Doc-only override (typeless `{ description }`), or legacy `type: 'unmapped'`.
-    if (!hasType) {
+    if (isDocOnlyOverride) {
       const inherited = inheritedFieldsByName.get(name);
       if (inherited) {
         // Merge doc-only override into inherited view so the mapping continues to be inherited.
