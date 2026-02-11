@@ -65,23 +65,16 @@ export const complementaryVizSchemaNoESQL = schema.oneOf([
   }),
 ]);
 
-export const complementaryVizSchemaESQL = schema.oneOf([
-  barBackgroundChartSchema.extends(
-    {
-      /**
-       * Max value
-       */
-      max_value: esqlColumnSchema,
-    },
-    { meta: { id: 'metricComplementaryBar' } }
-  ),
-  schema.object(
-    {
-      type: schema.literal('trend'),
-    },
-    { meta: { id: 'metricComplementaryTrend', description: 'Trend complementary viz' } }
-  ),
-]);
+// Note: 'trend' type is not supported for ES|QL yet
+export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
+  {
+    /**
+     * Max value
+     */
+    max_value: esqlColumnSchema,
+  },
+  { meta: { id: 'metricComplementaryBar' } }
+);
 
 const metricStateBackgroundChartSchemaNoESQL = {
   /**
