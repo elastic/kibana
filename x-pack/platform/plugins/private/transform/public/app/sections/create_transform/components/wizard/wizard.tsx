@@ -17,7 +17,14 @@ import React, {
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiSteps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSteps,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -91,19 +98,65 @@ const StepSelectData: FC<SelectDataStepProps> = ({
   setCurrentStep,
   onSavedObjectSelected,
 }) => {
+  const [isSourceSelectionModalVisible, setIsSourceSelectionModalVisible] = useState(false);
+
+  const openSourceSelectionModal = useCallback(() => {
+    setIsSourceSelectionModalVisible(true);
+  }, []);
+
+  const closeSourceSelectionModal = useCallback(() => {
+    setIsSourceSelectionModalVisible(false);
+  }, []);
+
+  const handleSavedObjectSelected = useCallback(
+    (id: string) => {
+      onSavedObjectSelected(id);
+      setIsSourceSelectionModalVisible(false);
+    },
+    [onSavedObjectSelected]
+  );
+
   return (
     <>
-      {isCurrentStep ? (
+      {isCurrentStep && (
         <>
-          <StepSelectDataForm
-            searchItemsError={searchItemsError}
-            onSavedObjectSelected={onSavedObjectSelected}
-          />
+          <EuiButton
+            onClick={openSourceSelectionModal}
+            data-test-subj="transformStepSelectDataOpenModalButton"
+          >
+            {i18n.translate('xpack.transform.stepSelectData.openModalButtonLabel', {
+              defaultMessage: 'Select data source',
+            })}
+          </EuiButton>
+
+          {isSourceSelectionModalVisible && (
+            <EuiModal
+              onClose={closeSourceSelectionModal}
+              maxWidth={640}
+              aria-label={i18n.translate('xpack.transform.stepSelectData.modalAriaLabel', {
+                defaultMessage: 'Select data source',
+              })}
+            >
+              <EuiModalHeader>
+                <EuiModalHeaderTitle>
+                  {i18n.translate('xpack.transform.stepSelectData.modalTitle', {
+                    defaultMessage: 'Select data source',
+                  })}
+                </EuiModalHeaderTitle>
+              </EuiModalHeader>
+              <EuiModalBody>
+                <StepSelectDataForm
+                  searchItemsError={searchItemsError}
+                  onSavedObjectSelected={handleSavedObjectSelected}
+                />
+              </EuiModalBody>
+            </EuiModal>
+          )}
+
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.DEFINE)} nextActive={isNextActive} />
         </>
-      ) : searchItems ? (
-        <StepSelectDataSummary searchItems={searchItems} />
-      ) : null}
+      )}
+      {!isCurrentStep && searchItems && <StepSelectDataSummary searchItems={searchItems} />}
     </>
   );
 };
