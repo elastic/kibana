@@ -13,7 +13,7 @@ import { inject, injectable } from 'inversify';
 import { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
-import { createExecutionContext, isRuleExecutionCancellationError } from '../../cancellation';
+import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];

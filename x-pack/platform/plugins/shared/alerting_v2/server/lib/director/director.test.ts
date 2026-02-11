@@ -15,7 +15,7 @@ import { createQueryService } from '../services/query_service/query_service.mock
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
 import type { LatestAlertEventState } from './queries';
-import { createExecutionContext } from '../cancellation';
+import { createExecutionContext } from '../execution_context';
 
 const testExecutionContext = createExecutionContext(new AbortController().signal);
 

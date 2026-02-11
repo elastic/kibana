@@ -19,7 +19,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import { createExecutionContext } from '../cancellation';
+import { createExecutionContext } from '../execution_context';
 
 /**
  * Raw input from the task runner. Contains an AbortSignal but no ExecutionContext yet.

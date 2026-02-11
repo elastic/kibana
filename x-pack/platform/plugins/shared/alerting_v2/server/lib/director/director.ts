@@ -16,7 +16,7 @@ import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy } from './strategies/types';
-import type { ExecutionContext } from '../cancellation';
+import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
   ruleId: string;

@@ -8,7 +8,7 @@
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
-import type { ExecutionContext } from '../cancellation';
+import type { ExecutionContext } from '../execution_context';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
