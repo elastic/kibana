@@ -9,7 +9,7 @@ import type {
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
-  KibanaUrl,
+  ObltApiServicesFixture,
 } from '@kbn/scout-oblt';
 import {
   test as base,
@@ -20,32 +20,57 @@ import {
 import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
+import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
+import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
+import { NodeDetailsPage } from './page_objects/node_details/node_details';
+import { SavedViews } from './page_objects/saved_views';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
+    assetDetailsPage: AssetDetailsPage;
+    nodeDetailsPage: NodeDetailsPage;
+    savedViews: SavedViews;
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ObltApiServicesFixture & {
+    inventoryViews: InventoryViewApiService;
+    nodeDetailsPage: NodeDetailsPage;
+  };
+}
+
+export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
-      page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
-    },
+    { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
+    const savedViews = createLazyPageObject(SavedViews, page);
+
     const extendedPageObjects = {
       ...pageObjects,
-      inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl),
+      inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl, savedViews),
+      assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
+      nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
+      savedViews,
     };
 
     await use(extendedPageObjects);
+  },
+  apiServices: async (
+    { apiServices, kbnClient, log },
+    use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+      ...apiServices,
+      inventoryViews: getInventoryViewsApiService({
+        kbnClient,
+        log,
+      }),
+    };
+
+    await use(extendedApiServices);
   },
 });
 

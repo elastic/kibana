@@ -186,6 +186,22 @@ export interface DocViewerExtension {
 }
 
 /**
+ * Parameters passed to the additional cell actions extension
+ */
+export interface AdditionalCellActionsParams {
+  /**
+   * Available actions for the additional cell actions extension
+   */
+  actions?: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+  };
+}
+
+/**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
@@ -503,7 +519,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: () => AdditionalCellAction[];
+  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration
@@ -535,7 +551,11 @@ export interface Profile {
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */

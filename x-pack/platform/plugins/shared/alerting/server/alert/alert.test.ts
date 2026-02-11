@@ -788,7 +788,6 @@ describe('resetPendingRecoveredCount', () => {
     expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });
-
 describe('isFilteredOut', () => {
   const summarizedAlerts: CombinedSummarizedAlerts = {
     all: {
@@ -887,5 +886,24 @@ describe('resetActiveCount', () => {
     });
     alert.resetActiveCount();
     expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('isDelayed', () => {
+  test('returns false when status is not delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('active');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns false when status is not set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns true when status is delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('delayed');
+    expect(alert.isDelayed()).toEqual(true);
   });
 });

@@ -11,7 +11,7 @@
     "server": true,
     "configPath": ["xpack", "dataSources"],
     "requiredPlugins": ["actions", "dataCatalog", "agentBuilder", "workflowsManagement", "triggersActionsUi"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["taskManager"],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [
       "common"

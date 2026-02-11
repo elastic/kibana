@@ -52,7 +52,6 @@ tasks:
       - /src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-i18n-react/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-monaco/**/*.{js,ts,tsx}
-      - /src/platform/packages/shared/kbn-monaco/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/common/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/env/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_context/render/**/*.{js,ts,tsx}

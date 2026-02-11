@@ -64,6 +64,7 @@ export const typeToEuiIconMap = {
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
   percolator: { iconType: 'tokenPercolator' },
+  null: { iconType: 'tokenNull' },
 } as const;
 
 type AllowedIconType = keyof typeof typeToEuiIconMap;

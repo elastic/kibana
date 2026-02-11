@@ -8,13 +8,14 @@
  */
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import { useESQLQueryStats } from '@kbn/esql/public';
 import {
   type Filter,
   type Query,
@@ -128,7 +129,6 @@ export const DiscoverTopNav = ({
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
-    stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
     onUpdateESQLQuery,
@@ -206,6 +206,11 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, stateContainer, updateAppState]
   );
 
+  const esqlQueryStats = useESQLQueryStats(
+    isEsqlMode,
+    stateContainer.dataState.inspectorAdapters.requests
+  );
+
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
@@ -241,6 +246,36 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+  const onDataViewEditedAction = useCurrentTabAction(internalStateActions.onDataViewEdited);
+  const onDataViewEdited = useCallback(
+    (editedDataView: DataView) => {
+      dispatch(onDataViewEditedAction({ editedDataView }));
+    },
+    [dispatch, onDataViewEditedAction]
+  );
+  const createAndAppendAdHocDataView = useCurrentTabAction(
+    internalStateActions.createAndAppendAdHocDataView
+  );
+  const onCreateDefaultAdHocDataView = useCallback(
+    (dataViewSpec: DataViewSpec) => {
+      dispatch(createAndAppendAdHocDataView({ dataViewSpec }));
+    },
+    [dispatch, createAndAppendAdHocDataView]
+  );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
@@ -250,14 +285,23 @@ export const DiscoverTopNav = ({
       },
       currentDataViewId: dataView?.id,
       onAddField: addField,
-      onDataViewCreated: stateContainer.actions.onDataViewCreated,
-      onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
-      onChangeDataView: stateContainer.actions.onChangeDataView,
+      onDataViewCreated,
+      onCreateDefaultAdHocDataView,
+      onChangeDataView,
       adHocDataViews,
       savedDataViews,
-      onEditDataView: stateContainer.actions.onDataViewEdited,
+      onEditDataView: onDataViewEdited,
     };
-  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer]);
+  }, [
+    adHocDataViews,
+    addField,
+    dataView,
+    savedDataViews,
+    onChangeDataView,
+    onDataViewCreated,
+    onDataViewEdited,
+    onCreateDefaultAdHocDataView,
+  ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
@@ -375,6 +419,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
       />
       {isESQLToDataViewTransitionModalVisible && (

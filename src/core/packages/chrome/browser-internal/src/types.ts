@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -34,45 +34,32 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    *
    * @remarks
-   * LegacyHeader is a fixed layout header component that is used in the legacy fixed layout.
-   * Apart from the header, it also includes the navigations, banner and the chromeless header state.
-   * It decides which header - classic or project based on the chromeStyle$ observable.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used in the grid layout with the "classic" navigation.
+   * Header that is used with the "classic" navigation.
    * It includes the header and the overlay classic navigation.
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getClassicHeaderComponentForGridLayout(): JSX.Element;
+  getClassicHeaderComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header UI
    * @internal
    *
    * @remarks
-   * Header that is used in the grid layout with the "project" navigation (solution and serverless)
+   * Header that is used with the "project" navigation (solution and serverless)
    * It includes the header.
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectHeaderComponentForGridLayout(): JSX.Element;
+  getProjectHeaderComponent(): JSX.Element;
 
   /**
-   * Used only by the rendering service to render the new project side navigation UI
+   * Used only by the rendering service to render the project side navigation UI
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectSideNavComponentForGridLayout(): JSX.Element;
+  getProjectSideNavComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
@@ -105,11 +92,10 @@ export interface InternalChromeStart extends ChromeStart {
   getProjectAppMenuComponent(): JSX.Element;
 
   /**
-   * Used only by the rendering service to retrieve the set of classNames
-   * that will be set on the body element.
+   * Used only by the rendering service to render the sidebar UI
    * @internal
    */
-  getBodyClasses$(): Observable<string[]>;
+  getSidebarComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the global footer UI (devbar)

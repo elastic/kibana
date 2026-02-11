@@ -102,8 +102,8 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         // Only public step definitions have documentation and examples
         return {
           ...definition,
-          summary: stepDefinition.label,
-          description: stepDefinition.description ?? null,
+          description: stepDefinition.label, // Short title-like text
+          summary: stepDefinition.description ?? null, // Explanation of the step behavior
           documentation: stepDefinition.documentation?.url,
           examples: stepDefinition.documentation?.examples
             ? { snippet: stepDefinition.documentation?.examples.join('\n') }
@@ -123,19 +123,8 @@ function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
-
   Object.values(connectorTypes).forEach((connectorType) => {
     try {
-      // Create connector ID schema with available instances
-      // If no instances exist, use a generic string schema
-      const connectorIdSchema =
-        connectorType.instances.length > 0
-          ? z.enum([
-              connectorType.instances[0].id,
-              ...connectorType.instances.slice(1).map((i) => i.id),
-            ] as [string, ...string[]])
-          : z.string();
-
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
@@ -151,8 +140,7 @@ function convertDynamicConnectorsToContractsInternal(
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
-            connectorIdRequired: true,
-            connectorId: connectorIdSchema,
+            hasConnectorId: 'required',
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
@@ -169,8 +157,7 @@ function convertDynamicConnectorsToContractsInternal(
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
-          connectorIdRequired: true,
-          connectorId: connectorIdSchema,
+          hasConnectorId: 'required',
           outputSchema,
           description: `${connectorType.displayName} connector`,
           instances: connectorType.instances,
@@ -184,8 +171,7 @@ function convertDynamicConnectorsToContractsInternal(
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
-        connectorIdRequired: true,
-        connectorId: z.string(),
+        hasConnectorId: 'required',
         outputSchema: z.any(),
         description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
         instances: connectorType.instances,
@@ -357,14 +343,14 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
-): z.ZodTypeAny => {
+): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
-): z.ZodTypeAny => {
+): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
 };

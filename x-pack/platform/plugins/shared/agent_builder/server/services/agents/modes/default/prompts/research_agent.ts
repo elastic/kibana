@@ -8,13 +8,16 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
-import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
-import type { ResearchAgentAction } from '../actions';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getSkillsInstructions } from '../../../../skills/prompts';
+import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
+import { getFileSystemInstructions } from '../../../../runner/store';
+import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -22,33 +25,45 @@ const tools = {
   search: sanitizeToolId(platformCoreTools.search),
 };
 
-interface ResearchAgentPromptParams {
-  customInstructions?: string;
-  capabilities: ResolvedAgentCapabilities;
-  initialMessages: BaseMessageLike[];
-  actions: ResearchAgentAction[];
-  attachmentTypes: ProcessedAttachmentType[];
-  clearSystemMessage?: boolean;
-  outputSchema?: Record<string, unknown>;
-}
+type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
-export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
-  const { initialMessages, actions, clearSystemMessage = false } = params;
+export const getResearchAgentPrompt = async (
+  params: ResearchAgentPromptParams
+): Promise<BaseMessageLike[]> => {
+  const { actions, processedConversation, resultTransformer } = params;
+  const clearSystemMessage = params.configuration.research.replace_default_instructions;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
+
   return [
     [
       'system',
-      clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
+      clearSystemMessage
+        ? await getBaseSystemMessage(params)
+        : await getResearchSystemMessage(params),
     ],
-    ...initialMessages,
+    ...getConversationAttachmentsSystemMessages(
+      params.processedConversation.versionedAttachmentPresentation
+    ),
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
 };
 
-export const getBaseSystemMessage = ({
-  customInstructions,
-  attachmentTypes,
+export const getBaseSystemMessage = async ({
+  configuration: {
+    research: { instructions: customInstructions },
+  },
+  conversationTimestamp,
+  processedConversation: { attachmentTypes },
   outputSchema,
-}: ResearchAgentPromptParams): string => {
+  filestore,
+  experimentalFeatures,
+}: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
@@ -60,6 +75,10 @@ That answering agent will have access to the conversation history and to all inf
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
 3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
 
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
+
 ## INSTRUCTIONS
 
 ${customInstructions}
@@ -69,7 +88,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
@@ -77,11 +96,16 @@ ${attachmentTypeInstructions(attachmentTypes)}
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };
 
-export const getResearchSystemMessage = ({
-  customInstructions,
-  attachmentTypes,
+export const getResearchSystemMessage = async ({
+  configuration: {
+    research: { instructions: customInstructions },
+  },
+  conversationTimestamp,
+  processedConversation: { attachmentTypes },
   outputSchema,
-}: ResearchAgentPromptParams): string => {
+  filestore,
+  experimentalFeatures,
+}: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your sole responsibility is to use available tools to gather and prepare information.
@@ -167,6 +191,10 @@ Constraints:
       - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
       - Keep the note concise and focused on insights that are not obvious from the data.
 
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
+
 ${customInstructionsBlock(customInstructions)}
 
 ${structuredOutputDescription(outputSchema)}
@@ -174,7 +202,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).

@@ -12,7 +12,7 @@ import { ScoutTestConfigStats } from '@kbn/scout-reporting';
 import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
 import yaml from 'js-yaml';
 import { readFileSync } from 'node:fs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';

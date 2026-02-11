@@ -19,6 +19,7 @@ import { lastItem } from '../../../ast/visitor/utils';
 import type {
   FunctionDefinition,
   FunctionParameterType,
+  PromQLFunctionParamType,
   Signature,
   SupportedDataType,
 } from '../types';
@@ -26,17 +27,26 @@ import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
 import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
+import { UnmappedFieldsStrategy } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
+import { getUnmappedFieldType } from './settings';
+import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
+import type { PromQLAstExpression } from '../../../embedded_languages/promql/types';
 
 // #region type detection
 
 /**
  * Determines the type of the expression
+ * @param root The root AST node of the expression
+ * @param columns Optional map of available columns to resolve column types
+ * @param unmappedFieldsStrategy Strategy to handle unmapped fields, it's only relevant if columns maps is provided
+ * @returns The determined type or 'unknown' if it cannot be determined
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  columns?: Map<string, ESQLColumnData>
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -46,7 +56,7 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], columns);
+    return getExpressionType(root[0], columns, unmappedFieldsStrategy);
   }
 
   if (isLiteral(root)) {
@@ -79,8 +89,9 @@ export function getExpressionType(
     if (isParamLiteral(lastArg)) {
       return lastArg.literalType;
     }
+
     if (!column) {
-      return 'unknown';
+      return getUnmappedFieldType(unmappedFieldsStrategy);
     }
     if ('hasConflict' in column && column.hasConflict) {
       return 'unknown';
@@ -89,7 +100,7 @@ export function getExpressionType(
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], columns);
+    return getExpressionType(root.values[0], columns, unmappedFieldsStrategy);
   }
 
   if (root.type === 'map') {
@@ -127,10 +138,12 @@ export function getExpressionType(
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
-      return getExpressionType(root.args[root.args.length - 1], columns);
+      return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
     }
 
-    const argTypes = root.args.map((arg) => getExpressionType(arg, columns));
+    const argTypes = root.args.map((arg) =>
+      getExpressionType(arg, columns, unmappedFieldsStrategy)
+    );
     const literalMask = root.args.map((arg) => isLiteral(arg));
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,
@@ -448,4 +461,32 @@ export function getAssignmentExpressionRoot(
   }
 
   return root;
+}
+
+export function getPromqlExpressionType(
+  expression: PromQLAstExpression
+): PromQLFunctionParamType | undefined {
+  switch (expression.type) {
+    case 'selector':
+      return expression.duration ? 'range_vector' : 'instant_vector';
+    case 'subquery':
+      return 'range_vector';
+    case 'literal':
+      return expression.literalType === 'string' ? 'string' : 'scalar';
+    case 'parens':
+      return getPromqlExpressionType(expression.child);
+    case 'unary-expression':
+      return getPromqlExpressionType(expression.arg);
+    case 'function':
+      return normalizePromqlReturnType(
+        getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType
+      );
+    case 'binary-expression': {
+      const bothScalar =
+        getPromqlExpressionType(expression.left) === 'scalar' &&
+        getPromqlExpressionType(expression.right) === 'scalar';
+
+      return bothScalar ? 'scalar' : 'instant_vector';
+    }
+  }
 }

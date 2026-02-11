@@ -112,7 +112,12 @@ const setupTest = async ({
     defaultFetchStatus,
     resetTheHook,
   });
-  props.stateContainer.actions.setDataView(dataViewMock);
+  const { stateContainer } = props;
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+      dataView: dataViewMock,
+    })
+  );
   return props;
 };
 
@@ -574,7 +579,11 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-* | keep field1' },
     });
-    stateContainer.actions.setDataView(dataViewAdHoc);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewAdHoc,
+      })
+    );
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {

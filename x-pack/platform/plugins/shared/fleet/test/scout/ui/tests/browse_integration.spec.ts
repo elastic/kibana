@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
-test.describe('Browse integration', { tag: ['@ess'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
+test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ apiServices, config }) => {
+    // TODO: re-enable when the 'beforeAll' hook starts working on Cloud
+    // The following line will skip all tests in this suite when running on ECH
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(
+      config.isCloud === true,
+      `Core API returns 404 for 'xpack.fleet.experimentalFeatures' on ECH`
+    );
+
+    // skip() in beforeAll only skips the tests, not the beforeAll hook itself
+    if (config.isCloud) {
+      return;
+    }
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
     });
   });
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, config }) => {
+    if (config.isCloud) {
+      return;
+    }
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
     });

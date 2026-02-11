@@ -16,8 +16,8 @@ export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   }
 );
 
-export const OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.openInDiscoverArialLabel',
+export const OPEN_IN_DISCOVER_ARIA_LABEL = i18n.translate(
+  'unifiedDocViewer.observability.traces.openInDiscoverAriaLabel',
   { defaultMessage: 'Open in discover link' }
 );
 

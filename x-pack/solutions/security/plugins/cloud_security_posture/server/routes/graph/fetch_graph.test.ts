@@ -9,7 +9,10 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
+} from '@kbn/cloud-security-posture-common/utils/helpers';
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -39,6 +42,7 @@ describe('fetchGraph', () => {
 
     logger = {
       trace: jest.fn(),
+      debug: jest.fn(),
       info: jest.fn(),
       error: jest.fn(),
     } as unknown as Logger;
@@ -138,7 +142,161 @@ describe('fetchGraph', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
+  describe('LOOKUP JOIN integration', () => {
+    it('should include LOOKUP JOIN clause when entities index is in lookup mode', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+
+      // Mock the indices.getSettings to return lookup mode
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: {
+            settings: {
+              index: {
+                mode: 'lookup',
+              },
+            },
+          },
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify LOOKUP JOIN is used (preferred over ENRICH)
+      expect(query).toContain(`LOOKUP JOIN ${indexName} ON entity.id`);
+
+      // Verify LOOKUP JOIN populates expected fields
+      expect(query).toContain('actorEntityName');
+      expect(query).toContain('actorEntityType');
+      expect(query).toContain('actorEntitySubType');
+      expect(query).toContain('targetEntityName');
+      expect(query).toContain('targetEntityType');
+      expect(query).toContain('targetEntitySubType');
+
+      // Verify ENRICH is NOT used when LOOKUP JOIN is available
+      expect(query).not.toContain('ENRICH');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should not include LOOKUP JOIN clause when entities index is not in lookup mode', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+
+      // Mock the indices.getSettings to return standard mode (not lookup)
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: {
+            settings: {
+              index: {
+                mode: 'standard',
+              },
+            },
+          },
+        });
+
+      // Also mock enrich policy to not exist
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify LOOKUP JOIN is NOT used
+      expect(query).not.toContain('LOOKUP JOIN');
+
+      // Verify ENRICH is also NOT used (no policy exists)
+      expect(query).not.toContain('ENRICH');
+
+      // Verify fallback EVALs are present for null values
+      expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+targetEntityName\s*=\s*TO_STRING\(null\)/);
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should not include LOOKUP JOIN when entities index does not exist', async () => {
+      // Mock the indices.getSettings to throw 404 (index not found)
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockRejectedValueOnce({ statusCode: 404 });
+
+      // Also mock enrich policy to not exist
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify LOOKUP JOIN is NOT used
+      expect(query).not.toContain('LOOKUP JOIN');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+  });
+
   describe('ENRICH policy integration', () => {
+    beforeEach(() => {
+      // Default: no lookup index available (falls back to ENRICH check)
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockRejectedValue({ statusCode: 404 });
+    });
+
     it('should include ENRICH clause when policy exists', async () => {
       // Mock the enrich.getPolicy method to return a policy that exists
       (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest

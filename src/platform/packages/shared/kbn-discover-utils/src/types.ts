@@ -18,7 +18,7 @@ export type {
   RowControlRowProps,
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
-export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
+export { AppMenuActionId } from './components/app_menu/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 

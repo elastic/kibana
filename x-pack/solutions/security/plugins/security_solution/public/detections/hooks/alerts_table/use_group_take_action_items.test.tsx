@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useGroupTakeActionsItems } from './use_group_take_action_items';
@@ -21,6 +21,13 @@ describe('useGroupTakeActionsItems', () => {
     tableId: 'mock-id',
     groupNumber: 0,
     selectedGroup: 'test',
+    closePopover: () => {},
+    groupBucket: {
+      key: ['bucket-test'],
+      key_as_string: 'bucket-test',
+      selectedGroup: 'test',
+      doc_count: 0,
+    },
   };
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
     const { result } = renderHook(
@@ -32,7 +39,11 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
+
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
@@ -46,7 +57,10 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
@@ -60,7 +74,10 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(3);
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
@@ -74,12 +91,13 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => {
-      const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.items.length).toEqual(2);
-      expect(currentParams.items[0].key).toEqual('acknowledge');
-      expect(currentParams.items[1].key).toEqual('close-alert-with-reason');
-    });
+
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(2);
+    expect(buttons[0].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
+    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns open & acknowledged take actions items if currentStatus === ["closed"]', async () => {
@@ -93,12 +111,13 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => {
-      const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.items.length).toEqual(2);
-      expect(currentParams.items[0].key).toEqual('open');
-      expect(currentParams.items[1].key).toEqual('acknowledge');
-    });
+
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(2);
+    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(buttons[1].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
   });
 
   it('returns open & closed take actions items if currentStatus === ["acknowledged"]', async () => {
@@ -112,12 +131,13 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => {
-      const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.items.length).toEqual(2);
-      expect(currentParams.items[0].key).toEqual('open');
-      expect(currentParams.items[1].key).toEqual('close-alert-with-reason');
-    });
+
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(2);
+    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns empty take actions items if showAlertStatusActions is false', async () => {
@@ -130,7 +150,10 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(0);
   });
 
   it('returns array take actions items if showAlertStatusActions is true', async () => {
@@ -143,6 +166,9 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
+    const { queryAllByRole } = render(result.current(getActionItemsParams));
+    const buttons = await queryAllByRole('button');
+
+    expect(buttons.length).toBe(3);
   });
 });

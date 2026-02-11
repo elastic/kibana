@@ -16,6 +16,7 @@ import {
   getIndicesAsArray,
   indicesLoading,
   indicesError,
+  indicesEnrichmentErrors,
   getTableState,
 } from '../../../../store/selectors';
 import {
@@ -40,6 +41,7 @@ const mapStateToProps = (state, props) => {
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
     indicesError: indicesError(state),
+    indicesEnrichmentErrors: indicesEnrichmentErrors(state),
     toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap,
   };
 };

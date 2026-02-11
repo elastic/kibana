@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
@@ -137,10 +138,17 @@ export function buildCellActions(
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
   onFilter?: DocViewFilterFn,
-  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  hideFilteringOnComputedColumns?: boolean
 ) {
+  const shouldShowFilters = shouldShowFieldFilterInOutActions({
+    dataViewField: field,
+    hideFilteringOnComputedColumns,
+    onFilter,
+  });
+
   return [
-    ...(onFilter && field.filterable
+    ...(shouldShowFilters
       ? [
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterInBtn({
