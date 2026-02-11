@@ -26,10 +26,10 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         additionalIndexPattern: {
-          type: 'keyword', 
+          type: 'keyword',
         },
         additionalIndexPatterns: {
-          type: 'keyword', 
+          type: 'keyword',
         },
         fieldHistoryLength: {
           type: 'integer',
