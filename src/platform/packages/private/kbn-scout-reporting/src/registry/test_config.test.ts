@@ -71,7 +71,12 @@ describe('test_config module', () => {
             id: 'f44f18cc703276d-178a4921f7b18d0',
             title: 'Module modularity should be the off the charts',
             expectedStatus: 'passed',
-            tags: ['@svlSecurity', '@ess'],
+            tags: [
+              '@local-serverless-security_complete',
+              '@cloud-serverless-security_complete',
+              '@local-stateful-classic',
+              '@cloud-stateful-classic',
+            ],
             location: {
               file: path.join(
                 scoutRoot,
