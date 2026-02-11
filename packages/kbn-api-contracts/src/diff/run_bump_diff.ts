@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import path from 'node:path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { BumpDiffEntry } from './parse_bump_diff';
 
@@ -39,8 +39,9 @@ const isBumpServiceError = (error: unknown): boolean => {
 
 export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntry[] => {
   try {
-    const output = execSync(
-      `npm run --silent bump:diff -- "${basePath}" "${currentPath}" --format=json`,
+    const output = execFileSync(
+      'npm',
+      ['run', '--silent', 'bump:diff', '--', basePath, currentPath, '--format=json'],
       {
         cwd: OAS_DOCS_DIR,
         encoding: 'utf-8',

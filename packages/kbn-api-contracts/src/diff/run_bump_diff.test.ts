@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { runBumpDiff, BumpServiceError } from './run_bump_diff';
 
 jest.mock('@kbn/repo-info', () => ({
@@ -15,10 +15,10 @@ jest.mock('@kbn/repo-info', () => ({
 }));
 
 jest.mock('child_process', () => ({
-  execSync: jest.fn(),
+  execFileSync: jest.fn(),
 }));
 
-const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
+const mockExecFileSync = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
 describe('runBumpDiff', () => {
   afterEach(() => {
@@ -29,13 +29,22 @@ describe('runBumpDiff', () => {
     const bumpOutput = JSON.stringify([
       { id: '1', name: 'GET /api/test', type: 'endpoint', status: 'added' },
     ]);
-    mockExecSync.mockReturnValue(bumpOutput);
+    mockExecFileSync.mockReturnValue(bumpOutput);
 
     const result = runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml');
 
     expect(result).toEqual([{ id: '1', name: 'GET /api/test', type: 'endpoint', status: 'added' }]);
-    expect(mockExecSync).toHaveBeenCalledWith(
-      'npm run --silent bump:diff -- "/tmp/base.yaml" "/tmp/current.yaml" --format=json',
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'npm',
+      [
+        'run',
+        '--silent',
+        'bump:diff',
+        '--',
+        '/tmp/base.yaml',
+        '/tmp/current.yaml',
+        '--format=json',
+      ],
       expect.objectContaining({
         encoding: 'utf-8',
         timeout: 240_000,
@@ -44,12 +53,12 @@ describe('runBumpDiff', () => {
   });
 
   it('returns empty array for empty output', () => {
-    mockExecSync.mockReturnValue('');
+    mockExecFileSync.mockReturnValue('');
     expect(runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toEqual([]);
   });
 
   it('returns empty array for empty JSON array output', () => {
-    mockExecSync.mockReturnValue('[]');
+    mockExecFileSync.mockReturnValue('[]');
     expect(runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toEqual([]);
   });
 
@@ -62,7 +71,7 @@ describe('runBumpDiff', () => {
       stdout: bumpOutput,
       status: 1,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -77,7 +86,7 @@ describe('runBumpDiff', () => {
       stdout: 'not json',
       status: 1,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -89,7 +98,7 @@ describe('runBumpDiff', () => {
       stdout: '',
       status: 2,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -103,7 +112,7 @@ describe('runBumpDiff', () => {
       stdout: '',
       status: 1,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -117,7 +126,7 @@ describe('runBumpDiff', () => {
         'Error: We were unable to compute your documentation diff. Sorry about that. Please try again later.',
       status: 1,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -137,7 +146,7 @@ describe('runBumpDiff', () => {
         status: 2,
       }
     );
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
@@ -150,7 +159,7 @@ describe('runBumpDiff', () => {
       stderr: 'spawnSync /bin/sh ENOBUFS',
       status: null,
     });
-    mockExecSync.mockImplementation(() => {
+    mockExecFileSync.mockImplementation(() => {
       throw error;
     });
 
