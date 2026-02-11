@@ -464,9 +464,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await indexDocument(esClient, rootStream, doc);
         expect(response.result).to.eql('created');
         const result = await fetchDocument(esClient, rootStream, response._id);
-        expect(result._index).to.match(
-          new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`)
-        );
+        expect(result._index).to.match(new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`));
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:00.000Z');
         expect(result._source).to.have.property('message', 'test message');
         expect(result._source).to.have.property('stream');
@@ -571,7 +569,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:20.000Z');
         expect(result._source).to.have.property('message', 'Apache error log');
         expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', `${rootStream}.apache.error`);
+        expect((result._source as any).stream).to.have.property(
+          'name',
+          `${rootStream}.apache.error`
+        );
       });
 
       it(`Does not index to ${rootStream}.apache.error if routing is disabled`, async () => {
@@ -917,51 +918,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // Test field inheritance for new root streams
     ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
       describe(`Basic setup for ${rootStream}`, () => {
-      before(async () => {
-        await enableStreams(apiClient);
-      });
-
-      after(async () => {
-        await disableStreams(apiClient);
-      });
-
-      it('inherit fields', async () => {
-        const fields: FieldDefinition = {
-          'attributes.foo': { type: 'keyword' },
-          'attributes.bar': { type: 'long' },
-        };
-          await putStream(apiClient, `${rootStream}.one`, {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              wired: { fields, routing: [] },
-              failure_store: { inherit: {} },
-            },
-          },
+        before(async () => {
+          await enableStreams(apiClient);
         });
+
+        after(async () => {
+          await disableStreams(apiClient);
+        });
+
+        it('inherit fields', async () => {
+          const fields: FieldDefinition = {
+            'attributes.foo': { type: 'keyword' },
+            'attributes.bar': { type: 'long' },
+          };
+          await putStream(apiClient, `${rootStream}.one`, {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                wired: { fields, routing: [] },
+                failure_store: { inherit: {} },
+              },
+            },
+          });
 
           await putStream(apiClient, `${rootStream}.one.two.three`, {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              settings: {},
-              wired: { fields: {}, routing: [] },
-              failure_store: { inherit: {} },
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
+              },
             },
-          },
-        });
+          });
 
-        const inheritedFields = Object.entries(fields).reduce((acc, field) => {
+          const inheritedFields = Object.entries(fields).reduce((acc, field) => {
             acc[field[0]] = { ...field[1], from: `${rootStream}.one` };
-          return acc;
-        }, {} as InheritedFieldDefinition);
+            return acc;
+          }, {} as InheritedFieldDefinition);
 
           await expectFields(
             [`${rootStream}.one.two`, `${rootStream}.one.two.three`],
