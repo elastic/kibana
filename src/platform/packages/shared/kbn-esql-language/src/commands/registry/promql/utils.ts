@@ -12,21 +12,21 @@ import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
 import { countTopLevelCommas } from '../../definitions/utils/shared';
-import { PromqlWalker } from '../../../promql/walker';
-import { PromQLParser } from '../../../promql';
+import { PromQLParser } from '../../../embedded_languages/promql';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLFunction,
   PromQLLabel,
   PromQLSelector,
-} from '../../../promql/types';
+} from '../../../embedded_languages/promql/types';
 import {
   getPromqlFunctionDefinition,
   getPromqlParamTypesForFunction,
   isPromqlAcrossSeriesFunction,
 } from '../../definitions/utils/promql';
 import type { PromQLFunctionParamType } from '../../definitions/types';
+import { PromqlWalker } from '../../../embedded_languages/promql/ast/walker';
 
 // ============================================================================
 // Types

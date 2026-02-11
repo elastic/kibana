@@ -18,7 +18,6 @@ import {
   getMetricTypesForSignature,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../shared/sorting';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
@@ -44,6 +43,7 @@ import {
   isAtValidColumnSuggestionPosition,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
+import { SuggestionCategory } from '../../../language/autocomplete/utils';
 
 export async function autocomplete(
   query: string,
