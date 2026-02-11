@@ -163,6 +163,7 @@ export class CoreSystem {
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      basePath: injectedMetadata.basePath,
       coreContext: this.coreContext,
     });
     this.docLinks = new DocLinksService(this.coreContext);
@@ -377,7 +378,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        analytics,
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
