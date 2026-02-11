@@ -56,9 +56,9 @@ const barBackgroundChartSchema = schema.object({
 export const complementaryVizSchemaNoESQL = schema.oneOf([
   barBackgroundChartSchema.extends({
     /**
-     * Goal value
+     * Max value
      */
-    goal_value: metricOperationDefinitionSchema,
+    max_value: metricOperationDefinitionSchema,
   }),
   schema.object({
     type: schema.literal('trend'),
@@ -69,9 +69,9 @@ export const complementaryVizSchemaESQL = schema.oneOf([
   barBackgroundChartSchema.extends(
     {
       /**
-       * Goal value
+       * Max value
        */
-      goal_value: esqlColumnSchema,
+      max_value: esqlColumnSchema,
     },
     { meta: { id: 'metricComplementaryBar' } }
   ),

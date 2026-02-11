@@ -113,7 +113,7 @@ describe('Metric Schema', () => {
             background_chart: {
               type: 'bar',
               direction: 'horizontal',
-              goal_value: {
+              max_value: {
                 operation: 'static_value',
                 value: 80,
               },

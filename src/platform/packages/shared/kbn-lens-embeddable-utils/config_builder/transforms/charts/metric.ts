@@ -240,7 +240,7 @@ function buildFromTextBasedLayer(
             ? {
                 background_chart: {
                   type: 'bar',
-                  goal_value: getValueApiColumn(visualization.maxAccessor, layer),
+                  max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
                     ? { direction: visualization.progressDirection }
                     : {}),
@@ -293,7 +293,7 @@ function buildFromFormBasedLayer(
       ? {
           background_chart: {
             type: 'bar',
-            goal_value: maxValue,
+            max_value: maxValue,
             ...(visualization.progressDirection
               ? { direction: visualization.progressDirection }
               : {}),
@@ -519,7 +519,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   if (primaryMetric.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.goal_value);
+    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
@@ -547,7 +547,7 @@ function getValueColumns(layer: MetricStateESQL) {
       ? [
           getValueColumn(
             getAccessorName('max'),
-            primaryMetric.background_chart.goal_value.column,
+            primaryMetric.background_chart.max_value.column,
             'number'
           ),
         ]
