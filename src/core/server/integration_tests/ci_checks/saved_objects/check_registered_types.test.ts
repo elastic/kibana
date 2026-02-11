@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "17539a3771f7f76e261fca5ca1c817bcbb2fcbbe8b359e4b0abb96bbdbfe7360",
+        "action": "3ab1aa6b6d32d7704fa2dc5fe34c65d632d869af3736f5d08a761d09b93430e2",
         "action_task_params": "6751dc8a4707a432bc9b90f5a025f183aefc84bca5ec26c29ce6939b24ea81e4",
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
         "alert": "119624b6025ea6794d2c33e2b41c2e4730d10446430b285691f7638ee6787af5",
@@ -238,7 +238,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action|mappings: c4a658c865d4c30b51ae9b49e1dec06d012bc213",
         "action|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "action|10.2.0: 4367848750ed49705e88d5ffbe6229bf25312bd17e0f66f1848ec0031b6667b8",
-        "action|10.1.0: fee2efac085bebe989be536170f1ab3c209f56cad93ca9acc20c11d97f1fee91",
+        "action|10.1.0: e588c3ab049a6d529d68099cac0cb5b8256603d421f28dd475bbcd2146451d6f",
         "action|8.3.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|8.0.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|7.16.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
