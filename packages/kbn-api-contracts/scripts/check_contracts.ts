@@ -147,8 +147,8 @@ run(
       specPath: (flags.specPath as string) || getDefaultSpecPath(distribution),
       baseBranch: (flags.baseBranch as string) || 'main',
       mergeBase: (flags.mergeBase as string) || undefined,
-      allowlistPath: flags.allowlistPath as string | undefined,
-      terraformApisPath: flags.terraformApisPath as string | undefined,
+      allowlistPath: (flags.allowlistPath as string) || undefined,
+      terraformApisPath: (flags.terraformApisPath as string) || undefined,
     };
 
     log.info(`Checking ${opts.distribution} API contracts...`);
