@@ -27,6 +27,41 @@ import {
 const FROZEN_INDEX_NAME: string = 'test-frozen-index';
 const COLD_INDEX_NAME: string = 'test-cold-index';
 
+/**
+ * Cleans up test indices, including any ILM-renamed versions (partial-*, restored-*).
+ * This handles cleanup from previous failed runs where ILM may have renamed indices.
+ */
+async function cleanupTestIndices(providerContext: FtrProviderContext, indexNames: string[]) {
+  const es = providerContext.getService('es');
+  const log = providerContext.getService('log');
+
+  for (const indexName of indexNames) {
+    // Delete any indices matching the pattern (includes ILM-renamed indices like partial-*, restored-*)
+    for (const pattern of [indexName, `partial-${indexName}`, `restored-${indexName}`]) {
+      try {
+        const exists = await es.indices.exists({ index: pattern });
+        if (exists) {
+          log.debug(`Cleanup: Deleting index ${pattern}`);
+          await es.indices.delete({ index: pattern, ignore_unavailable: true });
+        }
+      } catch (e: any) {
+        log.debug(`Cleanup: Could not delete index ${pattern}: ${e.message}`);
+      }
+    }
+
+    // Clean up any leftover aliases
+    try {
+      const aliasExists = await es.indices.existsAlias({ name: indexName });
+      if (aliasExists) {
+        log.debug(`Cleanup: Deleting alias ${indexName}`);
+        await es.indices.deleteAlias({ name: indexName, index: '_all' });
+      }
+    } catch (e: any) {
+      log.debug(`Cleanup: Could not delete alias ${indexName}: ${e.message}`);
+    }
+  }
+}
+
 const SMALL_HOST_MAPPING: MappingTypeMapping = {
   properties: {
     '@timestamp': {
@@ -49,8 +84,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/232405
-  describe.skip('@ess Host transform logic', () => {
+  describe('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest.get('/api/entity_store/status').expect(200);
@@ -62,7 +96,20 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Install Entity Store and test Host transform', () => {
       before(async () => {
+        const log = providerContext.getService('log');
+        log.info('Host transform test: Starting setup...');
+
+        // Clean up entity store and any leftover indices from previous failed runs
         await cleanUpEntityStore(providerContext);
+        await cleanupTestIndices(providerContext, [FROZEN_INDEX_NAME, COLD_INDEX_NAME]);
+
+        // Also clean up any leftover data streams
+        try {
+          await es.indices.deleteDataStream({ name: COMMON_DATASTREAM_NAME });
+        } catch (e: any) {
+          log.debug(`Cleanup: Data stream ${COMMON_DATASTREAM_NAME} did not exist`);
+        }
+
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
@@ -72,30 +119,26 @@ export default function (providerContext: FtrProviderContext) {
         await es.indices.create({ index: FROZEN_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
         // Create a test index that will be moved to cold matching transform's pattern to store test documents
         await es.indices.create({ index: COLD_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
+
+        log.info('Host transform test: Setup complete');
       });
 
       after(async () => {
         const log = providerContext.getService('log');
-        await es.indices.deleteDataStream({ name: COMMON_DATASTREAM_NAME });
+        log.info('Host transform test: Starting teardown...');
 
+        // Delete the data stream
         try {
-          await es.indices.deleteAlias({
-            name: FROZEN_INDEX_NAME,
-            index: `*${FROZEN_INDEX_NAME}*`,
-          });
+          await es.indices.deleteDataStream({ name: COMMON_DATASTREAM_NAME });
         } catch (e: any) {
-          // we should not fail a test on the tear down
-          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+          log.debug(`Teardown: Could not delete data stream: ${e.message}`);
         }
 
-        try {
-          await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
-        } catch (e: any) {
-          // we should not fail a test on the tear down
-          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
-        }
+        // Clean up test indices (including any ILM-renamed versions)
+        await cleanupTestIndices(providerContext, [FROZEN_INDEX_NAME, COLD_INDEX_NAME]);
 
         await dataView.delete('security-solution');
+        log.info('Host transform test: Teardown complete');
       });
 
       beforeEach(async () => {
