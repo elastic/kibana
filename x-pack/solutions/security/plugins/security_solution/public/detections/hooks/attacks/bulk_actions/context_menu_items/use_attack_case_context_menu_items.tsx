@@ -5,106 +5,78 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import { useMemo } from 'react';
+import { useBulkAttackCaseItems } from '../bulk_action_items/use_bulk_attack_case_items';
 import {
-  getAttackDiscoveryMarkdown,
-  type AttackDiscoveryAlert,
-} from '@kbn/elastic-assistant-common';
-import { useCallback, useMemo } from 'react';
-import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
-import { APP_ID } from '../../../../../../common';
-import { useKibana } from '../../../../../common/lib/kibana';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-} from '../../../../../common/components/visualization_actions/translations';
-import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+  ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
+} from '../constants';
+import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
+import type {
+  AttackWithCase,
+  BaseAttackContextMenuItemsProps,
+  BulkAttackContextMenuItems,
+} from '../types';
 
-interface UseAttackCaseContextMenuItemsProps {
-  attack: AttackDiscoveryAlert;
-  closePopover?: () => void;
+export interface UseAttackCaseContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
+  /** Array of attacks with alert ids and markdown comments */
+  attacksWithCase: AttackWithCase[];
+  /** Title used to initialize "create case" flyout */
+  title: string;
 }
 
 export const useAttackCaseContextMenuItems = ({
-  attack,
+  attacksWithCase,
+  title,
   closePopover,
-}: UseAttackCaseContextMenuItemsProps): {
-  items: EuiContextMenuPanelItemDescriptorEntry[];
-} => {
-  const {
-    services: { cases },
-  } = useKibana();
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
-  const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
-  const canUserCreateAndReadCases = useCallback(
-    () => canCreateAndReadCases,
-    [canCreateAndReadCases]
+  clearSelection,
+  setIsLoading,
+  refresh,
+}: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
+  const bulkActionItems = useBulkAttackCaseItems({
+    title,
+  });
+
+  const alertItems = useMemo(
+    () =>
+      attacksWithCase.map((attack) => ({
+        _id: attack.attackId,
+        data: [
+          { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds },
+          { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: [attack.markdownComment] },
+        ],
+        ecs: { _id: attack.attackId },
+      })),
+    [attacksWithCase]
   );
 
-  const { onAddToNewCase, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
-    canUserCreateAndReadCases,
-    title: attack.title,
-  });
-
-  const { onAddToExistingCase, disabled: isAddToExistingCaseDisabled } = useAddToExistingCase({
-    canUserCreateAndReadCases,
-  });
-
-  const markdownComment = useMemo(
+  const contextMenuItems = useMemo(
     () =>
-      getAttackDiscoveryMarkdown({
-        attackDiscovery: attack,
-        replacements: attack.replacements,
+      transformBulkActionsToContextMenuItems({
+        bulkActionItems,
+        alertItems,
+        closePopover,
+        clearSelection,
+        setIsLoading,
+        refresh,
       }),
-    [attack]
+    [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 
-  const onAddToNewCaseClick = useCallback(() => {
-    closePopover?.();
-    onAddToNewCase({
-      alertIds: attack.alertIds,
-      replacements: attack.replacements,
-      markdownComments: [markdownComment],
-    });
-  }, [attack.alertIds, attack.replacements, closePopover, markdownComment, onAddToNewCase]);
-
-  const onAddToExistingCaseClick = useCallback(() => {
-    closePopover?.();
-    onAddToExistingCase({
-      alertIds: attack.alertIds,
-      replacements: attack.replacements,
-      markdownComments: [markdownComment],
-    });
-  }, [attack.alertIds, attack.replacements, closePopover, markdownComment, onAddToExistingCase]);
-
-  const items = useMemo<EuiContextMenuPanelItemDescriptorEntry[]>(
-    () =>
-      canCreateAndReadCases
-        ? [
-            {
-              name: ADD_TO_NEW_CASE,
-              key: 'attack-add-to-new-case',
-              'data-test-subj': 'attack-add-to-new-case',
-              disabled: isAddToNewCaseDisabled,
-              onClick: onAddToNewCaseClick,
-            },
-            {
-              name: ADD_TO_EXISTING_CASE,
-              key: 'attack-add-to-existing-case',
-              'data-test-subj': 'attack-add-to-existing-case',
-              disabled: isAddToExistingCaseDisabled,
-              onClick: onAddToExistingCaseClick,
-            },
-          ]
-        : [],
-    [
-      canCreateAndReadCases,
-      isAddToExistingCaseDisabled,
-      isAddToNewCaseDisabled,
-      onAddToExistingCaseClick,
-      onAddToNewCaseClick,
-    ]
+  return useMemo(
+    () => ({
+      ...contextMenuItems,
+      // Add-to-case opens another flyout/modal so we close the current popover immediately.
+      items: contextMenuItems.items.map((item) => ({
+        ...item,
+        onClick: item.onClick
+          ? (event) => {
+              item.onClick?.(event);
+              closePopover?.();
+            }
+          : undefined,
+      })),
+    }),
+    [closePopover, contextMenuItems]
   );
-
-  return { items };
 };
