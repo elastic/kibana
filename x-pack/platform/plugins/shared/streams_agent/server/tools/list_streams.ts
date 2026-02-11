@@ -28,7 +28,7 @@ export function createListStreamsTool({
     id: STREAMS_LIST_STREAMS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Lists all streams the user has access to. Returns each stream\'s name, type (wired or classic), data quality status, and storage information.',
+      'Lists all streams the user has access to. Returns each stream\'s name and description. Use this to discover available streams or when the user asks what streams they have.',
     tags: ['streams'],
     schema: listStreamsSchema,
     handler: async (_toolParams, context) => {

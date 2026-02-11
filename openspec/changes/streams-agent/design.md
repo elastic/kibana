@@ -163,6 +163,35 @@ A new `streams` namespace is added to Agent Builder's namespace list, and the ag
 - Progressive disclosure (normal mutations get standard protocol, destructive operations get extra requirements)
 - Negative examples (explicitly show what WRONG behavior looks like)
 
+### 14. Agent instructions: Holistic prompt engineering review
+
+**Decision:** The agent system instructions are restructured and expanded based on a comprehensive prompt engineering review. The changes address eight identified issues:
+
+1. **Instruction ordering** — The `<mutation_protocol>` section is moved to immediately after `<role>`, leveraging primacy effect. LLMs pay most attention to the beginning and end of instructions; safety-critical rules were previously buried in the middle.
+
+2. **Response formatting guidance** — A new `<response_formatting>` section provides explicit formatting patterns for each tool output type (schema as field lists, data quality as concise metrics, lifecycle as summary lines, partitions as numbered lists). Without this, the LLM defaults to prose for everything, producing inconsistent and verbose responses.
+
+3. **Error handling guidance** — A new `<error_handling>` section tells the agent to report errors clearly with the stream name and attempted operation, explain likely causes if known, and suggest next steps. Without this, the agent may silently retry, give generic errors, or guess at causes.
+
+4. **Multi-step workflow examples** — A new `<workflows>` section provides a concrete few-shot example of a complete orchestration flow (query data → suggest partitions → create partitions with sequential execution). This gives the LLM a template for complex multi-tool interactions.
+
+5. **Tool selection heuristics** — A new `<tool_selection>` section guides the agent on when to use `get_stream` (general overview) vs focused tools (`get_schema`, `get_data_quality`, `get_lifecycle_stats`), and when to use `query_documents` vs `list_streams`. Without this, the agent may over-call or under-call tools.
+
+6. **Tone and conciseness** — The `<role>` section now includes a communication style directive: be direct, lead with data not filler, prefer structured formatting over prose. Operations teams value brevity.
+
+7. **`list_streams` tool description fix** — The tool description claimed to return type, data quality status, and storage, but the handler only returns name and description. The description is corrected to match reality.
+
+8. **Ambiguous stream name resolution** — The `<context_tracking>` section now includes guidance for handling partial stream names (e.g., "nginx" → try "logs.nginx", fall back to `list_streams` to find matches).
+
+**Rationale:** Each issue was identified through testing or prompt engineering best practice analysis:
+- Issues 1, 6 are structural improvements grounded in LLM attention patterns and user experience research.
+- Issues 2, 4, 5 apply the "Show, Don't Tell" principle — examples and concrete heuristics outperform abstract instructions.
+- Issue 3 fills a gap that causes poor error experiences.
+- Issue 7 prevents the LLM from referencing data that doesn't exist in tool responses.
+- Issue 8 improves the natural language experience by reducing unnecessary clarification prompts.
+
+**Trade-off:** The expanded instructions add ~400–500 tokens to the system prompt. This is justified because the instructions are read once per conversation and the improvements affect every interaction. The token cost is amortized across all tool calls in the conversation.
+
 ## Risks / Trade-offs
 
 - **[LLM accuracy for mutations]** The agent might misinterpret user intent and propose incorrect changes (e.g. wrong stream name, wrong retention value). → *Mitigation:* The preview-confirm-apply cycle ensures the user sees exactly what will change before it's applied. The agent instructions emphasize always confirming before acting.

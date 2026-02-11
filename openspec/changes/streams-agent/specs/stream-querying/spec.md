@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: List all streams
-The agent SHALL provide a tool `streams.list_streams` that returns all streams the user has access to, including each stream's name, type (wired/classic), data quality status, and storage size.
+The agent SHALL provide a tool `streams.list_streams` that returns all streams the user has access to, including each stream's name and description.
 
 #### Scenario: User asks what streams exist
 - **WHEN** the user asks "what streams do I have?" or similar
-- **THEN** the agent calls `streams.list_streams` and presents a summary of all streams with name, type, quality status, and storage size
+- **THEN** the agent calls `streams.list_streams` and presents a summary of all streams with name and description
 
-#### Scenario: User asks for streams with data quality issues
-- **WHEN** the user asks "which streams have data quality issues?"
-- **THEN** the agent calls `streams.list_streams`, filters results to streams with degraded or poor quality status, and presents the filtered list with quality details
+#### Scenario: User asks for details about specific streams from the list
+- **WHEN** the user sees the stream list and asks about a specific stream's quality, retention, or schema
+- **THEN** the agent uses the appropriate focused tool (`get_data_quality`, `get_lifecycle_stats`, `get_schema`) to retrieve the details
 
 ### Requirement: Get stream detail
 The agent SHALL provide a tool `streams.get_stream` that accepts a stream name and returns its full configuration: retention policy, storage size, ingestion rates, processors, partitions (children), schema (mapped/unmapped fields), data quality metrics, and features/systems.
@@ -74,4 +74,51 @@ The agent SHALL be able to answer questions about storage usage across multiple 
 
 #### Scenario: User asks which streams use the most storage
 - **WHEN** the user asks "which streams are using the most storage?"
-- **THEN** the agent calls `streams.list_streams`, sorts by storage size, and presents the top streams with storage size, ingestion rate, and retention policy so the user can identify optimization opportunities
+- **THEN** the agent calls `streams.list_streams` to discover streams, then calls `streams.get_lifecycle_stats` for relevant streams, and presents the results sorted by storage size with retention policy context
+
+### Requirement: Response formatting
+The agent SHALL present structured tool output using lists, tables, and concise summaries — not prose paragraphs. Formatting guidance SHALL be included in the agent's system instructions for each major output type:
+
+- **Query documents**: Chronological list — one entry per document with timestamp and key fields
+- **Schema fields**: Field list — one per line with field name and type
+- **Data quality**: Concise summary — quality score, degraded %, failed %, failure store status
+- **Lifecycle stats**: Summary line — retention value, source, storage size, tier breakdown
+- **Partition suggestions**: Numbered list — name, routing condition, estimated traffic percentage
+- **Stream detail**: Sectioned summary — separate sections for retention, processors, partitions, schema
+
+#### Scenario: Agent presents schema information
+- **WHEN** the user asks "what fields are in logs.nginx?"
+- **THEN** the agent presents fields as a list (e.g. `status_code: keyword`, `request_path: match_only_text`) rather than narrating them in prose
+
+#### Scenario: Agent presents data quality metrics
+- **WHEN** the user asks "how's the data quality on logs.payments?"
+- **THEN** the agent presents a concise summary (e.g. "Quality: Degraded — 12% degraded, 0.3% failed, failure store: enabled") rather than narrating each metric
+
+### Requirement: Tool selection heuristics
+The agent's system instructions SHALL include guidance on selecting the appropriate read tool based on the user's question:
+
+- For a **general overview** of a stream → `get_stream` (returns everything in one call)
+- For a **specific aspect** (schema, quality, retention) → the focused tool (`get_schema`, `get_data_quality`, `get_lifecycle_stats`)
+- For understanding **what data looks like** → `query_documents`
+- For **comparing across streams** or discovering streams → `list_streams`
+
+The agent SHALL NOT call multiple focused tools when a single `get_stream` call would answer the question, and SHALL NOT call `get_stream` when the user only asked about a specific aspect.
+
+#### Scenario: User asks a general question about a stream
+- **WHEN** the user asks "tell me about logs.nginx"
+- **THEN** the agent calls `get_stream` (one call) rather than calling `get_schema` + `get_data_quality` + `get_lifecycle_stats` separately
+
+#### Scenario: User asks only about retention
+- **WHEN** the user asks "what's the retention on logs.nginx?"
+- **THEN** the agent calls `get_lifecycle_stats` (focused) rather than `get_stream` (which returns much more than needed)
+
+### Requirement: Ambiguous stream name resolution
+When a user refers to a stream by a partial or informal name (e.g. "nginx" instead of "logs.nginx", or "the android stream"), the agent SHALL attempt to resolve the name intelligently rather than immediately asking for clarification.
+
+#### Scenario: User uses a partial stream name
+- **WHEN** the user says "show me nginx" and the stream name is actually `logs.nginx`
+- **THEN** the agent tries the likely full name (e.g. `logs.nginx`). If that fails, it calls `list_streams` to find matching names and asks the user to confirm which stream they meant.
+
+#### Scenario: User uses an informal name
+- **WHEN** the user says "the android stream" in a conversation where `logs.android` has been discussed
+- **THEN** the agent resolves it from conversation context without asking for clarification

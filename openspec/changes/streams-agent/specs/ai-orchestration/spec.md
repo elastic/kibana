@@ -80,12 +80,43 @@ The agent SHALL provide a tool `streams.generate_description` that accepts a str
 - **THEN** the agent calls `streams.generate_description` and presents the generated description, offering to save it to the stream's configuration
 
 ### Requirement: Multi-step AI workflow orchestration
-The agent SHALL be able to chain multiple AI tools and management tools into multi-step workflows, guided by conversational context and user direction.
+The agent SHALL be able to chain multiple AI tools and management tools into multi-step workflows, guided by conversational context and user direction. The agent's system instructions SHALL include at least one complete few-shot example of a multi-step workflow to provide a concrete template for complex orchestration.
+
+The general pattern for multi-step workflows is:
+1. **Inspect** — Query data and/or gather stream details to understand current state
+2. **Analyze** — Call AI tools (with accurate time ranges from step 1) to get suggestions
+3. **Present** — Show suggestions to the user and ask which to accept
+4. **Apply** — Execute accepted changes one at a time via write tools, following preview-confirm-apply
+5. **Follow up** — Suggest logical next steps
 
 #### Scenario: Onboard a new application end-to-end
 - **WHEN** the user asks "I just started sending application logs to logs, help me set it up"
-- **THEN** the agent orchestrates a multi-step workflow: first suggests partitions, then after the user accepts partitions, suggests processing pipelines for the new child streams, then offers to configure retention — each step following the preview-confirm-apply cycle
+- **THEN** the agent orchestrates:
+  1. Calls `query_documents` to inspect the data and determine the time range
+  2. Calls `suggest_partitions` with accurate `startMs`/`endMs` to suggest how to organize the stream
+  3. Presents the suggestions and asks which to accept
+  4. After confirmation, calls `fork_stream` for each accepted partition (one at a time)
+  5. Suggests follow-up actions (set up field extraction, configure retention)
 
 #### Scenario: Diagnose and fix data quality issues
 - **WHEN** the user asks "something seems wrong with logs.payments, help me fix it"
-- **THEN** the agent retrieves data quality metrics, identifies the root causes (mapping conflicts, pipeline failures), and suggests corrective actions (add processors, fix mappings, enable failure store) — each action following the preview-confirm-apply cycle
+- **THEN** the agent orchestrates:
+  1. Calls `get_data_quality` to retrieve metrics
+  2. Calls `get_schema` to check for mapping issues
+  3. Calls `query_documents` to inspect recent data for patterns
+  4. Presents a diagnosis with specific root causes
+  5. Suggests corrective actions (add processors, fix mappings, enable failure store) — each following preview-confirm-apply
+
+#### Scenario: Help organize a stream (complete example)
+- **WHEN** the user asks "help me set up logs.android"
+- **THEN** the agent follows this flow:
+  - Agent: [calls `query_documents`] "Here's what logs.android contains: [chronological list]. I can see 3 distinct processes. Want me to suggest how to partition this stream?"
+  - User: "Yes"
+  - Agent: [calls `suggest_partitions` with `startMs`/`endMs` from the query results] "Here are the suggested partitions: [numbered list with conditions]. Want me to create them?"
+  - User: "Yes, create all 3"
+  - Agent: "I'll create these 3 partitions one at a time: [list]. Shall I proceed?"
+  - User: "Go ahead"
+  - Agent: [calls `fork_stream` #1] "Created logs.android.android-phone ✓"
+  - Agent: [calls `fork_stream` #2] "Created logs.android.android-systemui ✓"
+  - Agent: [calls `fork_stream` #3] "Created logs.android.tencent-qt-qtl ✓"
+  - Agent: "All 3 partitions created. You might want to set up field extraction for these new streams, or configure their retention policies."

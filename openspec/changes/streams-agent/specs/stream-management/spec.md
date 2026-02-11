@@ -113,3 +113,23 @@ The agent SHALL provide a tool `streams.update_settings` that accepts a stream n
 #### Scenario: Change replica count
 - **WHEN** the user asks "set replicas to 2 on logs.critical"
 - **THEN** the agent previews the settings change and after confirmation, applies it
+
+### Requirement: Error handling for failed operations
+When a tool call fails, the agent SHALL handle the error gracefully:
+1. Report the error clearly to the user — include the stream name and what the agent was trying to do
+2. If the likely cause is known, explain it briefly (e.g. "the stream may not exist", "a lock conflict occurred — another operation may be in progress", "insufficient permissions")
+3. Suggest a next step: retry, try a different approach, or ask the user for guidance
+
+The agent SHALL NOT silently retry failed operations. The agent SHALL NOT give generic "something went wrong" errors when the tool returns a specific error message.
+
+#### Scenario: Write tool fails with lock conflict
+- **WHEN** a write tool fails with a lock conflict error
+- **THEN** the agent explains that another operation may be modifying the stream concurrently, and offers to retry after a moment
+
+#### Scenario: Tool fails because stream does not exist
+- **WHEN** a tool fails because the specified stream name does not exist
+- **THEN** the agent tells the user the stream was not found, suggests checking the name, and offers to call `list_streams` to find available streams
+
+#### Scenario: Tool fails with permission error
+- **WHEN** a tool fails because the user lacks the required permissions
+- **THEN** the agent explains that the operation requires additional permissions and suggests the user contact their administrator
